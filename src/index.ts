@@ -1,13 +1,17 @@
 // ── Public API for panchang-ts ────────────────────────
 
 // Primary entry points
-export { getInstantPanchang } from './core/panchang';
+export { getDailyPanchang, getInstantPanchang } from './core/panchang';
 
 // Astronomy utilities
 export { computeSunrise as getSunrise, computeSunset as getSunset } from './astronomy/sunrise';
 export { getSiderealSunLongitude } from './astronomy/sun';
 export { getSiderealMoonLongitude } from './astronomy/moon';
 export { computeAyanamsa as getAyanamsa } from './astronomy/ayanamsa';
+
+// Inauspicious periods & muhurta
+export { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './core/inauspicious';
+export { computeAbhijitMuhurta } from './core/muhurta';
 
 // Types
 export type {
