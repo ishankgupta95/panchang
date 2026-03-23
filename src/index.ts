@@ -1,13 +1,12 @@
 // ── Public API for panchang-ts ────────────────────────
-// Uncomment exports as each module is implemented.
 
-// Primary entry points (Phase 6–7)
-// export { getDailyPanchang, getInstantPanchang } from './core/panchang';
+// Primary entry points
+export { getInstantPanchang } from './core/panchang';
 
-// Astronomy utilities (Phase 2)
-// export { computeSunrise as getSunrise, computeSunset as getSunset } from './astronomy/sunrise';
-// export { getSiderealSunLongitude } from './astronomy/sun';
-// export { getSiderealMoonLongitude } from './astronomy/moon';
+// Astronomy utilities
+export { computeSunrise as getSunrise, computeSunset as getSunset } from './astronomy/sunrise';
+export { getSiderealSunLongitude } from './astronomy/sun';
+export { getSiderealMoonLongitude } from './astronomy/moon';
 export { computeAyanamsa as getAyanamsa } from './astronomy/ayanamsa';
 
 // Types

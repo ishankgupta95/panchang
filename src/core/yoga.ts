@@ -1,2 +1,41 @@
-// TODO: Phase 4
-export {};
+import { normalize360 } from '../utils/angle';
+import { YOGA_SPAN } from '../utils/constants';
+import type { YogaInfo } from '../types/elements';
+
+/**
+ * Yoga = combined sidereal longitude of Sun and Moon, divided into 27 parts.
+ *
+ * Formula:
+ *   yogaAngle = normalize360(siderealSun + siderealMoon)
+ *   yogaIndex = floor(yogaAngle / 13.3333)
+ */
+export function computeYogaFromLongitudes(
+  siderealMoon: number,
+  siderealSun: number,
+  name: string,
+): YogaInfo {
+  const angle = normalize360(siderealSun + siderealMoon);
+  const index = Math.floor(angle / YOGA_SPAN);
+  const elapsed = angle - index * YOGA_SPAN;
+  const completionPercentage = (elapsed / YOGA_SPAN) * 100;
+  return {
+    index,
+    name,
+    completionPercentage: Math.round(completionPercentage * 100) / 100,
+    endTime: null,
+  };
+}
+
+export function getYogaIndexAtTime(
+  date: Date,
+  getCachedMoon: (d: Date) => number,
+  getCachedSun: (d: Date) => number,
+): number {
+  const angle = normalize360(getCachedSun(date) + getCachedMoon(date));
+  return Math.floor(angle / YOGA_SPAN);
+}
+
+/** Direct longitude → index. Used by the orchestrator at sunrise. */
+export function getYogaIndex(siderealMoon: number, siderealSun: number): number {
+  return Math.floor(normalize360(siderealSun + siderealMoon) / YOGA_SPAN);
+}
