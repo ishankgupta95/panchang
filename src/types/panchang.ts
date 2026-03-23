@@ -1,0 +1,60 @@
+import type { GeoLocation } from './location';
+import type {
+  DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
+  TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, TimePeriod,
+} from './elements';
+
+export interface MasaInfo {
+  index: number;
+  name: string;
+}
+
+export interface DailyPanchangResult {
+  date: Date;
+  location: GeoLocation;
+  timezone: number;
+
+  sunrise: Date;
+  sunset: Date;
+  nextSunrise: Date;
+  dayDurationMinutes: number;
+  nightDurationMinutes: number;
+
+  tithis: DailyTithiInfo[];
+  nakshatras: DailyNakshatraInfo[];
+  yogas: DailyYogaInfo[];
+  karanas: DailyKaranaInfo[];
+  vara: VaraInfo;
+
+  rahuKalam: TimePeriod;
+  gulikaKalam: TimePeriod;
+  yamaganda: TimePeriod;
+  abhijitMuhurta: TimePeriod;
+
+  ayanamsa: number;
+  siderealSunAtSunrise: number;
+  siderealMoonAtSunrise: number;
+  masa: MasaInfo;
+
+  _debug?: {
+    totalMs: number;
+    sunriseMs: number;
+    elementsMs: number;
+    endTimesMs: number;
+  };
+}
+
+export interface InstantPanchangResult {
+  timestamp: Date;
+  location: GeoLocation;
+
+  tithi: TithiInfo;
+  nakshatra: NakshatraInfo;
+  yoga: YogaInfo;
+  karana: KaranaInfo;
+  vara: VaraInfo;
+
+  ayanamsa: number;
+  siderealSun: number;
+  siderealMoon: number;
+}
