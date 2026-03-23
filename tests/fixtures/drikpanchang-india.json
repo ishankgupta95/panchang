@@ -1,1 +1,35 @@
-[]
+[
+  {
+    "date": "2025-01-14",
+    "city": "Pune",
+    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Tuesday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-07-04",
+    "city": "New York",
+    "location": { "latitude": 40.7128, "longitude": -74.006 },
+    "timezone": -240,
+    "expected": {
+      "varaEnglish": "Friday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-12-31",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.2090 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Wednesday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  }
+]
