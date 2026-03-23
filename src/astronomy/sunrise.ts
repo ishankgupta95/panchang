@@ -1,17 +1,65 @@
-// TODO: Phase 2 — implement after installing astronomy-engine
+import { Body, SearchRiseSet, MakeTime, Observer } from 'astronomy-engine';
 import { PanchangError } from '../types/errors';
 import type { GeoLocation } from '../types/location';
 
-export function computeSunrise(_searchFromUtc: Date, location: GeoLocation, _limitDays: number = 2): Date {
-  // Placeholder — replace with astronomy-engine call in Phase 2:
-  // import { Body, SearchRiseSet, MakeTime, Observer } from 'astronomy-engine';
-  // const observer = new Observer(location.latitude, location.longitude, location.elevation ?? 0);
-  // const result = SearchRiseSet(Body.Sun, observer, +1, MakeTime(searchFromUtc), limitDays);
-  void location;
-  throw new PanchangError('Not implemented yet — install astronomy-engine first', 'NO_SUNRISE');
+/**
+ * Compute sunrise nearest to (and after) the given UTC search start.
+ *
+ * @param searchFromUtc  Start searching from this UTC instant.
+ *                       For daily mode, this is local midnight converted to UTC.
+ * @param location       Observer coordinates.
+ * @param limitDays      How far ahead to search. Default 2 (handles polar edge cases).
+ * @returns              Sunrise as a UTC Date.
+ * @throws PanchangError (NO_SUNRISE) for polar regions with no sunrise.
+ */
+export function computeSunrise(
+  searchFromUtc: Date,
+  location: GeoLocation,
+  limitDays: number = 2
+): Date {
+  const observer = new Observer(
+    location.latitude,
+    location.longitude,
+    location.elevation ?? 0
+  );
+  const astroTime = MakeTime(searchFromUtc);
+  const result = SearchRiseSet(Body.Sun, observer, +1, astroTime, limitDays);
+
+  if (!result) {
+    throw new PanchangError(
+      `No sunrise found within ${limitDays} days for ` +
+        `(${location.latitude}°, ${location.longitude}°) near ${searchFromUtc.toISOString()}. ` +
+        `This location may be experiencing midnight sun or polar night.`,
+      'NO_SUNRISE'
+    );
+  }
+
+  return result.date;
 }
 
-export function computeSunset(_searchFromUtc: Date, location: GeoLocation, _limitDays: number = 2): Date {
-  void location;
-  throw new PanchangError('Not implemented yet — install astronomy-engine first', 'NO_SUNSET');
+/**
+ * Compute sunset nearest to (and after) the given UTC search start.
+ */
+export function computeSunset(
+  searchFromUtc: Date,
+  location: GeoLocation,
+  limitDays: number = 2
+): Date {
+  const observer = new Observer(
+    location.latitude,
+    location.longitude,
+    location.elevation ?? 0
+  );
+  const astroTime = MakeTime(searchFromUtc);
+  const result = SearchRiseSet(Body.Sun, observer, -1, astroTime, limitDays);
+
+  if (!result) {
+    throw new PanchangError(
+      `No sunset found within ${limitDays} days for ` +
+        `(${location.latitude}°, ${location.longitude}°) near ${searchFromUtc.toISOString()}.`,
+      'NO_SUNSET'
+    );
+  }
+
+  return result.date;
 }
