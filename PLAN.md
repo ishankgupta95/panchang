@@ -52,7 +52,8 @@ panchang-ts/
 │   │   ├── karana.ts                 # Karana calculation + end-time finder
 │   │   ├── vara.ts                   # Vara (weekday) — sunrise-aware
 │   │   ├── muhurta.ts                # Abhijit Muhurta
-│   │   └── inauspicious.ts           # Rahu Kalam, Gulika Kalam, Yamaganda
+│   │   ├── inauspicious.ts           # Rahu Kalam, Gulika Kalam, Yamaganda
+│   │   └── masa.ts                   # Solar month (Saura Masa)
 │   │
 │   ├── astronomy/
 │   │   ├── sun.ts                    # Sidereal Sun longitude
@@ -109,7 +110,7 @@ panchang-ts/
 │   │   ├── western-cities.test.ts    # London, NYC — negative offsets
 │   │   └── edge-cases.test.ts        # Polar, midnight, year boundary
 │   ├── perf/
-│   │   └── benchmark.test.ts         # Performance regression tests
+│   │   └── benchmark.bench.ts        # Performance regression tests (vitest bench)
 │   └── fixtures/
 │       ├── drikpanchang-india.json   # 15+ Indian city/date combos
 │       ├── drikpanchang-world.json   # 5+ non-Indian city combos
@@ -339,6 +340,54 @@ Max expected per element:
 - Nakshatra: 2 (break at 3)
 - Yoga: 2 (break at 3)
 - Karana: 3 (break at 5)
+
+### 3.3 findDailyElements — TypeScript Signature
+
+This function lives in `src/utils/search.ts`. It is generic over the element info type.
+
+```typescript
+// src/utils/search.ts (addition)
+
+import type { Language } from '../types/options';
+
+/**
+ * Walk from sunrise to nextSunrise, collecting all element transitions.
+ *
+ * @param sunriseUtc      Day start (UTC)
+ * @param nextSunriseUtc  Day end (UTC)
+ * @param elementAtSunrise The pre-computed element at sunrise
+ * @param getIndexAtTime  Callback: returns element index at a UTC instant
+ * @param resolveName     i18n resolver for element names
+ * @param lang            Language for names
+ * @param totalElements   Cycle size (30 for Tithi, 27 for Nakshatra/Yoga, 60 for Karana)
+ * @param searchWindowHours Forward search window per element (36 for Tithi/Nakshatra/Yoga, 18 for Karana)
+ * @param maxIterations   Binary search iterations
+ * @param maxPerDay       Safety cap (2 for Tithi/Nakshatra/Yoga, 4 for Karana)
+ */
+export function findDailyElements<T extends { index: number; endTime: Date | null }>(
+  sunriseUtc: Date,
+  nextSunriseUtc: Date,
+  elementAtSunrise: T,
+  getIndexAtTime: (date: Date) => number,
+  resolveName: (index: number, lang: Language) => string,
+  lang: Language,
+  totalElements: number,
+  searchWindowHours: number,
+  maxIterations: number,
+  maxPerDay: number,
+): Array<T & { startTime: Date | null; isActiveAtSunrise: boolean }> {
+  // Implementation: see Section 3.2 pseudocode.
+  // cursor starts at sunriseUtc.
+  // For each iteration:
+  //   1. Compute element at cursor (already have it for first iteration)
+  //   2. findTransitionTime(cursor, cursor + searchWindowHours, element.index, getIndexAtTime, maxIterations)
+  //   3. Clamp endTime: if endTime > nextSunriseUtc, use nextSunriseUtc
+  //   4. Compute startTime via findStartTime for first element (its start may be before sunrise)
+  //   5. Push {element, startTime, endTime, isActiveAtSunrise: results.length === 0}
+  //   6. If endTime >= nextSunriseUtc: break
+  //   7. cursor = endTime + 1ms. Compute new element. Safety break at maxPerDay.
+}
+```
 
 ---
 
@@ -970,6 +1019,11 @@ export function getTithiIndexAtTime(
   const angle = normalize360(moonLon - sunLon);
   return Math.floor(angle / TITHI_SPAN);
 }
+
+/** Direct longitude → index (no Date needed). Used by the orchestrator at sunrise. */
+export function getTithiIndexFromLons(siderealMoon: number, siderealSun: number): number {
+  return Math.floor(normalize360(siderealMoon - siderealSun) / TITHI_SPAN);
+}
 ```
 
 ### 7.3 Nakshatra
@@ -1058,6 +1112,11 @@ export function getYogaIndexAtTime(
   const angle = normalize360(getCachedSun(date) + getCachedMoon(date));
   return Math.floor(angle / YOGA_SPAN);
 }
+
+/** Direct longitude → index. Used by the orchestrator at sunrise. */
+export function getYogaIndex(siderealMoon: number, siderealSun: number): number {
+  return Math.floor(normalize360(siderealSun + siderealMoon) / YOGA_SPAN);
+}
 ```
 
 ### 7.5 Karana
@@ -1116,6 +1175,11 @@ export function getKaranaIndexAtTime(
 ): number {
   const angle = normalize360(getCachedMoon(date) - getCachedSun(date));
   return Math.floor(angle / KARANA_SPAN);
+}
+
+/** Direct longitude → index. Used by the orchestrator at sunrise. */
+export function getKaranaIndex(siderealMoon: number, siderealSun: number): number {
+  return Math.floor(normalize360(siderealMoon - siderealSun) / KARANA_SPAN);
 }
 ```
 
