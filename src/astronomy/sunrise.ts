@@ -39,6 +39,12 @@ export function computeSunrise(
 
 /**
  * Compute sunset nearest to (and after) the given UTC search start.
+ *
+ * @param searchFromUtc  Start searching from this UTC instant (typically sunrise).
+ * @param location       Observer coordinates.
+ * @param limitDays      How far ahead to search. Default 2.
+ * @returns              Sunset as a UTC Date.
+ * @throws PanchangError (NO_SUNSET) for polar regions with no sunset.
  */
 export function computeSunset(
   searchFromUtc: Date,

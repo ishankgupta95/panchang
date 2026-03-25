@@ -42,6 +42,34 @@ import type {
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo, TimePeriod,
 } from '../types/elements';
 
+/**
+ * Returns the Panchang elements active at a single UTC moment.
+ *
+ * Use this for birth-chart calculations, muhurta selection, or any case
+ * where you need the exact element at a specific instant rather than a
+ * full sunrise-to-sunrise day.
+ *
+ * @param date     UTC instant to evaluate.
+ * @param location Observer coordinates `{ latitude, longitude, elevation? }`.
+ * @param options  Optional settings: `ayanamsa`, `language`, `computeEndTimes`,
+ *                 `precision`. No `timezone` required — the result is UTC-based.
+ * @returns        `InstantPanchangResult` with one value per element
+ *                 (tithi, nakshatra, yoga, karana, vara) plus sidereal longitudes.
+ * @throws         `PanchangError` for invalid inputs or polar locations with no sunrise.
+ *
+ * @example
+ * ```typescript
+ * import { getInstantPanchang } from 'panchang-ts';
+ *
+ * const p = getInstantPanchang(
+ *   new Date('2025-01-14T03:00:00Z'),
+ *   { latitude: 18.5204, longitude: 73.8567 },
+ *   { language: 'sa' },
+ * );
+ * console.log(p.tithi.name);     // "कृष्ण चतुर्दशी"
+ * console.log(p.tithi.endTime);  // Date (UTC) when this Tithi ends
+ * ```
+ */
 export function getInstantPanchang(
   date: Date,
   location: GeoLocation,
@@ -120,6 +148,49 @@ export function getInstantPanchang(
   };
 }
 
+/**
+ * Returns the full Hindu Panchang for a sunrise-to-sunrise day.
+ *
+ * The "day" is defined as the window from the local sunrise to the following
+ * sunrise (as per Vedic convention). Multiple elements per category are
+ * returned when a transition occurs during the day — e.g. if Tithi changes
+ * at 14:30 the result has two `DailyTithiInfo` entries.
+ *
+ * All `Date` objects in the result are **offset-adjusted** to the requested
+ * timezone. Read their components via `getUTC*` methods:
+ * ```
+ * result.sunrise.getUTCHours()   // local sunrise hour
+ * result.sunrise.getHours()      // ← wrong, uses system timezone
+ * ```
+ *
+ * @param date     Any `Date` within the local calendar day you want.
+ *                 Only the calendar date is used; the time component is ignored.
+ * @param location Observer coordinates `{ latitude, longitude, elevation? }`.
+ * @param options  Settings — `timezone` is required (UTC offset in minutes,
+ *                 e.g. 330 for IST). Also accepts `ayanamsa`, `language`,
+ *                 `computeEndTimes`, `precision`.
+ * @returns        `DailyPanchangResult` with element arrays, sunrise/sunset,
+ *                 inauspicious periods, muhurta, ayanamsa, and Masa.
+ * @throws         `PanchangError` for invalid inputs or polar locations with no sunrise.
+ *
+ * @example
+ * ```typescript
+ * import { getDailyPanchang } from 'panchang-ts';
+ *
+ * const result = getDailyPanchang(
+ *   new Date(2025, 0, 14),                      // Jan 14, 2025
+ *   { latitude: 18.5204, longitude: 73.8567 },  // Pune, India
+ *   { timezone: 330 },                          // IST = UTC+5:30
+ * );
+ *
+ * result.tithis[0].name;           // "Krishna Chaturdashi"
+ * result.vara.name;                // "Mangalavara"
+ * result.rahuKalam.start;          // Date — read via getUTCHours()
+ *
+ * // Fast mode (names only, ~5× faster):
+ * const fast = getDailyPanchang(date, loc, { timezone: 330, computeEndTimes: false });
+ * ```
+ */
 export function getDailyPanchang(
   date: Date,
   location: GeoLocation,

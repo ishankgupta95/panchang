@@ -25,14 +25,39 @@ export function computeInauspiciousPeriod(
   return { start, end };
 }
 
+/**
+ * Compute Rahu Kalam — the inauspicious period ruled by Rahu.
+ * Daytime is divided into 8 equal slots; the slot index varies by weekday.
+ *
+ * @param sunrise   UTC sunrise Date.
+ * @param sunset    UTC sunset Date.
+ * @param varaIndex Weekday index: 0 = Sunday, 6 = Saturday.
+ * @returns         `{ start, end }` UTC Dates for the Rahu Kalam period.
+ */
 export function computeRahuKalam(sunrise: Date, sunset: Date, varaIndex: number): TimePeriod {
   return computeInauspiciousPeriod(sunrise, sunset, varaIndex, RAHU_KALAM_SLOTS);
 }
 
+/**
+ * Compute Gulika Kalam — the inauspicious period ruled by Saturn's son Gulika.
+ *
+ * @param sunrise   UTC sunrise Date.
+ * @param sunset    UTC sunset Date.
+ * @param varaIndex Weekday index: 0 = Sunday, 6 = Saturday.
+ * @returns         `{ start, end }` UTC Dates for the Gulika Kalam period.
+ */
 export function computeGulikaKalam(sunrise: Date, sunset: Date, varaIndex: number): TimePeriod {
   return computeInauspiciousPeriod(sunrise, sunset, varaIndex, GULIKA_SLOTS);
 }
 
+/**
+ * Compute Yamaganda — the inauspicious period associated with Yama (death).
+ *
+ * @param sunrise   UTC sunrise Date.
+ * @param sunset    UTC sunset Date.
+ * @param varaIndex Weekday index: 0 = Sunday, 6 = Saturday.
+ * @returns         `{ start, end }` UTC Dates for the Yamaganda period.
+ */
 export function computeYamaganda(sunrise: Date, sunset: Date, varaIndex: number): TimePeriod {
   return computeInauspiciousPeriod(sunrise, sunset, varaIndex, YAMAGANDA_SLOTS);
 }

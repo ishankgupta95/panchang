@@ -4,6 +4,23 @@
 import { PanchangError } from '../types/errors';
 import type { AyanamsaType } from '../types/options';
 
+/**
+ * Compute the ayanamsa (precession offset) for a given UTC date.
+ *
+ * The ayanamsa is subtracted from the tropical (ecliptic) longitude to obtain
+ * the sidereal longitude used in Vedic astrology.
+ *
+ * @param date UTC date to evaluate.
+ * @param type Ayanamsa system: `'lahiri'` (default), `'raman'`, or `'krishnamurti'`.
+ * @returns    Ayanamsa value in degrees. Typical range ~23–24° for dates near J2000.
+ * @throws     `PanchangError` (INVALID_AYANAMSA) for unrecognised type strings.
+ *
+ * @example
+ * ```typescript
+ * import { getAyanamsa } from 'panchang-ts';
+ * getAyanamsa(new Date('2025-01-01T00:00:00Z'), 'lahiri'); // ~24.10
+ * ```
+ */
 export function computeAyanamsa(date: Date, type: AyanamsaType = 'lahiri'): number {
   const T = julianCenturiesFromJ2000(date);
 
