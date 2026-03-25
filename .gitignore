@@ -27,3 +27,6 @@ Thumbs.db
 
 # Vitest
 __snapshots__/
+
+# Claude Code memory (local AI context, not project source)
+memory/
