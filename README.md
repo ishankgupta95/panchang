@@ -26,6 +26,10 @@ Works offline in React Native (Hermes), Node.js, and browsers.
 
 ```bash
 npm install panchang-ts
+# or
+pnpm add panchang-ts
+# or
+yarn add panchang-ts
 ```
 
 ## Quick Start
