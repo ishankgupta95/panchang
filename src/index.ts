@@ -5,6 +5,7 @@ export { getDailyPanchang, getInstantPanchang } from './core/panchang';
 
 // Astronomy utilities
 export { computeSunrise as getSunrise, computeSunset as getSunset } from './astronomy/sunrise';
+export { getMoonrise, getMoonset } from './astronomy/moonrise';
 export { getSiderealSunLongitude } from './astronomy/sun';
 export { getSiderealMoonLongitude } from './astronomy/moon';
 export { computeAyanamsa as getAyanamsa } from './astronomy/ayanamsa';

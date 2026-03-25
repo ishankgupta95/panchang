@@ -33,6 +33,8 @@ import { computeSamvat } from './samvat';
 import { computeChandraRashi, computeSuryaNakshatra } from './rashi';
 import { computeChoghadiya } from './choghadiya';
 import { computeHora } from './hora';
+import { computePanchaka } from './panchaka';
+import { getMoonrise, getMoonset } from '../astronomy/moonrise';
 import {
   resolveTithiName,
   resolveNakshatraName,
@@ -169,6 +171,7 @@ export function getInstantPanchang(
     samvat,
     chandraRashi,
     suryaNakshatra,
+    panchaka: computePanchaka(siderealMoon),
   };
 }
 
@@ -286,6 +289,9 @@ export function getDailyPanchang(
     sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
     (idx) => getTranslations(lang).grahaNames[idx]!,
   );
+  const moonriseUtc = getMoonrise(localMidnightUtc, location);
+  const moonsetUtc = getMoonset(localMidnightUtc, location);
+  const panchaka = computePanchaka(siderealMoonAtSunrise);
 
   // ── 6. Find transitions (daily element arrays) ───────
   let tithis: DailyTithiInfo[];
@@ -407,5 +413,8 @@ export function getDailyPanchang(
       day:   hora.day.map(s   => ({ ...s, ...convertTimePeriod(s) })),
       night: hora.night.map(s => ({ ...s, ...convertTimePeriod(s) })),
     },
+    moonrise: moonriseUtc ? toLocal(moonriseUtc) : null,
+    moonset:  moonsetUtc  ? toLocal(moonsetUtc)  : null,
+    panchaka,
   };
 }

@@ -44,6 +44,9 @@ export interface DailyPanchangResult {
   brahmaMuhurta: TimePeriod;
   choghadiya: ChoghadiyaInfo;
   hora: HoraInfo;
+  moonrise: Date | null;
+  moonset: Date | null;
+  panchaka: boolean;
 
   _debug?: {
     totalMs: number;
@@ -71,4 +74,5 @@ export interface InstantPanchangResult {
   chandraRashi: RashiInfo;
   /** Sun's current Nakshatra (changes every ~13–14 days) */
   suryaNakshatra: RashiInfo;
+  panchaka: boolean;
 }
