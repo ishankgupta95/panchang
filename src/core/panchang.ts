@@ -31,6 +31,8 @@ import { computeMasa } from './masa';
 import { computeChandraMasa } from './chandramasa';
 import { computeSamvat } from './samvat';
 import { computeChandraRashi, computeSuryaNakshatra } from './rashi';
+import { computeChoghadiya } from './choghadiya';
+import { computeHora } from './hora';
 import {
   resolveTithiName,
   resolveNakshatraName,
@@ -276,6 +278,14 @@ export function getDailyPanchang(
     (idx) => resolveNakshatraName(idx, lang),
   );
   const brahmaMuhurta = computeBrahmaMuhurta(sunriseUtc, sunsetUtc);
+  const choghadiya = computeChoghadiya(
+    sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
+    (idx) => getTranslations(lang).choghadiyaNames[idx]!,
+  );
+  const hora = computeHora(
+    sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
+    (idx) => getTranslations(lang).grahaNames[idx]!,
+  );
 
   // ── 6. Find transitions (daily element arrays) ───────
   let tithis: DailyTithiInfo[];
@@ -389,5 +399,13 @@ export function getDailyPanchang(
     chandraRashi,
     suryaNakshatra,
     brahmaMuhurta: convertTimePeriod(brahmaMuhurta),
+    choghadiya: {
+      day:   choghadiya.day.map(s   => ({ ...s, ...convertTimePeriod(s) })),
+      night: choghadiya.night.map(s => ({ ...s, ...convertTimePeriod(s) })),
+    },
+    hora: {
+      day:   hora.day.map(s   => ({ ...s, ...convertTimePeriod(s) })),
+      night: hora.night.map(s => ({ ...s, ...convertTimePeriod(s) })),
+    },
   };
 }

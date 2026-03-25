@@ -4,6 +4,8 @@ export type {
   TimePeriod, TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo,
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
   ChandraMasaInfo, SamvatInfo, RashiInfo,
+  ChoghadiyaSlot, ChoghadiyaInfo, ChoghadiyaQuality,
+  HoraSlot, HoraInfo,
 } from './elements';
 export type { DailyPanchangResult, InstantPanchangResult, MasaInfo } from './panchang';
 export { PanchangError } from './errors';

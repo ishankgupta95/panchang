@@ -46,5 +46,7 @@ export const en: PanchangTranslations = {
     'Shravana', 'Bhadrapada', 'Ashwin', 'Kartika',
     'Margashirsha', 'Pausha', 'Magha', 'Phalguna',
   ],
+  choghadiyaNames: ['Udveg', 'Char', 'Labh', 'Amrit', 'Kaal', 'Shubh', 'Rog'],
+  grahaNames: ['Sun', 'Venus', 'Mercury', 'Moon', 'Saturn', 'Jupiter', 'Mars'],
   misc: { purnima: 'Purnima', amavasya: 'Amavasya', adhika: 'Adhika' },
 };

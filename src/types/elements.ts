@@ -68,6 +68,39 @@ export interface ChandraMasaInfo {
   purnimantaName: string;
 }
 
+// ── Choghadiya ────────────────────────────────────────
+
+export type ChoghadiyaQuality = 'auspicious' | 'inauspicious' | 'neutral';
+
+export interface ChoghadiyaSlot extends TimePeriod {
+  /** 0–6: index within the 7-name Choghadiya cycle */
+  index: number;
+  name: string;
+  quality: ChoghadiyaQuality;
+}
+
+export interface ChoghadiyaInfo {
+  /** 8 equal slots from sunrise to sunset */
+  day: ChoghadiyaSlot[];
+  /** 8 equal slots from sunset to next sunrise */
+  night: ChoghadiyaSlot[];
+}
+
+// ── Hora (planetary hours) ────────────────────────────
+
+export interface HoraSlot extends TimePeriod {
+  /** 0–6 in Chaldean order: Sun, Venus, Mercury, Moon, Saturn, Jupiter, Mars */
+  planetIndex: number;
+  planet: string;
+}
+
+export interface HoraInfo {
+  /** 12 equal horas from sunrise to sunset */
+  day: HoraSlot[];
+  /** 12 equal horas from sunset to next sunrise */
+  night: HoraSlot[];
+}
+
 // ── Samvat (Hindu year eras) ──────────────────────────
 
 export interface SamvatInfo {

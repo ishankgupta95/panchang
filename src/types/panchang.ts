@@ -2,7 +2,7 @@ import type { GeoLocation } from './location';
 import type {
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, TimePeriod,
-  ChandraMasaInfo, SamvatInfo, RashiInfo,
+  ChandraMasaInfo, SamvatInfo, RashiInfo, ChoghadiyaInfo, HoraInfo,
 } from './elements';
 
 export interface MasaInfo {
@@ -42,6 +42,8 @@ export interface DailyPanchangResult {
   /** Sun's current Nakshatra (changes every ~13–14 days) */
   suryaNakshatra: RashiInfo;
   brahmaMuhurta: TimePeriod;
+  choghadiya: ChoghadiyaInfo;
+  hora: HoraInfo;
 
   _debug?: {
     totalMs: number;

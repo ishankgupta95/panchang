@@ -22,6 +22,8 @@ export type {
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, MasaInfo,
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
   ChandraMasaInfo, SamvatInfo, RashiInfo,
+  ChoghadiyaSlot, ChoghadiyaInfo, ChoghadiyaQuality,
+  HoraSlot, HoraInfo,
   TimePeriod,
   PanchangErrorCode,
 } from './types';
