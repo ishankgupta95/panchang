@@ -2,6 +2,7 @@ import type { GeoLocation } from './location';
 import type {
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, TimePeriod,
+  ChandraMasaInfo, SamvatInfo,
 } from './elements';
 
 export interface MasaInfo {
@@ -35,6 +36,8 @@ export interface DailyPanchangResult {
   siderealSunAtSunrise: number;
   siderealMoonAtSunrise: number;
   masa: MasaInfo;
+  chandramasa: ChandraMasaInfo;
+  samvat: SamvatInfo;
 
   _debug?: {
     totalMs: number;
@@ -57,4 +60,6 @@ export interface InstantPanchangResult {
   ayanamsa: number;
   siderealSun: number;
   siderealMoon: number;
+  chandramasa: ChandraMasaInfo;
+  samvat: SamvatInfo;
 }

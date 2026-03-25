@@ -3351,3 +3351,275 @@ MIT
 *This document is the complete implementation specification for panchang-ts v0.1.0.*
 *Every type, function, formula, config file, test, and deployment step is here.*
 *Build it phase by phase, validate each phase against DrikPanchang, and ship.*
+
+---
+
+## Phase 13 — Missing Panchang Essentials
+
+The five core elements, solar masa, inauspicious periods, and Abhijit Muhurta are done.
+The following essential features are still missing.
+
+---
+
+### Step 13-1 — Chandra Masa (Lunar Month) + Adhika Masa
+
+**What:** The Hindu calendar is lunisolar. The lunar month name (Chaitra, Vaishakha, …) is the primary calendar identifier, more fundamental than the solar month already implemented.
+
+**Algorithm:**
+- Moon–Sun elongation gives current position in the lunar month
+- Estimate Sun's sidereal longitude at the most recent Amavasya (new moon):
+  `daysElapsed = elongation / 360 × 29.5306`
+  `sunAtNewMoon = (siderealSun − daysElapsed / 365.25 × 360 + 36000) mod 360`
+- Solar month at new moon = `floor(sunAtNewMoon / 30)` → 1:1 map to lunar month name
+- Lunar month names (index 0–11): Chaitra, Vaishakha, Jyeshtha, Ashadha, Shravana,
+  Bhadrapada, Ashwin, Kartika, Margashirsha, Pausha, Magha, Phalguna
+
+**Adhika Masa detection:**
+- Estimate Sun's longitude at the NEXT Amavasya (≈ 29.53 − daysElapsed days away)
+- If `solarMonthAtPrevNewMoon === solarMonthAtNextNewMoon` → both new moons in the same
+  solar month → current month is **Adhika** (leap)
+
+**Purnimanta system (North India):**
+- If Shukla Paksha: Purnimanta month name = Amanta month name (same)
+- If Krishna Paksha: Purnimanta month name = next Amanta month name
+  `purnimantaIndex = (amatnaIndex + 1) % 12`
+
+**New type:**
+```ts
+interface ChandraMasaInfo {
+  index: number;           // 0 = Chaitra … 11 = Phalguna (Amanta)
+  name: string;            // translated name
+  isAdhika: boolean;       // true = extra/leap month
+  purnimantaIndex: number; // index in Purnimanta system
+  purnimantaName: string;  // name in Purnimanta system
+}
+```
+
+**Files:**
+- Create `src/core/chandramasa.ts`
+- Add `chandraMasaNames` to `src/i18n/types.ts`, `en.ts`, `sa.ts`
+- Add `ChandraMasaInfo` to `src/types/elements.ts`
+- Add `resolveChandraMasaName()` to `src/i18n/resolver.ts`
+
+---
+
+### Step 13-2 — Vikram Samvat & Shaka Samvat (Hindu Year Eras)
+
+**What:** The Hindu year number. Every printed panchang shows this at the top.
+
+**Algorithm:**
+- Vikram Samvat new year = Chaitra Shukla Pratipad ≈ late March / April
+- VS = Gregorian year + 57 (April–December)
+- VS = Gregorian year + 56 (January–March)
+- Shaka Samvat: same new year point, offset from 78 CE
+  - Shaka = Gregorian year − 77 (April–December)
+  - Shaka = Gregorian year − 78 (January–March)
+
+**New type:**
+```ts
+interface SamvatInfo {
+  vikramSamvat: number;
+  shakaSamvat: number;
+}
+```
+
+**Files:**
+- Create `src/core/samvat.ts`
+- Add `SamvatInfo` to `src/types/elements.ts`
+
+---
+
+### Step 13-3 — Chandra Rashi + Surya Nakshatra
+
+**What:** Two simple derivations from already-computed longitudes.
+
+- **Chandra Rashi:** `floor(siderealMoon / 30)` = Moon's zodiac sign index (0–11)
+- **Surya Nakshatra:** `floor(siderealSun / (360/27))` = Sun's nakshatra index (0–26)
+
+**New type:**
+```ts
+interface RashiInfo {
+  index: number;  // 0 = Mesha … 11 = Meena
+  name: string;
+}
+```
+
+Surya Nakshatra reuses the existing `NakshatraInfo` type (without `pada`/`endTime`).
+
+**Files:**
+- Create `src/core/rashi.ts` (exports `computeChandraRashi`, `computeSuryaNakshatra`)
+- Rashi names reuse existing `masaNames` (same 12 sidereal signs)
+
+---
+
+### Step 13-4 — Brahma Muhurta
+
+**What:** The auspicious window 96–48 minutes before sunrise (2 muhurtas). Present in every panchang app.
+
+**Algorithm:**
+- muhurtaDuration = dayDuration / 30 (approximate; typically ≈ 48 min)
+- Start: `sunrise − 2 × muhurtaDuration`
+- End:   `sunrise − 1 × muhurtaDuration`
+
+**Files:**
+- Add `computeBrahmaMuhurta(sunrise: Date, sunset: Date): TimePeriod` to `src/core/muhurta.ts`
+
+---
+
+### Step 13-5 — Choghadiya
+
+**What:** Divides daytime and nighttime each into 8 equal slots, each named and rated. Widely used in Indian calendar apps for activity scheduling.
+
+**Algorithm:**
+- 7 choghadiya names cycle: Udveg(0), Char(1), Labh(2), Amrit(3), Kaal(4), Shubh(5), Rog(6)
+- Quality: Amrit/Shubh/Labh = auspicious; Char = neutral; Kaal/Rog/Udveg = inauspicious
+- Day starting index by weekday (Sun=0 … Sat=6): `[0, 3, 6, 2, 5, 1, 4]`
+- Night starting index by weekday:                `[5, 1, 4, 6, 0, 3, 2]`
+- Slot i: `start = reference + i × (duration / 8)`, name = `(startIndex + i) % 7`
+
+**New types:**
+```ts
+type ChoghadiyaQuality = 'auspicious' | 'inauspicious' | 'neutral';
+
+interface ChoghadiyaSlot extends TimePeriod {
+  index: number;
+  name: string;
+  quality: ChoghadiyaQuality;
+}
+
+interface ChoghadiyaInfo {
+  day: ChoghadiyaSlot[];    // 8 slots (sunrise → sunset)
+  night: ChoghadiyaSlot[];  // 8 slots (sunset → next sunrise)
+}
+```
+
+**Files:**
+- Create `src/core/choghadiya.ts`
+- Add `choghadiyaNames` to i18n files
+
+---
+
+### Step 13-6 — Hora (Planetary Hours)
+
+**What:** 24 planetary hours per day (12 daytime + 12 nighttime), each ruled by a planet in Chaldean order. Used for muhurta selection.
+
+**Algorithm:**
+- Chaldean order: Sun(0), Venus(1), Mercury(2), Moon(3), Saturn(4), Jupiter(5), Mars(6)
+- First daytime hora planet by weekday: `[0, 3, 6, 2, 5, 1, 4]`
+- Daytime: 12 equal horas (sunrise → sunset), each = dayDuration / 12
+- Nighttime: 12 equal horas (sunset → next sunrise), each = nightDuration / 12
+- Planet for hora i: `(firstPlanetIndex + i) % 7`
+
+**New types:**
+```ts
+interface HoraSlot extends TimePeriod {
+  planet: string;       // "Sun", "Moon", etc.
+  planetIndex: number;  // 0–6 in Chaldean order
+}
+
+interface HoraInfo {
+  day: HoraSlot[];    // 12 slots
+  night: HoraSlot[];  // 12 slots
+}
+```
+
+**Files:**
+- Create `src/core/hora.ts`
+- Add `grahaNames` (7 planet names in Chaldean order) to i18n files
+
+---
+
+### Step 13-7 — Moonrise / Moonset
+
+**What:** Analogous to sunrise/sunset but for the Moon. Required for rituals; displayed in every printed panchang.
+
+**Algorithm:**
+- Use `SearchRiseSet(Body.Moon, observer, +1/−1, startTime, 2)` from astronomy-engine
+- Returns `null` (not throws) when no moonrise/moonset within search window — unlike sunrise, missing moonrise on a given calendar day is normal
+
+**New exports:**
+```ts
+getMoonrise(searchFromUtc: Date, location: GeoLocation): Date | null
+getMoonset(searchFromUtc: Date, location: GeoLocation): Date | null
+```
+
+**Fields added to `DailyPanchangResult`:**
+```ts
+moonrise: Date | null;
+moonset: Date | null;
+```
+
+**Files:**
+- Create `src/astronomy/moonrise.ts`
+
+---
+
+### Step 13-8 — Panchaka Detection
+
+**What:** Flag when the Moon is in the last 5 nakshatras (Dhanishta 3rd–4th pada through Revati). Considered inauspicious for certain activities.
+
+**Algorithm:**
+- Panchaka zone: `siderealMoon >= 300.0°`
+  (= Dhanishta 3rd pada start: `22 × (360/27) + (360/27)/2 ≈ 300°`)
+- `isPanchaka = siderealMoon >= 300.0`
+
+**New field on `DailyPanchangResult` and `InstantPanchangResult`:**
+```ts
+panchaka: boolean;
+```
+
+**Files:**
+- Create `src/core/panchaka.ts`
+
+---
+
+### Step 13-9 — Wire All New Features + Update Public Exports
+
+**What:** Integrate every new computation into `getDailyPanchang` / `getInstantPanchang`, extend result types, and expose from the public API.
+
+**Additions to `DailyPanchangResult`:**
+```ts
+chandramasa: ChandraMasaInfo;
+samvat: SamvatInfo;
+chandraRashi: RashiInfo;
+suryaNakshatra: { index: number; name: string };
+brahmaMuhurta: TimePeriod;
+choghadiya: ChoghadiyaInfo;
+hora: HoraInfo;
+moonrise: Date | null;
+moonset: Date | null;
+panchaka: boolean;
+```
+
+**Additions to `InstantPanchangResult`:**
+```ts
+chandramasa: ChandraMasaInfo;
+samvat: SamvatInfo;
+chandraRashi: RashiInfo;
+suryaNakshatra: { index: number; name: string };
+panchaka: boolean;
+```
+
+**Files to modify:**
+- `src/types/elements.ts` — add `ChandraMasaInfo`, `SamvatInfo`, `RashiInfo`, `ChoghadiyaSlot`, `ChoghadiyaInfo`, `HoraSlot`, `HoraInfo`
+- `src/types/panchang.ts` — extend both result interfaces
+- `src/core/panchang.ts` — import and call all new compute functions; convert new Date fields with `toLocal`
+- `src/types/index.ts` — re-export new types
+- `src/index.ts` — export new functions (`getMoonrise`, `getMoonset`, etc.) and new types
+- `src/i18n/types.ts`, `en.ts`, `sa.ts` — add `chandraMasaNames`, `grahaNames`, `choghadiyaNames`
+
+---
+
+### Execution Order Summary
+
+| Step | Feature | New file(s) |
+|------|---------|-------------|
+| 13-1 | Chandra Masa + Adhika Masa | `core/chandramasa.ts` |
+| 13-2 | Vikram & Shaka Samvat | `core/samvat.ts` |
+| 13-3 | Chandra Rashi + Surya Nakshatra | `core/rashi.ts` |
+| 13-4 | Brahma Muhurta | extends `core/muhurta.ts` |
+| 13-5 | Choghadiya | `core/choghadiya.ts` |
+| 13-6 | Hora | `core/hora.ts` |
+| 13-7 | Moonrise / Moonset | `astronomy/moonrise.ts` |
+| 13-8 | Panchaka | `core/panchaka.ts` |
+| 13-9 | Wire + Exports | `types/`, `core/panchang.ts`, `index.ts` |

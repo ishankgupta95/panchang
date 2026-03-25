@@ -28,11 +28,14 @@ import { computeVara } from './vara';
 import { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './inauspicious';
 import { computeAbhijitMuhurta } from './muhurta';
 import { computeMasa } from './masa';
+import { computeChandraMasa } from './chandramasa';
+import { computeSamvat } from './samvat';
 import {
   resolveTithiName,
   resolveNakshatraName,
   resolveYogaName,
   resolveKaranaName,
+  resolveChandraMasaName,
   getTranslations,
 } from '../i18n/resolver';
 import type { GeoLocation } from '../types/location';
@@ -114,6 +117,11 @@ export function getInstantPanchang(
     location,
   );
   const vara = computeVara(date, sunriseUtc, getTranslations(lang).varaNames);
+  const chandramasa = computeChandraMasa(
+    siderealSun, siderealMoon,
+    (idx, isAdhika) => resolveChandraMasaName(idx, lang, isAdhika),
+  );
+  const samvat = computeSamvat(date);
 
   if (doEndTimes) {
     tithi.endTime = findTransitionTime(
@@ -145,6 +153,8 @@ export function getInstantPanchang(
     ayanamsa: ayanamsaValue,
     siderealSun,
     siderealMoon,
+    chandramasa,
+    samvat,
   };
 }
 
@@ -240,6 +250,11 @@ export function getDailyPanchang(
   );
   const vara = computeVara(sunriseUtc, sunriseUtc, getTranslations(lang).varaNames);
   const masa = computeMasa(siderealSunAtSunrise);
+  const chandramasa = computeChandraMasa(
+    siderealSunAtSunrise, siderealMoonAtSunrise,
+    (idx, isAdhika) => resolveChandraMasaName(idx, lang, isAdhika),
+  );
+  const samvat = computeSamvat(sunriseUtc);
 
   // ── 6. Find transitions (daily element arrays) ───────
   let tithis: DailyTithiInfo[];
@@ -348,5 +363,7 @@ export function getDailyPanchang(
     siderealSunAtSunrise,
     siderealMoonAtSunrise,
     masa,
+    chandramasa,
+    samvat,
   };
 }

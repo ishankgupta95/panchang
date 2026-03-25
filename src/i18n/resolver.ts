@@ -37,3 +37,9 @@ export function resolveKaranaName(index: number, lang: Language): string {
 export function resolveMasaName(index: number, lang: Language): string {
   return getTranslations(lang).masaNames[index]!;
 }
+
+export function resolveChandraMasaName(index: number, lang: Language, adhika = false): string {
+  const t = getTranslations(lang);
+  const name = t.chandraMasaNames[index]!;
+  return adhika ? `${t.misc.adhika} ${name}` : name;
+}

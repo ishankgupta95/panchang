@@ -41,5 +41,10 @@ export const en: PanchangTranslations = {
     'Simha', 'Kanya', 'Tula', 'Vrischika',
     'Dhanus', 'Makara', 'Kumbha', 'Meena',
   ],
-  misc: { purnima: 'Purnima', amavasya: 'Amavasya' },
+  chandraMasaNames: [
+    'Chaitra', 'Vaishakha', 'Jyeshtha', 'Ashadha',
+    'Shravana', 'Bhadrapada', 'Ashwin', 'Kartika',
+    'Margashirsha', 'Pausha', 'Magha', 'Phalguna',
+  ],
+  misc: { purnima: 'Purnima', amavasya: 'Amavasya', adhika: 'Adhika' },
 };

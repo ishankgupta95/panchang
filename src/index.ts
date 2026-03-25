@@ -21,6 +21,7 @@ export type {
   DailyPanchangResult, InstantPanchangResult,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, MasaInfo,
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
+  ChandraMasaInfo, SamvatInfo,
   TimePeriod,
   PanchangErrorCode,
 } from './types';
