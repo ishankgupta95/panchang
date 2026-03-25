@@ -2,7 +2,7 @@ import type { GeoLocation } from './location';
 import type {
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, TimePeriod,
-  ChandraMasaInfo, SamvatInfo,
+  ChandraMasaInfo, SamvatInfo, RashiInfo,
 } from './elements';
 
 export interface MasaInfo {
@@ -38,6 +38,10 @@ export interface DailyPanchangResult {
   masa: MasaInfo;
   chandramasa: ChandraMasaInfo;
   samvat: SamvatInfo;
+  chandraRashi: RashiInfo;
+  /** Sun's current Nakshatra (changes every ~13–14 days) */
+  suryaNakshatra: RashiInfo;
+  brahmaMuhurta: TimePeriod;
 
   _debug?: {
     totalMs: number;
@@ -62,4 +66,7 @@ export interface InstantPanchangResult {
   siderealMoon: number;
   chandramasa: ChandraMasaInfo;
   samvat: SamvatInfo;
+  chandraRashi: RashiInfo;
+  /** Sun's current Nakshatra (changes every ~13–14 days) */
+  suryaNakshatra: RashiInfo;
 }

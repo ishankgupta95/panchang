@@ -26,15 +26,17 @@ import {
 } from './karana';
 import { computeVara } from './vara';
 import { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './inauspicious';
-import { computeAbhijitMuhurta } from './muhurta';
+import { computeAbhijitMuhurta, computeBrahmaMuhurta } from './muhurta';
 import { computeMasa } from './masa';
 import { computeChandraMasa } from './chandramasa';
 import { computeSamvat } from './samvat';
+import { computeChandraRashi, computeSuryaNakshatra } from './rashi';
 import {
   resolveTithiName,
   resolveNakshatraName,
   resolveYogaName,
   resolveKaranaName,
+  resolveMasaName,
   resolveChandraMasaName,
   getTranslations,
 } from '../i18n/resolver';
@@ -122,6 +124,14 @@ export function getInstantPanchang(
     (idx, isAdhika) => resolveChandraMasaName(idx, lang, isAdhika),
   );
   const samvat = computeSamvat(date);
+  const chandraRashi = computeChandraRashi(
+    siderealMoon,
+    (idx) => resolveMasaName(idx, lang),
+  );
+  const suryaNakshatra = computeSuryaNakshatra(
+    siderealSun,
+    (idx) => resolveNakshatraName(idx, lang),
+  );
 
   if (doEndTimes) {
     tithi.endTime = findTransitionTime(
@@ -155,6 +165,8 @@ export function getInstantPanchang(
     siderealMoon,
     chandramasa,
     samvat,
+    chandraRashi,
+    suryaNakshatra,
   };
 }
 
@@ -255,6 +267,15 @@ export function getDailyPanchang(
     (idx, isAdhika) => resolveChandraMasaName(idx, lang, isAdhika),
   );
   const samvat = computeSamvat(sunriseUtc);
+  const chandraRashi = computeChandraRashi(
+    siderealMoonAtSunrise,
+    (idx) => resolveMasaName(idx, lang),
+  );
+  const suryaNakshatra = computeSuryaNakshatra(
+    siderealSunAtSunrise,
+    (idx) => resolveNakshatraName(idx, lang),
+  );
+  const brahmaMuhurta = computeBrahmaMuhurta(sunriseUtc, sunsetUtc);
 
   // ── 6. Find transitions (daily element arrays) ───────
   let tithis: DailyTithiInfo[];
@@ -365,5 +386,8 @@ export function getDailyPanchang(
     masa,
     chandramasa,
     samvat,
+    chandraRashi,
+    suryaNakshatra,
+    brahmaMuhurta: convertTimePeriod(brahmaMuhurta),
   };
 }

@@ -19,3 +19,26 @@ export function computeAbhijitMuhurta(sunrise: Date, sunset: Date): TimePeriod {
 
   return { start, end };
 }
+
+/**
+ * Brahma Muhurta: the auspicious 96-minute window ending 48 minutes before sunrise.
+ *
+ * Daytime is divided into 30 equal muhurtas (each ≈ 48 min for a 12-hour day).
+ * Brahma Muhurta spans the 29th and 30th muhurtas of the *preceding* night,
+ * i.e. the two muhurtas immediately before sunrise.
+ *
+ * Start: sunrise − 2 × muhurtaDuration
+ * End:   sunrise − 1 × muhurtaDuration
+ *
+ * @param sunrise Sunrise UTC Date
+ * @param sunset  Sunset UTC Date (used to derive the muhurta length)
+ */
+export function computeBrahmaMuhurta(sunrise: Date, sunset: Date): TimePeriod {
+  const dayDurationMs = sunset.getTime() - sunrise.getTime();
+  const muhurtaDurationMs = dayDurationMs / 30;
+
+  const end = new Date(sunrise.getTime() - muhurtaDurationMs);
+  const start = new Date(end.getTime() - muhurtaDurationMs);
+
+  return { start, end };
+}

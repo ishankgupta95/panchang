@@ -11,7 +11,7 @@ export { computeAyanamsa as getAyanamsa } from './astronomy/ayanamsa';
 
 // Inauspicious periods & muhurta
 export { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './core/inauspicious';
-export { computeAbhijitMuhurta } from './core/muhurta';
+export { computeAbhijitMuhurta, computeBrahmaMuhurta } from './core/muhurta';
 
 // Types
 export type {
@@ -21,7 +21,7 @@ export type {
   DailyPanchangResult, InstantPanchangResult,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, MasaInfo,
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
-  ChandraMasaInfo, SamvatInfo,
+  ChandraMasaInfo, SamvatInfo, RashiInfo,
   TimePeriod,
   PanchangErrorCode,
 } from './types';

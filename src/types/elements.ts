@@ -45,6 +45,14 @@ export interface DailyNakshatraInfo extends NakshatraInfo, DailyElementBase {}
 export interface DailyYogaInfo extends YogaInfo, DailyElementBase {}
 export interface DailyKaranaInfo extends KaranaInfo, DailyElementBase {}
 
+// ── Rashi (zodiac sign) ───────────────────────────────
+
+export interface RashiInfo {
+  /** 0 = Mesha … 11 = Meena */
+  index: number;
+  name: string;
+}
+
 // ── Chandra Masa (lunar month) ────────────────────────
 
 export interface ChandraMasaInfo {
