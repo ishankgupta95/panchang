@@ -3216,24 +3216,22 @@ export const KARANA_SEARCH_HOURS = 18;
 
 ## 23. Implementation Phases & Timeline
 
-| Phase | What | Outputs | Validates | Time |
-|-------|------|---------|-----------|------|
-| **1** | Utils: `angle.ts`, `timezone.ts`, `validation.ts`, `constants.ts` | Unit tests for all utils | normalize360, midnight conversion, input guards | 0.5 day |
-| **2** | Astronomy: `ayanamsa.ts`, `sun.ts`, `moon.ts`, `sunrise.ts` | Ayanamsa tests vs Swiss Ephemeris. Sunrise tests vs DrikPanchang ±2 min for 3 cities | Foundation is correct | 2 days |
-| **3** | Cache: `cache.ts` + `search.ts` (binary search) | Cache hit/miss tests. Search precision tests with mock functions | Performance infrastructure works | 1 day |
-| **4** | Core: `tithi.ts` + `getInstantPanchang` | Tithi name exact match for 5 fixtures | First working Panchang output | 1 day |
-| **5** | Core: `nakshatra.ts`, `yoga.ts`, `karana.ts` | All 5 Panchangam elements match DrikPanchang | Core elements complete | 1.5 days |
-| **6** | Core: `vara.ts`, `inauspicious.ts`, `muhurta.ts`, `masa.ts` | Rahu Kalam ±3 min. Abhijit Muhurta ±3 min | All elements done | 1 day |
-| **7** | Orchestrator: `panchang.ts` daily mode + multi-element walker | Integration tests: 15+ fixtures pass. Multi-element days validated | Daily mode works end-to-end | 2 days |
-| **8** | i18n: `en.ts`, `sa.ts`, `hi.ts`, `resolver.ts` | Sanskrit names verified against authoritative texts | Translations correct | 0.5 day |
-| **9** | Build: `tsup.config.ts`, dual ESM/CJS, `.gitignore`, `.npmignore` | `npm pack --dry-run` clean. ESM + CJS smoke tests | Package structure correct | 0.5 day |
-| **10** | Hermes: `hermes-check.sh`, CI pipeline | Bytecode compiles. CI green on Node 18/20/22 | Production CI ready | 0.5 day |
-| **11** | Link into dharmSetu: Metro config, two-pass rendering hook | Full Panchang renders on physical Android device | Real-world validation | 1 day |
-| **12** | Performance: benchmark tests, cache tuning, profiling on device | Meet budget-Android targets. Benchmark regression tests | Performance acceptable | 1 day |
-| **13** | Docs: README, CONTRIBUTING, JSDoc on public API | README has usage examples, API reference, compatibility notes | Community-ready | 0.5 day |
-| **14** | Publish: changesets, `npm publish 0.1.0` | Package live on npm. Fresh `npm install` smoke test passes | Shipped |0.5 day |
-
-**Total: ~13 days of focused work.**
+| Phase | What | Status |
+|-------|------|--------|
+| **1** | Utils: `angle.ts`, `timezone.ts`, `validation.ts`, `constants.ts` | ✅ DONE |
+| **2** | Astronomy: `ayanamsa.ts`, `sun.ts`, `moon.ts`, `sunrise.ts` | ✅ DONE |
+| **3** | Cache: `cache.ts` + `search.ts` (binary search) | ✅ DONE |
+| **4** | Core: `tithi.ts` + `getInstantPanchang` | ✅ DONE |
+| **5** | Core: `nakshatra.ts`, `yoga.ts`, `karana.ts` | ✅ DONE |
+| **6** | Core: `vara.ts`, `inauspicious.ts`, `muhurta.ts`, `masa.ts` | ✅ DONE |
+| **7** | Orchestrator: `panchang.ts` daily mode + multi-element walker | ✅ DONE |
+| **8** | i18n: `en.ts`, `sa.ts`, `hi.ts`, `resolver.ts` | ✅ DONE |
+| **9** | Build: `tsup.config.ts`, dual ESM/CJS | ✅ DONE |
+| **10** | Hermes: `hermes-check.sh`, CI pipeline | ✅ DONE |
+| **11** | Link into dharmSetu: Metro config, two-pass rendering hook | ✅ DONE |
+| **12** | Performance: benchmark tests, cache tuning | ✅ DONE |
+| **13** | Docs: README, JSDoc on public API | ✅ DONE |
+| **14** | Publish: `npm publish` → v0.2.2 live on npm | ✅ DONE |
 
 ---
 
@@ -3348,16 +3346,15 @@ MIT
 
 ---
 
-*This document is the complete implementation specification for panchang-ts v0.1.0.*
-*Every type, function, formula, config file, test, and deployment step is here.*
-*Build it phase by phase, validate each phase against DrikPanchang, and ship.*
+*Phases 1–14 (original build) and Phase 13 (missing essentials) are complete.*
+*panchang-ts is live on npm at v0.2.2 with 133 passing tests.*
+*Phases 14–17 below define the feature expansion roadmap.*
 
 ---
 
-## Phase 13 — Missing Panchang Essentials
+## Phase 13 — Missing Panchang Essentials ✅ COMPLETE
 
-The five core elements, solar masa, inauspicious periods, and Abhijit Muhurta are done.
-The following essential features are still missing.
+All Phase 13 features are implemented and shipped in v0.2.x.
 
 ---
 
@@ -3612,14 +3609,470 @@ panchaka: boolean;
 
 ### Execution Order Summary
 
-| Step | Feature | New file(s) |
-|------|---------|-------------|
-| 13-1 | Chandra Masa + Adhika Masa | `core/chandramasa.ts` |
-| 13-2 | Vikram & Shaka Samvat | `core/samvat.ts` |
-| 13-3 | Chandra Rashi + Surya Nakshatra | `core/rashi.ts` |
-| 13-4 | Brahma Muhurta | extends `core/muhurta.ts` |
-| 13-5 | Choghadiya | `core/choghadiya.ts` |
-| 13-6 | Hora | `core/hora.ts` |
-| 13-7 | Moonrise / Moonset | `astronomy/moonrise.ts` |
-| 13-8 | Panchaka | `core/panchaka.ts` |
-| 13-9 | Wire + Exports | `types/`, `core/panchang.ts`, `index.ts` |
+| Step | Feature | New file(s) | Status |
+|------|---------|-------------|--------|
+| 13-1 | Chandra Masa + Adhika Masa | `core/chandramasa.ts` | ✅ DONE |
+| 13-2 | Vikram & Shaka Samvat | `core/samvat.ts` | ✅ DONE |
+| 13-3 | Chandra Rashi + Surya Nakshatra | `core/rashi.ts` | ✅ DONE |
+| 13-4 | Brahma Muhurta | extends `core/muhurta.ts` | ✅ DONE |
+| 13-5 | Choghadiya | `core/choghadiya.ts` | ✅ DONE |
+| 13-6 | Hora | `core/hora.ts` | ✅ DONE |
+| 13-7 | Moonrise / Moonset | `astronomy/moonrise.ts` | ✅ DONE |
+| 13-8 | Panchaka | `core/panchaka.ts` | ✅ DONE |
+| 13-9 | Wire + Exports | `types/`, `core/panchang.ts`, `index.ts` | ✅ DONE |
+
+---
+
+## Feature Expansion Plan (v4) — Closing the Gap & Surpassing Competition
+
+> **Context:** Derived from a feature-by-feature comparison of `panchang-ts` against
+> `@ishubhamx/panchangam-js` (v2.1.x). The goal is to close the feature gap,
+> surpass the competition, and build toward the needs of the **dharmSetu** companion app.
+
+---
+
+### Current Competitive Position
+
+#### Unique advantages of panchang-ts (panchangam-js does NOT have):
+
+| Feature | Notes |
+|---------|-------|
+| 3 ayanamsa systems (Lahiri, Raman, KP) | panchangam-js has no ayanamsa config |
+| 3 languages (en, sa, hi) | panchangam-js has partial/hardcoded name arrays |
+| Chandra Masa + Adhika (leap month) detection | Not in panchangam-js |
+| Purnimanta system (North-Indian month naming) | Not in panchangam-js |
+| Vikram Samvat + Shaka Samvat | Not in panchangam-js |
+| Saura Masa (solar month) | Not in panchangam-js |
+| Panchaka detection | Not in panchangam-js |
+| Daily mode vs Instant mode | panchangam-js only has `getPanchangam()` |
+| `computeEndTimes: false` (5× faster names-only) | Not in panchangam-js |
+| `precision` option (standard vs high) | Not in panchangam-js |
+| Typed `PanchangError` with error codes | Not in panchangam-js |
+| Low-level utility exports | Not in panchangam-js |
+| Two-pass rendering pattern for React Native | Not in panchangam-js |
+| Completion percentage per element | Not in panchangam-js |
+| Paksha info (Shukla/Krishna) in TithiInfo | Not in panchangam-js |
+| Karana end times + fixed/movable typing | panchangam-js has karana but no end times |
+| `nextSunrise`, `dayDurationMinutes`, `nightDurationMinutes` | Not in panchangam-js |
+| Ayanamsa value (degrees) exposed in result | Not in panchangam-js |
+| Sidereal Sun + Moon longitudes exposed | Not as cleanly in panchangam-js |
+
+#### Feature parity (both libraries have):
+
+- Tithi, Nakshatra, Yoga, Karana, Vara (core Pancha Anga)
+- Sunrise / Sunset, Moonrise / Moonset
+- Tithi, Nakshatra, Yoga end times
+- Elevation support in location
+- Abhijit Muhurta, Brahma Muhurta
+- Rahu Kalam, Gulika Kalam, Yamaganda
+- Choghadiya (8 day + 8 night, named + rated)
+- Hora (planetary hours)
+- Chandra Rashi (Moon sign), Surya Nakshatra
+- Timezone offset parameter
+- React Native / Hermes compatible
+
+---
+
+## Phase 14 — dharmSetu MVP Features
+
+### Step 14-1 — Special Yogas (Auspicious Day Detection)
+
+**What:** Detect special auspicious yogas — combinations of Tithi + Nakshatra + Vara:
+- **Amrit Siddhi Yoga** — specific Tithi × Vara combinations (lookup table)
+- **Sarvartha Siddhi Yoga** — specific Nakshatra × Vara combinations (lookup table)
+- **Ravi Pushya Yoga** — Sunday + Pushya Nakshatra
+- **Guru Pushya Yoga** — Thursday + Pushya Nakshatra
+
+**Why:** Commonly checked when selecting muhurtas for important events. Drik Panchang shows them prominently. panchangam-js has this, we don't.
+
+**Implementation:**
+- Create `src/core/specialYogas.ts`
+- Amrit Siddhi: 7×30 (Vara × Tithi) boolean lookup table
+- Sarvartha Siddhi: 7×27 (Vara × Nakshatra) boolean lookup table
+- Ravi/Guru Pushya: check vara index + nakshatra index
+- Return: `SpecialYogaInfo[]` array
+
+**Types:**
+```ts
+interface SpecialYogaInfo {
+  name: string;
+  type: 'amrit_siddhi' | 'sarvartha_siddhi' | 'ravi_pushya' | 'guru_pushya';
+}
+```
+
+**Depends on:** Tithi, Nakshatra, Vara (all implemented).
+**Effort:** Small. Pure lookup tables.
+
+---
+
+### Step 14-2 — Dur Muhurta (Inauspicious Windows)
+
+**What:** Two inauspicious periods of ~48 minutes each per day. Position shifts based on Vara.
+
+**Why:** Commonly shown alongside Rahu Kalam. Users avoid starting important work during Dur Muhurta. panchangam-js has this.
+
+**Algorithm:**
+- Each muhurta = (sunset - sunrise) / 30 duration
+- Dur Muhurta positions are fixed per Vara (lookup table of muhurta indices):
+  - Sunday: 26th and 29th muhurta
+  - Monday: 22nd and 27th
+  - Tuesday: 18th and 25th
+  - Wednesday: 14th and 23rd
+  - Thursday: 10th and 21st
+  - Friday: 6th and 19th
+  - Saturday: 2nd and 17th
+- Calculate start/end from sunrise + (index × muhurta_duration)
+
+**Implementation:**
+- Create `src/core/durMuhurta.ts`
+- Return: `[TimePeriod, TimePeriod]` (always 2 entries)
+
+**Depends on:** Sunrise, Sunset (implemented).
+**Effort:** Small. Vara-based offset table.
+
+---
+
+### Step 14-3 — Festival Detection
+
+**What:** Auto-detect Hindu festivals based on Tithi + Chandra Masa + special rules.
+
+**Why:** #1 feature dharmSetu users will expect. panchangam-js detects festivals automatically.
+
+**Implementation:**
+- Create `src/core/festivals.ts` with a registry of festival rules
+- Each rule: `(tithi, masa, nakshatra, vara, ...) => FestivalInfo | null`
+- Start with 20–30 major pan-Indian festivals:
+  - Diwali = Kartika, Krishna Amavasya
+  - Ekadashi = any month, Shukla/Krishna Ekadashi (tithi 11)
+  - Rama Navami = Chaitra, Shukla Navami
+  - Maha Shivaratri = Magha, Krishna Chaturdashi
+  - Holi = Phalguna, Purnima
+  - Ganesh Chaturthi = Bhadrapada, Shukla Chaturthi
+  - Navratri = Ashvina, Shukla Pratipada through Navami
+  - Makar Sankranti = Sun enters Makara rashi
+  - etc.
+- Return array (multiple festivals can fall on one day)
+- Must respect language setting (en/sa/hi)
+- Add festival names to i18n files
+
+**Types:**
+```ts
+interface FestivalInfo {
+  name: string;           // "Diwali", "दीपावली"
+  type: 'major' | 'minor' | 'ekadashi' | 'pradosha' | 'sankranti';
+  description?: string;
+}
+```
+
+**Depends on:** Chandra Masa (implemented), Tithi (implemented).
+**Effort:** Medium. Lookup-table heavy, but edge cases around Adhika masa and regional variations.
+
+---
+
+### Step 14-4 — Wire Phase 14 Features + Update Exports
+
+**What:** Integrate all Phase 14 features into `getDailyPanchang` / `getInstantPanchang`.
+
+**Additions to `DailyPanchangResult`:**
+```ts
+specialYogas: SpecialYogaInfo[];
+durMuhurta: [TimePeriod, TimePeriod];
+festivals: FestivalInfo[];
+```
+
+**Additions to `InstantPanchangResult`:**
+```ts
+specialYogas: SpecialYogaInfo[];
+festivals: FestivalInfo[];
+```
+
+**Files to modify:**
+- `src/types/elements.ts` — add `SpecialYogaInfo`, `FestivalInfo`
+- `src/types/panchang.ts` — extend both result interfaces
+- `src/core/panchang.ts` — import and call new compute functions
+- `src/index.ts` — export new types and functions
+- `src/i18n/` — add festival names, special yoga names
+
+---
+
+## Phase 15 — Regional Completeness
+
+### Step 15-1 — Gowri Panchangam (Gowri Nalla Neram)
+
+**What:** 8 time slots for day + 8 for night, each assigned a name and auspiciousness rating. Popular in Tamil Nadu / South India.
+
+**Why:** panchangam-js includes this. Drik Panchang shows it for South Indian cities. Important for dharmSetu's South Indian user base.
+
+**Implementation:**
+- Create `src/core/gowri.ts`
+- Similar structure to Choghadiya — divide day into 8 equal slots, night into 8 equal slots
+- Assignment order differs from Choghadiya; Gowri uses a fixed rotation starting from Vara
+- Day slot names: Udyog, Amrit, Roga, Laabh, Shubh, Kaal, Dhan, Chal
+- Night: same names, different starting rotation
+- Reuse `ChoghadiyaSlot` pattern
+
+**Types:**
+```ts
+interface GowriSlot extends TimePeriod {
+  index: number;
+  name: string;            // "Udyog", "Amrit", etc.
+  quality: 'auspicious' | 'inauspicious' | 'neutral';
+}
+
+interface GowriInfo {
+  day: GowriSlot[];    // 8 slots
+  night: GowriSlot[];  // 8 slots
+}
+```
+
+**Depends on:** Sunrise, Sunset, nextSunrise, Vara (all implemented).
+**Effort:** Small-Medium. Similar to Choghadiya implementation.
+
+---
+
+### Step 15-2 — Govardhan Muhurta
+
+**What:** An afternoon auspicious period, calculated relative to local noon and sunset.
+
+**Implementation:**
+- Create logic in `src/core/muhurta.ts` (extend existing file)
+- Govardhan Muhurta ≈ the 8th muhurta from sunrise (varies by tradition)
+- Some traditions: starts at 3/5th of daytime, lasts one muhurta duration
+- Return: `TimePeriod` (same pattern as Abhijit/Brahma)
+
+**Depends on:** Sunrise, Sunset (implemented).
+**Effort:** Small.
+
+---
+
+### Step 15-3 — Wire Phase 15 Features + Update Exports
+
+**Additions to `DailyPanchangResult`:**
+```ts
+gowriPanchangam: GowriInfo;
+govardhanMuhurta: TimePeriod;
+```
+
+**Files to modify:**
+- `src/types/elements.ts` — add `GowriSlot`, `GowriInfo`
+- `src/types/panchang.ts` — extend result interfaces
+- `src/core/panchang.ts` — import and call new compute functions
+- `src/index.ts` — export new types
+- `src/i18n/` — add Gowri slot names
+
+---
+
+## Phase 16 — Validation Hardening
+
+### Step 16-1 — Expanded Validation Suite (200+ Days)
+
+**What:** Expand from 15+ date/city combinations to 200+ consecutive days validated against Drik Panchang.
+
+**Why:** panchangam-js claims 200 consecutive days (Sep 2025–Apr 2026) validated with 100% accuracy, plus 25+ year regression tests.
+
+**Implementation:**
+- Collect Drik Panchang data for 200 days for Pune, Delhi, Chennai, Mumbai, Bangalore
+- Create `tests/validation/` directory with JSON fixtures
+- Vitest parametric tests comparing output against ground truth
+- Add long-range dates: 2030, 2035, 2040, 2045, 2050 for regression confidence
+- Tolerances:
+  - Sunrise/sunset: ±2 min
+  - Element end times: ±5 min
+  - Element names: exact match
+
+**Effort:** Medium-Large. Data collection is the bottleneck.
+
+---
+
+## Phase 17 — Jyotish Expansion (Optional / Separate Module)
+
+> **Note:** These features push panchang-ts from a Panchang library into Jyotish (astrology)
+> territory. Consider whether these belong in panchang-ts core or a separate `jyotish-ts` package.
+
+### Step 17-1 — Planetary Positions (7 Graha)
+
+**What:** Sidereal longitude, Rashi (sign), degree for: Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn.
+
+**Why:** panchangam-js returns `planetaryPositions` with rashi, rashiName, degree, longitude for all 7 planets.
+
+**Implementation:**
+- Extend `src/astronomy/` — we already compute Sun and Moon sidereal longitudes
+- Use `astronomy-engine`'s `EclipticLongitude()` for Mars, Mercury, Jupiter, Venus, Saturn
+- Apply ayanamsa correction (already have `getAyanamsa()`)
+- `floor(siderealLongitude / 30)` → Rashi index
+- `siderealLongitude % 30` → degree within Rashi
+- Behind an `includePlanets: true` option flag, disabled by default (compute cost)
+
+**Types:**
+```ts
+interface GrahaPosition {
+  planet: string;
+  siderealLongitude: number;
+  rashi: RashiInfo;
+  degreeInRashi: number;
+  nakshatra: NakshatraInfo;
+  isRetrograde?: boolean;   // for Mars–Saturn
+}
+
+interface PlanetaryPositions {
+  sun: GrahaPosition;
+  moon: GrahaPosition;
+  mars: GrahaPosition;
+  mercury: GrahaPosition;
+  jupiter: GrahaPosition;
+  venus: GrahaPosition;
+  saturn: GrahaPosition;
+}
+```
+
+**Depends on:** astronomy-engine (dependency), getAyanamsa (implemented).
+**Effort:** Medium. astronomy-engine calls are straightforward, testing accuracy for 5 additional planets is work.
+
+---
+
+### Step 17-2 — Chandra Balam (Moon Strength)
+
+**What:** A calculation of Moon's strength based on its sign placement and other factors.
+
+**Why:** panchangam-js includes it.
+
+**Implementation:**
+- Lookup table based on Moon's Rashi
+- Some traditions use more complex calculations
+
+**Depends on:** Chandra Rashi (implemented).
+**Effort:** Small.
+
+---
+
+### Step 17-3 — Vimshottari Dasha System
+
+**What:** The 120-year planetary period system. Given a birth nakshatra and Moon's degree within it, calculate:
+- Current Mahadasha (major period) + ruling planet
+- Dasha balance (time remaining)
+- Full 120-year cycle with start/end dates
+- Antardasha (sub-periods within each Mahadasha)
+
+**Why:** panchangam-js includes full Vimshottari Dasha with mahadasha, antardasha, and dasha balance.
+
+**Algorithm:**
+- Dasha cycle: Ketu(7yr) → Venus(20yr) → Sun(6yr) → Moon(10yr) → Mars(7yr) → Rahu(18yr) → Jupiter(16yr) → Saturn(19yr) → Mercury(17yr) = 120 years
+- Birth nakshatra → starting dasha lord (each nakshatra has a ruling planet)
+- Moon's degree within nakshatra → elapsed fraction → dasha balance at birth
+- From birth date + balance, compute all subsequent dasha periods
+- Antardasha: subdivide each mahadasha proportionally among 9 planets
+
+**Important:** Requires a birth date/time as input — different from daily panchang.
+
+**Implementation:**
+- Separate export: `computeVimshottariDasha(birthNakshatra, moonDegreeInNakshatra, birthDate)`
+- Consider placing in a separate `src/jyotish/` directory
+
+**Depends on:** Nakshatra calculations (implemented).
+**Effort:** Medium-Large. Math is well-defined but antardasha subdivision and date arithmetic needs careful testing.
+
+---
+
+### Step 17-4 — Kundli Milan / Ashtakoota Guna Matching
+
+**What:** Marriage compatibility scoring using the Ashtakoota system — 8 aspects (Kootas), 36 total points:
+- **Varna** (1 pt) — spiritual compatibility
+- **Vashya** (2 pts) — mutual attraction / dominance
+- **Tara** (3 pts) — birth star compatibility
+- **Yoni** (4 pts) — physical/sexual compatibility
+- **Graha Maitri** (5 pts) — intellectual/mental connection
+- **Gana** (6 pts) — temperament (Deva/Manushya/Rakshasa)
+- **Bhakoot** (7 pts) — financial prosperity / family welfare
+- **Nadi** (8 pts) — health & progeny (most important, Nadi Dosha check)
+
+**Why:** Neither panchangam-js nor panchang-ts has this. **First mover advantage.** Most searched Jyotish feature on the web.
+
+**Implementation:**
+- Standalone export: `computeGunaMilan(brideNakshatra, groomNakshatra, options?)`
+- Each Koota is a lookup table or simple comparison logic
+- Also include Manglik Dosha check if planetary positions are available
+
+**Types:**
+```ts
+interface KootaScore {
+  name: string;
+  maxPoints: number;
+  obtained: number;
+  description: string;
+}
+
+interface GunaMilanResult {
+  totalPoints: number;       // out of 36
+  kootas: KootaScore[];      // 8 entries
+  isNadiDosha: boolean;
+  isBhakootDosha: boolean;
+  recommendation: 'excellent' | 'very_good' | 'average' | 'below_average';
+  // 31-36 = excellent, 21-30 = very good, 18-20 = average, <18 = below average
+}
+```
+
+**Depends on:** Nakshatra, Rashi lookups (data already exists).
+**Effort:** Medium. All lookup tables, no astronomy. Validation against Drik Panchang output needed.
+
+---
+
+### Step 17-5 — Wire Phase 17 Features + Update Exports
+
+**Additions to `DailyPanchangResult` (when `includePlanets: true`):**
+```ts
+planetaryPositions?: PlanetaryPositions;
+chandraBalam?: ChandraBalamInfo;
+```
+
+**New standalone exports:**
+```ts
+import { computeVimshottariDasha, computeGunaMilan } from 'panchang-ts';
+```
+
+**Files to create/modify:**
+- `src/jyotish/planets.ts` — planetary position calculations
+- `src/jyotish/chandraBalam.ts` — Moon strength
+- `src/jyotish/dasha.ts` — Vimshottari Dasha
+- `src/jyotish/gunaMilan.ts` — Ashtakoota matching
+- `src/jyotish/index.ts` — barrel export
+- `src/types/jyotish.ts` — all Jyotish-specific types
+- `src/types/options.ts` — add `includePlanets` flag
+- `src/index.ts` — export new modules
+
+---
+
+## Execution Summary — All Phases
+
+| Phase | Focus | Steps | Key Deliverables | Status |
+|-------|-------|-------|------------------|--------|
+| **1–12** | Core build, publish | 1 → 14 | Full Panchang lib, npm v0.2.2 | ✅ DONE |
+| **13** | Missing Panchang Essentials | 13-1 → 13-9 | Chandra Masa, Samvat, Rashi, Brahma Muhurta, Choghadiya, Hora, Moonrise/set, Panchaka | ✅ DONE |
+| **14** | dharmSetu MVP Features | 14-1 → 14-4 | Special Yogas, Dur Muhurta, Festival Detection | ⬜ NOT STARTED |
+| **15** | Regional Completeness | 15-1 → 15-3 | Gowri Panchangam, Govardhan Muhurta | ⬜ NOT STARTED |
+| **16** | Validation Hardening | 16-1 | 200+ day validation suite, long-range regression | 🔶 PARTIAL |
+| **17** | Jyotish Expansion | 17-1 → 17-5 | 7 Graha positions, Chandra Balam, Vimshottari Dasha, Kundli Milan | ⬜ NOT STARTED |
+
+---
+
+## Competitive Summary (Post All Phases)
+
+| Metric | panchangam-js | panchang-ts |
+|--------|:------------:|:-----------:|
+| Core Pancha Anga | ✅ | ✅ |
+| End times for all elements | ✅ | ✅ |
+| Lunar calendar (Masa, Samvat) | ❌ | ✅ |
+| Ayanamsa options | ❌ (hardcoded) | ✅ (3 systems) |
+| i18n | Partial | ✅ (en/sa/hi) |
+| Daily + Instant modes | ❌ | ✅ |
+| Performance toggles | ❌ | ✅ |
+| Typed errors | ❌ | ✅ |
+| Festival detection | ✅ | ✅ (Phase 14) |
+| Special Yogas | ✅ | ✅ (Phase 14) |
+| Dur Muhurta | ✅ | ✅ (Phase 14) |
+| Gowri Panchangam | ✅ | ✅ (Phase 15) |
+| 7-planet positions | ✅ | ✅ (Phase 17) |
+| Vimshottari Dasha | ✅ | ✅ (Phase 17) |
+| Kundli Milan | ❌ | ✅ (Phase 17 — first mover) |
+| Validation depth | 200 days | 200+ days (Phase 16) |
+
+**After Phase 14+15, panchang-ts surpasses panchangam-js on every dimension that matters for a devotional app, while maintaining architectural advantages (types, modes, perf toggles, i18n, calendar systems) that panchangam-js cannot match.**
