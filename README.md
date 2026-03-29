@@ -298,9 +298,11 @@ interface DailyTithiInfo extends TithiInfo {
 // ── Lunar calendar ───────────────────────────────────────────────────────────
 
 interface ChandraMasaInfo {
-  index: number;       // 0 = Chaitra … 11 = Phalguna
-  name: string;        // e.g. "Pausha"
-  isAdhika: boolean;   // true = leap/intercalary month
+  index: number;          // 0 = Chaitra … 11 = Phalguna (Amanta / South-Indian)
+  name: string;           // e.g. "Pausha" (Amanta name)
+  isAdhika: boolean;      // true = leap/intercalary month
+  purnimantaIndex: number; // Month index in Purnimanta (North-Indian) system
+  purnimantaName: string;  // Month name in Purnimanta system
 }
 
 interface SamvatInfo {
@@ -316,6 +318,26 @@ interface RashiInfo {
 }
 
 // chandraRashi and suryaNakshatra both use RashiInfo
+
+interface VaraInfo {
+  index: number;       // 0 = Sunday … 6 = Saturday
+  name: string;        // e.g. "Ravivara"
+  shortName: string;   // e.g. "Sun"
+  englishName: string; // e.g. "Sunday"
+}
+
+interface MasaInfo {
+  index: number;  // 0 = Mesha … 11 = Meena (solar month)
+  name: string;   // e.g. "Dhanu"
+}
+
+interface KaranaInfo {
+  index: number;
+  name: string;
+  completionPercentage: number;
+  endTime: Date | null;
+  type: 'fixed' | 'movable';
+}
 
 // ── Choghadiya ───────────────────────────────────────────────────────────────
 
