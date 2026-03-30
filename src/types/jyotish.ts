@@ -1,5 +1,4 @@
 import type { NakshatraInfo, RashiInfo } from './elements';
-import type { InstantPanchangResult } from './panchang';
 
 // ── Graha (planetary) positions ──────────────────────
 
@@ -24,8 +23,6 @@ export interface GrahaPosition {
    * Rahu/Ketu are always retrograde by definition.
    */
   isRetrograde: boolean;
-  /** 1-based house number where this planet sits (set after house assignment) */
-  house: number;
 }
 
 export interface PlanetaryPositions {
@@ -38,46 +35,6 @@ export interface PlanetaryPositions {
   saturn: GrahaPosition;
   rahu: GrahaPosition;
   ketu: GrahaPosition;
-}
-
-// ── Kundli (birth chart) ──────────────────────────────
-
-export interface KundliHouse {
-  /** 1–12 */
-  number: number;
-  /** Zodiac sign on the cusp of this house */
-  rashi: RashiInfo;
-  /** Short planet abbreviations occupying this house (e.g. "Su", "Mo") */
-  planets: string[];
-}
-
-export interface NavamsaPosition {
-  planet: GrahaName;
-  /** Navamsa rashi (D-9 sign) */
-  rashi: RashiInfo;
-}
-
-export interface NavamsaChart {
-  positions: NavamsaPosition[];
-  /** Navamsa Lagna rashi */
-  lagna: RashiInfo;
-}
-
-export interface KundliResult {
-  /** Sidereal longitude of the Ascendant in degrees [0, 360) */
-  lagnaLongitude: number;
-  /** Ascendant sign */
-  lagna: RashiInfo;
-  /** 12 houses, 1st house = lagna sign */
-  houses: KundliHouse[];
-  /** All 9 graha positions with house assignments */
-  grahas: PlanetaryPositions;
-  /** Navamsa (D-9) divisional chart */
-  navamsa: NavamsaChart;
-  /** Full Panchang at the birth moment */
-  birthPanchang: InstantPanchangResult;
-  /** Vimshottari Dasha from birth */
-  dasha: VimshottariDashaResult;
 }
 
 // ── Vimshottari Dasha ─────────────────────────────────

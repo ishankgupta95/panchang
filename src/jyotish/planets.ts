@@ -97,7 +97,6 @@ function buildGrahaPosition(
     degreeInRashi,
     nakshatra: computeNakshatraFromLongitude(siderealLon, nakshatraNameFn(nakIdx)),
     isRetrograde: isRetro,
-    house: 0, // assigned later in computeKundli
   };
 }
 

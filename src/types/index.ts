@@ -14,6 +14,5 @@ export { PanchangError } from './errors';
 export type { PanchangErrorCode } from './errors';
 export type {
   GrahaName, GrahaPosition, PlanetaryPositions,
-  KundliHouse, NavamsaPosition, NavamsaChart, KundliResult,
   DashaLord, AntarDasha, MahaDasha, VimshottariDashaResult,
 } from './jyotish';

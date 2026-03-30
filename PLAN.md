@@ -3957,90 +3957,6 @@ interface PlanetaryPositions {
 
 ---
 
-### Step 17-4 — Kundli Milan / Ashtakoota Guna Matching
-
-**What:** Marriage compatibility scoring using the Ashtakoota system — 8 aspects (Kootas), 36 total points:
-- **Varna** (1 pt) — spiritual compatibility
-- **Vashya** (2 pts) — mutual attraction / dominance
-- **Tara** (3 pts) — birth star compatibility
-- **Yoni** (4 pts) — physical/sexual compatibility
-- **Graha Maitri** (5 pts) — intellectual/mental connection
-- **Gana** (6 pts) — temperament (Deva/Manushya/Rakshasa)
-- **Bhakoot** (7 pts) — financial prosperity / family welfare
-- **Nadi** (8 pts) — health & progeny (most important, Nadi Dosha check)
-
-**Why:** Neither panchangam-js nor panchang-ts has this. **First mover advantage.** Most searched Jyotish feature on the web.
-
-**Implementation:**
-- Standalone export: `computeGunaMilan(brideNakshatra, groomNakshatra, options?)`
-- Each Koota is a lookup table or simple comparison logic
-- Also include Manglik Dosha check if planetary positions are available
-
-**Types:**
-```ts
-interface KootaScore {
-  name: string;
-  maxPoints: number;
-  obtained: number;
-  description: string;
-}
-
-interface GunaMilanResult {
-  totalPoints: number;       // out of 36
-  kootas: KootaScore[];      // 8 entries
-  isNadiDosha: boolean;
-  isBhakootDosha: boolean;
-  recommendation: 'excellent' | 'very_good' | 'average' | 'below_average';
-  // 31-36 = excellent, 21-30 = very good, 18-20 = average, <18 = below average
-}
-```
-
-**Depends on:** Nakshatra, Rashi lookups (data already exists).
-**Effort:** Medium. All lookup tables, no astronomy. Validation against Drik Panchang output needed.
-
----
-
-### Step 17-4b — Kundli Chart Data (Janam Kundli)
-
-**What:** Given a birth date/time and location, return all data needed to render a North Indian or South Indian Kundli chart:
-- All 9 Graha positions (Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, Ketu) placed in the 12 houses
-- Lagna (Ascendant) calculation — the rising sign at the birth moment
-- House assignments for each graha based on Lagna
-- Navamsa (D-9) chart positions
-- Basic Yogas formed by planetary combinations
-
-**Why:** Most requested Jyotish feature. Consumers (dharmagya.app, dharmSetu) need structured chart data to render Kundli diagrams and generate PDF reports. The library should return the data; rendering is the consumer's concern.
-
-**Types:**
-```ts
-interface KundliResult {
-  lagna: RashiInfo;                    // Ascendant sign
-  lagnaLongitude: number;              // Exact sidereal longitude of ascendant
-  houses: KundliHouse[];               // 12 houses (1st = lagna sign)
-  grahas: GrahaPosition[];             // 9 graha positions with house assignments
-  navamsa: NavamsaChart;               // D-9 divisional chart
-  birthPanchang: InstantPanchangResult; // Full panchang at birth moment
-  dashaBalance: VimshottariDashaResult; // Dasha periods from birth
-}
-
-interface KundliHouse {
-  number: number;           // 1–12
-  rashi: RashiInfo;         // Sign occupying this house
-  planets: string[];        // Planet names in this house
-}
-```
-
-**Key calculation — Lagna (Ascendant):**
-- Compute Local Sidereal Time (LST) from UTC + observer longitude
-- LST → ascending ecliptic degree (requires obliquity + latitude)
-- Apply ayanamsa → sidereal ascendant → Lagna Rashi
-- `astronomy-engine` provides `SiderealTime()` and ecliptic conversion utilities
-
-**Depends on:** Step 17-1 (all graha positions), Step 17-3 (Vimshottari Dasha).
-**Effort:** Large. Lagna calculation is the hardest part — requires accurate sidereal time and ecliptic-to-horizon conversion. Everything else is lookups once positions are known.
-
----
-
 ### Step 17-5 — Wire Phase 17 Features + Update Exports
 
 **Additions to `DailyPanchangResult` (when `includePlanets: true`):**
@@ -4051,14 +3967,13 @@ chandraBalam?: ChandraBalamInfo;
 
 **New standalone exports:**
 ```ts
-import { computeVimshottariDasha, computeGunaMilan } from 'panchang-ts';
+import { computeVimshottariDasha } from 'panchang-ts';
 ```
 
 **Files to create/modify:**
 - `src/jyotish/planets.ts` — planetary position calculations
 - `src/jyotish/chandraBalam.ts` — Moon strength
 - `src/jyotish/dasha.ts` — Vimshottari Dasha
-- `src/jyotish/gunaMilan.ts` — Ashtakoota matching
 - `src/jyotish/index.ts` — barrel export
 - `src/types/jyotish.ts` — all Jyotish-specific types
 - `src/types/options.ts` — add `includePlanets` flag
@@ -4075,7 +3990,7 @@ import { computeVimshottariDasha, computeGunaMilan } from 'panchang-ts';
 | **14** | dharmSetu MVP Features | 14-1 → 14-4 | Special Yogas, Dur Muhurta, Festival Detection | ✅ DONE (v0.3.1) |
 | **15** | Regional Completeness | 15-1 → 15-2 | Gowri Panchangam | ✅ DONE (v0.3.1) |
 | **16** | Validation Hardening | 16-1 | 200+ day validation suite, long-range regression | 🔶 PARTIAL |
-| **17** | Jyotish Expansion | 17-1 → 17-5 | 7 Graha positions, Rahu/Ketu, Chandra Balam, Vimshottari Dasha, Kundli Milan, Kundli chart data | ⬜ NOT STARTED |
+| **17** | Jyotish Expansion | 17-1 → 17-5 | 7 Graha positions, Rahu/Ketu, Chandra Balam, Vimshottari Dasha | ⬜ NOT STARTED |
 
 ---
 
@@ -4097,7 +4012,6 @@ import { computeVimshottariDasha, computeGunaMilan } from 'panchang-ts';
 | Gowri Panchangam | ✅ | ✅ (Phase 15) |
 | 7-planet positions | ✅ | ✅ (Phase 17) |
 | Vimshottari Dasha | ✅ | ✅ (Phase 17) |
-| Kundli Milan | ❌ | ✅ (Phase 17 — first mover) |
 | Validation depth | 200 days | 200+ days (Phase 16) |
 
 **After Phase 14+15, panchang-ts surpasses panchangam-js on every dimension that matters for a devotional app, while maintaining architectural advantages (types, modes, perf toggles, i18n, calendar systems) that panchangam-js cannot match.**

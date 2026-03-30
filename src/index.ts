@@ -3,11 +3,9 @@
 // Primary entry points
 export { getDailyPanchang, getInstantPanchang } from './core/panchang';
 
-// Jyotish (Vedic astrology) — Kundli, planetary positions, dasha
-export { computeKundli } from './jyotish/kundli';
+// Jyotish (Vedic astrology) — planetary positions, dasha
 export { computePlanetaryPositions, GRAHA_ABBR } from './jyotish/planets';
 export { computeVimshottariDasha } from './jyotish/dasha';
-export { computeLagnaLongitude } from './jyotish/lagna';
 
 // Astronomy utilities
 export { computeSunrise as getSunrise, computeSunset as getSunset } from './astronomy/sunrise';
@@ -38,10 +36,8 @@ export type {
   PanchangErrorCode,
   // Jyotish types
   GrahaName, GrahaPosition, PlanetaryPositions,
-  KundliHouse, NavamsaPosition, NavamsaChart, KundliResult,
   DashaLord, AntarDasha, MahaDasha, VimshottariDashaResult,
 } from './types';
-export type { KundliOptions } from './jyotish/kundli';
 
 // Errors
 export { PanchangError } from './types/errors';
