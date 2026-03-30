@@ -4000,6 +4000,47 @@ interface GunaMilanResult {
 
 ---
 
+### Step 17-4b — Kundli Chart Data (Janam Kundli)
+
+**What:** Given a birth date/time and location, return all data needed to render a North Indian or South Indian Kundli chart:
+- All 9 Graha positions (Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, Ketu) placed in the 12 houses
+- Lagna (Ascendant) calculation — the rising sign at the birth moment
+- House assignments for each graha based on Lagna
+- Navamsa (D-9) chart positions
+- Basic Yogas formed by planetary combinations
+
+**Why:** Most requested Jyotish feature. Consumers (dharmagya.app, dharmSetu) need structured chart data to render Kundli diagrams and generate PDF reports. The library should return the data; rendering is the consumer's concern.
+
+**Types:**
+```ts
+interface KundliResult {
+  lagna: RashiInfo;                    // Ascendant sign
+  lagnaLongitude: number;              // Exact sidereal longitude of ascendant
+  houses: KundliHouse[];               // 12 houses (1st = lagna sign)
+  grahas: GrahaPosition[];             // 9 graha positions with house assignments
+  navamsa: NavamsaChart;               // D-9 divisional chart
+  birthPanchang: InstantPanchangResult; // Full panchang at birth moment
+  dashaBalance: VimshottariDashaResult; // Dasha periods from birth
+}
+
+interface KundliHouse {
+  number: number;           // 1–12
+  rashi: RashiInfo;         // Sign occupying this house
+  planets: string[];        // Planet names in this house
+}
+```
+
+**Key calculation — Lagna (Ascendant):**
+- Compute Local Sidereal Time (LST) from UTC + observer longitude
+- LST → ascending ecliptic degree (requires obliquity + latitude)
+- Apply ayanamsa → sidereal ascendant → Lagna Rashi
+- `astronomy-engine` provides `SiderealTime()` and ecliptic conversion utilities
+
+**Depends on:** Step 17-1 (all graha positions), Step 17-3 (Vimshottari Dasha).
+**Effort:** Large. Lagna calculation is the hardest part — requires accurate sidereal time and ecliptic-to-horizon conversion. Everything else is lookups once positions are known.
+
+---
+
 ### Step 17-5 — Wire Phase 17 Features + Update Exports
 
 **Additions to `DailyPanchangResult` (when `includePlanets: true`):**
@@ -4031,10 +4072,10 @@ import { computeVimshottariDasha, computeGunaMilan } from 'panchang-ts';
 |-------|-------|-------|------------------|--------|
 | **1–12** | Core build, publish | 1 → 14 | Full Panchang lib, npm v0.2.2 | ✅ DONE |
 | **13** | Missing Panchang Essentials | 13-1 → 13-9 | Chandra Masa, Samvat, Rashi, Brahma Muhurta, Choghadiya, Hora, Moonrise/set, Panchaka | ✅ DONE |
-| **14** | dharmSetu MVP Features | 14-1 → 14-4 | Special Yogas, Dur Muhurta, Festival Detection | ⬜ NOT STARTED |
-| **15** | Regional Completeness | 15-1 → 15-2 | Gowri Panchangam | ⬜ NOT STARTED |
+| **14** | dharmSetu MVP Features | 14-1 → 14-4 | Special Yogas, Dur Muhurta, Festival Detection | ✅ DONE (v0.3.1) |
+| **15** | Regional Completeness | 15-1 → 15-2 | Gowri Panchangam | ✅ DONE (v0.3.1) |
 | **16** | Validation Hardening | 16-1 | 200+ day validation suite, long-range regression | 🔶 PARTIAL |
-| **17** | Jyotish Expansion | 17-1 → 17-5 | 7 Graha positions, Chandra Balam, Vimshottari Dasha, Kundli Milan | ⬜ NOT STARTED |
+| **17** | Jyotish Expansion | 17-1 → 17-5 | 7 Graha positions, Rahu/Ketu, Chandra Balam, Vimshottari Dasha, Kundli Milan, Kundli chart data | ⬜ NOT STARTED |
 
 ---
 

@@ -22,6 +22,7 @@ Works offline in React Native (Hermes), Node.js, and browsers.
 - **Instant mode:** Elements active at an exact moment (birth charts, muhurta selection)
 - **3 ayanamsa systems:** Lahiri (default), B.V. Raman, KP (Krishnamurti)
 - **3 languages:** English, Sanskrit (Devanagari), Hindi
+- **Jyotish (Vedic astrology):** Janam Kundli with Lagna, 12 houses (whole-sign), all 9 graha positions, Navamsa (D-9) chart, Vimshottari Dasha with Antardasha breakdown
 - **React Native compatible:** Pure JS math, no native modules, tested on Hermes
 - **Fast:** ~0.1 ms names-only on Node.js; <100 ms on budget Android (Hermes)
 - **Typed:** Full TypeScript types for every result and option
@@ -185,6 +186,77 @@ const result = getDailyPanchang(
 
 ---
 
+### `computeKundli(birthDateUtc, location, options?)`
+
+Compute a complete Janam Kundli (Vedic birth chart).
+
+```typescript
+import { computeKundli } from 'panchang-ts';
+
+const kundli = computeKundli(
+  new Date('1990-06-15T08:30:00Z'),            // UTC birth moment
+  { latitude: 18.5204, longitude: 73.8567 },   // birth location
+  { ayanamsa: 'lahiri', language: 'en' },
+);
+
+// Ascendant
+console.log(kundli.lagna.name);                // "Karka" (Cancer)
+console.log(kundli.lagnaLongitude);            // 95.4 (sidereal degrees)
+
+// Planetary positions
+const sun = kundli.grahas.sun;
+console.log(sun.rashi.name);                   // "Mithuna"
+console.log(sun.nakshatra.name);               // "Ardra"
+console.log(sun.degreeInRashi);                // 24.3
+console.log(sun.isRetrograde);                 // false
+
+// Houses (whole-sign)
+kundli.houses.forEach(h => {
+  console.log(`House ${h.number}: ${h.rashi.name} — ${h.planets.join(', ')}`);
+});
+
+// Navamsa (D-9) chart
+console.log(kundli.navamsa.lagna.name);        // Navamsa lagna sign
+kundli.navamsa.positions.forEach(p => {
+  console.log(p.planet, '→', p.rashi.name);
+});
+
+// Vimshottari Dasha
+const dasha = kundli.dasha;
+console.log(dasha.currentMahaDashaLord);       // e.g. "Jupiter"
+dasha.mahaDashas.forEach(md => {
+  console.log(md.lord, md.startDate, '→', md.endDate, `(${md.years}y)`);
+  md.antarDashas.forEach(ad => {
+    console.log('  ', ad.lord, ad.startDate, '→', ad.endDate);
+  });
+});
+
+// Full birth Panchang is also included
+console.log(kundli.birthPanchang.tithi.name);  // Tithi at birth
+```
+
+**Returns: `KundliResult`**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `lagnaLongitude` | `number` | Sidereal longitude of the Ascendant in degrees [0, 360) |
+| `lagna` | `RashiInfo` | Ascendant zodiac sign |
+| `houses` | `KundliHouse[]` | 12 houses; House 1 = Lagna sign (whole-sign system) |
+| `grahas` | `PlanetaryPositions` | All 9 graha positions with rashi, nakshatra, house, retrograde flag |
+| `navamsa` | `NavamsaChart` | D-9 divisional chart with Lagna and all planet positions |
+| `dasha` | `VimshottariDashaResult` | Full Vimshottari Dasha sequence from birth with Antardasha breakdown |
+| `birthPanchang` | `InstantPanchangResult` | Complete Panchang at the birth moment |
+
+**`KundliOptions`** (optional):
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `ayanamsa` | `'lahiri' \| 'raman' \| 'krishnamurti'` | `'lahiri'` | Ayanamsa system |
+| `language` | `'en' \| 'sa' \| 'hi'` | `'en'` | Language for names |
+| `computeDasha` | `boolean` | `true` | Set `false` to skip Vimshottari Dasha computation |
+
+---
+
 ### `getInstantPanchang(date, location, options?)`
 
 Returns the single Panchang element active at an exact UTC moment.
@@ -259,6 +331,9 @@ import {
   computeRahuKalam, computeGulikaKalam, computeYamaganda,
   computeAbhijitMuhurta, computeBrahmaMuhurta,
   computeGowriPanchangam,
+  // Jyotish
+  computePlanetaryPositions, computeVimshottariDasha, computeLagnaLongitude,
+  GRAHA_ABBR,
 } from 'panchang-ts';
 
 // Sunrise/sunset
@@ -292,6 +367,21 @@ const gowri = computeGowriPanchangam(sunrise, sunset, nextSunrise, varaIndex,
 );
 // gowri.day  → 8 GowriSlot (sunrise → sunset)
 // gowri.night → 8 GowriSlot (sunset → next sunrise)
+
+// Planetary positions (all 9 grahas, sidereal)
+const grahas = computePlanetaryPositions(birthDate, 'lahiri');
+console.log(grahas.jupiter.rashi.name);  // e.g. "Dhanu"
+console.log(grahas.saturn.isRetrograde); // true/false
+console.log(GRAHA_ABBR['Jupiter']);      // "Ju"
+
+// Lagna (Ascendant) longitude — useful when building a custom chart renderer
+const lagnaLon = computeLagnaLongitude(birthDate, latitude, longitude, 'lahiri');
+
+// Vimshottari Dasha — pass birth date and Moon's sidereal longitude
+const moonLon = getSiderealMoonLongitude(birthDate, 'lahiri');
+const dasha = computeVimshottariDasha(birthDate, moonLon);
+console.log(dasha.currentMahaDashaLord);   // e.g. "Rahu"
+console.log(dasha.mahaDashas[0]!.antarDashas[0]!.lord); // e.g. "Rahu"
 ```
 
 ---
@@ -444,6 +534,74 @@ interface FestivalInfo {
 //   Pradosha:  Krishna Trayodashi only (tithi 27)
 //   Sankranti: Sun within 1° past a rashi boundary (degInRashi < 1.0)
 //   Fixed festivals (e.g. Diwali): matched by chandramasa index + tithi index; skipped during Adhika months
+
+// ── Jyotish (Vedic astrology) ────────────────────────────────────────────────
+
+type GrahaName = 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn' | 'Rahu' | 'Ketu';
+
+interface GrahaPosition {
+  planet: GrahaName;
+  siderealLongitude: number;   // degrees [0, 360)
+  rashi: RashiInfo;            // zodiac sign
+  degreeInRashi: number;       // degrees within sign [0, 30)
+  nakshatra: NakshatraInfo;    // nakshatra + pada + completion %
+  isRetrograde: boolean;       // always false for Sun/Moon; always true for Rahu/Ketu
+  house: number;               // 1–12 (whole-sign system, relative to Lagna)
+}
+
+interface PlanetaryPositions {
+  sun: GrahaPosition; moon: GrahaPosition; mars: GrahaPosition;
+  mercury: GrahaPosition; jupiter: GrahaPosition; venus: GrahaPosition;
+  saturn: GrahaPosition; rahu: GrahaPosition; ketu: GrahaPosition;
+}
+
+interface KundliHouse {
+  number: number;    // 1–12
+  rashi: RashiInfo;  // sign on this house cusp
+  planets: string[]; // short abbreviations: "Su", "Mo", "Ma", "Me", "Ju", "Ve", "Sa", "Ra", "Ke"
+}
+
+interface NavamsaPosition {
+  planet: GrahaName;
+  rashi: RashiInfo;  // D-9 (Navamsa) sign for this planet
+}
+
+interface NavamsaChart {
+  positions: NavamsaPosition[];
+  lagna: RashiInfo;  // Navamsa Lagna sign
+}
+
+type DashaLord = 'Ketu' | 'Venus' | 'Sun' | 'Moon' | 'Mars' | 'Rahu' | 'Jupiter' | 'Saturn' | 'Mercury';
+
+interface AntarDasha {
+  lord: DashaLord;
+  startDate: Date;
+  endDate: Date;
+}
+
+interface MahaDasha {
+  lord: DashaLord;
+  startDate: Date;
+  endDate: Date;
+  years: number;           // full duration in years (proportional for the first/partial dasha)
+  antarDashas: AntarDasha[];
+}
+
+interface VimshottariDashaResult {
+  currentMahaDashaLord: DashaLord;  // active Mahadasha as of today
+  currentIndex: number;              // index into mahaDashas
+  mahaDashas: MahaDasha[];           // 9-entry sequence starting from birth
+}
+
+interface KundliResult {
+  lagnaLongitude: number;        // sidereal ascendant in degrees [0, 360)
+  lagna: RashiInfo;              // ascendant sign
+  houses: KundliHouse[];         // 12 houses (whole-sign)
+  grahas: PlanetaryPositions;    // all 9 graha positions
+  navamsa: NavamsaChart;         // D-9 chart
+  birthPanchang: InstantPanchangResult;
+  dasha: VimshottariDashaResult;
+}
 ```
 
 ---
