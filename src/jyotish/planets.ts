@@ -1,4 +1,4 @@
-import { Body, EclipticLongitude, MakeTime } from 'astronomy-engine';
+import { Body, GeoVector, Ecliptic, MakeTime } from 'astronomy-engine';
 import { computeAyanamsa, dateToJulianDay } from '../astronomy/ayanamsa';
 import { getSiderealSunLongitude } from '../astronomy/sun';
 import { getSiderealMoonLongitude } from '../astronomy/moon';
@@ -21,13 +21,11 @@ export function meanObliquity(T: number): number {
 
 /**
  * Tropical geocentric ecliptic longitude of a planet via astronomy-engine.
- * Note: EclipticLongitude is heliocentric for the named body; for geocentric
- * we use it directly — this is correct for outer/inner planets referenced
- * to Earth's frame because astronomy-engine's EclipticLongitude already
- * accounts for the Earth's position (it returns the geo-ecliptic lon).
+ * Uses GeoVector (geocentric) + Ecliptic conversion — correct for Vedic astrology.
  */
 function getTropicalPlanetLongitude(body: Body, date: Date): number {
-  return EclipticLongitude(body, MakeTime(date));
+  const vec = GeoVector(body, MakeTime(date), true);
+  return Ecliptic(vec).elon;
 }
 
 /**
@@ -37,8 +35,8 @@ function getTropicalPlanetLongitude(body: Body, date: Date): number {
  */
 function isRetrograde(body: Body, date: Date): boolean {
   const dt = 3600_000; // 1 hour in ms
-  const lon0 = EclipticLongitude(body, MakeTime(new Date(date.getTime() - dt)));
-  const lon1 = EclipticLongitude(body, MakeTime(new Date(date.getTime() + dt)));
+  const lon0 = Ecliptic(GeoVector(body, MakeTime(new Date(date.getTime() - dt)), false)).elon;
+  const lon1 = Ecliptic(GeoVector(body, MakeTime(new Date(date.getTime() + dt)), false)).elon;
   // Unwrap for boundary crossing
   let delta = lon1 - lon0;
   if (delta > 180) delta -= 360;
