@@ -11,10 +11,10 @@
     }
   },
   {
-    "date": "2025-07-04",
-    "city": "New York",
-    "location": { "latitude": 40.7128, "longitude": -74.006 },
-    "timezone": -240,
+    "date": "2025-03-14",
+    "city": "Pune",
+    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "timezone": 330,
     "expected": {
       "varaEnglish": "Friday",
       "tithiCountAtLeast": 1,
@@ -22,12 +22,188 @@
     }
   },
   {
-    "date": "2025-12-31",
-    "city": "Delhi",
-    "location": { "latitude": 28.6139, "longitude": 77.2090 },
+    "date": "2025-04-06",
+    "city": "Pune",
+    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Sunday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-06-21",
+    "city": "Pune",
+    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Saturday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-08-27",
+    "city": "Pune",
+    "location": { "latitude": 18.5204, "longitude": 73.8567 },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Wednesday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-10-02",
+    "city": "Pune",
+    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Thursday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-10-20",
+    "city": "Pune",
+    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Monday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-11-01",
+    "city": "Pune",
+    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Saturday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-11-05",
+    "city": "Pune",
+    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Wednesday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-12-25",
+    "city": "Pune",
+    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Thursday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-12-31",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Wednesday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-01-14",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Tuesday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-01-14",
+    "city": "Chennai",
+    "location": { "latitude": 13.0827, "longitude": 80.2707 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Tuesday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-01-14",
+    "city": "Mumbai",
+    "location": { "latitude": 19.076, "longitude": 72.8777 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Tuesday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-01-14",
+    "city": "Bangalore",
+    "location": { "latitude": 12.9716, "longitude": 77.5946 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Tuesday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2026-01-01",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Thursday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2026-01-14",
+    "city": "Pune",
+    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Wednesday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2026-03-01",
+    "city": "Pune",
+    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Sunday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2026-04-14",
+    "city": "Pune",
+    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Tuesday",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }

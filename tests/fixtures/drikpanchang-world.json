@@ -1,1 +1,112 @@
-[]
+[
+  {
+    "date": "2025-07-04",
+    "city": "New York",
+    "location": { "latitude": 40.7128, "longitude": -74.006 },
+    "timezone": -240,
+    "expected": {
+      "varaEnglish": "Friday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-01-01",
+    "city": "London",
+    "location": { "latitude": 51.5074, "longitude": -0.1278 },
+    "timezone": 0,
+    "expected": {
+      "varaEnglish": "Wednesday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-03-20",
+    "city": "Tokyo",
+    "location": { "latitude": 35.6762, "longitude": 139.6503 },
+    "timezone": 540,
+    "expected": {
+      "varaEnglish": "Wednesday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-06-21",
+    "city": "Sydney",
+    "location": { "latitude": -33.8688, "longitude": 151.2093 },
+    "timezone": 600,
+    "expected": {
+      "varaEnglish": "Friday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-12-21",
+    "city": "Cape Town",
+    "location": { "latitude": -33.9249, "longitude": 18.4241 },
+    "timezone": 120,
+    "expected": {
+      "varaEnglish": "Sunday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-08-15",
+    "city": "Singapore",
+    "location": { "latitude": 1.3521, "longitude": 103.8198 },
+    "timezone": 480,
+    "expected": {
+      "varaEnglish": "Thursday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-10-15",
+    "city": "Dubai",
+    "location": { "latitude": 25.2048, "longitude": 55.2708 },
+    "timezone": 240,
+    "expected": {
+      "varaEnglish": "Wednesday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-04-01",
+    "city": "Los Angeles",
+    "location": { "latitude": 34.0522, "longitude": -118.2437 },
+    "timezone": -420,
+    "expected": {
+      "varaEnglish": "Tuesday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-09-01",
+    "city": "Nairobi",
+    "location": { "latitude": -1.2921, "longitude": 36.8219 },
+    "timezone": 180,
+    "expected": {
+      "varaEnglish": "Monday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  },
+  {
+    "date": "2025-11-01",
+    "city": "Toronto",
+    "location": { "latitude": 43.6532, "longitude": -79.3832 },
+    "timezone": -240,
+    "expected": {
+      "varaEnglish": "Saturday",
+      "tithiCountAtLeast": 1,
+      "nakshatraCountAtLeast": 1
+    }
+  }
+]

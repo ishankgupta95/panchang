@@ -26,7 +26,8 @@ import {
 } from './karana';
 import { computeVara } from './vara';
 import { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './inauspicious';
-import { computeAbhijitMuhurta, computeBrahmaMuhurta } from './muhurta';
+import { computeAbhijitMuhurta, computeBrahmaMuhurta, computeGovardhanMuhurta } from './muhurta';
+import { computeGowriPanchangam } from './gowri';
 import { computeMasa } from './masa';
 import { computeChandraMasa } from './chandramasa';
 import { computeSamvat } from './samvat';
@@ -306,6 +307,11 @@ export function getDailyPanchang(
     sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
     (idx) => getTranslations(lang).grahaNames[idx]!,
   );
+  const gowriPanchangam = computeGowriPanchangam(
+    sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
+    (idx) => getTranslations(lang).gowriNames[idx]!,
+  );
+  const govardhanMuhurta = computeGovardhanMuhurta(sunriseUtc, sunsetUtc);
   const moonriseUtc = getMoonrise(localMidnightUtc, location);
   const moonsetUtc = getMoonset(localMidnightUtc, location);
   const panchaka = computePanchaka(siderealMoonAtSunrise);
@@ -449,5 +455,10 @@ export function getDailyPanchang(
     specialYogas,
     durMuhurta: [convertTimePeriod(durMuhurtaUtc[0]), convertTimePeriod(durMuhurtaUtc[1])],
     festivals,
+    gowriPanchangam: {
+      day:   gowriPanchangam.day.map(s   => ({ ...s, ...convertTimePeriod(s) })),
+      night: gowriPanchangam.night.map(s => ({ ...s, ...convertTimePeriod(s) })),
+    },
+    govardhanMuhurta: convertTimePeriod(govardhanMuhurta),
   };
 }

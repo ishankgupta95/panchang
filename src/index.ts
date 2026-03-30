@@ -12,7 +12,8 @@ export { computeAyanamsa as getAyanamsa } from './astronomy/ayanamsa';
 
 // Inauspicious periods & muhurta
 export { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './core/inauspicious';
-export { computeAbhijitMuhurta, computeBrahmaMuhurta } from './core/muhurta';
+export { computeAbhijitMuhurta, computeBrahmaMuhurta, computeGovardhanMuhurta } from './core/muhurta';
+export { computeGowriPanchangam } from './core/gowri';
 
 // Types
 export type {
@@ -25,6 +26,7 @@ export type {
   ChandraMasaInfo, SamvatInfo, RashiInfo,
   ChoghadiyaSlot, ChoghadiyaInfo, ChoghadiyaQuality,
   HoraSlot, HoraInfo,
+  GowriSlot, GowriInfo,
   SpecialYogaInfo, FestivalInfo,
   TimePeriod,
   PanchangErrorCode,

@@ -86,6 +86,22 @@ export interface ChoghadiyaInfo {
   night: ChoghadiyaSlot[];
 }
 
+// ── Gowri Panchangam ──────────────────────────────────
+
+export interface GowriSlot extends TimePeriod {
+  /** 0–7: index within the 8-name Gowri cycle */
+  index: number;
+  name: string;
+  quality: ChoghadiyaQuality;
+}
+
+export interface GowriInfo {
+  /** 8 equal slots from sunrise to sunset */
+  day: GowriSlot[];
+  /** 8 equal slots from sunset to next sunrise */
+  night: GowriSlot[];
+}
+
 // ── Hora (planetary hours) ────────────────────────────
 
 export interface HoraSlot extends TimePeriod {

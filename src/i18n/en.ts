@@ -47,6 +47,7 @@ export const en: PanchangTranslations = {
     'Margashirsha', 'Pausha', 'Magha', 'Phalguna',
   ],
   choghadiyaNames: ['Udveg', 'Char', 'Labh', 'Amrit', 'Kaal', 'Shubh', 'Rog'],
+  gowriNames: ['Udyog', 'Amrit', 'Roga', 'Laabh', 'Shubh', 'Kaal', 'Dhan', 'Chal'],
   grahaNames: ['Sun', 'Venus', 'Mercury', 'Moon', 'Saturn', 'Jupiter', 'Mars'],
   specialYogaNames: {
     amrit_siddhi: 'Amrit Siddhi Yoga',

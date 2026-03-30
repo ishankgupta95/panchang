@@ -3,7 +3,7 @@ import type {
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, TimePeriod,
   ChandraMasaInfo, SamvatInfo, RashiInfo, ChoghadiyaInfo, HoraInfo,
-  SpecialYogaInfo, FestivalInfo,
+  SpecialYogaInfo, FestivalInfo, GowriInfo,
 } from './elements';
 
 export interface MasaInfo {
@@ -51,6 +51,8 @@ export interface DailyPanchangResult {
   specialYogas: SpecialYogaInfo[];
   durMuhurta: [TimePeriod, TimePeriod];
   festivals: FestivalInfo[];
+  gowriPanchangam: GowriInfo;
+  govardhanMuhurta: TimePeriod;
 
   _debug?: {
     totalMs: number;

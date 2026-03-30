@@ -1,6 +1,19 @@
 import { describe, it, expect } from 'vitest';
 import { getDailyPanchang } from '../../src/core/panchang';
-import fixtures from '../fixtures/drikpanchang-india.json';
+import indiaFixtures from '../fixtures/drikpanchang-india.json';
+import worldFixtures from '../fixtures/drikpanchang-world.json';
+
+type Fixture = {
+  date: string;
+  city: string;
+  location: { latitude: number; longitude: number };
+  timezone: number;
+  expected: {
+    varaEnglish: string;
+    tithiCountAtLeast: number;
+    nakshatraCountAtLeast: number;
+  };
+};
 
 // Use noon UTC so getDate() returns the intended calendar day in any system timezone
 function dateAtNoonUtc(dateStr: string): Date {
@@ -8,7 +21,7 @@ function dateAtNoonUtc(dateStr: string): Date {
   return new Date(Date.UTC(y, m - 1, d, 12, 0, 0, 0));
 }
 
-describe('getDailyPanchang — fixture regression', () => {
+function runFixtureSuite(fixtures: Fixture[]) {
   for (const fixture of fixtures) {
     const { date, city, location, timezone, expected } = fixture;
 
@@ -49,6 +62,24 @@ describe('getDailyPanchang — fixture regression', () => {
         expect(result.dayDurationMinutes).toBeGreaterThan(0);
         expect(result.dayDurationMinutes).toBeLessThan(24 * 60);
       });
+
+      it('gowriPanchangam has 8 day + 8 night slots', () => {
+        expect(result.gowriPanchangam.day).toHaveLength(8);
+        expect(result.gowriPanchangam.night).toHaveLength(8);
+      });
+
+      it('govardhanMuhurta is within daytime', () => {
+        expect(result.govardhanMuhurta.start.getTime()).toBeGreaterThan(result.sunrise.getTime());
+        expect(result.govardhanMuhurta.end.getTime()).toBeLessThan(result.sunset.getTime());
+      });
     });
   }
+}
+
+describe('getDailyPanchang — India fixture regression', () => {
+  runFixtureSuite(indiaFixtures as Fixture[]);
+});
+
+describe('getDailyPanchang — World fixture regression', () => {
+  runFixtureSuite(worldFixtures as Fixture[]);
 });

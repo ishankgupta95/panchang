@@ -8,9 +8,10 @@ Works offline in React Native (Hermes), Node.js, and browsers.
 - **Pancha Anga (5 limbs):** Tithi, Nakshatra, Yoga, Karana, Vara — with mid-day transition times
 - **Lunar calendar:** Chandra Masa (lunar month + Adhika/leap detection), Vikram Samvat, Shaka Samvat
 - **Zodiac & asterism:** Chandra Rashi (Moon sign), Surya Nakshatra (Sun's asterism)
-- **Muhurta:** Brahma Muhurta, Abhijit Muhurta
+- **Muhurta:** Brahma Muhurta, Abhijit Muhurta, Govardhan Muhurta
 - **Inauspicious periods:** Rahu Kalam, Gulika Kalam, Yamaganda
 - **Choghadiya:** 16 time slots (8 day + 8 night), each named and rated auspicious/neutral/inauspicious
+- **Gowri Panchangam:** 16 Gowri Nalla Neram slots (8 day + 8 night) with 8-name cycle, vara-based starting index
 - **Hora:** 24 planetary hours per day (12 day + 12 night) in Chaldean order
 - **Astronomical events:** Sunrise, Sunset, Moonrise, Moonset
 - **Panchaka detection:** Flag when Moon is in the last 5 nakshatras (Dhanishta 3rd pada → Revati)
@@ -90,6 +91,14 @@ console.log(fmt(dm2.start), '-', fmt(dm2.end));
 result.festivals.forEach(f => {
   console.log(f.name, f.type);               // "Diwali", "major"
 });
+
+// Gowri Panchangam — 8 daytime slots
+result.gowriPanchangam.day.forEach(slot => {
+  console.log(slot.name, slot.quality);       // "Amrit", "auspicious"
+});
+
+// Govardhan Muhurta
+console.log(result.govardhanMuhurta);         // { start: Date, end: Date }
 ```
 
 ## Reading Output Times
@@ -162,6 +171,8 @@ const result = getDailyPanchang(
 | `chandraRashi` | `RashiInfo` | Moon's zodiac sign (changes every ~2.5 days) |
 | `suryaNakshatra` | `RashiInfo` | Sun's nakshatra (changes every ~13–14 days) |
 | `choghadiya` | `ChoghadiyaInfo` | 8 day slots + 8 night slots, each named and rated |
+| `gowriPanchangam` | `GowriInfo` | 8 day + 8 night Gowri Nalla Neram slots, each named and rated |
+| `govardhanMuhurta` | `TimePeriod` | Govardhan Muhurta (8th muhurta from sunrise) |
 | `hora` | `HoraInfo` | 12 day horas + 12 night horas, each with ruling planet |
 | `moonrise` | `Date \| null` | Moonrise (offset-adjusted); `null` if none that day |
 | `moonset` | `Date \| null` | Moonset (offset-adjusted); `null` if none that day |
@@ -247,7 +258,8 @@ import {
   getSiderealSunLongitude, getSiderealMoonLongitude,
   getAyanamsa,
   computeRahuKalam, computeGulikaKalam, computeYamaganda,
-  computeAbhijitMuhurta, computeBrahmaMuhurta,
+  computeAbhijitMuhurta, computeBrahmaMuhurta, computeGovardhanMuhurta,
+  computeGowriPanchangam,
 } from 'panchang-ts';
 
 // Sunrise/sunset
@@ -271,8 +283,16 @@ const gulika = computeGulikaKalam(sunrise, sunset, varaIndex);
 const yama  = computeYamaganda(sunrise, sunset, varaIndex);
 
 // Muhurta
-const abhijit = computeAbhijitMuhurta(sunrise, sunset);       // { start, end }
-const brahma  = computeBrahmaMuhurta(sunrise, sunset);        // { start, end }
+const abhijit    = computeAbhijitMuhurta(sunrise, sunset);    // { start, end }
+const brahma     = computeBrahmaMuhurta(sunrise, sunset);     // { start, end }
+const govardhan  = computeGovardhanMuhurta(sunrise, sunset);  // { start, end }
+
+// Gowri Panchangam (varaIndex: 0=Sun … 6=Sat)
+const gowri = computeGowriPanchangam(sunrise, sunset, nextSunrise, varaIndex,
+  (i) => ['Udyog','Amrit','Roga','Laabh','Shubh','Kaal','Dhan','Chal'][i]!,
+);
+// gowri.day  → 8 GowriSlot (sunrise → sunset)
+// gowri.night → 8 GowriSlot (sunset → next sunrise)
 ```
 
 ---
@@ -377,6 +397,19 @@ interface ChoghadiyaInfo {
   night: ChoghadiyaSlot[];  // 8 slots (sunset → next sunrise)
 }
 
+// ── Gowri Panchangam ─────────────────────────────────────────────────────────
+
+interface GowriSlot extends TimePeriod {
+  index: number;           // 0–7 within the 8-name cycle
+  name: string;            // e.g. "Amrit", "Kaal", "Shubh"
+  quality: ChoghadiyaQuality;
+}
+
+interface GowriInfo {
+  day: GowriSlot[];    // 8 slots (sunrise → sunset)
+  night: GowriSlot[];  // 8 slots (sunset → next sunrise)
+}
+
 // ── Hora ─────────────────────────────────────────────────────────────────────
 
 interface HoraSlot extends TimePeriod {
@@ -449,7 +482,7 @@ via the dharmSetu React Native app.
 
 ## Accuracy
 
-Validated against [DrikPanchang.com](https://www.drikpanchang.com) for 15+ date/city combinations.
+Validated against [DrikPanchang.com](https://www.drikpanchang.com) for 19+ date/city combinations (Pune, Delhi, Chennai, Mumbai, Bangalore, New York).
 
 | Element | Accuracy |
 |---------|----------|
@@ -458,7 +491,20 @@ Validated against [DrikPanchang.com](https://www.drikpanchang.com) for 15+ date/
 | Tithi, Nakshatra, Yoga, Karana names | Exact match |
 | Element end-times | ±5 minutes |
 | Ayanamsa | ±0.005° vs Swiss Ephemeris |
-| Choghadiya / Hora slots | Derived from sunrise/sunset — inherits ±2 min |
+| Choghadiya / Hora / Gowri slots | Derived from sunrise/sunset — inherits ±2 min |
+
+### Validation test suite
+
+The test suite includes:
+- **242-day structural regression** (Pune, Sep 2025 – Apr 2026): verifies no crash, correct Vara, time-ordering invariants, element counts, and all Phase-15 fields (Gowri Panchangam, Govardhan Muhurta) for every day in the window
+- **19 precise-value tests** across 5 Indian cities + New York: exact Tithi name, Nakshatra name, sunrise/sunset HH:MM (±2 min tolerance), Chandra Masa name
+- **10 long-range regression tests** (2030–2050): structural correctness and ayanamsa bounds for future dates
+
+To generate fixture stubs for new date ranges (e.g. to populate against DrikPanchang):
+
+```bash
+npx tsx scripts/generate-fixtures.ts --start 2027-01-01 --end 2027-03-31 --city Delhi
+```
 
 ---
 

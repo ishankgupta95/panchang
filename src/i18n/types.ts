@@ -13,6 +13,8 @@ export interface PanchangTranslations {
   chandraMasaNames: readonly string[];
   /** Choghadiya names, index 0–6: Udveg, Char, Labh, Amrit, Kaal, Shubh, Rog */
   choghadiyaNames: readonly string[];
+  /** Gowri Panchangam names, index 0–7: Udyog, Amrit, Roga, Laabh, Shubh, Kaal, Dhan, Chal */
+  gowriNames: readonly string[];
   /** Planet names in Chaldean order: Sun, Venus, Mercury, Moon, Saturn, Jupiter, Mars */
   grahaNames: readonly string[];
   /** Special yoga names keyed by type */
