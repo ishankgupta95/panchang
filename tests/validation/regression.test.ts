@@ -4,7 +4,7 @@
  * Three suites:
  *   1. 242-day structural suite (Pune, Sep 2025 – Apr 2026)
  *      Verifies: no crash, valid shapes, correct vara, time-ordering invariants,
- *      element-count range, new Phase-15 fields (Gowri, Govardhan).
+ *      element-count range, Phase-15 fields (Gowri Panchangam).
  *
  *   2. Precise-value suite (~20 entries)
  *      Verifies: exact tithi name, nakshatra name, sunrise/sunset HH:MM (±2 min),
@@ -83,11 +83,9 @@ describe('242-day structural regression (Pune, Sep 2025 – Apr 2026)', () => {
         expect(r.yamaganda.start.getTime()).toBeLessThan(r.yamaganda.end.getTime());
       });
 
-      it('abhijitMuhurta and govardhanMuhurta are within daytime', () => {
+      it('abhijitMuhurta is within daytime', () => {
         expect(r.abhijitMuhurta.start.getTime()).toBeGreaterThan(r.sunrise.getTime());
         expect(r.abhijitMuhurta.end.getTime()).toBeLessThan(r.sunset.getTime());
-        expect(r.govardhanMuhurta.start.getTime()).toBeGreaterThan(r.sunrise.getTime());
-        expect(r.govardhanMuhurta.end.getTime()).toBeLessThan(r.sunset.getTime());
       });
 
       it('choghadiya has 8 day + 8 night slots covering sunrise→nextSunrise', () => {

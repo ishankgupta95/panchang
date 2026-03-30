@@ -52,7 +52,6 @@ export interface DailyPanchangResult {
   durMuhurta: [TimePeriod, TimePeriod];
   festivals: FestivalInfo[];
   gowriPanchangam: GowriInfo;
-  govardhanMuhurta: TimePeriod;
 
   _debug?: {
     totalMs: number;

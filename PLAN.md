@@ -3830,27 +3830,11 @@ interface GowriInfo {
 
 ---
 
-### Step 15-2 — Govardhan Muhurta
-
-**What:** An afternoon auspicious period, calculated relative to local noon and sunset.
-
-**Implementation:**
-- Create logic in `src/core/muhurta.ts` (extend existing file)
-- Govardhan Muhurta ≈ the 8th muhurta from sunrise (varies by tradition)
-- Some traditions: starts at 3/5th of daytime, lasts one muhurta duration
-- Return: `TimePeriod` (same pattern as Abhijit/Brahma)
-
-**Depends on:** Sunrise, Sunset (implemented).
-**Effort:** Small.
-
----
-
-### Step 15-3 — Wire Phase 15 Features + Update Exports
+### Step 15-2 — Wire Phase 15 Features + Update Exports
 
 **Additions to `DailyPanchangResult`:**
 ```ts
 gowriPanchangam: GowriInfo;
-govardhanMuhurta: TimePeriod;
 ```
 
 **Files to modify:**
@@ -4048,7 +4032,7 @@ import { computeVimshottariDasha, computeGunaMilan } from 'panchang-ts';
 | **1–12** | Core build, publish | 1 → 14 | Full Panchang lib, npm v0.2.2 | ✅ DONE |
 | **13** | Missing Panchang Essentials | 13-1 → 13-9 | Chandra Masa, Samvat, Rashi, Brahma Muhurta, Choghadiya, Hora, Moonrise/set, Panchaka | ✅ DONE |
 | **14** | dharmSetu MVP Features | 14-1 → 14-4 | Special Yogas, Dur Muhurta, Festival Detection | ⬜ NOT STARTED |
-| **15** | Regional Completeness | 15-1 → 15-3 | Gowri Panchangam, Govardhan Muhurta | ⬜ NOT STARTED |
+| **15** | Regional Completeness | 15-1 → 15-2 | Gowri Panchangam | ⬜ NOT STARTED |
 | **16** | Validation Hardening | 16-1 | 200+ day validation suite, long-range regression | 🔶 PARTIAL |
 | **17** | Jyotish Expansion | 17-1 → 17-5 | 7 Graha positions, Chandra Balam, Vimshottari Dasha, Kundli Milan | ⬜ NOT STARTED |
 

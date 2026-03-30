@@ -8,7 +8,7 @@ Works offline in React Native (Hermes), Node.js, and browsers.
 - **Pancha Anga (5 limbs):** Tithi, Nakshatra, Yoga, Karana, Vara — with mid-day transition times
 - **Lunar calendar:** Chandra Masa (lunar month + Adhika/leap detection), Vikram Samvat, Shaka Samvat
 - **Zodiac & asterism:** Chandra Rashi (Moon sign), Surya Nakshatra (Sun's asterism)
-- **Muhurta:** Brahma Muhurta, Abhijit Muhurta, Govardhan Muhurta
+- **Muhurta:** Brahma Muhurta, Abhijit Muhurta
 - **Inauspicious periods:** Rahu Kalam, Gulika Kalam, Yamaganda
 - **Choghadiya:** 16 time slots (8 day + 8 night), each named and rated auspicious/neutral/inauspicious
 - **Gowri Panchangam:** 16 Gowri Nalla Neram slots (8 day + 8 night) with 8-name cycle, vara-based starting index
@@ -97,8 +97,7 @@ result.gowriPanchangam.day.forEach(slot => {
   console.log(slot.name, slot.quality);       // "Amrit", "auspicious"
 });
 
-// Govardhan Muhurta
-console.log(result.govardhanMuhurta);         // { start: Date, end: Date }
+
 ```
 
 ## Reading Output Times
@@ -164,7 +163,7 @@ const result = getDailyPanchang(
 | `gulikaKalam` | `TimePeriod` | Gulika Kalam start/end |
 | `yamaganda` | `TimePeriod` | Yamaganda start/end |
 | `abhijitMuhurta` | `TimePeriod` | Abhijit Muhurta start/end |
-| `brahmaMuhurta` | `TimePeriod` | Brahma Muhurta (96–48 min before sunrise) |
+| `brahmaMuhurta` | `TimePeriod` | Brahma Muhurta — two muhurtas (dayDuration/30 each) before sunrise; ends one muhurta before sunrise (≈ 48–24 min window for typical 12-h days) |
 | `masa` | `MasaInfo` | Solar month (Saura Masa) |
 | `chandramasa` | `ChandraMasaInfo` | Lunar month + Adhika (leap) flag |
 | `samvat` | `SamvatInfo` | Vikram Samvat and Shaka Samvat year numbers |
@@ -172,7 +171,7 @@ const result = getDailyPanchang(
 | `suryaNakshatra` | `RashiInfo` | Sun's nakshatra (changes every ~13–14 days) |
 | `choghadiya` | `ChoghadiyaInfo` | 8 day slots + 8 night slots, each named and rated |
 | `gowriPanchangam` | `GowriInfo` | 8 day + 8 night Gowri Nalla Neram slots, each named and rated |
-| `govardhanMuhurta` | `TimePeriod` | Govardhan Muhurta (8th muhurta from sunrise) |
+
 | `hora` | `HoraInfo` | 12 day horas + 12 night horas, each with ruling planet |
 | `moonrise` | `Date \| null` | Moonrise (offset-adjusted); `null` if none that day |
 | `moonset` | `Date \| null` | Moonset (offset-adjusted); `null` if none that day |
@@ -239,7 +238,7 @@ console.log(result.panchaka);               // false
 |--------|------|---------|-------------|
 | `timezone` | `number \| string` | **required** | UTC offset in minutes (330 for IST). Use a number on Hermes — IANA strings require `Intl`. |
 | `ayanamsa` | `'lahiri' \| 'raman' \| 'krishnamurti'` | `'lahiri'` | Ayanamsa system |
-| `language` | `'en' \| 'sa' \| 'hi'` | `'en'` | Language for element names |
+| `language` | `'en' \| 'sa' \| 'hi'` | `'en'` | Language for element names. `'hi'` currently uses the same Devanagari names as `'sa'`. |
 | `computeEndTimes` | `boolean` | `true` | Set `false` for ~5× faster, names-only output |
 | `precision` | `'standard' \| 'high'` | `'standard'` | Binary-search iterations (15 vs 25). High precision is rarely needed. |
 
@@ -258,7 +257,7 @@ import {
   getSiderealSunLongitude, getSiderealMoonLongitude,
   getAyanamsa,
   computeRahuKalam, computeGulikaKalam, computeYamaganda,
-  computeAbhijitMuhurta, computeBrahmaMuhurta, computeGovardhanMuhurta,
+  computeAbhijitMuhurta, computeBrahmaMuhurta,
   computeGowriPanchangam,
 } from 'panchang-ts';
 
@@ -285,7 +284,7 @@ const yama  = computeYamaganda(sunrise, sunset, varaIndex);
 // Muhurta
 const abhijit    = computeAbhijitMuhurta(sunrise, sunset);    // { start, end }
 const brahma     = computeBrahmaMuhurta(sunrise, sunset);     // { start, end }
-const govardhan  = computeGovardhanMuhurta(sunrise, sunset);  // { start, end }
+
 
 // Gowri Panchangam (varaIndex: 0=Sun … 6=Sat)
 const gowri = computeGowriPanchangam(sunrise, sunset, nextSunrise, varaIndex,
@@ -332,11 +331,14 @@ interface NakshatraInfo {
 }
 
 interface DailyTithiInfo extends TithiInfo {
-  startTime: Date | null;      // null if active at sunrise
-  isActiveAtSunrise: boolean;
+  startTime: Date | null;      // null when isActiveAtSunrise is true (element was already active at sunrise)
+  isActiveAtSunrise: boolean;  // true → this element was present at sunrise; false → it started mid-day (startTime is set)
 }
 
 // DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo follow the same pattern
+
+// Note: endTime and startTime are null on ALL daily elements when computeEndTimes: false.
+// completionPercentage: 0 = just started, 100 = about to end (computed at sunrise moment).
 
 // ── Lunar calendar ───────────────────────────────────────────────────────────
 
@@ -364,9 +366,9 @@ interface RashiInfo {
 
 interface VaraInfo {
   index: number;       // 0 = Sunday … 6 = Saturday
-  name: string;        // e.g. "Ravivara"
-  shortName: string;   // e.g. "Sun"
-  englishName: string; // e.g. "Sunday"
+  name: string;        // e.g. "Ravivara" (localized full name)
+  shortName: string;   // e.g. "Ravi" (localized short form, Sanskrit by default)
+  englishName: string; // e.g. "Sunday" (always English, locale-independent)
 }
 
 interface MasaInfo {
@@ -413,8 +415,8 @@ interface GowriInfo {
 // ── Hora ─────────────────────────────────────────────────────────────────────
 
 interface HoraSlot extends TimePeriod {
-  planet: string;       // "Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"
-  planetIndex: number;  // 0–6 in Chaldean order
+  planet: string;       // Chaldean order: "Sun"(0), "Venus"(1), "Mercury"(2), "Moon"(3), "Saturn"(4), "Jupiter"(5), "Mars"(6)
+  planetIndex: number;  // 0–6 — index into the Chaldean sequence above
 }
 
 interface HoraInfo {
@@ -434,8 +436,14 @@ interface SpecialYogaInfo {
 interface FestivalInfo {
   name: string;         // e.g. "Diwali", "Ekadashi"
   type: 'major' | 'minor' | 'ekadashi' | 'pradosha' | 'sankranti';
-  description?: string; // extra detail, e.g. rashi index for Sankranti
+  description?: string; // For sankranti: "Rashi 3" — the numeric rashi index as a string; look up name from masaNames
 }
+
+// Detection rules:
+//   Ekadashi:  both Shukla (tithi 10) and Krishna (tithi 25) pakshas
+//   Pradosha:  Krishna Trayodashi only (tithi 27)
+//   Sankranti: Sun within 1° past a rashi boundary (degInRashi < 1.0)
+//   Fixed festivals (e.g. Diwali): matched by chandramasa index + tithi index; skipped during Adhika months
 ```
 
 ---
@@ -496,7 +504,7 @@ Validated against [DrikPanchang.com](https://www.drikpanchang.com) for 19+ date/
 ### Validation test suite
 
 The test suite includes:
-- **242-day structural regression** (Pune, Sep 2025 – Apr 2026): verifies no crash, correct Vara, time-ordering invariants, element counts, and all Phase-15 fields (Gowri Panchangam, Govardhan Muhurta) for every day in the window
+- **242-day structural regression** (Pune, Sep 2025 – Apr 2026): verifies no crash, correct Vara, time-ordering invariants, element counts, and all fields (including Gowri Panchangam) for every day in the window
 - **19 precise-value tests** across 5 Indian cities + New York: exact Tithi name, Nakshatra name, sunrise/sunset HH:MM (±2 min tolerance), Chandra Masa name
 - **10 long-range regression tests** (2030–2050): structural correctness and ayanamsa bounds for future dates
 
@@ -538,7 +546,8 @@ try {
 ```
 
 `PanchangErrorCode` values: `INVALID_DATE`, `INVALID_LATITUDE`, `INVALID_LONGITUDE`,
-`INVALID_TIMEZONE`, `INVALID_AYANAMSA`, `NO_SUNRISE`, `NO_SUNSET`.
+`INVALID_ELEVATION`, `INVALID_TIMEZONE`, `INVALID_AYANAMSA`, `TIMEZONE_RESOLUTION_FAILED`,
+`NO_SUNRISE`, `NO_SUNSET`, `SEARCH_DIVERGED`.
 
 Note: `getMoonrise` / `getMoonset` never throw — they return `null` when no rise/set
 occurs within the search window (this is normal for the Moon).

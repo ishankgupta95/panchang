@@ -68,10 +68,7 @@ function runFixtureSuite(fixtures: Fixture[]) {
         expect(result.gowriPanchangam.night).toHaveLength(8);
       });
 
-      it('govardhanMuhurta is within daytime', () => {
-        expect(result.govardhanMuhurta.start.getTime()).toBeGreaterThan(result.sunrise.getTime());
-        expect(result.govardhanMuhurta.end.getTime()).toBeLessThan(result.sunset.getTime());
-      });
+
     });
   }
 }

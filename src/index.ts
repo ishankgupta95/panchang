@@ -12,7 +12,7 @@ export { computeAyanamsa as getAyanamsa } from './astronomy/ayanamsa';
 
 // Inauspicious periods & muhurta
 export { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './core/inauspicious';
-export { computeAbhijitMuhurta, computeBrahmaMuhurta, computeGovardhanMuhurta } from './core/muhurta';
+export { computeAbhijitMuhurta, computeBrahmaMuhurta } from './core/muhurta';
 export { computeGowriPanchangam } from './core/gowri';
 
 // Types

@@ -21,32 +21,10 @@ export function computeAbhijitMuhurta(sunrise: Date, sunset: Date): TimePeriod {
 }
 
 /**
- * Govardhan Muhurta: the 8th muhurta from sunrise (index 7, 0-based).
+ * Brahma Muhurta: the two muhurtas immediately before sunrise.
  *
- * One muhurta = (sunset − sunrise) / 15. Govardhan Muhurta falls at the same
- * solar position as Abhijit (centered near local noon) but is referenced in
- * South-Indian Panchang for Govardhan puja timing.
- *
- * @param sunrise Sunrise UTC Date
- * @param sunset  Sunset UTC Date
- */
-export function computeGovardhanMuhurta(sunrise: Date, sunset: Date): TimePeriod {
-  const dayDurationMs = sunset.getTime() - sunrise.getTime();
-  const muhurtaDurationMs = dayDurationMs / 15;
-
-  // 8th muhurta = index 7 (0-based)
-  const start = new Date(sunrise.getTime() + 7 * muhurtaDurationMs);
-  const end = new Date(start.getTime() + muhurtaDurationMs);
-
-  return { start, end };
-}
-
-/**
- * Brahma Muhurta: the auspicious 96-minute window ending 48 minutes before sunrise.
- *
- * Daytime is divided into 30 equal muhurtas (each ≈ 48 min for a 12-hour day).
- * Brahma Muhurta spans the 29th and 30th muhurtas of the *preceding* night,
- * i.e. the two muhurtas immediately before sunrise.
+ * Muhurta length is proportional to the day: dayDuration / 30.
+ * For a typical 12-hour day this equals ~24 min, making the window ~48–24 min before sunrise.
  *
  * Start: sunrise − 2 × muhurtaDuration
  * End:   sunrise − 1 × muhurtaDuration
