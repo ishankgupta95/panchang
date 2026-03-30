@@ -554,6 +554,12 @@ occurs within the search window (this is normal for the Moon).
 
 ---
 
+## Acknowledgements
+
+- **[astronomy-engine](https://github.com/cosinekitty/astronomy)** by Don Cross — the sole runtime dependency. Provides the astronomical algorithms used for sunrise/sunset, moonrise/moonset, and planetary longitude calculations. MIT licensed.
+
+---
+
 ## License
 
 MIT
