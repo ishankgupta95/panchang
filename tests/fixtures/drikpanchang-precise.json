@@ -11,7 +11,7 @@
       "nakshatraAtSunrise": "Punarvasu",
       "sunriseHHMM": "07:09",
       "sunsetHHMM": "18:17",
-      "chandramasaName": "Margashirsha",
+      "chandramasaName": "Pausha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -27,7 +27,7 @@
       "nakshatraAtSunrise": "Punarvasu",
       "sunriseHHMM": "07:15",
       "sunsetHHMM": "17:45",
-      "chandramasaName": "Margashirsha",
+      "chandramasaName": "Pausha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -43,7 +43,7 @@
       "nakshatraAtSunrise": "Punarvasu",
       "sunriseHHMM": "06:34",
       "sunsetHHMM": "18:01",
-      "chandramasaName": "Margashirsha",
+      "chandramasaName": "Pausha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -59,7 +59,7 @@
       "nakshatraAtSunrise": "Punarvasu",
       "sunriseHHMM": "07:14",
       "sunsetHHMM": "18:20",
-      "chandramasaName": "Margashirsha",
+      "chandramasaName": "Pausha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -75,7 +75,7 @@
       "nakshatraAtSunrise": "Punarvasu",
       "sunriseHHMM": "06:45",
       "sunsetHHMM": "18:11",
-      "chandramasaName": "Margashirsha",
+      "chandramasaName": "Pausha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -92,7 +92,7 @@
       "nakshatraAtSunrise": "Uttara Phalguni",
       "sunriseHHMM": "06:43",
       "sunsetHHMM": "18:44",
-      "chandramasaName": "Magha",
+      "chandramasaName": "Phalguna",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -109,7 +109,7 @@
       "nakshatraAtSunrise": "Pushya",
       "sunriseHHMM": "06:24",
       "sunsetHHMM": "18:49",
-      "chandramasaName": "Phalguna",
+      "chandramasaName": "Chaitra",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -125,7 +125,7 @@
       "nakshatraAtSunrise": "Ashwini",
       "sunriseHHMM": "05:59",
       "sunsetHHMM": "19:13",
-      "chandramasaName": "Vaishakha",
+      "chandramasaName": "Jyeshtha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -141,7 +141,7 @@
       "nakshatraAtSunrise": "Chitra",
       "sunriseHHMM": "05:30",
       "sunsetHHMM": "20:30",
-      "chandramasaName": "Jyeshtha",
+      "chandramasaName": "Ashadha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -157,7 +157,7 @@
       "nakshatraAtSunrise": "Chitra",
       "sunriseHHMM": "06:19",
       "sunsetHHMM": "18:52",
-      "chandramasaName": "Shravana",
+      "chandramasaName": "Bhadrapada",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -174,7 +174,7 @@
       "nakshatraAtSunrise": "Uttara Ashadha",
       "sunriseHHMM": "06:25",
       "sunsetHHMM": "18:22",
-      "chandramasaName": "Bhadrapada",
+      "chandramasaName": "Ashwin",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -191,7 +191,7 @@
       "nakshatraAtSunrise": "Hasta",
       "sunriseHHMM": "06:29",
       "sunsetHHMM": "18:08",
-      "chandramasaName": "Bhadrapada",
+      "chandramasaName": "Ashwin",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -208,7 +208,7 @@
       "nakshatraAtSunrise": "Ashwini",
       "sunriseHHMM": "06:36",
       "sunsetHHMM": "18:00",
-      "chandramasaName": "Ashwin",
+      "chandramasaName": "Kartika",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -224,7 +224,7 @@
       "nakshatraAtSunrise": "Dhanishta",
       "sunriseHHMM": "07:03",
       "sunsetHHMM": "18:05",
-      "chandramasaName": "Margashirsha",
+      "chandramasaName": "Pausha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -240,7 +240,7 @@
       "nakshatraAtSunrise": "Krittika",
       "sunriseHHMM": "07:13",
       "sunsetHHMM": "17:34",
-      "chandramasaName": "Margashirsha",
+      "chandramasaName": "Pausha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -256,7 +256,7 @@
       "nakshatraAtSunrise": "Rohini",
       "sunriseHHMM": "07:13",
       "sunsetHHMM": "17:35",
-      "chandramasaName": "Margashirsha",
+      "chandramasaName": "Pausha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -273,7 +273,7 @@
       "nakshatraAtSunrise": "Anuradha",
       "sunriseHHMM": "07:09",
       "sunsetHHMM": "18:17",
-      "chandramasaName": "Margashirsha",
+      "chandramasaName": "Pausha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -289,7 +289,7 @@
       "nakshatraAtSunrise": "Pushya",
       "sunriseHHMM": "06:53",
       "sunsetHHMM": "18:40",
-      "chandramasaName": "Magha",
+      "chandramasaName": "Phalguna",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -305,7 +305,7 @@
       "nakshatraAtSunrise": "Shatabhisha",
       "sunriseHHMM": "06:18",
       "sunsetHHMM": "18:51",
-      "chandramasaName": "Phalguna",
+      "chandramasaName": "Chaitra",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }

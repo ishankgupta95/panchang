@@ -38,11 +38,12 @@ const FESTIVAL_REGISTRY: readonly FestivalRule[] = [
   { key: 'maha_navami',        masa: 6,  tithi: 8,  type: 'major' },
   { key: 'dussehra',           masa: 6,  tithi: 9,  type: 'major' },
   { key: 'sharad_purnima',     masa: 6,  tithi: 14, type: 'major' },
-  // Kartika (7)
-  { key: 'karva_chauth',       masa: 7,  tithi: 18, type: 'major' },
-  { key: 'dhanteras',          masa: 7,  tithi: 27, type: 'major' },
-  { key: 'narak_chaturdashi',  masa: 7,  tithi: 28, type: 'major' },
-  { key: 'diwali',             masa: 7,  tithi: 29, type: 'major' },
+  // Ashwin (6) — Krishna Paksha festivals (Amanta: Ashwin; Purnimanta calls these "Kartika")
+  { key: 'karva_chauth',       masa: 6,  tithi: 18, type: 'major' },
+  { key: 'dhanteras',          masa: 6,  tithi: 27, type: 'major' },
+  { key: 'narak_chaturdashi',  masa: 6,  tithi: 28, type: 'major' },
+  { key: 'diwali',             masa: 6,  tithi: 29, type: 'major' },
+  // Kartika (7) — Shukla Paksha
   { key: 'kartika_purnima',    masa: 7,  tithi: 14, type: 'minor' },
   // Magha (10)
   { key: 'vasant_panchami',    masa: 10, tithi: 4,  type: 'major' },

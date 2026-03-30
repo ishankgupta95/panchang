@@ -5,8 +5,8 @@ const resolver = (key: string) => key;
 
 describe('computeFestivals', () => {
   describe('major fixed festivals', () => {
-    it('detects Diwali — Kartika (7), Amavasya (29)', () => {
-      const result = computeFestivals(29, 10, 7, false, 3, 200, resolver);
+    it('detects Diwali — Ashwin (6), Amavasya (29)', () => {
+      const result = computeFestivals(29, 10, 6, false, 3, 200, resolver);
       expect(result.some(f => f.name === 'diwali' && f.type === 'major')).toBe(true);
     });
 
@@ -49,7 +49,7 @@ describe('computeFestivals', () => {
   describe('Adhika masa handling', () => {
     it('skips fixed festivals during Adhika month', () => {
       // Diwali conditions but Adhika month
-      const result = computeFestivals(29, 10, 7, true, 3, 200, resolver);
+      const result = computeFestivals(29, 10, 6, true, 3, 200, resolver);
       expect(result.some(f => f.name === 'diwali')).toBe(false);
     });
 
@@ -111,7 +111,7 @@ describe('computeFestivals', () => {
 
   it('uses name resolver for translated names', () => {
     const customResolver = (key: string) => `translated_${key}`;
-    const result = computeFestivals(29, 10, 7, false, 3, 200, customResolver);
+    const result = computeFestivals(29, 10, 6, false, 3, 200, customResolver);
     const diwali = result.find(f => f.name === 'translated_diwali');
     expect(diwali).toBeDefined();
   });
@@ -123,8 +123,8 @@ describe('computeFestivals', () => {
   });
 
   it('can return multiple festivals on the same day', () => {
-    // Kartika(7) Krishna Trayodashi(27) = Dhanteras + Pradosha
-    const result = computeFestivals(27, 10, 7, false, 3, 200, resolver);
+    // Ashwin(6) Krishna Trayodashi(27) = Dhanteras + Pradosha
+    const result = computeFestivals(27, 10, 6, false, 3, 200, resolver);
     expect(result.length).toBeGreaterThanOrEqual(2);
     expect(result.some(f => f.name === 'dhanteras')).toBe(true);
     expect(result.some(f => f.type === 'pradosha')).toBe(true);

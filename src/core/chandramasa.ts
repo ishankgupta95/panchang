@@ -8,12 +8,13 @@ const TROPICAL_YEAR = 365.25;
 /**
  * Compute the current Chandra Masa (Hindu lunar month) from sidereal longitudes.
  *
- * The Amanta (South-Indian) month is named by the solar month (Saura Masa) in
- * which its initiating Amavasya (new moon) falls.  The mapping is direct:
- *   Sun in Mesha at Amavasya → Chaitra (index 0)
- *   Sun in Vrishabha         → Vaishakha (index 1)
+ * The Amanta (South-Indian) month is named after the nakshatra in which
+ * the Purnima (full moon) of that month typically falls.  The Amavasya
+ * that initiates a month falls one rashi behind the month's name:
+ *   Sun in Meena at Amavasya  → Chaitra (index 0)
+ *   Sun in Mesha at Amavasya  → Vaishakha (index 1)
  *   …
- *   Sun in Meena             → Phalguna (index 11)
+ *   Sun in Kumbha at Amavasya → Phalguna (index 11)
  *
  * Adhika Masa (intercalary month): when two consecutive Amavasyas fall within
  * the same solar month the first initiates an Adhika (extra) month and the
@@ -48,7 +49,7 @@ export function computeChandraMasa(
   // Adhika: both Amavasyas land in the same solar month
   const isAdhika = solarMonthAtPrev === solarMonthAtNext;
 
-  const index = solarMonthAtPrev;
+  const index = (solarMonthAtPrev + 1) % 12;
   const name = nameFn(index, isAdhika);
 
   // ── Purnimanta ───────────────────────────────────────
