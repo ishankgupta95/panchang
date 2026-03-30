@@ -3,6 +3,7 @@ import type {
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, TimePeriod,
   ChandraMasaInfo, SamvatInfo, RashiInfo, ChoghadiyaInfo, HoraInfo,
+  SpecialYogaInfo, FestivalInfo,
 } from './elements';
 
 export interface MasaInfo {
@@ -47,6 +48,9 @@ export interface DailyPanchangResult {
   moonrise: Date | null;
   moonset: Date | null;
   panchaka: boolean;
+  specialYogas: SpecialYogaInfo[];
+  durMuhurta: [TimePeriod, TimePeriod];
+  festivals: FestivalInfo[];
 
   _debug?: {
     totalMs: number;
@@ -75,4 +79,6 @@ export interface InstantPanchangResult {
   /** Sun's current Nakshatra (changes every ~13–14 days) */
   suryaNakshatra: RashiInfo;
   panchaka: boolean;
+  specialYogas: SpecialYogaInfo[];
+  festivals: FestivalInfo[];
 }

@@ -6,6 +6,7 @@ export type {
   ChandraMasaInfo, SamvatInfo, RashiInfo,
   ChoghadiyaSlot, ChoghadiyaInfo, ChoghadiyaQuality,
   HoraSlot, HoraInfo,
+  SpecialYogaInfo, FestivalInfo,
 } from './elements';
 export type { DailyPanchangResult, InstantPanchangResult, MasaInfo } from './panchang';
 export { PanchangError } from './errors';

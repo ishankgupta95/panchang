@@ -15,9 +15,21 @@ export interface PanchangTranslations {
   choghadiyaNames: readonly string[];
   /** Planet names in Chaldean order: Sun, Venus, Mercury, Moon, Saturn, Jupiter, Mars */
   grahaNames: readonly string[];
+  /** Special yoga names keyed by type */
+  specialYogaNames: {
+    amrit_siddhi: string;
+    sarvartha_siddhi: string;
+    ravi_pushya: string;
+    guru_pushya: string;
+  };
+  /** Festival names keyed by festival ID */
+  festivalNames: Record<string, string>;
   misc: {
     purnima: string;
     amavasya: string;
     adhika: string;
+    ekadashi: string;
+    pradosha: string;
+    sankranti: string;
   };
 }

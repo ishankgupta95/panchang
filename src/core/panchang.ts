@@ -34,6 +34,9 @@ import { computeChandraRashi, computeSuryaNakshatra } from './rashi';
 import { computeChoghadiya } from './choghadiya';
 import { computeHora } from './hora';
 import { computePanchaka } from './panchaka';
+import { computeSpecialYogas } from './specialYogas';
+import { computeDurMuhurta } from './durMuhurta';
+import { computeFestivals } from './festivals';
 import { getMoonrise, getMoonset } from '../astronomy/moonrise';
 import {
   resolveTithiName,
@@ -156,6 +159,18 @@ export function getInstantPanchang(
     );
   }
 
+  const t = getTranslations(lang);
+  const specialYogas = computeSpecialYogas(
+    vara.index, tithi.index,
+    Math.floor(siderealMoon / NAKSHATRA_SPAN),
+    (type) => (t.specialYogaNames as Record<string, string>)[type] ?? type,
+  );
+  const festivals = computeFestivals(
+    tithi.index, Math.floor(siderealMoon / NAKSHATRA_SPAN),
+    chandramasa.index, chandramasa.isAdhika, vara.index, siderealSun,
+    (key) => t.festivalNames[key] ?? (t.misc as Record<string, string>)[key] ?? key,
+  );
+
   return {
     timestamp: date,
     location,
@@ -172,6 +187,8 @@ export function getInstantPanchang(
     chandraRashi,
     suryaNakshatra,
     panchaka: computePanchaka(siderealMoon),
+    specialYogas,
+    festivals,
   };
 }
 
@@ -292,6 +309,19 @@ export function getDailyPanchang(
   const moonriseUtc = getMoonrise(localMidnightUtc, location);
   const moonsetUtc = getMoonset(localMidnightUtc, location);
   const panchaka = computePanchaka(siderealMoonAtSunrise);
+
+  const t = getTranslations(lang);
+  const specialYogas = computeSpecialYogas(
+    vara.index, tithiAtSunrise.index,
+    Math.floor(siderealMoonAtSunrise / NAKSHATRA_SPAN),
+    (type) => (t.specialYogaNames as Record<string, string>)[type] ?? type,
+  );
+  const durMuhurtaUtc = computeDurMuhurta(sunriseUtc, sunsetUtc, vara.index);
+  const festivals = computeFestivals(
+    tithiAtSunrise.index, Math.floor(siderealMoonAtSunrise / NAKSHATRA_SPAN),
+    chandramasa.index, chandramasa.isAdhika, vara.index, siderealSunAtSunrise,
+    (key) => t.festivalNames[key] ?? (t.misc as Record<string, string>)[key] ?? key,
+  );
 
   // ── 6. Find transitions (daily element arrays) ───────
   let tithis: DailyTithiInfo[];
@@ -416,5 +446,8 @@ export function getDailyPanchang(
     moonrise: moonriseUtc ? toLocal(moonriseUtc) : null,
     moonset:  moonsetUtc  ? toLocal(moonsetUtc)  : null,
     panchaka,
+    specialYogas,
+    durMuhurta: [convertTimePeriod(durMuhurtaUtc[0]), convertTimePeriod(durMuhurtaUtc[1])],
+    festivals,
   };
 }

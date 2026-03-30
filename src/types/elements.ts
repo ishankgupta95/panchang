@@ -109,3 +109,18 @@ export interface SamvatInfo {
   /** Shaka Samvat year (same new-year point, offset 135 years behind VS) */
   shakaSamvat: number;
 }
+
+// ── Special Yogas (auspicious day detection) ─────────
+
+export interface SpecialYogaInfo {
+  name: string;
+  type: 'amrit_siddhi' | 'sarvartha_siddhi' | 'ravi_pushya' | 'guru_pushya';
+}
+
+// ── Festivals ────────────────────────────────────────
+
+export interface FestivalInfo {
+  name: string;
+  type: 'major' | 'minor' | 'ekadashi' | 'pradosha' | 'sankranti';
+  description?: string;
+}

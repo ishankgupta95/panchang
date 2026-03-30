@@ -14,6 +14,9 @@ Works offline in React Native (Hermes), Node.js, and browsers.
 - **Hora:** 24 planetary hours per day (12 day + 12 night) in Chaldean order
 - **Astronomical events:** Sunrise, Sunset, Moonrise, Moonset
 - **Panchaka detection:** Flag when Moon is in the last 5 nakshatras (Dhanishta 3rd pada → Revati)
+- **Special Yogas:** Amrit Siddhi, Sarvartha Siddhi, Ravi Pushya, Guru Pushya — detected from Vara × Tithi/Nakshatra tables
+- **Dur Muhurta:** Two ~48-minute inauspicious windows per day, position varies by Vara
+- **Festival detection:** 24 major pan-Indian festivals, recurring Ekadashi & Pradosha Vrata, Sankranti; skips Adhika (leap) months automatically
 - **Daily mode:** Full sunrise-to-sunrise day with all element transitions
 - **Instant mode:** Elements active at an exact moment (birth charts, muhurta selection)
 - **3 ayanamsa systems:** Lahiri (default), B.V. Raman, KP (Krishnamurti)
@@ -72,6 +75,21 @@ result.choghadiya.day.forEach(slot => {
 
 // Panchaka
 console.log(result.panchaka);                 // true | false
+
+// Special Yogas active today
+result.specialYogas.forEach(yoga => {
+  console.log(yoga.name, yoga.type);          // "Guru Pushya Yoga", "guru_pushya"
+});
+
+// Dur Muhurta — two inauspicious windows
+const [dm1, dm2] = result.durMuhurta;
+console.log(fmt(dm1.start), '-', fmt(dm1.end)); // e.g. "11:36 - 12:24"
+console.log(fmt(dm2.start), '-', fmt(dm2.end));
+
+// Festivals today
+result.festivals.forEach(f => {
+  console.log(f.name, f.type);               // "Diwali", "major"
+});
 ```
 
 ## Reading Output Times
@@ -148,6 +166,9 @@ const result = getDailyPanchang(
 | `moonrise` | `Date \| null` | Moonrise (offset-adjusted); `null` if none that day |
 | `moonset` | `Date \| null` | Moonset (offset-adjusted); `null` if none that day |
 | `panchaka` | `boolean` | `true` when Moon is in last 5 nakshatras |
+| `specialYogas` | `SpecialYogaInfo[]` | Auspicious yogas active today (may be empty) |
+| `durMuhurta` | `[TimePeriod, TimePeriod]` | Two inauspicious ~48-min windows |
+| `festivals` | `FestivalInfo[]` | Festivals / observances today (may be empty) |
 | `ayanamsa` | `number` | Ayanamsa in degrees at sunrise |
 | `siderealSunAtSunrise` | `number` | Sun sidereal longitude at sunrise (°) |
 | `siderealMoonAtSunrise` | `number` | Moon sidereal longitude at sunrise (°) |
@@ -191,6 +212,8 @@ console.log(result.panchaka);               // false
 | `chandraRashi` | `RashiInfo` | Moon's zodiac sign |
 | `suryaNakshatra` | `RashiInfo` | Sun's nakshatra |
 | `panchaka` | `boolean` | `true` when Moon is in last 5 nakshatras |
+| `specialYogas` | `SpecialYogaInfo[]` | Auspicious yogas at this moment (may be empty) |
+| `festivals` | `FestivalInfo[]` | Festivals / observances at this moment (may be empty) |
 | `ayanamsa` | `number` | Ayanamsa in degrees |
 | `siderealSun` | `number` | Sun sidereal longitude (°) |
 | `siderealMoon` | `number` | Moon sidereal longitude (°) |
@@ -364,6 +387,21 @@ interface HoraSlot extends TimePeriod {
 interface HoraInfo {
   day: HoraSlot[];    // 12 slots (sunrise → sunset)
   night: HoraSlot[];  // 12 slots (sunset → next sunrise)
+}
+
+// ── Special Yogas ────────────────────────────────────────────────────────────
+
+interface SpecialYogaInfo {
+  name: string;    // e.g. "Guru Pushya Yoga"
+  type: 'amrit_siddhi' | 'sarvartha_siddhi' | 'ravi_pushya' | 'guru_pushya';
+}
+
+// ── Festivals ────────────────────────────────────────────────────────────────
+
+interface FestivalInfo {
+  name: string;         // e.g. "Diwali", "Ekadashi"
+  type: 'major' | 'minor' | 'ekadashi' | 'pradosha' | 'sankranti';
+  description?: string; // extra detail, e.g. rashi index for Sankranti
 }
 ```
 

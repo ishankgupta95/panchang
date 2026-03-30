@@ -25,6 +25,7 @@ export type {
   ChandraMasaInfo, SamvatInfo, RashiInfo,
   ChoghadiyaSlot, ChoghadiyaInfo, ChoghadiyaQuality,
   HoraSlot, HoraInfo,
+  SpecialYogaInfo, FestivalInfo,
   TimePeriod,
   PanchangErrorCode,
 } from './types';
