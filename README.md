@@ -44,7 +44,7 @@ import { getDailyPanchang } from 'panchang-ts';
 
 const result = getDailyPanchang(
   new Date(2025, 0, 14),                      // January 14, 2025
-  { latitude: 18.5204, longitude: 73.8567 },  // Pune, India
+  { latitude: 23.1765, longitude: 75.7885 },  // Ujjain, India
   { timezone: 330 },                          // IST = UTC+5:30 = 330 minutes
 );
 

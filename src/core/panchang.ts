@@ -76,7 +76,7 @@ import type {
  *
  * const p = getInstantPanchang(
  *   new Date('2025-01-14T03:00:00Z'),
- *   { latitude: 18.5204, longitude: 73.8567 },
+ *   { latitude: 23.1765, longitude: 75.7885 },  // Ujjain, India
  *   { language: 'sa' },
  * );
  * console.log(p.tithi.name);     // "कृष्ण चतुर्दशी"
@@ -224,7 +224,7 @@ export function getInstantPanchang(
  *
  * const result = getDailyPanchang(
  *   new Date(2025, 0, 14),                      // Jan 14, 2025
- *   { latitude: 18.5204, longitude: 73.8567 },  // Pune, India
+ *   { latitude: 23.1765, longitude: 75.7885 },  // Ujjain, India
  *   { timezone: 330 },                          // IST = UTC+5:30
  * );
  *
