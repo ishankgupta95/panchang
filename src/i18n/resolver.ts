@@ -10,6 +10,11 @@ export function getTranslations(lang: Language): PanchangTranslations {
   return TRANSLATIONS[lang] ?? en;
 }
 
+export function resolvePakshaName(index: number, lang: Language): string {
+  const t = getTranslations(lang);
+  return index < 15 ? t.pakshaNames.shukla : t.pakshaNames.krishna;
+}
+
 export function resolveTithiName(index: number, lang: Language): string {
   const t = getTranslations(lang);
   if (index === 14) return t.misc.purnima;

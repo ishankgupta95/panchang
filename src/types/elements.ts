@@ -11,7 +11,7 @@ interface ElementBase {
 }
 
 export interface TithiInfo extends ElementBase {
-  paksha: 'Shukla' | 'Krishna';
+  paksha: string;
   number: number;
 }
 

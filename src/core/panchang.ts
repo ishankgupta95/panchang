@@ -41,6 +41,7 @@ import { computeFestivals } from './festivals';
 import { getMoonrise, getMoonset } from '../astronomy/moonrise';
 import {
   resolveTithiName,
+  resolvePakshaName,
   resolveNakshatraName,
   resolveYogaName,
   resolveKaranaName,
@@ -104,9 +105,11 @@ export function getInstantPanchang(
   const siderealSun = getSun(date);
   const ayanamsaValue = computeAyanamsa(date, ayanamsaType);
 
+  const tithiIdx = getTithiIndexFromLons(siderealMoon, siderealSun);
   const tithi = computeTithiFromLongitudes(
     siderealMoon, siderealSun,
-    resolveTithiName(getTithiIndexFromLons(siderealMoon, siderealSun), lang),
+    resolveTithiName(tithiIdx, lang),
+    resolvePakshaName(tithiIdx, lang),
   );
   const nakshatra = computeNakshatraFromLongitude(
     siderealMoon,
@@ -267,9 +270,11 @@ export function getDailyPanchang(
   const ayanamsaValue = computeAyanamsa(sunriseUtc, ayanamsaType);
 
   // ── 5. Compute elements at sunrise ───────────────────
+  const tithiIdxAtSunrise = getTithiIndexFromLons(siderealMoonAtSunrise, siderealSunAtSunrise);
   const tithiAtSunrise = computeTithiFromLongitudes(
     siderealMoonAtSunrise, siderealSunAtSunrise,
-    resolveTithiName(getTithiIndexFromLons(siderealMoonAtSunrise, siderealSunAtSunrise), lang),
+    resolveTithiName(tithiIdxAtSunrise, lang),
+    resolvePakshaName(tithiIdxAtSunrise, lang),
   );
   const nakshatraAtSunrise = computeNakshatraFromLongitude(
     siderealMoonAtSunrise,
@@ -284,7 +289,7 @@ export function getDailyPanchang(
     resolveKaranaName(getKaranaIndex(siderealMoonAtSunrise, siderealSunAtSunrise), lang),
   );
   const vara = computeVara(sunriseUtc, sunriseUtc, getTranslations(lang).varaNames);
-  const masa = computeMasa(siderealSunAtSunrise);
+  const masa = computeMasa(siderealSunAtSunrise, (idx) => resolveMasaName(idx, lang));
   const chandramasa = computeChandraMasa(
     siderealSunAtSunrise, siderealMoonAtSunrise,
     (idx, isAdhika) => resolveChandraMasaName(idx, lang, isAdhika),
@@ -340,7 +345,8 @@ export function getDailyPanchang(
       (d) => getTithiIndexAtTime(d, getMoon, getSun),
       (d) => {
         const moon = getMoon(d), sun = getSun(d);
-        return computeTithiFromLongitudes(moon, sun, resolveTithiName(getTithiIndexFromLons(moon, sun), lang));
+        const idx = getTithiIndexFromLons(moon, sun);
+        return computeTithiFromLongitudes(moon, sun, resolveTithiName(idx, lang), resolvePakshaName(idx, lang));
       },
       30, 36, maxIter, 2,
     ) as DailyTithiInfo[];

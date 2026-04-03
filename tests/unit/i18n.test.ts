@@ -13,6 +13,7 @@ import { hi } from '../../src/i18n/hi';
 import {
   getTranslations,
   resolveTithiName,
+  resolvePakshaName,
   resolveNakshatraName,
   resolveYogaName,
   resolveKaranaName,
@@ -178,6 +179,24 @@ describe('resolveKaranaName', () => {
 
   it('Bava (index 1) in English', () => {
     expect(resolveKaranaName(1, 'en')).toBe('Bava');
+  });
+});
+
+describe('resolvePakshaName', () => {
+  it('Shukla paksha (index < 15) in English', () => {
+    expect(resolvePakshaName(0, 'en')).toBe('Shukla');
+  });
+
+  it('Krishna paksha (index >= 15) in English', () => {
+    expect(resolvePakshaName(15, 'en')).toBe('Krishna');
+  });
+
+  it('Shukla paksha in Sanskrit', () => {
+    expect(resolvePakshaName(0, 'sa')).toBe('शुक्ल');
+  });
+
+  it('Krishna paksha in Hindi', () => {
+    expect(resolvePakshaName(15, 'hi')).toBe('कृष्ण');
   });
 });
 

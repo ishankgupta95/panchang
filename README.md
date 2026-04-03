@@ -239,7 +239,7 @@ console.log(result.panchaka);               // false
 |--------|------|---------|-------------|
 | `timezone` | `number \| string` | **required** | UTC offset in minutes (330 for IST). Use a number on Hermes — IANA strings require `Intl`. |
 | `ayanamsa` | `'lahiri' \| 'raman' \| 'krishnamurti'` | `'lahiri'` | Ayanamsa system |
-| `language` | `'en' \| 'sa' \| 'hi'` | `'en'` | Language for element names. `'hi'` currently uses the same Devanagari names as `'sa'`. |
+| `language` | `'en' \| 'sa' \| 'hi'` | `'en'` | Language for all element names (tithi, paksha, masa, etc.). `'sa'` = classical Sanskrit Devanagari, `'hi'` = modern Hindi Devanagari. |
 | `computeEndTimes` | `boolean` | `true` | Set `false` for ~5× faster, names-only output |
 | `precision` | `'standard' \| 'high'` | `'standard'` | Binary-search iterations (15 vs 25). High precision is rarely needed. |
 
@@ -331,7 +331,7 @@ interface TimePeriod {
 interface TithiInfo {
   index: number;               // 0–29
   name: string;                // e.g. "Shukla Pratipada"
-  paksha: 'Shukla' | 'Krishna';
+  paksha: string;              // "Shukla"/"Krishna" (en), "शुक्ल"/"कृष्ण" (sa/hi) — localized
   number: number;              // 1–15 within the paksha
   completionPercentage: number;
   endTime: Date | null;

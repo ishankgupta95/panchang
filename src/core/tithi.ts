@@ -16,12 +16,12 @@ export function computeTithiFromLongitudes(
   siderealMoon: number,
   siderealSun: number,
   name: string,
+  paksha: string,
 ): TithiInfo {
   const angle = normalize360(siderealMoon - siderealSun);
   const index = Math.floor(angle / TITHI_SPAN);
   const elapsed = angle - index * TITHI_SPAN;
   const completionPercentage = (elapsed / TITHI_SPAN) * 100;
-  const paksha: 'Shukla' | 'Krishna' = index < 15 ? 'Shukla' : 'Krishna';
   const number = index < 15 ? index + 1 : index - 14;
   return {
     index,

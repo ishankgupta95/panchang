@@ -9,16 +9,13 @@ import type { MasaInfo } from '../types/panchang';
  * This is the solar month (Saura). Lunar month (Chandramana) is more complex
  * and can be added in a future version.
  */
-const MASA_NAMES_EN = [
-  'Mesha', 'Vrishabha', 'Mithuna', 'Karka',
-  'Simha', 'Kanya', 'Tula', 'Vrischika',
-  'Dhanus', 'Makara', 'Kumbha', 'Meena',
-] as const;
-
-export function computeMasa(siderealSunLon: number): MasaInfo {
+export function computeMasa(
+  siderealSunLon: number,
+  nameResolver: (index: number) => string,
+): MasaInfo {
   const index = Math.floor(siderealSunLon / 30);
   return {
     index,
-    name: MASA_NAMES_EN[index]!,
+    name: nameResolver(index),
   };
 }
