@@ -54,6 +54,7 @@ import type { InstantPanchangOptions, PanchangOptions } from '../types/options';
 import type { InstantPanchangResult, DailyPanchangResult } from '../types/panchang';
 import type {
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo, TimePeriod,
+  ChoghadiyaQuality,
 } from '../types/elements';
 
 /**
@@ -173,6 +174,7 @@ export function getInstantPanchang(
     tithi.index, Math.floor(siderealMoon / NAKSHATRA_SPAN),
     chandramasa.index, chandramasa.isAdhika, vara.index, siderealSun,
     (key) => t.festivalNames[key] ?? (t.misc as Record<string, string>)[key] ?? key,
+    (idx) => resolveMasaName(idx, lang),
   );
 
   return {
@@ -304,9 +306,11 @@ export function getDailyPanchang(
     (idx) => resolveNakshatraName(idx, lang),
   );
   const brahmaMuhurta = computeBrahmaMuhurta(sunriseUtc, sunsetUtc);
+  const qualityNameFn = (q: ChoghadiyaQuality) => getTranslations(lang).qualityNames[q];
   const choghadiya = computeChoghadiya(
     sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
     (idx) => getTranslations(lang).choghadiyaNames[idx]!,
+    qualityNameFn,
   );
   const hora = computeHora(
     sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
@@ -315,6 +319,7 @@ export function getDailyPanchang(
   const gowriPanchangam = computeGowriPanchangam(
     sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
     (idx) => getTranslations(lang).gowriNames[idx]!,
+    qualityNameFn,
   );
   const moonriseUtc = getMoonrise(localMidnightUtc, location);
   const moonsetUtc = getMoonset(localMidnightUtc, location);
@@ -331,6 +336,7 @@ export function getDailyPanchang(
     tithiAtSunrise.index, Math.floor(siderealMoonAtSunrise / NAKSHATRA_SPAN),
     chandramasa.index, chandramasa.isAdhika, vara.index, siderealSunAtSunrise,
     (key) => t.festivalNames[key] ?? (t.misc as Record<string, string>)[key] ?? key,
+    (idx) => resolveMasaName(idx, lang),
   );
 
   // ── 6. Find transitions (daily element arrays) ───────

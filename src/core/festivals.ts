@@ -78,6 +78,7 @@ export function computeFestivals(
   _varaIndex: number,
   siderealSun: number,
   nameResolver: (key: string) => string,
+  rashiNameResolver?: (index: number) => string,
 ): FestivalInfo[] {
   const results: FestivalInfo[] = [];
 
@@ -114,10 +115,11 @@ export function computeFestivals(
   const degInRashi = siderealSun % 30;
   if (degInRashi < 1.0) {
     const rashiIndex = Math.floor(siderealSun / 30) % 12;
+    const rashiName = rashiNameResolver ? rashiNameResolver(rashiIndex) : `Rashi ${rashiIndex}`;
     results.push({
       name: nameResolver('sankranti'),
       type: 'sankranti',
-      description: `Rashi ${rashiIndex}`,
+      description: rashiName,
     });
   }
 

@@ -77,6 +77,8 @@ export interface ChoghadiyaSlot extends TimePeriod {
   index: number;
   name: string;
   quality: ChoghadiyaQuality;
+  /** Localized display name for the quality (e.g. "शुभ" in Hindi) */
+  qualityName: string;
 }
 
 export interface ChoghadiyaInfo {
@@ -93,6 +95,8 @@ export interface GowriSlot extends TimePeriod {
   index: number;
   name: string;
   quality: ChoghadiyaQuality;
+  /** Localized display name for the quality (e.g. "शुभ" in Hindi) */
+  qualityName: string;
 }
 
 export interface GowriInfo {

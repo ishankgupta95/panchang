@@ -11,6 +11,7 @@ import { computeChoghadiya } from '../../src/core/choghadiya';
 
 const nameResolver = (idx: number) =>
   ['Udveg', 'Char', 'Labh', 'Amrit', 'Kaal', 'Shubh', 'Rog'][idx]!;
+const qualityNameResolver = (q: string) => q;
 
 // Fixed sunrise/sunset for testability
 const SUNRISE = new Date('2025-01-14T01:45:00Z'); // 07:15 IST
@@ -20,7 +21,7 @@ const NEXT_SUNRISE = new Date('2025-01-15T01:45:00Z');
 describe('computeChoghadiya', () => {
   describe('structural checks', () => {
     for (let vara = 0; vara < 7; vara++) {
-      const result = computeChoghadiya(SUNRISE, SUNSET, NEXT_SUNRISE, vara, nameResolver);
+      const result = computeChoghadiya(SUNRISE, SUNSET, NEXT_SUNRISE, vara, nameResolver, qualityNameResolver);
 
       it(`vara ${vara}: returns 8 day + 8 night slots`, () => {
         expect(result.day).toHaveLength(8);
@@ -75,7 +76,7 @@ describe('computeChoghadiya', () => {
   });
 
   describe('quality assignment', () => {
-    const result = computeChoghadiya(SUNRISE, SUNSET, NEXT_SUNRISE, 0, nameResolver);
+    const result = computeChoghadiya(SUNRISE, SUNSET, NEXT_SUNRISE, 0, nameResolver, qualityNameResolver);
     const allSlots = [...result.day, ...result.night];
 
     it('Amrit and Labh are auspicious', () => {

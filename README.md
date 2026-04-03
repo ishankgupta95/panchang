@@ -72,7 +72,7 @@ console.log(result.rahuKalam);                // { start: Date, end: Date }
 
 // Choghadiya — 8 daytime slots
 result.choghadiya.day.forEach(slot => {
-  console.log(slot.name, slot.quality);       // "Amrit", "auspicious"
+  console.log(slot.name, slot.qualityName);   // "Amrit", "Auspicious"
 });
 
 // Panchaka
@@ -95,7 +95,7 @@ result.festivals.forEach(f => {
 
 // Gowri Panchangam — 8 daytime slots
 result.gowriPanchangam.day.forEach(slot => {
-  console.log(slot.name, slot.quality);       // "Amrit", "auspicious"
+  console.log(slot.name, slot.qualityName);   // "Amrit", "Auspicious"
 });
 
 
@@ -293,6 +293,7 @@ const brahma     = computeBrahmaMuhurta(sunrise, sunset);     // { start, end }
 // Gowri Panchangam (varaIndex: 0=Sun … 6=Sat)
 const gowri = computeGowriPanchangam(sunrise, sunset, nextSunrise, varaIndex,
   (i) => ['Udyog','Amrit','Roga','Laabh','Shubh','Kaal','Dhan','Chal'][i]!,
+  (q) => ({ auspicious: 'Auspicious', inauspicious: 'Inauspicious', neutral: 'Neutral' })[q],
 );
 // gowri.day  → 8 GowriSlot (sunrise → sunset)
 // gowri.night → 8 GowriSlot (sunset → next sunrise)
@@ -406,8 +407,9 @@ type ChoghadiyaQuality = 'auspicious' | 'inauspicious' | 'neutral';
 
 interface ChoghadiyaSlot extends TimePeriod {
   index: number;
-  name: string;           // e.g. "Amrit", "Kaal", "Shubh"
-  quality: ChoghadiyaQuality;
+  name: string;              // e.g. "Amrit", "Kaal", "Shubh" (localized)
+  quality: ChoghadiyaQuality; // programmatic key: 'auspicious' | 'inauspicious' | 'neutral'
+  qualityName: string;       // localized display name (e.g. "Auspicious", "शुभ", "शुभम्")
 }
 
 interface ChoghadiyaInfo {
@@ -418,9 +420,10 @@ interface ChoghadiyaInfo {
 // ── Gowri Panchangam ─────────────────────────────────────────────────────────
 
 interface GowriSlot extends TimePeriod {
-  index: number;           // 0–7 within the 8-name cycle
-  name: string;            // e.g. "Amrit", "Kaal", "Shubh"
-  quality: ChoghadiyaQuality;
+  index: number;              // 0–7 within the 8-name cycle
+  name: string;               // e.g. "Amrit", "Kaal", "Shubh" (localized)
+  quality: ChoghadiyaQuality; // programmatic key: 'auspicious' | 'inauspicious' | 'neutral'
+  qualityName: string;        // localized display name (e.g. "Auspicious", "शुभ", "शुभम्")
 }
 
 interface GowriInfo {
@@ -452,7 +455,7 @@ interface SpecialYogaInfo {
 interface FestivalInfo {
   name: string;         // e.g. "Diwali", "Ekadashi"
   type: 'major' | 'minor' | 'ekadashi' | 'pradosha' | 'sankranti';
-  description?: string; // For sankranti: "Rashi 3" — the numeric rashi index as a string; look up name from masaNames
+  description?: string; // For sankranti: localized rashi name (e.g. "Makara", "मकर")
 }
 
 // Detection rules:

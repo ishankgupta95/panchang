@@ -13,21 +13,22 @@ const SLOT_MS  = DAY_MS / 8; // 90 minutes per slot
 // Gowri name map (index 0–7)
 const NAMES = ['Udyog', 'Amrit', 'Roga', 'Laabh', 'Shubh', 'Kaal', 'Dhan', 'Chal'];
 const nameFn = (i: number) => NAMES[i]!;
+const qualityNameFn = (q: string) => q;
 
 describe('computeGowriPanchangam', () => {
   describe('slot count and structure', () => {
     it('returns 8 day slots', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn, qualityNameFn);
       expect(g.day).toHaveLength(8);
     });
 
     it('returns 8 night slots', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn, qualityNameFn);
       expect(g.night).toHaveLength(8);
     });
 
     it('each slot has start, end, index, name, quality', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn, qualityNameFn);
       for (const slot of [...g.day, ...g.night]) {
         expect(slot).toHaveProperty('start');
         expect(slot).toHaveProperty('end');
@@ -40,17 +41,17 @@ describe('computeGowriPanchangam', () => {
 
   describe('day slots timing (Sunday, varaIndex=0)', () => {
     it('day slot 0 starts at sunrise', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn, qualityNameFn);
       expect(g.day[0]!.start.getTime()).toBe(sunrise.getTime());
     });
 
     it('day slot 7 ends at sunset', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn, qualityNameFn);
       expect(g.day[7]!.end.getTime()).toBe(sunset.getTime());
     });
 
     it('each day slot is exactly 1/8 of daytime', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn, qualityNameFn);
       for (const slot of g.day) {
         const dur = slot.end.getTime() - slot.start.getTime();
         expect(dur).toBe(SLOT_MS);
@@ -58,7 +59,7 @@ describe('computeGowriPanchangam', () => {
     });
 
     it('day slots are contiguous', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn, qualityNameFn);
       for (let i = 1; i < 8; i++) {
         expect(g.day[i]!.start.getTime()).toBe(g.day[i - 1]!.end.getTime());
       }
@@ -67,17 +68,17 @@ describe('computeGowriPanchangam', () => {
 
   describe('night slots timing (Sunday, varaIndex=0)', () => {
     it('night slot 0 starts at sunset', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn, qualityNameFn);
       expect(g.night[0]!.start.getTime()).toBe(sunset.getTime());
     });
 
     it('night slot 7 ends at next sunrise', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn, qualityNameFn);
       expect(g.night[7]!.end.getTime()).toBe(nextSunrise.getTime());
     });
 
     it('each night slot is exactly 1/8 of nighttime', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn, qualityNameFn);
       for (const slot of g.night) {
         const dur = slot.end.getTime() - slot.start.getTime();
         expect(dur).toBe(NIGHT_MS / 8);
@@ -93,12 +94,12 @@ describe('computeGowriPanchangam', () => {
 
     for (let vara = 0; vara < 7; vara++) {
       it(`Sunday (vara=${vara}): first day slot index = ${dayStartIndices[vara]}`, () => {
-        const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, vara, nameFn);
+        const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, vara, nameFn, qualityNameFn);
         expect(g.day[0]!.index).toBe(dayStartIndices[vara]);
       });
 
       it(`Sunday (vara=${vara}): first night slot index = ${nightStartIndices[vara]}`, () => {
-        const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, vara, nameFn);
+        const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, vara, nameFn, qualityNameFn);
         expect(g.night[0]!.index).toBe(nightStartIndices[vara]);
       });
     }
@@ -107,7 +108,7 @@ describe('computeGowriPanchangam', () => {
   describe('slot index advances +1 mod 8', () => {
     it('day slots follow mod-8 cycle from starting index', () => {
       // Sunday: day start index = 6
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn, qualityNameFn);
       for (let i = 0; i < 8; i++) {
         expect(g.day[i]!.index).toBe((6 + i) % 8);
       }
@@ -115,7 +116,7 @@ describe('computeGowriPanchangam', () => {
 
     it('night slots follow mod-8 cycle from starting index', () => {
       // Sunday: night start index = 2
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn, qualityNameFn);
       for (let i = 0; i < 8; i++) {
         expect(g.night[i]!.index).toBe((2 + i) % 8);
       }
@@ -135,14 +136,14 @@ describe('computeGowriPanchangam', () => {
     };
 
     it('day slots have correct quality for their index', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 1, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 1, nameFn, qualityNameFn);
       for (const slot of g.day) {
         expect(slot.quality).toBe(QUALITY_MAP[slot.index]);
       }
     });
 
     it('night slots have correct quality for their index', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 3, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 3, nameFn, qualityNameFn);
       for (const slot of g.night) {
         expect(slot.quality).toBe(QUALITY_MAP[slot.index]);
       }
@@ -151,7 +152,7 @@ describe('computeGowriPanchangam', () => {
 
   describe('name resolution via nameFn', () => {
     it('slot name matches nameFn(index)', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn, qualityNameFn);
       for (const slot of [...g.day, ...g.night]) {
         expect(slot.name).toBe(nameFn(slot.index));
       }
@@ -161,13 +162,13 @@ describe('computeGowriPanchangam', () => {
   describe('Saturday (varaIndex=6)', () => {
     // Day start index = 0 (Udyog), Night start index = 4 (Shubh)
     it('Saturday day starts at index 0 (Udyog)', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 6, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 6, nameFn, qualityNameFn);
       expect(g.day[0]!.index).toBe(0);
       expect(g.day[0]!.name).toBe('Udyog');
     });
 
     it('Saturday night starts at index 4 (Shubh)', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 6, nameFn);
+      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 6, nameFn, qualityNameFn);
       expect(g.night[0]!.index).toBe(4);
       expect(g.night[0]!.name).toBe('Shubh');
     });

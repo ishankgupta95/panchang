@@ -30,18 +30,21 @@ function buildSlots(
   durationMs: number,
   startIndex: number,
   nameFn: (index: number) => string,
+  qualityNameFn: (quality: ChoghadiyaQuality) => string,
   count: number,
 ): ChoghadiyaSlot[] {
   const slotMs = durationMs / count;
   const slots: ChoghadiyaSlot[] = [];
   for (let i = 0; i < count; i++) {
     const idx = (startIndex + i) % 7;
+    const quality = CHOGHADIYA_QUALITY[idx]!;
     slots.push({
       start: new Date(reference.getTime() + i * slotMs),
       end: new Date(reference.getTime() + (i + 1) * slotMs),
       index: idx,
       name: nameFn(idx),
-      quality: CHOGHADIYA_QUALITY[idx]!,
+      quality,
+      qualityName: qualityNameFn(quality),
     });
   }
   return slots;
@@ -59,6 +62,7 @@ function buildSlots(
  * @param nextSunrise  UTC next-day sunrise Date.
  * @param varaIndex  Weekday index: 0 = Sunday, 6 = Saturday.
  * @param nameFn     Callback returning translated Choghadiya name for index 0–6.
+ * @param qualityNameFn  Callback returning translated quality name.
  */
 export function computeChoghadiya(
   sunrise: Date,
@@ -66,12 +70,13 @@ export function computeChoghadiya(
   nextSunrise: Date,
   varaIndex: number,
   nameFn: (index: number) => string,
+  qualityNameFn: (quality: ChoghadiyaQuality) => string,
 ): ChoghadiyaInfo {
   const dayMs   = sunset.getTime()      - sunrise.getTime();
   const nightMs = nextSunrise.getTime() - sunset.getTime();
 
   return {
-    day:   buildSlots(sunrise, dayMs,   DAY_START_INDEX[varaIndex]!,   nameFn, 8),
-    night: buildSlots(sunset,  nightMs, NIGHT_START_INDEX[varaIndex]!, nameFn, 8),
+    day:   buildSlots(sunrise, dayMs,   DAY_START_INDEX[varaIndex]!,   nameFn, qualityNameFn, 8),
+    night: buildSlots(sunset,  nightMs, NIGHT_START_INDEX[varaIndex]!, nameFn, qualityNameFn, 8),
   };
 }

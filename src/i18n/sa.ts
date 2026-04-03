@@ -49,6 +49,7 @@ export const sa: PanchangTranslations = {
   choghadiyaNames: ['उद्वेग', 'चर', 'लाभ', 'अमृत', 'काल', 'शुभ', 'रोग'],
   gowriNames: ['उद्योग', 'अमृत', 'रोग', 'लाभ', 'शुभ', 'काल', 'धन', 'चल'],
   grahaNames: ['सूर्य', 'शुक्र', 'बुध', 'चन्द्र', 'शनि', 'गुरु', 'मङ्गल'],
+  qualityNames: { auspicious: 'शुभम्', inauspicious: 'अशुभम्', neutral: 'सामान्यम्' },
   specialYogaNames: {
     amrit_siddhi: 'अमृत सिद्धि योग',
     sarvartha_siddhi: 'सर्वार्थ सिद्धि योग',
