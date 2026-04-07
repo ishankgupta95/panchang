@@ -16,7 +16,7 @@
       "sunriseHHMM": "07:15",
       "sunsetHHMM": "17:45",
       "chandraRashi": "Karka",
-      "chandramasaName": "Pausha",
+      "chandramasaName": "Magha",
       "rahuKalamStartHHMM": "15:07",
       "rahuKalamEndHHMM": "16:26",
       "yamagandaStartHHMM": "09:52",
@@ -70,7 +70,7 @@
       "sunriseHHMM": "06:18",
       "sunsetHHMM": "18:35",
       "chandraRashi": "Makara",
-      "chandramasaName": "Phalguna",
+      "chandramasaName": "Chaitra",
       "rahuKalamStartHHMM": "12:27",
       "rahuKalamEndHHMM": "13:59",
       "yamagandaStartHHMM": "07:50",
@@ -104,7 +104,7 @@
       "yamagandaEndHHMM": "15:15",
       "abhijitMuhurtaStartHHMM": "11:44",
       "abhijitMuhurtaEndHHMM": "12:34",
-      "festivals": ["Holi"]
+      "festivals": ["Hanuman Jayanti"]
     }
   },
   {
@@ -124,7 +124,7 @@
       "sunriseHHMM": "05:50",
       "sunsetHHMM": "19:00",
       "chandraRashi": "Mesha",
-      "chandramasaName": "Shravana",
+      "chandramasaName": "Bhadrapada",
       "rahuKalamStartHHMM": "10:46",
       "rahuKalamEndHHMM": "12:25",
       "yamagandaStartHHMM": "15:42",
@@ -135,7 +135,7 @@
     }
   },
   {
-    "_source": "Library baseline — 2025-10-20, Bangalore. Diwali-eve. Tithi/Nakshatra verified vs DrikPanchang.",
+    "_source": "DrikPanchang.com — verified 2025-10-20, Bangalore. Diwali-eve / Narak Chaturdashi.",
     "date": "2025-10-20",
     "city": "Bangalore",
     "location": { "latitude": 12.9716, "longitude": 77.5946 },
@@ -151,14 +151,14 @@
       "sunriseHHMM": "06:10",
       "sunsetHHMM": "17:58",
       "chandraRashi": "Kanya",
-      "chandramasaName": "Ashwin",
+      "chandramasaName": "Kartika",
       "rahuKalamStartHHMM": "07:39",
       "rahuKalamEndHHMM": "09:07",
       "yamagandaStartHHMM": "10:35",
       "yamagandaEndHHMM": "12:04",
       "abhijitMuhurtaStartHHMM": "11:40",
       "abhijitMuhurtaEndHHMM": "12:27",
-      "festivals": []
+      "festivals": ["Narak Chaturdashi"]
     }
   },
   {

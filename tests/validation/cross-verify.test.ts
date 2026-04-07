@@ -175,6 +175,16 @@ describe('DrikPanchang cross-verification', () => {
         });
       }
 
+      // ── Festivals ──
+      if (expected.festivals.length > 0) {
+        it(`festivals include ${expected.festivals.join(', ')}`, () => {
+          const actualNames = r.festivals.map((f: { name: string }) => f.name);
+          for (const name of expected.festivals) {
+            expect(actualNames).toContain(name);
+          }
+        });
+      }
+
       // ── Structural invariants ──
       it('sunrise < sunset < nextSunrise', () => {
         expect(r.sunrise.getTime()).toBeLessThan(r.sunset.getTime());

@@ -3,7 +3,10 @@
     "_note": "Library-baseline fixtures. varaEnglish and sunrise/sunset times verified against DrikPanchang (±2 min tolerance).",
     "date": "2025-01-14",
     "city": "Pune",
-    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "location": {
+      "latitude": 18.5204,
+      "longitude": 73.8567
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Tuesday",
@@ -11,7 +14,7 @@
       "nakshatraAtSunrise": "Punarvasu",
       "sunriseHHMM": "07:09",
       "sunsetHHMM": "18:17",
-      "chandramasaName": "Pausha",
+      "chandramasaName": "Magha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -19,7 +22,10 @@
   {
     "date": "2025-01-14",
     "city": "Delhi",
-    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "location": {
+      "latitude": 28.6139,
+      "longitude": 77.209
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Tuesday",
@@ -27,7 +33,7 @@
       "nakshatraAtSunrise": "Punarvasu",
       "sunriseHHMM": "07:15",
       "sunsetHHMM": "17:45",
-      "chandramasaName": "Pausha",
+      "chandramasaName": "Magha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -35,7 +41,10 @@
   {
     "date": "2025-01-14",
     "city": "Chennai",
-    "location": { "latitude": 13.0827, "longitude": 80.2707 },
+    "location": {
+      "latitude": 13.0827,
+      "longitude": 80.2707
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Tuesday",
@@ -43,7 +52,7 @@
       "nakshatraAtSunrise": "Punarvasu",
       "sunriseHHMM": "06:34",
       "sunsetHHMM": "18:01",
-      "chandramasaName": "Pausha",
+      "chandramasaName": "Magha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -51,7 +60,10 @@
   {
     "date": "2025-01-14",
     "city": "Mumbai",
-    "location": { "latitude": 19.076, "longitude": 72.8777 },
+    "location": {
+      "latitude": 19.076,
+      "longitude": 72.8777
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Tuesday",
@@ -59,7 +71,7 @@
       "nakshatraAtSunrise": "Punarvasu",
       "sunriseHHMM": "07:14",
       "sunsetHHMM": "18:20",
-      "chandramasaName": "Pausha",
+      "chandramasaName": "Magha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -67,7 +79,10 @@
   {
     "date": "2025-01-14",
     "city": "Bangalore",
-    "location": { "latitude": 12.9716, "longitude": 77.5946 },
+    "location": {
+      "latitude": 12.9716,
+      "longitude": 77.5946
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Tuesday",
@@ -75,7 +90,7 @@
       "nakshatraAtSunrise": "Punarvasu",
       "sunriseHHMM": "06:45",
       "sunsetHHMM": "18:11",
-      "chandramasaName": "Pausha",
+      "chandramasaName": "Magha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -84,7 +99,10 @@
     "_note": "Holi 2025 — Purnima in Magha / Phalguna. DrikPanchang shows Full Moon tithi.",
     "date": "2025-03-14",
     "city": "Pune",
-    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "location": {
+      "latitude": 18.5204,
+      "longitude": 73.8567
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Friday",
@@ -101,7 +119,10 @@
     "_note": "Rama Navami 2025 — Shukla Navami in Chaitra.",
     "date": "2025-04-06",
     "city": "Pune",
-    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "location": {
+      "latitude": 18.5204,
+      "longitude": 73.8567
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Sunday",
@@ -117,7 +138,10 @@
   {
     "date": "2025-06-21",
     "city": "Pune",
-    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "location": {
+      "latitude": 18.5204,
+      "longitude": 73.8567
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Saturday",
@@ -125,7 +149,7 @@
       "nakshatraAtSunrise": "Ashwini",
       "sunriseHHMM": "05:59",
       "sunsetHHMM": "19:13",
-      "chandramasaName": "Jyeshtha",
+      "chandramasaName": "Ashadha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -133,7 +157,10 @@
   {
     "date": "2025-07-04",
     "city": "New York",
-    "location": { "latitude": 40.7128, "longitude": -74.006 },
+    "location": {
+      "latitude": 40.7128,
+      "longitude": -74.006
+    },
     "timezone": -240,
     "expected": {
       "varaEnglish": "Friday",
@@ -149,7 +176,10 @@
   {
     "date": "2025-08-27",
     "city": "Pune",
-    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "location": {
+      "latitude": 18.5204,
+      "longitude": 73.8567
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Wednesday",
@@ -166,7 +196,10 @@
     "_note": "Gandhi Jayanti 2025",
     "date": "2025-10-02",
     "city": "Pune",
-    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "location": {
+      "latitude": 18.5204,
+      "longitude": 73.8567
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Thursday",
@@ -183,7 +216,10 @@
     "_note": "Diwali-season entry. Krishna Chaturdashi (Narak Chaturdashi) neighbourhood.",
     "date": "2025-10-20",
     "city": "Pune",
-    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "location": {
+      "latitude": 18.5204,
+      "longitude": 73.8567
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Monday",
@@ -191,7 +227,7 @@
       "nakshatraAtSunrise": "Hasta",
       "sunriseHHMM": "06:29",
       "sunsetHHMM": "18:08",
-      "chandramasaName": "Ashwin",
+      "chandramasaName": "Kartika",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -200,7 +236,10 @@
     "_note": "Kartika Purnima 2025",
     "date": "2025-11-05",
     "city": "Pune",
-    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "location": {
+      "latitude": 18.5204,
+      "longitude": 73.8567
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Wednesday",
@@ -216,7 +255,10 @@
   {
     "date": "2025-12-25",
     "city": "Pune",
-    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "location": {
+      "latitude": 18.5204,
+      "longitude": 73.8567
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Thursday",
@@ -232,7 +274,10 @@
   {
     "date": "2025-12-31",
     "city": "Delhi",
-    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "location": {
+      "latitude": 28.6139,
+      "longitude": 77.209
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Wednesday",
@@ -248,7 +293,10 @@
   {
     "date": "2026-01-01",
     "city": "Delhi",
-    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "location": {
+      "latitude": 28.6139,
+      "longitude": 77.209
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Thursday",
@@ -265,7 +313,10 @@
     "_note": "Makar Sankranti 2026",
     "date": "2026-01-14",
     "city": "Pune",
-    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "location": {
+      "latitude": 18.5204,
+      "longitude": 73.8567
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Wednesday",
@@ -273,7 +324,7 @@
       "nakshatraAtSunrise": "Anuradha",
       "sunriseHHMM": "07:09",
       "sunsetHHMM": "18:17",
-      "chandramasaName": "Pausha",
+      "chandramasaName": "Magha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -281,7 +332,10 @@
   {
     "date": "2026-03-01",
     "city": "Pune",
-    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "location": {
+      "latitude": 18.5204,
+      "longitude": 73.8567
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Sunday",
@@ -297,7 +351,10 @@
   {
     "date": "2026-04-14",
     "city": "Pune",
-    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "location": {
+      "latitude": 18.5204,
+      "longitude": 73.8567
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Tuesday",
@@ -305,7 +362,7 @@
       "nakshatraAtSunrise": "Shatabhisha",
       "sunriseHHMM": "06:18",
       "sunsetHHMM": "18:51",
-      "chandramasaName": "Chaitra",
+      "chandramasaName": "Vaishakha",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }

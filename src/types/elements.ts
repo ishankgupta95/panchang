@@ -56,12 +56,18 @@ export interface RashiInfo {
 // ── Chandra Masa (lunar month) ────────────────────────
 
 export interface ChandraMasaInfo {
-  /** 0 = Chaitra … 11 = Phalguna (Amanta / South-Indian system) */
+  /** Month index in the active system (0 = Chaitra … 11 = Phalguna) */
   index: number;
-  /** Translated month name (Amanta) */
+  /** Translated month name in the active system */
   name: string;
   /** True when two new moons fall in the same solar month (extra/leap month) */
   isAdhika: boolean;
+  /** Which system `index`/`name` represent */
+  system: 'purnimanta' | 'amanta';
+  /** Month index in the Amanta (South-Indian) system */
+  amantaIndex: number;
+  /** Month name in the Amanta system */
+  amantaName: string;
   /** Month index in the Purnimanta (North-Indian) system */
   purnimantaIndex: number;
   /** Month name in the Purnimanta system */

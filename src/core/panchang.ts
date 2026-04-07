@@ -131,9 +131,11 @@ export function getInstantPanchang(
     location,
   );
   const vara = computeVara(date, sunriseUtc, getTranslations(lang).varaNames);
+  const masaSystem = options?.masaSystem ?? 'purnimanta';
   const chandramasa = computeChandraMasa(
     siderealSun, siderealMoon,
     (idx, isAdhika) => resolveChandraMasaName(idx, lang, isAdhika),
+    masaSystem,
   );
   const samvat = computeSamvat(date);
   const chandraRashi = computeChandraRashi(
@@ -172,7 +174,7 @@ export function getInstantPanchang(
   );
   const festivals = computeFestivals(
     tithi.index, Math.floor(siderealMoon / NAKSHATRA_SPAN),
-    chandramasa.index, chandramasa.isAdhika, vara.index, siderealSun,
+    chandramasa.amantaIndex, chandramasa.isAdhika, vara.index, siderealSun,
     (key) => t.festivalNames[key] ?? (t.misc as Record<string, string>)[key] ?? key,
     (idx) => resolveMasaName(idx, lang),
   );
@@ -292,9 +294,11 @@ export function getDailyPanchang(
   );
   const vara = computeVara(sunriseUtc, sunriseUtc, getTranslations(lang).varaNames);
   const masa = computeMasa(siderealSunAtSunrise, (idx) => resolveMasaName(idx, lang));
+  const masaSystem = options.masaSystem ?? 'purnimanta';
   const chandramasa = computeChandraMasa(
     siderealSunAtSunrise, siderealMoonAtSunrise,
     (idx, isAdhika) => resolveChandraMasaName(idx, lang, isAdhika),
+    masaSystem,
   );
   const samvat = computeSamvat(sunriseUtc);
   const chandraRashi = computeChandraRashi(
@@ -334,7 +338,7 @@ export function getDailyPanchang(
   const durMuhurtaUtc = computeDurMuhurta(sunriseUtc, sunsetUtc, vara.index);
   const festivals = computeFestivals(
     tithiAtSunrise.index, Math.floor(siderealMoonAtSunrise / NAKSHATRA_SPAN),
-    chandramasa.index, chandramasa.isAdhika, vara.index, siderealSunAtSunrise,
+    chandramasa.amantaIndex, chandramasa.isAdhika, vara.index, siderealSunAtSunrise,
     (key) => t.festivalNames[key] ?? (t.misc as Record<string, string>)[key] ?? key,
     (idx) => resolveMasaName(idx, lang),
   );

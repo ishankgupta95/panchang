@@ -6,7 +6,7 @@ Works offline in React Native (Hermes), Node.js, and browsers.
 ## Features
 
 - **Pancha Anga (5 limbs):** Tithi, Nakshatra, Yoga, Karana, Vara — with mid-day transition times
-- **Lunar calendar:** Chandra Masa (lunar month + Adhika/leap detection), Vikram Samvat, Shaka Samvat
+- **Lunar calendar:** Chandra Masa (lunar month + Adhika/leap detection), Purnimanta (default) and Amanta systems, Vikram Samvat, Shaka Samvat
 - **Zodiac & asterism:** Chandra Rashi (Moon sign), Surya Nakshatra (Sun's asterism)
 - **Muhurta:** Brahma Muhurta, Abhijit Muhurta
 - **Inauspicious periods:** Rahu Kalam, Gulika Kalam, Yamaganda
@@ -53,8 +53,9 @@ console.log(result.tithis[0].name);           // "Krishna Chaturdashi"
 console.log(result.nakshatras[0].name);       // "Mrigashira"
 console.log(result.vara.name);                // "Mangalavara"
 
-// Lunar calendar
-console.log(result.chandramasa.name);         // "Pausha"
+// Lunar calendar (Purnimanta by default)
+console.log(result.chandramasa.name);         // "Magha"
+console.log(result.chandramasa.amantaName);   // "Pausha" (South Indian)
 console.log(result.samvat.vikramSamvat);      // 2081
 console.log(result.samvat.shakaSamvat);       // 1946
 
@@ -166,7 +167,7 @@ const result = getDailyPanchang(
 | `abhijitMuhurta` | `TimePeriod` | Abhijit Muhurta start/end |
 | `brahmaMuhurta` | `TimePeriod` | Brahma Muhurta — two muhurtas (dayDuration/30 each) before sunrise; ends one muhurta before sunrise (≈ 48–24 min window for typical 12-h days) |
 | `masa` | `MasaInfo` | Solar month (Saura Masa) |
-| `chandramasa` | `ChandraMasaInfo` | Lunar month + Adhika (leap) flag |
+| `chandramasa` | `ChandraMasaInfo` | Lunar month (Purnimanta by default) + Adhika (leap) flag |
 | `samvat` | `SamvatInfo` | Vikram Samvat and Shaka Samvat year numbers |
 | `chandraRashi` | `RashiInfo` | Moon's zodiac sign (changes every ~2.5 days) |
 | `suryaNakshatra` | `RashiInfo` | Sun's nakshatra (changes every ~13–14 days) |
@@ -201,7 +202,7 @@ const result = getInstantPanchang(
 
 console.log(result.tithi.name);              // "कृष्ण चतुर्दशी"
 console.log(result.nakshatra.name);          // "मृगशिरा"
-console.log(result.chandramasa.name);        // "पौष"
+console.log(result.chandramasa.name);        // "माघ"
 console.log(result.chandraRashi.name);       // "मिथुन"
 console.log(result.samvat.vikramSamvat);     // 2081
 console.log(result.panchaka);               // false
@@ -242,6 +243,7 @@ console.log(result.panchaka);               // false
 | `language` | `'en' \| 'sa' \| 'hi'` | `'en'` | Language for all element names (tithi, paksha, masa, etc.). `'sa'` = classical Sanskrit Devanagari, `'hi'` = modern Hindi Devanagari. |
 | `computeEndTimes` | `boolean` | `true` | Set `false` for ~5× faster, names-only output |
 | `precision` | `'standard' \| 'high'` | `'standard'` | Binary-search iterations (15 vs 25). High precision is rarely needed. |
+| `masaSystem` | `'purnimanta' \| 'amanta'` | `'purnimanta'` | Lunar month naming system. Purnimanta (North Indian, used by DrikPanchang) or Amanta (South Indian / Maharashtra / Gujarat). |
 
 **`InstantPanchangOptions`** (optional for `getInstantPanchang`): same as above but without `timezone`.
 
@@ -360,11 +362,14 @@ interface DailyTithiInfo extends TithiInfo {
 // ── Lunar calendar ───────────────────────────────────────────────────────────
 
 interface ChandraMasaInfo {
-  index: number;          // 0 = Chaitra … 11 = Phalguna (Amanta / South-Indian)
-  name: string;           // e.g. "Pausha" (Amanta name)
-  isAdhika: boolean;      // true = leap/intercalary month
-  purnimantaIndex: number; // Month index in Purnimanta (North-Indian) system
-  purnimantaName: string;  // Month name in Purnimanta system
+  index: number;            // 0 = Chaitra … 11 = Phalguna (in the active system)
+  name: string;             // e.g. "Magha" (follows masaSystem option)
+  isAdhika: boolean;        // true = leap/intercalary month
+  system: 'purnimanta' | 'amanta'; // which system index/name represent
+  amantaIndex: number;      // month index in Amanta (South-Indian) system
+  amantaName: string;       // month name in Amanta system
+  purnimantaIndex: number;  // month index in Purnimanta (North-Indian) system
+  purnimantaName: string;   // month name in Purnimanta system
 }
 
 interface SamvatInfo {
