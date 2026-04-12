@@ -3868,12 +3868,15 @@ gowriPanchangam: GowriInfo;
 
 ---
 
-## Phase 17 — Jyotish Expansion (Optional / Separate Module)
+## Phase 17 — Jyotish Expansion 🔶 PARTIAL
 
-> **Note:** These features push panchang-ts from a Panchang library into Jyotish (astrology)
-> territory. Consider whether these belong in panchang-ts core or a separate `jyotish-ts` package.
+> **Status (2026-04-12):** Steps 17-1 and 17-3 are implemented and exported. Step 17-2
+> (Chandra Balam) is not started. Step 17-5 (wiring) is partial — planetary positions
+> and dasha are exported from [src/index.ts](src/index.ts), but Chandra Balam isn't.
+> Quality work (Rahu true-node correctness, Drik validation for planetary positions,
+> dasha API ergonomics) is tracked in **Phase 18** — Jyotish Completion & Quality.
 
-### Step 17-1 — Planetary Positions (7 Graha)
+### Step 17-1 — Planetary Positions (9 Graha) ✅ DONE
 
 **What:** Sidereal longitude, Rashi (sign), degree for: Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn.
 
@@ -3914,7 +3917,7 @@ interface PlanetaryPositions {
 
 ---
 
-### Step 17-2 — Chandra Balam (Moon Strength)
+### Step 17-2 — Chandra Balam (Moon Strength) ⬜ NOT STARTED
 
 **What:** A calculation of Moon's strength based on its sign placement and other factors.
 
@@ -3929,7 +3932,7 @@ interface PlanetaryPositions {
 
 ---
 
-### Step 17-3 — Vimshottari Dasha System
+### Step 17-3 — Vimshottari Dasha System ✅ DONE
 
 **What:** The 120-year planetary period system. Given a birth nakshatra and Moon's degree within it, calculate:
 - Current Mahadasha (major period) + ruling planet
@@ -3957,7 +3960,7 @@ interface PlanetaryPositions {
 
 ---
 
-### Step 17-5 — Wire Phase 17 Features + Update Exports
+### Step 17-5 — Wire Phase 17 Features + Update Exports 🔶 PARTIAL
 
 **Additions to `DailyPanchangResult` (when `includePlanets: true`):**
 ```ts
@@ -3979,6 +3982,355 @@ import { computeVimshottariDasha } from 'panchang-ts';
 - `src/types/options.ts` — add `includePlanets` flag
 - `src/index.ts` — export new modules
 
+**Phase 17 completion status:**
+
+| Step | Feature | File(s) | Status |
+|------|---------|---------|--------|
+| 17-1 | Planetary Positions (9 Graha incl. Rahu/Ketu) | [src/jyotish/planets.ts](src/jyotish/planets.ts) | ✅ DONE — quality gated by 18-1, 18-3 |
+| 17-2 | Chandra Balam | `src/jyotish/chandraBalam.ts` (to create) | ⬜ NOT STARTED |
+| 17-3 | Vimshottari Dasha | [src/jyotish/dasha.ts](src/jyotish/dasha.ts) | ✅ DONE — API review in 18-5 |
+| 17-5 | Wire + exports | [src/index.ts](src/index.ts) | 🔶 PARTIAL — Chandra Balam not wired |
+
+---
+
+## Phase 18 — Jyotish Completion & Quality ⬜ NOT STARTED
+
+> **Goal:** Bring jyotish to v1-grade quality. Fix correctness issues in planetary
+> code, close the feature gap (Chandra Balam), validate against Drik Panchang,
+> and review jyotish API ergonomics before they're frozen by a v1 tag.
+>
+> **Why now:** Phase 17 delivered feature *existence*, not feature *trust*. v1
+> implies "API is stable and outputs are verified." Today the jyotish layer has
+> zero external validation and at least one formula that reads as incomplete.
+
+### Step 18-1 — Fix / Replace True-Node Rahu Formula
+
+**What:** The true-Rahu correction in [src/jyotish/planets.ts:51-81](src/jyotish/planets.ts#L51-L81) applies a Meeus-style perturbation series but one term degenerates to a constant:
+
+```ts
+-0.1500 * Math.sin((0 * F_rad) + (Math.PI * 2 * (357.5 / 360)))
+```
+
+The `0 * F_rad` zeroes out the argument's variable part, producing a fixed ~0.0065° contribution regardless of date. That's not a correct Meeus node correction — it's a stub.
+
+**Why:** Rahu/Ketu longitude feeds every downstream jyotish computation that uses them (dasha analyses, transit checks, remedy selection). Shipping a half-correct formula under a "true node" label is worse than shipping a documented mean-node fallback.
+
+**Implementation — pick one:**
+- **Option A (recommended):** Replace with Meeus *mean* node (Chapter 47):
+  ```ts
+  Ω = 125.04455501 − 1934.13626197·T + 0.00207765·T² + 2.139e-6·T³
+  ```
+  Accuracy: ±1.5° from true node, adequate for Vedic astrology which traditionally uses mean node anyway. Document this in JSDoc as `meanNode` (not `trueNode`).
+- **Option B:** Use astronomy-engine's `SearchMoonNode` to locate the actual ascending node crossing and refine with a Newton step. Accuracy: arc-seconds. Cost: ~2× the compute.
+- **Option C:** Port the full Meeus periodic corrections series (45 terms). High accuracy, high surface-area for bugs.
+
+**Recommendation:** Option A. It's honest about the accuracy trade and matches standard Vedic practice (most traditions use mean node). If a user explicitly requests true-node accuracy later, add it as an opt-in `nodeType: 'mean' | 'true'` option.
+
+**Depends on:** Nothing — pure refactor.
+**Effort:** 1–2 hours (including updating tests and JSDoc).
+
+---
+
+### Step 18-2 — Chandra Balam (Moon Strength)
+
+**What:** Implement the lookup declared in Phase 17 step 17-2. Given the native's janma rashi (birth Moon sign) and the current transit Moon rashi, return a strength classification.
+
+**Why:** Phase 17 scoped it; panchangam-js includes it; it's one lookup away from being useful.
+
+**Algorithm — classical Ashta Balam rule:**
+From the janma rashi, positions 1, 3, 6, 7, 10, 11 are strong (Chandra Balam present);
+positions 2, 4, 5, 8, 9, 12 are weak (Chandra Balam absent).
+Some traditions soften 4 and 8 via a parihara (Tara Balam) adjustment — keep that as a follow-up.
+
+**Implementation:**
+- Create `src/jyotish/chandraBalam.ts`
+- Export `computeChandraBalam(janmaRashiIndex: number, transitMoonRashiIndex: number): ChandraBalamInfo`
+- Lookup table indexed by `(transit - janma + 12) % 12` returning `'strong' | 'weak'`
+- Also emit the house number (1–12) and classical verdict string
+
+**Types:**
+```ts
+interface ChandraBalamInfo {
+  house: number;                       // 1–12
+  quality: 'strong' | 'weak';
+  englishName: string;                 // "Shubha" | "Ashubha"
+  name: string;                        // i18n
+}
+```
+
+**Wiring:**
+- Add to `DailyPanchangResult` only when caller passes a `janmaRashi` option (opt-in; requires birth data)
+- Export `computeChandraBalam` as standalone from [src/index.ts](src/index.ts)
+- i18n strings in `en.ts`/`sa.ts`/`hi.ts`
+
+**Depends on:** `computeChandraRashi` (implemented).
+**Effort:** 2–3 hours.
+
+---
+
+### Step 18-3 — Drik-Validate Planetary Positions
+
+**What:** Add `tests/fixtures/drikpanchang-planets.json` with 5–8 dates × 9 planets' sidereal longitude + rashi + nakshatra, sourced from Drik Panchang's "Planetary Positions" page.
+
+**Why:** Today the entire jyotish layer has zero external validation. Panchang elements are Δ=0min against Drik; planetary positions are unverified. Before v1 we need to establish that planets match Drik within a publishable tolerance.
+
+**Tolerances:**
+- Sidereal longitude: ±0.1° for Sun/Moon (already Δ=0 via panchang checks)
+- Sidereal longitude: ±0.25° for Mars–Saturn (astronomy-engine accuracy class)
+- Sidereal longitude: ±1.5° for Rahu (mean node, after 18-1)
+- Rashi: exact match (integer index)
+- Nakshatra: exact match (name)
+- Retrograde flag: exact match
+
+**Fixture shape:**
+```jsonc
+{
+  "date": "2025-01-14T12:00:00Z",
+  "ayanamsa": "lahiri",
+  "expected": {
+    "sun":     { "siderealLongitude": 270.23, "rashi": "Makara",  "nakshatra": "Uttara Ashadha", "retrograde": false },
+    "moon":    { ... },
+    "mars":    { ..., "retrograde": true },
+    ...
+    "rahu":    { ..., "retrograde": true },
+    "ketu":    { ... }
+  }
+}
+```
+
+**Implementation:**
+- Create `tests/validation/planetary-positions.test.ts`
+- Iterate fixtures; assert each planet's longitude, rashi index, nakshatra name, retrograde flag
+- Pick dates that exercise: retrograde Mercury, retrograde Mars, retrograde Saturn, a full-moon day, a new-moon day, one 2030 date for long-range drift
+
+**Depends on:** 18-1 (Rahu formula decision — the tolerance depends on which option was chosen).
+**Effort:** 3–4 hours (most of it Drik scraping).
+
+---
+
+### Step 18-4 — Drik-Validate Vimshottari Dasha
+
+**What:** For 1–2 published example charts, verify `computeVimshottariDasha` returns the correct mahadasha sequence, current mahadasha, antardasha, and dasha balance at birth.
+
+**Why:** Dasha math is deterministic given birth nakshatra + Moon's degree, so a single well-chosen fixture catches every class of bug (nakshatra-lord lookup, balance fraction, antardasha proportions, cycle wrap-around).
+
+**Test cases to collect:**
+1. A public historical figure with a widely-agreed birth chart (e.g. a classical text example). Validate all 9 mahadashas' start/end dates to within ±1 day.
+2. A synthetic "birth at exact start of Ashwini nakshatra (Moon longitude = 0.0°)" case → dasha balance should equal exactly Ketu's 7-year allocation.
+3. A synthetic "birth at very end of Revati (Moon longitude = 359.99°)" case → dasha balance should be ~0, first mahadasha ends almost immediately, second begins.
+
+**Implementation:**
+- Create `tests/validation/dasha.test.ts`
+- Parametric assertions on `mahaDashas[i].lord`, `startDate`, `endDate` (±24 h)
+- Check antardasha subdivision sums to the parent mahadasha duration (invariant test)
+
+**Depends on:** 17-3.
+**Effort:** 2–3 hours.
+
+---
+
+### Step 18-5 — Dasha API Ergonomics Review
+
+**What:** Today `computeVimshottariDasha(birthDate, moonSiderealLon)` requires the caller to compute sidereal Moon longitude themselves. Decide whether to:
+- (a) keep the low-level signature and document the two-step call,
+- (b) add a higher-level convenience: `computeVimshottariDasha({ birthDate, location, ayanamsaType? })` that computes moonSid internally,
+- (c) expose both — convenience wrapper + primitive.
+
+**Why:** Once v1 ships, this signature is frozen. A later breaking change means v2. Better to get it right now.
+
+**Recommendation:** Option (c). Keep the primitive `computeVimshottariDasha` as-is (low-level, composable, easy to test), and add `computeVimshottariDashaFromBirth({ birthDate, location, ayanamsaType })` as the ergonomic default. Document both.
+
+**Implementation:**
+- Add wrapper in [src/jyotish/dasha.ts](src/jyotish/dasha.ts)
+- Export from [src/index.ts](src/index.ts)
+- Update README
+
+**Depends on:** 18-4 (validate before renaming / adding signatures).
+**Effort:** 1 hour.
+
+---
+
+### Step 18-6 — Wire Chandra Balam + Update Exports
+
+**What:** Once 18-2 exists, wire it in:
+
+- Add optional `janmaRashi?: RashiInfo` input to `PanchangOptions`
+- If provided, include `chandraBalam: ChandraBalamInfo` in `DailyPanchangResult`
+- Export `computeChandraBalam` + `ChandraBalamInfo` type from [src/index.ts](src/index.ts)
+- Add to README and type barrel
+
+**Depends on:** 18-2.
+**Effort:** 1 hour.
+
+---
+
+**Phase 18 completion table:**
+
+| Step | Feature | File(s) | Effort | Status |
+|------|---------|---------|--------|--------|
+| 18-1 | Fix true-node Rahu → mean-node (documented) | `src/jyotish/planets.ts` | 1–2h | ⬜ |
+| 18-2 | Chandra Balam lookup | `src/jyotish/chandraBalam.ts` | 2–3h | ⬜ |
+| 18-3 | Drik planetary validation | `tests/fixtures/drikpanchang-planets.json`, `tests/validation/planetary-positions.test.ts` | 3–4h | ⬜ |
+| 18-4 | Drik dasha validation | `tests/validation/dasha.test.ts` | 2–3h | ⬜ |
+| 18-5 | Dasha API ergonomics (add `...FromBirth` wrapper) | `src/jyotish/dasha.ts`, `src/index.ts` | 1h | ⬜ |
+| 18-6 | Wire Chandra Balam + exports | `src/types/options.ts`, `src/core/panchang.ts`, `src/index.ts` | 1h | ⬜ |
+
+**Total Phase 18 effort:** ~1 focused engineering day.
+
+---
+
+## Phase 19 — v1 Release Preparation ⬜ NOT STARTED
+
+> **Goal:** Ship `panchang-ts@1.0.0` with a stable, documented, externally-validated
+> API. This is the semver commitment — after this tag, any breaking change
+> requires v2.
+
+### Step 19-1 — Festival Detection Drik Validation
+
+**What:** Today festivals are computed ([src/core/festivals.ts](src/core/festivals.ts)) but never compared against Drik. Add 8–12 fixture dates covering major festivals (Mahashivratri, Holi, Ram Navami, Raksha Bandhan, Janmashtami, Ganesh Chaturthi, Navratri day 1, Dussehra, Karva Chauth, Diwali/Lakshmi Puja, Makar Sankranti, Ugadi) with `expected.festivals: [...]` populated.
+
+**Why:** Festivals are the single most user-visible surface. A one-day drift on Diwali is the class of bug that ships silently today and files an issue on day one of release.
+
+**Implementation:**
+- Extend [tests/fixtures/drikpanchang-verified.json](tests/fixtures/drikpanchang-verified.json) or add `tests/fixtures/drikpanchang-festivals.json`
+- Cross-verify already iterates `expected.festivals` — just needs data
+- Decide semantics: `arrayContaining` (Drik lists may include regional variants we don't) vs. exact
+
+**Effort:** 2–3 hours.
+
+---
+
+### Step 19-2 — Tithi / Nakshatra End-Time Validation
+
+**What:** Name-at-sunrise is a coarse assertion (mentioned in the earlier audit). Extend 5 verified fixtures with `tithiEndHHMM` + `nakshatraEndHHMM` + `yogaEndHHMM` + `karanaEndHHMM` and assert the computed endTimes within ±10 minutes.
+
+**Why:** Name matching can mask end-time drift up to half a tithi. End-time precision is what users rely on for muhurta selection.
+
+**Implementation:**
+- Extend fixture schema
+- Extend [tests/validation/cross-verify.test.ts](tests/validation/cross-verify.test.ts) to assert end times on fixtures that include them
+
+**Effort:** 2 hours.
+
+---
+
+### Step 19-3 — Public API Audit
+
+**What:** Walk every export from [src/index.ts](src/index.ts) and confirm:
+- Naming is consistent (`compute*` vs. `get*` is mixed today — e.g. `computeAyanamsa` is re-exported as `getAyanamsa`)
+- No `@internal` types leak through `.d.ts`
+- Every public function has JSDoc with `@param`, `@returns`, at least one `@example`
+- Types exported from `types/` barrel match what the JSDoc references
+- No TODO/FIXME comments in any public-facing .d.ts
+
+**Implementation:**
+- Script: build, then `grep -r "@internal\|TODO\|FIXME" dist/*.d.ts`
+- Manual walk-through of `src/index.ts` against README's API section
+- Fix inconsistencies (mostly JSDoc, maybe 1–2 renames with deprecation aliases)
+
+**Effort:** 3–4 hours.
+
+---
+
+### Step 19-4 — README + Docs Sync
+
+**What:** Current README may lag recent additions (gowri, hora, choghadiya, festivals, jyotish). Audit section-by-section:
+- Installation (unchanged)
+- Quick start (covers current API shape?)
+- API reference (every public export listed?)
+- Feature matrix (reflects Phases 13–19?)
+- Examples for jyotish (planets, dasha, chandra balam)
+- Validation section (claim: "Drik-verified at Δ=0min on 250 strict checks across 5 Indian cities + NY, Jan 2025 – Apr 2026")
+
+**Effort:** 2–3 hours.
+
+---
+
+### Step 19-5 — Seconds-Precision Cross-Verify (Audit Gap)
+
+**What:** The "Δ=0min" claim is at minute resolution. Re-run cross-verify with second-level precision on at least the 8 verified fixtures. If sub-minute drift exists, document it or tighten the model. This is the audit gap flagged earlier.
+
+**Why:** A "±0 min" claim that turns out to hide ±45s drift is embarrassing to surface post-v1. Better to know now.
+
+**Implementation:**
+- Extend fixtures (or add a separate precision fixture) with `sunriseHHMMSS`
+- Cross-verify with `diffSeconds <= 60` (document whatever tolerance we actually achieve)
+
+**Effort:** 1–2 hours.
+
+---
+
+### Step 19-6 — Changeset, Versioning, Release Notes
+
+**What:** Use `@changesets/cli` (already a dev-dep) to author the v1.0.0 changeset. Content:
+- "Stable API — this version begins the semver compatibility promise"
+- List Phase 13–18 deliverables chronologically
+- Acknowledge breaking changes from v0.x (if any — likely none since we've been additive, but audit)
+- Migration guide for v0.x users (should be a no-op)
+
+**Effort:** 1–2 hours.
+
+---
+
+### Step 19-7 — Publish v1.0.0
+
+**What:**
+- `npm run build` → `npm run test:run` → `npm run test:hermes`
+- Verify `package.json` `version: "1.0.0"`
+- `npm run release` (or `npm publish` if not using changesets pipeline)
+- Tag git: `git tag v1.0.0 && git push --tags`
+- Draft GitHub release from the changeset
+
+**Effort:** 30 minutes.
+
+---
+
+**Phase 19 completion table:**
+
+| Step | Focus | Effort | Status |
+|------|-------|--------|--------|
+| 19-1 | Festival Drik validation | 2–3h | ⬜ |
+| 19-2 | End-time validation | 2h | ⬜ |
+| 19-3 | Public API audit | 3–4h | ⬜ |
+| 19-4 | README + docs sync | 2–3h | ⬜ |
+| 19-5 | Seconds-precision cross-verify | 1–2h | ⬜ |
+| 19-6 | Changeset + release notes | 1–2h | ⬜ |
+| 19-7 | Publish v1.0.0 | 0.5h | ⬜ |
+
+**Total Phase 19 effort:** ~1.5 engineering days.
+
+---
+
+## Phase 20 — Post-v1 Jyotish (Optional) ⬜ NOT STARTED
+
+> These features are out of scope for v1 but documented here so the roadmap
+> is visible. They can ship as v1.x minor releases (additive only).
+
+### Step 20-1 — Kundli Milan (Ashtakoota Matching)
+
+**What:** Marriage-compatibility scoring — given two nakshatras, compute the 8-factor Ashtakoota match (Varna, Vashya, Tara, Yoni, Graha Maitri, Gana, Bhakoot, Nadi) summed to 36 points.
+
+**Implementation:**
+- `src/jyotish/kundliMilan.ts` — pure lookup tables + deterministic math
+- `computeKundliMilan(boyNakshatra, girlNakshatra): KundliMilanResult`
+- Types: per-factor score + total + verdict
+
+**Effort:** 1 day (math is simple, tables are long).
+
+---
+
+### Step 20-2 — Shadbala (Planetary Strengths)
+
+**What:** 6-fold planetary strength computation (Sthana, Dig, Kala, Chesta, Naisargika, Drik bala).
+**Effort:** Large (2–3 days). Defer unless a user requests it.
+
+---
+
+### Step 20-3 — Divisional Charts (D9 Navamsa, D10 Dashamsa)
+
+**What:** Vargas — subdivisions of rashi used in classical chart reading.
+**Effort:** Medium (1 day). Straightforward math once planetary positions exist.
+
 ---
 
 ## Execution Summary — All Phases
@@ -3990,7 +4342,10 @@ import { computeVimshottariDasha } from 'panchang-ts';
 | **14** | dharmSetu MVP Features | 14-1 → 14-4 | Special Yogas, Dur Muhurta, Festival Detection | ✅ DONE (v0.3.1) |
 | **15** | Regional Completeness | 15-1 → 15-2 | Gowri Panchangam | ✅ DONE (v0.3.1) |
 | **16** | Validation Hardening | 16-1 | 200+ day validation suite, long-range regression | 🔶 PARTIAL |
-| **17** | Jyotish Expansion | 17-1 → 17-5 | 7 Graha positions, Rahu/Ketu, Chandra Balam, Vimshottari Dasha | ⬜ NOT STARTED |
+| **17** | Jyotish Expansion | 17-1 → 17-5 | 9 Graha positions, Vimshottari Dasha | 🔶 PARTIAL (17-1, 17-3 done; 17-2, 17-5 remaining) |
+| **18** | Jyotish Completion & Quality | 18-1 → 18-6 | Rahu formula fix, Chandra Balam, Drik validation for planets + dasha, API review | ⬜ NOT STARTED |
+| **19** | v1 Release Preparation | 19-1 → 19-7 | Festival validation, end-time validation, API/docs audit, publish v1.0.0 | ⬜ NOT STARTED |
+| **20** | Post-v1 Jyotish (optional) | 20-1 → 20-3 | Kundli Milan, Shadbala, Divisional Charts | ⬜ NOT STARTED |
 
 ---
 
