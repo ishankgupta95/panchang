@@ -1,0 +1,116 @@
+[
+  {
+    "_source": "DrikPanchang.com — Sidereal Planetary Positions page, Lahiri/Chitra Paksha ayanamsa, Delhi (geoname-id=1273294). Scraped 2026-04-12.",
+    "date": "2025-01-14",
+    "instantUTC": "2025-01-14T18:13:36Z",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "ayanamsa": "lahiri",
+    "expected": {
+      "sun":     { "siderealLongitude": 270.62, "rashi": "Makara",    "nakshatra": "Uttara Ashadha",    "retrograde": false },
+      "moon":    { "siderealLongitude": 100.78, "rashi": "Karka",     "nakshatra": "Pushya",            "retrograde": false },
+      "mars":    { "siderealLongitude":  92.53, "rashi": "Karka",     "nakshatra": "Punarvasu",         "retrograde": true  },
+      "mercury": { "siderealLongitude": 255.00, "rashi": "Dhanus",    "nakshatra": "Purva Ashadha",     "retrograde": false },
+      "jupiter": { "siderealLongitude":  47.78, "rashi": "Vrishabha", "nakshatra": "Rohini",            "retrograde": true  },
+      "venus":   { "siderealLongitude": 317.71, "rashi": "Kumbha",    "nakshatra": "Shatabhisha",       "retrograde": false },
+      "saturn":  { "siderealLongitude": 321.47, "rashi": "Kumbha",    "nakshatra": "Purva Bhadrapada",  "retrograde": false },
+      "rahu":    { "siderealLongitude": 336.55, "rashi": "Meena",     "nakshatra": "Uttara Bhadrapada", "retrograde": true  },
+      "ketu":    { "siderealLongitude": 156.55, "rashi": "Kanya",     "nakshatra": "Uttara Phalguni",   "retrograde": true  }
+    }
+  },
+  {
+    "_source": "DrikPanchang.com — Delhi, scraped 2026-04-12",
+    "date": "2025-01-01",
+    "instantUTC": "2025-01-01T18:13:36Z",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "ayanamsa": "lahiri",
+    "expected": {
+      "sun":     { "siderealLongitude": 257.37, "rashi": "Dhanus",    "nakshatra": "Purva Ashadha",    "retrograde": false },
+      "moon":    { "siderealLongitude": 279.97, "rashi": "Makara",    "nakshatra": "Uttara Ashadha",   "retrograde": false },
+      "mars":    { "siderealLongitude":  97.45, "rashi": "Karka",     "nakshatra": "Pushya",           "retrograde": true  },
+      "mercury": { "siderealLongitude": 236.64, "rashi": "Vrischika", "nakshatra": "Jyeshtha",         "retrograde": false },
+      "jupiter": { "siderealLongitude":  48.92, "rashi": "Vrishabha", "nakshatra": "Rohini",           "retrograde": true  },
+      "venus":   { "siderealLongitude": 304.31, "rashi": "Kumbha",    "nakshatra": "Dhanishta",        "retrograde": false },
+      "saturn":  { "siderealLongitude": 320.36, "rashi": "Kumbha",    "nakshatra": "Purva Bhadrapada", "retrograde": false },
+      "rahu":    { "siderealLongitude": 337.24, "rashi": "Meena",     "nakshatra": "Uttara Bhadrapada","retrograde": true  },
+      "ketu":    { "siderealLongitude": 157.24, "rashi": "Kanya",     "nakshatra": "Uttara Phalguni",  "retrograde": true  }
+    }
+  },
+  {
+    "_source": "DrikPanchang.com — Delhi, scraped 2026-04-12. Date chosen mid-year + northern summer solstice window.",
+    "date": "2025-07-04",
+    "instantUTC": "2025-07-04T18:13:36Z",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "ayanamsa": "lahiri",
+    "expected": {
+      "sun":     { "siderealLongitude":  78.80, "rashi": "Mithuna",   "nakshatra": "Ardra",            "retrograde": false },
+      "moon":    { "siderealLongitude": 190.06, "rashi": "Tula",      "nakshatra": "Swati",            "retrograde": false },
+      "mars":    { "siderealLongitude": 135.73, "rashi": "Simha",     "nakshatra": "Purva Phalguni",   "retrograde": false },
+      "mercury": { "siderealLongitude": 104.72, "rashi": "Karka",     "nakshatra": "Pushya",           "retrograde": false },
+      "jupiter": { "siderealLongitude":  71.45, "rashi": "Mithuna",   "nakshatra": "Ardra",            "retrograde": false },
+      "venus":   { "siderealLongitude":  35.90, "rashi": "Vrishabha", "nakshatra": "Krittika",         "retrograde": false },
+      "saturn":  { "siderealLongitude": 337.65, "rashi": "Meena",     "nakshatra": "Uttara Bhadrapada","retrograde": false },
+      "rahu":    { "siderealLongitude": 327.49, "rashi": "Kumbha",    "nakshatra": "Purva Bhadrapada", "retrograde": true  },
+      "ketu":    { "siderealLongitude": 147.49, "rashi": "Simha",     "nakshatra": "Uttara Phalguni",  "retrograde": true  }
+    }
+  },
+  {
+    "_source": "DrikPanchang.com — Delhi, scraped 2026-04-12. Sun in Karka, Saturn retrograde.",
+    "date": "2025-08-15",
+    "instantUTC": "2025-08-15T18:13:35Z",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "ayanamsa": "lahiri",
+    "expected": {
+      "sun":     { "siderealLongitude": 118.94, "rashi": "Karka",     "nakshatra": "Ashlesha",         "retrograde": false },
+      "moon":    { "siderealLongitude":  22.89, "rashi": "Mesha",     "nakshatra": "Bharani",          "retrograde": false },
+      "mars":    { "siderealLongitude": 161.28, "rashi": "Kanya",     "nakshatra": "Hasta",            "retrograde": false },
+      "mercury": { "siderealLongitude": 101.18, "rashi": "Karka",     "nakshatra": "Pushya",           "retrograde": false },
+      "jupiter": { "siderealLongitude":  80.55, "rashi": "Mithuna",   "nakshatra": "Punarvasu",        "retrograde": false },
+      "venus":   { "siderealLongitude":  83.99, "rashi": "Mithuna",   "nakshatra": "Punarvasu",        "retrograde": false },
+      "saturn":  { "siderealLongitude": 336.79, "rashi": "Meena",     "nakshatra": "Uttara Bhadrapada","retrograde": true  },
+      "rahu":    { "siderealLongitude": 325.26, "rashi": "Kumbha",    "nakshatra": "Purva Bhadrapada", "retrograde": true  },
+      "ketu":    { "siderealLongitude": 145.26, "rashi": "Simha",     "nakshatra": "Purva Phalguni",   "retrograde": true  }
+    }
+  },
+  {
+    "_source": "DrikPanchang.com — Delhi, scraped 2026-04-12. Saturn retrograde, dense conjunctions in Tula.",
+    "date": "2025-10-20",
+    "instantUTC": "2025-10-20T18:13:38Z",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "ayanamsa": "lahiri",
+    "expected": {
+      "sun":     { "siderealLongitude": 183.38, "rashi": "Tula",      "nakshatra": "Chitra",           "retrograde": false },
+      "moon":    { "siderealLongitude": 175.06, "rashi": "Kanya",     "nakshatra": "Chitra",           "retrograde": false },
+      "mars":    { "siderealLongitude": 205.29, "rashi": "Tula",      "nakshatra": "Vishakha",         "retrograde": false },
+      "mercury": { "siderealLongitude": 205.57, "rashi": "Tula",      "nakshatra": "Vishakha",         "retrograde": false },
+      "jupiter": { "siderealLongitude":  90.15, "rashi": "Karka",     "nakshatra": "Punarvasu",        "retrograde": false },
+      "venus":   { "siderealLongitude": 164.31, "rashi": "Kanya",     "nakshatra": "Hasta",            "retrograde": false },
+      "saturn":  { "siderealLongitude": 332.16, "rashi": "Meena",     "nakshatra": "Purva Bhadrapada", "retrograde": true  },
+      "rahu":    { "siderealLongitude": 321.77, "rashi": "Kumbha",    "nakshatra": "Purva Bhadrapada", "retrograde": true  },
+      "ketu":    { "siderealLongitude": 141.77, "rashi": "Simha",     "nakshatra": "Purva Phalguni",   "retrograde": true  }
+    }
+  },
+  {
+    "_source": "DrikPanchang.com — Delhi, scraped 2026-04-12. Future date — exercises long-range ephemeris stability.",
+    "date": "2026-03-30",
+    "instantUTC": "2026-03-30T18:13:36Z",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "ayanamsa": "lahiri",
+    "expected": {
+      "sun":     { "siderealLongitude": 345.82, "rashi": "Meena",     "nakshatra": "Uttara Bhadrapada","retrograde": false },
+      "moon":    { "siderealLongitude": 138.21, "rashi": "Simha",     "nakshatra": "Purva Phalguni",   "retrograde": false },
+      "mars":    { "siderealLongitude": 327.91, "rashi": "Kumbha",    "nakshatra": "Purva Bhadrapada", "retrograde": false },
+      "mercury": { "siderealLongitude": 318.46, "rashi": "Kumbha",    "nakshatra": "Shatabhisha",      "retrograde": false },
+      "jupiter": { "siderealLongitude":  81.47, "rashi": "Mithuna",   "nakshatra": "Punarvasu",        "retrograde": false },
+      "venus":   { "siderealLongitude":   5.88, "rashi": "Mesha",     "nakshatra": "Ashwini",          "retrograde": false },
+      "saturn":  { "siderealLongitude": 341.16, "rashi": "Meena",     "nakshatra": "Uttara Bhadrapada","retrograde": false },
+      "rahu":    { "siderealLongitude": 313.23, "rashi": "Kumbha",    "nakshatra": "Shatabhisha",      "retrograde": true  },
+      "ketu":    { "siderealLongitude": 133.23, "rashi": "Simha",     "nakshatra": "Magha",            "retrograde": true  }
+    }
+  }
+]

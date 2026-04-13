@@ -1,4 +1,6 @@
 import { NAKSHATRA_SPAN } from '../utils/constants';
+import { getSiderealMoonLongitude } from '../astronomy/moon';
+import type { AyanamsaType } from '../types/options';
 import type { DashaLord, MahaDasha, AntarDasha, VimshottariDashaResult } from '../types/jyotish';
 
 // ── Vimshottari cycle constants ──────────────────────────────────────────────
@@ -36,8 +38,27 @@ const MS_PER_YEAR = 365.25 * 24 * 3600 * 1000;
 /**
  * Compute the complete Vimshottari Dasha sequence from the birth moment.
  *
+ * The 120-year cycle is seeded by the nakshatra-lord at birth; the first
+ * mahadasha is a partial balance (elapsed fraction of the birth nakshatra is
+ * subtracted), and subsequent mahadashas follow the classical cycle order.
+ * Each mahadasha is further subdivided into 9 antardashas proportionally.
+ *
  * @param birthDate          UTC birth time.
  * @param moonSiderealLon    Sidereal longitude of the Moon at birth [0, 360).
+ * @returns                  `VimshottariDashaResult` — starting lord + 9
+ *                           mahadashas with antardashas.
+ *
+ * @example
+ * ```typescript
+ * import { computeVimshottariDasha, getSiderealMoonLongitude } from 'panchang-ts';
+ *
+ * const birth = new Date('1990-06-15T10:30:00Z');
+ * const moonLon = getSiderealMoonLongitude(birth, 'lahiri');
+ * const dasha = computeVimshottariDasha(birth, moonLon);
+ * dasha.startLord;                // e.g. "Venus"
+ * dasha.mahadashas[0].lord;       // same as startLord
+ * dasha.mahadashas[0].antardashas.length; // 9
+ * ```
  */
 export function computeVimshottariDasha(
   birthDate: Date,
@@ -91,6 +112,29 @@ export function computeVimshottariDasha(
     currentIndex: Math.max(0, currentIndex),
     mahaDashas,
   };
+}
+
+/**
+ * Ergonomic wrapper: compute Vimshottari Dasha directly from a birth timestamp
+ * without asking the caller to pre-compute sidereal Moon longitude.
+ *
+ * @param birthDate      UTC birth instant.
+ * @param ayanamsaType   Ayanamsa system. Defaults to `'lahiri'`.
+ * @returns              `VimshottariDashaResult` — same shape as
+ *                       {@link computeVimshottariDasha}.
+ *
+ * @example
+ * ```ts
+ * const dasha = computeVimshottariDashaFromBirth(new Date('1990-06-15T04:30:00Z'));
+ * console.log(dasha.currentMahaDashaLord);
+ * ```
+ */
+export function computeVimshottariDashaFromBirth(
+  birthDate: Date,
+  ayanamsaType: AyanamsaType = 'lahiri',
+): VimshottariDashaResult {
+  const moonSid = getSiderealMoonLongitude(birthDate, ayanamsaType);
+  return computeVimshottariDasha(birthDate, moonSid);
 }
 
 function buildAntarDashas(

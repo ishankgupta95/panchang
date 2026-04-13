@@ -56,6 +56,7 @@ export const sa: PanchangTranslations = {
     ravi_pushya: 'रवि पुष्य योग',
     guru_pushya: 'गुरु पुष्य योग',
   },
+  chandraBalamNames: { shubha: 'शुभ', ashubha: 'अशुभ' },
   festivalNames: {
     ugadi: 'युगादि',
     rama_navami: 'राम नवमी',

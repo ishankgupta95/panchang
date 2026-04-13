@@ -163,7 +163,7 @@ Rahu Kalam, Gulika Kalam, Yamaganda, Panchaka detection.
 Amrit Siddhi, Sarvartha Siddhi, Ravi Pushya, Guru Pushya yoga detection. 24 major pan-Indian festivals, recurring Ekadashi & Pradosha Vrata, Sankranti — Adhika months auto-skipped.
 
 ### Jyotish (Vedic Astrology)
-All 9 graha positions (geocentric, sidereal) with rashi, nakshatra, pada, and retrograde status. Vimshottari Dasha with Antardasha breakdown.
+All 9 graha positions (geocentric, sidereal) with rashi, nakshatra, pada, and retrograde status. Vimshottari Dasha with Antardasha breakdown — from a birth moment alone or from an explicit Moon longitude. Chandra Balam (transit-Moon favorability relative to janma rashi).
 
 ### Astronomy
 Sunrise, Sunset, Moonrise, Moonset, Chandra Rashi (Moon sign), Surya Nakshatra.
@@ -310,7 +310,9 @@ import {
   computeAbhijitMuhurta, computeBrahmaMuhurta,
   computeGowriPanchangam,
   // Jyotish
-  computePlanetaryPositions, computeVimshottariDasha,
+  computePlanetaryPositions,
+  computeVimshottariDasha, computeVimshottariDashaFromBirth,
+  computeChandraBalam,
   GRAHA_ABBR,
 } from 'panchang-ts';
 
@@ -342,17 +344,27 @@ const brahma  = computeBrahmaMuhurta(sunrise, sunset);     // { start, end }
 **Jyotish (Vedic Astrology):**
 
 ```typescript
-// All 9 graha positions (sidereal)
+// All 9 graha positions (sidereal — Rahu/Ketu use mean node)
 const grahas = computePlanetaryPositions(birthDate, 'lahiri');
 console.log(grahas.jupiter.rashi.name);   // "Dhanu"
 console.log(grahas.saturn.isRetrograde);  // true/false
 console.log(GRAHA_ABBR['Jupiter']);       // "Ju"
 
-// Vimshottari Dasha — pass birth date and Moon's sidereal longitude
-const moonLon = getSiderealMoonLongitude(birthDate, 'lahiri');
-const dasha = computeVimshottariDasha(birthDate, moonLon);
+// Vimshottari Dasha — convenience form: birth date only (Moon longitude derived)
+const dasha = computeVimshottariDashaFromBirth(birthDate, 'lahiri');
 console.log(dasha.currentMahaDashaLord);                   // "Rahu"
 console.log(dasha.mahaDashas[0]!.antarDashas[0]!.lord);    // "Rahu"
+
+// Or pass an explicit Moon sidereal longitude (useful when you already have one)
+const moonLon = getSiderealMoonLongitude(birthDate, 'lahiri');
+const dasha2  = computeVimshottariDasha(birthDate, moonLon);
+
+// Chandra Balam — transit Moon's favorability vs. janma rashi
+// janmaRashi and transitMoonRashi are 0-indexed (0 = Mesha ... 11 = Meena)
+const cb = computeChandraBalam(3 /* Karka */, 6 /* Tula */);
+console.log(cb.house);        // 4
+console.log(cb.quality);      // "weak"
+console.log(cb.englishName);  // "Ashubha"
 ```
 
 ---
@@ -559,6 +571,13 @@ interface VimshottariDashaResult {
   currentIndex: number;
   mahaDashas: MahaDasha[];  // 9-entry sequence starting from birth
 }
+
+interface ChandraBalamInfo {
+  house: number;                       // 1 = janma rashi; 12 = rashi before janma
+  quality: 'strong' | 'weak';          // Shubha houses = 1,3,6,7,10,11
+  englishName: string;                 // "Shubha" | "Ashubha"
+  name: string;                        // localized
+}
 ```
 </details>
 
@@ -594,16 +613,42 @@ InteractionManager.runAfterInteractions(() => {
 
 ## Accuracy
 
-Validated against [DrikPanchang.com](https://www.drikpanchang.com) for 19+ date/city combinations across India and New York.
+4,864 tests passing, including Drik-verified fixtures against
+[DrikPanchang.com](https://www.drikpanchang.com) spanning 2025–2026 across
+Delhi, Chennai, and New York.
 
-| Element | Accuracy |
-|---------|----------|
-| Sunrise / Sunset | ±2 minutes |
-| Moonrise / Moonset | ±2 minutes |
-| Tithi, Nakshatra, Yoga, Karana names | Exact match |
-| Element end-times | ±5 minutes |
-| Ayanamsa | ±0.005° vs Swiss Ephemeris |
-| Choghadiya / Hora / Gowri slots | Derived from sunrise/sunset — inherits ±2 min |
+| Element | Accuracy | Validation |
+|---------|----------|------------|
+| Sunrise / Sunset | **≤29 s observed vs Drik minute-midpoint** (±45 s tolerance) | 16 assertions |
+| Moonrise / Moonset | ±2 min vs Drik | Strict fixtures |
+| Tithi, Nakshatra, Yoga, Karana names | Exact match vs Drik | Strict fixtures |
+| Tithi / Nakshatra / Yoga / Karana end-times | **±3 min tolerance, max 2.01 min observed** | 20 assertions |
+| Ayanamsa | ±0.005° vs Swiss Ephemeris | Unit tests |
+| Planetary positions (Sun–Saturn) | **±0.02° vs Drik sidereal** | Drik fixtures |
+| Planetary positions (Rahu/Ketu, mean node) | ≤0.5° typical; ±2° tolerance to absorb mean-vs-true drift | Drik fixtures |
+| Rashi / Nakshatra / Retrograde flag | Exact match vs Drik | Drik fixtures |
+| Festival dates | 12 Drik-verified festivals (2025–2026) — see caveats below | Drik fixtures |
+| Choghadiya / Hora / Gowri slots | Derived from sunrise/sunset — inherits ±2 min | — |
+
+### Festival Detection — Documented Tradeoff
+
+Library uses **tithi-at-sunrise** to resolve a festival to a calendar day.
+DrikPanchang applies several other traditional rules depending on the
+festival; where those rules pick a different day, our output can drift
+±1 day vs Drik. This is a rule-choice tradeoff, not a computation bug —
+it is documented and deliberately surfaced rather than hidden.
+
+| Resolution rule Drik uses | Festivals affected |
+|---------------------------|--------------------|
+| Tithi-at-midnight | Krishna Janmashtami, Maha Shivaratri, Diwali / Lakshmi Puja |
+| Madhyahna-vyapini (tithi overlapping noon) | Ganesh Chaturthi on edge years, Akshaya Tritiya 2026 |
+| Kshaya-tithi handling (tithi never at sunrise) | Ugadi 2026-03-19 (Pratipad is Kshaya) |
+
+If exact Drik parity matters for your use case, cross-check the above
+festival set against the Drik site for the target year. Everything else
+— Holi, Ugadi (non-Kshaya years), Rama Navami, Raksha Bandhan, Ganesh
+Chaturthi (normal years), Navaratri, Dussehra, Karva Chauth, Hanuman
+Jayanti — matches Drik's canonical date across 2025 and 2026 fixtures.
 
 ---
 

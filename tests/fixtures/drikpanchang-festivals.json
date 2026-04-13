@@ -1,0 +1,98 @@
+[
+  {
+    "_source": "DrikPanchang 2025 Hindu calendar — Holi (Phalguna Purnima at sunrise)",
+    "date": "2025-03-14",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Holi"
+  },
+  {
+    "_source": "DrikPanchang 2025 Hindu calendar — Ugadi / Gudi Padwa, Chaitra Shukla Pratipada",
+    "date": "2025-03-30",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Ugadi"
+  },
+  {
+    "_source": "DrikPanchang 2025 Hindu calendar — Rama Navami, Chaitra Shukla Navami",
+    "date": "2025-04-06",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Rama Navami"
+  },
+  {
+    "_source": "DrikPanchang 2025 Hindu calendar — Akshaya Tritiya, Vaishakha Shukla Tritiya",
+    "date": "2025-04-30",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Akshaya Tritiya"
+  },
+  {
+    "_source": "DrikPanchang 2025 Hindu calendar — Raksha Bandhan, Shravana Purnima",
+    "date": "2025-08-09",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Raksha Bandhan"
+  },
+  {
+    "_source": "DrikPanchang 2025 Hindu calendar — Ganesh Chaturthi, Bhadrapada Shukla Chaturthi",
+    "date": "2025-08-27",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Ganesh Chaturthi"
+  },
+  {
+    "_source": "DrikPanchang 2025 Hindu calendar — Sharad Navaratri begins, Ashwin Shukla Pratipada",
+    "date": "2025-09-22",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Sharad Navaratri"
+  },
+  {
+    "_source": "DrikPanchang 2025 Hindu calendar — Dussehra / Vijayadashami, Ashwin Shukla Dashami",
+    "date": "2025-10-02",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Dussehra"
+  },
+  {
+    "_source": "DrikPanchang 2025 Hindu calendar — Karva Chauth, Ashwin Krishna Chaturthi",
+    "date": "2025-10-10",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Karva Chauth"
+  },
+  {
+    "_source": "DrikPanchang 2026 Hindu calendar — Hanuman Jayanti, Chaitra Purnima",
+    "date": "2026-04-02",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Hanuman Jayanti"
+  },
+  {
+    "_source": "DrikPanchang 2026 Hindu calendar — Raksha Bandhan, Shravana Purnima",
+    "date": "2026-08-28",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Raksha Bandhan"
+  },
+  {
+    "_source": "DrikPanchang 2026 Hindu calendar — Karva Chauth, Ashwin Krishna Chaturthi",
+    "date": "2026-10-29",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Karva Chauth"
+  }
+]

@@ -15,6 +15,7 @@
 import { describe, it, expect } from 'vitest';
 import { getDailyPanchang } from '../../src/core/panchang';
 import fixtures from '../fixtures/drikpanchang-verified.json';
+import festivalFixtures from '../fixtures/drikpanchang-festivals.json';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -39,6 +40,26 @@ function diffMinutes(a: string, b: string): number {
     return h * 60 + m;
   };
   return Math.abs(toMin(a) - toMin(b));
+}
+
+/**
+ * Parse an end-time string like "03:21+1" or "23:49" into minutes since
+ * 00:00 of the fixture's reference date. The "+N" suffix means N days later.
+ */
+function parseEndMinutes(s: string): number {
+  const [hm, dayOffset] = s.split('+') as [string, string | undefined];
+  const [h, m] = hm.split(':').map(Number) as [number, number];
+  return h * 60 + m + (dayOffset ? Number(dayOffset) * 1440 : 0);
+}
+
+/**
+ * Convert a library endTime Date (stored with local clock in UTC fields) to
+ * minutes since 00:00 of the fixture's reference date.
+ */
+function endMinutesFromDate(endTime: Date, dateStr: string): number {
+  const [y, mo, d] = dateStr.split('-').map(Number) as [number, number, number];
+  const midnight = Date.UTC(y, mo - 1, d, 0, 0, 0);
+  return (endTime.getTime() - midnight) / 60000;
 }
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -68,6 +89,10 @@ type VerifiedFixture = {
     abhijitMuhurtaStartHHMM: string | null;
     abhijitMuhurtaEndHHMM: string | null;
     festivals: string[];
+    tithiEndHHMM?: string;
+    nakshatraEndHHMM?: string;
+    yogaEndHHMM?: string;
+    karanaEndHHMM?: string;
   };
 };
 
@@ -175,6 +200,43 @@ describe('DrikPanchang cross-verification', () => {
         });
       }
 
+      // ── Element end times (Phase 19-2) ──
+      // Tolerance: ±3 min vs Drik (observed max drift = 2.01 min across 20
+      // end-time assertions on 5 fixture days). Our Meeus truncation gives
+      // sub-arc-minute agreement on Moon+Sun longitudes, which is what drives
+      // tithi/nakshatra/yoga/karana boundary timing.
+      if (expected.tithiEndHHMM) {
+        it(`tithi[0] endTime within ±3 min of ${expected.tithiEndHHMM}`, () => {
+          const actual = endMinutesFromDate(r.tithis[0]!.endTime!, date);
+          const drik = parseEndMinutes(expected.tithiEndHHMM!);
+          expect(Math.abs(actual - drik)).toBeLessThanOrEqual(3);
+        });
+      }
+
+      if (expected.nakshatraEndHHMM) {
+        it(`nakshatras[0] endTime within ±3 min of ${expected.nakshatraEndHHMM}`, () => {
+          const actual = endMinutesFromDate(r.nakshatras[0]!.endTime!, date);
+          const drik = parseEndMinutes(expected.nakshatraEndHHMM!);
+          expect(Math.abs(actual - drik)).toBeLessThanOrEqual(3);
+        });
+      }
+
+      if (expected.yogaEndHHMM) {
+        it(`yogas[0] endTime within ±3 min of ${expected.yogaEndHHMM}`, () => {
+          const actual = endMinutesFromDate(r.yogas[0]!.endTime!, date);
+          const drik = parseEndMinutes(expected.yogaEndHHMM!);
+          expect(Math.abs(actual - drik)).toBeLessThanOrEqual(3);
+        });
+      }
+
+      if (expected.karanaEndHHMM) {
+        it(`karanas[0] endTime within ±3 min of ${expected.karanaEndHHMM}`, () => {
+          const actual = endMinutesFromDate(r.karanas[0]!.endTime!, date);
+          const drik = parseEndMinutes(expected.karanaEndHHMM!);
+          expect(Math.abs(actual - drik)).toBeLessThanOrEqual(3);
+        });
+      }
+
       // ── Festivals ──
       if (expected.festivals.length > 0) {
         it(`festivals include ${expected.festivals.join(', ')}`, () => {
@@ -202,6 +264,34 @@ describe('DrikPanchang cross-verification', () => {
         expect(r.ayanamsa).toBeGreaterThanOrEqual(24.0);
         expect(r.ayanamsa).toBeLessThanOrEqual(24.3);
       });
+    });
+  }
+});
+
+// ── Festival Drik validation (Phase 19-1) ────────────────────────────────────
+//
+// Targets festivals whose date is fixed by tithi-at-sunrise (how this library
+// computes). Janmashtami, Maha Shivaratri, and Diwali/Lakshmi Puja use
+// "tithi present at midnight/sunset" in Drik's tradition and will drift up to
+// one day from the tithi-at-sunrise rule — they are intentionally omitted here
+// and documented as a known limitation in the README.
+
+type FestivalFixture = {
+  _source: string;
+  date: string;
+  city: string;
+  location: { latitude: number; longitude: number };
+  timezone: number;
+  expectedFestival: string;
+};
+
+describe('DrikPanchang festival cross-verification', () => {
+  for (const fixture of festivalFixtures as FestivalFixture[]) {
+    const { date, city, location, timezone, expectedFestival } = fixture;
+    it(`${date} / ${city} emits festival "${expectedFestival}"`, () => {
+      const r = getDailyPanchang(noonUtc(date), location, { timezone });
+      const names = r.festivals.map((f: { name: string }) => f.name);
+      expect(names).toContain(expectedFestival);
     });
   }
 });

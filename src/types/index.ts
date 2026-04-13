@@ -15,4 +15,5 @@ export type { PanchangErrorCode } from './errors';
 export type {
   GrahaName, GrahaPosition, PlanetaryPositions,
   DashaLord, AntarDasha, MahaDasha, VimshottariDashaResult,
+  ChandraBalamInfo,
 } from './jyotish';
