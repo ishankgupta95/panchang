@@ -613,13 +613,13 @@ InteractionManager.runAfterInteractions(() => {
 
 ## Accuracy
 
-4,848 tests passing, including Drik-verified fixtures against
+4,864 tests passing, including Drik-verified fixtures against
 [DrikPanchang.com](https://www.drikpanchang.com) spanning 2025–2026 across
 Delhi, Chennai, and New York.
 
 | Element | Accuracy | Validation |
 |---------|----------|------------|
-| Sunrise / Sunset | ±2 min vs Drik | Strict fixtures |
+| Sunrise / Sunset | **≤29 s observed vs Drik minute-midpoint** (±45 s tolerance) | 16 assertions |
 | Moonrise / Moonset | ±2 min vs Drik | Strict fixtures |
 | Tithi, Nakshatra, Yoga, Karana names | Exact match vs Drik | Strict fixtures |
 | Tithi / Nakshatra / Yoga / Karana end-times | **±3 min tolerance, max 2.01 min observed** | 20 assertions |
