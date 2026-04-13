@@ -38,6 +38,7 @@ import { computePanchaka } from './panchaka';
 import { computeSpecialYogas } from './specialYogas';
 import { computeDurMuhurta } from './durMuhurta';
 import { computeFestivals } from './festivals';
+import { computeChandraBalam } from '../jyotish/chandraBalam';
 import { getMoonrise, getMoonset } from '../astronomy/moonrise';
 import {
   resolveTithiName,
@@ -179,6 +180,10 @@ export function getInstantPanchang(
     (idx) => resolveMasaName(idx, lang),
   );
 
+  const chandraBalam = options?.janmaRashi !== undefined
+    ? computeChandraBalam(options.janmaRashi, chandraRashi.index, lang)
+    : undefined;
+
   return {
     timestamp: date,
     location,
@@ -197,6 +202,7 @@ export function getInstantPanchang(
     panchaka: computePanchaka(siderealMoon),
     specialYogas,
     festivals,
+    ...(chandraBalam !== undefined ? { chandraBalam } : {}),
   };
 }
 
@@ -428,6 +434,10 @@ export function getDailyPanchang(
     (k as DailyKaranaInfo).startTime = toLocalOrNull((k as DailyKaranaInfo).startTime);
   }
 
+  const chandraBalam = options.janmaRashi !== undefined
+    ? computeChandraBalam(options.janmaRashi, chandraRashi.index, lang)
+    : undefined;
+
   // ── 9. Assemble result ───────────────────────────────
   return {
     date,
@@ -474,5 +484,6 @@ export function getDailyPanchang(
       day:   gowriPanchangam.day.map(s   => ({ ...s, ...convertTimePeriod(s) })),
       night: gowriPanchangam.night.map(s => ({ ...s, ...convertTimePeriod(s) })),
     },
+    ...(chandraBalam !== undefined ? { chandraBalam } : {}),
   };
 }

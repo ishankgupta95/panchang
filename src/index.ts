@@ -3,9 +3,10 @@
 // Primary entry points
 export { getDailyPanchang, getInstantPanchang } from './core/panchang';
 
-// Jyotish (Vedic astrology) — planetary positions, dasha
+// Jyotish (Vedic astrology) — planetary positions, dasha, Chandra Balam
 export { computePlanetaryPositions, GRAHA_ABBR } from './jyotish/planets';
-export { computeVimshottariDasha } from './jyotish/dasha';
+export { computeVimshottariDasha, computeVimshottariDashaFromBirth } from './jyotish/dasha';
+export { computeChandraBalam } from './jyotish/chandraBalam';
 
 // Astronomy utilities
 export { computeSunrise as getSunrise, computeSunset as getSunset } from './astronomy/sunrise';
@@ -37,6 +38,7 @@ export type {
   // Jyotish types
   GrahaName, GrahaPosition, PlanetaryPositions,
   DashaLord, AntarDasha, MahaDasha, VimshottariDashaResult,
+  ChandraBalamInfo,
 } from './types';
 
 // Errors

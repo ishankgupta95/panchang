@@ -5,6 +5,7 @@ import type {
   ChandraMasaInfo, SamvatInfo, RashiInfo, ChoghadiyaInfo, HoraInfo,
   SpecialYogaInfo, FestivalInfo, GowriInfo,
 } from './elements';
+import type { ChandraBalamInfo } from './jyotish';
 
 export interface MasaInfo {
   index: number;
@@ -52,6 +53,8 @@ export interface DailyPanchangResult {
   durMuhurta: [TimePeriod, TimePeriod];
   festivals: FestivalInfo[];
   gowriPanchangam: GowriInfo;
+  /** Chandra Balam — only present when `options.janmaRashi` is provided. */
+  chandraBalam?: ChandraBalamInfo;
 
   _debug?: {
     totalMs: number;
@@ -82,4 +85,6 @@ export interface InstantPanchangResult {
   panchaka: boolean;
   specialYogas: SpecialYogaInfo[];
   festivals: FestivalInfo[];
+  /** Chandra Balam — only present when `options.janmaRashi` is provided. */
+  chandraBalam?: ChandraBalamInfo;
 }

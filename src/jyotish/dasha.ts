@@ -1,4 +1,6 @@
 import { NAKSHATRA_SPAN } from '../utils/constants';
+import { getSiderealMoonLongitude } from '../astronomy/moon';
+import type { AyanamsaType } from '../types/options';
 import type { DashaLord, MahaDasha, AntarDasha, VimshottariDashaResult } from '../types/jyotish';
 
 // ── Vimshottari cycle constants ──────────────────────────────────────────────
@@ -91,6 +93,27 @@ export function computeVimshottariDasha(
     currentIndex: Math.max(0, currentIndex),
     mahaDashas,
   };
+}
+
+/**
+ * Ergonomic wrapper: compute Vimshottari Dasha directly from a birth timestamp
+ * without asking the caller to pre-compute sidereal Moon longitude.
+ *
+ * @param birthDate      UTC birth instant.
+ * @param ayanamsaType   Ayanamsa system. Defaults to `'lahiri'`.
+ *
+ * @example
+ * ```ts
+ * const dasha = computeVimshottariDashaFromBirth(new Date('1990-06-15T04:30:00Z'));
+ * console.log(dasha.currentMahaDashaLord);
+ * ```
+ */
+export function computeVimshottariDashaFromBirth(
+  birthDate: Date,
+  ayanamsaType: AyanamsaType = 'lahiri',
+): VimshottariDashaResult {
+  const moonSid = getSiderealMoonLongitude(birthDate, ayanamsaType);
+  return computeVimshottariDasha(birthDate, moonSid);
 }
 
 function buildAntarDashas(

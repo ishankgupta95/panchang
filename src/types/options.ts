@@ -11,6 +11,12 @@ export interface PanchangOptions {
   precision?: Precision;
   /** Lunar month naming system. Default: `'purnimanta'` (North Indian). */
   masaSystem?: MasaSystem;
+  /**
+   * Native's janma (birth) Moon rashi index (0 = Mesha … 11 = Meena). When
+   * provided, the result includes `chandraBalam` computed against the current
+   * chandraRashi. Omit to skip Chandra Balam entirely.
+   */
+  janmaRashi?: number;
 }
 
 export interface InstantPanchangOptions {
@@ -20,4 +26,10 @@ export interface InstantPanchangOptions {
   precision?: Precision;
   /** Lunar month naming system. Default: `'purnimanta'` (North Indian). */
   masaSystem?: MasaSystem;
+  /**
+   * Native's janma (birth) Moon rashi index (0 = Mesha … 11 = Meena). When
+   * provided, the result includes `chandraBalam` computed against the current
+   * chandraRashi. Omit to skip Chandra Balam entirely.
+   */
+  janmaRashi?: number;
 }

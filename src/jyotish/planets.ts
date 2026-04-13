@@ -45,39 +45,27 @@ function isRetrograde(body: Body, date: Date): boolean {
 }
 
 /**
- * True node (accurate ~0.05°) via Moon's ecliptic latitude zero-crossing.
- * Uses a short bracket around the date instead of a full search.
+ * Tropical longitude of the Moon's mean ascending node (Rahu).
+ *
+ * Uses the Meeus Ch. 47 polynomial (Astronomical Algorithms, 2nd ed., eq. 47.7).
+ * Accuracy vs. the true (instantaneous) node: typically within ±0.5°, with
+ * worst-case excursions near ±2° during the periodic perturbation peaks. This
+ * matches classical Vedic practice, which traditionally uses the mean node for
+ * Rahu/Ketu in Vimshottari Dasha and transit computations. If true-node
+ * accuracy is later required, a `nodeType: 'mean' | 'true'` option can be
+ * added to expose the full periodic correction series.
+ *
+ * T is measured in Julian centuries from J2000.0.
  */
-function getTrueRahuLongitudeTropical(date: Date): number {
-  // Sample Moon's ecliptic latitude 27 days apart (half a nodal period ~27.2 days)
-  // and interpolate to find the zero crossing.
-  // For production use, the mean node (within ±1.5°) is sufficient for Vedic astrology.
-  // We refine using the Moon's latitude perturbation.
+function getMeanRahuLongitudeTropical(date: Date): number {
   const T = (dateToJulianDay(date) - 2451545.0) / 36525.0;
-
-  // Longitude of mean node
-  const omega =
-    125.04455501
-    - 1934.13626197 * T
-    + 0.00207765 * T * T;
-
-  // Moon's argument of latitude (F)
-  const F = normalize360(
-    93.27191028
-    + 483202.0175233 * T
-    - 0.0036825 * T * T
-    + 0.000003083 * T * T * T,
+  return normalize360(
+    125.0445479
+    - 1934.1362891 * T
+    + 0.0020754 * T * T
+    + (T * T * T) / 467441
+    - (T * T * T * T) / 60616000,
   );
-
-  // First-order correction to get the true node (Meeus correction terms)
-  const F_rad = (F * Math.PI) / 180;
-  const correction =
-    -1.4979 * Math.sin(2 * F_rad)
-    - 0.1500 * Math.sin((0 * F_rad) + (Math.PI * 2 * (357.5 / 360))) // solar anomaly approx
-    - 0.1226 * Math.sin(2 * ((omega * Math.PI) / 180))
-    + 0.1176 * Math.sin(2 * F_rad - 2 * ((omega * Math.PI) / 180));
-
-  return normalize360(omega + correction / 60); // correction in arcmin → degrees
 }
 
 function buildGrahaPosition(
@@ -134,8 +122,8 @@ export function computePlanetaryPositions(
   const venTrop = getTropicalPlanetLongitude(Body.Venus, date);
   const satTrop = getTropicalPlanetLongitude(Body.Saturn, date);
 
-  // Rahu (true ascending node) — Ketu is exactly opposite
-  const rahuTrop = getTrueRahuLongitudeTropical(date);
+  // Rahu (Moon's mean ascending node; typ. ±0.5° of true node, ~±2° worst-case) — Ketu opposite
+  const rahuTrop = getMeanRahuLongitudeTropical(date);
   const ketuTrop = normalize360(rahuTrop + 180);
 
   // Retrograde: not applicable to Sun/Moon/nodes

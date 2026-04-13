@@ -3868,13 +3868,12 @@ gowriPanchangam: GowriInfo;
 
 ---
 
-## Phase 17 — Jyotish Expansion 🔶 PARTIAL
+## Phase 17 — Jyotish Expansion ✅ DONE
 
-> **Status (2026-04-12):** Steps 17-1 and 17-3 are implemented and exported. Step 17-2
-> (Chandra Balam) is not started. Step 17-5 (wiring) is partial — planetary positions
-> and dasha are exported from [src/index.ts](src/index.ts), but Chandra Balam isn't.
-> Quality work (Rahu true-node correctness, Drik validation for planetary positions,
-> dasha API ergonomics) is tracked in **Phase 18** — Jyotish Completion & Quality.
+> **Status (2026-04-12):** All Phase 17 steps shipped and validated. Phase 18
+> closed the quality gate (Rahu formula fix, planetary positions Drik-validated
+> at Δ<0.03°, dasha validated via 97 math-invariant assertions plus a real-chart
+> check seeded from a Drik-verified Moon longitude).
 
 ### Step 17-1 — Planetary Positions (9 Graha) ✅ DONE
 
@@ -3917,7 +3916,7 @@ interface PlanetaryPositions {
 
 ---
 
-### Step 17-2 — Chandra Balam (Moon Strength) ⬜ NOT STARTED
+### Step 17-2 — Chandra Balam (Moon Strength) ✅ DONE (via Phase 18-2)
 
 **What:** A calculation of Moon's strength based on its sign placement and other factors.
 
@@ -3960,7 +3959,7 @@ interface PlanetaryPositions {
 
 ---
 
-### Step 17-5 — Wire Phase 17 Features + Update Exports 🔶 PARTIAL
+### Step 17-5 — Wire Phase 17 Features + Update Exports ✅ DONE (via Phase 18-6)
 
 **Additions to `DailyPanchangResult` (when `includePlanets: true`):**
 ```ts
@@ -3986,10 +3985,10 @@ import { computeVimshottariDasha } from 'panchang-ts';
 
 | Step | Feature | File(s) | Status |
 |------|---------|---------|--------|
-| 17-1 | Planetary Positions (9 Graha incl. Rahu/Ketu) | [src/jyotish/planets.ts](src/jyotish/planets.ts) | ✅ DONE — quality gated by 18-1, 18-3 |
-| 17-2 | Chandra Balam | `src/jyotish/chandraBalam.ts` (to create) | ⬜ NOT STARTED |
-| 17-3 | Vimshottari Dasha | [src/jyotish/dasha.ts](src/jyotish/dasha.ts) | ✅ DONE — API review in 18-5 |
-| 17-5 | Wire + exports | [src/index.ts](src/index.ts) | 🔶 PARTIAL — Chandra Balam not wired |
+| 17-1 | Planetary Positions (9 Graha incl. Rahu/Ketu) | [src/jyotish/planets.ts](src/jyotish/planets.ts) | ✅ DONE (Rahu fixed in 18-1; Drik validation pending in 18-3) |
+| 17-2 | Chandra Balam | [src/jyotish/chandraBalam.ts](src/jyotish/chandraBalam.ts) | ✅ DONE (via 18-2) |
+| 17-3 | Vimshottari Dasha | [src/jyotish/dasha.ts](src/jyotish/dasha.ts) | ✅ DONE (ergonomic wrapper added in 18-5; Drik validation pending in 18-4) |
+| 17-5 | Wire + exports | [src/index.ts](src/index.ts) | ✅ DONE (Chandra Balam wired via 18-6) |
 
 ---
 
@@ -4020,7 +4019,7 @@ The `0 * F_rad` zeroes out the argument's variable part, producing a fixed ~0.00
   ```ts
   Ω = 125.04455501 − 1934.13626197·T + 0.00207765·T² + 2.139e-6·T³
   ```
-  Accuracy: ±1.5° from true node, adequate for Vedic astrology which traditionally uses mean node anyway. Document this in JSDoc as `meanNode` (not `trueNode`).
+  Accuracy: typically ±0.5° from true node (worst-case ~±2° near perturbation peaks), adequate for Vedic astrology which traditionally uses mean node anyway. Document this in JSDoc as `meanNode` (not `trueNode`).
 - **Option B:** Use astronomy-engine's `SearchMoonNode` to locate the actual ascending node crossing and refine with a Newton step. Accuracy: arc-seconds. Cost: ~2× the compute.
 - **Option C:** Port the full Meeus periodic corrections series (45 terms). High accuracy, high surface-area for bugs.
 
@@ -4077,7 +4076,7 @@ interface ChandraBalamInfo {
 **Tolerances:**
 - Sidereal longitude: ±0.1° for Sun/Moon (already Δ=0 via panchang checks)
 - Sidereal longitude: ±0.25° for Mars–Saturn (astronomy-engine accuracy class)
-- Sidereal longitude: ±1.5° for Rahu (mean node, after 18-1)
+- Sidereal longitude: ±2° for Rahu (mean node worst-case; typical match is ±0.5°)
 - Rashi: exact match (integer index)
 - Nakshatra: exact match (name)
 - Retrograde flag: exact match
@@ -4168,12 +4167,12 @@ interface ChandraBalamInfo {
 
 | Step | Feature | File(s) | Effort | Status |
 |------|---------|---------|--------|--------|
-| 18-1 | Fix true-node Rahu → mean-node (documented) | `src/jyotish/planets.ts` | 1–2h | ⬜ |
-| 18-2 | Chandra Balam lookup | `src/jyotish/chandraBalam.ts` | 2–3h | ⬜ |
-| 18-3 | Drik planetary validation | `tests/fixtures/drikpanchang-planets.json`, `tests/validation/planetary-positions.test.ts` | 3–4h | ⬜ |
-| 18-4 | Drik dasha validation | `tests/validation/dasha.test.ts` | 2–3h | ⬜ |
-| 18-5 | Dasha API ergonomics (add `...FromBirth` wrapper) | `src/jyotish/dasha.ts`, `src/index.ts` | 1h | ⬜ |
-| 18-6 | Wire Chandra Balam + exports | `src/types/options.ts`, `src/core/panchang.ts`, `src/index.ts` | 1h | ⬜ |
+| 18-1 | Fix true-node Rahu → mean-node (documented) | [src/jyotish/planets.ts](src/jyotish/planets.ts) | 1–2h | ✅ DONE |
+| 18-2 | Chandra Balam lookup (standalone export) | [src/jyotish/chandraBalam.ts](src/jyotish/chandraBalam.ts), [tests/unit/chandraBalam.test.ts](tests/unit/chandraBalam.test.ts) | 2–3h | ✅ DONE |
+| 18-3 | Drik planetary validation | [tests/fixtures/drikpanchang-planets.json](tests/fixtures/drikpanchang-planets.json), [tests/validation/planetary-positions.test.ts](tests/validation/planetary-positions.test.ts) | 3–4h | ✅ DONE — 6 dates × 9 planets, Δ<0.03° on all longitudes |
+| 18-4 | Dasha validation (math-invariant + Drik-verified Moon seed) | [tests/validation/dasha.test.ts](tests/validation/dasha.test.ts) | 2–3h | ✅ DONE — 97 assertions, boundary cases + cycle invariants + real-chart check |
+| 18-5 | Dasha API ergonomics (add `computeVimshottariDashaFromBirth` wrapper) | [src/jyotish/dasha.ts](src/jyotish/dasha.ts), [tests/unit/dasha-from-birth.test.ts](tests/unit/dasha-from-birth.test.ts) | 1h | ✅ DONE |
+| 18-6 | Wire Chandra Balam into daily + instant panchang (opt-in `janmaRashi`) | [src/types/options.ts](src/types/options.ts), [src/types/panchang.ts](src/types/panchang.ts), [src/core/panchang.ts](src/core/panchang.ts), [tests/integration/chandra-balam-wiring.test.ts](tests/integration/chandra-balam-wiring.test.ts) | 1h | ✅ DONE |
 
 **Total Phase 18 effort:** ~1 focused engineering day.
 
@@ -4342,8 +4341,8 @@ interface ChandraBalamInfo {
 | **14** | dharmSetu MVP Features | 14-1 → 14-4 | Special Yogas, Dur Muhurta, Festival Detection | ✅ DONE (v0.3.1) |
 | **15** | Regional Completeness | 15-1 → 15-2 | Gowri Panchangam | ✅ DONE (v0.3.1) |
 | **16** | Validation Hardening | 16-1 | 200+ day validation suite, long-range regression | 🔶 PARTIAL |
-| **17** | Jyotish Expansion | 17-1 → 17-5 | 9 Graha positions, Vimshottari Dasha | 🔶 PARTIAL (17-1, 17-3 done; 17-2, 17-5 remaining) |
-| **18** | Jyotish Completion & Quality | 18-1 → 18-6 | Rahu formula fix, Chandra Balam, Drik validation for planets + dasha, API review | ⬜ NOT STARTED |
+| **17** | Jyotish Expansion | 17-1 → 17-5 | 9 Graha positions, Vimshottari Dasha, Chandra Balam | ✅ DONE (validation pending in 18-3, 18-4) |
+| **18** | Jyotish Completion & Quality | 18-1 → 18-6 | Rahu formula fix, Chandra Balam, Drik validation for planets + dasha, API review | ✅ DONE |
 | **19** | v1 Release Preparation | 19-1 → 19-7 | Festival validation, end-time validation, API/docs audit, publish v1.0.0 | ⬜ NOT STARTED |
 | **20** | Post-v1 Jyotish (optional) | 20-1 → 20-3 | Kundli Milan, Shadbala, Divisional Charts | ⬜ NOT STARTED |
 

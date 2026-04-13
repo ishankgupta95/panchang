@@ -69,3 +69,25 @@ export interface VimshottariDashaResult {
    */
   mahaDashas: MahaDasha[];
 }
+
+// ── Chandra Balam ─────────────────────────────────────
+
+/**
+ * Transit Moon strength relative to a native's janma (birth) rashi.
+ *
+ * Classical Chandra Balam rule (cf. Parashara, BPHS Ch. 3): Moon is **Shubha**
+ * (strong / favorable) when transiting houses 1, 3, 6, 7, 10, 11 from the janma
+ * rashi, and **Ashubha** (weak / unfavorable) in houses 2, 4, 5, 8, 9, 12. This
+ * is the bare house-based rule; some traditions soften it via a parihara
+ * (Tara Balam) adjustment not applied here.
+ */
+export interface ChandraBalamInfo {
+  /** 1 = janma rashi itself; 2 = next rashi; … 12 = rashi prior to janma */
+  house: number;
+  /** Classical quality — 'strong' maps to Shubha, 'weak' to Ashubha */
+  quality: 'strong' | 'weak';
+  /** Sanskrit transliteration ('Shubha' | 'Ashubha') */
+  englishName: string;
+  /** Locale-specific name */
+  name: string;
+}

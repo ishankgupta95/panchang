@@ -24,6 +24,8 @@ export interface PanchangTranslations {
     ravi_pushya: string;
     guru_pushya: string;
   };
+  /** Chandra Balam quality labels (Moon's transit strength from janma rashi) */
+  chandraBalamNames: { shubha: string; ashubha: string };
   /** Quality names for Choghadiya / Gowri slots */
   qualityNames: { auspicious: string; inauspicious: string; neutral: string };
   /** Festival names keyed by festival ID */
