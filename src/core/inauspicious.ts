@@ -33,6 +33,15 @@ export function computeInauspiciousPeriod(
  * @param sunset    UTC sunset Date.
  * @param varaIndex Weekday index: 0 = Sunday, 6 = Saturday.
  * @returns         `{ start, end }` UTC Dates for the Rahu Kalam period.
+ *
+ * @example
+ * ```typescript
+ * import { computeRahuKalam, getSunrise, getSunset } from 'panchang-ts';
+ * const loc = { latitude: 28.6139, longitude: 77.209 };
+ * const sr = getSunrise(new Date('2025-01-14T00:00:00Z'), loc);
+ * const ss = getSunset(sr, loc);
+ * const rk = computeRahuKalam(sr, ss, 2); // Tuesday
+ * ```
  */
 export function computeRahuKalam(sunrise: Date, sunset: Date, varaIndex: number): TimePeriod {
   return computeInauspiciousPeriod(sunrise, sunset, varaIndex, RAHU_KALAM_SLOTS);
@@ -45,6 +54,12 @@ export function computeRahuKalam(sunrise: Date, sunset: Date, varaIndex: number)
  * @param sunset    UTC sunset Date.
  * @param varaIndex Weekday index: 0 = Sunday, 6 = Saturday.
  * @returns         `{ start, end }` UTC Dates for the Gulika Kalam period.
+ *
+ * @example
+ * ```typescript
+ * import { computeGulikaKalam } from 'panchang-ts';
+ * const gk = computeGulikaKalam(sunrise, sunset, 2); // Tuesday
+ * ```
  */
 export function computeGulikaKalam(sunrise: Date, sunset: Date, varaIndex: number): TimePeriod {
   return computeInauspiciousPeriod(sunrise, sunset, varaIndex, GULIKA_SLOTS);
@@ -57,6 +72,12 @@ export function computeGulikaKalam(sunrise: Date, sunset: Date, varaIndex: numbe
  * @param sunset    UTC sunset Date.
  * @param varaIndex Weekday index: 0 = Sunday, 6 = Saturday.
  * @returns         `{ start, end }` UTC Dates for the Yamaganda period.
+ *
+ * @example
+ * ```typescript
+ * import { computeYamaganda } from 'panchang-ts';
+ * const yg = computeYamaganda(sunrise, sunset, 2); // Tuesday
+ * ```
  */
 export function computeYamaganda(sunrise: Date, sunset: Date, varaIndex: number): TimePeriod {
   return computeInauspiciousPeriod(sunrise, sunset, varaIndex, YAMAGANDA_SLOTS);

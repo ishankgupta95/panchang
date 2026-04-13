@@ -64,6 +64,20 @@ function buildSlots(
  * @param varaIndex  Weekday index: 0 = Sunday, 6 = Saturday.
  * @param nameFn     Callback returning translated Gowri slot name for index 0–7.
  * @param qualityNameFn  Callback returning translated quality name.
+ * @returns          `GowriInfo` — `{ day: GowriSlot[8], night: GowriSlot[8] }`
+ *                   with start/end times and quality for each slot.
+ *
+ * @example
+ * ```typescript
+ * import { computeGowriPanchangam } from 'panchang-ts';
+ * const gowri = computeGowriPanchangam(
+ *   sunrise, sunset, nextSunrise, 2, // Tuesday
+ *   (i) => ['Udyog','Amrit','Roga','Laabh','Shubh','Kaal','Dhan','Chal'][i]!,
+ *   (q) => q,
+ * );
+ * gowri.day[0].name;     // e.g. "Roga"
+ * gowri.day[0].quality;  // "inauspicious"
+ * ```
  */
 export function computeGowriPanchangam(
   sunrise: Date,

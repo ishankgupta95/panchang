@@ -8,10 +8,21 @@ void Body;
 
 /**
  * Sidereal longitude of the Sun at a given UTC instant.
- * Returns degrees in range [0, 360).
  *
  * Uses SunPosition() for the geocentric ecliptic longitude of the Sun.
  * EclipticLongitude(Body.Sun) is not valid — the Sun has no heliocentric longitude.
+ *
+ * @param date          UTC instant.
+ * @param ayanamsaType  Ayanamsa system: `'lahiri'` (default in most APIs),
+ *                      `'raman'`, or `'krishnamurti'`.
+ * @returns             Sidereal longitude in degrees, normalized to [0, 360).
+ *
+ * @example
+ * ```typescript
+ * import { getSiderealSunLongitude } from 'panchang-ts';
+ * const lon = getSiderealSunLongitude(new Date('2025-01-14T12:00:00Z'), 'lahiri');
+ * // ~269.3° — Sun in Makara (Capricorn) rashi
+ * ```
  */
 export function getSiderealSunLongitude(date: Date, ayanamsaType: AyanamsaType): number {
   const astroTime = MakeTime(date);

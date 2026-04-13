@@ -11,6 +11,16 @@ import type { GeoLocation } from '../types/location';
  * @param location       Observer coordinates.
  * @param limitDays      How far ahead to search. Default 2.
  * @returns              Moonrise as a UTC Date, or `null` if none found.
+ *
+ * @example
+ * ```typescript
+ * import { getMoonrise } from 'panchang-ts';
+ * const mr = getMoonrise(
+ *   new Date('2025-01-14T00:00:00Z'),
+ *   { latitude: 28.6139, longitude: 77.209 },   // Delhi
+ * );
+ * // mr may be null on days where the Moon does not rise
+ * ```
  */
 export function getMoonrise(
   searchFromUtc: Date,
@@ -36,6 +46,14 @@ export function getMoonrise(
  * @param location       Observer coordinates.
  * @param limitDays      How far ahead to search. Default 2.
  * @returns              Moonset as a UTC Date, or `null` if none found.
+ *
+ * @example
+ * ```typescript
+ * import { getMoonrise, getMoonset } from 'panchang-ts';
+ * const loc = { latitude: 28.6139, longitude: 77.209 };
+ * const mr = getMoonrise(new Date('2025-01-14T00:00:00Z'), loc);
+ * const ms = mr ? getMoonset(mr, loc) : null;
+ * ```
  */
 export function getMoonset(
   searchFromUtc: Date,

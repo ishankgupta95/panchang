@@ -6,8 +6,16 @@ import type { TimePeriod } from '../types/elements';
  *
  * For a 12-hour day: each muhurta = 48 min. Abhijit = ~11:36 AM to 12:24 PM.
  *
- * @param sunrise Sunrise UTC Date
- * @param sunset  Sunset UTC Date
+ * @param sunrise Sunrise UTC Date.
+ * @param sunset  Sunset UTC Date.
+ * @returns       `{ start, end }` UTC Dates for Abhijit Muhurta.
+ *
+ * @example
+ * ```typescript
+ * import { computeAbhijitMuhurta } from 'panchang-ts';
+ * const am = computeAbhijitMuhurta(sunrise, sunset);
+ * // am.start ≈ 11:36, am.end ≈ 12:24 local clock
+ * ```
  */
 export function computeAbhijitMuhurta(sunrise: Date, sunset: Date): TimePeriod {
   const dayDurationMs = sunset.getTime() - sunrise.getTime();
@@ -29,8 +37,16 @@ export function computeAbhijitMuhurta(sunrise: Date, sunset: Date): TimePeriod {
  * Start: sunrise − 2 × muhurtaDuration
  * End:   sunrise − 1 × muhurtaDuration
  *
- * @param sunrise Sunrise UTC Date
- * @param sunset  Sunset UTC Date (used to derive the muhurta length)
+ * @param sunrise Sunrise UTC Date.
+ * @param sunset  Sunset UTC Date (used to derive the muhurta length).
+ * @returns       `{ start, end }` UTC Dates for Brahma Muhurta (pre-sunrise).
+ *
+ * @example
+ * ```typescript
+ * import { computeBrahmaMuhurta } from 'panchang-ts';
+ * const bm = computeBrahmaMuhurta(sunrise, sunset);
+ * // bm.end === sunrise − (dayDuration/30)
+ * ```
  */
 export function computeBrahmaMuhurta(sunrise: Date, sunset: Date): TimePeriod {
   const dayDurationMs = sunset.getTime() - sunrise.getTime();

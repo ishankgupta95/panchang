@@ -1,4 +1,16 @@
 // ── Public API for panchang-ts ────────────────────────
+//
+// Naming convention:
+//   - `get*`     — simple retrievers returning a single value at an instant
+//                  (getSunrise, getMoonrise, getAyanamsa, getSidereal*Longitude)
+//                  and the two top-level panchang entry points.
+//   - `compute*` — synthesize a multi-field structured result from derived
+//                  astronomical inputs (computePlanetaryPositions,
+//                  computeVimshottariDasha, computeRahuKalam, …).
+//
+// This file is the sole public surface. Anything not re-exported here is
+// @internal and may change in any release. After v1.0.0 every export below
+// becomes a semver-stable contract — breaking changes require a major bump.
 
 // Primary entry points
 export { getDailyPanchang, getInstantPanchang } from './core/panchang';

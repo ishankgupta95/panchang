@@ -8,7 +8,17 @@ import { NAKSHATRA_SPAN } from '../utils/constants';
 import type { AyanamsaType } from '../types/options';
 import type { GrahaPosition, GrahaName, PlanetaryPositions } from '../types/jyotish';
 
-// Short abbreviations used in chart display
+/**
+ * Two-letter abbreviations for the 9 grahas, suitable for chart tables and
+ * compact UI displays.
+ *
+ * @example
+ * ```typescript
+ * import { GRAHA_ABBR } from 'panchang-ts';
+ * GRAHA_ABBR.Jupiter; // "Ju"
+ * GRAHA_ABBR.Rahu;    // "Ra"
+ * ```
+ */
 export const GRAHA_ABBR: Record<GrahaName, string> = {
   Sun: 'Su', Moon: 'Mo', Mars: 'Ma', Mercury: 'Me',
   Jupiter: 'Ju', Venus: 'Ve', Saturn: 'Sa', Rahu: 'Ra', Ketu: 'Ke',
@@ -92,12 +102,25 @@ function buildGrahaPosition(
 const identity = (idx: number) => String(idx);
 
 /**
- * Compute geocentric sidereal positions for all 9 grahas.
+ * Compute geocentric sidereal positions for all 9 grahas (Sun, Moon, Mars,
+ * Mercury, Jupiter, Venus, Saturn, Rahu, Ketu).
  *
  * @param date          UTC instant.
  * @param ayanamsaType  Ayanamsa system.
  * @param nakshatraName Function returning the Nakshatra name for an index.
  * @param rashiName     Function returning the Rashi name for an index.
+ * @returns             `PlanetaryPositions` — per-planet sidereal longitude,
+ *                      rashi, nakshatra + pada, and retrograde flag.
+ *
+ * @example
+ * ```typescript
+ * import { computePlanetaryPositions } from 'panchang-ts';
+ *
+ * const p = computePlanetaryPositions(new Date('2025-01-14T12:00:00Z'), 'lahiri');
+ * p.jupiter.rashi.index;      // 1 (Vrishabha)
+ * p.jupiter.isRetrograde;     // true
+ * p.moon.nakshatra.name;      // e.g. "Punarvasu"
+ * ```
  */
 export function computePlanetaryPositions(
   date: Date,

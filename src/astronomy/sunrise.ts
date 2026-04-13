@@ -11,6 +11,16 @@ import type { GeoLocation } from '../types/location';
  * @param limitDays      How far ahead to search. Default 2 (handles polar edge cases).
  * @returns              Sunrise as a UTC Date.
  * @throws PanchangError (NO_SUNRISE) for polar regions with no sunrise.
+ *
+ * @example
+ * ```typescript
+ * import { getSunrise } from 'panchang-ts';
+ * const sunrise = getSunrise(
+ *   new Date('2025-01-14T00:00:00Z'),
+ *   { latitude: 28.6139, longitude: 77.209 },   // Delhi
+ * );
+ * // sunrise.toISOString() ≈ "2025-01-14T01:45:00.000Z" (07:15 IST)
+ * ```
  */
 export function computeSunrise(
   searchFromUtc: Date,
@@ -45,6 +55,14 @@ export function computeSunrise(
  * @param limitDays      How far ahead to search. Default 2.
  * @returns              Sunset as a UTC Date.
  * @throws PanchangError (NO_SUNSET) for polar regions with no sunset.
+ *
+ * @example
+ * ```typescript
+ * import { getSunrise, getSunset } from 'panchang-ts';
+ * const loc = { latitude: 28.6139, longitude: 77.209 };
+ * const sunrise = getSunrise(new Date('2025-01-14T00:00:00Z'), loc);
+ * const sunset  = getSunset(sunrise, loc);
+ * ```
  */
 export function computeSunset(
   searchFromUtc: Date,

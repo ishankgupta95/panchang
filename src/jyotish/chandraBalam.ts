@@ -17,6 +17,7 @@ const STRONG_HOUSES: ReadonlySet<number> = new Set([1, 3, 6, 7, 10, 11]);
  * @param janmaRashiIndex         Rashi the Moon occupied at birth (0 = Mesha … 11 = Meena).
  * @param transitMoonRashiIndex   Rashi the Moon currently occupies (0 = Mesha … 11 = Meena).
  * @param lang                    Output language for the localized `name`. Defaults to 'en'.
+ * @returns                       `ChandraBalamInfo` — `{ house, quality, englishName, name }`.
  *
  * @example
  * ```ts
