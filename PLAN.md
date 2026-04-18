@@ -4756,9 +4756,9 @@ Pradosha too has 14 named variants based on vara (weekday):
 
 ---
 
-## Phase 25 — Astronomy Expansion ⬜ NOT STARTED
+## Phase 25 — Astronomy Expansion ✅ DONE
 
-### Step 25-1 — Eclipse detection (solar + lunar)
+### Step 25-1 — Eclipse detection (solar + lunar) ✅ DONE
 
 **What:** Grahan (eclipse) is classically significant — many vratas and rituals shift around it. astronomy-engine exposes `SearchLunarEclipse` / `SearchGlobalSolarEclipse` — we currently don't surface either.
 
@@ -4793,7 +4793,7 @@ interface EclipseInfo {
 
 **Effort:** 1 day.
 
-### Step 25-2 — Muhurta library completion
+### Step 25-2 — Muhurta library completion ✅ DONE
 
 **What:** library has Abhijit + Brahma muhurtas + Rahu/Gulika/Yamaganda kalams + Dur Muhurta. Missing:
 - **Vijaya Muhurta** — 11th muhurta of the day, auspicious for starting journeys.
@@ -4820,10 +4820,44 @@ interface EclipseInfo {
 
 | Step | Feature | Effort | Status |
 |------|---------|--------|--------|
-| 25-1 | Eclipse detection (solar + lunar) + sutak | 1d | ⬜ |
-| 25-2 | Muhurta library completion (Vijaya, Godhuli, Nishita, Amrit) | 0.5d | ⬜ |
+| 25-1 | Eclipse detection (solar + lunar) + sutak | 1d | ✅ |
+| 25-2 | Muhurta library completion (Vijaya, Godhuli, Nishita, Amrit) | 0.5d | ✅ |
 
 **Total Phase 25 effort:** ~1.5 engineering days.
+
+### Phase 25 — Shipped notes
+
+- New module [src/astronomy/eclipse.ts](src/astronomy/eclipse.ts) built on
+  astronomy-engine's `SearchLunarEclipse` / `SearchLocalSolarEclipse`:
+  - `getUpcomingLunarEclipse(fromUtc, withinDays, location?)` → `EclipseInfo | null`
+  - `getUpcomingSolarEclipse(fromUtc, location, withinDays)` → `EclipseInfo | null`
+  - `getEclipseDuringDay(sunriseUtc, nextSunriseUtc, location)` → `EclipseInfo | null`
+- `EclipseInfo` exported from public types (`EclipseInfo`, `EclipseSubtype`).
+  Fields: `kind`, `subtype`, `start`, `peak`, `end`, `visibleFromLocation`,
+  `magnitude` (obscuration 0–1), `sutakStart`, `sutakEnd`, `description`.
+  Sutak windows: 9h pre-start for solar, 3h for lunar.
+- Visibility: solar uses the `partial_begin`/`peak` altitude from astronomy-engine's
+  local-solar helper; lunar is derived from Moon altitude at peak via
+  `Equator` + `Horizon`.
+- `DailyPanchangResult.eclipse: EclipseInfo | null` populated per Hindu day;
+  also emitted as a top-of-list festival entry with new `type: 'eclipse'`
+  (added to the `FestivalInfo.type` enum) and new i18n keys `surya_grahan` /
+  `chandra_grahan` for en + hi.
+- Four new muhurtas in [src/core/muhurta.ts](src/core/muhurta.ts):
+  - `computeVijayaMuhurta` (11th day-muhurta of 15)
+  - `computeGodhuliMuhurta` (48-min window centered on sunset)
+  - `computeNishitaMuhurta` (8th night-muhurta of 15, contains local midnight;
+    the plan's "15th muhurta of the night" is astronomically inconsistent with
+    Janmashtami's midnight anchor — implemented as midnight-centered per
+    classical usage and the existing `nishitaUtc` anchor at panchang.ts:376)
+  - `computeAmritKala` (4-ghatika window keyed to sunrise-nakshatra using the
+    Muhurta Chintamani offset table; returns `null` when the window would
+    spill past nextSunrise)
+- `DailyPanchangResult` gains `vijayaMuhurta`, `godhuliMuhurta`,
+  `nishitaMuhurta`, `amritKala` (last one nullable).
+- Public exports in [src/index.ts](src/index.ts) include the 4 new muhurta
+  functions + 3 eclipse helpers + `EclipseInfo`, `EclipseSubtype` types.
+- 37 new unit/integration tests (4920 → 4957 passing).
 
 ---
 

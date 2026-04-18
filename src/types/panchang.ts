@@ -3,7 +3,7 @@ import type {
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, TimePeriod,
   ChandraMasaInfo, SamvatInfo, RashiInfo, ChoghadiyaInfo, HoraInfo,
-  SpecialYogaInfo, FestivalInfo, GowriInfo, BhadraInfo,
+  SpecialYogaInfo, FestivalInfo, GowriInfo, BhadraInfo, EclipseInfo,
 } from './elements';
 import type { ChandraBalamInfo } from './jyotish';
 
@@ -57,6 +57,14 @@ export interface DailyPanchangResult {
   chandraBalam?: ChandraBalamInfo;
   /** Bhadra Kala (Vishti karana) window overlapping this Hindu day, or null. */
   bhadra: BhadraInfo | null;
+  /** Next few muhurtas: Vijaya (11th day-muhurta), Godhuli, Nishita (15th night-muhurta). */
+  vijayaMuhurta: TimePeriod;
+  godhuliMuhurta: TimePeriod;
+  nishitaMuhurta: TimePeriod;
+  /** Amrit Kala — nakshatra-specific auspicious window; `null` when the day's nakshatra has none. */
+  amritKala: TimePeriod | null;
+  /** Eclipse (Grahan) overlapping this Hindu day, or `null` when none occurs. */
+  eclipse: EclipseInfo | null;
 
   _debug?: {
     totalMs: number;

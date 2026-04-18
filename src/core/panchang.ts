@@ -26,7 +26,12 @@ import {
 } from './karana';
 import { computeVara } from './vara';
 import { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './inauspicious';
-import { computeAbhijitMuhurta, computeBrahmaMuhurta } from './muhurta';
+import {
+  computeAbhijitMuhurta, computeBrahmaMuhurta,
+  computeVijayaMuhurta, computeGodhuliMuhurta,
+  computeNishitaMuhurta, computeAmritKala,
+} from './muhurta';
+import { getEclipseDuringDay } from '../astronomy/eclipse';
 import { computeGowriPanchangam } from './gowri';
 import { computeMasa } from './masa';
 import { computeChandraMasa } from './chandramasa';
@@ -524,6 +529,21 @@ export function getDailyPanchang(
     (idx) => resolveMasaName(idx, lang),
   );
 
+  // Eclipse: detected once per Hindu day; surface as both a top-level field
+  // (wired in step 9) and a festival entry so downstream consumers iterating
+  // `festivals` see it.
+  const eclipseUtc = getEclipseDuringDay(sunriseUtc, nextSunriseUtc, location);
+  if (eclipseUtc) {
+    const eclipseKey = eclipseUtc.kind === 'solar' ? 'surya_grahan' : 'chandra_grahan';
+    const eclipseName = t.festivalNames[eclipseKey]
+      ?? (eclipseUtc.kind === 'solar' ? 'Surya Grahan' : 'Chandra Grahan');
+    festivals.unshift({
+      name: eclipseName,
+      type: 'eclipse',
+      description: eclipseUtc.description,
+    });
+  }
+
   // ── 6. Find transitions (daily element arrays) ───────
   let tithis: DailyTithiInfo[];
   let nakshatras: DailyNakshatraInfo[];
@@ -580,6 +600,13 @@ export function getDailyPanchang(
   const gulikaKalam = computeGulikaKalam(sunriseUtc, sunsetUtc, vara.index);
   const yamaganda = computeYamaganda(sunriseUtc, sunsetUtc, vara.index);
   const abhijitMuhurta = computeAbhijitMuhurta(sunriseUtc, sunsetUtc);
+  const vijayaMuhurtaUtc = computeVijayaMuhurta(sunriseUtc, sunsetUtc);
+  const godhuliMuhurtaUtc = computeGodhuliMuhurta(sunsetUtc);
+  const nishitaMuhurtaUtc = computeNishitaMuhurta(sunsetUtc, nextSunriseUtc);
+  const amritKalaUtc = computeAmritKala(
+    sunriseUtc, nextSunriseUtc,
+    Math.floor(siderealMoonAtSunrise / NAKSHATRA_SPAN),
+  );
 
   // ── 8. Convert all UTC dates to local display ────────
   const toLocal = (d: Date) => utcToLocalDisplay(d, offsetMinutes);
@@ -665,6 +692,24 @@ export function getDailyPanchang(
           end: toLocal(bhadraUtc.end),
           location: bhadraUtc.location,
           isActive: bhadraUtc.isActive,
+        }
+      : null,
+    vijayaMuhurta: convertTimePeriod(vijayaMuhurtaUtc),
+    godhuliMuhurta: convertTimePeriod(godhuliMuhurtaUtc),
+    nishitaMuhurta: convertTimePeriod(nishitaMuhurtaUtc),
+    amritKala: amritKalaUtc ? convertTimePeriod(amritKalaUtc) : null,
+    eclipse: eclipseUtc
+      ? {
+          kind: eclipseUtc.kind,
+          subtype: eclipseUtc.subtype,
+          start: toLocal(eclipseUtc.start),
+          peak: toLocal(eclipseUtc.peak),
+          end: toLocal(eclipseUtc.end),
+          visibleFromLocation: eclipseUtc.visibleFromLocation,
+          magnitude: eclipseUtc.magnitude,
+          sutakStart: toLocal(eclipseUtc.sutakStart),
+          sutakEnd: toLocal(eclipseUtc.sutakEnd),
+          description: eclipseUtc.description,
         }
       : null,
     ...(chandraBalam !== undefined ? { chandraBalam } : {}),

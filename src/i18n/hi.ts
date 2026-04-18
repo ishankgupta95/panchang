@@ -154,6 +154,9 @@ export const hi: PanchangTranslations = {
     mangala_gauri: 'मंगला गौरी व्रत',
     kartik_somvar: 'कार्तिक सोमवार',
     magha_shanivar: 'माघ शनिवार',
+    // Eclipse (Grahan)
+    surya_grahan: 'सूर्य ग्रहण',
+    chandra_grahan: 'चंद्र ग्रहण',
   },
   misc: {
     purnima: 'पूर्णिमा',

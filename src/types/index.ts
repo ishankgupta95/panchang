@@ -8,6 +8,7 @@ export type {
   HoraSlot, HoraInfo,
   GowriSlot, GowriInfo,
   SpecialYogaInfo, FestivalInfo, BhadraInfo,
+  EclipseInfo, EclipseSubtype,
 } from './elements';
 export type { DailyPanchangResult, InstantPanchangResult, MasaInfo } from './panchang';
 export { PanchangError } from './errors';

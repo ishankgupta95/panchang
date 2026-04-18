@@ -156,6 +156,9 @@ export const en: PanchangTranslations = {
     mangala_gauri: 'Mangala Gauri Vrat',
     kartik_somvar: 'Kartik Somvar',
     magha_shanivar: 'Magha Shanivar',
+    // Eclipse (Grahan)
+    surya_grahan: 'Surya Grahan (Solar Eclipse)',
+    chandra_grahan: 'Chandra Grahan (Lunar Eclipse)',
   },
   misc: {
     purnima: 'Purnima',

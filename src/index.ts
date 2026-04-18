@@ -29,8 +29,17 @@ export { computeAyanamsa as getAyanamsa } from './astronomy/ayanamsa';
 
 // Inauspicious periods & muhurta
 export { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './core/inauspicious';
-export { computeAbhijitMuhurta, computeBrahmaMuhurta } from './core/muhurta';
+export {
+  computeAbhijitMuhurta, computeBrahmaMuhurta,
+  computeVijayaMuhurta, computeGodhuliMuhurta,
+  computeNishitaMuhurta, computeAmritKala,
+} from './core/muhurta';
 export { computeGowriPanchangam } from './core/gowri';
+
+// Eclipses (Grahan)
+export {
+  getUpcomingSolarEclipse, getUpcomingLunarEclipse, getEclipseDuringDay,
+} from './astronomy/eclipse';
 
 // Types
 export type {

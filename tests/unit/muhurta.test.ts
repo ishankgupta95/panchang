@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { computeAbhijitMuhurta } from '../../src/core/muhurta';
+import {
+  computeAbhijitMuhurta,
+  computeVijayaMuhurta,
+  computeGodhuliMuhurta,
+  computeNishitaMuhurta,
+  computeAmritKala,
+} from '../../src/core/muhurta';
 
 // Known 12-hour day: sunrise 06:00 UTC, sunset 18:00 UTC
 // Each of 15 muhurtas = 12h/15 = 48 minutes
@@ -59,5 +65,138 @@ describe('computeAbhijitMuhurta', () => {
     // end = 11:12 + 36min = 11:48
     expect(abhijit.end.getUTCHours()).toBe(11);
     expect(abhijit.end.getUTCMinutes()).toBe(48);
+  });
+});
+
+describe('computeVijayaMuhurta', () => {
+  it('is the 11th muhurta (index 10) of a 12-hour day', () => {
+    // sunrise 06:00, sunset 18:00. muhurta = 48 min. Vijaya = 06:00 + 10*48 = 14:00.
+    const vijaya = computeVijayaMuhurta(sunrise, sunset);
+    expect(vijaya.start.getUTCHours()).toBe(14);
+    expect(vijaya.start.getUTCMinutes()).toBe(0);
+    expect(vijaya.end.getUTCHours()).toBe(14);
+    expect(vijaya.end.getUTCMinutes()).toBe(48);
+  });
+
+  it('duration is exactly 1/15 of daytime', () => {
+    const vijaya = computeVijayaMuhurta(sunrise, sunset);
+    expect(vijaya.end.getTime() - vijaya.start.getTime()).toBe(MUHURTA_MS);
+  });
+
+  it('falls after Abhijit and before sunset', () => {
+    const abhijit = computeAbhijitMuhurta(sunrise, sunset);
+    const vijaya = computeVijayaMuhurta(sunrise, sunset);
+    expect(vijaya.start.getTime()).toBeGreaterThan(abhijit.end.getTime());
+    expect(vijaya.end.getTime()).toBeLessThan(sunset.getTime());
+  });
+
+  it('scales for a shorter winter day (9h)', () => {
+    const shortSunrise = new Date('2024-12-21T07:00:00Z');
+    const shortSunset = new Date('2024-12-21T16:00:00Z');
+    const vijaya = computeVijayaMuhurta(shortSunrise, shortSunset);
+    // muhurta = 36 min; start = 07:00 + 10*36min = 07:00 + 360min = 13:00
+    expect(vijaya.start.getUTCHours()).toBe(13);
+    expect(vijaya.start.getUTCMinutes()).toBe(0);
+    expect(vijaya.end.getUTCHours()).toBe(13);
+    expect(vijaya.end.getUTCMinutes()).toBe(36);
+  });
+});
+
+describe('computeGodhuliMuhurta', () => {
+  it('is a 48-minute window centered on sunset', () => {
+    const god = computeGodhuliMuhurta(sunset);
+    expect(god.start.getUTCHours()).toBe(17);
+    expect(god.start.getUTCMinutes()).toBe(36);
+    expect(god.end.getUTCHours()).toBe(18);
+    expect(god.end.getUTCMinutes()).toBe(24);
+  });
+
+  it('center is exactly sunset', () => {
+    const god = computeGodhuliMuhurta(sunset);
+    const centerMs = (god.start.getTime() + god.end.getTime()) / 2;
+    expect(centerMs).toBe(sunset.getTime());
+  });
+
+  it('is 48 minutes long regardless of day length', () => {
+    const long = computeGodhuliMuhurta(new Date('2024-06-21T20:00:00Z'));
+    const short = computeGodhuliMuhurta(new Date('2024-12-21T16:00:00Z'));
+    expect(long.end.getTime() - long.start.getTime()).toBe(48 * 60_000);
+    expect(short.end.getTime() - short.start.getTime()).toBe(48 * 60_000);
+  });
+});
+
+describe('computeNishitaMuhurta', () => {
+  // Symmetric 12-hour night: sunset 18:00 -> nextSunrise 06:00.
+  // Each night-muhurta = 48 min. 8th night muhurta (index 7):
+  //   start = 18:00 + 7*48min = 18:00 + 336min = 23:36
+  //   end   = 23:36 + 48min   = 00:24 (next day)
+  const nightSunset = new Date('2024-01-01T18:00:00Z');
+  const nextSunrise = new Date('2024-01-02T06:00:00Z');
+
+  it('contains local midnight for a symmetric 12-hour night', () => {
+    const nishita = computeNishitaMuhurta(nightSunset, nextSunrise);
+    const midnightMs = new Date('2024-01-02T00:00:00Z').getTime();
+    expect(midnightMs).toBeGreaterThanOrEqual(nishita.start.getTime());
+    expect(midnightMs).toBeLessThanOrEqual(nishita.end.getTime());
+  });
+
+  it('is the 8th night-muhurta of 15 (start at 23:36 for this symmetric case)', () => {
+    const nishita = computeNishitaMuhurta(nightSunset, nextSunrise);
+    expect(nishita.start.getUTCHours()).toBe(23);
+    expect(nishita.start.getUTCMinutes()).toBe(36);
+  });
+
+  it('duration is exactly 1/15 of night length', () => {
+    const nishita = computeNishitaMuhurta(nightSunset, nextSunrise);
+    const nightMs = nextSunrise.getTime() - nightSunset.getTime();
+    expect(nishita.end.getTime() - nishita.start.getTime()).toBe(nightMs / 15);
+  });
+
+  it('scales for a short summer night (8h)', () => {
+    const summerSunset  = new Date('2024-06-21T20:00:00Z');
+    const summerSunrise = new Date('2024-06-22T04:00:00Z');
+    const nishita = computeNishitaMuhurta(summerSunset, summerSunrise);
+    // 8h night, each muhurta 32 min. start = 20:00 + 7*32 = 20:00 + 224min = 23:44
+    expect(nishita.start.getUTCHours()).toBe(23);
+    expect(nishita.start.getUTCMinutes()).toBe(44);
+  });
+});
+
+describe('computeAmritKala', () => {
+  // Symmetric 24-hour ahoratra: ghatika = 24 min.
+  const ahoSunrise = new Date('2024-01-01T06:00:00Z');
+  const ahoNextSunrise = new Date('2024-01-02T06:00:00Z');
+
+  it('returns a 4-ghatika (96 min) window when within the Hindu day', () => {
+    // Pushya (index 7): offset 20 ghatikas = 480 min = 8h. start = 14:00, end = 15:36.
+    const amrit = computeAmritKala(ahoSunrise, ahoNextSunrise, 7);
+    expect(amrit).not.toBeNull();
+    const width = amrit!.end.getTime() - amrit!.start.getTime();
+    expect(width).toBe(96 * 60_000);
+    expect(amrit!.start.getUTCHours()).toBe(14);
+    expect(amrit!.start.getUTCMinutes()).toBe(0);
+  });
+
+  it('offset differs per nakshatra (Anuradha at 10 ghatikas)', () => {
+    // Anuradha (16): offset 10 ghatikas = 240 min = 4h. start = 10:00.
+    const amrit = computeAmritKala(ahoSunrise, ahoNextSunrise, 16);
+    expect(amrit).not.toBeNull();
+    expect(amrit!.start.getUTCHours()).toBe(10);
+    expect(amrit!.start.getUTCMinutes()).toBe(0);
+  });
+
+  it('scales ghatika duration proportionally to ahoratra length', () => {
+    // A 12h ahoratra: each ghatika = 12 min. Pushya offset 20 ghatikas = 240 min = 4h.
+    const shortNext = new Date(ahoSunrise.getTime() + 12 * 3600_000);
+    const amrit = computeAmritKala(ahoSunrise, shortNext, 7);
+    expect(amrit).not.toBeNull();
+    expect(amrit!.start.getUTCHours()).toBe(10); // 06:00 + 4h = 10:00
+    // Window length = 4 ghatikas * 12 min = 48 min
+    expect(amrit!.end.getTime() - amrit!.start.getTime()).toBe(48 * 60_000);
+  });
+
+  it('returns null for out-of-range nakshatra index', () => {
+    expect(computeAmritKala(ahoSunrise, ahoNextSunrise, -1)).toBeNull();
+    expect(computeAmritKala(ahoSunrise, ahoNextSunrise, 27)).toBeNull();
   });
 });
