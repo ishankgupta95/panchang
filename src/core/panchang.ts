@@ -38,6 +38,7 @@ import { computePanchaka } from './panchaka';
 import { computeSpecialYogas } from './specialYogas';
 import { computeDurMuhurta } from './durMuhurta';
 import { computeFestivals } from './festivals';
+import { computeBhadraKaal } from './bhadra';
 import { computeChandraBalam } from '../jyotish/chandraBalam';
 import { getMoonrise, getMoonset } from '../astronomy/moonrise';
 import {
@@ -375,6 +376,13 @@ export function getDailyPanchang(
   const arunodayaUtc = new Date(sunriseUtc.getTime() - 96 * 60_000);
 
   const tithiAt = (d: Date) => getTithiIndexFromLons(getMoon(d), getSun(d));
+
+  // Anchors for the START of each kala (used by the long-tithi dedupe).
+  const madhyahnaStartUtc = new Date(sunriseUtc.getTime() + dayLengthMs / 4);
+  const aparahnaStartUtc = new Date(sunriseUtc.getTime() + (dayLengthMs * 3) / 5);
+  const pradoshaStartUtc = sunsetUtc;
+  const nishitaStartUtc = new Date(sunsetUtc.getTime() + (nextSunriseUtc.getTime() - sunsetUtc.getTime()) * 0.3);
+
   const tithiByRule: Partial<Record<
     'madhyahna' | 'aparahna' | 'pradosha' | 'nishita' | 'chandrodaya',
     number
@@ -384,12 +392,46 @@ export function getDailyPanchang(
     pradosha:  tithiAt(pradoshaUtc),
     nishita:   tithiAt(nishitaUtc),
   };
+  const tithiByRuleStart: Partial<Record<
+    'madhyahna' | 'aparahna' | 'pradosha' | 'nishita' | 'chandrodaya',
+    number
+  >> = {
+    madhyahna: tithiAt(madhyahnaStartUtc),
+    aparahna:  tithiAt(aparahnaStartUtc),
+    pradosha:  tithiAt(pradoshaStartUtc),
+    nishita:   tithiAt(nishitaStartUtc),
+  };
 
   // Moonrise within this Hindu day (may be null if moon doesn't rise in the window)
   const moonriseInDayUtc = getMoonrise(sunriseUtc, location);
   if (moonriseInDayUtc && moonriseInDayUtc.getTime() < nextSunriseUtc.getTime()) {
     tithiByRule.chandrodaya = tithiAt(moonriseInDayUtc);
+    tithiByRuleStart.chandrodaya = tithiByRule.chandrodaya;
   }
+
+  // Yesterday's tithi-by-rule values: we re-run the same anchor math a day back
+  // so the dedupe only suppresses when yesterday genuinely held the same tithi
+  // across its kala. This is a cheap extra set of longitude samples.
+  const yesterdaySunriseUtc = computeSunrise(
+    new Date(sunriseUtc.getTime() - 24 * 3600_000 - 2 * 3600_000),
+    location,
+  );
+  const yesterdaySunsetUtc = computeSunset(yesterdaySunriseUtc, location);
+  const yesterdayDayLengthMs = yesterdaySunsetUtc.getTime() - yesterdaySunriseUtc.getTime();
+  const yesterdayMadhyahnaUtc = new Date(yesterdaySunriseUtc.getTime() + yesterdayDayLengthMs / 2);
+  const yesterdayAparahnaUtc = new Date(yesterdaySunriseUtc.getTime() + (yesterdayDayLengthMs * 8) / 10);
+  const yesterdayPradoshaUtc = new Date(yesterdaySunsetUtc.getTime() + 60 * 60_000);
+  const yesterdayNishitaUtc = new Date((yesterdaySunsetUtc.getTime() + sunriseUtc.getTime()) / 2);
+
+  const priorDayTithiByRule: Partial<Record<
+    'madhyahna' | 'aparahna' | 'pradosha' | 'nishita' | 'chandrodaya',
+    number
+  >> = {
+    madhyahna: tithiAt(yesterdayMadhyahnaUtc),
+    aparahna:  tithiAt(yesterdayAparahnaUtc),
+    pradosha:  tithiAt(yesterdayPradoshaUtc),
+    nishita:   tithiAt(yesterdayNishitaUtc),
+  };
 
   // Sankranti: transit-time search. Compare Sun's rashi at sunrise vs nextSunrise;
   // if different, a transit occurred during this Hindu day. We emit Sankranti on
@@ -409,17 +451,72 @@ export function getDailyPanchang(
     ekadashiDashamiViddha = tithiAtArunodaya === dashamiIndex;
   }
 
+  // Smarta-Dwadashi: did yesterday's sunrise hold a Dashami-viddha Ekadashi
+  // AND today's sunrise hold Dwadashi (11 or 26)? If so, the Smarta fast
+  // observed today rather than yesterday.
+  let smartaDwadashiToday = false;
+  if (tithiAtSunrise.index === 11 || tithiAtSunrise.index === 26) {
+    const ekadashiIndex = tithiAtSunrise.index === 11 ? 10 : 25;
+    const dashamiIndex = tithiAtSunrise.index === 11 ? 9 : 24;
+    const yesterdaySunriseTithi = tithiAt(yesterdaySunriseUtc);
+    if (yesterdaySunriseTithi === ekadashiIndex) {
+      const yesterdayArunodayaUtc = new Date(yesterdaySunriseUtc.getTime() - 96 * 60_000);
+      const yesterdayArunodayaTithi = tithiAt(yesterdayArunodayaUtc);
+      smartaDwadashiToday = yesterdayArunodayaTithi === dashamiIndex;
+    }
+  }
+
+  // priorMasaWasAdhika: if today's amanta masa equals yesterday's amanta
+  // masa AND yesterday was Adhika, today falls in the Nija that follows
+  // an Adhika (relevant for `shift-to-nija` festivals).
+  const yesterdayMoon = getMoon(yesterdaySunriseUtc);
+  const yesterdaySun = getSun(yesterdaySunriseUtc);
+  const yesterdayChandramasa = computeChandraMasa(
+    yesterdaySun, yesterdayMoon,
+    (idx, isAdhika) => resolveChandraMasaName(idx, lang, isAdhika),
+    masaSystem,
+  );
+  const priorMasaWasAdhika =
+    yesterdayChandramasa.amantaIndex === chandramasa.amantaIndex &&
+    yesterdayChandramasa.isAdhika &&
+    !chandramasa.isAdhika;
+
+  // Bhadra Kala window overlapping today's Hindu day.
+  const bhadraUtc = computeBhadraKaal(sunriseUtc, nextSunriseUtc, getMoon, getSun);
+
+  // Format a clock string from offset-adjusted local Date for descriptions.
+  const formatClock = (d: Date): string => {
+    const hh = String(d.getUTCHours()).padStart(2, '0');
+    const mm = String(d.getUTCMinutes()).padStart(2, '0');
+    return `${hh}:${mm}`;
+  };
+
   const festivals = computeFestivals(
     {
       tithiIndex: tithiAtSunrise.index,
       nakshatraIndex: Math.floor(siderealMoonAtSunrise / NAKSHATRA_SPAN),
       chandraMasaIndex: chandramasa.amantaIndex,
+      purnimantaMasaIndex: chandramasa.purnimantaIndex,
+      amantaMasaName: chandramasa.amantaName,
+      purnimantaMasaName: chandramasa.purnimantaName,
       isAdhika: chandramasa.isAdhika,
+      priorMasaWasAdhika,
       varaIndex: vara.index,
       solarMasaIndex: rashiAtSunrise,
       tithiByRule,
+      tithiByRuleStart,
+      priorDayTithiByRule,
       sankrantiRashi,
       ekadashiDashamiViddha,
+      smartaDwadashiToday,
+      moonriseInDay: moonriseInDayUtc,
+      bhadra: bhadraUtc
+        ? {
+            start: utcToLocalDisplay(bhadraUtc.start, offsetMinutes),
+            end: utcToLocalDisplay(bhadraUtc.end, offsetMinutes),
+          }
+        : null,
+      formatClock,
     },
     (key) => t.festivalNames[key] ?? (t.misc as Record<string, string>)[key] ?? key,
     (idx) => resolveMasaName(idx, lang),
@@ -560,6 +657,14 @@ export function getDailyPanchang(
       day:   gowriPanchangam.day.map(s   => ({ ...s, ...convertTimePeriod(s) })),
       night: gowriPanchangam.night.map(s => ({ ...s, ...convertTimePeriod(s) })),
     },
+    bhadra: bhadraUtc
+      ? {
+          start: toLocal(bhadraUtc.start),
+          end: toLocal(bhadraUtc.end),
+          location: bhadraUtc.location,
+          isActive: bhadraUtc.isActive,
+        }
+      : null,
     ...(chandraBalam !== undefined ? { chandraBalam } : {}),
   };
 }

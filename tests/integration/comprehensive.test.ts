@@ -306,7 +306,7 @@ describe('getDailyPanchang — comprehensive field validation', () => {
 
     for (const f of r.festivals) {
       it(`festival "${f.name}" has valid type`, () => {
-        expect(['major', 'minor', 'ekadashi', 'pradosha', 'sankranti']).toContain(f.type);
+        expect(['major', 'minor', 'ekadashi', 'smarta_ekadashi', 'vaishnava_ekadashi', 'pradosha', 'sankranti']).toContain(f.type);
       });
     }
   });

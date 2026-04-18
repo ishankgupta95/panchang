@@ -193,11 +193,64 @@ describe('computeFestivals', () => {
       expect(ekadashi?.description).toMatch(/Dashami-viddha/);
     });
 
-    it('emits plain Ekadashi (no description) when not viddha', () => {
-      const r = computeFestivals(ctx({ tithiIndex: 10 }), resolver);
-      const ekadashi = r.find(f => f.type === 'ekadashi');
-      expect(ekadashi).toBeDefined();
-      expect(ekadashi!.description).toBeUndefined();
+    it('emits Smarta + Vaishnava + generic Ekadashi on a non-viddha Ekadashi-at-sunrise day', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 10, chandraMasaIndex: 2 }), resolver);
+      expect(r.some(f => f.type === 'vaishnava_ekadashi')).toBe(true);
+      expect(r.some(f => f.type === 'smarta_ekadashi')).toBe(true);
+      expect(r.some(f => f.type === 'ekadashi')).toBe(true);
+    });
+
+    it('on viddha day: Vaishnava today, Smarta deferred to Dwadashi', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 10, ekadashiDashamiViddha: true }),
+        resolver,
+      );
+      const smarta = r.find(f => f.type === 'smarta_ekadashi');
+      const vaishnava = r.find(f => f.type === 'vaishnava_ekadashi');
+      expect(vaishnava).toBeDefined();
+      expect(smarta).toBeDefined();
+      expect(smarta!.description).toMatch(/deferred/);
+    });
+
+    it('emits Smarta Ekadashi on Dwadashi day when yesterday was viddha', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 11, smartaDwadashiToday: true }),
+        resolver,
+      );
+      expect(r.some(f => f.type === 'smarta_ekadashi')).toBe(true);
+      expect(r.some(f => f.type === 'vaishnava_ekadashi')).toBe(false);
+    });
+  });
+
+  describe('Named Ekadashi lookup', () => {
+    it('uses Nirjala name for Jyeshtha Shukla Ekadashi', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 10, chandraMasaIndex: 2 }), resolver);
+      const vaishnava = r.find(f => f.type === 'vaishnava_ekadashi');
+      expect(vaishnava?.description).toBe('ekadashi_nirjala');
+    });
+
+    it('uses Apara name for Jyeshtha Krishna Ekadashi', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 25, chandraMasaIndex: 2 }), resolver);
+      const vaishnava = r.find(f => f.type === 'vaishnava_ekadashi');
+      expect(vaishnava?.description).toBe('ekadashi_apara');
+    });
+
+    it('uses Padmini name for Adhika Shukla Ekadashi', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 10, chandraMasaIndex: 7, isAdhika: true }),
+        resolver,
+      );
+      const vaishnava = r.find(f => f.type === 'vaishnava_ekadashi');
+      expect(vaishnava?.description).toBe('ekadashi_padmini');
+    });
+
+    it('uses Parama name for Adhika Krishna Ekadashi', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 25, chandraMasaIndex: 7, isAdhika: true }),
+        resolver,
+      );
+      const vaishnava = r.find(f => f.type === 'vaishnava_ekadashi');
+      expect(vaishnava?.description).toBe('ekadashi_parama');
     });
   });
 
@@ -232,6 +285,126 @@ describe('computeFestivals', () => {
         resolver,
       );
       expect(r.some(f => f.type === 'pradosha')).toBe(true);
+    });
+
+    it('attaches weekday variant name as description', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 12, varaIndex: 6, tithiByRule: { pradosha: 12 } }),
+        resolver,
+      );
+      const p = r.find(f => f.type === 'pradosha');
+      expect(p?.description).toBe('shani_pradosha');
+    });
+
+    it('Guru Pradosha on Thursday (vara 4)', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 12, varaIndex: 4, tithiByRule: { pradosha: 12 } }),
+        resolver,
+      );
+      const p = r.find(f => f.type === 'pradosha');
+      expect(p?.description).toBe('guru_pradosha');
+    });
+  });
+
+  describe('Bhadra exclusion (Raksha Bandhan)', () => {
+    const bhadraEnd = new Date('2025-08-09T08:08:00.000Z');
+    it('attaches "Observe after Bhadra ends at HH:MM" when Bhadra present', () => {
+      const r = computeFestivals(
+        ctx({
+          tithiIndex: 14,
+          chandraMasaIndex: 4,
+          bhadra: { start: new Date('2025-08-09T01:00:00.000Z'), end: bhadraEnd },
+          formatClock: (d) => `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`,
+        }),
+        resolver,
+      );
+      const rb = r.find(f => f.name === 'raksha_bandhan');
+      expect(rb).toBeDefined();
+      expect(rb!.description).toBe('Observe after Bhadra ends at 08:08');
+    });
+
+    it('omits exclusion when Bhadra absent', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 14, chandraMasaIndex: 4 }),
+        resolver,
+      );
+      const rb = r.find(f => f.name === 'raksha_bandhan');
+      expect(rb?.description).toBeUndefined();
+    });
+  });
+
+  describe('Long-tithi dedupe', () => {
+    it('suppresses today when yesterday already claimed Ganesh Chaturthi', () => {
+      // Scenario: today madhyahna-end tithi = 3 (Chaturthi), but madhyahna-start = 4,
+      // meaning Chaturthi STARTED today during madhyahna. Yesterday madhyahna = 3 too
+      // (yesterday's kala held Chaturthi through) — so yesterday already emitted.
+      const r = computeFestivals(
+        ctx({
+          tithiIndex: 3,
+          chandraMasaIndex: 5,
+          tithiByRule: { madhyahna: 3 },
+          tithiByRuleStart: { madhyahna: 4 },   // today: started during kala
+          priorDayTithiByRule: { madhyahna: 3 }, // yesterday: prevailed
+        }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'ganesh_chaturthi')).toBe(false);
+    });
+
+    it('emits today when yesterday did NOT hold the target tithi', () => {
+      const r = computeFestivals(
+        ctx({
+          tithiIndex: 3,
+          chandraMasaIndex: 5,
+          tithiByRule: { madhyahna: 3 },
+          tithiByRuleStart: { madhyahna: 3 },   // today: prevailed throughout
+          priorDayTithiByRule: { madhyahna: 2 }, // yesterday: different tithi
+        }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'ganesh_chaturthi')).toBe(true);
+    });
+  });
+
+  describe('Adhika-masa nuance', () => {
+    it('Janmashtami (shift-to-nija) is suppressed in Adhika Shravana', () => {
+      const r = computeFestivals(
+        ctx({
+          tithiIndex: 22, chandraMasaIndex: 4, isAdhika: true,
+          tithiByRule: { nishita: 22 },
+        }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'krishna_janmashtami')).toBe(false);
+    });
+
+    it('Janmashtami fires in Nija Shravana following an Adhika', () => {
+      const r = computeFestivals(
+        ctx({
+          tithiIndex: 22, chandraMasaIndex: 4, isAdhika: false,
+          priorMasaWasAdhika: true,
+          tithiByRule: { nishita: 22 },
+        }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'krishna_janmashtami')).toBe(true);
+    });
+  });
+
+  describe('Purnimanta naming awareness', () => {
+    it('Diwali gets a Purnimanta description when Purnimanta masa name is supplied', () => {
+      const r = computeFestivals(
+        ctx({
+          tithiIndex: 29,
+          chandraMasaIndex: 6,
+          tithiByRule: { pradosha: 29 },
+          amantaMasaName: 'Ashwin',
+          purnimantaMasaName: 'Kartika',
+        }),
+        resolver,
+      );
+      const d = r.find(f => f.name === 'diwali');
+      expect(d?.description).toBe('Purnimanta: Kartika Krishna Paksha');
     });
   });
 

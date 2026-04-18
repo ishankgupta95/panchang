@@ -147,6 +147,24 @@ export interface SpecialYogaInfo {
 
 export interface FestivalInfo {
   name: string;
-  type: 'major' | 'minor' | 'ekadashi' | 'pradosha' | 'sankranti';
+  type:
+    | 'major'
+    | 'minor'
+    | 'ekadashi'
+    | 'smarta_ekadashi'
+    | 'vaishnava_ekadashi'
+    | 'pradosha'
+    | 'sankranti';
   description?: string;
+  /** Smarta-only: when Ekadashi is Dashami-viddha, the Dwadashi fast day. */
+  deferralDate?: Date;
+}
+
+// ── Bhadra Kala (Vishti karana window) ───────────────
+
+export interface BhadraInfo {
+  start: Date;
+  end: Date;
+  location: 'earth' | 'heaven' | 'paatal';
+  isActive: boolean;
 }

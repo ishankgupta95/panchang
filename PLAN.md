@@ -4451,7 +4451,7 @@ interface ChandraBalamInfo {
 
 ---
 
-## Phase 23 — Classical Correctness Completion ⬜ NOT STARTED
+## Phase 23 — Classical Correctness Completion ✅ DONE
 
 > **Goal:** Finish the classical rule system so that panchang-ts reproduces Drik's festival dating not just for the common cases (Phase 21) but also for the edge cases that depend on Bhadra Kala exclusion, Smarta/Vaishnava split, named Ekadashi identity, long-tithi dedupe, Adhika-masa shift, and Purnimanta regional naming. Each step is independently shippable; order below is by effort × impact.
 
@@ -4611,12 +4611,12 @@ Pradosha too has 14 named variants based on vara (weekday):
 
 | Step | Feature | Effort | Status |
 |------|---------|--------|--------|
-| 23-1 | Bhadra Kala + Raksha Bandhan exclusion | 1d | ⬜ |
-| 23-2 | Smarta/Vaishnava Ekadashi split | 0.5d | ⬜ |
-| 23-3 | 24 named Ekadashis + 14 named Pradoshas | 1d | ⬜ |
-| 23-4 | Multi-day dedupe for long tithis | 0.5d | ⬜ |
-| 23-5 | Adhika masa nuance per festival | 1d | ⬜ |
-| 23-6 | Purnimanta registry awareness | 0.25d | ⬜ |
+| 23-1 | Bhadra Kala + Raksha Bandhan exclusion | 1d | ✅ |
+| 23-2 | Smarta/Vaishnava Ekadashi split | 0.5d | ✅ |
+| 23-3 | 24 named Ekadashis + 14 named Pradoshas | 1d | ✅ |
+| 23-4 | Multi-day dedupe for long tithis | 0.5d | ✅ |
+| 23-5 | Adhika masa nuance per festival | 1d | ✅ |
+| 23-6 | Purnimanta registry awareness | 0.25d | ✅ |
 
 **Total Phase 23 effort:** ~4 engineering days.
 

@@ -45,6 +45,7 @@ export type {
   HoraSlot, HoraInfo,
   GowriSlot, GowriInfo,
   SpecialYogaInfo, FestivalInfo,
+  BhadraInfo,
   TimePeriod,
   PanchangErrorCode,
   // Jyotish types

@@ -3,7 +3,7 @@ import type {
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, TimePeriod,
   ChandraMasaInfo, SamvatInfo, RashiInfo, ChoghadiyaInfo, HoraInfo,
-  SpecialYogaInfo, FestivalInfo, GowriInfo,
+  SpecialYogaInfo, FestivalInfo, GowriInfo, BhadraInfo,
 } from './elements';
 import type { ChandraBalamInfo } from './jyotish';
 
@@ -55,6 +55,8 @@ export interface DailyPanchangResult {
   gowriPanchangam: GowriInfo;
   /** Chandra Balam — only present when `options.janmaRashi` is provided. */
   chandraBalam?: ChandraBalamInfo;
+  /** Bhadra Kala (Vishti karana) window overlapping this Hindu day, or null. */
+  bhadra: BhadraInfo | null;
 
   _debug?: {
     totalMs: number;
