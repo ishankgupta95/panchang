@@ -71,6 +71,29 @@ import type {
  * where you need the exact element at a specific instant rather than a
  * full sunrise-to-sunrise day.
  *
+ * ### Festival-detection limitations in instant mode
+ *
+ * `getInstantPanchang` evaluates festival rules against the tithi / nakshatra /
+ * chandraMasa at the given instant only. It does **not** perform the
+ * sunrise-to-next-sunrise refinements that `getDailyPanchang` provides, so the
+ * following classes of festivals may be missing or mis-dated when queried via
+ * this API:
+ *
+ * - **Canonical-time rules** (Phase 21): Ganesh Chaturthi (madhyahna), Shivaratri
+ *   (nishita), most Pradosha variants, Chandrodaya-keyed festivals (Karva Chauth
+ *   moonrise, etc.) — these require knowing whether the canonical window falls
+ *   within the Hindu day window.
+ * - **Transit-based Sankranti**: solar-month boundary is detected from the
+ *   sunrise-to-next-sunrise transit, not the instantaneous solar longitude.
+ * - **Ekadashi viddha** (Smarta vs Vaishnava split): requires checking tithi
+ *   state across aruṇodaya of both the candidate and following day.
+ * - **Long-tithi dedupe & Bhadra/Raksha Bandhan exclusion**: also sunrise-keyed.
+ *
+ * Pan-Indian tithi/nakshatra-based festivals (e.g. Holi, Diwali, Raksha
+ * Bandhan date selection) do resolve correctly as long as the queried instant
+ * matches the canonical window. For reliable festival dating, use
+ * `getDailyPanchang` instead.
+ *
  * @param date     UTC instant to evaluate.
  * @param location Observer coordinates `{ latitude, longitude, elevation? }`.
  * @param options  Optional settings: `ayanamsa`, `language`, `computeEndTimes`,
@@ -91,6 +114,9 @@ import type {
  * console.log(p.tithi.name);     // "कृष्ण चतुर्दशी"
  * console.log(p.tithi.endTime);  // Date (UTC) when this Tithi ends
  * ```
+ *
+ * @see getDailyPanchang — for sunrise-to-next-sunrise Hindu day with full
+ *                        canonical-time festival dating.
  */
 export function getInstantPanchang(
   date: Date,

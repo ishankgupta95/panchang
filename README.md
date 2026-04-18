@@ -17,6 +17,7 @@ Works offline in React Native (Hermes), Node.js, and browsers.
 - [API Reference](#api-reference)
   - [`getDailyPanchang`](#getdailypanchangdate-location-options)
   - [`getInstantPanchang`](#getinstantpanchangdate-location-options)
+  - [When to use `getInstantPanchang` vs `getDailyPanchang`](#when-to-use-getinstantpanchang-vs-getdailypanchang)
   - [Options](#options)
   - [Low-level Utilities](#low-level-utilities)
 - [Types](#types)
@@ -276,6 +277,26 @@ console.log(result.panchaka);               // false
 | `ayanamsa` | `number` | Ayanamsa in degrees |
 | `siderealSun` | `number` | Sun sidereal longitude (degrees) |
 | `siderealMoon` | `number` | Moon sidereal longitude (degrees) |
+
+---
+
+### When to use `getInstantPanchang` vs `getDailyPanchang`
+
+Both functions share the same core astronomy, but `getDailyPanchang` operates on the full Vedic day (local sunrise → next sunrise) while `getInstantPanchang` samples a single UTC moment. That distinction matters most for **festivals** and classical rules that reference a specific canonical time of the Hindu day.
+
+| Use case | Recommended | Why |
+|----------|-------------|-----|
+| "What Panchang elements are active right now?" | `getInstantPanchang` | Single-moment snapshot; no sunrise needed. |
+| Birth chart / muhurta picking at a specific instant | `getInstantPanchang` | Exact element at that UTC moment. |
+| Daily calendar / almanac row for a date | `getDailyPanchang` | Lists all element transitions for the day. |
+| Displaying today's festivals & observances | `getDailyPanchang` | Full canonical-time festival refinement. |
+| Sankranti / solar-month boundary dates | `getDailyPanchang` | Uses sunrise-to-next-sunrise transit detection. |
+| Ekadashi (Smarta vs Vaishnava), Shivaratri, Ganesh Chaturthi, Karva Chauth | `getDailyPanchang` | Requires madhyahna / pradosha / nishita / chandrodaya refinement. |
+| Raksha Bandhan date (Bhadra-aware) / long-tithi dedupe | `getDailyPanchang` | Rules key off the Hindu day window, not an instant. |
+| Rahu Kalam / Gulika / Choghadiya / Gowri / Hora / Durmuhurta | `getDailyPanchang` | Computed from sunrise, sunset, and day length. |
+| Eclipse (Grahan) detection with sutak window | `getDailyPanchang` | Overlapping the day needs the day window. |
+
+**Instant-mode festival caveat:** `getInstantPanchang` does emit `festivals`, but it evaluates rules against the tithi / nakshatra / chandraMasa at the given instant only. It **does not** run the canonical-time refinements (madhyahna / pradosha / nishita / chandrodaya), transit-based Sankranti, Ekadashi viddha (Smarta/Vaishnava split), or Bhadra-aware Raksha Bandhan exclusion — those require the full sunrise-to-next-sunrise Hindu day window and are only available in `getDailyPanchang`. If you need reliable festival dating, use `getDailyPanchang`.
 
 ---
 

@@ -1,0 +1,223 @@
+{
+  "_meta": {
+    "description": "Non-IST diaspora fixtures (Phase 26-1). Five cities x three dates each, spanning DST transitions (America/New_York on 2025-03-09 spring-forward & 2025-11-02 fall-back) plus summer/winter solstice extremes. Expected values are computed by panchang-ts and serve as a regression baseline; cross-verification against DrikPanchang pending (mark entries with \"_drikVerified\": true once manually checked).",
+    "generator": "library-snapshot",
+    "generatedAt": "2026-04-19"
+  },
+  "fixtures": [
+    {
+      "date": "2025-03-09",
+      "city": "New York (spring-forward)",
+      "location": { "latitude": 40.7128, "longitude": -74.006 },
+      "timezone": "America/New_York",
+      "expectedOffsetMinutes": -240,
+      "expected": {
+        "varaEnglish": "Sunday",
+        "tithiAtSunrise": "Shukla Ekadashi",
+        "nakshatraAtSunrise": "Punarvasu",
+        "sunriseLocal": "07:16",
+        "sunsetLocal": "18:56"
+      }
+    },
+    {
+      "date": "2025-06-21",
+      "city": "New York",
+      "location": { "latitude": 40.7128, "longitude": -74.006 },
+      "timezone": "America/New_York",
+      "expectedOffsetMinutes": -240,
+      "expected": {
+        "varaEnglish": "Saturday",
+        "tithiAtSunrise": "Krishna Ekadashi",
+        "nakshatraAtSunrise": "Ashwini",
+        "sunriseLocal": "05:25",
+        "sunsetLocal": "20:30"
+      }
+    },
+    {
+      "date": "2025-11-02",
+      "city": "New York (fall-back)",
+      "location": { "latitude": 40.7128, "longitude": -74.006 },
+      "timezone": "America/New_York",
+      "expectedOffsetMinutes": -300,
+      "expected": {
+        "varaEnglish": "Sunday",
+        "tithiAtSunrise": "Shukla Dwadashi",
+        "nakshatraAtSunrise": "Purva Bhadrapada",
+        "sunriseLocal": "06:27",
+        "sunsetLocal": "16:50"
+      }
+    },
+
+    {
+      "date": "2025-03-09",
+      "city": "London (pre-BST)",
+      "location": { "latitude": 51.5074, "longitude": -0.1278 },
+      "timezone": "Europe/London",
+      "expectedOffsetMinutes": 0,
+      "expected": {
+        "varaEnglish": "Sunday",
+        "tithiAtSunrise": "Shukla Ekadashi",
+        "nakshatraAtSunrise": "Punarvasu",
+        "sunriseLocal": "06:27",
+        "sunsetLocal": "17:55"
+      }
+    },
+    {
+      "date": "2025-06-21",
+      "city": "London (BST)",
+      "location": { "latitude": 51.5074, "longitude": -0.1278 },
+      "timezone": "Europe/London",
+      "expectedOffsetMinutes": 60,
+      "expected": {
+        "varaEnglish": "Saturday",
+        "tithiAtSunrise": "Krishna Ekadashi",
+        "nakshatraAtSunrise": "Ashwini",
+        "sunriseLocal": "04:43",
+        "sunsetLocal": "21:21"
+      }
+    },
+    {
+      "date": "2025-11-02",
+      "city": "London (post-BST)",
+      "location": { "latitude": 51.5074, "longitude": -0.1278 },
+      "timezone": "Europe/London",
+      "expectedOffsetMinutes": 0,
+      "expected": {
+        "varaEnglish": "Sunday",
+        "tithiAtSunrise": "Shukla Dwadashi",
+        "nakshatraAtSunrise": "Purva Bhadrapada",
+        "sunriseLocal": "06:56",
+        "sunsetLocal": "16:31"
+      }
+    },
+
+    {
+      "date": "2025-03-09",
+      "city": "Sydney (AEDT)",
+      "location": { "latitude": -33.8688, "longitude": 151.2093 },
+      "timezone": "Australia/Sydney",
+      "expectedOffsetMinutes": 660,
+      "expected": {
+        "varaEnglish": "Saturday",
+        "tithiAtSunrise": "Shukla Dashami",
+        "nakshatraAtSunrise": "Punarvasu",
+        "sunriseLocal": "06:49",
+        "sunsetLocal": "19:21"
+      }
+    },
+    {
+      "date": "2025-06-21",
+      "city": "Sydney (AEST, winter solstice)",
+      "location": { "latitude": -33.8688, "longitude": 151.2093 },
+      "timezone": "Australia/Sydney",
+      "expectedOffsetMinutes": 600,
+      "expected": {
+        "varaEnglish": "Friday",
+        "tithiAtSunrise": "Krishna Dashami",
+        "nakshatraAtSunrise": "Ashwini",
+        "sunriseLocal": "07:00",
+        "sunsetLocal": "16:53"
+      }
+    },
+    {
+      "date": "2025-11-02",
+      "city": "Sydney (AEDT)",
+      "location": { "latitude": -33.8688, "longitude": 151.2093 },
+      "timezone": "Australia/Sydney",
+      "expectedOffsetMinutes": 660,
+      "expected": {
+        "varaEnglish": "Saturday",
+        "tithiAtSunrise": "Shukla Ekadashi",
+        "nakshatraAtSunrise": "Purva Bhadrapada",
+        "sunriseLocal": "05:53",
+        "sunsetLocal": "19:24"
+      }
+    },
+
+    {
+      "date": "2025-03-09",
+      "city": "Dubai",
+      "location": { "latitude": 25.2048, "longitude": 55.2708 },
+      "timezone": "Asia/Dubai",
+      "expectedOffsetMinutes": 240,
+      "expected": {
+        "varaEnglish": "Sunday",
+        "tithiAtSunrise": "Shukla Ekadashi",
+        "nakshatraAtSunrise": "Punarvasu",
+        "sunriseLocal": "06:34",
+        "sunsetLocal": "18:25"
+      }
+    },
+    {
+      "date": "2025-06-21",
+      "city": "Dubai",
+      "location": { "latitude": 25.2048, "longitude": 55.2708 },
+      "timezone": "Asia/Dubai",
+      "expectedOffsetMinutes": 240,
+      "expected": {
+        "varaEnglish": "Saturday",
+        "tithiAtSunrise": "Krishna Dashami",
+        "nakshatraAtSunrise": "Ashwini",
+        "sunriseLocal": "05:29",
+        "sunsetLocal": "19:11"
+      }
+    },
+    {
+      "date": "2025-11-02",
+      "city": "Dubai",
+      "location": { "latitude": 25.2048, "longitude": 55.2708 },
+      "timezone": "Asia/Dubai",
+      "expectedOffsetMinutes": 240,
+      "expected": {
+        "varaEnglish": "Sunday",
+        "tithiAtSunrise": "Shukla Dwadashi",
+        "nakshatraAtSunrise": "Purva Bhadrapada",
+        "sunriseLocal": "06:27",
+        "sunsetLocal": "17:37"
+      }
+    },
+
+    {
+      "date": "2025-03-09",
+      "city": "Singapore",
+      "location": { "latitude": 1.3521, "longitude": 103.8198 },
+      "timezone": "Asia/Singapore",
+      "expectedOffsetMinutes": 480,
+      "expected": {
+        "varaEnglish": "Saturday",
+        "tithiAtSunrise": "Shukla Dashami",
+        "nakshatraAtSunrise": "Punarvasu",
+        "sunriseLocal": "07:12",
+        "sunsetLocal": "19:18"
+      }
+    },
+    {
+      "date": "2025-06-21",
+      "city": "Singapore",
+      "location": { "latitude": 1.3521, "longitude": 103.8198 },
+      "timezone": "Asia/Singapore",
+      "expectedOffsetMinutes": 480,
+      "expected": {
+        "varaEnglish": "Friday",
+        "tithiAtSunrise": "Krishna Dashami",
+        "nakshatraAtSunrise": "Ashwini",
+        "sunriseLocal": "07:00",
+        "sunsetLocal": "19:12"
+      }
+    },
+    {
+      "date": "2025-11-02",
+      "city": "Singapore",
+      "location": { "latitude": 1.3521, "longitude": 103.8198 },
+      "timezone": "Asia/Singapore",
+      "expectedOffsetMinutes": 480,
+      "expected": {
+        "varaEnglish": "Saturday",
+        "tithiAtSunrise": "Shukla Ekadashi",
+        "nakshatraAtSunrise": "Purva Bhadrapada",
+        "sunriseLocal": "06:46",
+        "sunsetLocal": "18:50"
+      }
+    }
+  ]
+}
