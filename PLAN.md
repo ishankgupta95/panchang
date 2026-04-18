@@ -4321,8 +4321,14 @@ interface ChandraBalamInfo {
 | **16** | Validation Hardening | 16-1 | 200+ day validation suite, long-range regression | 🔶 PARTIAL |
 | **17** | Jyotish Expansion | 17-1 → 17-5 | 9 Graha positions, Vimshottari Dasha, Chandra Balam | ✅ DONE (validation pending in 18-3, 18-4) |
 | **18** | Jyotish Completion & Quality | 18-1 → 18-6 | Rahu formula fix, Chandra Balam, Drik validation for planets + dasha, API review | ✅ DONE |
-| **19** | v1 Release Preparation | 19-1 → 19-7 | Festival validation, end-time validation, API/docs audit, publish v1.0.0 | ⬜ NOT STARTED |
+| **19** | v1 Release Preparation | 19-1 → 19-7 | Festival validation, end-time validation, API/docs audit, publish v1.0.0 | ✅ DONE (19-7 user-driven) |
 | **20** | Post-v1 Jyotish (optional) | 20-1 → 20-3 | Kundli Milan, Shadbala, Divisional Charts | ⬜ NOT STARTED |
+| **21** | Festival Rule System | 21-1 → 21-8 | `dateRule` tags, transit-based Sankranti, nakshatra+solarMasa registry, Ekadashi viddha, Pradosha both-paksha fix, Diwali dedupe | ✅ DONE |
+| **22** | Sanskrit Locale Removal | 22-1 | Drop `'sa'` Language, delete `sa.ts`, update tests + docs | ✅ DONE |
+| **23** | Classical Correctness Completion | 23-1 → 23-6 | Bhadra Kala + RB exclusion, Smarta/Vaishnava Ekadashi split, 24 named Ekadashis, multi-day dedupe, Adhika nuance, Purnimanta registry | ⬜ NOT STARTED |
+| **24** | Festival Coverage Expansion | 24-1 → 24-10 | Regional solar-month festivals, Chhath, Avani Avittam, Ayyappa, Vat Savitri, Masik Shivaratri, Vinayaka Chaturthi, weekday-qualified Pradosha, Pushya days, month+weekday patterns | ⬜ NOT STARTED |
+| **25** | Astronomy Expansion | 25-1 → 25-2 | Eclipse (solar + lunar) detection, muhurta library completion (Vijaya/Godhuli/Nishita/Amrit) | ⬜ NOT STARTED |
+| **26** | Diaspora & API Polish | 26-1 → 26-2 | Non-IST cross-verification, document `getInstantPanchang` dateRule limitations | ⬜ NOT STARTED |
 
 ---
 
@@ -4334,7 +4340,7 @@ interface ChandraBalamInfo {
 | End times for all elements | ✅ | ✅ |
 | Lunar calendar (Masa, Samvat) | ❌ | ✅ |
 | Ayanamsa options | ❌ (hardcoded) | ✅ (3 systems) |
-| i18n | Partial | ✅ (en/sa/hi) |
+| i18n | Partial | ✅ (en/hi) |
 | Daily + Instant modes | ❌ | ✅ |
 | Performance toggles | ❌ | ✅ |
 | Typed errors | ❌ | ✅ |
@@ -4347,3 +4353,515 @@ interface ChandraBalamInfo {
 | Validation depth | 200 days | 200+ days (Phase 16) |
 
 **After Phase 14+15, panchang-ts surpasses panchangam-js on every dimension that matters for a devotional app, while maintaining architectural advantages (types, modes, perf toggles, i18n, calendar systems) that panchangam-js cannot match.**
+
+---
+
+## Phase 21 — Festival Rule System ✅ DONE
+
+> **Goal:** Close the gap between "tithi-at-sunrise for every festival" (the v1.0 simplification) and how Drik / published panchangs actually date festivals. Introduces a per-festival `dateRule` tag plus the canonical-time infrastructure (`madhyahna`, `aparahna`, `pradosha`, `nishita`, `chandrodaya`) needed to evaluate each festival at its classical anchor. Also fills three structural gaps: transit-based Sankranti, nakshatra + solar-masa rule type, and Ekadashi Dashami-viddha detection.
+
+### Step 21-1 — `FestivalDateRule` type + `computeFestivals` context object ✅ DONE
+
+**What shipped:**
+- [src/core/festivals.ts](src/core/festivals.ts) — new `export type FestivalDateRule = 'sunrise' | 'madhyahna' | 'aparahna' | 'pradosha' | 'nishita' | 'chandrodaya'`.
+- `computeFestivals` signature refactored from 8 positional args to a single `FestivalComputeContext` object. Context carries `tithiIndex` (sunrise, the default rule fallback), `nakshatraIndex`, `chandraMasaIndex`, `solarMasaIndex`, `isAdhika`, `varaIndex`, plus optional `tithiByRule`, `sankrantiRashi`, `ekadashiDashamiViddha`.
+- Rule evaluation picks `tithiByRule[rule.dateRule] ?? ctx.tithiIndex`, so omitting `tithiByRule` gives the old sunrise-only behaviour — backward-compat for callers that can't build a full context (e.g., `getInstantPanchang`).
+
+### Step 21-2 — Tag existing festivals with classical rules ✅ DONE
+
+**What shipped:** per-festival `dateRule` tags in the registry:
+- `madhyahna`: Akshaya Tritiya, Ganesh Chaturthi, Rama Navami, Vasant Panchami
+- `pradosha`: Diwali, Dhanteras
+- `nishita`: Krishna Janmashtami, Maha Shivaratri
+- Raksha Bandhan / Karva Chauth / Narak Chaturdashi left on `sunrise` (matches published Drik observance; aparahna-vyapini / chandrodaya rules are too strict for how these are actually dated).
+
+**Verified:** Akshaya Tritiya 2026 now correctly fires on Apr 19 (Tritiya at midday), not Apr 20 (Tritiya at sunrise but Chaturthi at midday).
+
+### Step 21-3 — Canonical-time anchor builder in `getDailyPanchang` ✅ DONE
+
+**What shipped:** [src/core/panchang.ts](src/core/panchang.ts) precomputes tithi at each canonical anchor within the Hindu day (sunrise → nextSunrise):
+- `madhyahna`: sunrise + 0.5 × dayLength (mid-day)
+- `aparahna`: sunrise + 0.8 × dayLength (end of aparahna kala)
+- `pradosha`: sunset + 60 min (end of pradosha kala, 2.5 ghatikas)
+- `nishita`: midpoint of sunset-to-nextSunrise (local midnight)
+- `chandrodaya`: moonrise within the Hindu day, or `undefined` if moon doesn't rise in the window
+- `arunodaya`: sunrise − 96 min (for Ekadashi viddha; not a `FestivalDateRule`, used only for ctx.ekadashiDashamiViddha)
+
+**Why end-of-kala anchors:** anchoring at the END of each kala (rather than the midpoint or start) ensures a tithi which only briefly enters the kala doesn't qualify as "pervading" it. This was the fix for the Diwali-fires-on-two-days bug — Amavasya ending just barely inside Oct 21 2025 pradosha was incorrectly emitting a second Diwali.
+
+### Step 21-4 — Transit-based Sankranti ✅ DONE
+
+**What shipped:** Sankranti detection moved out of the registry loop into [panchang.ts](src/core/panchang.ts). Replaces the naive `siderealSun % 30 < 1.0` at-sunrise check with a rashi-at-sunrise vs rashi-at-nextSunrise comparison; when they differ, a transit occurred within the Hindu day and we emit Sankranti for the new rashi.
+
+**Impact:** old rule dated every Sankranti exactly one day late (sunrise check fires only *after* the transit). New rule fires on the Hindu day containing the transit, matching Drik.
+
+### Step 21-5 — Nakshatra + solar-masa rule type + Onam ✅ DONE
+
+**What shipped:** `FestivalRule` gained optional `solarMasa` + `nakshatra` fields as an alternative to `masa + tithi`. Registry entry `{ key: 'onam', solarMasa: 4, nakshatra: 21, type: 'major' }` wires Thiruvonam nakshatra in Simha solar month for the Malayalam calendar. Generalises to any nakshatra-based festival (Phase 24 will add more).
+
+### Step 21-6 — Sankashti Chaturthi (monthly, chandrodaya rule) ✅ DONE
+
+**What shipped:** recurring emission when `tithiByRule.chandrodaya === 18` (Krishna Chaturthi at moonrise). Fires once per lunar month, regardless of masa. Unlike Karva Chauth (which Drik dates by sunrise rule), Sankashti's classical chandrodaya-vyapini rule is respected in published panchangs, so the chandrodaya anchor is the right one here.
+
+### Step 21-7 — Pradosha Vrata: both pakshas + pradosha-kala anchor ✅ DONE
+
+**What shipped:** previously the code checked `tithiIndex === 27` (Krishna Trayodashi only). Classical Pradosha is observed on **both** Shukla (tithi 12) and Krishna (tithi 27) Trayodashi, evaluated at pradosha kala (not sunrise). New check: `tithiForRule('pradosha') === 12 || === 27`. Added assertion in the unit suite — the old test that documented the bug ("does not detect Pradosha on Shukla Trayodashi") has been inverted.
+
+### Step 21-8 — Ekadashi Dashami-viddha detection ✅ DONE
+
+**What shipped:** tithi at arunodaya (sunrise − 96 min) is compared against Dashami (tithi 9 or 24). When the Ekadashi-at-sunrise is Dashami-viddha, we annotate the emitted Ekadashi with a `description` noting the Smarta fast defers to the next day (Dwadashi) while Vaishnava observes today. Does not yet emit two distinct events — that's Phase 23-2.
+
+### Test + fixture additions ✅ DONE
+
+- [tests/unit/festivals.test.ts](tests/unit/festivals.test.ts) — rewritten for the new context signature. 37 unit tests covering every `dateRule`, Adhika-skip semantics, viddha, Sankranti, Onam.
+- [tests/fixtures/drikpanchang-festivals.json](tests/fixtures/drikpanchang-festivals.json) — 8 Drik-verified fixtures added for newly-corrected or newly-supported festivals: Akshaya Tritiya 2026-04-19, Makar Sankranti 2026-01-14, Ganesh Chaturthi 2026-09-14, Krishna Janmashtami 2025-08-15, Maha Shivaratri 2025-02-26, Diwali 2025-10-20, Dhanteras 2025-10-18, Onam 2025-09-05.
+
+**Final state:** 4,888 tests pass, tsc clean.
+
+**Phase 21 completion table:**
+
+| Step | Feature | Status |
+|------|---------|--------|
+| 21-1 | `FestivalDateRule` + context object | ✅ |
+| 21-2 | Tag festivals with classical rules | ✅ |
+| 21-3 | Canonical-time anchors (end-of-kala) | ✅ |
+| 21-4 | Transit-based Sankranti | ✅ |
+| 21-5 | Nakshatra + solar-masa rule type + Onam | ✅ |
+| 21-6 | Sankashti Chaturthi (monthly, chandrodaya) | ✅ |
+| 21-7 | Pradosha: both pakshas + pradosha-kala anchor | ✅ |
+| 21-8 | Ekadashi Dashami-viddha detection | ✅ |
+
+---
+
+## Phase 22 — Sanskrit Locale Removal ✅ DONE
+
+**What shipped:**
+- [src/types/options.ts](src/types/options.ts) — `Language` narrowed from `'en' | 'sa' | 'hi'` to `'en' | 'hi'`.
+- [src/i18n/sa.ts](src/i18n/sa.ts) deleted.
+- [src/i18n/resolver.ts](src/i18n/resolver.ts) — `sa` import + translation-map entry removed.
+- [tests/unit/i18n.test.ts](tests/unit/i18n.test.ts) — Sanskrit language fixture + `getTranslations('sa')` case + `resolvePakshaName(0, 'sa')` case removed.
+- [tests/unit/chandraBalam.test.ts](tests/unit/chandraBalam.test.ts), [tests/integration/chandra-balam-wiring.test.ts](tests/integration/chandra-balam-wiring.test.ts), [tests/integration/comprehensive.test.ts](tests/integration/comprehensive.test.ts) — `sa` language usages replaced with `hi` or removed.
+- JSDoc `@example` in [src/core/panchang.ts](src/core/panchang.ts) switched `{ language: 'sa' }` → `{ language: 'hi' }`.
+
+**Why:** Sanskrit and Hindi Devanagari outputs were identical for all panchang element names (the `sa.ts` and `hi.ts` files were near-duplicates), so the extra locale added maintenance surface with no functional benefit. The `chandraMasaNames`, `festivalNames`, etc. that matter are all Devanagari in `hi.ts`.
+
+**Note:** historical PLAN.md sections (Phase 13-1, §11.3, etc.) still reference `sa.ts` — those are historical build notes describing what was true at that point in time. Intentionally not scrubbed.
+
+**Final state:** 4,864 tests pass (24 Sanskrit-specific assertions removed), tsc clean.
+
+---
+
+## Phase 23 — Classical Correctness Completion ⬜ NOT STARTED
+
+> **Goal:** Finish the classical rule system so that panchang-ts reproduces Drik's festival dating not just for the common cases (Phase 21) but also for the edge cases that depend on Bhadra Kala exclusion, Smarta/Vaishnava split, named Ekadashi identity, long-tithi dedupe, Adhika-masa shift, and Purnimanta regional naming. Each step is independently shippable; order below is by effort × impact.
+
+### Step 23-1 — Bhadra Kala module + Raksha Bandhan exclusion
+
+**What:** Bhadra (also called Vishti Karana in specific contexts) is an inauspicious period that classically disqualifies Raksha Bandhan observance. Drik publishes Bhadra-Punchha + Bhadra-Mukha times for every Raksha Bandhan day and shifts the ceremony to after Bhadra ends. Currently the library doesn't detect Bhadra at all.
+
+**Implementation:**
+- New module `src/core/bhadra.ts`:
+  - Bhadra is active during specific half-tithis (the Vishti karana span). The 60 karanas repeat every half-tithi; Vishti is karana index 7 (0-indexed within the 11-karana cycle) occurring in Shukla Chaturthi 2nd half, Shukla Ashtami 1st half, Shukla Ekadashi 2nd half, Shukla Purnima 1st half, Krishna Tritiya 2nd half, Krishna Saptami 1st half, Krishna Dashami 2nd half, Krishna Chaturdashi 1st half — the 8 Vishti occurrences per lunar month.
+  - `computeBhadraKaal(sunriseUtc, nextSunriseUtc, getMoon, getSun): { start: Date, end: Date } | null` — returns the Bhadra window within the Hindu day or null.
+  - Bhadra-mukha (face) vs Bhadra-punchha (tail) classification: depends on whether Bhadra is in daytime (tail is auspicious portion) or nighttime (face is auspicious portion). Add as a sub-field.
+- Wire into [src/core/panchang.ts](src/core/panchang.ts) daily result as optional `bhadra: BhadraInfo | null` field.
+- New `FestivalRule` field: `bhadraExclude?: boolean`. When true and Bhadra is active for > half the canonical kala, emit with a description "Observe after Bhadra ends at HH:MM" instead of suppressing the festival entirely. Apply to `raksha_bandhan`.
+- Add a `DailyPanchangResult.bhadra` field in [src/types/panchang.ts](src/types/panchang.ts).
+
+**Types:**
+```ts
+interface BhadraInfo {
+  start: Date;         // offset-adjusted local face
+  end: Date;
+  location: 'earth' | 'heaven' | 'paatal';  // determines shubh/ashubh phase
+  isActive: boolean;   // currently-active flag at sunrise of this day
+}
+```
+
+**Tests:**
+- Unit test: compute Bhadra window for a known date, verify start/end match Drik ±3 min.
+- Fixture: Raksha Bandhan 2025-08-09 with description mentioning Bhadra-end timing (Drik publishes 13:38 IST for this day).
+
+**Effort:** 1 engineering day.
+
+---
+
+### Step 23-2 — Smarta vs Vaishnava Ekadashi as distinct events
+
+**What:** Phase 21-8 detects Dashami-viddha but emits only one `ekadashi` event with a descriptive note. Classical practice treats these as two distinct observances on different days. Library should emit:
+- `smarta_ekadashi` on the Ekadashi-at-sunrise day when NOT viddha, OR on the Dwadashi-at-sunrise day FOLLOWING a viddha Ekadashi.
+- `vaishnava_ekadashi` always on the Ekadashi-at-sunrise day regardless of viddha.
+- On a non-viddha day: emit both (identical date) with a single generic `ekadashi` for ergonomics.
+
+**Implementation:**
+- Cross-day logic: need to know yesterday's viddha state to decide if today (Dwadashi-at-sunrise) is a Smarta Ekadashi.
+- Simplest: compute tithi-at-arunodaya for YESTERDAY as well (add `yesterdayArunodayaTithi` to context). If yesterday was viddha-Ekadashi and today is Dwadashi-at-sunrise, emit Smarta Ekadashi today.
+- Or: emit both events always on the Ekadashi-at-sunrise day with a `deferralDate: Date` on Smarta when viddha. Keeps the computation single-day.
+- Registry: add `smarta_ekadashi` and `vaishnava_ekadashi` keys to i18n. Emit generic `ekadashi` only when both coincide (to avoid UX clutter).
+
+**Types:**
+```ts
+interface FestivalInfo {
+  name: string;
+  type: 'major' | 'minor' | 'ekadashi' | 'smarta_ekadashi' | 'vaishnava_ekadashi' | 'pradosha' | 'sankranti';
+  description?: string;
+  deferralDate?: Date;  // Smarta-only: when viddha, points to the Dwadashi fast day
+}
+```
+
+**Tests:**
+- 2025-02-24 Delhi: Vijaya Ekadashi was Dashami-viddha per Drik; Smarta on Feb 24, Vaishnava on Feb 25. Lock in.
+- 2025-03-25 Delhi: Papamochani Ekadashi, non-viddha, both coincide.
+
+**Effort:** 0.5 day.
+
+---
+
+### Step 23-3 — 24 named Ekadashis + named Pradosha variants
+
+**What:** library emits generic `ekadashi`. Classical tradition names each of the 24 yearly Ekadashis:
+
+| Month (Amanta) | Shukla Ekadashi | Krishna Ekadashi |
+|---|---|---|
+| Chaitra | Kamada | Papamochani |
+| Vaishakha | Mohini | Varuthini |
+| Jyeshtha | Nirjala | Apara |
+| Ashadha | Devshayani | Yogini |
+| Shravana | Putrada (Pavitra) | Kamika |
+| Bhadrapada | Parivartini | Aja |
+| Ashwin | Pashankusha | Indira |
+| Kartika | Prabodhini (Devutthana) | Rama |
+| Margashirsha | Mokshada | Utpanna |
+| Pausha | Putrada | Saphala |
+| Magha | Jaya | Shattila |
+| Phalguna | Amalaki | Vijaya |
+| Adhika (leap) | Padmini | Parama |
+
+Pradosha too has 14 named variants based on vara (weekday):
+- Som Pradosha (Monday), Bhauma (Tuesday), Saumya/Budha (Wednesday), Guru (Thursday), Bhrigu/Shukra (Friday), Shani (Saturday), Bhanu/Ravi (Sunday) × 2 pakshas.
+
+**Implementation:**
+- Lookup table keyed by `(chandraMasaIndex, isAdhika, paksha)` → Ekadashi name.
+- Pradosha lookup by `(varaIndex, paksha)` → variant name.
+- New i18n keys for all 26 names (24 regular + 2 Adhika Ekadashis) + 14 Pradosha variants. English + Hindi.
+- Emit the specific name as `description` alongside the generic `ekadashi` / `pradosha` event. Don't churn the primary `name` field.
+
+**Tests:** one fixture per month across 2025 confirming names (12 Shukla + 12 Krishna).
+
+**Effort:** 1 day (mostly table data entry + i18n).
+
+---
+
+### Step 23-4 — Multi-day dedupe heuristic for long tithis
+
+**What:** when a tithi spans the canonical anchor on two consecutive days (rare, happens ~1% of years for tithis near the moon-speed minimum), the current code emits the festival twice. Classical tiebreaker: observe on the day the tithi is "more prevailing" — measured by how much of the canonical kala it occupies.
+
+**Implementation:**
+- For each `dateRule`, compute tithi at BOTH start and end of the kala (not just the end-anchor currently used).
+- If both match the target tithi, tithi occupies the full kala — emit.
+- If only end matches (target tithi STARTED during the kala), check if the PRIOR day has both start+end match → suppress today's emission.
+- If only start matches (tithi ENDED during kala), always suppress — tithi was not prevailing at canonical time.
+- Cross-day check needs yesterday's context; easiest to add a `priorDayTithiByRule` field to `FestivalComputeContext` (pass undefined when computing day-1 without context).
+
+**Tests:**
+- Synthetic: construct a context where Tritiya spans Apr 19 madhyahna AND Apr 20 start-of-madhyahna; verify only Apr 19 emits.
+- Real: find a year where Akshaya Tritiya has this boundary (search 2000–2050); lock in.
+
+**Effort:** 0.5 day.
+
+---
+
+### Step 23-5 — Adhika masa nuance (shift vs skip per festival)
+
+**What:** currently ALL registry festivals skip during Adhika months (`if (!ctx.isAdhika)`). Classical practice is more nuanced:
+
+| Festival | Adhika behaviour |
+|---|---|
+| Ugadi, Holi, Navaratri, Dussehra, Ganesh Chaturthi | Skip in Adhika (observe only in Nija) |
+| Janmashtami, Ram Navami, Rama Navami | Observe in Nija masa following the Adhika |
+| Purushottama-specific observances | Observe in Adhika specifically (Vishnu/Purushottama dedication) |
+| Ekadashi, Pradosha, Sankashti | Observe in both Adhika and Nija (recurring) |
+
+**Implementation:**
+- New `FestivalRule` field: `adhikaBehaviour?: 'skip' | 'shift-to-nija' | 'observe-in-both'` (default `'skip'`).
+- When `'shift-to-nija'`: suppress in Adhika, and emit on the equivalent tithi in the following Nija masa.
+- When `'observe-in-both'`: emit in both Adhika and Nija (current behaviour for Ekadashi, which bypasses the Adhika skip already).
+- `shift-to-nija` requires lookahead: computing "this is the Nija masa after an Adhika" needs cross-month state. Simplest: check if the PRIOR month was Adhika with same masa index. Add `priorMasaWasAdhika: boolean` to context (derivable from last month's Amavasya).
+
+**Tests:** 2023 had Adhika Shravana. Locked-in fixtures for Krishna Janmashtami 2023 (should observe in Nija Shravana, not Adhika Shravana).
+
+**Effort:** 1 day.
+
+---
+
+### Step 23-6 — Purnimanta registry awareness
+
+**What:** the registry uses Amanta masa (0 = Chaitra … 11 = Phalguna). In Purnimanta regions (most of N/W/E India) Krishna-paksha festivals are named by the NEXT masa: e.g., the Diwali Amavasya is "Kartika Amavasya" in Purnimanta convention but "Ashwin Amavasya" in Amanta. The dates are identical — only the displayed masa name differs. Currently `masaSystem` option flips the chandra masa name display but the festival registry doesn't reflect which system the festival was traditionally named under.
+
+**Implementation:**
+- New `FestivalRule` field: `namingSystem?: 'amanta' | 'purnimanta'` — purely cosmetic, describes how the festival's masa was traditionally labelled.
+- When `options.masaSystem === 'purnimanta'` and the festival's `namingSystem === 'purnimanta'`, emit the festival's description with the Purnimanta masa name. Applies mainly to Krishna-paksha festivals in Ashwin (Diwali, Dhanteras, Karva Chauth, Narak Chaturdashi) → display as "Kartika Krishna" instead of "Ashwin Krishna" in description.
+- No change to registry matching rules — date detection stays Amanta-indexed since that's unambiguous.
+
+**Effort:** 0.25 day.
+
+---
+
+**Phase 23 completion table:**
+
+| Step | Feature | Effort | Status |
+|------|---------|--------|--------|
+| 23-1 | Bhadra Kala + Raksha Bandhan exclusion | 1d | ⬜ |
+| 23-2 | Smarta/Vaishnava Ekadashi split | 0.5d | ⬜ |
+| 23-3 | 24 named Ekadashis + 14 named Pradoshas | 1d | ⬜ |
+| 23-4 | Multi-day dedupe for long tithis | 0.5d | ⬜ |
+| 23-5 | Adhika masa nuance per festival | 1d | ⬜ |
+| 23-6 | Purnimanta registry awareness | 0.25d | ⬜ |
+
+**Total Phase 23 effort:** ~4 engineering days.
+
+---
+
+## Phase 24 — Festival Coverage Expansion ⬜ NOT STARTED
+
+> **Goal:** Bring the festival registry from its current ~25 entries to a classically complete ~60+ entries covering regional (Tamil, Malayalam, Bengali, Marathi), recurring monthly/weekly, and composite (tithi+nakshatra or month+weekday) festivals.
+
+### Step 24-1 — Solar-month regional Sankranti festivals
+
+**What:** Sankranti is detected (Phase 21-4), but the regional festival name attached to each Sankranti varies by region and is currently just `"Sankranti"` with a `description: rashi_name`. Classical distinct names:
+
+| Sankranti | Regional name | Rashi |
+|---|---|---|
+| Mesha | Baisakhi (Punjab), Vishu (Kerala), Pohela Boishakh (Bengal), Puthandu (Tamil) | 0 |
+| Makara | Makar Sankranti (N India), Pongal (Tamil), Uttarayan (Gujarat), Bihu (Assam) | 9 |
+| Karka | Dakshinayana | 3 |
+| Simha | Singh Sankranti | 4 |
+
+**Implementation:**
+- Separate `sankranti_regional` festival registry keyed by rashi index → array of region-tagged names.
+- When Sankranti fires, emit additional regional festival events with the appropriate name.
+- Option for users to scope to a region: `options.region?: 'tamil' | 'kerala' | 'bengali' | 'north-india' | 'all'` (default `'all'`).
+
+**Effort:** 0.5 day.
+
+### Step 24-2 — Chhath Puja
+
+**What:** 4-day festival starting on Kartika Shukla Chaturthi (day 1 = Nahay Khay), Panchami (Kharna), Shashthi (Sandhya Arghya, the main evening), Saptami morning (Usha Arghya).
+
+**Implementation:**
+- Add 4 registry entries:
+  - `chhath_nahay_khay` (masa 7, tithi 3, sunrise)
+  - `chhath_kharna` (masa 7, tithi 4, sunrise)
+  - `chhath_sandhya_arghya` (masa 7, tithi 5, pradosha)
+  - `chhath_usha_arghya` (masa 7, tithi 6, sunrise)
+- Emit as `type: 'major'` with descriptions.
+
+**Effort:** 0.25 day.
+
+### Step 24-3 — Avani Avittam / Upakarma
+
+**What:** Thread-changing ceremony for Brahmin men, timed differently per Vedic shakha:
+- **Yajur Upakarma**: Shravana Purnima in Shravana masa (approximates Phase 21's Raksha Bandhan date but tied to Shravana nakshatra).
+- **Rig Upakarma**: Shravana nakshatra in Shravana masa (whichever day the nakshatra occurs).
+- **Sama Upakarma**: Hasta nakshatra in Bhadrapada masa.
+
+**Implementation:** 3 new registry entries using the nakshatra+masa rule type (extends Phase 21-5). Needs nakshatra+chandraMasa composite matching (currently registry only has nakshatra+solarMasa for Onam — extend to also support nakshatra+chandraMasa).
+
+**Effort:** 0.5 day.
+
+### Step 24-4 — Ayyappa Makara Jyothi
+
+**What:** Sabarimala temple festival. Date is Makar Sankranti (rashi 9) — already detected — but the EVENT emitted needs to be distinct (temple-specific, not a general panchang event). Tie into Step 24-1's regional registry.
+
+**Effort:** 0.1 day (essentially a rename within 24-1).
+
+### Step 24-5 — Vat Savitri
+
+**What:** Jyeshtha Amavasya (Purnimanta) or Jyeshtha Purnima (Amanta) — married women's fast. Currently registry has `masa 5, tithi 29` as Mahalaya Amavasya (Bhadrapada). Vat Savitri on Jyeshtha Amavasya is separate.
+
+**Implementation:** `{ key: 'vat_savitri_amavasya', masa: 2, tithi: 29, type: 'major' }` — Jyeshtha = masa index 2. Also `vat_savitri_purnima` (masa 2, tithi 14) for the S Indian variant. `adhikaBehaviour: 'skip'`.
+
+**Effort:** 0.15 day.
+
+### Step 24-6 — Masik Shivaratri (monthly)
+
+**What:** every month on Krishna Chaturdashi (tithi 28) at nishita kala. Maha Shivaratri is the Magha-month instance.
+
+**Implementation:** add recurring rule in the `computeFestivals` function body (similar to Sankashti Chaturthi pattern): `if (tithiByRule.nishita === 28) emit masik_shivaratri`. Exclude when Maha Shivaratri fires (i.e., when chandraMasa === Magha) to avoid double-emission.
+
+**Effort:** 0.2 day.
+
+### Step 24-7 — Vinayaka Chaturthi (monthly)
+
+**What:** every month on Shukla Chaturthi (tithi 3) at madhyahna. Ganesh Chaturthi is the Bhadrapada instance.
+
+**Implementation:** similar pattern to 24-6. Emit when `tithiByRule.madhyahna === 3` and exclude when chandraMasa === Bhadrapada (Ganesh Chaturthi fires).
+
+**Effort:** 0.15 day.
+
+### Step 24-8 — Weekday-qualified Pradosha (Shani, Som, Bhauma, Guru, Shukra, Saumya, Bhanu)
+
+**What:** covered in Phase 23-3 (named Pradosha variants). Effectively duplicate — track this as complete when 23-3 ships.
+
+**Effort:** 0 (covered by 23-3).
+
+### Step 24-9 — Pushya Nakshatra days (Ravi Pushya, Guru Pushya)
+
+**What:** Pushya (nakshatra 7) occurring on Sunday (Ravi Pushya Yoga) or Thursday (Guru Pushya Yoga) is auspicious for gold buying, asset purchase, new ventures. Library already has `computeSpecialYogas` detecting these — but as *yogas*, not festivals. User feedback is that some apps want them surfaced as festival-like events.
+
+**Implementation:** NO code change needed — surface the existing special yoga via docs. Alternative: add a mirror festival entry (nakshatra 7 + varaIndex match) that emits the same event also in `festivals` array for UX convenience.
+
+**Effort:** 0.1 day (docs + optional mirror entry).
+
+### Step 24-10 — Month+weekday recurring patterns
+
+**What:** "Shravan Somvar" (every Monday of Shravana masa), "Mangala Gauri" (every Tuesday of Shravana), "Sankat Nivaran Shanivar" (every Saturday). New rule type.
+
+**Implementation:**
+- New `FestivalRule` kind: `{ chandraMasa: number, vara: number, ... }` — emit when both match at sunrise.
+- Extend rule-matching loop in `computeFestivals` to handle this new kind.
+- Add entries: Shravan Somvar, Mangala Gauri, Kartik Somvar, Magha Shanivar.
+
+**Effort:** 0.5 day.
+
+---
+
+**Phase 24 completion table:**
+
+| Step | Festival(s) | Effort | Status |
+|------|-------------|--------|--------|
+| 24-1 | Regional Sankranti names (Baisakhi, Pongal, Vishu, Bihu, etc.) | 0.5d | ⬜ |
+| 24-2 | Chhath Puja 4-day | 0.25d | ⬜ |
+| 24-3 | Avani Avittam / Upakarma (3 shakhas) | 0.5d | ⬜ |
+| 24-4 | Ayyappa Makara Jyothi | 0.1d | ⬜ |
+| 24-5 | Vat Savitri (Amavasya + Purnima) | 0.15d | ⬜ |
+| 24-6 | Masik Shivaratri (monthly) | 0.2d | ⬜ |
+| 24-7 | Vinayaka Chaturthi (monthly) | 0.15d | ⬜ |
+| 24-8 | Weekday-qualified Pradosha | (via 23-3) | ⬜ |
+| 24-9 | Ravi / Guru Pushya (docs + mirror) | 0.1d | ⬜ |
+| 24-10 | Month+weekday recurring | 0.5d | ⬜ |
+
+**Total Phase 24 effort:** ~2.5 engineering days.
+
+---
+
+## Phase 25 — Astronomy Expansion ⬜ NOT STARTED
+
+### Step 25-1 — Eclipse detection (solar + lunar)
+
+**What:** Grahan (eclipse) is classically significant — many vratas and rituals shift around it. astronomy-engine exposes `SearchLunarEclipse` / `SearchGlobalSolarEclipse` — we currently don't surface either.
+
+**Implementation:**
+- New module `src/astronomy/eclipse.ts`:
+  - `getUpcomingSolarEclipse(fromUtc: Date, location: GeoLocation, withinDays: number): SolarEclipseInfo | null`
+  - `getUpcomingLunarEclipse(fromUtc: Date, withinDays: number): LunarEclipseInfo | null`
+  - `getEclipseDuringDay(sunriseUtc: Date, nextSunriseUtc: Date, location: GeoLocation): EclipseInfo | null`
+- Wire into `DailyPanchangResult.eclipse: EclipseInfo | null` — populated only when an eclipse is visible from the location within the Hindu day.
+- Emit as a high-priority festival-like entry (`type: 'eclipse'` new enum value) with description noting totality percentage, start/end times, visibility.
+- Sutak (pre-eclipse inauspicious period) and Moksha (post-eclipse purification): 9-hour pre-eclipse sutak for solar, 3-hour for lunar. Surface as a sub-field.
+
+**Types:**
+```ts
+interface EclipseInfo {
+  kind: 'solar' | 'lunar';
+  subtype: 'partial' | 'total' | 'annular' | 'penumbral';
+  start: Date;
+  peak: Date;
+  end: Date;
+  visibleFromLocation: boolean;
+  magnitude: number;           // 0–1 fraction obscured
+  sutakStart: Date;            // pre-eclipse impurity window start
+  sutakEnd: Date;
+  description: string;
+}
+```
+
+**Tests:**
+- Lunar eclipse 2025-03-14 (partial): verify detection and sutak window.
+- Solar eclipse 2025-09-21 (partial, visible from Australia): verify `visibleFromLocation: false` for Delhi.
+
+**Effort:** 1 day.
+
+### Step 25-2 — Muhurta library completion
+
+**What:** library has Abhijit + Brahma muhurtas + Rahu/Gulika/Yamaganda kalams + Dur Muhurta. Missing:
+- **Vijaya Muhurta** — 11th muhurta of the day, auspicious for starting journeys.
+- **Godhuli Muhurta** — the "cow-dust hour," ~48 min around sunset.
+- **Nishita Muhurta** — 15th muhurta of the night, for Janmashtami-like events.
+- **Amrit Kala** — auspicious window, varies by nakshatra.
+
+**Implementation:**
+- Extend [src/core/muhurta.ts](src/core/muhurta.ts) with the missing computations. Day is divided into 15 muhurtas from sunrise to sunset; night similarly into 15 from sunset to nextSunrise. Each muhurta = dayLength/15.
+- Add to `DailyPanchangResult`:
+  - `vijayaMuhurta: TimePeriod`
+  - `godhuliMuhurta: TimePeriod`
+  - `nishitaMuhurta: TimePeriod`
+  - `amritKala: TimePeriod | null` (null when nakshatra doesn't have one)
+- i18n keys for all four names (en + hi).
+
+**Tests:** fixture-based ±3 min comparison against Drik, similar to existing Abhijit/Brahma tests.
+
+**Effort:** 0.5 day.
+
+---
+
+**Phase 25 completion table:**
+
+| Step | Feature | Effort | Status |
+|------|---------|--------|--------|
+| 25-1 | Eclipse detection (solar + lunar) + sutak | 1d | ⬜ |
+| 25-2 | Muhurta library completion (Vijaya, Godhuli, Nishita, Amrit) | 0.5d | ⬜ |
+
+**Total Phase 25 effort:** ~1.5 engineering days.
+
+---
+
+## Phase 26 — Diaspora & API Polish ⬜ NOT STARTED
+
+### Step 26-1 — Non-IST timezone cross-verification
+
+**What:** all Drik fixtures use IST (+330 min). Diaspora users (US Eastern, UK, Australia, Gulf) may hit edge cases around Hindu-day boundaries, DST transitions, and sunrise/sunset edge cases at higher latitudes.
+
+**Implementation:**
+- Collect Drik-verified fixtures from 5 non-IST locations: New York, London, Sydney, Dubai, Singapore. 3 dates each × 5 locations = 15 fixtures covering tithi-at-sunrise, sunrise/sunset, festival dating, Sankranti attribution.
+- Add to [tests/fixtures/drikpanchang-world.json](tests/fixtures/drikpanchang-world.json) (file already exists; currently only handful of entries).
+- Verify `options.timezone` as string (IANA zone name like `'America/New_York'`) resolves DST correctly for a date in March (spring-forward) and November (fall-back).
+- Specific risk: DST transition day has non-24h civil day; `getLocalMidnightUtc` must handle this (test for 2025-03-09 New York, 2025-11-02 New York).
+
+**Effort:** 0.75 day (mostly fixture collection + one possible DST edge case fix).
+
+### Step 26-2 — Document `getInstantPanchang` dateRule limitations
+
+**What:** `getInstantPanchang` intentionally does NOT perform canonical-time refinement (Phase 21), Sankranti transit detection, or Ekadashi viddha — those all require the full sunrise-to-nextSunrise Hindu day window. Currently [src/core/panchang.ts:170-171](src/core/panchang.ts#L170) comments this but README/API docs don't surface it.
+
+**Implementation:**
+- Expand [src/core/panchang.ts](src/core/panchang.ts) JSDoc on `getInstantPanchang` to explicitly list what festival detection features are NOT available in instant mode.
+- Add a README section: "When to use `getInstantPanchang` vs `getDailyPanchang`" with a decision table.
+- No code change — docs only.
+
+**Effort:** 0.25 day.
+
+---
+
+**Phase 26 completion table:**
+
+| Step | Focus | Effort | Status |
+|------|-------|--------|--------|
+| 26-1 | Non-IST cross-verification + DST edge cases | 0.75d | ⬜ |
+| 26-2 | Document `getInstantPanchang` dateRule gaps | 0.25d | ⬜ |
+
+**Total Phase 26 effort:** ~1 engineering day.
+
+---
+
+## Grand Total — Phases 23–26 (new work after Phase 21/22)
+
+| Phase | Focus | Effort | Tests Added (est.) |
+|-------|-------|--------|--------------------|
+| 23 | Classical Correctness Completion | 4d | ~80 |
+| 24 | Festival Coverage Expansion | 2.5d | ~40 |
+| 25 | Astronomy Expansion | 1.5d | ~20 |
+| 26 | Diaspora & API Polish | 1d | ~15 |
+| **Total** | — | **~9 engineering days** | **~155 new tests** |
+
+After all of Phases 23–26, the festival registry grows from ~25 entries to ~60+, eclipse support lands, and diaspora use is externally-verified. This is the "everything perfect" scope; each phase is independently shippable as a minor v1.x release.

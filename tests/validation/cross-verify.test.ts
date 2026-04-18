@@ -270,11 +270,10 @@ describe('DrikPanchang cross-verification', () => {
 
 // ── Festival Drik validation (Phase 19-1) ────────────────────────────────────
 //
-// Targets festivals whose date is fixed by tithi-at-sunrise (how this library
-// computes). Janmashtami, Maha Shivaratri, and Diwali/Lakshmi Puja use
-// "tithi present at midnight/sunset" in Drik's tradition and will drift up to
-// one day from the tithi-at-sunrise rule — they are intentionally omitted here
-// and documented as a known limitation in the README.
+// Per-festival `dateRule` tags in FESTIVAL_REGISTRY select the canonical time
+// at which the qualifying tithi must prevail: sunrise (default), madhyahna
+// (mid-day — e.g. Akshaya Tritiya), pradosha (sunset — e.g. Diwali Amavasya),
+// or nishita (local midnight — e.g. Janmashtami, Maha Shivaratri).
 
 type FestivalFixture = {
   _source: string;

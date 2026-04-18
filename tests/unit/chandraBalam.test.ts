@@ -70,11 +70,6 @@ describe('computeChandraBalam', () => {
       expect(computeChandraBalam(0, 1, 'en').name).toBe('Ashubha');
     });
 
-    it('sa returns Devanagari शुभ / अशुभ', () => {
-      expect(computeChandraBalam(0, 0, 'sa').name).toBe('शुभ');
-      expect(computeChandraBalam(0, 1, 'sa').name).toBe('अशुभ');
-    });
-
     it('hi returns Devanagari शुभ / अशुभ', () => {
       expect(computeChandraBalam(0, 0, 'hi').name).toBe('शुभ');
       expect(computeChandraBalam(0, 1, 'hi').name).toBe('अशुभ');

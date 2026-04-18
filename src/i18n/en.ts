@@ -82,6 +82,8 @@ export const en: PanchangTranslations = {
     holi: 'Holi',
     mahalaya_amavasya: 'Mahalaya Amavasya',
     kartika_purnima: 'Kartika Purnima',
+    sankashti_chaturthi: 'Sankashti Chaturthi',
+    onam: 'Thiru Onam',
   },
   misc: {
     purnima: 'Purnima',

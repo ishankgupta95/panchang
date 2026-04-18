@@ -80,7 +80,7 @@ import type {
  * const p = getInstantPanchang(
  *   new Date('2025-01-14T03:00:00Z'),
  *   { latitude: 23.1765, longitude: 75.7885 },  // Ujjain, India
- *   { language: 'sa' },
+ *   { language: 'hi' },
  * );
  * console.log(p.tithi.name);     // "कृष्ण चतुर्दशी"
  * console.log(p.tithi.endTime);  // Date (UTC) when this Tithi ends
@@ -173,9 +173,19 @@ export function getInstantPanchang(
     Math.floor(siderealMoon / NAKSHATRA_SPAN),
     (type) => (t.specialYogaNames as Record<string, string>)[type] ?? type,
   );
+  // Instant-mode festival detection uses the tithi-at-instant for all rules;
+  // it does not attempt canonical-time (madhyahna/pradosha/nishita/chandrodaya)
+  // refinement, transit-based Sankranti, or Ekadashi viddha — those require a
+  // full sunrise-to-nextSunrise Hindu day and are computed in `getDailyPanchang`.
   const festivals = computeFestivals(
-    tithi.index, Math.floor(siderealMoon / NAKSHATRA_SPAN),
-    chandramasa.amantaIndex, chandramasa.isAdhika, vara.index, siderealSun,
+    {
+      tithiIndex: tithi.index,
+      nakshatraIndex: Math.floor(siderealMoon / NAKSHATRA_SPAN),
+      chandraMasaIndex: chandramasa.amantaIndex,
+      isAdhika: chandramasa.isAdhika,
+      varaIndex: vara.index,
+      solarMasaIndex: Math.floor(siderealSun / 30) % 12,
+    },
     (key) => t.festivalNames[key] ?? (t.misc as Record<string, string>)[key] ?? key,
     (idx) => resolveMasaName(idx, lang),
   );
@@ -342,9 +352,75 @@ export function getDailyPanchang(
     (type) => (t.specialYogaNames as Record<string, string>)[type] ?? type,
   );
   const durMuhurtaUtc = computeDurMuhurta(sunriseUtc, sunsetUtc, vara.index);
+
+  // ── Festival computation: canonical times + transits + viddha ──
+  //
+  // Canonical-time anchors within the Hindu day (sunrise → nextSunrise).
+  // Where a kala spans a range, we anchor near its END so that a tithi which
+  // only just entered the kala isn't counted as "pervading" it. This also
+  // prevents duplicate emission on the next day when a long tithi barely
+  // overlaps into that day's kala (e.g., Amavasya spanning two pradoshas).
+  //
+  //   madhyahna   — mid-day, midpoint of sunrise-to-sunset
+  //   aparahna    — end of aparahna kala (0.8 of day-length after sunrise)
+  //   pradosha    — end of pradosha kala (sunset + ~60 min = 2.5 ghatikas)
+  //   nishita     — local midnight, midpoint of sunset-to-nextSunrise
+  //   chandrodaya — moonrise within the Hindu day (null if moon doesn't rise)
+  //   arunodaya   — 96 minutes before sunrise (Ekadashi Dashami-viddha check)
+  const dayLengthMs = sunsetUtc.getTime() - sunriseUtc.getTime();
+  const madhyahnaUtc = new Date(sunriseUtc.getTime() + dayLengthMs / 2);
+  const aparahnaUtc = new Date(sunriseUtc.getTime() + (dayLengthMs * 8) / 10);
+  const pradoshaUtc = new Date(sunsetUtc.getTime() + 60 * 60_000);
+  const nishitaUtc = new Date((sunsetUtc.getTime() + nextSunriseUtc.getTime()) / 2);
+  const arunodayaUtc = new Date(sunriseUtc.getTime() - 96 * 60_000);
+
+  const tithiAt = (d: Date) => getTithiIndexFromLons(getMoon(d), getSun(d));
+  const tithiByRule: Partial<Record<
+    'madhyahna' | 'aparahna' | 'pradosha' | 'nishita' | 'chandrodaya',
+    number
+  >> = {
+    madhyahna: tithiAt(madhyahnaUtc),
+    aparahna:  tithiAt(aparahnaUtc),
+    pradosha:  tithiAt(pradoshaUtc),
+    nishita:   tithiAt(nishitaUtc),
+  };
+
+  // Moonrise within this Hindu day (may be null if moon doesn't rise in the window)
+  const moonriseInDayUtc = getMoonrise(sunriseUtc, location);
+  if (moonriseInDayUtc && moonriseInDayUtc.getTime() < nextSunriseUtc.getTime()) {
+    tithiByRule.chandrodaya = tithiAt(moonriseInDayUtc);
+  }
+
+  // Sankranti: transit-time search. Compare Sun's rashi at sunrise vs nextSunrise;
+  // if different, a transit occurred during this Hindu day. We emit Sankranti on
+  // the day containing the transit (the unambiguous rule for sunrise-to-sunrise days).
+  const rashiAtSunrise = Math.floor(siderealSunAtSunrise / 30) % 12;
+  const rashiAtNextSunrise = Math.floor(getSun(nextSunriseUtc) / 30) % 12;
+  const sankrantiRashi: number | null =
+    rashiAtSunrise !== rashiAtNextSunrise ? rashiAtNextSunrise : null;
+
+  // Ekadashi Dashami-viddha: if tithi-at-sunrise is Ekadashi (10/25) and
+  // tithi-at-arunodaya (~96 min before sunrise) is Dashami (9/24), the Ekadashi
+  // is Dashami-viddha and the Smarta fast shifts to Dwadashi.
+  let ekadashiDashamiViddha = false;
+  if (tithiAtSunrise.index === 10 || tithiAtSunrise.index === 25) {
+    const tithiAtArunodaya = tithiAt(arunodayaUtc);
+    const dashamiIndex = tithiAtSunrise.index === 10 ? 9 : 24;
+    ekadashiDashamiViddha = tithiAtArunodaya === dashamiIndex;
+  }
+
   const festivals = computeFestivals(
-    tithiAtSunrise.index, Math.floor(siderealMoonAtSunrise / NAKSHATRA_SPAN),
-    chandramasa.amantaIndex, chandramasa.isAdhika, vara.index, siderealSunAtSunrise,
+    {
+      tithiIndex: tithiAtSunrise.index,
+      nakshatraIndex: Math.floor(siderealMoonAtSunrise / NAKSHATRA_SPAN),
+      chandraMasaIndex: chandramasa.amantaIndex,
+      isAdhika: chandramasa.isAdhika,
+      varaIndex: vara.index,
+      solarMasaIndex: rashiAtSunrise,
+      tithiByRule,
+      sankrantiRashi,
+      ekadashiDashamiViddha,
+    },
     (key) => t.festivalNames[key] ?? (t.misc as Record<string, string>)[key] ?? key,
     (idx) => resolveMasaName(idx, lang),
   );

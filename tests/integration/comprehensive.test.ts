@@ -395,7 +395,7 @@ describe('getDailyPanchang — world cities', () => {
 // ── Language support ────────────────────────────────────────────────────────
 
 describe('getDailyPanchang — language support', () => {
-  for (const lang of ['en', 'sa', 'hi'] as const) {
+  for (const lang of ['en', 'hi'] as const) {
     it(`language "${lang}" produces non-empty names`, () => {
       const r = getDailyPanchang(noonUtc('2025-01-14'), PUNE, { timezone: 330, language: lang });
       expect(r.tithis[0]!.name.length).toBeGreaterThan(0);
@@ -406,8 +406,8 @@ describe('getDailyPanchang — language support', () => {
     });
   }
 
-  it('Sanskrit names contain Devanagari characters', () => {
-    const r = getDailyPanchang(noonUtc('2025-01-14'), PUNE, { timezone: 330, language: 'sa' });
+  it('Hindi names contain Devanagari characters', () => {
+    const r = getDailyPanchang(noonUtc('2025-01-14'), PUNE, { timezone: 330, language: 'hi' });
     // Devanagari Unicode range: \u0900-\u097F
     expect(r.tithis[0]!.name).toMatch(/[\u0900-\u097F]/);
     expect(r.vara.name).toMatch(/[\u0900-\u097F]/);

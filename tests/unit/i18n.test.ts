@@ -1,14 +1,13 @@
 /**
  * Unit tests for i18n (internationalization) support.
  *
- * Verifies that all 3 language packs (en, sa, hi) have complete
+ * Verifies that both language packs (en, hi) have complete
  * and correctly-sized translation arrays, and that the resolver
  * returns correct names for all languages.
  */
 
 import { describe, it, expect } from 'vitest';
 import { en } from '../../src/i18n/en';
-import { sa } from '../../src/i18n/sa';
 import { hi } from '../../src/i18n/hi';
 import {
   getTranslations,
@@ -23,7 +22,6 @@ import {
 
 const languages = [
   { code: 'en' as const, pack: en, label: 'English' },
-  { code: 'sa' as const, pack: sa, label: 'Sanskrit' },
   { code: 'hi' as const, pack: hi, label: 'Hindi' },
 ];
 
@@ -97,10 +95,6 @@ describe('i18n translation completeness', () => {
 describe('getTranslations', () => {
   it('returns English for "en"', () => {
     expect(getTranslations('en')).toBe(en);
-  });
-
-  it('returns Sanskrit for "sa"', () => {
-    expect(getTranslations('sa')).toBe(sa);
   });
 
   it('returns Hindi for "hi"', () => {
@@ -189,10 +183,6 @@ describe('resolvePakshaName', () => {
 
   it('Krishna paksha (index >= 15) in English', () => {
     expect(resolvePakshaName(15, 'en')).toBe('Krishna');
-  });
-
-  it('Shukla paksha in Sanskrit', () => {
-    expect(resolvePakshaName(0, 'sa')).toBe('शुक्ल');
   });
 
   it('Krishna paksha in Hindi', () => {

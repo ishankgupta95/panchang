@@ -1,10 +1,9 @@
 import { en } from './en';
-import { sa } from './sa';
 import { hi } from './hi';
 import type { PanchangTranslations } from './types';
 import type { Language } from '../types/options';
 
-const TRANSLATIONS: Record<Language, PanchangTranslations> = { en, sa, hi };
+const TRANSLATIONS: Record<Language, PanchangTranslations> = { en, hi };
 
 export function getTranslations(lang: Language): PanchangTranslations {
   return TRANSLATIONS[lang] ?? en;

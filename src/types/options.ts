@@ -1,5 +1,5 @@
 export type AyanamsaType = 'lahiri' | 'raman' | 'krishnamurti';
-export type Language = 'en' | 'sa' | 'hi';
+export type Language = 'en' | 'hi';
 export type Precision = 'standard' | 'high';
 export type MasaSystem = 'purnimanta' | 'amanta';
 
