@@ -81,6 +81,12 @@ describe('i18n translation completeness', () => {
         expect(festivalCount).toBeGreaterThanOrEqual(23);
       });
 
+      it('has every festival name non-empty', () => {
+        for (const v of Object.values(pack.festivalNames)) {
+          expect(v.length).toBeGreaterThan(0);
+        }
+      });
+
       it('no translation is empty string', () => {
         for (const name of pack.tithiNames) expect(name.length).toBeGreaterThan(0);
         for (const name of pack.nakshatraNames) expect(name.length).toBeGreaterThan(0);
@@ -90,6 +96,14 @@ describe('i18n translation completeness', () => {
       });
     });
   }
+});
+
+describe('i18n parity across language packs', () => {
+  it('en and hi have identical festivalNames key sets', () => {
+    const enKeys = Object.keys(en.festivalNames).sort();
+    const hiKeys = Object.keys(hi.festivalNames).sort();
+    expect(hiKeys).toEqual(enKeys);
+  });
 });
 
 describe('getTranslations', () => {

@@ -36,7 +36,7 @@ export { computeGowriPanchangam } from './core/gowri';
 export type {
   GeoLocation,
   PanchangOptions, InstantPanchangOptions,
-  AyanamsaType, Language, Precision, MasaSystem,
+  AyanamsaType, Language, Precision, MasaSystem, FestivalRegion,
   DailyPanchangResult, InstantPanchangResult,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, MasaInfo,
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,

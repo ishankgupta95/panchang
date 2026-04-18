@@ -119,6 +119,41 @@ export const hi: PanchangTranslations = {
     guru_pradosha: 'गुरु प्रदोष',
     bhrigu_pradosha: 'भृगु प्रदोष',
     shani_pradosha: 'शनि प्रदोष',
+    // Regional Sankranti variants
+    baisakhi: 'बैसाखी',
+    vishu: 'विषु',
+    pohela_boishakh: 'पोहेला बोइशाख',
+    puthandu: 'पुथांडु',
+    makar_sankranti: 'मकर संक्रांति',
+    pongal: 'पोंगल',
+    uttarayan: 'उत्तरायण',
+    bihu: 'माघ बिहू',
+    ayyappa_makara_jyothi: 'अय्यप्पा मकर ज्योति',
+    dakshinayana: 'दक्षिणायन',
+    singh_sankranti: 'सिंह संक्रांति',
+    // Chhath Puja
+    chhath_nahay_khay: 'छठ — नहाय खाय',
+    chhath_kharna: 'छठ — खरना',
+    chhath_sandhya_arghya: 'छठ — संध्या अर्घ्य',
+    chhath_usha_arghya: 'छठ — उषा अर्घ्य',
+    // Vat Savitri
+    vat_savitri_amavasya: 'वट सावित्री (अमावस्या)',
+    vat_savitri_purnima: 'वट सावित्री (पूर्णिमा)',
+    // Upakarma (Avani Avittam)
+    yajur_upakarma: 'यजुर् उपाकर्म (आवणि अवित्तम्)',
+    rig_upakarma: 'ऋग् उपाकर्म',
+    sama_upakarma: 'साम उपाकर्म',
+    // Monthly recurring
+    masik_shivaratri: 'मासिक शिवरात्रि',
+    vinayaka_chaturthi: 'विनायक चतुर्थी',
+    // Pushya Nakshatra
+    ravi_pushya: 'रवि पुष्य',
+    guru_pushya: 'गुरु पुष्य',
+    // Month+weekday recurring
+    shravan_somvar: 'श्रावण सोमवार',
+    mangala_gauri: 'मंगला गौरी व्रत',
+    kartik_somvar: 'कार्तिक सोमवार',
+    magha_shanivar: 'माघ शनिवार',
   },
   misc: {
     purnima: 'पूर्णिमा',

@@ -186,6 +186,7 @@ export function getInstantPanchang(
       isAdhika: chandramasa.isAdhika,
       varaIndex: vara.index,
       solarMasaIndex: Math.floor(siderealSun / 30) % 12,
+      region: options?.region ?? 'all',
     },
     (key) => t.festivalNames[key] ?? (t.misc as Record<string, string>)[key] ?? key,
     (idx) => resolveMasaName(idx, lang),
@@ -517,6 +518,7 @@ export function getDailyPanchang(
           }
         : null,
       formatClock,
+      region: options.region ?? 'all',
     },
     (key) => t.festivalNames[key] ?? (t.misc as Record<string, string>)[key] ?? key,
     (idx) => resolveMasaName(idx, lang),

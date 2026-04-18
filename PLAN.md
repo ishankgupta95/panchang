@@ -4622,7 +4622,7 @@ Pradosha too has 14 named variants based on vara (weekday):
 
 ---
 
-## Phase 24 — Festival Coverage Expansion ⬜ NOT STARTED
+## Phase 24 — Festival Coverage Expansion ✅ DONE
 
 > **Goal:** Bring the festival registry from its current ~25 entries to a classically complete ~60+ entries covering regional (Tamil, Malayalam, Bengali, Marathi), recurring monthly/weekly, and composite (tithi+nakshatra or month+weekday) festivals.
 
@@ -4730,18 +4730,29 @@ Pradosha too has 14 named variants based on vara (weekday):
 
 | Step | Festival(s) | Effort | Status |
 |------|-------------|--------|--------|
-| 24-1 | Regional Sankranti names (Baisakhi, Pongal, Vishu, Bihu, etc.) | 0.5d | ⬜ |
-| 24-2 | Chhath Puja 4-day | 0.25d | ⬜ |
-| 24-3 | Avani Avittam / Upakarma (3 shakhas) | 0.5d | ⬜ |
-| 24-4 | Ayyappa Makara Jyothi | 0.1d | ⬜ |
-| 24-5 | Vat Savitri (Amavasya + Purnima) | 0.15d | ⬜ |
-| 24-6 | Masik Shivaratri (monthly) | 0.2d | ⬜ |
-| 24-7 | Vinayaka Chaturthi (monthly) | 0.15d | ⬜ |
-| 24-8 | Weekday-qualified Pradosha | (via 23-3) | ⬜ |
-| 24-9 | Ravi / Guru Pushya (docs + mirror) | 0.1d | ⬜ |
-| 24-10 | Month+weekday recurring | 0.5d | ⬜ |
+| 24-1 | Regional Sankranti names (Baisakhi, Pongal, Vishu, Bihu, etc.) | 0.5d | ✅ |
+| 24-2 | Chhath Puja 4-day | 0.25d | ✅ |
+| 24-3 | Avani Avittam / Upakarma (3 shakhas) | 0.5d | ✅ |
+| 24-4 | Ayyappa Makara Jyothi | 0.1d | ✅ (via 24-1 kerala scope) |
+| 24-5 | Vat Savitri (Amavasya + Purnima) | 0.15d | ✅ |
+| 24-6 | Masik Shivaratri (monthly) | 0.2d | ✅ |
+| 24-7 | Vinayaka Chaturthi (monthly) | 0.15d | ✅ |
+| 24-8 | Weekday-qualified Pradosha | (via 23-3) | ✅ (shipped in Phase 23-3) |
+| 24-9 | Ravi / Guru Pushya (docs + mirror) | 0.1d | ✅ (mirror in festivals) |
+| 24-10 | Month+weekday recurring | 0.5d | ✅ |
 
 **Total Phase 24 effort:** ~2.5 engineering days.
+
+**Implementation summary:**
+- New rule kinds: `nakshatra+chandraMasa` (Rig/Sama Upakarma), `chandraMasa+vara` (Shravan Somvar, Mangala Gauri, Kartik Somvar, Magha Shanivar).
+- `SANKRANTI_REGIONAL` map emits region-tagged variants alongside the canonical `sankranti` event; new `region?: FestivalRegion` option (default `'all'`) on `PanchangOptions` / `InstantPanchangOptions` filters regional variants. Always-emitted `'all'`-scoped entries: Dakshinayana (Karka), Singh Sankranti (Simha).
+- Chhath Puja: 4 sunrise/pradosha entries in Kartika Shukla 4→7.
+- Vat Savitri: Amavasya (N India) + Purnima (S India) variants in Jyeshtha.
+- Yajur Upakarma added as a Shravana-Purnima registry entry (shares the day with Raksha Bandhan).
+- Masik Shivaratri / Vinayaka Chaturthi use the existing long-tithi dedupe and are suppressed in their Maha-equivalent months.
+- Pushya Nakshatra: `ravi_pushya` / `guru_pushya` mirrored into `festivals` for UX parity with `specialYogas`.
+- New `FestivalRegion` type exported from `panchang-ts`.
+- 36 new unit/integration tests; all 4920 tests pass.
 
 ---
 

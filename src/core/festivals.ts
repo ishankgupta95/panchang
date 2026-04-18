@@ -28,13 +28,33 @@ export type FestivalDateRule =
 type AdhikaBehaviour = 'skip' | 'shift-to-nija' | 'observe-in-both';
 
 /**
- * A festival rule keyed either by (chandra-masa + tithi) or (solar-masa + nakshatra).
- * Exactly one of the two matching strategies is used per rule.
+ * Regional scope for region-specific festival variants (primarily regional
+ * Sankranti names like Pongal/Vishu/Baisakhi). `'all'` (default) emits every
+ * region's variant; narrower values filter to that region only.
+ */
+export type FestivalRegion =
+  | 'all'
+  | 'north-india'
+  | 'tamil'
+  | 'kerala'
+  | 'bengal'
+  | 'punjab'
+  | 'gujarat'
+  | 'assam'
+  | 'maharashtra';
+
+/**
+ * A festival rule keyed by one of:
+ *   - (chandra-masa + tithi)
+ *   - (solar-masa + nakshatra)
+ *   - (chandra-masa + nakshatra)        — e.g. Rig/Sama Upakarma
+ *   - (chandra-masa + vara)             — e.g. Shravan Somvar, Mangala Gauri
+ * Exactly one matching strategy is used per rule.
  */
 interface FestivalRule {
   key: string;
   type: 'major' | 'minor';
-  /** Amanta Chandra masa 0–11 for tithi-based festivals */
+  /** Amanta Chandra masa 0–11 for tithi- or chandraMasa+nakshatra/vara rules */
   masa?: number;
   /** Tithi 0–29 for tithi-based festivals */
   tithi?: number;
@@ -42,6 +62,8 @@ interface FestivalRule {
   solarMasa?: number;
   /** Nakshatra 0–26 for nakshatra-based festivals */
   nakshatra?: number;
+  /** Vara 0–6 (0=Sunday…6=Saturday) for chandraMasa+vara recurring rules */
+  vara?: number;
   /** Canonical time at which the qualifying index must hold. Defaults to `sunrise`. */
   dateRule?: FestivalDateRule;
   /** When true, emit an exclusion notice if Bhadra kala overlaps this Hindu day. */
@@ -56,6 +78,44 @@ interface FestivalRule {
    */
   namingSystem?: 'amanta' | 'purnimanta';
 }
+
+/**
+ * Regional Sankranti name registry, keyed by solar rashi index. Each rashi
+ * transit can map to multiple regional festival names (e.g. Makara → Makar
+ * Sankranti, Pongal, Uttarayan, Bihu, Ayyappa Makara Jyothi). Filtered at
+ * emit time by `ctx.region`.
+ */
+interface SankrantiRegionalRule {
+  key: string;
+  region: FestivalRegion;
+  type: 'major' | 'minor';
+}
+
+const SANKRANTI_REGIONAL: Readonly<Record<number, readonly SankrantiRegionalRule[]>> = {
+  // Mesha (0) — solar new year across regions
+  0: [
+    { key: 'baisakhi',         region: 'punjab',      type: 'major' },
+    { key: 'vishu',            region: 'kerala',      type: 'major' },
+    { key: 'pohela_boishakh',  region: 'bengal',      type: 'major' },
+    { key: 'puthandu',         region: 'tamil',       type: 'major' },
+  ],
+  // Karka (3) — Dakshinayana (Sun's southward course begins)
+  3: [
+    { key: 'dakshinayana',     region: 'all',         type: 'minor' },
+  ],
+  // Simha (4)
+  4: [
+    { key: 'singh_sankranti',  region: 'all',         type: 'minor' },
+  ],
+  // Makara (9) — Uttarayana / harvest festivals
+  9: [
+    { key: 'makar_sankranti',    region: 'north-india', type: 'major' },
+    { key: 'pongal',             region: 'tamil',       type: 'major' },
+    { key: 'uttarayan',          region: 'gujarat',     type: 'major' },
+    { key: 'bihu',               region: 'assam',       type: 'major' },
+    { key: 'ayyappa_makara_jyothi', region: 'kerala',   type: 'major' },
+  ],
+};
 
 /**
  * Registry of major pan-Indian Hindu festivals.
@@ -113,9 +173,29 @@ const FESTIVAL_REGISTRY: readonly FestivalRule[] = [
   { key: 'holi',               masa: 11, tithi: 14, type: 'major' },
   // Bhadrapada (5) — end of Pitru Paksha
   { key: 'mahalaya_amavasya',  masa: 5,  tithi: 29, type: 'major' },
+  // ── Chhath Puja (Kartika Shukla Chaturthi→Saptami) ─────────
+  { key: 'chhath_nahay_khay',       masa: 7, tithi: 3, type: 'major' },
+  { key: 'chhath_kharna',           masa: 7, tithi: 4, type: 'major' },
+  { key: 'chhath_sandhya_arghya',   masa: 7, tithi: 5, type: 'major', dateRule: 'pradosha' },
+  { key: 'chhath_usha_arghya',      masa: 7, tithi: 6, type: 'major' },
+  // ── Vat Savitri (Jyeshtha masa, N India Amavasya + S India Purnima) ──
+  { key: 'vat_savitri_amavasya', masa: 2, tithi: 29, type: 'major' },
+  { key: 'vat_savitri_purnima',  masa: 2, tithi: 14, type: 'major' },
+  // ── Yajur Upakarma (Shravana Purnima, shares the day with Raksha Bandhan) ──
+  { key: 'yajur_upakarma',       masa: 4, tithi: 14, type: 'major' },
+  // ── Month+weekday recurring (Shravan Somvar etc.) ──────────
+  { key: 'shravan_somvar',   masa: 4,  vara: 1, type: 'minor', adhikaBehaviour: 'observe-in-both' },
+  { key: 'mangala_gauri',    masa: 4,  vara: 2, type: 'minor', adhikaBehaviour: 'observe-in-both' },
+  { key: 'kartik_somvar',    masa: 7,  vara: 1, type: 'minor', adhikaBehaviour: 'observe-in-both' },
+  { key: 'magha_shanivar',   masa: 10, vara: 6, type: 'minor', adhikaBehaviour: 'observe-in-both' },
   // ── Nakshatra-based (solar-month calendar) ──────────────────
   // Onam — Shravana nakshatra in Simha solar month (Malayalam calendar).
   { key: 'onam',               solarMasa: 4, nakshatra: 21, type: 'major' },
+  // ── Nakshatra + Chandra-masa (Upakarma variants) ─────────────
+  // Rig Upakarma — Shravana nakshatra (21) in Shravana chandra masa (4).
+  { key: 'rig_upakarma',       masa: 4, nakshatra: 21, type: 'major' },
+  // Sama Upakarma — Hasta nakshatra (12) in Bhadrapada chandra masa (5).
+  { key: 'sama_upakarma',      masa: 5, nakshatra: 12, type: 'major' },
 ];
 
 /**
@@ -220,6 +300,13 @@ export interface FestivalComputeContext {
   bhadra?: { start: Date; end: Date } | null;
   /** Format callback for Bhadra end time — already offset-adjusted local display. */
   formatClock?: (d: Date) => string;
+  /**
+   * Regional scope for regional-Sankranti variants (Pongal, Vishu, Baisakhi,
+   * etc.). Defaults to `'all'` — every region's variant is emitted when the
+   * underlying Sankranti fires. Narrower values filter to that region only.
+   * Region `'all'` tagged entries (Dakshinayana, Singh Sankranti) always emit.
+   */
+  region?: FestivalRegion;
 }
 
 function ekadashiNameKey(masaIndex: number, paksha: 0 | 1, isAdhika: boolean): string {
@@ -281,6 +368,18 @@ export function computeFestivals(
     let match = false;
     if (rule.nakshatra !== undefined && rule.solarMasa !== undefined) {
       match = rule.solarMasa === ctx.solarMasaIndex && rule.nakshatra === ctx.nakshatraIndex;
+    } else if (rule.nakshatra !== undefined && rule.masa !== undefined) {
+      // Nakshatra + Chandra-masa composite (Rig/Sama Upakarma).
+      const masaMatches =
+        rule.masa === ctx.chandraMasaIndex &&
+        (adhikaBehaviour !== 'shift-to-nija' || !ctx.isAdhika);
+      match = masaMatches && rule.nakshatra === ctx.nakshatraIndex;
+    } else if (rule.vara !== undefined && rule.masa !== undefined) {
+      // Chandra-masa + Vara recurring (Shravan Somvar, Mangala Gauri, …).
+      const masaMatches =
+        rule.masa === ctx.chandraMasaIndex &&
+        (adhikaBehaviour !== 'shift-to-nija' || !ctx.isAdhika);
+      match = masaMatches && rule.vara === ctx.varaIndex;
     } else if (rule.masa !== undefined && rule.tithi !== undefined) {
       const masaMatches =
         rule.masa === ctx.chandraMasaIndex &&
@@ -390,6 +489,55 @@ export function computeFestivals(
     results.push({ name: nameResolver('sankashti_chaturthi'), type: 'major' });
   }
 
+  // ── Masik Shivaratri (monthly) — Krishna Chaturdashi (28) at nishita ──
+  // Suppressed in Nija Magha (where Maha Shivaratri already fires).
+  const nishitaTithi = tithiForRule('nishita');
+  if (nishitaTithi === 28) {
+    const isMahaShivaratriMonth = !ctx.isAdhika && ctx.chandraMasaIndex === 10;
+    if (!isMahaShivaratriMonth) {
+      // Long-tithi dedupe parallel to the registry loop: suppress today if
+      // tithi started during today's kala AND yesterday's kala already held it.
+      const startTithi = ctx.tithiByRuleStart?.nishita;
+      const priorEndTithi = ctx.priorDayTithiByRule?.nishita;
+      const suppressed =
+        startTithi !== undefined &&
+        startTithi !== 28 &&
+        priorEndTithi === 28;
+      if (!suppressed) {
+        results.push({ name: nameResolver('masik_shivaratri'), type: 'minor' });
+      }
+    }
+  }
+
+  // ── Vinayaka Chaturthi (monthly) — Shukla Chaturthi (3) at madhyahna ──
+  // Suppressed in Nija Bhadrapada (where Ganesh Chaturthi already fires).
+  const madhyahnaTithi = tithiForRule('madhyahna');
+  if (madhyahnaTithi === 3) {
+    const isGaneshChaturthiMonth = !ctx.isAdhika && ctx.chandraMasaIndex === 5;
+    if (!isGaneshChaturthiMonth) {
+      const startTithi = ctx.tithiByRuleStart?.madhyahna;
+      const priorEndTithi = ctx.priorDayTithiByRule?.madhyahna;
+      const suppressed =
+        startTithi !== undefined &&
+        startTithi !== 3 &&
+        priorEndTithi === 3;
+      if (!suppressed) {
+        results.push({ name: nameResolver('vinayaka_chaturthi'), type: 'minor' });
+      }
+    }
+  }
+
+  // ── Ravi / Guru Pushya Yoga (mirror into festivals for UX) ──
+  // The same detection lives in `computeSpecialYogas`; mirroring here lets
+  // apps surface these as "festival-like" auspicious days without extra plumbing.
+  if (ctx.nakshatraIndex === 7) {
+    if (ctx.varaIndex === 0) {
+      results.push({ name: nameResolver('ravi_pushya'), type: 'minor' });
+    } else if (ctx.varaIndex === 4) {
+      results.push({ name: nameResolver('guru_pushya'), type: 'minor' });
+    }
+  }
+
   // ── Pradosha Vrata — Shukla/Krishna Trayodashi at pradosha-kala ──
   const pradoshaTithi = tithiForRule('pradosha');
   if (pradoshaTithi === 12 || pradoshaTithi === 27) {
@@ -411,6 +559,22 @@ export function computeFestivals(
       type: 'sankranti',
       description: rashiName,
     });
+
+    // Regional Sankranti variants (Pongal, Vishu, Baisakhi, Bihu, …).
+    // Emitted as additional type-'sankranti' entries so consumers can filter
+    // or display them alongside the canonical Sankranti event.
+    const region: FestivalRegion = ctx.region ?? 'all';
+    const regionalRules = SANKRANTI_REGIONAL[ctx.sankrantiRashi];
+    if (regionalRules) {
+      for (const r of regionalRules) {
+        if (region !== 'all' && r.region !== 'all' && r.region !== region) continue;
+        results.push({
+          name: nameResolver(r.key),
+          type: 'sankranti',
+          description: rashiName,
+        });
+      }
+    }
   }
 
   return results;

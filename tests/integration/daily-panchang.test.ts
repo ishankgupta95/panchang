@@ -80,3 +80,26 @@ describe('getDailyPanchang — India fixture regression', () => {
 describe('getDailyPanchang — World fixture regression', () => {
   runFixtureSuite(worldFixtures as Fixture[]);
 });
+
+describe('getDailyPanchang — regional Sankranti (Phase 24-1)', () => {
+  const CHENNAI = { latitude: 13.0827, longitude: 80.2707 };
+  const makarDay = dateAtNoonUtc('2025-01-14'); // Makar Sankranti day
+
+  it('region="all" emits pongal + makar_sankranti + bihu alongside canonical sankranti', () => {
+    const r = getDailyPanchang(makarDay, CHENNAI, { timezone: 330 });
+    const names = r.festivals.map(f => f.name);
+    expect(names).toContain('Sankranti');
+    expect(names).toContain('Pongal');
+    expect(names).toContain('Makar Sankranti');
+    expect(names).toContain('Magh Bihu');
+    expect(names).toContain('Ayyappa Makara Jyothi');
+  });
+
+  it('region="tamil" scopes regional variants to Tamil + "all"', () => {
+    const r = getDailyPanchang(makarDay, CHENNAI, { timezone: 330, region: 'tamil' });
+    const names = r.festivals.map(f => f.name);
+    expect(names).toContain('Pongal');
+    expect(names).not.toContain('Makar Sankranti');
+    expect(names).not.toContain('Ayyappa Makara Jyothi');
+  });
+});

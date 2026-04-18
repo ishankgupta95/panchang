@@ -470,6 +470,235 @@ describe('computeFestivals', () => {
     expect(r.some(f => f.name === 'translated_diwali')).toBe(true);
   });
 
+  describe('Phase 24-1: Regional Sankranti', () => {
+    it('emits Pongal + Makar Sankranti + Bihu + Uttarayan + Ayyappa on Makara (rashi 9)', () => {
+      const r = computeFestivals(ctx({ sankrantiRashi: 9 }), resolver, rashiResolver);
+      const names = r.map(f => f.name);
+      expect(names).toContain('sankranti');
+      expect(names).toContain('makar_sankranti');
+      expect(names).toContain('pongal');
+      expect(names).toContain('uttarayan');
+      expect(names).toContain('bihu');
+      expect(names).toContain('ayyappa_makara_jyothi');
+    });
+
+    it('emits Baisakhi + Vishu + Puthandu + Pohela Boishakh on Mesha (rashi 0)', () => {
+      const r = computeFestivals(ctx({ sankrantiRashi: 0 }), resolver, rashiResolver);
+      const names = r.map(f => f.name);
+      expect(names).toContain('baisakhi');
+      expect(names).toContain('vishu');
+      expect(names).toContain('puthandu');
+      expect(names).toContain('pohela_boishakh');
+    });
+
+    it('emits Dakshinayana on Karka (rashi 3) regardless of region', () => {
+      const r = computeFestivals(ctx({ sankrantiRashi: 3, region: 'tamil' }), resolver, rashiResolver);
+      expect(r.some(f => f.name === 'dakshinayana')).toBe(true);
+    });
+
+    it('region=tamil filters to tamil + "all" variants only', () => {
+      const r = computeFestivals(ctx({ sankrantiRashi: 9, region: 'tamil' }), resolver, rashiResolver);
+      const names = r.map(f => f.name);
+      expect(names).toContain('pongal');
+      expect(names).not.toContain('makar_sankranti');
+      expect(names).not.toContain('bihu');
+      expect(names).not.toContain('ayyappa_makara_jyothi');
+    });
+
+    it('region=kerala picks Vishu on Mesha and Ayyappa on Makara', () => {
+      const mesha = computeFestivals(ctx({ sankrantiRashi: 0, region: 'kerala' }), resolver, rashiResolver);
+      expect(mesha.some(f => f.name === 'vishu')).toBe(true);
+      expect(mesha.some(f => f.name === 'baisakhi')).toBe(false);
+
+      const makara = computeFestivals(ctx({ sankrantiRashi: 9, region: 'kerala' }), resolver, rashiResolver);
+      expect(makara.some(f => f.name === 'ayyappa_makara_jyothi')).toBe(true);
+      expect(makara.some(f => f.name === 'pongal')).toBe(false);
+    });
+
+    it('region=all (default) emits every regional variant', () => {
+      const r = computeFestivals(ctx({ sankrantiRashi: 9 }), resolver, rashiResolver);
+      expect(r.filter(f => f.type === 'sankranti').length).toBeGreaterThanOrEqual(6);
+    });
+  });
+
+  describe('Phase 24-2: Chhath Puja', () => {
+    it('Nahay Khay — Kartika (7) Shukla Chaturthi (3)', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 3, chandraMasaIndex: 7 }), resolver);
+      expect(r.some(f => f.name === 'chhath_nahay_khay')).toBe(true);
+    });
+    it('Kharna — Kartika (7) Shukla Panchami (4)', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 4, chandraMasaIndex: 7 }), resolver);
+      expect(r.some(f => f.name === 'chhath_kharna')).toBe(true);
+    });
+    it('Sandhya Arghya — uses pradosha tithi', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 4, chandraMasaIndex: 7, tithiByRule: { pradosha: 5 } }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'chhath_sandhya_arghya')).toBe(true);
+    });
+    it('Usha Arghya — Kartika (7) Shukla Shashthi (wait — Saptami=6)', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 6, chandraMasaIndex: 7 }), resolver);
+      expect(r.some(f => f.name === 'chhath_usha_arghya')).toBe(true);
+    });
+  });
+
+  describe('Phase 24-3: Upakarma (Avani Avittam)', () => {
+    it('Yajur Upakarma — Shravana Purnima (masa 4, tithi 14)', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 14, chandraMasaIndex: 4 }), resolver);
+      expect(r.some(f => f.name === 'yajur_upakarma')).toBe(true);
+    });
+    it('Rig Upakarma — Shravana nakshatra (21) in Shravana masa (4)', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 4, nakshatraIndex: 21, tithiIndex: 0 }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'rig_upakarma')).toBe(true);
+    });
+    it('Rig Upakarma does not fire outside Shravana masa', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 3, nakshatraIndex: 21, tithiIndex: 0 }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'rig_upakarma')).toBe(false);
+    });
+    it('Sama Upakarma — Hasta nakshatra (12) in Bhadrapada masa (5)', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 5, nakshatraIndex: 12, tithiIndex: 0 }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'sama_upakarma')).toBe(true);
+    });
+  });
+
+  describe('Phase 24-5: Vat Savitri', () => {
+    it('Amavasya variant — Jyeshtha (2) Amavasya (29)', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 29, chandraMasaIndex: 2 }), resolver);
+      expect(r.some(f => f.name === 'vat_savitri_amavasya')).toBe(true);
+    });
+    it('Purnima variant — Jyeshtha (2) Purnima (14)', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 14, chandraMasaIndex: 2 }), resolver);
+      expect(r.some(f => f.name === 'vat_savitri_purnima')).toBe(true);
+    });
+    it('does not fire in other months', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 29, chandraMasaIndex: 3 }), resolver);
+      expect(r.some(f => f.name === 'vat_savitri_amavasya')).toBe(false);
+    });
+  });
+
+  describe('Phase 24-6: Masik Shivaratri (monthly)', () => {
+    it('emits on Krishna Chaturdashi (28) at nishita', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 27, chandraMasaIndex: 2, tithiByRule: { nishita: 28 } }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'masik_shivaratri')).toBe(true);
+    });
+    it('is suppressed in Nija Magha (Maha Shivaratri month)', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 27, chandraMasaIndex: 10, tithiByRule: { nishita: 28 } }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'masik_shivaratri')).toBe(false);
+      expect(r.some(f => f.name === 'maha_shivaratri')).toBe(true);
+    });
+    it('still fires in Adhika Magha (Maha Shivaratri skipped)', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 27, chandraMasaIndex: 10, isAdhika: true, tithiByRule: { nishita: 28 } }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'masik_shivaratri')).toBe(true);
+      expect(r.some(f => f.name === 'maha_shivaratri')).toBe(false);
+    });
+  });
+
+  describe('Phase 24-7: Vinayaka Chaturthi (monthly)', () => {
+    it('emits on Shukla Chaturthi (3) at madhyahna', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 2, chandraMasaIndex: 2, tithiByRule: { madhyahna: 3 } }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'vinayaka_chaturthi')).toBe(true);
+    });
+    it('is suppressed in Nija Bhadrapada (Ganesh Chaturthi month)', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 2, chandraMasaIndex: 5, tithiByRule: { madhyahna: 3 } }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'vinayaka_chaturthi')).toBe(false);
+      expect(r.some(f => f.name === 'ganesh_chaturthi')).toBe(true);
+    });
+  });
+
+  describe('Phase 24-9: Pushya Nakshatra mirror', () => {
+    it('emits ravi_pushya on Sunday (vara 0) + Pushya (nakshatra 7)', () => {
+      const r = computeFestivals(
+        ctx({ nakshatraIndex: 7, varaIndex: 0, tithiIndex: 1 }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'ravi_pushya')).toBe(true);
+    });
+    it('emits guru_pushya on Thursday (vara 4) + Pushya', () => {
+      const r = computeFestivals(
+        ctx({ nakshatraIndex: 7, varaIndex: 4, tithiIndex: 1 }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'guru_pushya')).toBe(true);
+    });
+    it('does not emit on Pushya with a non-qualifying vara', () => {
+      const r = computeFestivals(
+        ctx({ nakshatraIndex: 7, varaIndex: 2, tithiIndex: 1 }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'ravi_pushya' || f.name === 'guru_pushya')).toBe(false);
+    });
+  });
+
+  describe('Phase 24-10: Month+weekday recurring', () => {
+    it('Shravan Somvar — Shravana masa (4) + Monday (vara 1)', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 4, varaIndex: 1, tithiIndex: 1 }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'shravan_somvar')).toBe(true);
+    });
+    it('Mangala Gauri — Shravana (4) + Tuesday (vara 2)', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 4, varaIndex: 2, tithiIndex: 1 }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'mangala_gauri')).toBe(true);
+    });
+    it('Kartik Somvar — Kartika (7) + Monday (vara 1)', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 7, varaIndex: 1, tithiIndex: 1 }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'kartik_somvar')).toBe(true);
+    });
+    it('Magha Shanivar — Magha (10) + Saturday (vara 6)', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 10, varaIndex: 6, tithiIndex: 1 }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'magha_shanivar')).toBe(true);
+    });
+    it('month-weekday rules also fire in Adhika (observe-in-both)', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 4, varaIndex: 1, tithiIndex: 1, isAdhika: true }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'shravan_somvar')).toBe(true);
+    });
+    it('does not fire on a different weekday', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 4, varaIndex: 3, tithiIndex: 1 }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'shravan_somvar')).toBe(false);
+    });
+  });
+
   it('returns empty when nothing matches', () => {
     expect(computeFestivals(ctx({ tithiIndex: 1 }), resolver)).toEqual([]);
   });

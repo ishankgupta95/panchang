@@ -1,5 +1,5 @@
 export type { GeoLocation } from './location';
-export type { PanchangOptions, InstantPanchangOptions, AyanamsaType, Language, Precision, MasaSystem } from './options';
+export type { PanchangOptions, InstantPanchangOptions, AyanamsaType, Language, Precision, MasaSystem, FestivalRegion } from './options';
 export type {
   TimePeriod, TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo,
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,

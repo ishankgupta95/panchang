@@ -121,6 +121,41 @@ export const en: PanchangTranslations = {
     guru_pradosha: 'Guru Pradosha',
     bhrigu_pradosha: 'Bhrigu Pradosha',
     shani_pradosha: 'Shani Pradosha',
+    // Regional Sankranti variants
+    baisakhi: 'Baisakhi',
+    vishu: 'Vishu',
+    pohela_boishakh: 'Pohela Boishakh',
+    puthandu: 'Puthandu',
+    makar_sankranti: 'Makar Sankranti',
+    pongal: 'Pongal',
+    uttarayan: 'Uttarayan',
+    bihu: 'Magh Bihu',
+    ayyappa_makara_jyothi: 'Ayyappa Makara Jyothi',
+    dakshinayana: 'Dakshinayana',
+    singh_sankranti: 'Singh Sankranti',
+    // Chhath Puja (4-day, Kartika Shukla Chaturthi→Saptami)
+    chhath_nahay_khay: 'Chhath — Nahay Khay',
+    chhath_kharna: 'Chhath — Kharna',
+    chhath_sandhya_arghya: 'Chhath — Sandhya Arghya',
+    chhath_usha_arghya: 'Chhath — Usha Arghya',
+    // Vat Savitri
+    vat_savitri_amavasya: 'Vat Savitri (Amavasya)',
+    vat_savitri_purnima: 'Vat Savitri (Purnima)',
+    // Upakarma (Avani Avittam) — 3 Vedic shakha variants
+    yajur_upakarma: 'Yajur Upakarma (Avani Avittam)',
+    rig_upakarma: 'Rig Upakarma',
+    sama_upakarma: 'Sama Upakarma',
+    // Monthly recurring
+    masik_shivaratri: 'Masik Shivaratri',
+    vinayaka_chaturthi: 'Vinayaka Chaturthi',
+    // Pushya Nakshatra (mirrored from specialYogas for UX)
+    ravi_pushya: 'Ravi Pushya',
+    guru_pushya: 'Guru Pushya',
+    // Month+weekday recurring
+    shravan_somvar: 'Shravan Somvar',
+    mangala_gauri: 'Mangala Gauri Vrat',
+    kartik_somvar: 'Kartik Somvar',
+    magha_shanivar: 'Magha Shanivar',
   },
   misc: {
     purnima: 'Purnima',
