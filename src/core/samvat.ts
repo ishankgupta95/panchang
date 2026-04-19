@@ -3,7 +3,7 @@ import type { SamvatInfo } from '../types/elements';
 /**
  * Compute the Vikram Samvat and Shaka Samvat year for a given UTC date.
  *
- * Both eras share the same new-year point: Chaitra Shukla Pratipad, which
+ * Both eras share the same new-year point: Chaitra Shukla Pratipada, which
  * falls in late March or April each Gregorian year.
  *
  * Approximation used: months 1–3 (Jan–Mar) are before the new year;

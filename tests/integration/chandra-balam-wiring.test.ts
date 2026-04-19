@@ -30,10 +30,10 @@ describe('Chandra Balam wiring — daily panchang', () => {
     expect(r.chandraBalam!.house).toBe(expectedHouse);
   });
 
-  it('localizes name when language is set to sa', () => {
+  it('localizes name when language is set to hi', () => {
     const r = getDailyPanchang(
       NOON_2025_01_14, DELHI,
-      { timezone: 330, janmaRashi: 0, language: 'sa' },
+      { timezone: 330, janmaRashi: 0, language: 'hi' },
     );
     expect(['शुभ', 'अशुभ']).toContain(r.chandraBalam!.name);
   });

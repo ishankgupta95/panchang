@@ -3,13 +3,13 @@ import { computeVara } from '../../src/core/vara';
 
 // Minimal vara names for testing (index matches day of week)
 const VARA_NAMES = [
-  { name: 'Ravivara', short: 'Ravi' },    // 0 = Sunday
-  { name: 'Somavara', short: 'Soma' },    // 1 = Monday
-  { name: 'Mangalavara', short: 'Mangal' }, // 2 = Tuesday
-  { name: 'Budhavara', short: 'Budh' },   // 3 = Wednesday
-  { name: 'Guruvara', short: 'Guru' },    // 4 = Thursday
-  { name: 'Shukravara', short: 'Shukra' }, // 5 = Friday
-  { name: 'Shanivara', short: 'Shani' },  // 6 = Saturday
+  { name: 'Raviwara', short: 'Ravi' },    // 0 = Sunday
+  { name: 'Somawara', short: 'Soma' },    // 1 = Monday
+  { name: 'Mangalawara', short: 'Mangal' }, // 2 = Tuesday
+  { name: 'Budhawara', short: 'Budh' },   // 3 = Wednesday
+  { name: 'Guruwara', short: 'Guru' },    // 4 = Thursday
+  { name: 'Shukrawara', short: 'Shukra' }, // 5 = Friday
+  { name: 'Shaniwara', short: 'Shani' },  // 6 = Saturday
 ] as const;
 
 // Jan 8, 2024 = Monday (Jan 1 2024 is Monday, +7 days is also Monday)
@@ -49,14 +49,14 @@ describe('computeVara — name resolution', () => {
   it('returns correct localized name and shortName', () => {
     const moment = new Date('2024-01-08T07:00:00Z'); // Monday post-sunrise
     const vara = computeVara(moment, MONDAY_SUNRISE, VARA_NAMES);
-    expect(vara.name).toBe('Somavara');
+    expect(vara.name).toBe('Somawara');
     expect(vara.shortName).toBe('Soma');
   });
 
   it('pre-sunrise returns previous day name', () => {
     const moment = new Date('2024-01-08T05:00:00Z'); // pre-sunrise → Sunday
     const vara = computeVara(moment, MONDAY_SUNRISE, VARA_NAMES);
-    expect(vara.name).toBe('Ravivara');
+    expect(vara.name).toBe('Raviwara');
     expect(vara.shortName).toBe('Ravi');
   });
 });

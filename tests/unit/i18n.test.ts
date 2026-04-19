@@ -1,14 +1,13 @@
 /**
  * Unit tests for i18n (internationalization) support.
  *
- * Verifies that all 3 language packs (en, sa, hi) have complete
+ * Verifies that both language packs (en, hi) have complete
  * and correctly-sized translation arrays, and that the resolver
  * returns correct names for all languages.
  */
 
 import { describe, it, expect } from 'vitest';
 import { en } from '../../src/i18n/en';
-import { sa } from '../../src/i18n/sa';
 import { hi } from '../../src/i18n/hi';
 import {
   getTranslations,
@@ -23,7 +22,6 @@ import {
 
 const languages = [
   { code: 'en' as const, pack: en, label: 'English' },
-  { code: 'sa' as const, pack: sa, label: 'Sanskrit' },
   { code: 'hi' as const, pack: hi, label: 'Hindi' },
 ];
 
@@ -83,6 +81,12 @@ describe('i18n translation completeness', () => {
         expect(festivalCount).toBeGreaterThanOrEqual(23);
       });
 
+      it('has every festival name non-empty', () => {
+        for (const v of Object.values(pack.festivalNames)) {
+          expect(v.length).toBeGreaterThan(0);
+        }
+      });
+
       it('no translation is empty string', () => {
         for (const name of pack.tithiNames) expect(name.length).toBeGreaterThan(0);
         for (const name of pack.nakshatraNames) expect(name.length).toBeGreaterThan(0);
@@ -94,13 +98,17 @@ describe('i18n translation completeness', () => {
   }
 });
 
+describe('i18n parity across language packs', () => {
+  it('en and hi have identical festivalNames key sets', () => {
+    const enKeys = Object.keys(en.festivalNames).sort();
+    const hiKeys = Object.keys(hi.festivalNames).sort();
+    expect(hiKeys).toEqual(enKeys);
+  });
+});
+
 describe('getTranslations', () => {
   it('returns English for "en"', () => {
     expect(getTranslations('en')).toBe(en);
-  });
-
-  it('returns Sanskrit for "sa"', () => {
-    expect(getTranslations('sa')).toBe(sa);
   });
 
   it('returns Hindi for "hi"', () => {
@@ -118,8 +126,8 @@ describe('resolveTithiName', () => {
     });
   }
 
-  it('Shukla Pratipad (index 0) in English', () => {
-    expect(resolveTithiName(0, 'en')).toContain('Pratipad');
+  it('Shukla Pratipada (index 0) in English', () => {
+    expect(resolveTithiName(0, 'en')).toContain('Pratipada');
   });
 
   it('Purnima (index 14) in English', () => {
@@ -189,10 +197,6 @@ describe('resolvePakshaName', () => {
 
   it('Krishna paksha (index >= 15) in English', () => {
     expect(resolvePakshaName(15, 'en')).toBe('Krishna');
-  });
-
-  it('Shukla paksha in Sanskrit', () => {
-    expect(resolvePakshaName(0, 'sa')).toBe('शुक्ल');
   });
 
   it('Krishna paksha in Hindi', () => {

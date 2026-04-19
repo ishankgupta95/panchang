@@ -130,7 +130,7 @@ export interface HoraInfo {
 // ── Samvat (Hindu year eras) ──────────────────────────
 
 export interface SamvatInfo {
-  /** Vikram Samvat year (increments at Chaitra Shukla Pratipad ≈ April) */
+  /** Vikram Samvat year (increments at Chaitra Shukla Pratipada ≈ April) */
   vikramSamvat: number;
   /** Shaka Samvat year (same new-year point, offset 135 years behind VS) */
   shakaSamvat: number;
@@ -147,6 +147,49 @@ export interface SpecialYogaInfo {
 
 export interface FestivalInfo {
   name: string;
-  type: 'major' | 'minor' | 'ekadashi' | 'pradosha' | 'sankranti';
+  type:
+    | 'major'
+    | 'minor'
+    | 'ekadashi'
+    | 'smarta_ekadashi'
+    | 'vaishnava_ekadashi'
+    | 'pradosha'
+    | 'sankranti'
+    | 'eclipse';
   description?: string;
+  /** Smarta-only: when Ekadashi is Dashami-viddha, the Dwadashi fast day. */
+  deferralDate?: Date;
+}
+
+// ── Eclipse (Grahan) ─────────────────────────────────
+
+export type EclipseSubtype = 'partial' | 'total' | 'annular' | 'penumbral';
+
+export interface EclipseInfo {
+  kind: 'solar' | 'lunar';
+  subtype: EclipseSubtype;
+  /** UTC time the eclipse's observable phase begins. */
+  start: Date;
+  /** UTC time of greatest eclipse. */
+  peak: Date;
+  /** UTC time the eclipse's observable phase ends. */
+  end: Date;
+  /** True when the body is above the horizon at peak for the observer's location. */
+  visibleFromLocation: boolean;
+  /** Fraction of the disc obscured at peak, range [0, 1]. */
+  magnitude: number;
+  /** Pre-eclipse impurity window start (sutak). */
+  sutakStart: Date;
+  /** End of sutak — coincides with eclipse end (moksha). */
+  sutakEnd: Date;
+  description: string;
+}
+
+// ── Bhadra Kala (Vishti karana window) ───────────────
+
+export interface BhadraInfo {
+  start: Date;
+  end: Date;
+  location: 'earth' | 'heaven' | 'paatal';
+  isActive: boolean;
 }

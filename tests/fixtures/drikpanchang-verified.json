@@ -7,10 +7,10 @@
     "timezone": 330,
     "expected": {
       "varaEnglish": "Tuesday",
-      "vara": "Mangalavara",
-      "tithiAtSunrise": "Krishna Pratipad",
+      "vara": "Mangalawara",
+      "tithiAtSunrise": "Krishna Pratipada",
       "nakshatraAtSunrise": "Punarvasu",
-      "yogaAtSunrise": "Vishkamba",
+      "yogaAtSunrise": "Vishkambha",
       "karanaAtSunrise": "Balava",
       "paksha": "Krishna",
       "sunriseHHMM": "07:15",
@@ -38,7 +38,7 @@
     "timezone": 330,
     "expected": {
       "varaEnglish": "Wednesday",
-      "vara": "Budhavara",
+      "vara": "Budhawara",
       "tithiAtSunrise": "Shukla Dwitiya",
       "nakshatraAtSunrise": "Uttara Ashadha",
       "yogaAtSunrise": "Vyaghata",
@@ -69,9 +69,9 @@
     "timezone": 330,
     "expected": {
       "varaEnglish": "Wednesday",
-      "vara": "Budhavara",
+      "vara": "Budhawara",
       "tithiAtSunrise": "Krishna Dwadashi",
-      "nakshatraAtSunrise": "Dhanishta",
+      "nakshatraAtSunrise": "Dhanishtha",
       "yogaAtSunrise": "Siddha",
       "karanaAtSunrise": "Kaulava",
       "paksha": "Krishna",
@@ -100,7 +100,7 @@
     "timezone": 330,
     "expected": {
       "varaEnglish": "Saturday",
-      "vara": "Shanivara",
+      "vara": "Shaniwara",
       "tithiAtSunrise": "Purnima",
       "nakshatraAtSunrise": "Hasta",
       "yogaAtSunrise": "Vyaghata",
@@ -131,7 +131,7 @@
     "timezone": 330,
     "expected": {
       "varaEnglish": "Friday",
-      "vara": "Shukravara",
+      "vara": "Shukrawara",
       "tithiAtSunrise": "Krishna Saptami",
       "nakshatraAtSunrise": "Ashwini",
       "yogaAtSunrise": "Ganda",
@@ -162,7 +162,7 @@
     "timezone": 330,
     "expected": {
       "varaEnglish": "Monday",
-      "vara": "Somavara",
+      "vara": "Somawara",
       "tithiAtSunrise": "Krishna Chaturdashi",
       "nakshatraAtSunrise": "Hasta",
       "yogaAtSunrise": "Vaidhriti",
@@ -189,7 +189,7 @@
     "timezone": 330,
     "expected": {
       "varaEnglish": "Sunday",
-      "vara": "Ravivara",
+      "vara": "Raviwara",
       "tithiAtSunrise": "Shukla Ekadashi",
       "nakshatraAtSunrise": "Purva Bhadrapada",
       "yogaAtSunrise": "Vyaghata",
@@ -216,7 +216,7 @@
     "timezone": 330,
     "expected": {
       "varaEnglish": "Monday",
-      "vara": "Somavara",
+      "vara": "Somawara",
       "tithiAtSunrise": "Shukla Dwadashi",
       "nakshatraAtSunrise": "Magha",
       "yogaAtSunrise": "Shula",

@@ -5,7 +5,7 @@ const resolver = (type: string) => type;
 
 describe('computeSpecialYogas', () => {
   describe('Amrit Siddhi Yoga', () => {
-    it('detects Sunday + Shukla Pratipad (tithi 0, number 1)', () => {
+    it('detects Sunday + Shukla Pratipada (tithi 0, number 1)', () => {
       const yogas = computeSpecialYogas(0, 0, 10, resolver);
       expect(yogas.some(y => y.type === 'amrit_siddhi')).toBe(true);
     });
@@ -81,7 +81,7 @@ describe('computeSpecialYogas', () => {
 
   it('can return multiple yogas simultaneously', () => {
     // Sunday + Pushya(7): Ravi Pushya + Sarvartha Siddhi (Sunday has Pushya)
-    // + Amrit Siddhi if tithi matches (use tithi 0 = Pratipad, number 1 for Sunday)
+    // + Amrit Siddhi if tithi matches (use tithi 0 = Pratipada, number 1 for Sunday)
     const yogas = computeSpecialYogas(0, 0, 7, resolver);
     expect(yogas.length).toBeGreaterThanOrEqual(2);
     const types = yogas.map(y => y.type);

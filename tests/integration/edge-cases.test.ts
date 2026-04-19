@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getDailyPanchang, getInstantPanchang } from '../../src/core/panchang';
+import { computeSunrise } from '../../src/astronomy/sunrise';
 import { PanchangError } from '../../src/types/errors';
 
 // Use noon UTC so getDate() is unambiguous in any system timezone
@@ -13,15 +14,18 @@ const NYC  = { latitude: 40.7128, longitude: -74.006 };
 const TROMSO = { latitude: 69.65, longitude: 18.96 };
 
 describe('edge cases', () => {
-  it('Tromsø in June throws PanchangError NO_SUNRISE (midnight sun)', () => {
-    expect(() =>
-      getDailyPanchang(noonUtc(2025, 6, 21), TROMSO, { timezone: 120 }),
-    ).toThrow(PanchangError);
+  it('Tromsø in June returns null (midnight sun — Hindu day undefined)', () => {
+    const result = getDailyPanchang(noonUtc(2025, 6, 21), TROMSO, { timezone: 120 });
+    expect(result).toBeNull();
+  });
 
+  it('low-level computeSunrise still throws PanchangError NO_SUNRISE for polar callers', () => {
+    // Direct callers of the low-level astronomy primitive still get the
+    // typed error; only the high-level `getDailyPanchang` surface returns null.
+    expect(() => computeSunrise(noonUtc(2025, 6, 21), TROMSO)).toThrow(PanchangError);
     try {
-      getDailyPanchang(noonUtc(2025, 6, 21), TROMSO, { timezone: 120 });
+      computeSunrise(noonUtc(2025, 6, 21), TROMSO);
     } catch (e) {
-      expect(e).toBeInstanceOf(PanchangError);
       expect((e as PanchangError).code).toBe('NO_SUNRISE');
     }
   });

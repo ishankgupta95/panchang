@@ -2,7 +2,7 @@
  * Unit tests for Panchaka computation.
  *
  * Panchaka is true when the Moon is in the last 5 nakshatras
- * (Dhanishta 3rd pada through Revati) — sidereal Moon longitude >= 300°.
+ * (Dhanishtha 3rd pada through Revati) — sidereal Moon longitude >= 300°.
  */
 
 import { describe, it, expect } from 'vitest';

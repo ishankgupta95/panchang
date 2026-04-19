@@ -1,6 +1,6 @@
 [
   {
-    "_note": "Library-baseline fixtures. varaEnglish and sunrise/sunset times verified against DrikPanchang (±2 min tolerance).",
+    "_note": "DrikPanchang.com — full Drik verification (scraped 2026-04-19). All `expected.tithiAtSunrise`, `nakshatraAtSunrise`, and `chandramasaName` values were re-fetched from Drik for each unique date and confirmed to match. Sunrise/sunset HH:MM are library-precise (sub-minute) but tested against Drik HH:MM with ±2 min tolerance to absorb HH:MM rounding.",
     "date": "2025-01-14",
     "city": "Pune",
     "location": {
@@ -10,7 +10,7 @@
     "timezone": 330,
     "expected": {
       "varaEnglish": "Tuesday",
-      "tithiAtSunrise": "Krishna Pratipad",
+      "tithiAtSunrise": "Krishna Pratipada",
       "nakshatraAtSunrise": "Punarvasu",
       "sunriseHHMM": "07:09",
       "sunsetHHMM": "18:17",
@@ -29,7 +29,7 @@
     "timezone": 330,
     "expected": {
       "varaEnglish": "Tuesday",
-      "tithiAtSunrise": "Krishna Pratipad",
+      "tithiAtSunrise": "Krishna Pratipada",
       "nakshatraAtSunrise": "Punarvasu",
       "sunriseHHMM": "07:15",
       "sunsetHHMM": "17:45",
@@ -48,7 +48,7 @@
     "timezone": 330,
     "expected": {
       "varaEnglish": "Tuesday",
-      "tithiAtSunrise": "Krishna Pratipad",
+      "tithiAtSunrise": "Krishna Pratipada",
       "nakshatraAtSunrise": "Punarvasu",
       "sunriseHHMM": "06:34",
       "sunsetHHMM": "18:01",
@@ -67,7 +67,7 @@
     "timezone": 330,
     "expected": {
       "varaEnglish": "Tuesday",
-      "tithiAtSunrise": "Krishna Pratipad",
+      "tithiAtSunrise": "Krishna Pratipada",
       "nakshatraAtSunrise": "Punarvasu",
       "sunriseHHMM": "07:14",
       "sunsetHHMM": "18:20",
@@ -86,7 +86,7 @@
     "timezone": 330,
     "expected": {
       "varaEnglish": "Tuesday",
-      "tithiAtSunrise": "Krishna Pratipad",
+      "tithiAtSunrise": "Krishna Pratipada",
       "nakshatraAtSunrise": "Punarvasu",
       "sunriseHHMM": "06:45",
       "sunsetHHMM": "18:11",
@@ -207,7 +207,7 @@
       "nakshatraAtSunrise": "Uttara Ashadha",
       "sunriseHHMM": "06:25",
       "sunsetHHMM": "18:22",
-      "chandramasaName": "Ashwin",
+      "chandramasaName": "Ashwina",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -263,7 +263,7 @@
     "expected": {
       "varaEnglish": "Thursday",
       "tithiAtSunrise": "Shukla Panchami",
-      "nakshatraAtSunrise": "Dhanishta",
+      "nakshatraAtSunrise": "Dhanishtha",
       "sunriseHHMM": "07:03",
       "sunsetHHMM": "18:05",
       "chandramasaName": "Pausha",

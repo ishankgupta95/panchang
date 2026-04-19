@@ -94,5 +94,69 @@
     "location": { "latitude": 28.6139, "longitude": 77.209 },
     "timezone": 330,
     "expectedFestival": "Karva Chauth"
+  },
+  {
+    "_source": "DrikPanchang 2026 — Akshaya Tritiya (madhyahna-vyapini rule: tithi begins 10:49 IST Apr 19, ends 07:27 IST Apr 20 — observed on Apr 19 because Tritiya prevails at mid-day)",
+    "date": "2026-04-19",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Akshaya Tritiya"
+  },
+  {
+    "_source": "DrikPanchang 2026 — Makar Sankranti (transit-time rule: Sun enters Makara rashi on Jan 14)",
+    "date": "2026-01-14",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Sankranti"
+  },
+  {
+    "_source": "DrikPanchang 2026 — Ganesh Chaturthi (madhyahna-vyapini Shukla Chaturthi of Bhadrapada)",
+    "date": "2026-09-14",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Ganesh Chaturthi"
+  },
+  {
+    "_source": "DrikPanchang 2025 — Smarta Krishna Janmashtami (nishita-vyapini Krishna Ashtami)",
+    "date": "2025-08-15",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Krishna Janmashtami"
+  },
+  {
+    "_source": "DrikPanchang 2025 — Maha Shivaratri (nishita-vyapini Krishna Chaturdashi of Magha)",
+    "date": "2025-02-26",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Maha Shivaratri"
+  },
+  {
+    "_source": "DrikPanchang 2025 — Diwali (Amavasya prevailing at pradosha kala)",
+    "date": "2025-10-20",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Diwali"
+  },
+  {
+    "_source": "DrikPanchang 2025 — Dhanteras (Krishna Trayodashi at pradosha kala)",
+    "date": "2025-10-18",
+    "city": "Delhi",
+    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "timezone": 330,
+    "expectedFestival": "Dhanteras"
+  },
+  {
+    "_source": "DrikPanchang 2025 — Onam (Thiruvonam nakshatra in Simha solar month, Kerala)",
+    "date": "2025-09-05",
+    "city": "Kochi",
+    "location": { "latitude": 9.9312, "longitude": 76.2673 },
+    "timezone": 330,
+    "expectedFestival": "Thiru Onam"
   }
 ]

@@ -1,7 +1,25 @@
 export type AyanamsaType = 'lahiri' | 'raman' | 'krishnamurti';
-export type Language = 'en' | 'sa' | 'hi';
+export type Language = 'en' | 'hi';
 export type Precision = 'standard' | 'high';
 export type MasaSystem = 'purnimanta' | 'amanta';
+
+/**
+ * Regional scope for region-specific festival variants (primarily regional
+ * Sankranti names — Pongal, Vishu, Baisakhi, Bihu, Ayyappa Makara Jyothi,
+ * etc.). Default `'all'` emits every regional variant; narrower values
+ * filter the regional variants to that region. The canonical pan-Indian
+ * `sankranti` event is always emitted regardless of this setting.
+ */
+export type FestivalRegion =
+  | 'all'
+  | 'north-india'
+  | 'tamil'
+  | 'kerala'
+  | 'bengal'
+  | 'punjab'
+  | 'gujarat'
+  | 'assam'
+  | 'maharashtra';
 
 export interface PanchangOptions {
   timezone: number | string;
@@ -17,6 +35,11 @@ export interface PanchangOptions {
    * chandraRashi. Omit to skip Chandra Balam entirely.
    */
   janmaRashi?: number;
+  /**
+   * Regional scope for region-specific festival variants. Default `'all'`.
+   * See {@link FestivalRegion} for supported regions.
+   */
+  region?: FestivalRegion;
 }
 
 export interface InstantPanchangOptions {
@@ -32,4 +55,9 @@ export interface InstantPanchangOptions {
    * chandraRashi. Omit to skip Chandra Balam entirely.
    */
   janmaRashi?: number;
+  /**
+   * Regional scope for region-specific festival variants. Default `'all'`.
+   * See {@link FestivalRegion} for supported regions.
+   */
+  region?: FestivalRegion;
 }

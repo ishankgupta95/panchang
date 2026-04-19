@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { computeTithiFromLongitudes, getTithiIndexFromLons } from '../../src/core/tithi';
 
 describe('computeTithiFromLongitudes', () => {
-  it('Shukla Pratipad at angle ~6°', () => {
-    const t = computeTithiFromLongitudes(66, 60, 'Shukla Pratipad', 'Shukla');
+  it('Shukla Pratipada at angle ~6°', () => {
+    const t = computeTithiFromLongitudes(66, 60, 'Shukla Pratipada', 'Shukla');
     expect(t.index).toBe(0);
     expect(t.paksha).toBe('Shukla');
     expect(t.number).toBe(1);
@@ -11,8 +11,8 @@ describe('computeTithiFromLongitudes', () => {
     expect(t.endTime).toBeNull();
   });
 
-  it('Purnima at exactly 180° → index 15 (Krishna Pratipad boundary)', () => {
-    // 180 / 12 = 15 → floor = 15 = Krishna Pratipad
+  it('Purnima at exactly 180° → index 15 (Krishna Pratipada boundary)', () => {
+    // 180 / 12 = 15 → floor = 15 = Krishna Pratipada
     // Purnima is index 14 (angles 168°–180°). At exactly 180°, it flips.
     const t = computeTithiFromLongitudes(180, 0, 'Purnima', 'Krishna');
     expect(t.index).toBe(15);
@@ -42,8 +42,8 @@ describe('computeTithiFromLongitudes', () => {
     expect(t.number).toBe(2);
   });
 
-  it('Krishna Pratipad at angle 180°', () => {
-    const t = computeTithiFromLongitudes(180, 0, 'Krishna Pratipad', 'Krishna');
+  it('Krishna Pratipada at angle 180°', () => {
+    const t = computeTithiFromLongitudes(180, 0, 'Krishna Pratipada', 'Krishna');
     expect(t.index).toBe(15);
     expect(t.paksha).toBe('Krishna');
     expect(t.number).toBe(1);

@@ -29,14 +29,23 @@ export { computeAyanamsa as getAyanamsa } from './astronomy/ayanamsa';
 
 // Inauspicious periods & muhurta
 export { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './core/inauspicious';
-export { computeAbhijitMuhurta, computeBrahmaMuhurta } from './core/muhurta';
+export {
+  computeAbhijitMuhurta, computeBrahmaMuhurta,
+  computeVijayaMuhurta, computeGodhuliMuhurta,
+  computeNishitaMuhurta, computeAmritKala,
+} from './core/muhurta';
 export { computeGowriPanchangam } from './core/gowri';
+
+// Eclipses (Grahan)
+export {
+  getUpcomingSolarEclipse, getUpcomingLunarEclipse, getEclipseDuringDay,
+} from './astronomy/eclipse';
 
 // Types
 export type {
   GeoLocation,
   PanchangOptions, InstantPanchangOptions,
-  AyanamsaType, Language, Precision, MasaSystem,
+  AyanamsaType, Language, Precision, MasaSystem, FestivalRegion,
   DailyPanchangResult, InstantPanchangResult,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, MasaInfo,
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
@@ -45,6 +54,7 @@ export type {
   HoraSlot, HoraInfo,
   GowriSlot, GowriInfo,
   SpecialYogaInfo, FestivalInfo,
+  BhadraInfo,
   TimePeriod,
   PanchangErrorCode,
   // Jyotish types
