@@ -120,20 +120,13 @@ on a given calendar day, which is normal.
 ### Language & Masa System
 
 ```typescript
-// Sanskrit names (Devanagari)
-const sa = getDailyPanchang(date, location, {
-  timezone: 330,
-  language: 'sa',
-});
-console.log(sa.tithis[0].name);              // "कृष्ण चतुर्दशी"
-console.log(sa.vara.name);                    // "मङ्गलवारः"
-
-// Hindi names
+// Hindi names (Devanagari)
 const hi = getDailyPanchang(date, location, {
   timezone: 330,
   language: 'hi',
 });
 console.log(hi.tithis[0].name);              // "कृष्ण चतुर्दशी"
+console.log(hi.vara.name);                   // "मंगलवार"
 
 // Amanta (South Indian) masa system
 const amanta = getDailyPanchang(date, location, {
@@ -183,7 +176,7 @@ All 9 graha positions (geocentric, sidereal) with rashi, nakshatra, pada, and re
 Sunrise, Sunset, Moonrise, Moonset, Chandra Rashi (Moon sign), Surya Nakshatra. Cross-verified across diaspora locations (New York, London, Sydney, Dubai, Singapore) including DST transitions via IANA timezone strings.
 
 ### Localization
-3 languages: **English**, **Sanskrit** (Devanagari), **Hindi**. All returned display strings respect the `language` option.
+2 languages: **English** and **Hindi** (Devanagari). All returned display strings respect the `language` option.
 
 ### Configuration
 3 ayanamsa systems (Lahiri, B.V. Raman, KP), 2 masa systems (Purnimanta, Amanta), adjustable precision, optional fast mode (`computeEndTimes: false` for ~5x speedup).
@@ -265,7 +258,7 @@ import { getInstantPanchang } from 'panchang-ts';
 const result = getInstantPanchang(
   new Date('2025-01-14T03:00:00Z'),           // UTC moment
   { latitude: 18.5204, longitude: 73.8567 },
-  { language: 'sa' },                          // Sanskrit names
+  { language: 'hi' },                          // Hindi (Devanagari) names
 );
 
 console.log(result.tithi.name);              // "कृष्ण चतुर्दशी"

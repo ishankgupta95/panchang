@@ -4925,4 +4925,4 @@ interface EclipseInfo {
 | 26 | Diaspora & API Polish | 1d | ~15 |
 | **Total** | — | **~9 engineering days** | **~155 new tests** |
 
-After all of Phases 23–26, the festival registry grows from ~25 entries to ~60+, eclipse support lands, and diaspora use is externally-verified. This is the "everything perfect" scope; each phase is independently shippable as a minor v1.x release.
+After all of Phases 23–26, the festival registry grows from ~25 entries to ~60+, eclipse support lands, and diaspora use is cross-verified. The **next npm publish is v2.0.0** — Phase 22 dropped the `'sa'` (Sanskrit) `Language` value, which is a breaking change to the public type surface; under the v1.0.0 CHANGELOG's stable-API promise ("any breaking change will require a v2 major bump"), this forces a major-version release even though Phases 21/23/24/25/26 are individually additive. Phases 23/24/25 also widen `DailyPanchangResult` with new fields (`bhadra`, `eclipse`, `vijayaMuhurta`, `godhuliMuhurta`, `nishitaMuhurta`, `amritKala`) and add the `region` option.
