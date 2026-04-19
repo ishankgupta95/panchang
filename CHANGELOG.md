@@ -1,5 +1,135 @@
 # panchang-ts
 
+## 2.1.0
+
+**Minor release — regional festival expansion + state-slug `FestivalRegion`
+scheme.** Backwards compatible: pre-v2.1 region strings continue to work with
+a one-shot deprecation warning; removal scheduled for v3.
+
+### Highlights
+
+- `FestivalRegion` expanded **9 → 22** values, consistent state-slug naming
+  (`'tamil'` → `'tamil-nadu'`, `'bengal'` → `'west-bengal'`, `'north-india'`
+  dropped in favour of explicit states).
+- **+14 new registered festivals** covering Maharashtra, Karnataka, Andhra
+  Pradesh, Telangana, Odisha, Rajasthan, UP, Bihar, Haryana, Himachal,
+  Uttarakhand, Assam, Goa, Madhya Pradesh, Nepal, and Jharkhand.
+- New `FestivalRule.regions?` allow-list, new `SankrantiRegionalRule.regions`
+  (was single-valued `region`), new `tithiRange` gate for weekday-in-paksha
+  rules (Varamahalakshmi), new transit-adjacent festival emission via
+  `nextDaySankrantiRashi` / `prevDaySankrantiRashi` context (Lohri + Raja
+  Parba 3-day arc).
+- Orphan-region sweep test — every `FestivalRegion` value must attach to a
+  specific scoped festival. Guards against reintroducing dead regions like
+  the pre-v2.1 `'maharashtra'` (defined in the type, unused in practice).
+
+### Breaking changes
+
+None. See *Migration* below for deprecation warnings and the one key rename.
+
+### Back-compat / deprecations
+
+Legacy region identifiers resolved via [src/core/regionAlias.ts](src/core/regionAlias.ts)
+with a one-shot `console.warn` per distinct legacy value per process:
+
+| Legacy value  | Canonical value | Removal |
+|---------------|-----------------|---------|
+| `'tamil'`     | `'tamil-nadu'`  | v3      |
+| `'bengal'`    | `'west-bengal'` | v3      |
+| `'north-india'` | `'all'`       | v3      |
+
+(`'north-india'` collapses to `'all'` because its sole previous attachment —
+Makar Sankranti — is genuinely pan-Indian. Northern-specific festivals like
+Lohri / Govardhan Puja / Bhai Dooj are now attached to explicit state slugs.)
+
+### New regions
+
+**South:** `'tamil-nadu'`, `'kerala'`, `'karnataka'`, `'andhra-pradesh'`,
+`'telangana'`.
+**East:** `'west-bengal'`, `'odisha'`, `'assam'`, `'bihar'`, `'jharkhand'`.
+**West:** `'gujarat'`, `'maharashtra'`, `'goa'`, `'rajasthan'`.
+**North / Central:** `'punjab'`, `'haryana'`, `'himachal-pradesh'`,
+`'uttarakhand'`, `'uttar-pradesh'`, `'madhya-pradesh'`.
+**Neighbour:** `'nepal'`.
+
+### New festivals
+
+- **Sankranti-anchored:** `bohag_bihu` (Assam, Mesha), `kati_bihu` (Assam,
+  Tula), `raja_sankranti` (Odisha, Karka), `harela` (Uttarakhand, Karka),
+  `sair` (Himachal, Kanya).
+- **Transit-adjacent:** `lohri` (Punjab/Haryana/Himachal, day before Makara),
+  `raja_pahili` (Odisha, day before Karka), `raja_basi` (Odisha, day after
+  Karka).
+- **Regional tithi-based:** `gudi_padwa` (Maharashtra/Goa), `gangaur`
+  (Rajasthan), `karaga` (Karnataka), `bonalu` (Telangana, Sundays in
+  Ashadha), `hariyali_teej`, `kajari_teej`, `hartalika_teej`,
+  `govardhan_puja`, `bhai_dooj`, `phagli` (Himachal), `bathukamma_start`
+  (Telangana, Bhadrapada Amavasya), `bathukamma_saddula` (Telangana, Ashwin
+  Shukla Navami).
+- **Weekday-in-paksha:** `varamahalakshmi` (Karnataka/AP/Telangana/TN — last
+  Friday of Shravana Shukla paksha before Purnima).
+- **Pan-Indian addition:** `jagannath_rath_yatra` (Ashadha Shukla Dwitiya).
+
+### Re-scoped / renamed (non-breaking outputs)
+
+- **`makar_sankranti`**: `region: 'north-india'` → `regions: ['all']`.
+  It's pan-Indian and was mistagged.
+- **`singh_sankranti`**: `region: 'all'` → `regions: ['odisha', 'bihar',
+  'jharkhand', 'nepal']`. Primarily observed there; not a pan-Indian
+  festival.
+- **Festival key rename** `bihu` → `magh_bihu` for consistency with the new
+  `bohag_bihu` / `kati_bihu` siblings. **Translated display name unchanged**
+  (`'Magh Bihu'` / `'माघ बिहू'`). Callers indexing the internal key `'bihu'`
+  directly (rare — most code reads `festival.name` which is the translated
+  string) must update to `'magh_bihu'`.
+
+### Type surface additions
+
+- `LegacyFestivalRegion` exported (union of the 3 deprecated strings).
+- `FestivalRule.regions?: readonly FestivalRegion[]` (internal rule type,
+  used when writing new rules).
+- `FestivalRule.tithiRange?: [number, number]` — gate `(masa + vara)` rules
+  to a tithi window.
+- `FestivalComputeContext.nextDaySankrantiRashi?: number | null`.
+- `FestivalComputeContext.prevDaySankrantiRashi?: number | null`.
+- `PanchangOptions.region` and `InstantPanchangOptions.region` widened to
+  `FestivalRegion | LegacyFestivalRegion`.
+
+### Docs
+
+- `README.md` — updated FestivalRegion enum listing, LegacyFestivalRegion
+  mapping, new "Regional Festival Filtering" code example (default vs scoped
+  vs Lohri), and a region-to-festival-keys reference table.
+
+### Test count
+
+**5,149** tests passing across 46 files (was 5,073 in v2.0.1 → **+76**).
+New unit file [tests/unit/regionAlias.test.ts](tests/unit/regionAlias.test.ts)
+covers alias resolution + one-shot warning semantics. Orphan-region sweep
+replaces a weak `r.length > 0` check with 21 explicit `(region →
+expectedScopedKey)` assertions + a compile-time exhaustiveness check.
+
+### Migration from 2.0.x
+
+```ts
+// Before
+getDailyPanchang(date, loc, { timezone: 330, region: 'tamil' });
+getDailyPanchang(date, loc, { timezone: 330, region: 'bengal' });
+getDailyPanchang(date, loc, { timezone: 330, region: 'north-india' });
+
+// After (recommended — removes the deprecation warning)
+getDailyPanchang(date, loc, { timezone: 330, region: 'tamil-nadu' });
+getDailyPanchang(date, loc, { timezone: 330, region: 'west-bengal' });
+getDailyPanchang(date, loc, { timezone: 330, region: 'all' });
+
+// Festival key rename (rare — only if you index festivalNames directly):
+// t.festivalNames['bihu']      // old
+// t.festivalNames['magh_bihu'] // new
+// (If you read festival.name, nothing changes — still 'Magh Bihu' / 'माघ बिहू'.)
+```
+
+---
+
 ## 2.0.0
 
 **Major release — correctness fixes + Drik-aligned API.** This release ships

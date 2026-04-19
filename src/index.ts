@@ -45,7 +45,7 @@ export {
 export type {
   GeoLocation,
   PanchangOptions, InstantPanchangOptions,
-  AyanamsaType, Language, Precision, MasaSystem, FestivalRegion,
+  AyanamsaType, Language, Precision, MasaSystem, FestivalRegion, LegacyFestivalRegion,
   DailyPanchangResult, InstantPanchangResult,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, MasaInfo,
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,

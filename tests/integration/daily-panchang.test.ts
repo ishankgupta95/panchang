@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { getDailyPanchang } from '../../src/core/panchang';
+import { __resetRegionAliasWarnings } from '../../src/core/regionAlias';
 import indiaFixtures from '../fixtures/structural-india.json';
 import worldFixtures from '../fixtures/structural-world.json';
 
@@ -95,11 +96,50 @@ describe('getDailyPanchang — regional Sankranti (Phase 24-1)', () => {
     expect(names).toContain('Ayyappa Makara Jyothi');
   });
 
-  it('region="tamil" scopes regional variants to Tamil + "all"', () => {
+  it('region="tamil-nadu" scopes regional variants to Tamil Nadu + pan-Indian', () => {
+    const r = getDailyPanchang(makarDay, CHENNAI, { timezone: 330, region: 'tamil-nadu' });
+    const names = r.festivals.map(f => f.name);
+    expect(names).toContain('Pongal');
+    // Makar Sankranti is pan-Indian post v2.1 — emits under every region.
+    expect(names).toContain('Makar Sankranti');
+    expect(names).not.toContain('Ayyappa Makara Jyothi');
+    expect(names).not.toContain('Magh Bihu');
+  });
+
+  it('legacy region="tamil" is accepted via alias resolver and behaves like tamil-nadu', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    __resetRegionAliasWarnings();
     const r = getDailyPanchang(makarDay, CHENNAI, { timezone: 330, region: 'tamil' });
     const names = r.festivals.map(f => f.name);
     expect(names).toContain('Pongal');
-    expect(names).not.toContain('Makar Sankranti');
-    expect(names).not.toContain('Ayyappa Makara Jyothi');
+    expect(names).not.toContain('Magh Bihu');
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+});
+
+describe('getDailyPanchang — v2.1 Lohri (day before Makara Sankranti)', () => {
+  const AMRITSAR = { latitude: 31.634, longitude: 74.872 };
+  const lohriDay = dateAtNoonUtc('2025-01-13');
+  const makarDayLocal = dateAtNoonUtc('2025-01-14');
+
+  it('emits Lohri on 2025-01-13 under region="punjab"', () => {
+    const r = getDailyPanchang(lohriDay, AMRITSAR, { timezone: 330, region: 'punjab' });
+    expect(r.festivals.some(f => f.name === 'Lohri')).toBe(true);
+  });
+
+  it('emits Lohri under region="all" (default)', () => {
+    const r = getDailyPanchang(lohriDay, AMRITSAR, { timezone: 330 });
+    expect(r.festivals.some(f => f.name === 'Lohri')).toBe(true);
+  });
+
+  it('does NOT emit Lohri under region="tamil-nadu"', () => {
+    const r = getDailyPanchang(lohriDay, AMRITSAR, { timezone: 330, region: 'tamil-nadu' });
+    expect(r.festivals.some(f => f.name === 'Lohri')).toBe(false);
+  });
+
+  it('does NOT emit Lohri on the actual Makara Sankranti day', () => {
+    const r = getDailyPanchang(makarDayLocal, AMRITSAR, { timezone: 330, region: 'punjab' });
+    expect(r.festivals.some(f => f.name === 'Lohri')).toBe(false);
   });
 });

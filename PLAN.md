@@ -4926,3 +4926,203 @@ interface EclipseInfo {
 | **Total** | — | **~9 engineering days** | **~155 new tests** |
 
 After all of Phases 23–26, the festival registry grows from ~25 entries to ~60+, eclipse support lands, and diaspora use is cross-verified. The **next npm publish is v2.0.0** — Phase 22 dropped the `'sa'` (Sanskrit) `Language` value, which is a breaking change to the public type surface; under the v1.0.0 CHANGELOG's stable-API promise ("any breaking change will require a v2 major bump"), this forces a major-version release even though Phases 21/23/24/25/26 are individually additive. Phases 23/24/25 also widen `DailyPanchangResult` with new fields (`bhadra`, `eclipse`, `vijayaMuhurta`, `godhuliMuhurta`, `nishitaMuhurta`, `amritKala`) and add the `region` option.
+
+---
+
+## Phase 27 — Regional Festival Expansion ✅ DONE
+
+> **Goal:** Fix the v2.0.x regional story. Phase 24 shipped a 9-value
+> `FestivalRegion` enum mixing state names (`kerala`, `gujarat`, `punjab`,
+> `assam`, `maharashtra`), ethno-linguistic labels (`tamil`, `bengal`), and
+> a direction (`north-india`). Several regions were **orphans** —
+> `maharashtra` and (largely) `north-india` existed in the type but
+> attached to no emitted festival. Several major traditions (Maharashtra,
+> Karnataka, AP/Telangana, Odisha, Rajasthan, Himachal, Uttarakhand) had
+> **zero** registered festivals. Phase 27 fixes naming, removes orphans,
+> and expands coverage to 21 states + Nepal.
+
+### Step 27-1 — State-slug `FestivalRegion` + back-compat aliases ✅
+
+**What:** Rename `tamil` → `tamil-nadu`, `bengal` → `west-bengal`, drop
+`north-india` (its only attachment — Makar Sankranti — was mistagged; it's
+pan-Indian). Add 13 new state slugs + `nepal`. Preserve the old strings for
+one major version via a runtime resolver.
+
+**Shipped:**
+- [src/types/options.ts](src/types/options.ts) — `FestivalRegion` expanded
+  9 → 22; new `LegacyFestivalRegion` union of the three pre-v2.1 values;
+  `PanchangOptions.region` / `InstantPanchangOptions.region` widened to
+  `FestivalRegion | LegacyFestivalRegion`.
+- [src/core/regionAlias.ts](src/core/regionAlias.ts) (new) —
+  `resolveRegionAlias()` with one-shot `console.warn` per distinct legacy
+  value per process. Wired at both public entry points in
+  [src/core/panchang.ts](src/core/panchang.ts).
+- [tests/unit/regionAlias.test.ts](tests/unit/regionAlias.test.ts) (new) —
+  7 specs: canonical passthrough, undefined → 'all', each legacy mapping,
+  warn-once semantics, reset hook.
+
+**Effort:** 0.5 day.
+
+### Step 27-2 — Allow-list on `FestivalRule` + `SankrantiRegionalRule` ✅
+
+**What:** Phase 24 only attached `region` to Sankranti regional variants;
+the main `FESTIVAL_REGISTRY` had no region filter at all, so Onam,
+Upakarma, and every masa+tithi rule emitted globally regardless of
+`ctx.region`. Change `SankrantiRegionalRule.region` (single-valued) to
+`regions: readonly FestivalRegion[]` (allow-list) for the multi-state
+cases (e.g. Singh Sankranti across Odisha/Bihar/Jharkhand/Nepal), and add
+the same `regions?` field to `FestivalRule` so new registry entries can
+scope properly.
+
+**Shipped:**
+- [src/core/festivals.ts](src/core/festivals.ts) — rule-level `regions?:
+  readonly FestivalRegion[]` (omitted = pan-Indian); emit loop gained a
+  single allow-list check that runs after the match check, preserving
+  O(n)-per-day performance.
+- `SankrantiRegionalRule.region` → `regions[]`. Multi-state emissions
+  (Singh Sankranti, Baisakhi in Punjab + Haryana) no longer duplicate.
+
+**Effort:** 0.25 day.
+
+### Step 27-3 — Sankranti-anchored regional additions ✅
+
+**What:** Add the three missing Bihus (Bohag Mesha / Kati Tula, alongside
+the existing Magh Makara), Raja Sankranti (Odisha, Karka), Harela
+(Uttarakhand, Karka — Shravana solar-month start), Sair (Himachal, Kanya —
+Ashwin solar-month start).
+
+**Shipped:**
+- New SANKRANTI_REGIONAL buckets: Karka (3), Kanya (5), Tula (6). Mesha
+  gained `bohag_bihu`.
+- Re-scoped `makar_sankranti` from `'north-india'` → `['all']` (pan-Indian
+  in practice). Re-scoped `singh_sankranti` from `'all'` → explicit
+  Odisha/Bihar/Jharkhand/Nepal allow-list.
+- Festival key `bihu` → `magh_bihu` for consistency with the new siblings.
+  Translated display name unchanged.
+
+**Effort:** 0.5 day.
+
+### Step 27-4 — Transit-adjacent emission (Lohri + Raja 3-day arc) ✅
+
+**What:** Some festivals fire on the Hindu day immediately before or after
+a solar transit — Lohri (day before Makara), Pahili Raja (day before
+Karka), Basi Raja (day after Karka). No existing registry rule shape
+captures "tomorrow's transit" or "yesterday's transit."
+
+**Shipped:**
+- New `FestivalComputeContext.nextDaySankrantiRashi?: number | null` and
+  `prevDaySankrantiRashi?: number | null`. Wired from
+  [src/core/panchang.ts](src/core/panchang.ts) by:
+  - next-day: tomorrow's sunset → day-after sunrise, compare rashi at
+    `nextSunriseUtc` vs `dayAfterSunriseUtc`. Anchoring via tomorrow's
+    sunset avoids a `SearchRiseSet` off-by-one when the start argument
+    equals an existing rise time.
+  - prev-day: reuse `yesterdaySunriseUtc` / `yesterdaySun` longitudes
+    already computed for viddha / `priorMasaWasAdhika` — zero extra cost.
+- Inline emissions in `computeFestivals`: Lohri under Punjab/Haryana/
+  Himachal when `nextDaySankrantiRashi === 9`; `raja_pahili` / `raja_basi`
+  under Odisha on the corresponding Karka-adjacent days. Instant-mode
+  callers leave the fields undefined → these festivals silently skip.
+
+**Effort:** 0.5 day.
+
+### Step 27-5 — Regional tithi/vara festivals (Maharashtra, Rajasthan, UP/Bihar, Karnataka, Telangana, Himachal) ✅
+
+**What:** Bulk-add the biggest region-specific festivals previously
+missing: Gudi Padwa (Maharashtra/Goa), Gangaur (Rajasthan), Karaga
+(Karnataka), Bonalu (Telangana — Sundays in Ashadha), Hariyali/Kajari/
+Hartalika Teej, Govardhan Puja, Bhai Dooj, Phagli (Himachal), Jagannath
+Rath Yatra (pan-Indian).
+
+**Shipped:** 10 new FESTIVAL_REGISTRY entries with `regions: [...]`
+allow-lists. Rath Yatra intentionally pan-Indian (no `regions` field)
+since it's observed nationwide despite Puri being the cultural epicenter.
+All classical masa+tithi or masa+vara rules — no new rule infrastructure
+required beyond step 27-2.
+
+**Effort:** 0.25 day.
+
+### Step 27-6 — Weekday-in-paksha gate (Varamahalakshmi) ✅
+
+**What:** Varamahalakshmi is the *last* Friday of Shravana Shukla paksha
+before Purnima. A bare `(masa + vara)` rule would also emit on the first
+Shukla Friday. Add a tithi-range gate so `(masa=4, vara=5)` only fires
+when sunrise tithi ∈ [7, 13] — the Friday closest to but before Purnima.
+
+**Shipped:**
+- [src/core/festivals.ts](src/core/festivals.ts) — new
+  `FestivalRule.tithiRange?: readonly [number, number]`. Applied in the
+  `(masa + vara)` branch of the match loop against the rule's `dateRule`
+  tithi (defaults to sunrise). Rules without `tithiRange` unaffected.
+- Varamahalakshmi scoped to Karnataka / AP / Telangana / Tamil Nadu.
+
+**Effort:** 0.2 day.
+
+### Step 27-7 — Bathukamma start + Saddula markers ✅
+
+**What:** Bathukamma is a 9-day Telangana festival (Bhadrapada Amavasya →
+Ashwin Shukla Navami). The library's single-day rule model doesn't
+represent multi-day windows; we emit the canonical start
+(Engili Pula Bathukamma, co-emits with Mahalaya) and climax (Saddula
+Bathukamma, co-emits with Maha Navami). Intermediate days carry no
+library-level emission by design.
+
+**Shipped:** 2 new FESTIVAL_REGISTRY entries scoped to Telangana.
+
+**Effort:** 0.1 day.
+
+### Step 27-8 — Strengthened orphan-region sweep ✅
+
+**What:** The initial v2.1 orphan-sweep test asserted only `r.length >
+0`, which passed trivially when a region got a pan-Indian festival like
+Ugadi — the exact failure mode we're trying to prevent. Replace with a
+specific `(region → expectedScopedKey)` table so deleting a region's
+allow-list breaks a specific named test.
+
+**Shipped:**
+- 21 explicit assertions in [tests/unit/festivals.test.ts](tests/unit/festivals.test.ts)
+  `describe('v2.1 — orphan-region sweep')`.
+- A compile-time exhaustiveness check: a `readonly Exclude<FestivalRegion,
+  'all'>[]` enumeration is matched against the SCENARIOS array at
+  test-time. Adding a new `FestivalRegion` value without adding a scenario
+  breaks the `'every FestivalRegion in the public type is covered by the
+  sweep'` test.
+
+**Effort:** 0.15 day.
+
+---
+
+**Phase 27 completion table:**
+
+| Step | Focus | Effort | Status |
+|------|-------|--------|--------|
+| 27-1 | State-slug `FestivalRegion` + legacy aliases | 0.5d | ✅ |
+| 27-2 | Allow-list (`regions[]`) on rules + Sankranti | 0.25d | ✅ |
+| 27-3 | Sankranti-anchored regionals (Bihus, Raja, Harela, Sair) | 0.5d | ✅ |
+| 27-4 | Transit-adjacent (Lohri + Raja 3-day arc) | 0.5d | ✅ |
+| 27-5 | Regional tithi/vara festivals (Gudi Padwa, Gangaur, Teej, Govardhan, Bhai Dooj, Phagli, Rath Yatra) | 0.25d | ✅ |
+| 27-6 | `tithiRange` gate (Varamahalakshmi) | 0.2d | ✅ |
+| 27-7 | Bathukamma start + Saddula markers | 0.1d | ✅ |
+| 27-8 | Strengthened orphan-region sweep | 0.15d | ✅ |
+
+**Total Phase 27 effort:** ~2.5 engineering days.
+
+**Shipped tests:** 76 new (5,073 → 5,149 passing).
+
+**Package release:** v2.1.0 (minor). Fully back-compat — legacy region
+strings continue to resolve with a one-shot deprecation warning; removal
+scheduled for v3. One internal key rename (`bihu` → `magh_bihu`) doesn't
+affect users who read the translated `festival.name`.
+
+---
+
+## Grand Total — Phases 23–27 (new work after Phase 21/22)
+
+| Phase | Focus | Effort | Tests Added |
+|-------|-------|--------|-------------|
+| 23 | Classical Correctness Completion | 4d | ~80 |
+| 24 | Festival Coverage Expansion | 2.5d | ~40 |
+| 25 | Astronomy Expansion | 1.5d | ~20 |
+| 26 | Diaspora & API Polish | 1d | ~15 |
+| 27 | Regional Festival Expansion | 2.5d | 76 |
+| **Total** | — | **~11.5 engineering days** | **~231 new tests** |

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { computeFestivals, type FestivalComputeContext } from '../../src/core/festivals';
+import type { FestivalRegion } from '../../src/types/options';
 
 const resolver = (key: string) => key;
 const rashiResolver = (idx: number) => `Rashi ${idx}`;
@@ -471,37 +472,39 @@ describe('computeFestivals', () => {
   });
 
   describe('Phase 24-1: Regional Sankranti', () => {
-    it('emits Pongal + Makar Sankranti + Bihu + Uttarayan + Ayyappa on Makara (rashi 9)', () => {
+    it('emits Pongal + Makar Sankranti + Magh Bihu + Uttarayan + Ayyappa on Makara (rashi 9)', () => {
       const r = computeFestivals(ctx({ sankrantiRashi: 9 }), resolver, rashiResolver);
       const names = r.map(f => f.name);
       expect(names).toContain('sankranti');
       expect(names).toContain('makar_sankranti');
       expect(names).toContain('pongal');
       expect(names).toContain('uttarayan');
-      expect(names).toContain('bihu');
+      expect(names).toContain('magh_bihu');
       expect(names).toContain('ayyappa_makara_jyothi');
     });
 
-    it('emits Baisakhi + Vishu + Puthandu + Pohela Boishakh on Mesha (rashi 0)', () => {
+    it('emits Baisakhi + Vishu + Puthandu + Pohela Boishakh + Bohag Bihu on Mesha (rashi 0)', () => {
       const r = computeFestivals(ctx({ sankrantiRashi: 0 }), resolver, rashiResolver);
       const names = r.map(f => f.name);
       expect(names).toContain('baisakhi');
       expect(names).toContain('vishu');
       expect(names).toContain('puthandu');
       expect(names).toContain('pohela_boishakh');
+      expect(names).toContain('bohag_bihu');
     });
 
     it('emits Dakshinayana on Karka (rashi 3) regardless of region', () => {
-      const r = computeFestivals(ctx({ sankrantiRashi: 3, region: 'tamil' }), resolver, rashiResolver);
+      const r = computeFestivals(ctx({ sankrantiRashi: 3, region: 'tamil-nadu' }), resolver, rashiResolver);
       expect(r.some(f => f.name === 'dakshinayana')).toBe(true);
     });
 
-    it('region=tamil filters to tamil + "all" variants only', () => {
-      const r = computeFestivals(ctx({ sankrantiRashi: 9, region: 'tamil' }), resolver, rashiResolver);
+    it('region=tamil-nadu filters to tamil-nadu + "all" variants only', () => {
+      const r = computeFestivals(ctx({ sankrantiRashi: 9, region: 'tamil-nadu' }), resolver, rashiResolver);
       const names = r.map(f => f.name);
       expect(names).toContain('pongal');
-      expect(names).not.toContain('makar_sankranti');
-      expect(names).not.toContain('bihu');
+      // makar_sankranti is now pan-Indian (regions: ['all']) — emits under any region
+      expect(names).toContain('makar_sankranti');
+      expect(names).not.toContain('magh_bihu');
       expect(names).not.toContain('ayyappa_makara_jyothi');
     });
 
@@ -517,6 +520,7 @@ describe('computeFestivals', () => {
 
     it('region=all (default) emits every regional variant', () => {
       const r = computeFestivals(ctx({ sankrantiRashi: 9 }), resolver, rashiResolver);
+      // Makara: sankranti + makar_sankranti + pongal + uttarayan + magh_bihu + ayyappa = 6
       expect(r.filter(f => f.type === 'sankranti').length).toBeGreaterThanOrEqual(6);
     });
   });
@@ -696,6 +700,399 @@ describe('computeFestivals', () => {
         resolver,
       );
       expect(r.some(f => f.name === 'shravan_somvar')).toBe(false);
+    });
+  });
+
+  describe('v2.1 regional expansion — SANKRANTI_REGIONAL', () => {
+    it('Bohag Bihu fires on Mesha transit (rashi 0) in assam', () => {
+      const r = computeFestivals(ctx({ sankrantiRashi: 0, region: 'assam' }), resolver, rashiResolver);
+      const names = r.map(f => f.name);
+      expect(names).toContain('bohag_bihu');
+      expect(names).not.toContain('puthandu');
+    });
+
+    it('Magh Bihu fires on Makara transit (rashi 9) in assam', () => {
+      const r = computeFestivals(ctx({ sankrantiRashi: 9, region: 'assam' }), resolver, rashiResolver);
+      expect(r.some(f => f.name === 'magh_bihu')).toBe(true);
+    });
+
+    it('Kati Bihu fires on Tula transit (rashi 6) in assam', () => {
+      const r = computeFestivals(ctx({ sankrantiRashi: 6, region: 'assam' }), resolver, rashiResolver);
+      expect(r.some(f => f.name === 'kati_bihu')).toBe(true);
+    });
+
+    it('Raja Sankranti + Harela fire on Karka transit scoped to odisha/uttarakhand', () => {
+      const odisha = computeFestivals(ctx({ sankrantiRashi: 3, region: 'odisha' }), resolver, rashiResolver);
+      expect(odisha.some(f => f.name === 'raja_sankranti')).toBe(true);
+      expect(odisha.some(f => f.name === 'dakshinayana')).toBe(true);
+      expect(odisha.some(f => f.name === 'harela')).toBe(false);
+
+      const uk = computeFestivals(ctx({ sankrantiRashi: 3, region: 'uttarakhand' }), resolver, rashiResolver);
+      expect(uk.some(f => f.name === 'harela')).toBe(true);
+      expect(uk.some(f => f.name === 'raja_sankranti')).toBe(false);
+    });
+
+    it('Sair fires on Kanya transit (rashi 5) in himachal-pradesh', () => {
+      const r = computeFestivals(ctx({ sankrantiRashi: 5, region: 'himachal-pradesh' }), resolver, rashiResolver);
+      expect(r.some(f => f.name === 'sair')).toBe(true);
+    });
+
+    it('Singh Sankranti is re-scoped — does NOT emit under tamil-nadu (was pan-Indian)', () => {
+      const tn = computeFestivals(ctx({ sankrantiRashi: 4, region: 'tamil-nadu' }), resolver, rashiResolver);
+      expect(tn.some(f => f.name === 'singh_sankranti')).toBe(false);
+      // Canonical sankranti still emits.
+      expect(tn.some(f => f.name === 'sankranti')).toBe(true);
+
+      const od = computeFestivals(ctx({ sankrantiRashi: 4, region: 'odisha' }), resolver, rashiResolver);
+      expect(od.some(f => f.name === 'singh_sankranti')).toBe(true);
+    });
+
+    it('Makar Sankranti is now pan-Indian — emits under every region', () => {
+      for (const region of ['tamil-nadu', 'kerala', 'west-bengal', 'karnataka'] as const) {
+        const r = computeFestivals(ctx({ sankrantiRashi: 9, region }), resolver, rashiResolver);
+        expect(r.some(f => f.name === 'makar_sankranti')).toBe(true);
+      }
+    });
+  });
+
+  describe('v2.1 regional expansion — FESTIVAL_REGISTRY regions filter', () => {
+    it('Gudi Padwa emits in maharashtra but not karnataka', () => {
+      const mh = computeFestivals(ctx({ tithiIndex: 0, chandraMasaIndex: 0, region: 'maharashtra' }), resolver);
+      expect(mh.some(f => f.name === 'gudi_padwa')).toBe(true);
+      expect(mh.some(f => f.name === 'ugadi')).toBe(true); // ugadi is pan-Indian
+
+      const kn = computeFestivals(ctx({ tithiIndex: 0, chandraMasaIndex: 0, region: 'karnataka' }), resolver);
+      expect(kn.some(f => f.name === 'gudi_padwa')).toBe(false);
+      expect(kn.some(f => f.name === 'ugadi')).toBe(true);
+    });
+
+    it('Gangaur — Chaitra (0) Shukla Tritiya (2), rajasthan only', () => {
+      const rj = computeFestivals(ctx({ tithiIndex: 2, chandraMasaIndex: 0, region: 'rajasthan' }), resolver);
+      expect(rj.some(f => f.name === 'gangaur')).toBe(true);
+
+      const ker = computeFestivals(ctx({ tithiIndex: 2, chandraMasaIndex: 0, region: 'kerala' }), resolver);
+      expect(ker.some(f => f.name === 'gangaur')).toBe(false);
+    });
+
+    it('Karaga — Chaitra (0) Purnima (14), karnataka only', () => {
+      const kn = computeFestivals(ctx({ tithiIndex: 14, chandraMasaIndex: 0, region: 'karnataka' }), resolver);
+      expect(kn.some(f => f.name === 'karaga')).toBe(true);
+      expect(kn.some(f => f.name === 'hanuman_jayanti')).toBe(true); // pan-Indian same day
+
+      const mh = computeFestivals(ctx({ tithiIndex: 14, chandraMasaIndex: 0, region: 'maharashtra' }), resolver);
+      expect(mh.some(f => f.name === 'karaga')).toBe(false);
+    });
+
+    it('Bonalu — Ashadha (3) + Sunday, telangana only, also in Adhika', () => {
+      const tg = computeFestivals(
+        ctx({ chandraMasaIndex: 3, varaIndex: 0, tithiIndex: 5, region: 'telangana' }),
+        resolver,
+      );
+      expect(tg.some(f => f.name === 'bonalu')).toBe(true);
+
+      const ap = computeFestivals(
+        ctx({ chandraMasaIndex: 3, varaIndex: 0, tithiIndex: 5, region: 'andhra-pradesh' }),
+        resolver,
+      );
+      expect(ap.some(f => f.name === 'bonalu')).toBe(false);
+
+      // observe-in-both: Adhika masa doesn't suppress Bonalu.
+      const adhika = computeFestivals(
+        ctx({ chandraMasaIndex: 3, varaIndex: 0, tithiIndex: 5, region: 'telangana', isAdhika: true }),
+        resolver,
+      );
+      expect(adhika.some(f => f.name === 'bonalu')).toBe(true);
+    });
+
+    it('Hariyali Teej — Shravana (4) Shukla Tritiya (2), filtered to allow-list', () => {
+      const rj = computeFestivals(ctx({ tithiIndex: 2, chandraMasaIndex: 4, region: 'rajasthan' }), resolver);
+      expect(rj.some(f => f.name === 'hariyali_teej')).toBe(true);
+
+      const ker = computeFestivals(ctx({ tithiIndex: 2, chandraMasaIndex: 4, region: 'kerala' }), resolver);
+      expect(ker.some(f => f.name === 'hariyali_teej')).toBe(false);
+    });
+
+    it('Kajari Teej — Shravana (4) Krishna Tritiya (17)', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 17, chandraMasaIndex: 4, region: 'uttar-pradesh' }), resolver);
+      expect(r.some(f => f.name === 'kajari_teej')).toBe(true);
+    });
+
+    it('Hartalika Teej — Bhadrapada (5) Shukla Tritiya (2)', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 2, chandraMasaIndex: 5, region: 'maharashtra' }), resolver);
+      expect(r.some(f => f.name === 'hartalika_teej')).toBe(true);
+    });
+
+    it('Govardhan Puja — Amanta Kartika (7) Shukla Pratipada (0), allow-list filter', () => {
+      const up = computeFestivals(ctx({ tithiIndex: 0, chandraMasaIndex: 7, region: 'uttar-pradesh' }), resolver);
+      expect(up.some(f => f.name === 'govardhan_puja')).toBe(true);
+
+      const tn = computeFestivals(ctx({ tithiIndex: 0, chandraMasaIndex: 7, region: 'tamil-nadu' }), resolver);
+      expect(tn.some(f => f.name === 'govardhan_puja')).toBe(false);
+    });
+
+    it('Bhai Dooj — Amanta Kartika (7) Shukla Dwitiya (1)', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 1, chandraMasaIndex: 7, region: 'bihar' }), resolver);
+      expect(r.some(f => f.name === 'bhai_dooj')).toBe(true);
+    });
+
+    it('Phagli — Phalguna (11) Purnima (14), himachal only', () => {
+      const hp = computeFestivals(ctx({ tithiIndex: 14, chandraMasaIndex: 11, region: 'himachal-pradesh' }), resolver);
+      expect(hp.some(f => f.name === 'phagli')).toBe(true);
+      // Holi fires on same day pan-Indian.
+      expect(hp.some(f => f.name === 'holi')).toBe(true);
+
+      const pb = computeFestivals(ctx({ tithiIndex: 14, chandraMasaIndex: 11, region: 'punjab' }), resolver);
+      expect(pb.some(f => f.name === 'phagli')).toBe(false);
+      expect(pb.some(f => f.name === 'holi')).toBe(true);
+    });
+
+    it('region=all emits every regional variant', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 0, chandraMasaIndex: 0, region: 'all' }), resolver);
+      const names = r.map(f => f.name);
+      expect(names).toContain('ugadi');
+      expect(names).toContain('gudi_padwa');
+    });
+  });
+
+  describe('v2.1 — Lohri (day before Makara Sankranti)', () => {
+    it('emits Lohri when nextDaySankrantiRashi is Makara (9) under punjab', () => {
+      const r = computeFestivals(
+        ctx({ nextDaySankrantiRashi: 9, region: 'punjab' }),
+        resolver, rashiResolver,
+      );
+      expect(r.some(f => f.name === 'lohri')).toBe(true);
+    });
+
+    it('emits Lohri under haryana / himachal-pradesh', () => {
+      for (const region of ['haryana', 'himachal-pradesh'] as const) {
+        const r = computeFestivals(ctx({ nextDaySankrantiRashi: 9, region }), resolver, rashiResolver);
+        expect(r.some(f => f.name === 'lohri')).toBe(true);
+      }
+    });
+
+    it('does NOT emit Lohri under tamil-nadu / kerala / west-bengal', () => {
+      for (const region of ['tamil-nadu', 'kerala', 'west-bengal'] as const) {
+        const r = computeFestivals(ctx({ nextDaySankrantiRashi: 9, region }), resolver, rashiResolver);
+        expect(r.some(f => f.name === 'lohri')).toBe(false);
+      }
+    });
+
+    it('does NOT emit Lohri when nextDaySankrantiRashi is not Makara', () => {
+      const r = computeFestivals(ctx({ nextDaySankrantiRashi: 0, region: 'punjab' }), resolver, rashiResolver);
+      expect(r.some(f => f.name === 'lohri')).toBe(false);
+    });
+
+    it('does NOT emit Lohri when nextDaySankrantiRashi is null/undefined', () => {
+      const r1 = computeFestivals(ctx({ nextDaySankrantiRashi: null, region: 'punjab' }), resolver, rashiResolver);
+      expect(r1.some(f => f.name === 'lohri')).toBe(false);
+
+      const r2 = computeFestivals(ctx({ region: 'punjab' }), resolver, rashiResolver);
+      expect(r2.some(f => f.name === 'lohri')).toBe(false);
+    });
+
+    it('emits Lohri under region=all', () => {
+      const r = computeFestivals(ctx({ nextDaySankrantiRashi: 9 }), resolver, rashiResolver);
+      expect(r.some(f => f.name === 'lohri')).toBe(true);
+    });
+  });
+
+  describe('v2.1 — orphan-region sweep', () => {
+    // Each FestivalRegion (other than 'all') must attach to ≥1 festival
+    // whose emission depends on the region scope. We assert the *specific
+    // scoped key* — a weak `r.length > 0` test would pass on pan-Indian
+    // emissions like Ugadi or the canonical Sankranti even if the region
+    // were dead. The (context, expected key) pairs below pin each region to
+    // a real allow-list entry; deleting that entry breaks the matching test.
+    const SCENARIOS: Array<{
+      region: Exclude<FestivalRegion, 'all'>;
+      ctx: FestivalComputeContext;
+      expectKey: string;
+    }> = [
+      { region: 'tamil-nadu',       ctx: ctx({ sankrantiRashi: 9, region: 'tamil-nadu' }),                           expectKey: 'pongal' },
+      { region: 'kerala',           ctx: ctx({ sankrantiRashi: 9, region: 'kerala' }),                               expectKey: 'ayyappa_makara_jyothi' },
+      { region: 'karnataka',        ctx: ctx({ tithiIndex: 14, chandraMasaIndex: 0, region: 'karnataka' }),          expectKey: 'karaga' },
+      { region: 'andhra-pradesh',   ctx: ctx({ chandraMasaIndex: 4, varaIndex: 5, tithiIndex: 12, region: 'andhra-pradesh' }), expectKey: 'varamahalakshmi' },
+      { region: 'telangana',        ctx: ctx({ chandraMasaIndex: 3, varaIndex: 0, region: 'telangana' }),            expectKey: 'bonalu' },
+      { region: 'west-bengal',      ctx: ctx({ sankrantiRashi: 0, region: 'west-bengal' }),                          expectKey: 'pohela_boishakh' },
+      { region: 'odisha',           ctx: ctx({ sankrantiRashi: 3, region: 'odisha' }),                               expectKey: 'raja_sankranti' },
+      { region: 'assam',            ctx: ctx({ sankrantiRashi: 0, region: 'assam' }),                                expectKey: 'bohag_bihu' },
+      { region: 'bihar',            ctx: ctx({ tithiIndex: 1, chandraMasaIndex: 7, region: 'bihar' }),               expectKey: 'bhai_dooj' },
+      { region: 'jharkhand',        ctx: ctx({ tithiIndex: 0, chandraMasaIndex: 7, region: 'jharkhand' }),           expectKey: 'govardhan_puja' },
+      { region: 'gujarat',          ctx: ctx({ sankrantiRashi: 9, region: 'gujarat' }),                              expectKey: 'uttarayan' },
+      { region: 'maharashtra',      ctx: ctx({ tithiIndex: 0, chandraMasaIndex: 0, region: 'maharashtra' }),         expectKey: 'gudi_padwa' },
+      { region: 'goa',              ctx: ctx({ tithiIndex: 0, chandraMasaIndex: 0, region: 'goa' }),                 expectKey: 'gudi_padwa' },
+      { region: 'rajasthan',        ctx: ctx({ tithiIndex: 2, chandraMasaIndex: 0, region: 'rajasthan' }),           expectKey: 'gangaur' },
+      { region: 'punjab',           ctx: ctx({ sankrantiRashi: 0, region: 'punjab' }),                               expectKey: 'baisakhi' },
+      { region: 'haryana',          ctx: ctx({ nextDaySankrantiRashi: 9, region: 'haryana' }),                       expectKey: 'lohri' },
+      { region: 'himachal-pradesh', ctx: ctx({ sankrantiRashi: 5, region: 'himachal-pradesh' }),                     expectKey: 'sair' },
+      { region: 'uttarakhand',      ctx: ctx({ sankrantiRashi: 3, region: 'uttarakhand' }),                          expectKey: 'harela' },
+      { region: 'uttar-pradesh',    ctx: ctx({ tithiIndex: 0, chandraMasaIndex: 7, region: 'uttar-pradesh' }),       expectKey: 'govardhan_puja' },
+      { region: 'madhya-pradesh',   ctx: ctx({ tithiIndex: 2, chandraMasaIndex: 4, region: 'madhya-pradesh' }),      expectKey: 'hariyali_teej' },
+      { region: 'nepal',            ctx: ctx({ sankrantiRashi: 4, region: 'nepal' }),                                expectKey: 'singh_sankranti' },
+    ];
+
+    for (const { region, ctx: scenarioCtx, expectKey } of SCENARIOS) {
+      it(`region='${region}' attaches to scoped festival '${expectKey}'`, () => {
+        const r = computeFestivals(scenarioCtx, resolver, rashiResolver);
+        const names = r.map(f => f.name);
+        expect(names).toContain(expectKey);
+      });
+    }
+
+    it('every FestivalRegion in the public type is covered by the sweep', () => {
+      // Type-side smoke: make sure the SCENARIOS array enumerates every
+      // non-'all' region — a compile-time exhaustiveness check on the
+      // discriminated union.
+      const ALL_REGIONS: readonly Exclude<FestivalRegion, 'all'>[] = [
+        'tamil-nadu', 'kerala', 'karnataka', 'andhra-pradesh', 'telangana',
+        'west-bengal', 'odisha', 'assam', 'bihar', 'jharkhand',
+        'gujarat', 'maharashtra', 'goa', 'rajasthan',
+        'punjab', 'haryana', 'himachal-pradesh', 'uttarakhand',
+        'uttar-pradesh', 'madhya-pradesh', 'nepal',
+      ];
+      const covered = new Set(SCENARIOS.map(s => s.region));
+      for (const r of ALL_REGIONS) expect(covered.has(r)).toBe(true);
+    });
+  });
+
+  describe('v2.1 — Varamahalakshmi (last Friday of Shravana Shukla before Purnima)', () => {
+    it('emits on Shravana (4) Friday with tithi in [7,13]', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 4, varaIndex: 5, tithiIndex: 12, region: 'karnataka' }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'varamahalakshmi')).toBe(true);
+    });
+
+    it('does NOT emit on a Friday earlier in Shukla paksha (tithi=2)', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 4, varaIndex: 5, tithiIndex: 2, region: 'karnataka' }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'varamahalakshmi')).toBe(false);
+    });
+
+    it('does NOT emit on a Krishna-paksha Friday (tithi=20)', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 4, varaIndex: 5, tithiIndex: 20, region: 'karnataka' }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'varamahalakshmi')).toBe(false);
+    });
+
+    it('does NOT emit on a non-Friday in the qualifying window', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 4, varaIndex: 4, tithiIndex: 12, region: 'karnataka' }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'varamahalakshmi')).toBe(false);
+    });
+
+    it('emits under all four scoped regions', () => {
+      for (const region of ['karnataka', 'andhra-pradesh', 'telangana', 'tamil-nadu'] as const) {
+        const r = computeFestivals(
+          ctx({ chandraMasaIndex: 4, varaIndex: 5, tithiIndex: 12, region }),
+          resolver,
+        );
+        expect(r.some(f => f.name === 'varamahalakshmi')).toBe(true);
+      }
+    });
+
+    it('does NOT emit under kerala', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 4, varaIndex: 5, tithiIndex: 12, region: 'kerala' }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'varamahalakshmi')).toBe(false);
+    });
+  });
+
+  describe('v2.1 — Bathukamma (Telangana) start + Saddula markers', () => {
+    it('Engili Pula Bathukamma — Bhadrapada (5) Amavasya (29)', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 29, chandraMasaIndex: 5, region: 'telangana' }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'bathukamma_start')).toBe(true);
+      expect(r.some(f => f.name === 'mahalaya_amavasya')).toBe(true); // pan-Indian same day
+    });
+
+    it('Saddula Bathukamma — Ashwin (6) Shukla Navami (8)', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 8, chandraMasaIndex: 6, region: 'telangana' }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'bathukamma_saddula')).toBe(true);
+      expect(r.some(f => f.name === 'maha_navami')).toBe(true); // pan-Indian same day
+    });
+
+    it('does NOT emit either marker outside Telangana', () => {
+      const r1 = computeFestivals(ctx({ tithiIndex: 29, chandraMasaIndex: 5, region: 'kerala' }), resolver);
+      expect(r1.some(f => f.name === 'bathukamma_start')).toBe(false);
+
+      const r2 = computeFestivals(ctx({ tithiIndex: 8, chandraMasaIndex: 6, region: 'kerala' }), resolver);
+      expect(r2.some(f => f.name === 'bathukamma_saddula')).toBe(false);
+    });
+  });
+
+  describe('v2.1 — Jagannath Rath Yatra (pan-Indian)', () => {
+    it('emits on Ashadha (3) Shukla Dwitiya (1) regardless of region', () => {
+      for (const region of ['all', 'odisha', 'kerala', 'tamil-nadu'] as const) {
+        const r = computeFestivals(ctx({ tithiIndex: 1, chandraMasaIndex: 3, region }), resolver);
+        expect(r.some(f => f.name === 'jagannath_rath_yatra')).toBe(true);
+      }
+    });
+
+    it('does NOT emit on a different tithi', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 2, chandraMasaIndex: 3 }), resolver);
+      expect(r.some(f => f.name === 'jagannath_rath_yatra')).toBe(false);
+    });
+  });
+
+  describe('v2.1 — Raja Parba 3-day arc (Odisha)', () => {
+    it('Pahili Raja — emits when nextDaySankrantiRashi=3 (Karka)', () => {
+      const r = computeFestivals(
+        ctx({ nextDaySankrantiRashi: 3, region: 'odisha' }),
+        resolver, rashiResolver,
+      );
+      expect(r.some(f => f.name === 'raja_pahili')).toBe(true);
+    });
+
+    it('Raja Sankranti — emits on Karka transit (sankrantiRashi=3)', () => {
+      const r = computeFestivals(
+        ctx({ sankrantiRashi: 3, region: 'odisha' }),
+        resolver, rashiResolver,
+      );
+      expect(r.some(f => f.name === 'raja_sankranti')).toBe(true);
+    });
+
+    it('Basi Raja — emits when prevDaySankrantiRashi=3 (yesterday was Karka)', () => {
+      const r = computeFestivals(
+        ctx({ prevDaySankrantiRashi: 3, region: 'odisha' }),
+        resolver, rashiResolver,
+      );
+      expect(r.some(f => f.name === 'raja_basi')).toBe(true);
+    });
+
+    it('does NOT emit Raja markers outside odisha (region=kerala)', () => {
+      const r1 = computeFestivals(ctx({ nextDaySankrantiRashi: 3, region: 'kerala' }), resolver, rashiResolver);
+      expect(r1.some(f => f.name === 'raja_pahili')).toBe(false);
+
+      const r2 = computeFestivals(ctx({ prevDaySankrantiRashi: 3, region: 'kerala' }), resolver, rashiResolver);
+      expect(r2.some(f => f.name === 'raja_basi')).toBe(false);
+    });
+
+    it('Pahili/Basi Raja emit under region=all (default)', () => {
+      const pahili = computeFestivals(ctx({ nextDaySankrantiRashi: 3 }), resolver, rashiResolver);
+      expect(pahili.some(f => f.name === 'raja_pahili')).toBe(true);
+
+      const basi = computeFestivals(ctx({ prevDaySankrantiRashi: 3 }), resolver, rashiResolver);
+      expect(basi.some(f => f.name === 'raja_basi')).toBe(true);
+    });
+
+    it('does NOT cross-fire — Lohri transit (Makara=9) does not emit Raja', () => {
+      const r = computeFestivals(ctx({ nextDaySankrantiRashi: 9, region: 'odisha' }), resolver, rashiResolver);
+      expect(r.some(f => f.name === 'raja_pahili')).toBe(false);
     });
   });
 

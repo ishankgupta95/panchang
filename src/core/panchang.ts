@@ -44,6 +44,7 @@ import { computePanchaka } from './panchaka';
 import { computeSpecialYogas } from './specialYogas';
 import { computeDurMuhurta } from './durMuhurta';
 import { computeFestivals } from './festivals';
+import { resolveRegionAlias } from './regionAlias';
 import { computeBhadraKaal } from './bhadra';
 import { computeChandraBalam } from '../jyotish/chandraBalam';
 import { getMoonrise, getMoonset } from '../astronomy/moonrise';
@@ -241,7 +242,7 @@ export function getInstantPanchang(
       isAdhika: chandramasa.isAdhika,
       varaIndex: vara.index,
       solarMasaIndex: Math.floor(siderealSun / 30) % 12,
-      region: options?.region ?? 'all',
+      region: resolveRegionAlias(options?.region),
     },
     (key) => t.festivalNames[key] ?? (t.misc as Record<string, string>)[key] ?? key,
     (idx) => resolveMasaName(idx, lang),
@@ -540,6 +541,36 @@ export function getDailyPanchang(
   const sankrantiRashi: number | null =
     rashiAtSunrise !== rashiAtNextSunrise ? rashiAtNextSunrise : null;
 
+  // Next-day Sankranti — Sun's rashi at the sunrise AFTER nextSunrise. Used
+  // by "day before Sankranti" observances (Lohri = day before Makara, Pahili
+  // Raja = day before Karka). We detect transit across TOMORROW'S Hindu day
+  // (nextSunrise → dayAfterSunrise) and return the target rashi. Anchored
+  // via tomorrow's sunset so `SearchRiseSet` unambiguously advances past
+  // tomorrow's sunrise.
+  let nextDaySankrantiRashi: number | null = null;
+  try {
+    const tomorrowSunsetUtc = computeSunset(nextSunriseUtc, location);
+    const dayAfterSunriseUtc = computeSunrise(tomorrowSunsetUtc, location);
+    const rashiAtDayAfterSunrise = Math.floor(getSun(dayAfterSunriseUtc) / 30) % 12;
+    if (rashiAtNextSunrise !== rashiAtDayAfterSunrise) {
+      nextDaySankrantiRashi = rashiAtDayAfterSunrise;
+    }
+  } catch (e: unknown) {
+    if (!(e instanceof PanchangError && (e.code === 'NO_SUNRISE' || e.code === 'NO_SUNSET'))) {
+      throw e;
+    }
+    // Polar days with no tomorrow sunrise/sunset: skip next-day marker.
+  }
+
+  // Prev-day Sankranti — Sun's rashi at YESTERDAY's sunrise vs today's. If
+  // they differ, a transit happened during yesterday's Hindu day. Used by
+  // "day after Sankranti" observances (Basi Raja = day after Karka). The
+  // yesterdaySunriseUtc and yesterdaySun longitudes are already computed for
+  // viddha / priorMasaWasAdhika, so this is a cheap reuse.
+  const rashiAtYesterdaySunrise = Math.floor(getSun(yesterdaySunriseUtc) / 30) % 12;
+  const prevDaySankrantiRashi: number | null =
+    rashiAtYesterdaySunrise !== rashiAtSunrise ? rashiAtSunrise : null;
+
   // Ekadashi Dashami-viddha: if tithi-at-sunrise is Ekadashi (10/25) and
   // tithi-at-arunodaya (~96 min before sunrise) is Dashami (9/24), the Ekadashi
   // is Dashami-viddha and the Smarta fast shifts to Dwadashi.
@@ -607,6 +638,8 @@ export function getDailyPanchang(
       priorDayTithiByRule,
       nakshatraIndicesInDay,
       sankrantiRashi,
+      nextDaySankrantiRashi,
+      prevDaySankrantiRashi,
       ekadashiDashamiViddha,
       smartaDwadashiToday,
       moonriseInDay: moonriseInDayUtc,
@@ -617,7 +650,7 @@ export function getDailyPanchang(
           }
         : null,
       formatClock,
-      region: options.region ?? 'all',
+      region: resolveRegionAlias(options.region),
     },
     (key) => t.festivalNames[key] ?? (t.misc as Record<string, string>)[key] ?? key,
     (idx) => resolveMasaName(idx, lang),

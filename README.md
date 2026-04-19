@@ -139,6 +139,37 @@ console.log(amanta.chandramasa.name);         // Amanta month name
 console.log(amanta.chandramasa.system);       // "amanta"
 ```
 
+### Regional Festival Filtering
+
+The `region` option scopes regional festival variants to one Indian state.
+Pan-Indian festivals (Diwali, Holi, Raksha Bandhan, the canonical
+`sankranti` event, …) emit regardless.
+
+```typescript
+// Default — every regional variant emits on Makar Sankranti day:
+const all = getDailyPanchang(jan14, chennai, { timezone: 330 });
+all.festivals.map(f => f.name);
+// → ["Sankranti", "Makar Sankranti", "Pongal", "Uttarayan",
+//    "Magh Bihu", "Ayyappa Makara Jyothi"]
+
+// Scope to Tamil Nadu — drops Bihu/Ayyappa/Uttarayan:
+const tn = getDailyPanchang(jan14, chennai, { timezone: 330, region: 'tamil-nadu' });
+tn.festivals.map(f => f.name);
+// → ["Sankranti", "Makar Sankranti", "Pongal"]
+
+// Lohri fires on the Hindu day BEFORE Makara transit, scoped to Punjab/
+// Haryana/Himachal — no extra wiring required, just the region option:
+const lohri = getDailyPanchang(jan13, amritsar, { timezone: 330, region: 'punjab' });
+lohri.festivals.some(f => f.name === 'Lohri');  // true
+
+// Pre-v2.1 region values still work but log a one-shot deprecation warning:
+getDailyPanchang(date, loc, { timezone: 330, region: 'tamil' });
+// console.warn: [panchang-ts] FestivalRegion 'tamil' is deprecated;
+//               use 'tamil-nadu'. Legacy value will be removed in v3.
+```
+
+See [`FestivalRegion`](#types) for the full state-slug list (21 states + `'nepal'`).
+
 ---
 
 ## Features
@@ -158,12 +189,13 @@ Rahu Kalam, Gulika Kalam, Yamaganda, Panchaka detection, Bhadra Kala (Vishti kar
 ### Special Yogas & Festivals
 Amrit Siddhi, Sarvartha Siddhi, Ravi Pushya, Guru Pushya yoga detection.
 
-**60+ festivals** spanning pan-Indian, regional, and classical observances:
+**80+ festivals** spanning pan-Indian, regional, and classical observances:
 
 - **Ekadashi** — 26 named variants (Putrada, Shat Tila, Nirjala, Devshayani, etc.) with **Smarta / Vaishnava split** via Dashami-viddha rule; Smarta fast emits a `deferralDate` for Dwadashi.
 - **Pradosha** — 7 weekday-qualified variants (Som Pradosh, Bhauma Pradosh, Shani Pradosh, etc.) firing on both Shukla & Krishna paksha.
-- **Sankranti** — transit-based solar-month boundary detection plus regional variants (**Pongal**, **Vishu**, **Baisakhi**, **Magh Bihu**, **Ayyappa Makara Jyothi**) scoped by the `region` option.
+- **Sankranti** — transit-based solar-month boundary detection plus regional variants (**Pongal**, **Vishu**, **Baisakhi**, **Pohela Boishakh**, **Bohag Bihu**, **Magh Bihu**, **Kati Bihu**, **Uttarayan**, **Ayyappa Makara Jyothi**, **Raja Sankranti**, **Harela**, **Sair**, **Singh Sankranti**) scoped by the `region` option. **Lohri** fires on the Hindu day immediately preceding Makara Sankranti under Punjab/Haryana/Himachal scopes.
 - **Canonical-time classical festivals** — Ganesh Chaturthi (madhyahna), Shivaratri (nishita), Diwali, Holi, Raksha Bandhan (Bhadra-aware, suppressed when Bhadra straddles Purnima), Karva Chauth (chandrodaya), Janmashtami, Dussehra, Navaratri, Ram Navami, Hanuman Jayanti, **Akshaya Tritiya & Parashurama Jayanti** (madhyahna-vyapini, co-emitted on Vaishakha Shukla Tritiya), Makar Sankranti.
+- **Regional festivals (v2.1)** — **Gudi Padwa** (Maharashtra/Goa), **Gangaur** (Rajasthan), **Karaga** (Karnataka), **Bonalu** (Telangana, recurring Sundays in Ashadha), **Varamahalakshmi** (last Friday of Shravana Shukla before Purnima, Karnataka/AP/Telangana/Tamil Nadu), **Bathukamma** (Telangana — Engili Pula + Saddula markers), **Hariyali / Kajari / Hartalika Teej**, **Govardhan Puja**, **Bhai Dooj**, **Phagli** (Himachal), **Jagannath Rath Yatra** (pan-Indian, Ashadha Shukla Dwitiya), **Raja Parba** 3-day arc (Odisha — Pahili / Sankranti / Basi) — all filtered by per-state allow-lists on the rule.
 - **Regional & seasonal** — Chhath (4-day sequence), Vat Savitri, Upakarma (3 shakha variants via nakshatra+chandraMasa), Onam (nakshatra+solarMasa).
 - **Monthly observances** — Masik Shivaratri, Vinayaka Chaturthi (suppressed in Maha-month), **Masik Karthigai** (any day Krittika nakshatra prevails — sampled at sunrise / midday / sunset / nishita), Pushya days, Shravan Somvar and other month+weekday patterns.
 - Adhika (leap) months auto-skipped for tithi-based rules; Purnimanta naming respected.
@@ -332,7 +364,7 @@ Both functions share the same core astronomy, but `getDailyPanchang` operates on
 | `computeEndTimes` | `boolean` | `true` | Set `false` for ~5x faster, names-only output |
 | `precision` | `'standard' \| 'high'` | `'standard'` | Binary-search iterations (15 vs 25). High precision is rarely needed. |
 | `masaSystem` | `'purnimanta' \| 'amanta'` | `'purnimanta'` | Lunar month naming system. Purnimanta (North Indian) or Amanta (South Indian). |
-| `region` | `FestivalRegion` | `'all'` | Scopes regional festival variants (Pongal, Vishu, Baisakhi, Bihu, Ayyappa, etc.). See [`FestivalRegion`](#types) for supported values. The canonical pan-Indian `sankranti` event is always emitted regardless. |
+| `region` | `FestivalRegion` | `'all'` | Scopes regional festival variants (Pongal, Vishu, Gudi Padwa, Lohri, Govardhan Puja, Bonalu, …) to a specific Indian state. See [`FestivalRegion`](#types) for the full list. Pre-v2.1 values (`'tamil'`, `'bengal'`, `'north-india'`) are still accepted but emit a deprecation warning; removal in v3. Pan-Indian festivals and the canonical `sankranti` event emit regardless of this setting. |
 | `janmaRashi` | `number` | _(omitted)_ | Native's birth Moon rashi index (0 = Mesha … 11 = Meena). When provided, the result includes `chandraBalam`. |
 
 **`InstantPanchangOptions`** (optional for `getInstantPanchang`): same as above but without `timezone` (instant mode works in UTC).
@@ -582,17 +614,56 @@ interface FestivalInfo {
   deferralDate?: Date;
 }
 
+// State-slug scheme. A caller sets `region` to limit regional variants to
+// their state; pan-Indian festivals (Holi, Diwali, Sankranti itself, …)
+// emit regardless.
 type FestivalRegion =
-  | 'all'           // default — emits every regional variant
-  | 'north-india'
-  | 'tamil'
-  | 'kerala'
-  | 'bengal'
-  | 'punjab'
-  | 'gujarat'
-  | 'assam'
-  | 'maharashtra';
+  | 'all'             // default — emits every regional variant
+  // South
+  | 'tamil-nadu' | 'kerala' | 'karnataka' | 'andhra-pradesh' | 'telangana'
+  // East
+  | 'west-bengal' | 'odisha' | 'assam' | 'bihar' | 'jharkhand'
+  // West
+  | 'gujarat' | 'maharashtra' | 'goa' | 'rajasthan'
+  // North / Central
+  | 'punjab' | 'haryana' | 'himachal-pradesh' | 'uttarakhand'
+  | 'uttar-pradesh' | 'madhya-pradesh'
+  // Neighbour
+  | 'nepal';
+
+// Pre-v2.1 identifiers. Accepted as input and mapped at call time; a
+// one-shot console warning fires per distinct legacy value. Removal in v3.
+//   'tamil'       → 'tamil-nadu'
+//   'bengal'      → 'west-bengal'
+//   'north-india' → 'all'       (Makar Sankranti is pan-Indian; use state
+//                                slugs for Lohri / Govardhan / Bhai Dooj)
+type LegacyFestivalRegion = 'tamil' | 'bengal' | 'north-india';
 ```
+
+**Region-scoped festivals** (non-exhaustive — see `src/core/festivals.ts`):
+
+| Region | Festival names (keys) |
+|---|---|
+| `tamil-nadu` | pongal, puthandu, varamahalakshmi |
+| `kerala` | vishu, ayyappa_makara_jyothi, onam *(solar-nakshatra)* |
+| `karnataka` | karaga, varamahalakshmi |
+| `andhra-pradesh` | varamahalakshmi |
+| `telangana` | bonalu, varamahalakshmi, bathukamma_start, bathukamma_saddula |
+| `west-bengal` | pohela_boishakh, bhai_dooj |
+| `odisha` | singh_sankranti, raja_pahili, raja_sankranti, raja_basi |
+| `assam` | bohag_bihu, magh_bihu, kati_bihu |
+| `bihar` | singh_sankranti, hariyali_teej, govardhan_puja, bhai_dooj |
+| `gujarat` | uttarayan, govardhan_puja, bhai_dooj |
+| `maharashtra` | gudi_padwa, hartalika_teej, bhai_dooj |
+| `goa` | gudi_padwa |
+| `rajasthan` | gangaur, hariyali_teej, kajari_teej, hartalika_teej, govardhan_puja, bhai_dooj |
+| `punjab` | baisakhi, lohri, govardhan_puja |
+| `haryana` | baisakhi, lohri, govardhan_puja, bhai_dooj |
+| `himachal-pradesh` | sair, phagli, lohri |
+| `uttarakhand` | harela |
+| `uttar-pradesh` | hariyali_teej, kajari_teej, hartalika_teej, govardhan_puja, bhai_dooj |
+| `madhya-pradesh` | hariyali_teej, kajari_teej, hartalika_teej |
+| `nepal` | singh_sankranti, bhai_dooj |
 </details>
 
 <details>

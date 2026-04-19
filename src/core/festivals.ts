@@ -1,4 +1,7 @@
 import type { FestivalInfo } from '../types/elements';
+import type { FestivalRegion } from '../types/options';
+
+export type { FestivalRegion };
 
 /**
  * Canonical time-of-day at which a festival's qualifying tithi must prevail.
@@ -26,22 +29,6 @@ export type FestivalDateRule =
  * - `observe-in-both`— Observe in both Adhika and Nija (e.g., Ekadashi is recurring).
  */
 type AdhikaBehaviour = 'skip' | 'shift-to-nija' | 'observe-in-both';
-
-/**
- * Regional scope for region-specific festival variants (primarily regional
- * Sankranti names like Pongal/Vishu/Baisakhi). `'all'` (default) emits every
- * region's variant; narrower values filter to that region only.
- */
-export type FestivalRegion =
-  | 'all'
-  | 'north-india'
-  | 'tamil'
-  | 'kerala'
-  | 'bengal'
-  | 'punjab'
-  | 'gujarat'
-  | 'assam'
-  | 'maharashtra';
 
 /**
  * A festival rule keyed by one of:
@@ -77,45 +64,97 @@ interface FestivalRule {
    * "Ashwin Amavasya" in Amanta). Registry matching stays Amanta-indexed.
    */
   namingSystem?: 'amanta' | 'purnimanta';
+  /**
+   * Regional scope. Omitted → pan-Indian (always emits). When set, the
+   * festival emits only if `ctx.region` is `'all'` or appears in this list.
+   * Include `'all'` explicitly to mark a rule as universal even when present.
+   */
+  regions?: readonly FestivalRegion[];
+  /**
+   * Tithi-range gate for `(masa + vara)` rules whose target day is a specific
+   * weekday within a sub-window of the lunar month — e.g. Varamahalakshmi
+   * is the *last Friday* of Shravana Shukla paksha before Purnima, which
+   * falls when (masa=4, vara=5, tithi ∈ [7, 13]).
+   *
+   * Pair `[startInclusive, endInclusive]` against the rule's `dateRule` tithi
+   * (defaults to sunrise). Rules without `tithiRange` ignore the field.
+   */
+  tithiRange?: readonly [number, number];
 }
 
 /**
  * Regional Sankranti name registry, keyed by solar rashi index. Each rashi
  * transit can map to multiple regional festival names (e.g. Makara → Makar
- * Sankranti, Pongal, Uttarayan, Bihu, Ayyappa Makara Jyothi). Filtered at
- * emit time by `ctx.region`.
+ * Sankranti, Pongal, Uttarayan, Magh Bihu, Ayyappa Makara Jyothi). Filtered
+ * at emit time by `ctx.region`.
+ *
+ * `regions` is an allow-list. An entry containing `'all'` emits universally
+ * (e.g. pan-Indian Dakshinayana); otherwise the entry emits only when
+ * `ctx.region` is `'all'` or appears in the list.
  */
 interface SankrantiRegionalRule {
   key: string;
-  region: FestivalRegion;
+  regions: readonly FestivalRegion[];
   type: 'major' | 'minor';
 }
 
 const SANKRANTI_REGIONAL: Readonly<Record<number, readonly SankrantiRegionalRule[]>> = {
   // Mesha (0) — solar new year across regions
   0: [
-    { key: 'baisakhi',         region: 'punjab',      type: 'major' },
-    { key: 'vishu',            region: 'kerala',      type: 'major' },
-    { key: 'pohela_boishakh',  region: 'bengal',      type: 'major' },
-    { key: 'puthandu',         region: 'tamil',       type: 'major' },
+    { key: 'baisakhi',         regions: ['punjab', 'haryana'],    type: 'major' },
+    { key: 'vishu',            regions: ['kerala'],               type: 'major' },
+    { key: 'pohela_boishakh',  regions: ['west-bengal'],          type: 'major' },
+    { key: 'puthandu',         regions: ['tamil-nadu'],           type: 'major' },
+    { key: 'bohag_bihu',       regions: ['assam'],                type: 'major' },
   ],
   // Karka (3) — Dakshinayana (Sun's southward course begins)
   3: [
-    { key: 'dakshinayana',     region: 'all',         type: 'minor' },
+    { key: 'dakshinayana',     regions: ['all'],                  type: 'minor' },
+    // Raja Parba (Odisha) — 4-day monsoon festival; we emit a single-day
+    // marker on Karka Sankranti, the most widely cited anchor day.
+    { key: 'raja_sankranti',   regions: ['odisha'],               type: 'major' },
+    // Harela (Kumaon / Uttarakhand) — observed on Shravana solar-month start.
+    { key: 'harela',           regions: ['uttarakhand'],          type: 'major' },
   ],
-  // Simha (4)
+  // Simha (4) — Singh Sankranti is primarily observed in Odisha, Bihar,
+  // and Nepal (as Singhasankranti); not a pan-Indian observance despite
+  // the pre-v2.1 tagging.
   4: [
-    { key: 'singh_sankranti',  region: 'all',         type: 'minor' },
+    { key: 'singh_sankranti',  regions: ['odisha', 'bihar', 'jharkhand', 'nepal'], type: 'minor' },
+  ],
+  // Kanya (5) — Sair (Himachal): first day of the Ashwin solar month.
+  5: [
+    { key: 'sair',             regions: ['himachal-pradesh'],     type: 'minor' },
+  ],
+  // Tula (6) — Kati Bihu (Assam): Kartika solar-month start.
+  6: [
+    { key: 'kati_bihu',        regions: ['assam'],                type: 'minor' },
   ],
   // Makara (9) — Uttarayana / harvest festivals
   9: [
-    { key: 'makar_sankranti',    region: 'north-india', type: 'major' },
-    { key: 'pongal',             region: 'tamil',       type: 'major' },
-    { key: 'uttarayan',          region: 'gujarat',     type: 'major' },
-    { key: 'bihu',               region: 'assam',       type: 'major' },
-    { key: 'ayyappa_makara_jyothi', region: 'kerala',   type: 'major' },
+    // Makar Sankranti is pan-Indian (re-scoped from the pre-v2.1 'north-india').
+    { key: 'makar_sankranti',    regions: ['all'],                type: 'major' },
+    { key: 'pongal',             regions: ['tamil-nadu'],         type: 'major' },
+    { key: 'uttarayan',          regions: ['gujarat'],            type: 'major' },
+    { key: 'magh_bihu',          regions: ['assam'],              type: 'major' },
+    { key: 'ayyappa_makara_jyothi', regions: ['kerala'],          type: 'major' },
   ],
 };
+
+/**
+ * Lohri — observed on the Hindu day immediately preceding Makara Sankranti.
+ * Emitted from `computeFestivals` when `ctx.nextDaySankrantiRashi === 9`.
+ */
+const LOHRI_REGIONS: readonly FestivalRegion[] = ['punjab', 'haryana', 'himachal-pradesh'];
+
+/**
+ * Raja Parba (Odisha) — 3-day monsoon festival anchored on Karka Sankranti:
+ *   Day 1 = Pahili Raja  (day BEFORE Karka transit; nextDaySankrantiRashi=3)
+ *   Day 2 = Raja Sankranti (transit day; emitted by SANKRANTI_REGIONAL[3])
+ *   Day 3 = Basi Raja    (day AFTER Karka transit; prevDaySankrantiRashi=3)
+ * The library does not emit the optional 4th day (Vasumati Snana).
+ */
+const RAJA_REGIONS: readonly FestivalRegion[] = ['odisha'];
 
 /**
  * Registry of major pan-Indian Hindu festivals.
@@ -199,6 +238,61 @@ const FESTIVAL_REGISTRY: readonly FestivalRule[] = [
   { key: 'rig_upakarma',       masa: 4, nakshatra: 21, type: 'major' },
   // Sama Upakarma — Hasta nakshatra (12) in Bhadrapada chandra masa (5).
   { key: 'sama_upakarma',      masa: 5, nakshatra: 12, type: 'major' },
+
+  // ── Regional festivals (v2.1 expansion) ─────────────────────
+  // Chaitra (0) — Marathi/Konkani New Year; same tithi as Ugadi but
+  // emitted as a Maharashtra-specific variant name alongside Ugadi.
+  { key: 'gudi_padwa',         masa: 0,  tithi: 0,  type: 'major',
+    regions: ['maharashtra', 'goa'] },
+  // Chaitra (0) Shukla Tritiya — Gangaur (18-day festival concludes here).
+  { key: 'gangaur',            masa: 0,  tithi: 2,  type: 'major',
+    regions: ['rajasthan'] },
+  // Chaitra (0) Purnima — Karaga festival of Bengaluru.
+  { key: 'karaga',             masa: 0,  tithi: 14, type: 'major',
+    regions: ['karnataka'] },
+  // Ashadha (3) — Bonalu, Sundays at Mahakali temples across Telangana.
+  { key: 'bonalu',             masa: 3,  vara: 0,   type: 'minor',
+    adhikaBehaviour: 'observe-in-both',
+    regions: ['telangana'] },
+  // Shravana (4) Shukla Tritiya — Hariyali Teej.
+  { key: 'hariyali_teej',      masa: 4,  tithi: 2,  type: 'major',
+    regions: ['rajasthan', 'uttar-pradesh', 'bihar', 'haryana', 'madhya-pradesh'] },
+  // Shravana (4) Krishna Tritiya — Kajari Teej (tithi 17 = Krishna Tritiya).
+  { key: 'kajari_teej',        masa: 4,  tithi: 17, type: 'major',
+    regions: ['rajasthan', 'uttar-pradesh', 'madhya-pradesh'] },
+  // Bhadrapada (5) Shukla Tritiya — Hartalika Teej.
+  { key: 'hartalika_teej',     masa: 5,  tithi: 2,  type: 'major',
+    regions: ['rajasthan', 'uttar-pradesh', 'bihar', 'maharashtra', 'madhya-pradesh'] },
+  // Amanta Kartika (7) Shukla Pratipada — day after Diwali.
+  // In Purnimanta convention this is also "Kartika Shukla Pratipada" (naming
+  // system aligns), so a namingSystem tag isn't required here.
+  { key: 'govardhan_puja',     masa: 7,  tithi: 0,  type: 'major',
+    regions: ['uttar-pradesh', 'bihar', 'haryana', 'rajasthan', 'gujarat',
+              'madhya-pradesh', 'punjab', 'jharkhand'] },
+  // Amanta Kartika (7) Shukla Dwitiya — Bhai Dooj.
+  { key: 'bhai_dooj',          masa: 7,  tithi: 1,  type: 'major',
+    regions: ['uttar-pradesh', 'bihar', 'haryana', 'maharashtra', 'gujarat',
+              'rajasthan', 'madhya-pradesh', 'west-bengal', 'jharkhand', 'nepal'] },
+  // Phalguna (11) Purnima — Phagli (varies by valley; Purnima anchor).
+  { key: 'phagli',             masa: 11, tithi: 14, type: 'minor',
+    regions: ['himachal-pradesh'] },
+  // Ashadha (3) Shukla Dwitiya — Jagannath Rath Yatra (pan-Indian; cultural
+  // epicenter is Puri, Odisha but observed nationwide).
+  { key: 'jagannath_rath_yatra', masa: 3, tithi: 1, type: 'major' },
+  // Shravana (4) Shukla — Varamahalakshmi: last Friday in Shukla paksha
+  // before Purnima. The (masa+vara) match is gated by tithi ∈ [7,13] so
+  // only the second Friday of the paksha (the one closest to Purnima) fires.
+  { key: 'varamahalakshmi',    masa: 4,  vara: 5,  type: 'major',
+    tithiRange: [7, 13],
+    regions: ['karnataka', 'andhra-pradesh', 'telangana', 'tamil-nadu'] },
+  // Bathukamma (Telangana) — 9-day floral festival from Bhadrapada
+  // Amavasya through Ashwin Shukla Navami. We emit start (Engili Pula
+  // Bathukamma, masa=5/tithi=29) and climax (Saddula Bathukamma, masa=6/
+  // tithi=8) markers; intermediate days carry no library-level emission.
+  { key: 'bathukamma_start',   masa: 5,  tithi: 29, type: 'major',
+    regions: ['telangana'] },
+  { key: 'bathukamma_saddula', masa: 6,  tithi: 8,  type: 'major',
+    regions: ['telangana'] },
 ];
 
 /**
@@ -290,6 +384,20 @@ export interface FestivalComputeContext {
   priorDayTithiByRule?: Partial<Record<FestivalDateRule, number>>;
   /** Rashi (0–11) the Sun enters during this Hindu day, or null if no transit. */
   sankrantiRashi?: number | null;
+  /**
+   * Rashi (0–11) the Sun enters on the NEXT Hindu day, or null if no transit
+   * tomorrow. Used for "day before Sankranti" observances — most notably
+   * Lohri (day before Makara) and Raja Pahili (day before Karka).
+   * Omit from instant-mode callers; the festival simply won't emit.
+   */
+  nextDaySankrantiRashi?: number | null;
+  /**
+   * Rashi (0–11) the Sun entered on the PREVIOUS Hindu day, or null if no
+   * transit yesterday. Used for "day after Sankranti" observances — currently
+   * only Raja Basi (day after Karka transit, 3rd day of Raja Parba).
+   * Omit from instant-mode callers; the festival simply won't emit.
+   */
+  prevDaySankrantiRashi?: number | null;
   /**
    * True when the Ekadashi at sunrise is Dashami-viddha (i.e., Dashami was
    * active at arunodaya, ~96 minutes before sunrise). Smarta schools shift
@@ -386,10 +494,20 @@ export function computeFestivals(
       match = masaMatches && rule.nakshatra === ctx.nakshatraIndex;
     } else if (rule.vara !== undefined && rule.masa !== undefined) {
       // Chandra-masa + Vara recurring (Shravan Somvar, Mangala Gauri, …).
+      // `tithiRange` (optional) further restricts the match to weekdays whose
+      // tithi falls within a sub-window of the lunar month — used for
+      // Varamahalakshmi (last Friday of Shravana Shukla paksha before Purnima).
       const masaMatches =
         rule.masa === ctx.chandraMasaIndex &&
         (adhikaBehaviour !== 'shift-to-nija' || !ctx.isAdhika);
-      match = masaMatches && rule.vara === ctx.varaIndex;
+      let inTithiRange = true;
+      if (rule.tithiRange !== undefined) {
+        const dateRule = rule.dateRule ?? 'sunrise';
+        const tithi = tithiForRule(dateRule);
+        const [lo, hi] = rule.tithiRange;
+        inTithiRange = tithi >= lo && tithi <= hi;
+      }
+      match = masaMatches && rule.vara === ctx.varaIndex && inTithiRange;
     } else if (rule.masa !== undefined && rule.tithi !== undefined) {
       const masaMatches =
         rule.masa === ctx.chandraMasaIndex &&
@@ -430,6 +548,16 @@ export function computeFestivals(
     }
 
     if (!match) continue;
+
+    // Regional filter: if the rule restricts its scope, emit only when the
+    // caller's region is `'all'` or appears in the rule's allow-list. Rules
+    // without `regions` are pan-Indian and emit unconditionally.
+    if (rule.regions !== undefined) {
+      const region: FestivalRegion = ctx.region ?? 'all';
+      if (region !== 'all' && !rule.regions.includes('all') && !rule.regions.includes(region)) {
+        continue;
+      }
+    }
 
     const festival: FestivalInfo = { name: nameResolver(rule.key), type: rule.type };
 
@@ -589,6 +717,7 @@ export function computeFestivals(
   }
 
   // ── Sankranti — Sun enters a new rashi during this Hindu day ──
+  const region: FestivalRegion = ctx.region ?? 'all';
   if (ctx.sankrantiRashi !== undefined && ctx.sankrantiRashi !== null) {
     const rashiName = rashiNameResolver
       ? rashiNameResolver(ctx.sankrantiRashi)
@@ -599,20 +728,43 @@ export function computeFestivals(
       description: rashiName,
     });
 
-    // Regional Sankranti variants (Pongal, Vishu, Baisakhi, Bihu, …).
+    // Regional Sankranti variants (Pongal, Vishu, Baisakhi, Magh Bihu, …).
     // Emitted as additional type-'sankranti' entries so consumers can filter
     // or display them alongside the canonical Sankranti event.
-    const region: FestivalRegion = ctx.region ?? 'all';
     const regionalRules = SANKRANTI_REGIONAL[ctx.sankrantiRashi];
     if (regionalRules) {
       for (const r of regionalRules) {
-        if (region !== 'all' && r.region !== 'all' && r.region !== region) continue;
+        if (region !== 'all' && !r.regions.includes('all') && !r.regions.includes(region)) continue;
         results.push({
           name: nameResolver(r.key),
           type: 'sankranti',
           description: rashiName,
         });
       }
+    }
+  }
+
+  // ── Lohri — Hindu day immediately preceding Makara Sankranti ──
+  // Fired from `nextDaySankrantiRashi === 9`; the caller (getDailyPanchang)
+  // supplies this by checking tomorrow's transit. Scoped to Punjab / Haryana /
+  // Himachal; not emitted in instant mode (context field is omitted there).
+  if (ctx.nextDaySankrantiRashi === 9) {
+    if (region === 'all' || LOHRI_REGIONS.includes(region)) {
+      results.push({ name: nameResolver('lohri'), type: 'major' });
+    }
+  }
+
+  // ── Raja Parba day 1 (Pahili Raja) — day before Karka Sankranti ──
+  if (ctx.nextDaySankrantiRashi === 3) {
+    if (region === 'all' || RAJA_REGIONS.includes(region)) {
+      results.push({ name: nameResolver('raja_pahili'), type: 'major' });
+    }
+  }
+
+  // ── Raja Parba day 3 (Basi Raja) — day after Karka Sankranti ──
+  if (ctx.prevDaySankrantiRashi === 3) {
+    if (region === 'all' || RAJA_REGIONS.includes(region)) {
+      results.push({ name: nameResolver('raja_basi'), type: 'major' });
     }
   }
 
