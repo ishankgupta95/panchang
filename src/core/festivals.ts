@@ -398,21 +398,32 @@ export function computeFestivals(
         (adhikaBehaviour !== 'shift-to-nija' || !ctx.isAdhika);
       if (masaMatches) {
         const dateRule = rule.dateRule ?? 'sunrise';
-        const effectiveTithi = tithiForRule(dateRule);
-        if (effectiveTithi === rule.tithi) {
-          // Long-tithi dedupe — suppress if yesterday already claimed it.
-          const startTithi = tithiForRuleStart(dateRule);
-          const priorEndTithi = priorDayTithiForRule(dateRule);
+        const endTithi = tithiForRule(dateRule);
+        const startTithi = tithiForRuleStart(dateRule);
+        const priorEndTithi = priorDayTithiForRule(dateRule);
+        // Classical vyapini rule: the tithi prevails during the kala. Sampling
+        // only the midpoint misses days where the tithi covered most of the
+        // kala but ended minutes before midpoint (e.g. Janmashtami 2026 Pune,
+        // where Ashtami ran 02:26 IST Sep 4 → 00:14 IST Sep 5, was active at
+        // nishita start but ended ~20 min before nishita midpoint).
+        const matchedByEnd = endTithi === rule.tithi;
+        const matchedByStart =
+          dateRule !== 'sunrise' &&
+          startTithi !== undefined &&
+          startTithi === rule.tithi &&
+          endTithi !== rule.tithi;
+        if (matchedByEnd || matchedByStart) {
+          // Tithi just nudged into today's kala-end but yesterday's kala-end
+          // also held it → yesterday already emitted, suppress today.
           if (
             dateRule !== 'sunrise' &&
             startTithi !== undefined &&
             startTithi !== rule.tithi &&
             priorEndTithi === rule.tithi
-          ) {
-            // Tithi started DURING today's kala; yesterday's kala-end also
-            // matched the target → yesterday already emitted, suppress today.
-            continue;
-          }
+          ) continue;
+          // Start-only match: tithi spanned yesterday's kala fully (yesterday
+          // matched by end) and is leaving today's kala — yesterday wins.
+          if (matchedByStart && priorEndTithi === rule.tithi) continue;
           match = true;
         }
       }
@@ -501,19 +512,20 @@ export function computeFestivals(
 
   // ── Masik Shivaratri (monthly) — Krishna Chaturdashi (28) at nishita ──
   // Suppressed in Nija Magha (where Maha Shivaratri already fires).
-  const nishitaTithi = tithiForRule('nishita');
-  if (nishitaTithi === 28) {
-    const isMahaShivaratriMonth = !ctx.isAdhika && ctx.chandraMasaIndex === 10;
-    if (!isMahaShivaratriMonth) {
-      // Long-tithi dedupe parallel to the registry loop: suppress today if
-      // tithi started during today's kala AND yesterday's kala already held it.
-      const startTithi = ctx.tithiByRuleStart?.nishita;
-      const priorEndTithi = ctx.priorDayTithiByRule?.nishita;
-      const suppressed =
+  {
+    const endTithi = tithiForRule('nishita');
+    const startTithi = ctx.tithiByRuleStart?.nishita;
+    const priorEndTithi = ctx.priorDayTithiByRule?.nishita;
+    const matchedByEnd = endTithi === 28;
+    const matchedByStart = startTithi !== undefined && startTithi === 28 && endTithi !== 28;
+    if (matchedByEnd || matchedByStart) {
+      const isMahaShivaratriMonth = !ctx.isAdhika && ctx.chandraMasaIndex === 10;
+      const dedupeA =
         startTithi !== undefined &&
         startTithi !== 28 &&
         priorEndTithi === 28;
-      if (!suppressed) {
+      const dedupeB = matchedByStart && priorEndTithi === 28;
+      if (!isMahaShivaratriMonth && !dedupeA && !dedupeB) {
         results.push({ name: nameResolver('masik_shivaratri'), type: 'minor' });
       }
     }
@@ -521,17 +533,20 @@ export function computeFestivals(
 
   // ── Vinayaka Chaturthi (monthly) — Shukla Chaturthi (3) at madhyahna ──
   // Suppressed in Nija Bhadrapada (where Ganesh Chaturthi already fires).
-  const madhyahnaTithi = tithiForRule('madhyahna');
-  if (madhyahnaTithi === 3) {
-    const isGaneshChaturthiMonth = !ctx.isAdhika && ctx.chandraMasaIndex === 5;
-    if (!isGaneshChaturthiMonth) {
-      const startTithi = ctx.tithiByRuleStart?.madhyahna;
-      const priorEndTithi = ctx.priorDayTithiByRule?.madhyahna;
-      const suppressed =
+  {
+    const endTithi = tithiForRule('madhyahna');
+    const startTithi = ctx.tithiByRuleStart?.madhyahna;
+    const priorEndTithi = ctx.priorDayTithiByRule?.madhyahna;
+    const matchedByEnd = endTithi === 3;
+    const matchedByStart = startTithi !== undefined && startTithi === 3 && endTithi !== 3;
+    if (matchedByEnd || matchedByStart) {
+      const isGaneshChaturthiMonth = !ctx.isAdhika && ctx.chandraMasaIndex === 5;
+      const dedupeA =
         startTithi !== undefined &&
         startTithi !== 3 &&
         priorEndTithi === 3;
-      if (!suppressed) {
+      const dedupeB = matchedByStart && priorEndTithi === 3;
+      if (!isGaneshChaturthiMonth && !dedupeA && !dedupeB) {
         results.push({ name: nameResolver('vinayaka_chaturthi'), type: 'minor' });
       }
     }
