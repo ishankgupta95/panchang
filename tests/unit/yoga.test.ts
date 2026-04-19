@@ -10,7 +10,7 @@ import { computeYogaFromLongitudes, getYogaIndex } from '../../src/core/yoga';
 import { NAKSHATRA_SPAN } from '../../src/utils/constants';
 
 const YOGA_NAMES = [
-  'Vishkamba', 'Priti', 'Ayushman', 'Saubhagya', 'Shobhana',
+  'Vishkambha', 'Priti', 'Ayushmana', 'Saubhagya', 'Shobhana',
   'Atiganda', 'Sukarma', 'Dhriti', 'Shula', 'Ganda',
   'Vriddhi', 'Dhruva', 'Vyaghata', 'Harshana', 'Vajra',
   'Siddhi', 'Vyatipata', 'Variyan', 'Parigha', 'Shiva',
@@ -19,7 +19,7 @@ const YOGA_NAMES = [
 ];
 
 describe('getYogaIndex', () => {
-  it('sum=0° → yoga index 0 (Vishkamba)', () => {
+  it('sum=0° → yoga index 0 (Vishkambha)', () => {
     expect(getYogaIndex(0, 0)).toBe(0);
   });
 

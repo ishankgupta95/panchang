@@ -26,15 +26,17 @@ export interface EclipseInfo {
   visibleFromLocation: boolean;
   /** Fraction of the disc obscured at peak, range [0, 1]. */
   magnitude: number;
-  /** Pre-eclipse impurity window start (sutak). 9h before `start` for solar, 3h for lunar. */
+  /** Pre-eclipse impurity window start (sutak). 12h (4 prahara) before `start` for solar, 9h (3 prahara) for lunar — classical Smarta convention. */
   sutakStart: Date;
   /** End of sutak — coincides with eclipse end (moksha / purification point). */
   sutakEnd: Date;
   description: string;
 }
 
-const SOLAR_SUTAK_HOURS = 9;
-const LUNAR_SUTAK_HOURS = 3;
+// Classical Smarta convention: 4 prahara (12h) for solar, 3 prahara (9h) for
+// lunar. A prahara = 1/8 of a day = 3 hours.
+const SOLAR_SUTAK_HOURS = 12;
+const LUNAR_SUTAK_HOURS = 9;
 
 function eclipseKindToSubtype(kind: EclipseKind): EclipseSubtype {
   switch (kind) {
@@ -68,17 +70,18 @@ function isBodyAboveHorizon(date: Date, location: GeoLocation, body: Body): bool
  * `withinDays` days after `fromUtc`, as an `EclipseInfo`, or `null` if none.
  *
  * Lunar eclipse visibility requires the Moon to be above the horizon at peak;
- * the `visibleFromLocation` field is set based on that check. Pass a location
- * if you want visibility filled in; otherwise visibility defaults to `false`.
+ * the `visibleFromLocation` field is set based on that check.
+ *
+ * Argument order matches `getUpcomingSolarEclipse` and `getEclipseDuringDay`.
  *
  * @param fromUtc     UTC instant to search forward from.
+ * @param location    Observer location (required for `visibleFromLocation`).
  * @param withinDays  Max number of days ahead to look.
- * @param location    Optional observer location for visibility check.
  */
 export function getUpcomingLunarEclipse(
   fromUtc: Date,
+  location: GeoLocation,
   withinDays: number,
-  location?: GeoLocation,
 ): EclipseInfo | null {
   let info = SearchLunarEclipse(fromUtc);
   // Sanity-bounded loop to catch the first eclipse whose PENUMBRAL start is
@@ -188,7 +191,7 @@ export function getEclipseDuringDay(
   const solar = getUpcomingSolarEclipse(sunriseUtc, location, windowDays);
   if (solar && solar.peak.getTime() < nextSunriseUtc.getTime()) return solar;
 
-  const lunar = getUpcomingLunarEclipse(sunriseUtc, windowDays, location);
+  const lunar = getUpcomingLunarEclipse(sunriseUtc, location, windowDays);
   if (lunar && lunar.peak.getTime() < nextSunriseUtc.getTime()) return lunar;
 
   return null;

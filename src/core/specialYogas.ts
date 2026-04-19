@@ -39,7 +39,7 @@ const SARVARTHA_SIDDHI_TABLE: ReadonlyMap<number, ReadonlySet<number>> = new Map
  * Detect special auspicious yogas active for a given Vara + Tithi + Nakshatra.
  *
  * @param varaIndex      0 = Sunday … 6 = Saturday
- * @param tithiIndex     0–29 (0 = Shukla Pratipad, 14 = Purnima, 29 = Amavasya)
+ * @param tithiIndex     0–29 (0 = Shukla Pratipada, 14 = Purnima, 29 = Amavasya)
  * @param nakshatraIndex 0–26 (0 = Ashwini … 26 = Revati)
  * @param nameResolver   Maps yoga type string → translated name
  */

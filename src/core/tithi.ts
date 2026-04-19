@@ -9,8 +9,8 @@ import type { TithiInfo } from '../types/elements';
  *   tithiAngle = normalize360(moonLon - sunLon)
  *   tithiIndex = floor(tithiAngle / 12)
  *
- * Indices 0–14  = Shukla Paksha (Pratipad to Purnima)
- * Indices 15–29 = Krishna Paksha (Pratipad to Amavasya)
+ * Indices 0–14  = Shukla Paksha (Pratipada to Purnima)
+ * Indices 15–29 = Krishna Paksha (Pratipada to Amavasya)
  */
 export function computeTithiFromLongitudes(
   siderealMoon: number,

@@ -121,7 +121,7 @@ const SANKRANTI_REGIONAL: Readonly<Record<number, readonly SankrantiRegionalRule
  * Registry of major pan-Indian Hindu festivals.
  *
  * Chandra Masa indices (Amanta): 0=Chaitra … 11=Phalguna.
- * Tithi indices: 0=Shukla Pratipad … 14=Purnima … 15=Krishna Pratipad … 29=Amavasya.
+ * Tithi indices: 0=Shukla Pratipada … 14=Purnima … 15=Krishna Pratipada … 29=Amavasya.
  * Nakshatra indices: 0=Ashwini … 26=Revati.
  * Solar masa indices: 0=Mesha … 11=Meena.
  */
@@ -131,7 +131,10 @@ const FESTIVAL_REGISTRY: readonly FestivalRule[] = [
   { key: 'rama_navami',        masa: 0,  tithi: 8,  type: 'major', dateRule: 'madhyahna', adhikaBehaviour: 'shift-to-nija' },
   { key: 'hanuman_jayanti',    masa: 0,  tithi: 14, type: 'major' },
   // Vaishakha (1)
+  // Akshaya Tritiya and Parashurama Jayanti share Vaishakha Shukla Tritiya;
+  // both are observed on the madhyahna-vyapini day (when the tithi prevails at midday).
   { key: 'akshaya_tritiya',    masa: 1,  tithi: 2,  type: 'major', dateRule: 'madhyahna' },
+  { key: 'parashurama_jayanti', masa: 1, tithi: 2,  type: 'major', dateRule: 'madhyahna' },
   // Ashadha (3)
   { key: 'guru_purnima',       masa: 3,  tithi: 14, type: 'major' },
   // Shravana (4)
@@ -247,6 +250,13 @@ export interface FestivalComputeContext {
   tithiIndex: number;
   /** Nakshatra 0–26 at sunrise. */
   nakshatraIndex: number;
+  /**
+   * Optional: set of nakshatra indices that occur during the Hindu day
+   * (sampled at sunrise / midday / sunset / nishita). Used by rules that
+   * fire whenever a given nakshatra prevails any time during the day —
+   * e.g. Masik Karthigai = Krittika anywhere on the day.
+   */
+  nakshatraIndicesInDay?: ReadonlySet<number>;
   /** Amanta chandra masa 0–11 at sunrise. */
   chandraMasaIndex: number;
   /** Purnimanta chandra masa 0–11 at sunrise (for cosmetic naming). */
@@ -536,6 +546,20 @@ export function computeFestivals(
     } else if (ctx.varaIndex === 4) {
       results.push({ name: nameResolver('guru_pushya'), type: 'minor' });
     }
+  }
+
+  // ── Masik Karthigai — monthly observance on Krittika-nakshatra day ──
+  // South Indian (primarily Tamil) tradition: lamps are lit on every day the
+  // Moon transits Krittika, with the annual Karthigai Deepam falling on the
+  // Krittika-Purnima conjunction in Kartika masa. We emit this whenever
+  // Krittika (index 2) is present at any sampled point during the Hindu day,
+  // not strictly at sunrise — the Drik convention since Krittika typically
+  // takes over after sunrise on at least one day per lunar month.
+  const krittikaPrevails =
+    ctx.nakshatraIndex === 2 ||
+    (ctx.nakshatraIndicesInDay !== undefined && ctx.nakshatraIndicesInDay.has(2));
+  if (krittikaPrevails) {
+    results.push({ name: nameResolver('masik_karthigai'), type: 'minor' });
   }
 
   // ── Pradosha Vrata — Shukla/Krishna Trayodashi at pradosha-kala ──

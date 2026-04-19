@@ -22,7 +22,7 @@ function ctx(overrides: Partial<FestivalComputeContext> = {}): FestivalComputeCo
 
 describe('computeFestivals', () => {
   describe('major fixed festivals (sunrise default rule)', () => {
-    it('detects Ugadi — Chaitra (0), Shukla Pratipad (0)', () => {
+    it('detects Ugadi — Chaitra (0), Shukla Pratipada (0)', () => {
       const r = computeFestivals(ctx({ tithiIndex: 0, chandraMasaIndex: 0 }), resolver);
       expect(r.some(f => f.name === 'ugadi')).toBe(true);
     });

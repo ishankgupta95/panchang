@@ -27,7 +27,7 @@
     "location": { "latitude": 35.6762, "longitude": 139.6503 },
     "timezone": 540,
     "expected": {
-      "varaEnglish": "Wednesday",
+      "varaEnglish": "Thursday",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -38,7 +38,7 @@
     "location": { "latitude": -33.8688, "longitude": 151.2093 },
     "timezone": 600,
     "expected": {
-      "varaEnglish": "Friday",
+      "varaEnglish": "Saturday",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }
@@ -60,7 +60,7 @@
     "location": { "latitude": 1.3521, "longitude": 103.8198 },
     "timezone": 480,
     "expected": {
-      "varaEnglish": "Thursday",
+      "varaEnglish": "Friday",
       "tithiCountAtLeast": 1,
       "nakshatraCountAtLeast": 1
     }

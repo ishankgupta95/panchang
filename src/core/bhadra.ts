@@ -7,7 +7,7 @@ import { getKaranaIndexAtTime } from './karana';
  * karana), which occurs 8 times per lunar month.
  *
  * Karana cycle (see [src/core/karana.ts](src/core/karana.ts)):
- *   - index 0:       Kimstughna (fixed, Shukla Pratipad 1st half)
+ *   - index 0:       Kimstughna (fixed, Shukla Pratipada 1st half)
  *   - index 1–56:    7-karana movable cycle (Bava→Vishti), repeating
  *   - index 57–59:   Shakuni, Chatushpada, Naga (fixed)
  *

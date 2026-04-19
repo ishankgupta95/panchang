@@ -31,7 +31,7 @@
       "mars":    { "siderealLongitude":  97.45, "rashi": "Karka",     "nakshatra": "Pushya",           "retrograde": true  },
       "mercury": { "siderealLongitude": 236.64, "rashi": "Vrischika", "nakshatra": "Jyeshtha",         "retrograde": false },
       "jupiter": { "siderealLongitude":  48.92, "rashi": "Vrishabha", "nakshatra": "Rohini",           "retrograde": true  },
-      "venus":   { "siderealLongitude": 304.31, "rashi": "Kumbha",    "nakshatra": "Dhanishta",        "retrograde": false },
+      "venus":   { "siderealLongitude": 304.31, "rashi": "Kumbha",    "nakshatra": "Dhanishtha",        "retrograde": false },
       "saturn":  { "siderealLongitude": 320.36, "rashi": "Kumbha",    "nakshatra": "Purva Bhadrapada", "retrograde": false },
       "rahu":    { "siderealLongitude": 337.24, "rashi": "Meena",     "nakshatra": "Uttara Bhadrapada","retrograde": true  },
       "ketu":    { "siderealLongitude": 157.24, "rashi": "Kanya",     "nakshatra": "Uttara Phalguni",  "retrograde": true  }

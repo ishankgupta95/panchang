@@ -2,7 +2,7 @@ import type { PanchangTranslations } from './types';
 
 export const en: PanchangTranslations = {
   tithiNames: [
-    'Pratipad', 'Dwitiya', 'Tritiya', 'Chaturthi', 'Panchami',
+    'Pratipada', 'Dwitiya', 'Tritiya', 'Chaturthi', 'Panchami',
     'Shashthi', 'Saptami', 'Ashtami', 'Navami', 'Dashami',
     'Ekadashi', 'Dwadashi', 'Trayodashi', 'Chaturdashi',
   ],
@@ -11,11 +11,11 @@ export const en: PanchangTranslations = {
     'Ardra', 'Punarvasu', 'Pushya', 'Ashlesha', 'Magha',
     'Purva Phalguni', 'Uttara Phalguni', 'Hasta', 'Chitra',
     'Swati', 'Vishakha', 'Anuradha', 'Jyeshtha', 'Mula',
-    'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishta',
+    'Purva Ashadha', 'Uttara Ashadha', 'Shravana', 'Dhanishtha',
     'Shatabhisha', 'Purva Bhadrapada', 'Uttara Bhadrapada', 'Revati',
   ],
   yogaNames: [
-    'Vishkamba', 'Priti', 'Ayushman', 'Saubhagya', 'Shobhana',
+    'Vishkambha', 'Priti', 'Ayushmana', 'Saubhagya', 'Shobhana',
     'Atiganda', 'Sukarma', 'Dhriti', 'Shula', 'Ganda',
     'Vriddhi', 'Dhruva', 'Vyaghata', 'Harshana', 'Vajra',
     'Siddhi', 'Vyatipata', 'Variyan', 'Parigha', 'Shiva',
@@ -27,13 +27,13 @@ export const en: PanchangTranslations = {
     fixed: ['Kimstughna', 'Shakuni', 'Chatushpada', 'Naga'],
   },
   varaNames: [
-    { name: 'Ravivara', short: 'Ravi' },
-    { name: 'Somavara', short: 'Soma' },
-    { name: 'Mangalavara', short: 'Mangal' },
-    { name: 'Budhavara', short: 'Budh' },
-    { name: 'Guruvara', short: 'Guru' },
-    { name: 'Shukravara', short: 'Shukra' },
-    { name: 'Shanivara', short: 'Shani' },
+    { name: 'Raviwara', short: 'Ravi' },
+    { name: 'Somawara', short: 'Soma' },
+    { name: 'Mangalawara', short: 'Mangal' },
+    { name: 'Budhawara', short: 'Budh' },
+    { name: 'Guruwara', short: 'Guru' },
+    { name: 'Shukrawara', short: 'Shukra' },
+    { name: 'Shaniwara', short: 'Shani' },
   ],
   pakshaNames: { shukla: 'Shukla', krishna: 'Krishna' },
   masaNames: [
@@ -43,7 +43,7 @@ export const en: PanchangTranslations = {
   ],
   chandraMasaNames: [
     'Chaitra', 'Vaishakha', 'Jyeshtha', 'Ashadha',
-    'Shravana', 'Bhadrapada', 'Ashwin', 'Kartika',
+    'Shravana', 'Bhadrapada', 'Ashwina', 'Kartika',
     'Margashirsha', 'Pausha', 'Magha', 'Phalguna',
   ],
   choghadiyaNames: ['Udveg', 'Char', 'Labh', 'Amrit', 'Kaal', 'Shubh', 'Rog'],
@@ -62,6 +62,7 @@ export const en: PanchangTranslations = {
     rama_navami: 'Rama Navami',
     hanuman_jayanti: 'Hanuman Jayanti',
     akshaya_tritiya: 'Akshaya Tritiya',
+    parashurama_jayanti: 'Parashurama Jayanti',
     guru_purnima: 'Guru Purnima',
     nag_panchami: 'Nag Panchami',
     raksha_bandhan: 'Raksha Bandhan',
@@ -148,6 +149,7 @@ export const en: PanchangTranslations = {
     // Monthly recurring
     masik_shivaratri: 'Masik Shivaratri',
     vinayaka_chaturthi: 'Vinayaka Chaturthi',
+    masik_karthigai: 'Masik Karthigai',
     // Pushya Nakshatra (mirrored from specialYogas for UX)
     ravi_pushya: 'Ravi Pushya',
     guru_pushya: 'Guru Pushya',

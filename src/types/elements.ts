@@ -130,7 +130,7 @@ export interface HoraInfo {
 // ── Samvat (Hindu year eras) ──────────────────────────
 
 export interface SamvatInfo {
-  /** Vikram Samvat year (increments at Chaitra Shukla Pratipad ≈ April) */
+  /** Vikram Samvat year (increments at Chaitra Shukla Pratipada ≈ April) */
   vikramSamvat: number;
   /** Shaka Samvat year (same new-year point, offset 135 years behind VS) */
   shakaSamvat: number;

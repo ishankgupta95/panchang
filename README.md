@@ -599,7 +599,7 @@ interface EclipseInfo {
   end: Date;                // UTC — observable phase ends
   visibleFromLocation: boolean;  // body above horizon at peak for observer
   magnitude: number;        // fraction of disc obscured at peak, [0, 1]
-  sutakStart: Date;         // pre-eclipse impurity window begins
+  sutakStart: Date;         // pre-eclipse impurity window begins — 12 h (4 prahara) before for solar, 9 h (3 prahara) before for lunar, per classical Smarta convention
   sutakEnd: Date;           // coincides with eclipse end (moksha)
   description: string;
 }
@@ -707,7 +707,7 @@ InteractionManager.runAfterInteractions(() => {
 
 ## Accuracy
 
-5,072 tests passing, including fixtures cross-verified against
+5,073 tests passing, including fixtures cross-verified against
 reference panchang calculations spanning 2025–2026 across Delhi, Chennai,
 New York, London, Sydney, Dubai, and Singapore (diaspora fixtures cover
 DST transitions on `America/New_York`).
@@ -715,7 +715,7 @@ DST transitions on `America/New_York`).
 | Element | Accuracy | Validation |
 |---------|----------|------------|
 | Sunrise / Sunset | **≤29 s observed vs reference minute-midpoint** (±45 s tolerance) | 16 assertions |
-| Moonrise / Moonset | ±2 min vs reference | Strict fixtures |
+| Moonrise / Moonset | Meeus apparent-upper-limb convention (refraction + parallax); ~3–5 min disagreement vs panchang authorities that use a simpler horizon model is expected and documented | Strict fixtures |
 | Tithi, Nakshatra, Yoga, Karana names | Exact match vs reference | Strict fixtures |
 | Tithi / Nakshatra / Yoga / Karana end-times | **±3 min tolerance, max 2.01 min observed** | 20 assertions |
 | Ayanamsa | ±0.005° vs Swiss Ephemeris | Unit tests |

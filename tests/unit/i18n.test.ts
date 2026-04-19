@@ -126,8 +126,8 @@ describe('resolveTithiName', () => {
     });
   }
 
-  it('Shukla Pratipad (index 0) in English', () => {
-    expect(resolveTithiName(0, 'en')).toContain('Pratipad');
+  it('Shukla Pratipada (index 0) in English', () => {
+    expect(resolveTithiName(0, 'en')).toContain('Pratipada');
   });
 
   it('Purnima (index 14) in English', () => {

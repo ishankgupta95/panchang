@@ -170,7 +170,7 @@ const AMRIT_KALA_OFFSET_GHATIKAS: readonly number[] = [
   24, // 19 Purva Ashadha
   20, // 20 Uttara Ashadha
   10, // 21 Shravana
-  10, // 22 Dhanishta
+  10, // 22 Dhanishtha
   18, // 23 Shatabhisha
   16, // 24 Purva Bhadrapada
   24, // 25 Uttara Bhadrapada

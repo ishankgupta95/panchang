@@ -10,7 +10,7 @@ const SYDNEY = { latitude: -33.8688, longitude: 151.2093 };
 
 describe('getUpcomingLunarEclipse', () => {
   it('finds the 2025-03-14 lunar eclipse when searching from early March 2025', () => {
-    const info = getUpcomingLunarEclipse(new Date('2025-03-01T00:00:00Z'), 30, DELHI);
+    const info = getUpcomingLunarEclipse(new Date('2025-03-01T00:00:00Z'), DELHI, 30);
     expect(info).not.toBeNull();
     expect(info!.kind).toBe('lunar');
     // Peak was around 2025-03-14 06:58 UTC
@@ -21,34 +21,34 @@ describe('getUpcomingLunarEclipse', () => {
     expect(peakDay.getUTCDate()).toBeLessThanOrEqual(15);
   });
 
-  it('sutakStart is 3 hours before the penumbral start for lunar', () => {
-    const info = getUpcomingLunarEclipse(new Date('2025-03-01T00:00:00Z'), 30, DELHI);
+  it('sutakStart is 9 hours (3 prahara) before the penumbral start for lunar', () => {
+    const info = getUpcomingLunarEclipse(new Date('2025-03-01T00:00:00Z'), DELHI, 30);
     expect(info).not.toBeNull();
     const gapMs = info!.start.getTime() - info!.sutakStart.getTime();
-    expect(gapMs).toBe(3 * 3600_000);
+    expect(gapMs).toBe(9 * 3600_000);
   });
 
   it('sutakEnd equals eclipse end', () => {
-    const info = getUpcomingLunarEclipse(new Date('2025-03-01T00:00:00Z'), 30, DELHI);
+    const info = getUpcomingLunarEclipse(new Date('2025-03-01T00:00:00Z'), DELHI, 30);
     expect(info).not.toBeNull();
     expect(info!.sutakEnd.getTime()).toBe(info!.end.getTime());
   });
 
   it('returns null when no eclipse falls within the window', () => {
     // A deliberately short window where no eclipse occurs (2025-01-01 + 20 days)
-    const info = getUpcomingLunarEclipse(new Date('2025-01-01T00:00:00Z'), 20, DELHI);
+    const info = getUpcomingLunarEclipse(new Date('2025-01-01T00:00:00Z'), DELHI, 20);
     expect(info).toBeNull();
   });
 
   it('magnitude (obscuration) is in [0, 1]', () => {
-    const info = getUpcomingLunarEclipse(new Date('2025-03-01T00:00:00Z'), 30, DELHI);
+    const info = getUpcomingLunarEclipse(new Date('2025-03-01T00:00:00Z'), DELHI, 30);
     expect(info).not.toBeNull();
     expect(info!.magnitude).toBeGreaterThanOrEqual(0);
     expect(info!.magnitude).toBeLessThanOrEqual(1);
   });
 
   it('description mentions the subtype', () => {
-    const info = getUpcomingLunarEclipse(new Date('2025-03-01T00:00:00Z'), 30, DELHI);
+    const info = getUpcomingLunarEclipse(new Date('2025-03-01T00:00:00Z'), DELHI, 30);
     expect(info).not.toBeNull();
     expect(info!.description.toLowerCase()).toContain(info!.subtype);
   });
@@ -75,11 +75,11 @@ describe('getUpcomingSolarEclipse', () => {
     }
   });
 
-  it('sutakStart is 9 hours before the partial start for solar', () => {
+  it('sutakStart is 12 hours (4 prahara) before the partial start for solar', () => {
     const info = getUpcomingSolarEclipse(new Date('2025-09-01T00:00:00Z'), SYDNEY, 30);
     expect(info).not.toBeNull();
     const gapMs = info!.start.getTime() - info!.sutakStart.getTime();
-    expect(gapMs).toBe(9 * 3600_000);
+    expect(gapMs).toBe(12 * 3600_000);
   });
 
   it('returns null when no solar eclipse occurs within the window', () => {

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { getDailyPanchang } from '../../src/core/panchang';
-import indiaFixtures from '../fixtures/drikpanchang-india.json';
-import worldFixtures from '../fixtures/drikpanchang-world.json';
+import indiaFixtures from '../fixtures/structural-india.json';
+import worldFixtures from '../fixtures/structural-world.json';
 
 type Fixture = {
   date: string;

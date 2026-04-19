@@ -62,6 +62,7 @@ export const hi: PanchangTranslations = {
     rama_navami: 'राम नवमी',
     hanuman_jayanti: 'हनुमान जयंती',
     akshaya_tritiya: 'अक्षय तृतीया',
+    parashurama_jayanti: 'परशुराम जयंती',
     guru_purnima: 'गुरु पूर्णिमा',
     nag_panchami: 'नाग पंचमी',
     raksha_bandhan: 'रक्षा बंधन',
@@ -145,6 +146,7 @@ export const hi: PanchangTranslations = {
     sama_upakarma: 'साम उपाकर्म',
     // Monthly recurring
     masik_shivaratri: 'मासिक शिवरात्रि',
+    masik_karthigai: 'मासिक कार्तिकै',
     vinayaka_chaturthi: 'विनायक चतुर्थी',
     // Pushya Nakshatra
     ravi_pushya: 'रवि पुष्य',

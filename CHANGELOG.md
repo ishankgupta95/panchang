@@ -1,5 +1,101 @@
 # panchang-ts
 
+## 2.0.0
+
+**Major release — correctness fixes + Drik-aligned API.** This release ships
+the full set of audit findings from the v1.0.0 pre-publish review (v1.0.0
+was never published to npm). Several breaking changes; see *Migration* below.
+
+### Breaking changes
+
+1. **`getDailyPanchang` return type is now `DailyPanchangResult | null`.**
+   Polar locations on dates with no sunrise / no sunset return `null` instead
+   of throwing `PanchangError(NO_SUNRISE)`. The low-level `computeSunrise` /
+   `computeSunset` primitives still throw — only the high-level surface was
+   changed so callers can branch on `result === null` without try/catch.
+2. **`getUpcomingLunarEclipse(fromUtc, location, withinDays)`** — argument
+   order now matches `getUpcomingSolarEclipse` and `getEclipseDuringDay`.
+   `location` was the optional 3rd argument in v1.0.0 and is now the
+   required 2nd argument.
+3. **Transliteration aligned to DrikPanchang.com.** Public string outputs
+   change in these 11 places:
+   - Tithi: `Pratipad` → `Pratipada`
+   - Yoga: `Vishkamba` → `Vishkambha`, `Ayushman` → `Ayushmana`
+   - Nakshatra: `Dhanishta` → `Dhanishtha`
+   - Chandra Masa: `Ashwin` → `Ashwina`
+   - Vara (all 7): `Ravivara` → `Raviwara`, `Somavara` → `Somawara`,
+     `Mangalavara` → `Mangalawara`, `Budhavara` → `Budhawara`,
+     `Guruvara` → `Guruwara`, `Shukravara` → `Shukrawara`,
+     `Shanivara` → `Shaniwara`. (Hindi i18n unchanged — Devanagari was
+     already correct.)
+   String comparisons in caller code that hard-code the old names will need
+   to be updated.
+
+### Bug fixes (correctness)
+
+- **Vara (weekday) was wrong for east-of-IST sunrises.** `getDailyPanchang`
+  computed weekday from `sunriseUtc.getUTCDay()`, returning the *previous*
+  day's weekday whenever local sunrise occurred before the timezone offset
+  (Delhi summer mornings, Singapore / Sydney / Tokyo year-round). All
+  weekday-keyed downstream fields — Rahu Kalam, Yamaganda, Gulika Kalam,
+  Choghadiya, Hora, durMuhurta — silently inherited this bug.
+  Fix: shift sunriseUtc by the configured timezone before reading
+  `getUTCDay()`. `getInstantPanchang` uses a longitude-derived LMT offset
+  for the same shift since it has no explicit timezone parameter.
+- **Moonset returned the previous lunation's setting.** On days where the
+  moon rises late and sets the following morning (typical winter solstice),
+  searching from `localMidnightUtc` returned the previous moon's set time
+  instead of the moonset paired with this day's moonrise. Fix: search from
+  `moonriseUtc ?? localMidnightUtc`.
+- **Eclipse sutak windows aligned to classical Smarta convention.** Solar:
+  9 h → 12 h (4 prahara); Lunar: 3 h → 9 h (3 prahara).
+
+### New features
+
+- **Parashurama Jayanti** added to the festival registry — fires on
+  Vaishakha Shukla Tritiya alongside Akshaya Tritiya (madhyahna-vyapini).
+- **Masik Karthigai** monthly observance added — fires whenever Krittika
+  nakshatra prevails any time during the Hindu day (sunrise / midday /
+  sunset / nishita sample), matching Drik's broader rule rather than a
+  strict at-sunrise check.
+
+### Test fixtures — provenance overhauled
+
+- `drikpanchang-diaspora.json` was previously library-self-seeded
+  (admitted in `_meta.generator: "library-snapshot"`). All 15 entries
+  now scraped from DrikPanchang.com (NYC, London, Sydney, Dubai,
+  Singapore × 3 dates each — geoname-ids documented in `_meta.source`).
+- `drikpanchang-precise.json` non-sunrise fields (tithi, nakshatra,
+  chandramasa) now Drik-verified for all 15 unique dates.
+- Renamed `drikpanchang-india.json` → `structural-india.json` and
+  `drikpanchang-world.json` → `structural-world.json` — these files only
+  assert calendar-derived weekday + structural counts, not Drik values.
+  The misleading "drikpanchang-" prefix is now reserved for true
+  Drik-sourced fixtures.
+- New [tests/fixtures/README.md](tests/fixtures/README.md) documents the
+  provenance of every fixture and codifies a no-self-seeding rule.
+
+### Test count
+
+5,073 tests passing across 45 files.
+
+### Migration from 1.0.0 (or 0.7.0)
+
+```ts
+// Before
+const result = getDailyPanchang(date, location, opts);     // throws on polar
+result.vara.name === 'Mangalavara'
+const e = getUpcomingLunarEclipse(from, 30, location);
+
+// After
+const result = getDailyPanchang(date, location, opts);     // null on polar
+if (result === null) { /* polar — handle */ }
+result.vara.name === 'Mangalawara'                         // note 'w' not 'v'
+const e = getUpcomingLunarEclipse(from, location, 30);     // (from, location, days)
+```
+
+---
+
 ## 1.0.0
 
 **Stable API.** This release begins the semver compatibility promise: every

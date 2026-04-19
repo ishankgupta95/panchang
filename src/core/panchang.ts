@@ -1,4 +1,5 @@
 import { validateDate, validateLocation } from '../utils/validation';
+import { PanchangError } from '../types/errors';
 import { LongitudeCache } from '../astronomy/cache';
 import { computeAyanamsa } from '../astronomy/ayanamsa';
 import { computeSunrise, computeSunset } from '../astronomy/sunrise';
@@ -158,12 +159,20 @@ export function getInstantPanchang(
     resolveKaranaName(getKaranaIndex(siderealMoon, siderealSun), lang),
   );
 
-  // For Vara in instant mode, we need sunrise to know if the moment is before/after sunrise
+  // For Vara in instant mode, we need sunrise to know if the moment is before/after sunrise.
+  // No explicit timezone is supplied here — derive a longitude-based local-mean-time offset
+  // so the weekday reflects the observer's local calendar day rather than UTC's.
+  // (Without this shift, observers east of the Date Line / west of GMT can be off-by-one.)
   const sunriseUtc = computeSunrise(
     new Date(date.getTime() - 12 * 3600_000),
     location,
   );
-  const vara = computeVara(date, sunriseUtc, getTranslations(lang).varaNames);
+  const lmtOffsetMinutes = Math.round(location.longitude * 4);
+  const vara = computeVara(
+    utcToLocalDisplay(date, lmtOffsetMinutes),
+    utcToLocalDisplay(sunriseUtc, lmtOffsetMinutes),
+    getTranslations(lang).varaNames,
+  );
   const masaSystem = options?.masaSystem ?? 'purnimanta';
   const chandramasa = computeChandraMasa(
     siderealSun, siderealMoon,
@@ -270,9 +279,10 @@ export function getInstantPanchang(
  * @param options  Settings — `timezone` is required (UTC offset in minutes,
  *                 e.g. 330 for IST). Also accepts `ayanamsa`, `language`,
  *                 `computeEndTimes`, `precision`.
- * @returns        `DailyPanchangResult` with element arrays, sunrise/sunset,
- *                 inauspicious periods, muhurta, ayanamsa, and Masa.
- * @throws         `PanchangError` for invalid inputs or polar locations with no sunrise.
+ * @returns        `DailyPanchangResult` on a normal day, or `null` for polar
+ *                 locations on dates with no sunrise / sunset (the Hindu day
+ *                 is undefined when sunrise doesn't occur). Invalid inputs
+ *                 still throw `PanchangError`.
  *
  * @example
  * ```typescript
@@ -283,10 +293,13 @@ export function getInstantPanchang(
  *   { latitude: 23.1765, longitude: 75.7885 },  // Ujjain, India
  *   { timezone: 330 },                          // IST = UTC+5:30
  * );
- *
- * result.tithis[0].name;           // "Krishna Chaturdashi"
- * result.vara.name;                // "Mangalavara"
- * result.rahuKalam.start;          // Date — read via getUTCHours()
+ * if (result === null) {
+ *   // Polar location with midnight sun / polar night.
+ * } else {
+ *   result.tithis[0].name;           // "Krishna Chaturdashi"
+ *   result.vara.name;                // "Mangalawara"
+ *   result.rahuKalam.start;          // Date — read via getUTCHours()
+ * }
  *
  * // Fast mode (names only, ~5× faster):
  * const fast = getDailyPanchang(date, loc, { timezone: 330, computeEndTimes: false });
@@ -296,7 +309,7 @@ export function getDailyPanchang(
   date: Date,
   location: GeoLocation,
   options: PanchangOptions,
-): DailyPanchangResult {
+): DailyPanchangResult | null {
   // ── 1. Validate inputs ──────────────────────────────
   validateDate(date);
   validateLocation(location);
@@ -312,10 +325,24 @@ export function getDailyPanchang(
   const getSun = (d: Date) => cache.getSun(d);
 
   // ── 3. Compute sunrise triplet ───────────────────────
+  // Polar locations: when sunrise / sunset cannot be found, return null so
+  // callers can branch instead of catching exceptions. The underlying
+  // `computeSunrise` still throws `PanchangError(NO_SUNRISE)` for direct
+  // callers who want the precise reason.
   const localMidnightUtc = getLocalMidnightUtc(date, offsetMinutes);
-  const sunriseUtc = computeSunrise(localMidnightUtc, location);
-  const sunsetUtc = computeSunset(sunriseUtc, location);
-  const nextSunriseUtc = computeSunrise(sunsetUtc, location);
+  let sunriseUtc: Date;
+  let sunsetUtc: Date;
+  let nextSunriseUtc: Date;
+  try {
+    sunriseUtc = computeSunrise(localMidnightUtc, location);
+    sunsetUtc = computeSunset(sunriseUtc, location);
+    nextSunriseUtc = computeSunrise(sunsetUtc, location);
+  } catch (e: unknown) {
+    if (e instanceof PanchangError && (e.code === 'NO_SUNRISE' || e.code === 'NO_SUNSET')) {
+      return null;
+    }
+    throw e;
+  }
 
   // ── 4. Compute longitudes at sunrise ─────────────────
   const siderealMoonAtSunrise = getMoon(sunriseUtc);
@@ -341,7 +368,12 @@ export function getDailyPanchang(
     siderealMoonAtSunrise, siderealSunAtSunrise,
     resolveKaranaName(getKaranaIndex(siderealMoonAtSunrise, siderealSunAtSunrise), lang),
   );
-  const vara = computeVara(sunriseUtc, sunriseUtc, getTranslations(lang).varaNames);
+  // Vara is the weekday at LOCAL sunrise — shift sunriseUtc into the configured
+  // timezone so getUTCDay() returns the local calendar weekday. Without this,
+  // sunrises whose UTC instant falls on the previous calendar day (e.g. India in
+  // summer, all of Asia/Australia year-round) get the wrong weekday.
+  const sunriseLocal = utcToLocalDisplay(sunriseUtc, offsetMinutes);
+  const vara = computeVara(sunriseLocal, sunriseLocal, getTranslations(lang).varaNames);
   const masa = computeMasa(siderealSunAtSunrise, (idx) => resolveMasaName(idx, lang));
   const masaSystem = options.masaSystem ?? 'purnimanta';
   const chandramasa = computeChandraMasa(
@@ -374,8 +406,15 @@ export function getDailyPanchang(
     (idx) => getTranslations(lang).gowriNames[idx]!,
     qualityNameFn,
   );
+  // Moonrise: first rise after local midnight (the moon may not rise on a given
+  // calendar day, in which case getMoonrise returns null).
+  // Moonset: pair it with the same lunation as moonrise — search from moonrise
+  // when one exists, falling back to local midnight only when there is no
+  // moonrise on this day. Searching from local midnight unconditionally returns
+  // the *previous* lunation's setting on days where the moon rises late and
+  // sets the following morning.
   const moonriseUtc = getMoonrise(localMidnightUtc, location);
-  const moonsetUtc = getMoonset(localMidnightUtc, location);
+  const moonsetUtc = getMoonset(moonriseUtc ?? localMidnightUtc, location);
   const panchaka = computePanchaka(siderealMoonAtSunrise);
 
   const t = getTranslations(lang);
@@ -440,6 +479,19 @@ export function getDailyPanchang(
     tithiByRule.chandrodaya = tithiAt(moonriseInDayUtc);
     tithiByRuleStart.chandrodaya = tithiByRule.chandrodaya;
   }
+
+  // Set of nakshatra indices that occur during this Hindu day. Used by
+  // nakshatra-prevailing rules (e.g. Masik Karthigai = Krittika anywhere
+  // during the day, not strictly at sunrise). Sample at sunrise / midday /
+  // sunset / midnight — this catches both same-nakshatra-all-day cases and
+  // single mid-day transitions (a 24h nakshatra spans at most 2 calendar days).
+  const nakshatraAt = (d: Date) => Math.floor(getMoon(d) / NAKSHATRA_SPAN);
+  const nakshatraIndicesInDay = new Set<number>([
+    nakshatraAt(sunriseUtc),
+    nakshatraAt(madhyahnaUtc),
+    nakshatraAt(sunsetUtc),
+    nakshatraAt(nishitaUtc),
+  ]);
 
   // Yesterday's tithi-by-rule values: we re-run the same anchor math a day back
   // so the dedupe only suppresses when yesterday genuinely held the same tithi
@@ -538,6 +590,7 @@ export function getDailyPanchang(
       tithiByRule,
       tithiByRuleStart,
       priorDayTithiByRule,
+      nakshatraIndicesInDay,
       sankrantiRashi,
       ekadashiDashamiViddha,
       smartaDwadashiToday,
