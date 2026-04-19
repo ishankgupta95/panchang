@@ -49,11 +49,13 @@ const result = getDailyPanchang(
   { latitude: 23.1765, longitude: 75.7885 },  // Ujjain, India
   { timezone: 330 },                          // IST = UTC+5:30 = 330 minutes
 );
+// result is `DailyPanchangResult | null` — null only at polar latitudes
+// where sunrise can't be computed. Anywhere else, narrow with `if (!result) return;`
 
 // Pancha Anga
 console.log(result.tithis[0].name);           // "Krishna Chaturdashi"
 console.log(result.nakshatras[0].name);       // "Mrigashira"
-console.log(result.vara.name);                // "Mangalavara"
+console.log(result.vara.name);                // "Mangalawara"
 
 // Lunar calendar (Purnimanta by default)
 console.log(result.chandramasa.name);         // "Magha"
@@ -161,9 +163,9 @@ Amrit Siddhi, Sarvartha Siddhi, Ravi Pushya, Guru Pushya yoga detection.
 - **Ekadashi** — 26 named variants (Putrada, Shat Tila, Nirjala, Devshayani, etc.) with **Smarta / Vaishnava split** via Dashami-viddha rule; Smarta fast emits a `deferralDate` for Dwadashi.
 - **Pradosha** — 7 weekday-qualified variants (Som Pradosh, Bhauma Pradosh, Shani Pradosh, etc.) firing on both Shukla & Krishna paksha.
 - **Sankranti** — transit-based solar-month boundary detection plus regional variants (**Pongal**, **Vishu**, **Baisakhi**, **Magh Bihu**, **Ayyappa Makara Jyothi**) scoped by the `region` option.
-- **Canonical-time classical festivals** — Ganesh Chaturthi (madhyahna), Shivaratri (nishita), Diwali, Holi, Raksha Bandhan (Bhadra-aware, suppressed when Bhadra straddles Purnima), Karva Chauth (chandrodaya), Janmashtami, Dussehra, Navaratri, Ram Navami, Hanuman Jayanti, Makar Sankranti.
+- **Canonical-time classical festivals** — Ganesh Chaturthi (madhyahna), Shivaratri (nishita), Diwali, Holi, Raksha Bandhan (Bhadra-aware, suppressed when Bhadra straddles Purnima), Karva Chauth (chandrodaya), Janmashtami, Dussehra, Navaratri, Ram Navami, Hanuman Jayanti, **Akshaya Tritiya & Parashurama Jayanti** (madhyahna-vyapini, co-emitted on Vaishakha Shukla Tritiya), Makar Sankranti.
 - **Regional & seasonal** — Chhath (4-day sequence), Vat Savitri, Upakarma (3 shakha variants via nakshatra+chandraMasa), Onam (nakshatra+solarMasa).
-- **Monthly observances** — Masik Shivaratri, Vinayaka Chaturthi (suppressed in Maha-month), Pushya days, Shravan Somvar and other month+weekday patterns.
+- **Monthly observances** — Masik Shivaratri, Vinayaka Chaturthi (suppressed in Maha-month), **Masik Karthigai** (any day Krittika nakshatra prevails — sampled at sunrise / midday / sunset / nishita), Pushya days, Shravan Somvar and other month+weekday patterns.
 - Adhika (leap) months auto-skipped for tithi-based rules; Purnimanta naming respected.
 
 ### Eclipses (Grahan)
@@ -199,7 +201,9 @@ const result = getDailyPanchang(
 );
 ```
 
-**Returns: `DailyPanchangResult`**
+**Returns: `DailyPanchangResult | null`**
+
+`null` is returned for polar locations on dates where sunrise or sunset cannot be computed (midnight sun, polar night). On every other location/date the function returns a populated result.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -269,7 +273,9 @@ console.log(result.samvat.vikramSamvat);     // 2081
 console.log(result.panchaka);               // false
 ```
 
-**Returns: `InstantPanchangResult`**
+**Returns: `InstantPanchangResult | null`**
+
+`null` is returned for polar locations where sunrise can't be computed (the Hindu-day weekday is undefined). On every other location/date the function returns a populated result.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -345,7 +351,11 @@ import {
   getAyanamsa,
   computeRahuKalam, computeGulikaKalam, computeYamaganda,
   computeAbhijitMuhurta, computeBrahmaMuhurta,
+  computeVijayaMuhurta, computeGodhuliMuhurta,
+  computeNishitaMuhurta, computeAmritKala,
   computeGowriPanchangam,
+  // Eclipses (signature: (fromUtc, location, withinDays))
+  getUpcomingSolarEclipse, getUpcomingLunarEclipse, getEclipseDuringDay,
   // Jyotish
   computePlanetaryPositions,
   computeVimshottariDasha, computeVimshottariDashaFromBirth,
@@ -456,7 +466,7 @@ interface DailyTithiInfo extends TithiInfo {
 
 interface VaraInfo {
   index: number;       // 0 = Sunday ... 6 = Saturday
-  name: string;        // e.g. "Ravivara" (localized)
+  name: string;        // e.g. "Raviwara" (localized)
   shortName: string;   // e.g. "Ravi" (localized)
   englishName: string; // e.g. "Sunday" (always English)
 }
@@ -738,7 +748,7 @@ documented and deliberately surfaced rather than hidden.
 |----------------------------|--------------------|
 | Tithi-at-midnight | Krishna Janmashtami, Maha Shivaratri, Diwali / Lakshmi Puja |
 | Madhyahna-vyapini (tithi overlapping noon) | Ganesh Chaturthi on edge years, Akshaya Tritiya 2026 |
-| Kshaya-tithi handling (tithi never at sunrise) | Ugadi 2026-03-19 (Pratipad is Kshaya) |
+| Kshaya-tithi handling (tithi never at sunrise) | Ugadi 2026-03-19 (Pratipada is Kshaya) |
 
 If strict parity with a specific panchang authority matters for your use
 case, cross-check the above festival set for the target year. Everything
@@ -766,7 +776,7 @@ try {
   getDailyPanchang(date, location, options);
 } catch (e) {
   if (e instanceof PanchangError) {
-    console.error(e.code);    // e.g. 'INVALID_LATITUDE', 'NO_SUNRISE'
+    console.error(e.code);    // e.g. 'INVALID_LATITUDE', 'INVALID_TIMEZONE'
     console.error(e.message);
   }
 }
@@ -776,8 +786,11 @@ Error codes: `INVALID_DATE`, `INVALID_LATITUDE`, `INVALID_LONGITUDE`,
 `INVALID_ELEVATION`, `INVALID_TIMEZONE`, `INVALID_AYANAMSA`, `TIMEZONE_RESOLUTION_FAILED`,
 `NO_SUNRISE`, `NO_SUNSET`, `SEARCH_DIVERGED`.
 
-`getMoonrise` / `getMoonset` return `null` instead of throwing when no rise/set
-occurs (normal for the Moon).
+**Polar locations (no sunrise / no sunset):** `getDailyPanchang` and `getInstantPanchang`
+return `null` rather than throwing — the Hindu day is undefined when sunrise can't be
+computed. The low-level `computeSunrise` / `computeSunset` primitives still throw
+`PanchangError(NO_SUNRISE)` / `PanchangError(NO_SUNSET)` for direct callers who need
+the precise reason. `getMoonrise` / `getMoonset` return `null` (normal for the Moon).
 
 ---
 

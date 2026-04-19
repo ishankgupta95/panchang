@@ -100,8 +100,9 @@ import type {
  * @param options  Optional settings: `ayanamsa`, `language`, `computeEndTimes`,
  *                 `precision`. No `timezone` required — the result is UTC-based.
  * @returns        `InstantPanchangResult` with one value per element
- *                 (tithi, nakshatra, yoga, karana, vara) plus sidereal longitudes.
- * @throws         `PanchangError` for invalid inputs or polar locations with no sunrise.
+ *                 (tithi, nakshatra, yoga, karana, vara) plus sidereal longitudes,
+ *                 or `null` for polar locations on dates with no sunrise. Invalid
+ *                 inputs still throw `PanchangError`.
  *
  * @example
  * ```typescript
@@ -112,8 +113,12 @@ import type {
  *   { latitude: 23.1765, longitude: 75.7885 },  // Ujjain, India
  *   { language: 'hi' },
  * );
- * console.log(p.tithi.name);     // "कृष्ण चतुर्दशी"
- * console.log(p.tithi.endTime);  // Date (UTC) when this Tithi ends
+ * if (p === null) {
+ *   // polar location — Hindu day undefined
+ * } else {
+ *   console.log(p.tithi.name);     // "कृष्ण चतुर्दशी"
+ *   console.log(p.tithi.endTime);  // Date (UTC) when this Tithi ends
+ * }
  * ```
  *
  * @see getDailyPanchang — for sunrise-to-next-sunrise Hindu day with full
@@ -123,7 +128,7 @@ export function getInstantPanchang(
   date: Date,
   location: GeoLocation,
   options?: InstantPanchangOptions,
-): InstantPanchangResult {
+): InstantPanchangResult | null {
   validateDate(date);
   validateLocation(location);
 
@@ -163,10 +168,20 @@ export function getInstantPanchang(
   // No explicit timezone is supplied here — derive a longitude-based local-mean-time offset
   // so the weekday reflects the observer's local calendar day rather than UTC's.
   // (Without this shift, observers east of the Date Line / west of GMT can be off-by-one.)
-  const sunriseUtc = computeSunrise(
-    new Date(date.getTime() - 12 * 3600_000),
-    location,
-  );
+  // Polar locations with no sunrise: return null to mirror getDailyPanchang's
+  // contract — the Hindu-day weekday is undefined when sunrise doesn't occur.
+  let sunriseUtc: Date;
+  try {
+    sunriseUtc = computeSunrise(
+      new Date(date.getTime() - 12 * 3600_000),
+      location,
+    );
+  } catch (e: unknown) {
+    if (e instanceof PanchangError && (e.code === 'NO_SUNRISE' || e.code === 'NO_SUNSET')) {
+      return null;
+    }
+    throw e;
+  }
   const lmtOffsetMinutes = Math.round(location.longitude * 4);
   const vara = computeVara(
     utcToLocalDisplay(date, lmtOffsetMinutes),
