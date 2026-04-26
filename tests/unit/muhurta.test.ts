@@ -5,6 +5,9 @@ import {
   computeGodhuliMuhurta,
   computeNishitaMuhurta,
   computeAmritKala,
+  computeMadhyahna,
+  computePratahSandhya,
+  computeSayahnaSandhya,
 } from '../../src/core/muhurta';
 
 // Known 12-hour day: sunrise 06:00 UTC, sunset 18:00 UTC
@@ -198,5 +201,95 @@ describe('computeAmritKala', () => {
   it('returns null for out-of-range nakshatra index', () => {
     expect(computeAmritKala(ahoSunrise, ahoNextSunrise, -1)).toBeNull();
     expect(computeAmritKala(ahoSunrise, ahoNextSunrise, 27)).toBeNull();
+  });
+});
+
+describe('computeMadhyahna', () => {
+  it('is centered exactly on the sunrise→sunset midpoint', () => {
+    const m = computeMadhyahna(sunrise, sunset);
+    const noonMs = (sunrise.getTime() + sunset.getTime()) / 2;
+    const centerMs = (m.start.getTime() + m.end.getTime()) / 2;
+    expect(centerMs).toBe(noonMs);
+  });
+
+  it('is 48 minutes wide (one classical muhurta)', () => {
+    const m = computeMadhyahna(sunrise, sunset);
+    expect(m.end.getTime() - m.start.getTime()).toBe(48 * 60_000);
+  });
+
+  it('starts at noon − 24min and ends at noon + 24min for a 12h day', () => {
+    // noon = 12:00. window = 11:36 → 12:24.
+    const m = computeMadhyahna(sunrise, sunset);
+    expect(m.start.getUTCHours()).toBe(11);
+    expect(m.start.getUTCMinutes()).toBe(36);
+    expect(m.end.getUTCHours()).toBe(12);
+    expect(m.end.getUTCMinutes()).toBe(24);
+  });
+
+  it('keeps a fixed 48-min width regardless of day length', () => {
+    const shortSunrise = new Date('2024-12-21T07:00:00Z');
+    const shortSunset = new Date('2024-12-21T16:00:00Z'); // 9h day, noon = 11:30
+    const m = computeMadhyahna(shortSunrise, shortSunset);
+    expect(m.end.getTime() - m.start.getTime()).toBe(48 * 60_000);
+    expect(m.start.getUTCHours()).toBe(11);
+    expect(m.start.getUTCMinutes()).toBe(6);
+    expect(m.end.getUTCHours()).toBe(11);
+    expect(m.end.getUTCMinutes()).toBe(54);
+  });
+});
+
+describe('computePratahSandhya', () => {
+  it('is centered exactly on sunrise', () => {
+    const p = computePratahSandhya(sunrise);
+    const centerMs = (p.start.getTime() + p.end.getTime()) / 2;
+    expect(centerMs).toBe(sunrise.getTime());
+  });
+
+  it('is 48 minutes wide (sunrise ±24 min)', () => {
+    const p = computePratahSandhya(sunrise);
+    expect(p.end.getTime() - p.start.getTime()).toBe(48 * 60_000);
+  });
+
+  it('start is 24 min before sunrise, end is 24 min after', () => {
+    // sunrise = 06:00 → window 05:36 → 06:24
+    const p = computePratahSandhya(sunrise);
+    expect(p.start.getUTCHours()).toBe(5);
+    expect(p.start.getUTCMinutes()).toBe(36);
+    expect(p.end.getUTCHours()).toBe(6);
+    expect(p.end.getUTCMinutes()).toBe(24);
+  });
+
+  it('window straddles sunrise', () => {
+    const p = computePratahSandhya(sunrise);
+    expect(p.start.getTime()).toBeLessThan(sunrise.getTime());
+    expect(p.end.getTime()).toBeGreaterThan(sunrise.getTime());
+  });
+});
+
+describe('computeSayahnaSandhya', () => {
+  it('is centered exactly on sunset', () => {
+    const s = computeSayahnaSandhya(sunset);
+    const centerMs = (s.start.getTime() + s.end.getTime()) / 2;
+    expect(centerMs).toBe(sunset.getTime());
+  });
+
+  it('is 48 minutes wide (sunset ±24 min)', () => {
+    const s = computeSayahnaSandhya(sunset);
+    expect(s.end.getTime() - s.start.getTime()).toBe(48 * 60_000);
+  });
+
+  it('start is 24 min before sunset, end is 24 min after', () => {
+    // sunset = 18:00 → window 17:36 → 18:24
+    const s = computeSayahnaSandhya(sunset);
+    expect(s.start.getUTCHours()).toBe(17);
+    expect(s.start.getUTCMinutes()).toBe(36);
+    expect(s.end.getUTCHours()).toBe(18);
+    expect(s.end.getUTCMinutes()).toBe(24);
+  });
+
+  it('window straddles sunset', () => {
+    const s = computeSayahnaSandhya(sunset);
+    expect(s.start.getTime()).toBeLessThan(sunset.getTime());
+    expect(s.end.getTime()).toBeGreaterThan(sunset.getTime());
   });
 });

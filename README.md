@@ -72,7 +72,11 @@ console.log(result.moonrise);                 // Date | null
 
 // Muhurta & inauspicious periods
 console.log(result.brahmaMuhurta);            // { start: Date, end: Date }
+console.log(result.madhyahna);                // solar noon ±24 min
 console.log(result.rahuKalam);                // { start: Date, end: Date }
+console.log(result.anandadiYoga.name);        // "Ananda" (Vara × Nakshatra cycle)
+console.log(result.gandaMula.active);         // false (or true with severity)
+console.log(result.varjyam);                  // { start, end } | null
 
 // Choghadiya — 8 daytime slots
 result.choghadiya.day.forEach(slot => {
@@ -181,13 +185,13 @@ Tithi, Nakshatra, Yoga, Karana, Vara — with transition times throughout the da
 Chandra Masa with Adhika (leap month) detection, both **Purnimanta** (North Indian, default) and **Amanta** (South Indian) systems, Vikram Samvat, Shaka Samvat.
 
 ### Muhurta & Auspicious Timing
-Brahma Muhurta, Abhijit Muhurta, Vijaya Muhurta (11th day-muhurta), Godhuli (sunset muhurta), Nishita (midnight muhurta, used for Shivaratri), nakshatra-keyed Amrit Kala. Choghadiya (16 slots), Gowri Panchangam / Nalla Neram (16 slots), Hora (24 planetary hours), Dur Muhurta (2 inauspicious windows).
+Brahma Muhurta, Abhijit Muhurta, Vijaya Muhurta (11th day-muhurta), Godhuli (sunset muhurta), Nishita (midnight muhurta, used for Shivaratri), **Madhyahna** (solar noon ±24 min ritual window), **Pratah Sandhya** / **Sayahna Sandhya** (dawn / dusk ±24 min twilight windows), nakshatra-keyed Amrit Kala. Choghadiya (16 slots), Gowri Panchangam / Nalla Neram (16 slots), Hora (24 planetary hours), Dur Muhurta (2 inauspicious windows), **Do Ghati Muhurta** (15 day + 15 night ~48-min slots, deity-keyed), **Panchaka Rahita Muhurta** (slices of the day free of Panchaka), **Anandadi Yoga** (28-name Vara × Nakshatra cycle).
 
 ### Inauspicious Periods
-Rahu Kalam, Gulika Kalam, Yamaganda, Panchaka detection, Bhadra Kala (Vishti karana window with earth / heaven / paatal location).
+Rahu Kalam, Gulika Kalam, Yamaganda, Panchaka detection, Bhadra Kala (Vishti karana window with earth / heaven / paatal location), **Varjyam** (BPHS-keyed forbidden ~96-min window per nakshatra), **Ganda Mula** (Moon in the 6 root nakshatras — Ashwini / Ashlesha / Magha / Jyeshtha / Mula / Revati — with `mild` / `severe` severity).
 
 ### Special Yogas & Festivals
-Amrit Siddhi, Sarvartha Siddhi, Ravi Pushya, Guru Pushya yoga detection.
+Amrit Siddhi, Sarvartha Siddhi, Ravi Pushya, Guru Pushya, **Dwipushkar**, **Tripushkar**, **Jwalamukhi**, **Aadal**, **Vidaal**, **Ravi** yoga detection.
 
 **80+ festivals** spanning pan-Indian, regional, and classical observances:
 
@@ -204,7 +208,7 @@ Amrit Siddhi, Sarvartha Siddhi, Ravi Pushya, Guru Pushya yoga detection.
 Solar & lunar eclipse detection with subtype (partial / total / annular / penumbral), magnitude at peak, observer-horizon visibility, and pre-eclipse **sutak** impurity window.
 
 ### Jyotish (Vedic Astrology)
-All 9 graha positions (geocentric, sidereal) with rashi, nakshatra, pada, and retrograde status. Vimshottari Dasha with Antardasha breakdown — from a birth moment alone or from an explicit Moon longitude. Chandra Balam (transit-Moon favorability relative to janma rashi).
+All 9 graha positions (geocentric, sidereal) with rashi, nakshatra, pada, and retrograde status. Vimshottari Dasha with Antardasha breakdown — from a birth moment alone or from an explicit Moon longitude. Chandra Balam (transit-Moon favorability relative to janma rashi). **Tarabala** (9-tara cycle — Janma, Sampat, Vipat, Kshema, Pratyari, Sadhaka, Vadha, Mitra, Ati-Mitra — keyed off janma nakshatra; parallel to Chandra Balam).
 
 ### Astronomy
 Sunrise, Sunset, Moonrise, Moonset, Chandra Rashi (Moon sign), Surya Nakshatra. Cross-verified across diaspora locations (New York, London, Sydney, Dubai, Singapore) including DST transitions via IANA timezone strings.
@@ -268,16 +272,27 @@ const result = getDailyPanchang(
 | `moonrise` | `Date \| null` | Moonrise; `null` if none that day |
 | `moonset` | `Date \| null` | Moonset; `null` if none that day |
 | `panchaka` | `boolean` | `true` when Moon is in last 5 nakshatras |
+| `panchakaRahita` | `TimePeriod[]` | Slices of the Hindu day FREE of Panchaka; `[]` when Panchaka pervades the entire day |
+| `doGhatiMuhurta` | `DoGhatiInfo` | 15 day + 15 night ~48-min deity-keyed slots covering sunrise→sunset and sunset→nextSunrise |
+| `gandaMula` | `GandaMulaInfo` | Moon-in-root-nakshatra detection at sunrise; `active: false` for the 21 non-root nakshatras |
+| `anandadiYoga` | `AnandadiYogaInfo` | Vara × Nakshatra 28-name cycle yoga at sunrise |
 | `specialYogas` | `SpecialYogaInfo[]` | Auspicious yogas active today |
 | `durMuhurta` | `[TimePeriod, TimePeriod]` | Two inauspicious ~48-min windows |
 | `vijayaMuhurta` | `TimePeriod` | Vijaya Muhurta — 11th day-muhurta, auspicious for success |
 | `godhuliMuhurta` | `TimePeriod` | Godhuli ("cow-dust") — sunset muhurta, auspicious for ceremonies |
 | `nishitaMuhurta` | `TimePeriod` | Nishita — midnight muhurta, used for Shivaratri and nocturnal rites |
+| `madhyahna` | `TimePeriod` | Madhyahna — solar noon as a ±24-min ritual window (one classical muhurta wide) |
+| `pratahSandhya` | `TimePeriod` | Dawn-twilight ritual window (sunrise ±24 min) |
+| `sayahnaSandhya` | `TimePeriod` | Dusk-twilight ritual window (sunset ±24 min) |
+| `dinamanaMinutes` | `number` | Classical alias of `dayDurationMinutes` (sunrise → sunset) |
+| `ratrimanaMinutes` | `number` | Classical alias of `nightDurationMinutes` (sunset → next sunrise) |
 | `amritKala` | `TimePeriod \| null` | Amrit Kala — nakshatra-specific auspicious window (null when nakshatra has none) |
+| `varjyam` | `TimePeriod \| null` | Varjyam (Vishaghati / Nakshatra Thyajyam) — BPHS-keyed forbidden ~96-min window; `null` when none overlaps the Hindu day |
 | `bhadra` | `BhadraInfo \| null` | Bhadra Kala (Vishti karana) window overlapping this Hindu day, or `null` |
 | `eclipse` | `EclipseInfo \| null` | Solar/lunar eclipse overlapping this Hindu day with sutak window, or `null` |
 | `festivals` | `FestivalInfo[]` | Festivals / observances today (filtered by `region` option) |
 | `chandraBalam` | `ChandraBalamInfo?` | Transit-Moon favorability — only present when `janmaRashi` option is passed |
+| `tarabala` | `TarabalaInfo?` | 9-tara cycle position — only present when `janmaNakshatra` option is passed |
 | `ayanamsa` | `number` | Ayanamsa in degrees at sunrise |
 | `siderealSunAtSunrise` | `number` | Sun sidereal longitude at sunrise (degrees) |
 | `siderealMoonAtSunrise` | `number` | Moon sidereal longitude at sunrise (degrees) |
@@ -323,9 +338,12 @@ console.log(result.panchaka);               // false
 | `chandraRashi` | `RashiInfo` | Moon's zodiac sign |
 | `suryaNakshatra` | `RashiInfo` | Sun's nakshatra |
 | `panchaka` | `boolean` | `true` when Moon is in last 5 nakshatras |
+| `gandaMula` | `GandaMulaInfo` | Moon-in-root-nakshatra detection at the queried instant |
+| `anandadiYoga` | `AnandadiYogaInfo` | Vara × Nakshatra 28-name cycle yoga at the queried instant |
 | `specialYogas` | `SpecialYogaInfo[]` | Auspicious yogas at this moment |
 | `festivals` | `FestivalInfo[]` | Festivals / observances at this moment (see caveat below) |
 | `chandraBalam` | `ChandraBalamInfo?` | Transit-Moon favorability — only present when `janmaRashi` option is passed |
+| `tarabala` | `TarabalaInfo?` | 9-tara cycle position — only present when `janmaNakshatra` option is passed |
 | `ayanamsa` | `number` | Ayanamsa in degrees |
 | `siderealSun` | `number` | Sun sidereal longitude (degrees) |
 | `siderealMoon` | `number` | Moon sidereal longitude (degrees) |
@@ -366,6 +384,7 @@ Both functions share the same core astronomy, but `getDailyPanchang` operates on
 | `masaSystem` | `'purnimanta' \| 'amanta'` | `'purnimanta'` | Lunar month naming system. Purnimanta (North Indian) or Amanta (South Indian). |
 | `region` | `FestivalRegion` | `'all'` | Scopes regional festival variants (Pongal, Vishu, Gudi Padwa, Lohri, Govardhan Puja, Bonalu, …) to a specific Indian state. See [`FestivalRegion`](#types) for the full list. Pre-v2.1 values (`'tamil'`, `'bengal'`, `'north-india'`) are still accepted but emit a deprecation warning; removal in v3. Pan-Indian festivals and the canonical `sankranti` event emit regardless of this setting. |
 | `janmaRashi` | `number` | _(omitted)_ | Native's birth Moon rashi index (0 = Mesha … 11 = Meena). When provided, the result includes `chandraBalam`. |
+| `janmaNakshatra` | `number` | _(omitted)_ | Native's birth Moon nakshatra index (0 = Ashwini … 26 = Revati). When provided, the result includes `tarabala`. |
 
 **`InstantPanchangOptions`** (optional for `getInstantPanchang`): same as above but without `timezone` (instant mode works in UTC).
 
@@ -788,10 +807,10 @@ InteractionManager.runAfterInteractions(() => {
 
 ## Accuracy
 
-5,073 tests passing, including fixtures cross-verified against
-reference panchang calculations spanning 2025–2026 across Delhi, Chennai,
-New York, London, Sydney, Dubai, and Singapore (diaspora fixtures cover
-DST transitions on `America/New_York`).
+5,905 tests passing across 61 files, including fixtures cross-verified
+against reference panchang calculations spanning 2025–2026 across Delhi,
+Chennai, New York, London, Sydney, Dubai, and Singapore (diaspora
+fixtures cover DST transitions on `America/New_York`).
 
 | Element | Accuracy | Validation |
 |---------|----------|------------|
@@ -805,6 +824,9 @@ DST transitions on `America/New_York`).
 | Rashi / Nakshatra / Retrograde flag | Exact match vs reference | Fixtures |
 | Festival dates | 12 cross-verified festivals (2025–2026) — see caveats below | Fixtures |
 | Choghadiya / Hora / Gowri slots | Derived from sunrise/sunset — inherits ±2 min | — |
+| Madhyahna midpoint, Anandadi Yoga name, Ganda Mula active flag | **Exact match across 50 Drik fixtures** (10 cities × 5 dates) | [phase28-cross-verify](tests/validation/phase28-cross-verify.test.ts) |
+
+**Phase 28 documented convention divergence** (these match classical sources, not DrikPanchang's specific renderings — see [phase28-cross-verify.test.ts](tests/validation/phase28-cross-verify.test.ts) for per-feature findings): **Pratah / Sayahna Sandhya** are computed as the symmetric ±24-min muhurta per Smarta-prayoga; DrikPanchang renders an asymmetric 81-min twilight (both classically valid). **Aadal / Vidaal** follow the classical Moon-from-Sun nakshatra-distance rule (AstroShastra, HoraSarvam, Ernst Wilhelm), NOT the popular Tamil-Vakya weekday rule used by some online panchangs. **Varjyam** emits the sunrise-anchored nakshatra's window only (single-window contract per [src/core/varjyam.ts:31-38](src/core/varjyam.ts#L31-L38)) — printed panchangs may show a second window on nakshatra-transition days. **Do Ghati Muhurta** does not rotate by weekday: the same 30-name deity-keyed sequence applies every day, verified against drikpanchang.com/muhurat/daily/do-ghati-muhurat.html for two distinct weekdays. Sourcing is cited inline in [src/core/doGhati.ts:3-21](src/core/doGhati.ts#L3-L21).
 
 ### Festival Detection — Documented Tradeoff
 

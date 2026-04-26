@@ -5126,3 +5126,433 @@ affect users who read the translated `festival.name`.
 | 26 | Diaspora & API Polish | 1d | ~15 |
 | 27 | Regional Festival Expansion | 2.5d | 76 |
 | **Total** | — | **~11.5 engineering days** | **~231 new tests** |
+
+---
+
+## Phase 28 — DrikPanchang Dainika Parity (Wave 1) — 📐 PLANNED (scoped 2026-04-25)
+
+**Goal.** Close the visible gap with [drikpanchang.com](https://www.drikpanchang.com/panchang/day-panchang.html) — the reference users compare dharmagya against. Every feature in this phase is a **lookup-table calculation built on existing primitives**: nakshatra index, vara index, tithi index, sunrise/sunset. No new astronomy, no new ayanamsa, no breaking API changes.
+
+**Why now.** Phase 25 finished astronomy. Phase 27 finished regional festivals. The remaining "obvious omissions" are not festivals or astronomy — they are classical dainika muhurta items present on every published panchang but absent here. Implementing them is days of work and unblocks both consumers (dharmagya app + dharmagya-website) to render parity panels.
+
+**Releases.** Three minor releases (v2.2 → v2.4), each independently shippable. Estimated **5–7 engineering days total**.
+
+### Step 28-1 — Tarabala (v2.2)
+
+**Status.** Scoped.
+
+**What.** Compute the 9-tara cycle (Janma, Sampat, Vipat, Kshema, Pratyari, Sadhaka, Vadha, Mitra, Ati-Mitra, repeating 3×) from janma nakshatra → transit moon nakshatra. Cousin to Chandra Balam.
+
+**Algorithm.** `taraIndex = ((transitNakshatra - janmaNakshatra + 27) % 27) % 9`. Map to one of nine tara names; mark Vipat / Pratyari / Vadha as inauspicious, others as auspicious.
+
+**Files.**
+- New: `src/jyotish/tarabala.ts` exporting `computeTarabala(janmaNakshatraIndex, transitNakshatraIndex, lang?)` → `TarabalaInfo { taraIndex, taraName, quality, englishName }`.
+- Wire into `src/core/panchang.ts` orchestrator: when `options.janmaNakshatra` is set, populate `DailyPanchangResult.tarabala`.
+- Add `tarabalaNames` to `src/i18n/types.ts`, `en.ts`, `hi.ts`.
+- Update `src/types/options.ts` — add `janmaNakshatra?: number` to `PanchangOptions` (parallel to existing `janmaRashi`).
+- Update `src/types/panchang.ts` — add `tarabala?: TarabalaInfo` to `DailyPanchangResult`.
+- Re-export `computeTarabala` and `TarabalaInfo` from `src/index.ts`.
+
+**Tests.** Cross-validate against DrikPanchang for 5 cities × 5 dates (25 fixtures) in `tests/validation/tarabala.test.ts`.
+
+**Effort.** ~0.5d.
+
+### Step 28-2 — Varjyam (v2.2)
+
+**Status.** Scoped.
+
+**What.** Forbidden ~1.6h window per day, nakshatra-keyed. Computed from nakshatra-start time + tabular offset (in ghatikas) + fixed duration.
+
+**Algorithm.** Lookup `VARJYAM_OFFSET_GHATIKAS[nakshatraIndex]` (27-element table from BPHS). `varjyamStart = nakshatraStartUtc + offsetGhatikas × 24min`. `varjyamEnd = varjyamStart + 96min` (4 ghatika ≈ 1h36m). May span midnight; clamp to next-sunrise window when needed.
+
+**Files.**
+- New: `src/core/varjyam.ts` exporting `computeVarjyam(currentNakshatra, sunriseUtc, nextSunriseUtc, getMoon)` → `TimePeriod | null`.
+- Constants: `VARJYAM_OFFSET_GHATIKAS` table (27 entries) in `src/utils/constants.ts`.
+- Wire into orchestrator; populate `DailyPanchangResult.varjyam`.
+- Re-export from `src/index.ts`.
+
+**Tests.** 25 DrikPanchang fixtures + edge cases (midnight crossing, polar locations).
+
+**Effort.** ~0.75d.
+
+### Step 28-3 — Ganda Mula (v2.2)
+
+**Status.** Scoped.
+
+**What.** Boolean detection — Moon in any of the 6 "root" nakshatras (Ashwini=0, Ashlesha=8, Magha=9, Jyeshtha=17, Mula=18, Revati=26). Plus the start/end window if currently active.
+
+**Files.**
+- New: `src/core/gandaMula.ts` exporting `computeGandaMula(currentNakshatraIndex)` → `GandaMulaInfo { active: boolean, nakshatraName?: string, severity?: 'mild'|'severe' }`.
+- Severity tags: Mula/Jyeshtha = severe; others = mild (per classical Smarta texts).
+- Wire into orchestrator.
+
+**Tests.** 6 fixtures covering each Ganda Mula nakshatra + 2 negative cases.
+
+**Effort.** ~0.25d.
+
+### Step 28-4 — Madhyahna + Pratah/Sayahna Sandhya + Dinamana/Ratrimana labels (v2.2)
+
+**Status.** Scoped.
+
+**What.**
+- **Madhyahna** = solar noon = `sunrise + dayDuration / 2` as a `TimePeriod` (instant ± 24min for muhurta-style window).
+- **Pratah Sandhya** = 24min before sunrise → 24min after sunrise (dawn twilight, classical ritual window).
+- **Sayahna Sandhya** = 24min before sunset → 24min after sunset.
+- **Dinamana** = `dayDurationMinutes` re-exposed as a labelled string-ready field (e.g. `"11h 56m"`).
+- **Ratrimana** = `nightDurationMinutes` re-exposed similarly.
+
+**Files.**
+- Extend `src/core/muhurta.ts` — add `computeMadhyahna(sunrise, sunset)`, `computePratahSandhya(sunrise)`, `computeSayahnaSandhya(sunset)`.
+- Extend `DailyPanchangResult` with `madhyahna: TimePeriod`, `pratahSandhya: TimePeriod`, `sayahnaSandhya: TimePeriod`, `dinamanaMinutes: number` (alias of dayDurationMinutes), `ratrimanaMinutes: number` (alias of nightDurationMinutes).
+- Re-export new functions from `src/index.ts`.
+
+**Tests.** Verify Madhyahna == sunrise + half-day. Verify Sandhya symmetry. Cross-check Pratah Sandhya against DrikPanchang for 5 cities.
+
+**Effort.** ~0.5d.
+
+### Step 28-5 — Anandadi Yoga (v2.3)
+
+**Status.** Scoped.
+
+**What.** 28 yogas formed by Vara × Nakshatra (7 × 28 = a 28-name cycle that repeats weekly). Classical names: Ananda, Kaladanda, Dhumra, Prajapati, Saumya, Dhwanksha, Dhwaja, Shrivatsa, Vajra, Mudgara, Chhatra, Maitra, Manasa, Padma, Lumba, Utpaata, Mrityu, Kana, Siddhi, Shubha, Amrita, Musala, Gada, Matanga, Raksha, Charma, Vajra (var), Sthira (full table per weekday).
+
+**Algorithm.** `anandadiIndex = ANANDADI_TABLE[varaIndex][nakshatraIndex]` → look up name + auspicious/inauspicious quality.
+
+**Files.**
+- New: `src/core/anandadiYoga.ts` exporting `computeAnandadiYoga(varaIndex, nakshatraIndex, nameFn)` → `AnandadiYogaInfo`.
+- Constants: `ANANDADI_TABLE` (7 × 28 lookup) in `src/utils/constants.ts`.
+- i18n: `anandadiYogaNames` (28 strings) in `en.ts` and `hi.ts`.
+- Wire into orchestrator.
+
+**Tests.** 28 fixtures (one per yoga) + DrikPanchang cross-check.
+
+**Effort.** ~0.75d.
+
+### Step 28-6 — Dwipushkar / Tripushkar / Jwalamukhi / Aadal / Vidaal / Ravi yogas (v2.3)
+
+**Status.** Scoped.
+
+**What.** Six classical yogas that combine Vara + Tithi + Nakshatra in fixed patterns. Each is a boolean detection from existing inputs, no new astronomy.
+
+- **Dwipushkar Yoga** — Bhadra-tithi (Dvitiya/Saptami/Dwadashi) + Sun/Tue/Sat + nakshatra ∈ {Mrigashira, Chitra, Dhanishtha} (results of actions get doubled).
+- **Tripushkar Yoga** — same Bhadra-tithi + same days + nakshatra ∈ {Krittika, Punarvasu, Uttara Phalguni, Vishakha, Uttara Ashadha, Purva Bhadrapada} (results tripled).
+- **Jwalamukhi Yoga** — inauspicious; Tithi 1+Nakshatra Mula, Tithi 2+Bharani, Tithi 4+Krittika, etc. (lookup table).
+- **Aadal Yoga** — vara × nakshatra subset (auspicious in classical Tamil panchanga).
+- **Vidaal Yoga** — vara × nakshatra subset (inauspicious counterpart).
+- **Ravi Yoga** — Sunday + nakshatras within 4-12 from current Sun's nakshatra.
+
+**Files.**
+- Extend `src/core/specialYogas.ts` — add detection rules + tables. Append to existing `SpecialYogaInfo[]` output (current types include `'amrit_siddhi' | 'sarvartha_siddhi' | 'ravi_pushya' | 'guru_pushya'`; add `'dwipushkar' | 'tripushkar' | 'jwalamukhi' | 'aadal' | 'vidaal' | 'ravi'`).
+- i18n: add 6 new festival/yoga keys to `specialYogaNames` in `en.ts` and `hi.ts`.
+
+**Tests.** 6 fixtures per yoga (12-30 total), DrikPanchang cross-check on 5 fixtures per yoga.
+
+**Effort.** ~1d.
+
+### Step 28-7 — Panchaka Rahita Muhurta + Do Ghati Muhurta (v2.4)
+
+**Status.** Scoped.
+
+**What.**
+- **Panchaka Rahita** — windows of the day **free** of Panchaka (Moon outside last 5 nakshatras). Useful for "when can I start construction today?" type queries. Returns array of `TimePeriod` slices when Panchaka is inactive.
+- **Do Ghati Muhurta** — enumerate the 15 daytime + 15 nighttime 2-ghatika windows (each ~48min), each labelled with its classical name and auspicious/inauspicious quality. This is just a finer-grained slot system parallel to Choghadiya.
+
+**Files.**
+- New: `src/core/panchakaRahita.ts` exporting `computePanchakaRahita(sunriseUtc, nextSunriseUtc, getMoon)` → `TimePeriod[]`.
+- New: `src/core/doGhati.ts` exporting `computeDoGhati(sunrise, sunset, nextSunrise, varaIndex, nameFn)` → `DoGhatiInfo { day: DoGhatiSlot[15], night: DoGhatiSlot[15] }`.
+- i18n: `doGhatiNames` (30 strings — one per slot index per period).
+- Wire both into orchestrator: `DailyPanchangResult.panchakaRahita`, `DailyPanchangResult.doGhatiMuhurta`.
+
+**Tests.** Validate Panchaka Rahita is empty when Moon is in Panchaka all day; non-empty otherwise. DrikPanchang Do Ghati cross-check.
+
+**Effort.** ~1d.
+
+### Phase 28 Exit Criteria
+
+- All v2.2 / v2.3 / v2.4 features pass DrikPanchang cross-validation (10 cities × 5 dates per feature, ±1 minute tolerance for time windows).
+- No regression in the existing 5,149 tests.
+- `getDailyPanchang` benchmark stays under 1ms even with new fields populated (cache + names-only fast path preserved).
+- All new modules pass `npm run test:hermes`.
+- `CHANGELOG.md` updated for each minor release.
+- Both consumer apps (dharmagya + dharmagya-website) can render new fields without code changes (additive to `DailyPanchangResult`).
+
+---
+
+## Phase 29 — Birth Chart Foundation (Wave 2) — 📐 PLANNED (scoped 2026-04-25)
+
+**Goal.** Add the kundli foundation that unlocks rashifal, marriage matching, and Sade Sati features in the consumer apps. **Major release v3.0.** Estimated **8–12 engineering days**.
+
+**Critical decision (locked).** House system is **configurable** via `options.houseSystem: 'whole-sign' | 'equal' | 'placidus-kp'`. Default is **`'whole-sign'`** (classical Vedic).
+
+### Step 29-1 — Lagna (Ascendant) calculation
+
+**What.** Compute the rising sign at birth. Foundation for everything else in this phase.
+
+**Algorithm.** Local sidereal time (LST) at birth → tropical RA of ascendant via `tan(RA) = sin(LST) / (cos(LST)·cos(ε) - tan(φ)·sin(ε))` (Meeus Ch. 13). Convert tropical → sidereal by subtracting ayanamsa. ε = mean obliquity of ecliptic (already implemented for retrograde detection in `jyotish/planets.ts`).
+
+**Files.**
+- New: `src/jyotish/lagna.ts` exporting `computeLagna(birthDate, location, ayanamsaType?)` → `LagnaInfo { siderealLongitude, rashi, degreeInRashi, nakshatra, pada }`.
+- Re-export from `src/index.ts`.
+
+**Tests.** Cross-check against Jagannath Hora (free desktop software) for 20 birth charts.
+
+**Effort.** ~1.5d.
+
+### Step 29-2 — Bhava (Houses) — configurable system
+
+**What.** Compute 12 house cusps using one of three systems.
+
+- **Whole Sign** (default) — each rashi is exactly one house starting from lagna's sign.
+- **Equal House** — each house is exactly 30°, starting from lagna's exact degree.
+- **Placidus-KP** — true cuspal positions; standard formula (Astrolabe / KP).
+
+**Files.**
+- New: `src/jyotish/bhava.ts` exporting `computeBhava(lagna, houseSystem?)` → `BhavaChart { houses: HouseInfo[12], system }`.
+- Add `HouseSystem` type to `src/types/options.ts`. Add `houseSystem?: HouseSystem` to a new `BirthChartOptions` type.
+- Re-export from `src/index.ts`.
+
+**Tests.** Each house system validated separately. Whole Sign is trivial; Placidus-KP validated against Jagannath Hora for 20 charts.
+
+**Effort.** ~2d.
+
+### Step 29-3 — Rashi Chart (D1) + Navamsa (D9)
+
+**What.** Place 9 grahas + lagna into the 12 houses.
+
+- **D1 (Rashi)** — straightforward placement of `computePlanetaryPositions()` output into bhava chart.
+- **D9 (Navamsa)** — each rashi divided into 9 navamsas (3°20' each); navamsa rashi computed via classical mapping (Movable: starts at own sign; Fixed: starts at 9th from own; Dual: starts at 5th from own).
+
+**Files.**
+- New: `src/jyotish/charts.ts` exporting `computeRashiChart(birthDate, location, options)` → `BirthChart { lagna, houses, planets, divisional: 'D1' }`.
+- Add `computeNavamsa(birthDate, location, options)` → same shape with `divisional: 'D9'`.
+- Re-export from `src/index.ts`.
+
+**Tests.** 20 birth charts vs Jagannath Hora.
+
+**Effort.** ~2d.
+
+### Step 29-4 — Ashtakoot Guna Milan (36-point matching)
+
+**What.** Marriage compatibility between two birth charts. The 8 koots:
+
+| Koot | Weight | Tests |
+|------|--------|-------|
+| Varna | 1 | Caste class compatibility (boy ≥ girl) |
+| Vashya | 2 | Mutual influence (rashi-grouping based) |
+| Tara | 3 | Health (nakshatra-difference based) |
+| Yoni | 4 | Sexual compatibility (nakshatra-animal based) |
+| Graha Maitri | 5 | Mental compatibility (rashi-lord friendship) |
+| Gana | 6 | Temperament (Deva/Manushya/Rakshasa) |
+| Bhakoot | 7 | Emotional/financial bond (rashi distance) |
+| Nadi | 8 | Health/genetics (nakshatra-nadi grouping) |
+
+Plus standard cancellations (same nakshatra different padas, same rashi different nakshatras, etc.).
+
+**Files.**
+- New: `src/jyotish/matching.ts` exporting `computeAshtakoot(boyMoon, girlMoon)` → `AshtakootResult { score: 0..36, koots: KootScore[8], doshas: DoshaInfo[], cancellations: string[] }`.
+- Tables: `VARNA`, `VASHYA`, `YONI`, `NADI` etc. in `src/jyotish/matchingTables.ts`.
+- Re-export from `src/index.ts`.
+
+**Tests.** 30+ pairs cross-validated against [drikpanchang.com/jyotisha/horoscope-match](https://www.drikpanchang.com/jyotisha/horoscope-match/horoscope-match.html) and ProKerala.
+
+**Effort.** ~2d.
+
+### Step 29-5 — Mangal Dosha + Sade Sati
+
+**What.**
+- **Mangal Dosha (Manglik)** — Mars in houses 1, 2, 4, 7, 8, 12 from lagna OR moon OR venus (three cuts). Standard cancellations (Mars in own/exalted sign, mutual mangalik, etc.).
+- **Sade Sati** — Saturn currently transiting 12th, 1st, or 2nd house from natal moon rashi. Returns phase (1/2/3) and start/end dates of current 7.5-year arc.
+
+**Files.**
+- New: `src/jyotish/doshas.ts` exporting `computeMangalDosha(birthChart)` → `MangalDoshaInfo { afflicted: boolean, fromLagna, fromMoon, fromVenus, cancellations }`.
+- New: `src/jyotish/sadeSati.ts` exporting `computeSadeSati(natalMoonRashi, asOfDate?)` → `SadeSatiInfo { active: boolean, phase: 1|2|3|null, currentArcStart, currentArcEnd, nextArcStart? }`.
+- Saturn transit: scan ahead/back using `computePlanetaryPositions().saturn.rashi` daily; binary-search the Saturn transit boundaries.
+- Re-export from `src/index.ts`.
+
+**Tests.** 20 charts each, cross-checked against ProKerala / DrikPanchang.
+
+**Effort.** ~2d.
+
+### Step 29-6 — Pratyantar dashas + planetary dignity + true node + new ayanamsa
+
+**What.** Round out classical accuracy.
+
+- **Pratyantar dashas** — extend `computeVimshottariDasha()` to return third-level pratyantar (sub-sub) periods. Same proportional split logic.
+- **Planetary dignity** tables: exalted, debilitated, moolatrikona, own-sign, friend, neutral, enemy. 9 × 12 grid.
+- **True Rahu/Ketu node** option — `options.nodeType: 'mean' | 'true'` (default mean, current behaviour). True node via astronomy-engine's `MoonNode` or equivalent calculation.
+- **Ayanamsa additions** — True Chitrapaksha + Thirukanitham. Extend `AyanamsaType` union.
+
+**Files.**
+- Extend `src/jyotish/dasha.ts` — add `computeVimshottariPratyantar(antardasha)`.
+- New: `src/jyotish/dignity.ts` exporting dignity tables + `computeDignity(graha, rashi)`.
+- Extend `src/astronomy/ayanamsa.ts` — add 'true-chitra', 'thirukanitham' polynomials.
+- Extend `src/jyotish/planets.ts` — add `nodeType` option, true-node calculation path.
+
+**Tests.** Per-feature test files; ayanamsa values validated against astrological reference tables.
+
+**Effort.** ~2d.
+
+### Phase 29 Exit Criteria
+
+- 20+ birth charts validated against Jagannath Hora (D1, D9, lagna match).
+- 30+ Ashtakoot pairs validated against DrikPanchang horoscope-match tool (±1 point tolerance per koot).
+- Sade Sati arc dates within ±2 days of authoritative sources for 20 sample charts.
+- `getDailyPanchang` regression — no slowdown for users not opting into birth-chart features.
+- API surface backwards compatible with v2.x (additive only).
+
+---
+
+## Phase 30 — Advanced Astrology + Muhurta Engine (Wave 3) — 📐 PLANNED (scoped 2026-04-25)
+
+**Goal.** Build on the Phase 29 foundation: divisional charts, aspects, planetary strength, more doshas, more dasha systems, and a **first-class muhurta scoring engine** that consolidates the duplicated occasion-matching logic currently living in both consumer apps. Estimated **8–10 engineering days**, delivered as multiple v3.x minor releases.
+
+### Step 30-1 — Divisional charts (D2, D3, D7, D10, D12, D30)
+
+**What.** Beyond D1/D9 (Phase 29), the most-consulted vargas:
+- **D2 Hora** — wealth (split each sign in half).
+- **D3 Drekkana** — siblings (each sign split in 3 of 10°).
+- **D7 Saptamsa** — children (each sign split in 7).
+- **D10 Dasamsa** — career (each sign split in 10 of 3°).
+- **D12 Dwadasamsa** — parents (each sign split in 12 of 2°30').
+- **D30 Trimsamsa** — misfortune (special non-uniform division per BPHS).
+
+**Files.**
+- New: `src/jyotish/divisionals.ts` exporting `computeDivisionalChart(birthDate, location, divisional, options)` → `BirthChart`.
+- Each divisional has its own mapping function in the same file (per classical rules).
+
+**Tests.** 20 charts × 6 divisionals vs Jagannath Hora.
+
+**Effort.** ~1.5d.
+
+### Step 30-2 — Drishti (Aspects)
+
+**What.** All 9 grahas aspect houses 7 from themselves. Plus special aspects: Mars 4 & 8, Jupiter 5 & 9, Saturn 3 & 10, Rahu/Ketu 5 & 9 (some traditions).
+
+**Files.**
+- New: `src/jyotish/aspects.ts` exporting `computeAspects(birthChart)` → `AspectMap { [planet]: number[] /* houses aspected */ }`.
+
+**Tests.** 10 charts vs Jagannath Hora.
+
+**Effort.** ~0.75d.
+
+### Step 30-3 — Shadbala (six-fold strength)
+
+**What.** Compute the 6 strengths per planet: Sthana (positional), Dig (directional), Kala (temporal), Chesta (motional), Naisargika (natural), Drik (aspectual). Sum to total Shadbala in Virupa units.
+
+**Files.**
+- New: `src/jyotish/shadbala.ts` exporting `computeShadbala(birthChart)` → `ShadbalaResult { sun, moon, mars, ... saturn: PlanetShadbala }` where `PlanetShadbala = { sthana, dig, kala, chesta, naisargika, drik, total }`.
+
+**Tests.** 10 charts vs ProKerala Shadbala calculator (within 5% tolerance per component).
+
+**Effort.** ~2d (most complex calc in Wave 3).
+
+### Step 30-4 — Kaal Sarp Dosha + Pitru Dosha
+
+**What.**
+- **Kaal Sarp Dosha** — all 7 visible planets between Rahu and Ketu. 12 subtypes by axis (Anant, Kulik, Vasuki, Shankhpal, Padma, Mahapadma, Takshak, Karkotak, Shankhachud, Ghatak, Vishdhar, Sheshnag).
+- **Pitru Dosha** — Sun + Rahu/Ketu in same house OR Sun-Saturn conjunction in 9th house.
+
+**Files.**
+- Extend `src/jyotish/doshas.ts` — add `computeKaalSarp(birthChart)`, `computePitruDosha(birthChart)`.
+
+**Effort.** ~0.75d.
+
+### Step 30-5 — Additional dasha systems (Ashtottari + Yogini + Chara)
+
+**What.**
+- **Ashtottari Dasha** — 108-year, 8 planets (no Ketu). Used when Moon in Krishna Paksha. Lord cycle: Sun(6), Moon(15), Mars(8), Mercury(17), Saturn(10), Jupiter(19), Rahu(12), Venus(21).
+- **Yogini Dasha** — 36-year, 8 Yoginis: Mangala(1), Pingala(2), Dhanya(3), Bhramari(4), Bhadrika(5), Ulka(6), Siddha(7), Sankata(8).
+- **Chara Dasha (Jaimini)** — sign-based, lord = sign-lord. Movable signs 9 years, fixed 8, dual 7 (one common variant).
+
+**Files.**
+- Extend `src/jyotish/dasha.ts` with new functions: `computeAshtottariDasha`, `computeYoginiDasha`, `computeCharaDasha`.
+
+**Tests.** 10 charts each vs PyJHora open-source reference.
+
+**Effort.** ~2d.
+
+### Step 30-6 — Muhurta scoring engine
+
+**What.** Consolidate the muhurta logic currently duplicated in `dharmagya/src/services/astrology/muhurat.ts` and `dharmagya-website/src/lib/muhurat.ts`. Both consumers will then import from the library.
+
+**API.**
+```ts
+type MuhurtaRule = {
+  occasion: string;
+  auspiciousTithis?: number[];
+  inauspiciousTithis?: number[];
+  auspiciousNakshatras?: number[];
+  inauspiciousNakshatras?: number[];
+  auspiciousVaras?: number[];
+  inauspiciousVaras?: number[];
+  auspiciousYogas?: number[];
+  inauspiciousYogas?: number[];
+  excludeBhadra?: boolean;
+  excludeEkadashi?: boolean;
+  requirePaksha?: 'shukla' | 'krishna';
+  excludeAdhikaMasa?: boolean;
+  // ... extensible
+};
+
+scoreMuhurta(date, location, rule, options?)
+  → MuhurtaScore { date, score: 0..100, passes: boolean, reasons: string[] }
+
+findAuspiciousDates(rule, range, location, options?)
+  → MuhurtaDay[]  // sorted by score desc
+```
+
+**Stock rules** shipped: `vivah`, `grihaPravesh`, `namakarana`, `vidyarambh`, `vahanKharidi`, `annaprashan`, `mundan`, `upanayanam`, `karnavedha`, `aksharabhyasam`, `seemantham`, `shopOpening`, `travelStart`.
+
+**Files.**
+- New: `src/muhurta/engine.ts` — scorer + finder.
+- New: `src/muhurta/rules/` directory — one file per stock occasion.
+- Re-export from `src/index.ts`.
+- Both consumer apps replace their local `muhurat.ts` with library calls (tracked in dharmagya / dharmagya-website plans).
+
+**Tests.** Each stock rule has its own test file with known auspicious dates from reference panchangs.
+
+**Effort.** ~2d.
+
+### Step 30-7 — Calendar conversion APIs
+
+**What.** Convenience helpers consumers want and currently scaffold themselves.
+
+- `convertGregorianToHindu(date, location)` → `{ tithi, masa, paksha, samvat, vara }`.
+- `convertHinduToGregorian({ samvat, masa, paksha, tithi }, location)` → `Date[]`.
+- `getEkadashiDatesForYear(year, location)` → `Date[]`.
+- `getSankrantisForYear(year, location)` → `SankrantiEvent[]`.
+- `getFestivalsInRange(start, end, location, options)` → `FestivalDay[]`.
+- `getUpcomingEclipses(fromDate, location, count?)` → `EclipseInfo[]`.
+- `getKaliYugaYear(date)` → number.
+- `getHinduNewYear(gregorianYear, region)` → `Date`.
+
+**Files.**
+- New: `src/calendar/convert.ts`, `src/calendar/yearly.ts`.
+- Re-export from `src/index.ts`.
+
+**Tests.** Spot-check each helper against published almanacs.
+
+**Effort.** ~1d.
+
+### Phase 30 Exit Criteria
+
+- All Wave 3 features tested and validated against PyJHora / Jagannath Hora / DrikPanchang where applicable.
+- Consumer apps (dharmagya + dharmagya-website) successfully replace their local `muhurat.ts` with library calls — no regression in muhurat finder UX.
+- Performance budget: divisional chart computation under 5ms; Shadbala under 10ms.
+- API documented in README.md with examples for each new export.
+- Zero new runtime dependencies.
+
+---
+
+## Wave Roadmap Summary
+
+| Phase | Wave | Focus | Effort | Releases |
+|-------|------|-------|--------|----------|
+| 28 | Wave 1 | DrikPanchang Dainika Parity (Tarabala, Varjyam, Ganda Mula, Anandadi, Dwipushkar/Tripushkar, Madhyahna, Sandhya, Panchaka Rahita, Do Ghati) | 5–7d | v2.2, v2.3, v2.4 |
+| 29 | Wave 2 | Birth Chart Foundation (Lagna, Bhava, D1, D9, Ashtakoot matching, Mangal Dosha, Sade Sati, true node, more ayanamsa) | 8–12d | v3.0 |
+| 30 | Wave 3 | Advanced Astrology + Muhurta Engine (D2/D3/D7/D10/D12/D30, Drishti, Shadbala, Kaal Sarp/Pitru, Ashtottari/Yogini/Chara, muhurta scoring, calendar conversions) | 8–10d | v3.x |
+| **Total** | — | — | **~25 engineering days** | — |
+
+Decisions locked: en+hi only (no new locales this roadmap), muhurta engine moves into library, house system configurable with whole-sign default.
+
+**Where to start:** Phase 28 Step 28-1 (Tarabala) — smallest unit, exercises the full wiring (jyotish module + i18n + orchestrator + types + index export + tests) without breaking changes. Once 28-1 lands cleanly, the rest of Phase 28 follows the same pattern.

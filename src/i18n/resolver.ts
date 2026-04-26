@@ -31,6 +31,10 @@ export function resolveYogaName(index: number, lang: Language): string {
   return getTranslations(lang).yogaNames[index]!;
 }
 
+export function resolveAnandadiYogaName(index: number, lang: Language): string {
+  return getTranslations(lang).anandadiYogaNames[index]!;
+}
+
 export function resolveKaranaName(index: number, lang: Language): string {
   const t = getTranslations(lang);
   if (index === 0) return t.karanaNames.fixed[0]!; // Kimstughna

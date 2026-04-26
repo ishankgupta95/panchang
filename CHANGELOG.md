@@ -1,5 +1,253 @@
 # panchang-ts
 
+## 2.4.0
+
+**Minor release — Phase 28 Wave 1 complete: Panchaka Rahita + Do Ghati
+Muhurta.** Closes the dainika-parity work scoped in Phase 28; backwards
+compatible (additive to `DailyPanchangResult` only).
+
+### Highlights
+
+- **Panchaka Rahita Muhurta** — `DailyPanchangResult.panchakaRahita`
+  exposes the slices of the Hindu day FREE of Panchaka (i.e. Moon
+  outside the last five nakshatras: Dhanishtha → Revati). Empty when
+  Panchaka pervades the whole day; one-or-more `TimePeriod[]` entries
+  otherwise. Useful for "when can I start construction today?" queries.
+- **Do Ghati Muhurta** — `DailyPanchangResult.doGhatiMuhurta` enumerates
+  the 15 daytime + 15 nighttime ~48-min slots covering sunrise→sunset and
+  sunset→nextSunrise. Each slot carries its classical deity name (Rudra,
+  Uraga, Mitra … Tvashta, Samirana) and `auspicious | inauspicious |
+  neutral` quality. Parallel slot system to Choghadiya, but at 2-ghati
+  resolution.
+
+### Sourcing finding (Do Ghati)
+
+DrikPanchang's Do Ghati table presents the **same 30-name sequence on every
+weekday** — there is **no vara-based rotation** of the kind Choghadiya /
+Gowri Panchangam use. Verified against drikpanchang.com/muhurat/daily/
+do-ghati-muhurat.html for Wed 2026-04-15 and Mon 2026-04-20 producing
+identical name sequences. This matches the classical Brahmana / Smriti
+enumeration where each muhurta is associated with a fixed presiding deity
+independent of the day of the week. `computeDoGhati` therefore takes no
+`varaIndex` parameter; sourcing is cited inline in
+[src/core/doGhati.ts:3-21](src/core/doGhati.ts#L3-L21).
+
+### New API surface
+
+```ts
+// Pure module — usable independently of getDailyPanchang
+export function computePanchakaRahita(
+  sunriseUtc: Date,
+  nextSunriseUtc: Date,
+  getMoon: (utc: Date) => { siderealLongitude: number },
+): TimePeriod[];
+
+export function computeDoGhati(
+  sunriseUtc: Date,
+  sunsetUtc: Date,
+  nextSunriseUtc: Date,
+  nameFn: (slotIndex: number) => string,
+): DoGhatiInfo;
+```
+
+### Type surface additions
+
+- `DoGhatiSlot extends TimePeriod` — `index: number; name: string;
+  quality: ChoghadiyaQuality; qualityName: string`.
+- `DoGhatiInfo { day: DoGhatiSlot[]; night: DoGhatiSlot[] }` — 15 + 15
+  slots (always exactly 30 total).
+- `DailyPanchangResult.panchakaRahita: TimePeriod[]` (always present;
+  `[]` when Panchaka pervades the day).
+- `DailyPanchangResult.doGhatiMuhurta: DoGhatiInfo` (always present).
+
+### i18n
+
+- `doGhatiNames: readonly string[30]` added to `Translations` and to
+  `en.ts` / `hi.ts`. Day-slot names indices 0–14, night-slot names
+  indices 15–29 (matches DrikPanchang's published order).
+
+### Breaking changes
+
+None.
+
+### Test count
+
+**5,441** tests passing across 60 files (was ~5,393 in v2.3.0 →
+**+~48**). New files: `tests/unit/panchakaRahita.test.ts`,
+`tests/unit/doGhati.test.ts`,
+`tests/integration/panchakaRahita-doGhati-wiring.test.ts`.
+
+---
+
+## 2.3.0
+
+**Minor release — Phase 28 Wave 1 (cont): Anandadi Yoga + six classical
+Vara/Tithi/Nakshatra yogas (Dwipushkar, Tripushkar, Jwalamukhi, Aadal,
+Vidaal, Ravi).** Backwards compatible.
+
+### Highlights
+
+- **Anandadi Yoga** — `DailyPanchangResult.anandadiYoga` exposes the
+  28-name Vara × Nakshatra cycle yoga (Ananda, Kaladanda, Dhumra …
+  Vardhamana). Per-yoga `quality` (`auspicious | inauspicious |
+  neutral`) follows the classical Smarta classification.
+- **Six new entries in `SpecialYogaInfo[]`** — the existing four
+  (`amrit_siddhi`, `sarvartha_siddhi`, `ravi_pushya`, `guru_pushya`)
+  are joined by:
+  - `dwipushkar` — Bhadra-tithi (Dvitiya/Saptami/Dwadashi) + Sun/Tue/Sat
+    + nakshatra ∈ {Mrigashira, Chitra, Dhanishtha}. Results doubled.
+  - `tripushkar` — same vara/tithi gate + nakshatra ∈ {Krittika,
+    Punarvasu, Uttara Phalguni, Vishakha, Uttara Ashadha, Purva
+    Bhadrapada}. Results tripled.
+  - `jwalamukhi` — inauspicious; tithi+nakshatra lookup table per
+    classical Muhurta-chintamani.
+  - `aadal` / `vidaal` — Tamil-tradition vara × nakshatra subsets;
+    Aadal auspicious, Vidaal inauspicious.
+  - `ravi` — Sunday + nakshatras 4–12 from current Sun's nakshatra.
+
+### New API surface
+
+```ts
+export function computeAnandadiYoga(
+  varaIndex: number,
+  nakshatraIndex: number,
+  lang?: Language,
+): AnandadiYogaInfo;
+
+// Special yogas remain accessed via getDailyPanchang().specialYogas
+// — the SpecialYogaInfo.type union is extended (see below).
+```
+
+### Type surface additions
+
+- `AnandadiYogaInfo { index: number; name: string; quality:
+  ChoghadiyaQuality; qualityName: string }` — index in 0–27.
+- `SpecialYogaInfo.type` widened from 4 names to 10 (additive — the
+  four prior values still in the union).
+- `DailyPanchangResult.anandadiYoga: AnandadiYogaInfo`.
+- `InstantPanchangResult.anandadiYoga: AnandadiYogaInfo`.
+
+### i18n
+
+- `anandadiYogaNames: readonly string[28]` and 6 new keys in
+  `specialYogaNames` (`dwipushkar`, `tripushkar`, `jwalamukhi`,
+  `aadal`, `vidaal`, `ravi`) added to `en.ts` / `hi.ts`.
+
+### Breaking changes
+
+None. Consumers who exhaustively `switch` on `SpecialYogaInfo['type']`
+will need to handle the six new cases (TS2367 from `assertNever`-style
+defaults), but this is a strict superset — old switches still compile
+and behave correctly when no new yoga is detected.
+
+### Test count
+
+**~5,393** tests passing (was ~5,269 in v2.2.0 → **+~124**). New files:
+`tests/unit/anandadiYoga.test.ts`, `tests/unit/specialYogas-v23.test.ts`,
+`tests/integration/anandadiYoga-wiring.test.ts`,
+`tests/integration/specialYogas-v23-wiring.test.ts`.
+
+---
+
+## 2.2.0
+
+**Minor release — Phase 28 Wave 1: Tarabala, Varjyam, Ganda Mula,
+Madhyahna + Pratah/Sayahna Sandhya, Dinamana/Ratrimana labels.**
+Backwards compatible. Closes the bulk of the visible gap with
+[drikpanchang.com](https://www.drikpanchang.com/panchang/day-panchang.html)'s
+dainika panchang panel.
+
+### Highlights
+
+- **Tarabala** — 9-tara cycle (Janma, Sampat, Vipat, Kshema, Pratyari,
+  Sadhaka, Vadha, Mitra, Ati-Mitra) keyed off the consumer's
+  `janmaNakshatra`. Cousin to Chandra Balam — only populated when the
+  birth nakshatra is supplied. New `options.janmaNakshatra?: number`
+  parallel to existing `options.janmaRashi`.
+- **Varjyam** — forbidden ~96-min window per day, nakshatra-keyed. Uses
+  the BPHS 27-entry offset table (`VARJYAM_OFFSET_GHATIKAS` in
+  [src/utils/constants.ts](src/utils/constants.ts)) anchored to nakshatra
+  start. May span midnight; clamps cleanly to the next-sunrise window.
+  `null` only when the start lies entirely outside the Hindu day.
+- **Ganda Mula** — Moon-in-root-nakshatra detection at sunrise. The 6
+  root nakshatras are Ashwini, Ashlesha, Magha, Jyeshtha, Mula, Revati;
+  Mula and Jyeshtha tagged `severity: 'severe'`, the rest `'mild'`.
+  `gandaMula.active === false` for the 21 non-root nakshatras.
+- **Madhyahna** — solar noon as a ±24-min ritual window (one classical
+  muhurta wide). New field `DailyPanchangResult.madhyahna: TimePeriod`.
+- **Pratah Sandhya** / **Sayahna Sandhya** — dawn / dusk twilight
+  windows (sunrise ±24min, sunset ±24min). Two new fields.
+- **Dinamana** / **Ratrimana labels** — classical aliases of
+  `dayDurationMinutes` / `nightDurationMinutes` exposed as
+  `dinamanaMinutes` / `ratrimanaMinutes` for parity with DrikPanchang
+  panel labelling.
+
+### New API surface
+
+```ts
+export function computeTarabala(
+  janmaNakshatraIndex: number,
+  transitNakshatraIndex: number,
+  lang?: Language,
+): TarabalaInfo;
+
+export function computeVarjyam(
+  currentNakshatra: NakshatraInfo,
+  sunriseUtc: Date,
+  nextSunriseUtc: Date,
+  getMoon: (utc: Date) => { siderealLongitude: number },
+): TimePeriod | null;
+
+export function computeGandaMula(
+  currentNakshatraIndex: number,
+  lang?: Language,
+): GandaMulaInfo;
+
+export function computeMadhyahna(sunriseUtc: Date, sunsetUtc: Date): TimePeriod;
+export function computePratahSandhya(sunriseUtc: Date): TimePeriod;
+export function computeSayahnaSandhya(sunsetUtc: Date): TimePeriod;
+```
+
+### Type surface additions
+
+- `TarabalaInfo { taraIndex: number; taraName: string; quality:
+  'auspicious' | 'inauspicious'; englishName: string }`.
+- `GandaMulaInfo { active: boolean; nakshatraName?: string; severity?:
+  'mild' | 'severe' }`.
+- `PanchangOptions.janmaNakshatra?: number` (0–26, parallel to
+  `janmaRashi`).
+- `DailyPanchangResult` gains: `tarabala?` (only when `janmaNakshatra`
+  set), `varjyam: TimePeriod | null`, `gandaMula: GandaMulaInfo`,
+  `madhyahna: TimePeriod`, `pratahSandhya: TimePeriod`, `sayahnaSandhya:
+  TimePeriod`, `dinamanaMinutes: number`, `ratrimanaMinutes: number`.
+- `InstantPanchangResult` gains: `tarabala?`, `gandaMula:
+  GandaMulaInfo`.
+
+### Sourcing
+
+- `VARJYAM_OFFSET_GHATIKAS` — 27-entry per-nakshatra offset table sourced
+  from BPHS / Muhurta-chintamani; cited inline in
+  [src/utils/constants.ts](src/utils/constants.ts).
+
+### i18n
+
+- `tarabalaNames: readonly string[9]`, `gandaMulaNakshatraNames` (subset
+  of nakshatraNames re-exposed), and severity / quality strings added to
+  `en.ts` / `hi.ts`.
+
+### Breaking changes
+
+None.
+
+### Test count
+
+**~5,269** tests passing (was 5,149 in v2.1.0 → **+~120**). New files:
+`tests/unit/tarabala.test.ts`, `tests/unit/varjyam.test.ts`,
+`tests/unit/gandaMula.test.ts`, plus four `*-wiring.test.ts` integration
+files for orchestrator pickup.
+
+---
+
 ## 2.1.0
 
 **Minor release — regional festival expansion + state-slug `FestivalRegion`

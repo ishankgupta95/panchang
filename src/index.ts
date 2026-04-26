@@ -19,6 +19,7 @@ export { getDailyPanchang, getInstantPanchang } from './core/panchang';
 export { computePlanetaryPositions, GRAHA_ABBR } from './jyotish/planets';
 export { computeVimshottariDasha, computeVimshottariDashaFromBirth } from './jyotish/dasha';
 export { computeChandraBalam } from './jyotish/chandraBalam';
+export { computeTarabala } from './jyotish/tarabala';
 
 // Astronomy utilities
 export { computeSunrise as getSunrise, computeSunset as getSunset } from './astronomy/sunrise';
@@ -29,10 +30,14 @@ export { computeAyanamsa as getAyanamsa } from './astronomy/ayanamsa';
 
 // Inauspicious periods & muhurta
 export { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './core/inauspicious';
+export { computeVarjyam } from './core/varjyam';
+export { computeGandaMula } from './core/gandaMula';
+export { computeAnandadiYoga } from './core/anandadiYoga';
 export {
   computeAbhijitMuhurta, computeBrahmaMuhurta,
   computeVijayaMuhurta, computeGodhuliMuhurta,
   computeNishitaMuhurta, computeAmritKala,
+  computeMadhyahna, computePratahSandhya, computeSayahnaSandhya,
 } from './core/muhurta';
 export { computeGowriPanchangam } from './core/gowri';
 
@@ -51,16 +56,19 @@ export type {
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
   ChandraMasaInfo, SamvatInfo, RashiInfo,
   ChoghadiyaSlot, ChoghadiyaInfo, ChoghadiyaQuality,
+  DoGhatiSlot, DoGhatiInfo,
   HoraSlot, HoraInfo,
   GowriSlot, GowriInfo,
   SpecialYogaInfo, FestivalInfo,
   BhadraInfo,
+  GandaMulaInfo,
+  AnandadiYogaInfo,
   TimePeriod,
   PanchangErrorCode,
   // Jyotish types
   GrahaName, GrahaPosition, PlanetaryPositions,
   DashaLord, AntarDasha, MahaDasha, VimshottariDashaResult,
-  ChandraBalamInfo,
+  ChandraBalamInfo, TarabalaInfo,
 } from './types';
 
 // Errors

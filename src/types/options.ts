@@ -73,6 +73,12 @@ export interface PanchangOptions {
    */
   janmaRashi?: number;
   /**
+   * Native's janma (birth) Moon nakshatra index (0 = Ashwini … 26 = Revati).
+   * When provided, the result includes `tarabala` — the 9-tara cycle position
+   * of the transit Moon's nakshatra relative to janma. Omit to skip Tarabala.
+   */
+  janmaNakshatra?: number;
+  /**
    * Regional scope for region-specific festival variants. Default `'all'`.
    * See {@link FestivalRegion} for supported regions; pre-v2.1 values
    * ({@link LegacyFestivalRegion}) are accepted and mapped internally.
@@ -93,6 +99,12 @@ export interface InstantPanchangOptions {
    * chandraRashi. Omit to skip Chandra Balam entirely.
    */
   janmaRashi?: number;
+  /**
+   * Native's janma (birth) Moon nakshatra index (0 = Ashwini … 26 = Revati).
+   * When provided, the result includes `tarabala` — the 9-tara cycle position
+   * of the transit Moon's nakshatra relative to janma. Omit to skip Tarabala.
+   */
+  janmaNakshatra?: number;
   /**
    * Regional scope for region-specific festival variants. Default `'all'`.
    * See {@link FestivalRegion} for supported regions; pre-v2.1 values

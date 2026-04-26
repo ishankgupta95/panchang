@@ -94,6 +94,27 @@ export interface ChoghadiyaInfo {
   night: ChoghadiyaSlot[];
 }
 
+// ── Do Ghati Muhurta ──────────────────────────────────
+
+export interface DoGhatiSlot extends TimePeriod {
+  /**
+   * 0–29 global slot index. 0–14 are daytime (Rudra…Bhaga),
+   * 15–29 are nighttime (Ishwara…Samirana).
+   */
+  index: number;
+  name: string;
+  quality: ChoghadiyaQuality;
+  /** Localized display name for the quality (e.g. "शुभ" in Hindi) */
+  qualityName: string;
+}
+
+export interface DoGhatiInfo {
+  /** 15 equal slots from sunrise to sunset (indices 0–14) */
+  day: DoGhatiSlot[];
+  /** 15 equal slots from sunset to next sunrise (indices 15–29) */
+  night: DoGhatiSlot[];
+}
+
 // ── Gowri Panchangam ──────────────────────────────────
 
 export interface GowriSlot extends TimePeriod {
@@ -140,7 +161,17 @@ export interface SamvatInfo {
 
 export interface SpecialYogaInfo {
   name: string;
-  type: 'amrit_siddhi' | 'sarvartha_siddhi' | 'ravi_pushya' | 'guru_pushya';
+  type:
+    | 'amrit_siddhi'
+    | 'sarvartha_siddhi'
+    | 'ravi_pushya'
+    | 'guru_pushya'
+    | 'dwipushkar'
+    | 'tripushkar'
+    | 'jwalamukhi'
+    | 'aadal'
+    | 'vidaal'
+    | 'ravi';
 }
 
 // ── Festivals ────────────────────────────────────────
@@ -192,4 +223,41 @@ export interface BhadraInfo {
   end: Date;
   location: 'earth' | 'heaven' | 'paatal';
   isActive: boolean;
+}
+
+// ── Ganda Mula (root nakshatra) ──────────────────────
+
+/**
+ * Detection of the Moon being in one of the 6 "gaṇḍānta-mūla" nakshatras —
+ * a classical inauspicious window for new beginnings (births, journeys,
+ * housewarmings) per Smarta muhurta literature (Muhurta-chintamani / BPHS).
+ *
+ * The 6 root nakshatras are Ashwini (0), Ashlesha (8), Magha (9), Jyeshtha
+ * (17), Mula (18), and Revati (26). Mula and Jyeshtha — the gaṇḍānta pair
+ * spanning the Vrischika/Dhanus rashi boundary — are classed *severe*; the
+ * other four are *mild*.
+ *
+ * `nakshatraName` and `severity` are populated only when `active` is true.
+ */
+export interface GandaMulaInfo {
+  active: boolean;
+  nakshatraName?: string;
+  severity?: 'mild' | 'severe';
+}
+
+// ── Anandadi Yoga (Vara × Nakshatra) ─────────────────
+
+/**
+ * Anandadi Yoga — the 28-name cycle formed by the day-of-week × nakshatra
+ * combination per Muhurta-chintamani Ch. 4. The day's anandadi yoga is a
+ * pure function of `(varaIndex, nakshatraIndex)` and is exposed in both
+ * daily and instant panchang results.
+ */
+export interface AnandadiYogaInfo {
+  /** Index in the 28-name cycle (0 = Ananda … 27 = Vardhamana). */
+  index: number;
+  /** Localized yoga name. */
+  name: string;
+  /** Classical quality of the yoga. */
+  quality: ChoghadiyaQuality;
 }

@@ -91,3 +91,38 @@ export interface ChandraBalamInfo {
   /** Locale-specific name */
   name: string;
 }
+
+// ── Tarabala ──────────────────────────────────────────
+
+/**
+ * Transit Moon's position in the 9-tara cycle relative to a native's janma
+ * (birth) nakshatra.
+ *
+ * Classical rule (cf. Muhurta-chintamani Ch. 4, BPHS Ch. 71): from the janma
+ * nakshatra, the 27 nakshatras divide into nine taras that repeat three times.
+ * The cycle, starting with janma itself, is:
+ *
+ *   1. Janma     (auspicious, mild caution)
+ *   2. Sampat    (auspicious — wealth)
+ *   3. Vipat     (inauspicious — calamity)
+ *   4. Kshema    (auspicious — well-being)
+ *   5. Pratyari  (inauspicious — obstacles)
+ *   6. Sadhaka   (auspicious — accomplishment)
+ *   7. Vadha     (inauspicious — destruction)
+ *   8. Mitra     (auspicious — friend)
+ *   9. Ati-Mitra (auspicious — best friend)
+ *
+ * Three of nine — Vipat (3rd), Pratyari (5th), Vadha (7th) — are classed as
+ * inauspicious; the other six are auspicious. This module reports that binary
+ * quality alongside the tara index and name.
+ */
+export interface TarabalaInfo {
+  /** 0..8 — position in the 9-tara cycle starting from janma nakshatra */
+  taraIndex: number;
+  /** Sanskrit transliteration: Janma | Sampat | Vipat | Kshema | Pratyari | Sadhaka | Vadha | Mitra | Ati-Mitra */
+  englishName: string;
+  /** Locale-specific name */
+  name: string;
+  /** 'inauspicious' for Vipat (2) / Pratyari (4) / Vadha (6); 'auspicious' otherwise */
+  quality: 'auspicious' | 'inauspicious';
+}

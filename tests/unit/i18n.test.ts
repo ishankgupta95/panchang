@@ -68,12 +68,19 @@ describe('i18n translation completeness', () => {
         expect(pack.gowriNames).toHaveLength(8);
       });
 
+      it('has 30 do ghati names', () => {
+        expect(pack.doGhatiNames).toHaveLength(30);
+        for (const name of pack.doGhatiNames) {
+          expect(name.length).toBeGreaterThan(0);
+        }
+      });
+
       it('has 7 graha names (Chaldean order)', () => {
         expect(pack.grahaNames).toHaveLength(7);
       });
 
-      it('has 4 special yoga names', () => {
-        expect(Object.keys(pack.specialYogaNames)).toHaveLength(4);
+      it('has 10 special yoga names', () => {
+        expect(Object.keys(pack.specialYogaNames)).toHaveLength(10);
       });
 
       it('has all major festival names', () => {

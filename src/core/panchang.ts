@@ -31,6 +31,7 @@ import {
   computeAbhijitMuhurta, computeBrahmaMuhurta,
   computeVijayaMuhurta, computeGodhuliMuhurta,
   computeNishitaMuhurta, computeAmritKala,
+  computeMadhyahna, computePratahSandhya, computeSayahnaSandhya,
 } from './muhurta';
 import { getEclipseDuringDay } from '../astronomy/eclipse';
 import { computeGowriPanchangam } from './gowri';
@@ -41,12 +42,18 @@ import { computeChandraRashi, computeSuryaNakshatra } from './rashi';
 import { computeChoghadiya } from './choghadiya';
 import { computeHora } from './hora';
 import { computePanchaka } from './panchaka';
+import { computePanchakaRahita } from './panchakaRahita';
+import { computeDoGhati } from './doGhati';
 import { computeSpecialYogas } from './specialYogas';
 import { computeDurMuhurta } from './durMuhurta';
 import { computeFestivals } from './festivals';
 import { resolveRegionAlias } from './regionAlias';
 import { computeBhadraKaal } from './bhadra';
+import { computeVarjyam } from './varjyam';
+import { computeGandaMula } from './gandaMula';
+import { computeAnandadiYoga } from './anandadiYoga';
 import { computeChandraBalam } from '../jyotish/chandraBalam';
+import { computeTarabala } from '../jyotish/tarabala';
 import { getMoonrise, getMoonset } from '../astronomy/moonrise';
 import {
   resolveTithiName,
@@ -228,6 +235,7 @@ export function getInstantPanchang(
   const specialYogas = computeSpecialYogas(
     vara.index, tithi.index,
     Math.floor(siderealMoon / NAKSHATRA_SPAN),
+    suryaNakshatra.index,
     (type) => (t.specialYogaNames as Record<string, string>)[type] ?? type,
   );
   // Instant-mode festival detection uses the tithi-at-instant for all rules;
@@ -251,6 +259,15 @@ export function getInstantPanchang(
   const chandraBalam = options?.janmaRashi !== undefined
     ? computeChandraBalam(options.janmaRashi, chandraRashi.index, lang)
     : undefined;
+  const tarabala = options?.janmaNakshatra !== undefined
+    ? computeTarabala(options.janmaNakshatra, Math.floor(siderealMoon / NAKSHATRA_SPAN), lang)
+    : undefined;
+  const gandaMula = computeGandaMula(Math.floor(siderealMoon / NAKSHATRA_SPAN), lang);
+  const anandadiYoga = computeAnandadiYoga(
+    vara.index,
+    Math.floor(siderealMoon / NAKSHATRA_SPAN),
+    lang,
+  );
 
   return {
     timestamp: date,
@@ -270,7 +287,10 @@ export function getInstantPanchang(
     panchaka: computePanchaka(siderealMoon),
     specialYogas,
     festivals,
+    gandaMula,
+    anandadiYoga,
     ...(chandraBalam !== undefined ? { chandraBalam } : {}),
+    ...(tarabala !== undefined ? { tarabala } : {}),
   };
 }
 
@@ -432,11 +452,18 @@ export function getDailyPanchang(
   const moonriseUtc = getMoonrise(localMidnightUtc, location);
   const moonsetUtc = getMoonset(moonriseUtc ?? localMidnightUtc, location);
   const panchaka = computePanchaka(siderealMoonAtSunrise);
+  const panchakaRahitaUtc = computePanchakaRahita(sunriseUtc, nextSunriseUtc, getMoon);
+  const doGhatiMuhurta = computeDoGhati(
+    sunriseUtc, sunsetUtc, nextSunriseUtc,
+    (idx) => getTranslations(lang).doGhatiNames[idx]!,
+    qualityNameFn,
+  );
 
   const t = getTranslations(lang);
   const specialYogas = computeSpecialYogas(
     vara.index, tithiAtSunrise.index,
     Math.floor(siderealMoonAtSunrise / NAKSHATRA_SPAN),
+    suryaNakshatra.index,
     (type) => (t.specialYogaNames as Record<string, string>)[type] ?? type,
   );
   const durMuhurtaUtc = computeDurMuhurta(sunriseUtc, sunsetUtc, vara.index);
@@ -614,6 +641,20 @@ export function getDailyPanchang(
   // Bhadra Kala window overlapping today's Hindu day.
   const bhadraUtc = computeBhadraKaal(sunriseUtc, nextSunriseUtc, getMoon, getSun);
 
+  // Varjyam (Vishaghati) window for the nakshatra active at sunrise.
+  const varjyamUtc = computeVarjyam(
+    nakshatraAtSunrise.index,
+    sunriseUtc,
+    nextSunriseUtc,
+    getMoon,
+  );
+
+  // Ganda Mula — pure index test on the nakshatra active at sunrise.
+  const gandaMula = computeGandaMula(nakshatraAtSunrise.index, lang);
+
+  // Anandadi Yoga — Vara × Nakshatra 28-name cycle, evaluated at sunrise.
+  const anandadiYoga = computeAnandadiYoga(vara.index, nakshatraAtSunrise.index, lang);
+
   // Format a clock string from offset-adjusted local Date for descriptions.
   const formatClock = (d: Date): string => {
     const hh = String(d.getUTCHours()).padStart(2, '0');
@@ -734,6 +775,9 @@ export function getDailyPanchang(
     sunriseUtc, nextSunriseUtc,
     Math.floor(siderealMoonAtSunrise / NAKSHATRA_SPAN),
   );
+  const madhyahnaWindowUtc = computeMadhyahna(sunriseUtc, sunsetUtc);
+  const pratahSandhyaUtc = computePratahSandhya(sunriseUtc);
+  const sayahnaSandhyaUtc = computeSayahnaSandhya(sunsetUtc);
 
   // ── 8. Convert all UTC dates to local display ────────
   const toLocal = (d: Date) => utcToLocalDisplay(d, offsetMinutes);
@@ -765,6 +809,13 @@ export function getDailyPanchang(
 
   const chandraBalam = options.janmaRashi !== undefined
     ? computeChandraBalam(options.janmaRashi, chandraRashi.index, lang)
+    : undefined;
+  const tarabala = options.janmaNakshatra !== undefined
+    ? computeTarabala(
+        options.janmaNakshatra,
+        Math.floor(siderealMoonAtSunrise / NAKSHATRA_SPAN),
+        lang,
+      )
     : undefined;
 
   // ── 9. Assemble result ───────────────────────────────
@@ -806,6 +857,11 @@ export function getDailyPanchang(
     moonrise: moonriseUtc ? toLocal(moonriseUtc) : null,
     moonset:  moonsetUtc  ? toLocal(moonsetUtc)  : null,
     panchaka,
+    panchakaRahita: panchakaRahitaUtc.map(convertTimePeriod),
+    doGhatiMuhurta: {
+      day:   doGhatiMuhurta.day.map(s   => ({ ...s, ...convertTimePeriod(s) })),
+      night: doGhatiMuhurta.night.map(s => ({ ...s, ...convertTimePeriod(s) })),
+    },
     specialYogas,
     durMuhurta: [convertTimePeriod(durMuhurtaUtc[0]), convertTimePeriod(durMuhurtaUtc[1])],
     festivals,
@@ -821,10 +877,18 @@ export function getDailyPanchang(
           isActive: bhadraUtc.isActive,
         }
       : null,
+    varjyam: varjyamUtc ? convertTimePeriod(varjyamUtc) : null,
+    gandaMula,
+    anandadiYoga,
     vijayaMuhurta: convertTimePeriod(vijayaMuhurtaUtc),
     godhuliMuhurta: convertTimePeriod(godhuliMuhurtaUtc),
     nishitaMuhurta: convertTimePeriod(nishitaMuhurtaUtc),
     amritKala: amritKalaUtc ? convertTimePeriod(amritKalaUtc) : null,
+    madhyahna: convertTimePeriod(madhyahnaWindowUtc),
+    pratahSandhya: convertTimePeriod(pratahSandhyaUtc),
+    sayahnaSandhya: convertTimePeriod(sayahnaSandhyaUtc),
+    dinamanaMinutes: Math.round(dayDurationMs / 60_000),
+    ratrimanaMinutes: Math.round(nightDurationMs / 60_000),
     eclipse: eclipseUtc
       ? {
           kind: eclipseUtc.kind,
@@ -840,5 +904,6 @@ export function getDailyPanchang(
         }
       : null,
     ...(chandraBalam !== undefined ? { chandraBalam } : {}),
+    ...(tarabala !== undefined ? { tarabala } : {}),
   };
 }

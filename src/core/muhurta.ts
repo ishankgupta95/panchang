@@ -144,6 +144,59 @@ export function computeAmritKala(
 }
 
 /**
+ * Madhyahna: solar noon as a ±24-minute (one-muhurta) ritual window.
+ *
+ * Center = sunrise + (sunset − sunrise) / 2, the midpoint of the daytime arc.
+ * Width = ±24 min, i.e. one classical muhurta = 48 min = 2 ghatikas. This
+ * is the "madhyahna kala" used by Smarta-prayoga texts for noon-anchored
+ * observances (Ganesh Chaturthi puja, etc.).
+ *
+ * @param sunrise Sunrise UTC Date.
+ * @param sunset  Sunset UTC Date.
+ * @returns       `{ start, end }` UTC Dates spanning solar noon ±24 min.
+ */
+export function computeMadhyahna(sunrise: Date, sunset: Date): TimePeriod {
+  const halfMs = 24 * 60_000;
+  const noonMs = (sunrise.getTime() + sunset.getTime()) / 2;
+  return {
+    start: new Date(noonMs - halfMs),
+    end: new Date(noonMs + halfMs),
+  };
+}
+
+/**
+ * Pratah Sandhya: dawn-twilight ritual window — 24 min before sunrise to
+ * 24 min after sunrise (one classical muhurta = 48 min, symmetric about
+ * sunrise). The Smarta-prayoga sandhyavandanam window per Dharmashastra.
+ *
+ * @param sunrise Sunrise UTC Date.
+ * @returns       `{ start, end }` UTC Dates spanning sunrise ±24 min.
+ */
+export function computePratahSandhya(sunrise: Date): TimePeriod {
+  const halfMs = 24 * 60_000;
+  return {
+    start: new Date(sunrise.getTime() - halfMs),
+    end: new Date(sunrise.getTime() + halfMs),
+  };
+}
+
+/**
+ * Sayahna Sandhya: dusk-twilight ritual window — 24 min before sunset to
+ * 24 min after sunset (one classical muhurta = 48 min, symmetric about
+ * sunset). Counterpart of Pratah Sandhya for the evening sandhyavandanam.
+ *
+ * @param sunset Sunset UTC Date.
+ * @returns      `{ start, end }` UTC Dates spanning sunset ±24 min.
+ */
+export function computeSayahnaSandhya(sunset: Date): TimePeriod {
+  const halfMs = 24 * 60_000;
+  return {
+    start: new Date(sunset.getTime() - halfMs),
+    end: new Date(sunset.getTime() + halfMs),
+  };
+}
+
+/**
  * Amrita Ghatika offsets (in ghatikas from sunrise) for each of 27 nakshatras,
  * drawn from Muhurta Chintamani. Each window is 4 ghatikas long.
  */

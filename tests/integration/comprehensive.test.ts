@@ -294,7 +294,10 @@ describe('getDailyPanchang — comprehensive field validation', () => {
 
     for (const sy of r.specialYogas) {
       it(`special yoga "${sy.name}" has valid type`, () => {
-        expect(['amrit_siddhi', 'sarvartha_siddhi', 'ravi_pushya', 'guru_pushya']).toContain(sy.type);
+        expect([
+          'amrit_siddhi', 'sarvartha_siddhi', 'ravi_pushya', 'guru_pushya',
+          'dwipushkar', 'tripushkar', 'jwalamukhi', 'aadal', 'vidaal', 'ravi',
+        ]).toContain(sy.type);
       });
     }
   });
