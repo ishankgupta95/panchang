@@ -1,3 +1,4 @@
+import { assertNakshatraIndex } from '../utils/validation';
 import type { TimePeriod } from '../types/elements';
 
 /**
@@ -130,7 +131,7 @@ export function computeAmritKala(
   nextSunrise: Date,
   nakshatraAtSunrise: number,
 ): TimePeriod | null {
-  if (nakshatraAtSunrise < 0 || nakshatraAtSunrise > 26) return null;
+  assertNakshatraIndex(nakshatraAtSunrise, 'nakshatraAtSunrise');
 
   const offsetGhatikas = AMRIT_KALA_OFFSET_GHATIKAS[nakshatraAtSunrise]!;
   const ahoratraMs = nextSunrise.getTime() - sunrise.getTime();
@@ -199,8 +200,15 @@ export function computeSayahnaSandhya(sunset: Date): TimePeriod {
 /**
  * Amrita Ghatika offsets (in ghatikas from sunrise) for each of 27 nakshatras,
  * drawn from Muhurta Chintamani. Each window is 4 ghatikas long.
+ *
+ * The "ghatika" here is elastic — `ahoratra / 60` — not the fixed 24-minute
+ * Varjyam ghatika; see `computeAmritKala` above. Compared with
+ * `VARJYAM_OFFSET_GHATIKAS` (offset from nakshatra start, fixed 24-min
+ * ghatikas) the values disagree at indices 3 (Rohini), 18 (Mula), 26 (Revati).
+ * The arrays are independently sourced — accidental cross-pollination is
+ * caught by the regression test in `tests/unit/varjyam.test.ts`.
  */
-const AMRIT_KALA_OFFSET_GHATIKAS: readonly number[] = [
+export const AMRIT_KALA_OFFSET_GHATIKAS: readonly number[] = [
   50, // 0  Ashwini
   24, // 1  Bharani
   30, // 2  Krittika

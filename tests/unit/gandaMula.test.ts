@@ -23,7 +23,7 @@ describe('computeGandaMula — the 6 root nakshatras', () => {
   for (const { idx, name, severity } of cases) {
     it(`nakshatra ${idx} (${name}) → active, severity=${severity}`, () => {
       const r = computeGandaMula(idx);
-      expect(r.active).toBe(true);
+      if (!r.active) throw new Error(`expected active at idx ${idx}`);
       expect(r.nakshatraName).toBe(name);
       expect(r.severity).toBe(severity);
     });
@@ -31,19 +31,19 @@ describe('computeGandaMula — the 6 root nakshatras', () => {
 });
 
 describe('computeGandaMula — non-Ganda-Mula nakshatras', () => {
-  // Two explicit negative fixtures requested by the spec.
-  it('Bharani (1) → not active, no name/severity', () => {
+  // Discriminated-union shape: when `active === false`, the result has
+  // exactly one key (`active`); `nakshatraName` and `severity` are not on
+  // the type. The runtime check below pins the shape.
+  it('Bharani (1) → inactive shape', () => {
     const r = computeGandaMula(1);
     expect(r.active).toBe(false);
-    expect(r.nakshatraName).toBeUndefined();
-    expect(r.severity).toBeUndefined();
+    expect(Object.keys(r).sort()).toEqual(['active']);
   });
 
-  it('Anuradha (16) → not active, no name/severity', () => {
+  it('Anuradha (16) → inactive shape', () => {
     const r = computeGandaMula(16);
     expect(r.active).toBe(false);
-    expect(r.nakshatraName).toBeUndefined();
-    expect(r.severity).toBeUndefined();
+    expect(Object.keys(r).sort()).toEqual(['active']);
   });
 
   it('all 21 non-root nakshatras return active: false', () => {
@@ -53,8 +53,7 @@ describe('computeGandaMula — non-Ganda-Mula nakshatras', () => {
       if (rootSet.has(i)) continue;
       const r = computeGandaMula(i);
       expect(r.active).toBe(false);
-      expect(r.nakshatraName).toBeUndefined();
-      expect(r.severity).toBeUndefined();
+      expect(Object.keys(r).sort()).toEqual(['active']);
       nonActive++;
     }
     expect(nonActive).toBe(21);
@@ -63,13 +62,21 @@ describe('computeGandaMula — non-Ganda-Mula nakshatras', () => {
 
 describe('computeGandaMula — i18n', () => {
   it('en (default) returns Sanskrit transliteration', () => {
-    expect(computeGandaMula(18).nakshatraName).toBe('Mula');
-    expect(computeGandaMula(0, 'en').nakshatraName).toBe('Ashwini');
+    const r1 = computeGandaMula(18);
+    if (!r1.active) throw new Error('Mula should be active');
+    expect(r1.nakshatraName).toBe('Mula');
+    const r2 = computeGandaMula(0, 'en');
+    if (!r2.active) throw new Error('Ashwini should be active');
+    expect(r2.nakshatraName).toBe('Ashwini');
   });
 
   it('hi returns Devanagari', () => {
-    expect(computeGandaMula(18, 'hi').nakshatraName).toBe('मूल');
-    expect(computeGandaMula(17, 'hi').nakshatraName).toBe('ज्येष्ठा');
+    const r1 = computeGandaMula(18, 'hi');
+    if (!r1.active) throw new Error('Mula should be active');
+    expect(r1.nakshatraName).toBe('मूल');
+    const r2 = computeGandaMula(17, 'hi');
+    if (!r2.active) throw new Error('Jyeshtha should be active');
+    expect(r2.nakshatraName).toBe('ज्येष्ठा');
   });
 });
 
@@ -99,7 +106,8 @@ describe('computeGandaMula — invariants', () => {
   it('exactly 2 of the 6 are severe (Mula + Jyeshtha)', () => {
     let severe = 0;
     for (let i = 0; i < 27; i++) {
-      if (computeGandaMula(i).severity === 'severe') severe++;
+      const r = computeGandaMula(i);
+      if (r.active && r.severity === 'severe') severe++;
     }
     expect(severe).toBe(2);
   });

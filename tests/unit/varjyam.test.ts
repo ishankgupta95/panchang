@@ -14,6 +14,7 @@ import {
   VARJYAM_DURATION_MINUTES,
   NAKSHATRA_SPAN,
 } from '../../src/utils/constants';
+import { AMRIT_KALA_OFFSET_GHATIKAS } from '../../src/core/muhurta';
 import { LongitudeCache } from '../../src/astronomy/cache';
 import { computeSunrise, computeSunset } from '../../src/astronomy/sunrise';
 
@@ -162,6 +163,36 @@ describe('VARJYAM_OFFSET_GHATIKAS table sanity', () => {
     expect(VARJYAM_OFFSET_GHATIKAS[16]).toBe(10);  // Anuradha 11–14
     expect(VARJYAM_OFFSET_GHATIKAS[18]).toBe(56);  // Mula     57–60
     expect(VARJYAM_OFFSET_GHATIKAS[26]).toBe(30);  // Revati   31–34
+  });
+});
+
+describe('VARJYAM_OFFSET_GHATIKAS vs AMRIT_KALA_OFFSET_GHATIKAS — cross-table pin', () => {
+  // The two tables are NOT redundant — they anchor on different reference
+  // points (nakshatra start vs sunrise) and use different ghatika definitions
+  // (fixed 24-min vs ahoratra/60). They share most values by classical-source
+  // coincidence but disagree at exactly three indices: Rohini (3), Mula (18),
+  // Revati (26). This test pins the divergence so an accidental copy from one
+  // table to the other fails immediately.
+
+  it('both tables have 27 entries', () => {
+    expect(VARJYAM_OFFSET_GHATIKAS.length).toBe(27);
+    expect(AMRIT_KALA_OFFSET_GHATIKAS.length).toBe(27);
+  });
+
+  it('tables disagree at exactly indices 3, 18, 26', () => {
+    const disagreements: number[] = [];
+    for (let i = 0; i < 27; i++) {
+      if (VARJYAM_OFFSET_GHATIKAS[i] !== AMRIT_KALA_OFFSET_GHATIKAS[i]) {
+        disagreements.push(i);
+      }
+    }
+    expect(disagreements).toEqual([3, 18, 26]);
+  });
+
+  it('AMRIT_KALA values at the three divergent indices', () => {
+    expect(AMRIT_KALA_OFFSET_GHATIKAS[3]).toBe(26);   // Rohini
+    expect(AMRIT_KALA_OFFSET_GHATIKAS[18]).toBe(20);  // Mula
+    expect(AMRIT_KALA_OFFSET_GHATIKAS[26]).toBe(20);  // Revati
   });
 });
 

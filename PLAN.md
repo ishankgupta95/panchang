@@ -5129,7 +5129,7 @@ affect users who read the translated `festival.name`.
 
 ---
 
-## Phase 28 — DrikPanchang Dainika Parity (Wave 1) — 📐 PLANNED (scoped 2026-04-25)
+## Phase 28 — DrikPanchang Dainika Parity (Wave 1) ✅ DONE
 
 **Goal.** Close the visible gap with [drikpanchang.com](https://www.drikpanchang.com/panchang/day-panchang.html) — the reference users compare dharmagya against. Every feature in this phase is a **lookup-table calculation built on existing primitives**: nakshatra index, vara index, tithi index, sunrise/sunset. No new astronomy, no new ayanamsa, no breaking API changes.
 
@@ -5159,11 +5159,13 @@ affect users who read the translated `festival.name`.
 
 ### Step 28-2 — Varjyam (v2.2)
 
-**Status.** Scoped.
+**Status.** Done.
 
 **What.** Forbidden ~1.6h window per day, nakshatra-keyed. Computed from nakshatra-start time + tabular offset (in ghatikas) + fixed duration.
 
-**Algorithm.** Lookup `VARJYAM_OFFSET_GHATIKAS[nakshatraIndex]` (27-element table from BPHS). `varjyamStart = nakshatraStartUtc + offsetGhatikas × 24min`. `varjyamEnd = varjyamStart + 96min` (4 ghatika ≈ 1h36m). May span midnight; clamp to next-sunrise window when needed.
+**Algorithm.** Lookup `VARJYAM_OFFSET_GHATIKAS[nakshatraIndex]` (27-element table from BPHS / Muhurta-chintamani Ch. 4 / DrikPanchang's published Tyajya Ghatis). `varjyamStart = nakshatraStartUtc + offsetGhatikas × 24min` (fixed 24-min ghatikas, anchored at nakshatra start). `varjyamEnd = varjyamStart + 96min` (4 ghatika ≈ 1h36m). The window is clamped to overlap with the Hindu day (sunrise → nextSunrise); `null` is returned when there is no overlap or when the nakshatra-start anchor cannot be located within a 30 h lookback.
+
+**Single-window contract.** Only the nakshatra active at sunrise is consulted. On nakshatra-transition days printed panchangs may render two Varjyam windows (one per nakshatra); this API returns at most one and may return `null` on the day when the second nakshatra's window is what consumers expect. A future revision may return an array — tracked but out of scope for v2.2.
 
 **Files.**
 - New: `src/core/varjyam.ts` exporting `computeVarjyam(currentNakshatra, sunriseUtc, nextSunriseUtc, getMoon)` → `TimePeriod | null`.
@@ -5171,7 +5173,7 @@ affect users who read the translated `festival.name`.
 - Wire into orchestrator; populate `DailyPanchangResult.varjyam`.
 - Re-export from `src/index.ts`.
 
-**Tests.** 25 DrikPanchang fixtures + edge cases (midnight crossing, polar locations).
+**Validation.** Unit tests cover the offset table, synthetic-Moon deterministic offsets, and a 30-day Delhi sweep ([tests/unit/varjyam.test.ts](tests/unit/varjyam.test.ts)). Cross-verify against DrikPanchang publishes ~7–40 min disagreement on shared (sunrise-nakshatra) windows; this is a **convention divergence** (DrikPanchang's published Varjyam appears to use elastic ghatikas anchored at sunrise, not the classical fixed-ghatika nakshatra-start anchor adopted here). The cross-verify in [tests/validation/phase28-cross-verify.test.ts](tests/validation/phase28-cross-verify.test.ts) asserts the canonical 96-min duration when the library returns non-null and tolerates `null` on transition days.
 
 **Effort.** ~0.75d.
 
@@ -5192,21 +5194,23 @@ affect users who read the translated `festival.name`.
 
 ### Step 28-4 — Madhyahna + Pratah/Sayahna Sandhya + Dinamana/Ratrimana labels (v2.2)
 
-**Status.** Scoped.
+**Status.** Done.
 
 **What.**
 - **Madhyahna** = solar noon = `sunrise + dayDuration / 2` as a `TimePeriod` (instant ± 24min for muhurta-style window).
-- **Pratah Sandhya** = 24min before sunrise → 24min after sunrise (dawn twilight, classical ritual window).
-- **Sayahna Sandhya** = 24min before sunset → 24min after sunset.
-- **Dinamana** = `dayDurationMinutes` re-exposed as a labelled string-ready field (e.g. `"11h 56m"`).
-- **Ratrimana** = `nightDurationMinutes` re-exposed similarly.
+- **Pratah Sandhya** = 24min before sunrise → 24min after sunrise (one classical 48-min muhurta symmetric about sunrise; dawn twilight ritual window).
+- **Sayahna Sandhya** = 24min before sunset → 24min after sunset (symmetric counterpart for the evening sandhyavandanam).
+- **Dinamana** = `dayDurationMinutes` re-exposed as `dinamanaMinutes`.
+- **Ratrimana** = `nightDurationMinutes` re-exposed as `ratrimanaMinutes`.
+
+**Convention note.** Pratah/Sayahna Sandhya here use the classical symmetric one-muhurta (48-min) window centered on sunrise/sunset. DrikPanchang's daily panchang renders an asymmetric ~81-minute window (sunrise−81min → sunrise for Pratah; sunset → sunset+81min for Sayahna), drawn from a different Smarta-prayoga tradition. Both forms are classically defensible; this library adopts the symmetric muhurta convention. Cross-verify is documented but **not asserted at ±1 min** for Sandhya.
 
 **Files.**
 - Extend `src/core/muhurta.ts` — add `computeMadhyahna(sunrise, sunset)`, `computePratahSandhya(sunrise)`, `computeSayahnaSandhya(sunset)`.
-- Extend `DailyPanchangResult` with `madhyahna: TimePeriod`, `pratahSandhya: TimePeriod`, `sayahnaSandhya: TimePeriod`, `dinamanaMinutes: number` (alias of dayDurationMinutes), `ratrimanaMinutes: number` (alias of nightDurationMinutes).
+- Extend `DailyPanchangResult` with `madhyahna: TimePeriod`, `pratahSandhya: TimePeriod`, `sayahnaSandhya: TimePeriod`, `dinamanaMinutes: number`, `ratrimanaMinutes: number`.
 - Re-export new functions from `src/index.ts`.
 
-**Tests.** Verify Madhyahna == sunrise + half-day. Verify Sandhya symmetry. Cross-check Pratah Sandhya against DrikPanchang for 5 cities.
+**Validation.** Madhyahna midpoint matches DrikPanchang within ±1 min on all 50 phase-28 fixtures. Pratah/Sayahna Sandhya are unit-tested for symmetry and 48-min width; the ~57-min and ~24-min offsets vs DrikPanchang are documented as known convention divergence in [tests/validation/phase28-cross-verify.test.ts](tests/validation/phase28-cross-verify.test.ts).
 
 **Effort.** ~0.5d.
 
@@ -5230,22 +5234,22 @@ affect users who read the translated `festival.name`.
 
 ### Step 28-6 — Dwipushkar / Tripushkar / Jwalamukhi / Aadal / Vidaal / Ravi yogas (v2.3)
 
-**Status.** Scoped.
+**Status.** Done.
 
 **What.** Six classical yogas that combine Vara + Tithi + Nakshatra in fixed patterns. Each is a boolean detection from existing inputs, no new astronomy.
 
-- **Dwipushkar Yoga** — Bhadra-tithi (Dvitiya/Saptami/Dwadashi) + Sun/Tue/Sat + nakshatra ∈ {Mrigashira, Chitra, Dhanishtha} (results of actions get doubled).
-- **Tripushkar Yoga** — same Bhadra-tithi + same days + nakshatra ∈ {Krittika, Punarvasu, Uttara Phalguni, Vishakha, Uttara Ashadha, Purva Bhadrapada} (results tripled).
-- **Jwalamukhi Yoga** — inauspicious; Tithi 1+Nakshatra Mula, Tithi 2+Bharani, Tithi 4+Krittika, etc. (lookup table).
-- **Aadal Yoga** — vara × nakshatra subset (auspicious in classical Tamil panchanga).
-- **Vidaal Yoga** — vara × nakshatra subset (inauspicious counterpart).
-- **Ravi Yoga** — Sunday + nakshatras within 4-12 from current Sun's nakshatra.
+- **Dwipushkar Yoga** — Bhadra-tithi (Dvitiya/Saptami/Dwadashi, paksha-tithi-numbers `{2, 7, 12}`) + Bhadra-vara (Sun/Tue/Sat, indices `{0, 2, 6}`) + nakshatra ∈ {Mrigashira (4), Chitra (13), Dhanishtha (22)}. Actions yield doubled results.
+- **Tripushkar Yoga** — same Bhadra-tithi + same Bhadra-vara + nakshatra ∈ {Krittika (2), Punarvasu (6), Uttara Phalguni (11), Vishakha (15), Uttara Ashadha (20), Purva Bhadrapada (24)}. Actions tripled.
+- **Jwalamukhi Yoga** — inauspicious; 5-row tithi-number × nakshatra-index lookup per Muhurta-chintamani 6.32: `{1: Mula(18), 5: Bharani(1), 8: Krittika(2), 9: Rohini(3), 10: Ashlesha(8)}`.
+- **Aadal Yoga** *(auspicious)* / **Vidaal Yoga** *(inauspicious)* — Moon-from-Sun nakshatra-distance in the **28-nakshatra scheme** (Abhijit between Uttara Ashadha and Shravana). `distance = ((moonNak28 - sunNak28 + 28) % 28) + 1`. Aadal triggers on `{2, 7, 9, 14, 16, 21, 23, 28}`; Vidaal on `{3, 6, 10, 13, 17, 20, 24, 27}`. Sources: AstroShastra Muhurta page, HoraSarvam (2023), Ernst Wilhelm's *Muhurta Yogas*. (Plan revision note: an earlier draft described these as a Tamil-Vakya weekday × nakshatra subset; the classical compilations consulted all use the distance rule, which the implementation adopts.)
+- **Ravi Yoga** *(auspicious)* — Moon-from-Sun nakshatra-distance in the **27-nakshatra scheme** (Abhijit not counted). `distance ∈ {4, 6, 9, 10, 13, 20}`. The implementation deliberately drops the "must be Sunday" filter that some popular sources add; DrikPanchang's Ravi Yoga occurrence page lists hits across all weekdays, which is the parity oracle the project follows. (Plan revision note: an earlier draft said "Sunday + nakshatras within 4-12"; the published DrikPanchang occurrence list contradicts both clauses.)
 
 **Files.**
-- Extend `src/core/specialYogas.ts` — add detection rules + tables. Append to existing `SpecialYogaInfo[]` output (current types include `'amrit_siddhi' | 'sarvartha_siddhi' | 'ravi_pushya' | 'guru_pushya'`; add `'dwipushkar' | 'tripushkar' | 'jwalamukhi' | 'aadal' | 'vidaal' | 'ravi'`).
-- i18n: add 6 new festival/yoga keys to `specialYogaNames` in `en.ts` and `hi.ts`.
+- New: `src/core/specialYogasData.ts` — moves all yoga lookup tables (existing + Phase-28-6) out of `src/core/specialYogas.ts` so the compute logic reads as a list of "for each yoga, check the table" without scrolling past hundreds of lines of reference data. The cited rule sources stay inline next to each table.
+- Extend `src/core/specialYogas.ts` — append `'dwipushkar' | 'tripushkar' | 'jwalamukhi' | 'aadal' | 'vidaal' | 'ravi'` to the `SpecialYogaInfo` type union and the detector chain. New parameter `suryaNakshatraIndex` is required (consumed by Aadal/Vidaal/Ravi).
+- i18n: add 6 new keys to `specialYogaNames` in `en.ts` and `hi.ts`.
 
-**Tests.** 6 fixtures per yoga (12-30 total), DrikPanchang cross-check on 5 fixtures per yoga.
+**Validation.** Per-yoga unit tests in [tests/unit/specialYogas-v23.test.ts](tests/unit/specialYogas-v23.test.ts). 180-day Delhi sweep in [tests/integration/specialYogas-v23-wiring.test.ts](tests/integration/specialYogas-v23-wiring.test.ts) with self-consistency checks (each emission day's distance is verified to match the documented set). Aadal / Vidaal are explicitly **not** cross-checked against DrikPanchang's `/yoga/...` occurrence pages — DrikPanchang publishes no algorithmic rule text and its Aadal/Vidaal page may use the popular Tamil-Vakya weekday-keyed rule instead of the classical distance rule; the disagreement (if any) is by design.
 
 **Effort.** ~1d.
 
@@ -5269,12 +5273,33 @@ affect users who read the translated `festival.name`.
 
 ### Phase 28 Exit Criteria
 
-- All v2.2 / v2.3 / v2.4 features pass DrikPanchang cross-validation (10 cities × 5 dates per feature, ±1 minute tolerance for time windows).
-- No regression in the existing 5,149 tests.
-- `getDailyPanchang` benchmark stays under 1ms even with new fields populated (cache + names-only fast path preserved).
+DrikPanchang parity was the original goal; the actual outcome is a per-feature mix of strict parity, classically-grounded convention divergence, and impedance mismatches where Drik's published format doesn't admit a per-fixture comparison. The criteria below reflect what was actually achieved and asserted in [tests/validation/phase28-cross-verify.test.ts](tests/validation/phase28-cross-verify.test.ts):
+
+**Strict parity (50/50 fixtures, 10 cities × 5 dates, asserted at ±1 min for time windows or exact match for categorical fields):**
+- Madhyahna midpoint
+- Anandadi Yoga name + quality
+- Ganda Mula `active` flag
+- Sunrise / sunset baseline (existing ±3-min convention preserved)
+
+**Classically-grounded convention divergence (asserted as library-internal regression bounds, NOT as Drik agreement; documented in `tests/validation/phase28-cross-verify.test.ts`):**
+- **Pratah / Sayahna Sandhya** — symmetric 48-min muhurta vs Drik's asymmetric 81-min window (Step 28-4 convention note).
+- **Varjyam** — fixed-ghatika nakshatra-start anchor vs Drik's apparent elastic-ghatika sunrise anchor; 7–40 min off on shared windows; single-window contract on transition days (Step 28-2 contract note).
+
+**Soft parity (one-way superset on recognized yoga types):**
+- Special yogas — library detects every yoga DrikPanchang's auspicious/inauspicious panel surfaces under a recognized name; reverse direction permitted.
+- **Aadal / Vidaal explicitly excluded** — Drik publishes no algorithmic rule text; library follows the classical Moon-from-Sun distance rule (Step 28-6 sourcing note).
+
+**Algorithm-only validation (Drik's published format does not admit per-fixture cross-check):**
+- **Tarabala** — Drik's panel is a per-nakshatra band ("Good Tarabalam till X PM for nakshatras N, M, …"). Algorithm verified by 38 unit cases in [tests/unit/tarabala.test.ts](tests/unit/tarabala.test.ts) plus integration wiring tests.
+- **Do Ghati Muhurta** — not on Drik's day-panchang page; the 30-name table at drikpanchang.com/muhurat/daily/do-ghati-muhurat.html is fixed across weekdays. Algorithm verified by [tests/unit/doGhati.test.ts](tests/unit/doGhati.test.ts) — including a per-slot quality pin so reordering the array fails immediately — plus a single-date cross-check for slot start times.
+
+**Engineering invariants (all met):**
+- No regression in the prior test suite — 5,916 tests pass after Phase 28.
+- `getDailyPanchang` keeps the cache + names-only fast path; no new ephemeris calls for users who don't opt into Phase 28 fields (everything new is index-keyed off existing primitives).
 - All new modules pass `npm run test:hermes`.
-- `CHANGELOG.md` updated for each minor release.
-- Both consumer apps (dharmagya + dharmagya-website) can render new fields without code changes (additive to `DailyPanchangResult`).
+- `CHANGELOG.md` updated for v2.2.0 (Phase 28 release).
+- API surface is additive: every Phase 28 field is a new key on `DailyPanchangResult` / `InstantPanchangResult`; consumer apps render them without code changes.
+- New helpers re-exported from `src/index.ts`: `computeTarabala`, `computeVarjyam`, `computeGandaMula`, `computeAnandadiYoga`, `computePanchakaRahita`, `computeDoGhati`, `computeMadhyahna`, `computePratahSandhya`, `computeSayahnaSandhya`.
 
 ---
 

@@ -1,5 +1,5 @@
 import { resolveNakshatraName } from '../i18n/resolver';
-import { TOTAL_NAKSHATRAS } from '../utils/constants';
+import { assertNakshatraIndex } from '../utils/validation';
 import type { Language } from '../types/options';
 import type { GandaMulaInfo } from '../types/elements';
 
@@ -48,15 +48,7 @@ export function computeGandaMula(
   currentNakshatraIndex: number,
   lang: Language = 'en',
 ): GandaMulaInfo {
-  if (
-    !Number.isInteger(currentNakshatraIndex) ||
-    currentNakshatraIndex < 0 ||
-    currentNakshatraIndex >= TOTAL_NAKSHATRAS
-  ) {
-    throw new RangeError(
-      `currentNakshatraIndex must be integer in [0, ${TOTAL_NAKSHATRAS - 1}], got ${currentNakshatraIndex}`,
-    );
-  }
+  assertNakshatraIndex(currentNakshatraIndex, 'currentNakshatraIndex');
 
   const severity = GANDA_MULA_SEVERITY.get(currentNakshatraIndex);
   if (severity === undefined) {

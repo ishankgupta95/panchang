@@ -25,8 +25,9 @@ describe('Ganda Mula wiring — daily panchang', () => {
       expect(r!.gandaMula.severity).toBe(SEVERE_SET.has(sunriseNak) ? 'severe' : 'mild');
     } else {
       expect(r!.gandaMula.active).toBe(false);
-      expect(r!.gandaMula.nakshatraName).toBeUndefined();
-      expect(r!.gandaMula.severity).toBeUndefined();
+      // Inactive narrows to `{ active: false }` — extra keys would violate the
+      // discriminated union; runtime check below pins that.
+      expect(Object.keys(r!.gandaMula).sort()).toEqual(['active']);
     }
   });
 
@@ -38,8 +39,8 @@ describe('Ganda Mula wiring — daily panchang', () => {
       const date = new Date(Date.UTC(2025, 0, 14) + day * 86_400_000);
       const r = getDailyPanchang(date, DELHI, { timezone: 330 });
       if (!r) continue;
-      if (r.gandaMula.severity === 'severe') severeDays++;
-      else if (r.gandaMula.severity === 'mild') mildDays++;
+      if (r.gandaMula.active && r.gandaMula.severity === 'severe') severeDays++;
+      else if (r.gandaMula.active && r.gandaMula.severity === 'mild') mildDays++;
       else inactiveDays++;
     }
     // Moon visits each nakshatra ~1 day per 27-day cycle, so a 30-day sweep
@@ -78,8 +79,9 @@ describe('Ganda Mula wiring — instant panchang', () => {
       expect(r!.gandaMula.severity).toBe(SEVERE_SET.has(nak) ? 'severe' : 'mild');
     } else {
       expect(r!.gandaMula.active).toBe(false);
-      expect(r!.gandaMula.nakshatraName).toBeUndefined();
-      expect(r!.gandaMula.severity).toBeUndefined();
+      // Inactive narrows to `{ active: false }` — extra keys would violate the
+      // discriminated union; runtime check below pins that.
+      expect(Object.keys(r!.gandaMula).sort()).toEqual(['active']);
     }
   });
 

@@ -100,19 +100,19 @@ export interface ChandraBalamInfo {
  *
  * Classical rule (cf. Muhurta-chintamani Ch. 4, BPHS Ch. 71): from the janma
  * nakshatra, the 27 nakshatras divide into nine taras that repeat three times.
- * The cycle, starting with janma itself, is:
+ * The cycle, starting with janma itself, is (`taraIndex` is 0-based):
  *
- *   1. Janma     (auspicious, mild caution)
- *   2. Sampat    (auspicious — wealth)
- *   3. Vipat     (inauspicious — calamity)
- *   4. Kshema    (auspicious — well-being)
- *   5. Pratyari  (inauspicious — obstacles)
- *   6. Sadhaka   (auspicious — accomplishment)
- *   7. Vadha     (inauspicious — destruction)
- *   8. Mitra     (auspicious — friend)
- *   9. Ati-Mitra (auspicious — best friend)
+ *   0. Janma     (auspicious, mild caution)
+ *   1. Sampat    (auspicious — wealth)
+ *   2. Vipat     (inauspicious — calamity)
+ *   3. Kshema    (auspicious — well-being)
+ *   4. Pratyari  (inauspicious — obstacles)
+ *   5. Sadhaka   (auspicious — accomplishment)
+ *   6. Vadha     (inauspicious — destruction)
+ *   7. Mitra     (auspicious — friend)
+ *   8. Ati-Mitra (auspicious — best friend)
  *
- * Three of nine — Vipat (3rd), Pratyari (5th), Vadha (7th) — are classed as
+ * Three of nine — Vipat (2), Pratyari (4), Vadha (6) — are classed as
  * inauspicious; the other six are auspicious. This module reports that binary
  * quality alongside the tara index and name.
  */

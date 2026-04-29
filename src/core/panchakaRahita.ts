@@ -23,6 +23,14 @@ import type { TimePeriod } from '../types/elements';
  * The implementation samples the predicate at the endpoints, and bisects
  * for the crossing time only when the endpoints disagree.
  *
+ * Boundary convention. Each returned slice is half-open `[start, end)` with
+ * `start` being the first instant the Moon is OUTSIDE Panchaka and `end` the
+ * first instant the Moon (re-)enters Panchaka. In the transition cases the
+ * crossing time produced by bisection equals exactly one of the two
+ * endpoints — the convention is therefore consistent regardless of whether
+ * the transition is panchaka→free (slice begins at the crossing) or
+ * free→panchaka (slice ends at the crossing).
+ *
  * @param sunriseUtc       UTC sunrise — start of the Hindu day.
  * @param nextSunriseUtc   UTC of the following day's local sunrise — end of the Hindu day.
  * @param getMoon          Sidereal Moon longitude (degrees, [0, 360)) at a UTC instant.
@@ -70,7 +78,7 @@ function bisectBoundary(
   let hi = hiUtc.getTime();
 
   for (let i = 0; i < MAX_ITERS && hi - lo > TOL_MS; i++) {
-    const mid = (lo + hi) / 2;
+    const mid = Math.floor((lo + hi) / 2);
     if (predicate(new Date(mid)) === startState) lo = mid;
     else hi = mid;
   }

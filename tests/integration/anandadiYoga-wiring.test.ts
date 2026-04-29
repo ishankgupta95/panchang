@@ -6,6 +6,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { getDailyPanchang, getInstantPanchang } from '../../src/core/panchang';
+import { ANANDADI_TABLE, NAKSHATRA_SPAN } from '../../src/utils/constants';
 
 const DELHI = { latitude: 28.6139, longitude: 77.209 };
 const NOON_2026_01_14 = new Date(Date.UTC(2026, 0, 14, 12, 0, 0, 0));
@@ -107,4 +108,27 @@ describe('Anandadi Yoga wiring — DrikPanchang cross-check (Delhi)', () => {
       expect(r!.anandadiYoga.quality).toBe(f.quality);
     });
   }
+});
+
+describe('Anandadi Yoga wiring — all 7 varas covered', () => {
+  // The DrikPanchang fixture set above happens to only sample varas 2–5; that
+  // leaves Sun/Mon/Sat untested. A 14-day Delhi sweep covers every weekday
+  // twice. For each day we re-derive the expected yoga from ANANDADI_TABLE
+  // using the (vara, sunrise-nakshatra) pair the panchang itself reports —
+  // which catches any wiring drift between `getDailyPanchang` and
+  // `computeAnandadiYoga` even though it doesn't pin values against an
+  // external oracle.
+  it('every vara 0..6 produces the table value for its sunrise-nakshatra', () => {
+    const seenVaras = new Set<number>();
+    for (let day = 0; day < 14; day++) {
+      const date = new Date(NOON_2026_01_14.getTime() + day * 86_400_000);
+      const r = getDailyPanchang(date, DELHI, { timezone: 330 });
+      if (!r) continue;
+      const nakshatraIndex = Math.floor(r.siderealMoonAtSunrise / NAKSHATRA_SPAN);
+      const expected = ANANDADI_TABLE[r.vara.index]![nakshatraIndex]!;
+      expect(r.anandadiYoga.index).toBe(expected);
+      seenVaras.add(r.vara.index);
+    }
+    expect(seenVaras).toEqual(new Set([0, 1, 2, 3, 4, 5, 6]));
+  });
 });

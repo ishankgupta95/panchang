@@ -198,9 +198,36 @@ describe('computeAmritKala', () => {
     expect(amrit!.end.getTime() - amrit!.start.getTime()).toBe(48 * 60_000);
   });
 
-  it('returns null for out-of-range nakshatra index', () => {
-    expect(computeAmritKala(ahoSunrise, ahoNextSunrise, -1)).toBeNull();
-    expect(computeAmritKala(ahoSunrise, ahoNextSunrise, 27)).toBeNull();
+  it('throws RangeError for out-of-range nakshatra index', () => {
+    // Aligned with the new Phase 28 functions (Varjyam, GandaMula, Anandadi):
+    // out-of-range indices are programmer errors and throw, leaving `null`
+    // to mean only "no Amrit Kala window today".
+    expect(() => computeAmritKala(ahoSunrise, ahoNextSunrise, -1)).toThrow(RangeError);
+    expect(() => computeAmritKala(ahoSunrise, ahoNextSunrise, 27)).toThrow(RangeError);
+  });
+
+  // The three indices where AMRIT_KALA_OFFSET_GHATIKAS diverges from
+  // VARJYAM_OFFSET_GHATIKAS — pinning them here makes accidental cross-table
+  // copy-paste fail loudly instead of silently shipping wrong windows.
+  it('Rohini (3) → 26 ghatikas → start 06:00 + 10:24 = 16:24', () => {
+    const amrit = computeAmritKala(ahoSunrise, ahoNextSunrise, 3);
+    expect(amrit).not.toBeNull();
+    expect(amrit!.start.getUTCHours()).toBe(16);
+    expect(amrit!.start.getUTCMinutes()).toBe(24);
+  });
+
+  it('Mula (18) → 20 ghatikas → start 06:00 + 8:00 = 14:00', () => {
+    const amrit = computeAmritKala(ahoSunrise, ahoNextSunrise, 18);
+    expect(amrit).not.toBeNull();
+    expect(amrit!.start.getUTCHours()).toBe(14);
+    expect(amrit!.start.getUTCMinutes()).toBe(0);
+  });
+
+  it('Revati (26) → 20 ghatikas → start 06:00 + 8:00 = 14:00', () => {
+    const amrit = computeAmritKala(ahoSunrise, ahoNextSunrise, 26);
+    expect(amrit).not.toBeNull();
+    expect(amrit!.start.getUTCHours()).toBe(14);
+    expect(amrit!.start.getUTCMinutes()).toBe(0);
   });
 });
 

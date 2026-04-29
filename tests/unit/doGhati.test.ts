@@ -167,6 +167,60 @@ describe('computeDoGhati — quality classification', () => {
   });
 });
 
+describe('computeDoGhati — full quality vector pin (per-slot)', () => {
+  // Pins every one of the 30 slots' quality classification against the
+  // DrikPanchang Do Ghati daily table. Reordering or relabelling the
+  // DO_GHATI_QUALITY array in `src/core/doGhati.ts` will fail this test
+  // immediately rather than silently shipping wrong auspicious/inauspicious
+  // labels behind structurally-correct slot counts.
+  const EXPECTED: ReadonlyArray<{ index: number; name: string; quality: 'auspicious' | 'inauspicious' }> = [
+    // Day (0–14)
+    { index:  0, name: 'Rudra',       quality: 'inauspicious' },
+    { index:  1, name: 'Uraga',       quality: 'inauspicious' },
+    { index:  2, name: 'Mitra',       quality: 'auspicious'   },
+    { index:  3, name: 'Pitara',      quality: 'inauspicious' },
+    { index:  4, name: 'Vasu',        quality: 'auspicious'   },
+    { index:  5, name: 'Ambu',        quality: 'auspicious'   },
+    { index:  6, name: 'Vishwedeva',  quality: 'auspicious'   },
+    { index:  7, name: 'Vidhi',       quality: 'auspicious'   },
+    { index:  8, name: 'Brahma',      quality: 'auspicious'   },
+    { index:  9, name: 'Indra',       quality: 'auspicious'   },
+    { index: 10, name: 'Indragni',    quality: 'inauspicious' },
+    { index: 11, name: 'Daitya',      quality: 'inauspicious' },
+    { index: 12, name: 'Varuna',      quality: 'auspicious'   },
+    { index: 13, name: 'Aryama',      quality: 'auspicious'   },
+    { index: 14, name: 'Bhaga',       quality: 'inauspicious' },
+    // Night (15–29)
+    { index: 15, name: 'Ishwara',     quality: 'inauspicious' },
+    { index: 16, name: 'Ajaikapada',  quality: 'inauspicious' },
+    { index: 17, name: 'Ahirbudhnya', quality: 'auspicious'   },
+    { index: 18, name: 'Pusha',       quality: 'auspicious'   },
+    { index: 19, name: 'Ashwini',     quality: 'auspicious'   },
+    { index: 20, name: 'Yama',        quality: 'inauspicious' },
+    { index: 21, name: 'Agni',        quality: 'inauspicious' },
+    { index: 22, name: 'Brahma',      quality: 'auspicious'   },
+    { index: 23, name: 'Chandra',     quality: 'auspicious'   },
+    { index: 24, name: 'Aditi',       quality: 'auspicious'   },
+    { index: 25, name: 'Brihaspati',  quality: 'auspicious'   },
+    { index: 26, name: 'Vishnu',      quality: 'auspicious'   },
+    { index: 27, name: 'Surya',       quality: 'auspicious'   },
+    { index: 28, name: 'Tvashta',     quality: 'auspicious'   },
+    { index: 29, name: 'Samirana',    quality: 'auspicious'   },
+  ];
+
+  const result = computeDoGhati(SUNRISE, SUNSET, NEXT_SUNRISE, nameResolver, qualityNameResolver);
+  const allSlots = [...result.day, ...result.night];
+
+  for (const expected of EXPECTED) {
+    it(`slot ${expected.index} (${expected.name}) → ${expected.quality}`, () => {
+      const slot = allSlots[expected.index]!;
+      expect(slot.index).toBe(expected.index);
+      expect(slot.name).toBe(expected.name);
+      expect(slot.quality).toBe(expected.quality);
+    });
+  }
+});
+
 describe('computeDoGhati — name sequence is fixed (no weekday rotation)', () => {
   // Independence-of-weekday is a stronger statement than the function
   // signature alone (no varaIndex parameter); this test simply documents

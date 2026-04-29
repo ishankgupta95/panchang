@@ -33,6 +33,8 @@ export { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './core/i
 export { computeVarjyam } from './core/varjyam';
 export { computeGandaMula } from './core/gandaMula';
 export { computeAnandadiYoga } from './core/anandadiYoga';
+export { computePanchakaRahita } from './core/panchakaRahita';
+export { computeDoGhati } from './core/doGhati';
 export {
   computeAbhijitMuhurta, computeBrahmaMuhurta,
   computeVijayaMuhurta, computeGodhuliMuhurta,

@@ -1,10 +1,22 @@
 import { getNakshatraIndexAtTime } from './nakshatra';
 import {
-  TOTAL_NAKSHATRAS,
+  GHATIKA_MINUTES,
   VARJYAM_OFFSET_GHATIKAS,
   VARJYAM_DURATION_MINUTES,
 } from '../utils/constants';
+import { assertNakshatraIndex } from '../utils/validation';
 import type { TimePeriod } from '../types/elements';
+
+/**
+ * Lookback window for `findNakshatraStart` bisection. A nakshatra spans
+ * roughly 21–27 hours (Moon's variable speed), so 30 h before any point inside
+ * the current nakshatra reliably sits in a *different* nakshatra — making the
+ * bisection valid. If the Moon is still in `currentIndex` at -30 h, the
+ * upstream longitude source is inconsistent (a single nakshatra cannot span
+ * >27 h); the bisection cannot anchor a valid window and we degrade to the
+ * `null` branch of the public contract.
+ */
+const NAKSHATRA_LOOKBACK_HOURS = 30;
 
 /**
  * Varjyam (also called Vishaghati / Nakshatra Thyajyam) — a forbidden
@@ -42,7 +54,10 @@ import type { TimePeriod } from '../types/elements';
  * @param nextSunriseUtc         UTC of the following day's local sunrise.
  * @param getMoon                Sidereal Moon longitude (degrees) at a UTC instant.
  * @returns                      The Varjyam `TimePeriod`, or `null` when the
- *                               computed window has no overlap with the Hindu day.
+ *                               computed window has no overlap with the Hindu day,
+ *                               or when the nakshatra-start anchor cannot be
+ *                               located within {@link NAKSHATRA_LOOKBACK_HOURS}
+ *                               (indicates an upstream longitude inconsistency).
  */
 export function computeVarjyam(
   currentNakshatraIndex: number,
@@ -50,24 +65,17 @@ export function computeVarjyam(
   nextSunriseUtc: Date,
   getMoon: (d: Date) => number,
 ): TimePeriod | null {
-  if (
-    !Number.isInteger(currentNakshatraIndex) ||
-    currentNakshatraIndex < 0 ||
-    currentNakshatraIndex >= TOTAL_NAKSHATRAS
-  ) {
-    throw new RangeError(
-      `currentNakshatraIndex must be integer in [0, ${TOTAL_NAKSHATRAS - 1}], got ${currentNakshatraIndex}`,
-    );
-  }
+  assertNakshatraIndex(currentNakshatraIndex, 'currentNakshatraIndex');
 
   const nakshatraStartUtc = findNakshatraStart(
     sunriseUtc,
     currentNakshatraIndex,
     (d) => getNakshatraIndexAtTime(d, getMoon),
   );
+  if (nakshatraStartUtc === null) return null;
 
   const offsetGhatikas = VARJYAM_OFFSET_GHATIKAS[currentNakshatraIndex]!;
-  const offsetMs = offsetGhatikas * 24 * 60_000;
+  const offsetMs = offsetGhatikas * GHATIKA_MINUTES * 60_000;
   const varjyamStart = new Date(nakshatraStartUtc.getTime() + offsetMs);
   const varjyamEnd = new Date(varjyamStart.getTime() + VARJYAM_DURATION_MINUTES * 60_000);
 
@@ -84,28 +92,31 @@ export function computeVarjyam(
 /**
  * Locate the leftmost UTC moment the Moon was already inside `currentIndex`.
  *
- * A nakshatra spans roughly 21–27 hours (Moon's variable speed), so 30 h
- * back from any point inside the current nakshatra reliably sits in a
- * different nakshatra — making bisection valid. We search for the
- * `bisect_left` of "Moon-index === currentIndex" over the [-30h, sunrise]
- * window. Tolerance: ~30 s.
+ * Bisects "Moon-index === currentIndex" over [sunrise − NAKSHATRA_LOOKBACK_HOURS,
+ * sunrise]. Tolerance: ~30 s. Operates on integer milliseconds; only the
+ * returned anchor is materialised as a Date.
+ *
+ * Returns `null` when the Moon is still in `currentIndex` at the lookback
+ * boundary — astronomically impossible (a single nakshatra cannot span >27 h),
+ * so this branch indicates inconsistent upstream longitude data. The caller
+ * surfaces it as the `null` branch of the Varjyam contract rather than
+ * throwing, since `null` already means "no Varjyam window to report".
  */
 function findNakshatraStart(
   sunriseUtc: Date,
   currentIndex: number,
   getIndexAt: (d: Date) => number,
-): Date {
+): Date | null {
   const TOL_MS = 30_000;
   const MAX_ITERS = 30;
-  let lo = sunriseUtc.getTime() - 30 * 3600_000;
+  const lookbackMs = NAKSHATRA_LOOKBACK_HOURS * 3600_000;
+  let lo = sunriseUtc.getTime() - lookbackMs;
   let hi = sunriseUtc.getTime();
 
-  // Defensive: if 30 h back is still currentIndex, the Moon's been in this
-  // nakshatra longer than astronomically possible — fall back to lo.
-  if (getIndexAt(new Date(lo)) === currentIndex) return new Date(lo);
+  if (getIndexAt(new Date(lo)) === currentIndex) return null;
 
   for (let i = 0; i < MAX_ITERS && hi - lo > TOL_MS; i++) {
-    const mid = (lo + hi) / 2;
+    const mid = Math.floor((lo + hi) / 2);
     if (getIndexAt(new Date(mid)) === currentIndex) hi = mid;
     else lo = mid;
   }
