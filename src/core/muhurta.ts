@@ -166,34 +166,49 @@ export function computeMadhyahna(sunrise: Date, sunset: Date): TimePeriod {
 }
 
 /**
- * Pratah Sandhya: dawn-twilight ritual window — 24 min before sunrise to
- * 24 min after sunrise (one classical muhurta = 48 min, symmetric about
- * sunrise). The Smarta-prayoga sandhyavandanam window per Dharmashastra.
+ * Pratah Sandhya: dawn-twilight ritual window — three nighttime ghatikas
+ * ending at sunrise. Width = `nightDuration / 10` (where `nightDuration` is
+ * sunset → nextSunrise, and one nighttime ghatika = `nightDuration / 30`).
  *
- * @param sunrise Sunrise UTC Date.
- * @returns       `{ start, end }` UTC Dates spanning sunrise ±24 min.
+ * Matches DrikPanchang's published Pratah Sandhya. The window is asymmetric:
+ * it begins ~3 ghatikas before sunrise and ends *at* sunrise — the classical
+ * Smarta-prayoga sandhyavandanam convention as rendered by DrikPanchang.
+ *
+ * @param sunrise      Sunrise UTC Date.
+ * @param sunset       Sunset UTC Date (used with `nextSunrise` to derive the
+ *                     night length that scales the sandhya).
+ * @param nextSunrise  Next day's sunrise UTC Date.
+ * @returns            `{ start, end }` UTC Dates with `end === sunrise`.
  */
-export function computePratahSandhya(sunrise: Date): TimePeriod {
-  const halfMs = 24 * 60_000;
+export function computePratahSandhya(
+  sunrise: Date,
+  sunset: Date,
+  nextSunrise: Date,
+): TimePeriod {
+  const widthMs = (nextSunrise.getTime() - sunset.getTime()) / 10;
   return {
-    start: new Date(sunrise.getTime() - halfMs),
-    end: new Date(sunrise.getTime() + halfMs),
+    start: new Date(sunrise.getTime() - widthMs),
+    end: sunrise,
   };
 }
 
 /**
- * Sayahna Sandhya: dusk-twilight ritual window — 24 min before sunset to
- * 24 min after sunset (one classical muhurta = 48 min, symmetric about
- * sunset). Counterpart of Pratah Sandhya for the evening sandhyavandanam.
+ * Sayahna Sandhya: dusk-twilight ritual window — three nighttime ghatikas
+ * starting at sunset. Width = `nightDuration / 10`. Matches DrikPanchang's
+ * published Sayahna Sandhya (asymmetric, begins *at* sunset).
  *
- * @param sunset Sunset UTC Date.
- * @returns      `{ start, end }` UTC Dates spanning sunset ±24 min.
+ * @param sunset       Sunset UTC Date.
+ * @param nextSunrise  Next day's sunrise UTC Date.
+ * @returns            `{ start, end }` UTC Dates with `start === sunset`.
  */
-export function computeSayahnaSandhya(sunset: Date): TimePeriod {
-  const halfMs = 24 * 60_000;
+export function computeSayahnaSandhya(
+  sunset: Date,
+  nextSunrise: Date,
+): TimePeriod {
+  const widthMs = (nextSunrise.getTime() - sunset.getTime()) / 10;
   return {
-    start: new Date(sunset.getTime() - halfMs),
-    end: new Date(sunset.getTime() + halfMs),
+    start: sunset,
+    end: new Date(sunset.getTime() + widthMs),
   };
 }
 

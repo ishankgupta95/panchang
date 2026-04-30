@@ -36,16 +36,20 @@ describe('Madhyahna / Sandhya wiring — daily panchang', () => {
     expect(centerMs).toBe(noonMs);
   });
 
-  it('pratah sandhya straddles sunrise', () => {
+  it('pratah sandhya ends at sunrise and is 3 night-ghatikas wide', () => {
+    expect(r.pratahSandhya.end.getTime()).toBe(r.sunrise.getTime());
     expect(r.pratahSandhya.start.getTime()).toBeLessThan(r.sunrise.getTime());
-    expect(r.pratahSandhya.end.getTime()).toBeGreaterThan(r.sunrise.getTime());
-    expect(r.pratahSandhya.end.getTime() - r.pratahSandhya.start.getTime()).toBe(48 * 60_000);
+    const widthMs = r.pratahSandhya.end.getTime() - r.pratahSandhya.start.getTime();
+    const expectedMs = r.ratrimanaMinutes * 60_000 / 10;
+    expect(Math.abs(widthMs - expectedMs)).toBeLessThan(60_000);
   });
 
-  it('sayahna sandhya straddles sunset', () => {
-    expect(r.sayahnaSandhya.start.getTime()).toBeLessThan(r.sunset.getTime());
+  it('sayahna sandhya starts at sunset and is 3 night-ghatikas wide', () => {
+    expect(r.sayahnaSandhya.start.getTime()).toBe(r.sunset.getTime());
     expect(r.sayahnaSandhya.end.getTime()).toBeGreaterThan(r.sunset.getTime());
-    expect(r.sayahnaSandhya.end.getTime() - r.sayahnaSandhya.start.getTime()).toBe(48 * 60_000);
+    const widthMs = r.sayahnaSandhya.end.getTime() - r.sayahnaSandhya.start.getTime();
+    const expectedMs = r.ratrimanaMinutes * 60_000 / 10;
+    expect(Math.abs(widthMs - expectedMs)).toBeLessThan(60_000);
   });
 
   it('dinamanaMinutes equals dayDurationMinutes', () => {
@@ -73,17 +77,15 @@ describe('Madhyahna / Sandhya wiring — multi-city sweep', () => {
   ];
 
   for (const [name, loc, tz] of cities) {
-    it(`${name}: pratah sandhya midpoint == sunrise (within 1s)`, () => {
+    it(`${name}: pratah sandhya end == sunrise`, () => {
       const r = getDailyPanchang(NOON_2025_01_14, loc, { timezone: tz })!;
       expect(r).not.toBeNull();
-      const midpointMs = (r.pratahSandhya.start.getTime() + r.pratahSandhya.end.getTime()) / 2;
-      expect(Math.abs(midpointMs - r.sunrise.getTime())).toBeLessThan(1000);
+      expect(r.pratahSandhya.end.getTime()).toBe(r.sunrise.getTime());
     });
 
-    it(`${name}: sayahna sandhya midpoint == sunset (within 1s)`, () => {
+    it(`${name}: sayahna sandhya start == sunset`, () => {
       const r = getDailyPanchang(NOON_2025_01_14, loc, { timezone: tz })!;
-      const midpointMs = (r.sayahnaSandhya.start.getTime() + r.sayahnaSandhya.end.getTime()) / 2;
-      expect(Math.abs(midpointMs - r.sunset.getTime())).toBeLessThan(1000);
+      expect(r.sayahnaSandhya.start.getTime()).toBe(r.sunset.getTime());
     });
 
     it(`${name}: dinamana + ratrimana ≈ 1440 min`, () => {
@@ -93,11 +95,11 @@ describe('Madhyahna / Sandhya wiring — multi-city sweep', () => {
   }
 });
 
-describe('Pratah Sandhya cross-check (DrikPanchang-style, ±2 min tolerance)', () => {
-  // Pratah Sandhya midpoint == sunrise, so cross-checking it is equivalent
-  // to cross-checking sunrise itself. Reference values are DrikPanchang's
-  // local sunrise for 2025-01-14 (Makar Sankranti). Tolerance ±2 min absorbs
-  // minor differences in horizon refraction model.
+describe('Sandhya cross-check (DrikPanchang-style, ±2 min tolerance)', () => {
+  // Reference values are DrikPanchang's local sunrise + Sandhya start times
+  // for 2025-01-14 (Makar Sankranti). Pratah Sandhya ends at sunrise and is
+  // (nightDuration / 10) wide; cross-checking the start time exercises both
+  // sunrise accuracy and the night-duration computation.
   const cases: Array<{
     city: string;
     loc: { latitude: number; longitude: number };
@@ -112,16 +114,12 @@ describe('Pratah Sandhya cross-check (DrikPanchang-style, ±2 min tolerance)', (
   ];
 
   for (const { city, loc, tz, sunriseLocalHHMM } of cases) {
-    it(`${city}: Pratah Sandhya midpoint within ±2 min of expected sunrise`, () => {
+    it(`${city}: Pratah Sandhya end within ±2 min of expected sunrise`, () => {
       const r = getDailyPanchang(NOON_2025_01_14, loc, { timezone: tz })!;
       expect(r).not.toBeNull();
-      const midpointMs = (r.pratahSandhya.start.getTime() + r.pratahSandhya.end.getTime()) / 2;
-      const midpoint = new Date(midpointMs);
-      // local clock from offset-shifted Date (read via getUTC*)
-      const localHour = midpoint.getUTCHours();
-      const localMinute = midpoint.getUTCMinutes();
+      const end = r.pratahSandhya.end;
       const expectedMin = sunriseLocalHHMM[0] * 60 + sunriseLocalHHMM[1];
-      const actualMin = localHour * 60 + localMinute;
+      const actualMin = end.getUTCHours() * 60 + end.getUTCMinutes();
       expect(Math.abs(actualMin - expectedMin)).toBeLessThanOrEqual(2);
     });
   }

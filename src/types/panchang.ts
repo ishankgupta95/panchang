@@ -51,10 +51,17 @@ export interface DailyPanchangResult {
   moonset: Date | null;
   panchaka: boolean;
   /**
-   * Panchaka Rahita Muhurta — slices of the Hindu day FREE of Panchaka
-   * (i.e. Moon outside the last five nakshatras). Empty when Panchaka
-   * pervades the entire day; single-element when the Moon never enters /
-   * leaves Panchaka or transitions exactly once during the day.
+   * Slices of the Hindu day during which the Moon is OUTSIDE Panchaka
+   * (i.e. outside the last five nakshatras: Dhanishtha 3rd–4th pada through
+   * Revati). Because the Moon moves monotonically, this is at most ONE slice:
+   * empty `[]` when Panchaka pervades the day, the full `[sunrise, nextSunrise]`
+   * when it doesn't, and a single half-day slice on transition days.
+   *
+   * **Not the same as DrikPanchang's "Panchak Rahit Muhurat" panel.** Drik
+   * publishes a multi-window auspicious-sub-slot derivation (Roga / Raja /
+   * Mrityu / Agni / Chora / Panchak slot exclusion). This field exposes only
+   * the broader Moon-out-of-Panchaka envelope; consumers wanting Drik-shaped
+   * sub-windows should compose this with the inauspicious-period overlay.
    */
   panchakaRahita: TimePeriod[];
   /**
@@ -87,9 +94,15 @@ export interface DailyPanchangResult {
   amritKala: TimePeriod | null;
   /** Madhyahna — solar noon as a ±24-min ritual window (one classical muhurta wide). */
   madhyahna: TimePeriod;
-  /** Pratah Sandhya — dawn-twilight ritual window (sunrise ±24 min). */
+  /**
+   * Pratah Sandhya — dawn-twilight ritual window. Asymmetric: ends *at* sunrise,
+   * width = `nightDuration / 10` (three nighttime ghatikas). Matches DrikPanchang.
+   */
   pratahSandhya: TimePeriod;
-  /** Sayahna Sandhya — dusk-twilight ritual window (sunset ±24 min). */
+  /**
+   * Sayahna Sandhya — dusk-twilight ritual window. Asymmetric: starts *at* sunset,
+   * width = `nightDuration / 10` (three nighttime ghatikas). Matches DrikPanchang.
+   */
   sayahnaSandhya: TimePeriod;
   /** Dinamana — classical alias of `dayDurationMinutes` (sunrise → sunset). */
   dinamanaMinutes: number;

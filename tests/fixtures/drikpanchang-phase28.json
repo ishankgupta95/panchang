@@ -17,17 +17,6 @@
       "sayahnaSandhyaEndHHMM": "19:07",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": true,
-      "gandaMulaStartHHMM": "00:00",
-      "gandaMulaEndHHMM": "23:59",
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:15", "endHHMM": "07:16" },
-        { "startHHMM": "08:58", "endHHMM": "10:25" },
-        { "startHHMM": "13:26", "endHHMM": "15:21" },
-        { "startHHMM": "17:36", "endHHMM": "19:56" },
-        { "startHHMM": "22:13", "endHHMM": "00:30+1" },
-        { "startHHMM": "02:49+1", "endHHMM": "05:08+1" },
-        { "startHHMM": "05:47+1", "endHHMM": "07:15+1" }
-      ],
       "auspiciousYogas": [],
       "inauspiciousYogas": ["Vidaal Yoga"]
     },
@@ -51,16 +40,6 @@
       "sayahnaSandhyaEndHHMM": "19:54",
       "anandadiYogaName": "Padma",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:32", "endHHMM": "09:27" },
-        { "startHHMM": "11:42", "endHHMM": "14:02" },
-        { "startHHMM": "15:22", "endHHMM": "16:20" },
-        { "startHHMM": "20:55", "endHHMM": "22:31" },
-        { "startHHMM": "23:14", "endHHMM": "01:18+1" },
-        { "startHHMM": "03:00+1", "endHHMM": "04:28+1" }
-      ],
       "auspiciousYogas": ["Brahma", "Indra"],
       "inauspiciousYogas": ["Vishti", "Vidaal Yoga", "Baana", "Bhadra", "Panchaka"]
     }
@@ -83,17 +62,6 @@
       "sayahnaSandhyaEndHHMM": "20:12",
       "anandadiYogaName": "Shrivatsa",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:50", "endHHMM": "09:05" },
-        { "startHHMM": "13:42", "endHHMM": "15:59" },
-        { "startHHMM": "18:18", "endHHMM": "20:37" },
-        { "startHHMM": "22:41", "endHHMM": "00:23+1" },
-        { "startHHMM": "01:50+1", "endHHMM": "03:15+1" },
-        { "startHHMM": "03:15+1", "endHHMM": "04:08+1" },
-        { "startHHMM": "04:51+1", "endHHMM": "05:10+1" }
-      ],
       "auspiciousYogas": ["Ravi Yoga"],
       "inauspiciousYogas": ["Aadal Yoga", "Vidaal Yoga"]
     }
@@ -116,17 +84,6 @@
       "sayahnaSandhyaEndHHMM": "20:09",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "05:47", "endHHMM": "06:22" },
-        { "startHHMM": "08:00", "endHHMM": "08:40" },
-        { "startHHMM": "10:56", "endHHMM": "12:26" },
-        { "startHHMM": "13:15", "endHHMM": "15:34" },
-        { "startHHMM": "19:20", "endHHMM": "20:48" },
-        { "startHHMM": "23:48", "endHHMM": "01:43+1" },
-        { "startHHMM": "04:54+1", "endHHMM": "05:48+1" }
-      ],
       "auspiciousYogas": ["Abhijit Muhurta", "Vijaya Muhurta"],
       "inauspiciousYogas": ["Vidaal Yoga", "Baana", "Bhadra"]
     }
@@ -149,17 +106,6 @@
       "sayahnaSandhyaEndHHMM": "18:51",
       "anandadiYogaName": "Matanga",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:36", "endHHMM": "07:33" },
-        { "startHHMM": "09:52", "endHHMM": "10:35" },
-        { "startHHMM": "11:56", "endHHMM": "13:38" },
-        { "startHHMM": "16:30", "endHHMM": "18:06" },
-        { "startHHMM": "22:16", "endHHMM": "00:36+1" },
-        { "startHHMM": "02:54+1", "endHHMM": "03:55+1" },
-        { "startHHMM": "05:10+1", "endHHMM": "06:37+1" }
-      ],
       "auspiciousYogas": ["Vaidhriti", "Brahma Muhurta"],
       "inauspiciousYogas": ["Vidaal Yoga", "Baana"]
     }
@@ -182,17 +128,6 @@
       "sayahnaSandhyaEndHHMM": "19:39",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": true,
-      "gandaMulaStartHHMM": "00:00",
-      "gandaMulaEndHHMM": "23:59",
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:15", "endHHMM": "07:15" },
-        { "startHHMM": "09:04", "endHHMM": "10:41" },
-        { "startHHMM": "13:59", "endHHMM": "15:59" },
-        { "startHHMM": "18:11", "endHHMM": "20:16" },
-        { "startHHMM": "22:33", "endHHMM": "00:40+1" },
-        { "startHHMM": "02:51+1", "endHHMM": "05:05+1" },
-        { "startHHMM": "05:47+1", "endHHMM": "07:15+1" }
-      ],
       "auspiciousYogas": [],
       "inauspiciousYogas": ["Vidaal Yoga"]
     },
@@ -216,16 +151,6 @@
       "sayahnaSandhyaEndHHMM": "20:04",
       "anandadiYogaName": "Padma",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "08:05", "endHHMM": "10:05" },
-        { "startHHMM": "12:17", "endHHMM": "14:31" },
-        { "startHHMM": "15:22", "endHHMM": "16:39" },
-        { "startHHMM": "20:57", "endHHMM": "22:31" },
-        { "startHHMM": "23:11", "endHHMM": "01:17+1" },
-        { "startHHMM": "03:07+1", "endHHMM": "04:43+1" }
-      ],
       "auspiciousYogas": ["Brahma", "Indra"],
       "inauspiciousYogas": ["Vidaal Yoga", "Bhadra", "Panchaka"]
     }
@@ -248,17 +173,6 @@
       "sayahnaSandhyaEndHHMM": "20:15",
       "anandadiYogaName": "Shrivatsa",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:28", "endHHMM": "09:40" },
-        { "startHHMM": "14:02", "endHHMM": "16:08" },
-        { "startHHMM": "18:20", "endHHMM": "20:34" },
-        { "startHHMM": "22:40", "endHHMM": "00:29+1" },
-        { "startHHMM": "02:06+1", "endHHMM": "03:40+1" },
-        { "startHHMM": "03:40+1", "endHHMM": "04:08+1" },
-        { "startHHMM": "05:10+1", "endHHMM": "05:24+1" }
-      ],
       "auspiciousYogas": ["Ravi Yoga"],
       "inauspiciousYogas": ["Aadal Yoga", "Vidaal Yoga"]
     }
@@ -281,17 +195,6 @@
       "sayahnaSandhyaEndHHMM": "20:16",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:18", "endHHMM": "06:51" },
-        { "startHHMM": "08:00", "endHHMM": "08:59" },
-        { "startHHMM": "11:06", "endHHMM": "12:26" },
-        { "startHHMM": "13:17", "endHHMM": "15:31" },
-        { "startHHMM": "19:27", "endHHMM": "21:03" },
-        { "startHHMM": "00:21+1", "endHHMM": "02:21+1" },
-        { "startHHMM": "04:54+1", "endHHMM": "06:18+1" }
-      ],
       "auspiciousYogas": ["Vajra", "Siddhi"],
       "inauspiciousYogas": ["Vishti", "Vidaal Yoga", "Dur Muhurtam", "Baana", "Bhadra"]
     }
@@ -314,17 +217,6 @@
       "sayahnaSandhyaEndHHMM": "19:19",
       "anandadiYogaName": "Matanga",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:41", "endHHMM": "07:35" },
-        { "startHHMM": "09:49", "endHHMM": "10:35" },
-        { "startHHMM": "11:55", "endHHMM": "13:44" },
-        { "startHHMM": "16:55", "endHHMM": "18:39" },
-        { "startHHMM": "22:51", "endHHMM": "01:05+1" },
-        { "startHHMM": "03:13+1", "endHHMM": "03:55+1" },
-        { "startHHMM": "05:20+1", "endHHMM": "06:41+1" }
-      ],
       "auspiciousYogas": ["Vaidhriti", "Vishkambha"],
       "inauspiciousYogas": ["Vidaal Yoga", "Baana"]
     }
@@ -347,17 +239,6 @@
       "sayahnaSandhyaEndHHMM": "19:17",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": true,
-      "gandaMulaStartHHMM": "00:00",
-      "gandaMulaEndHHMM": "23:59",
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:35", "endHHMM": "06:35" },
-        { "startHHMM": "08:29", "endHHMM": "10:10" },
-        { "startHHMM": "13:38", "endHHMM": "15:40" },
-        { "startHHMM": "17:52", "endHHMM": "20:01" },
-        { "startHHMM": "22:04", "endHHMM": "00:06+1" },
-        { "startHHMM": "02:12+1", "endHHMM": "04:24+1" },
-        { "startHHMM": "05:47+1", "endHHMM": "06:35+1" }
-      ],
       "auspiciousYogas": ["Vriddhi", "Dhruva"],
       "inauspiciousYogas": ["Vidaal Yoga", "Baana"]
     },
@@ -381,17 +262,6 @@
       "sayahnaSandhyaEndHHMM": "19:31",
       "anandadiYogaName": "Padma",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:44", "endHHMM": "09:46" },
-        { "startHHMM": "11:58", "endHHMM": "14:07" },
-        { "startHHMM": "15:22", "endHHMM": "16:10" },
-        { "startHHMM": "20:19", "endHHMM": "22:30" },
-        { "startHHMM": "22:31", "endHHMM": "00:37+1" },
-        { "startHHMM": "02:31+1", "endHHMM": "04:13+1" },
-        { "startHHMM": "05:52+1", "endHHMM": "05:56+1" }
-      ],
       "auspiciousYogas": ["Brahma", "Indra"],
       "inauspiciousYogas": ["Vishti", "Vidaal Yoga", "Panchaka"]
     }
@@ -414,17 +284,6 @@
       "sayahnaSandhyaEndHHMM": "19:37",
       "anandadiYogaName": "Shrivatsa",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:09", "endHHMM": "09:21" },
-        { "startHHMM": "13:33", "endHHMM": "15:35" },
-        { "startHHMM": "17:41", "endHHMM": "19:53" },
-        { "startHHMM": "22:00", "endHHMM": "23:54" },
-        { "startHHMM": "01:35+1", "endHHMM": "03:15+1" },
-        { "startHHMM": "03:15+1", "endHHMM": "05:03+1" },
-        { "startHHMM": "05:03+1", "endHHMM": "05:10+1" }
-      ],
       "auspiciousYogas": ["Ravi Yoga"],
       "inauspiciousYogas": ["Aadal Yoga", "Vidaal Yoga", "Baana"]
     }
@@ -447,17 +306,6 @@
       "sayahnaSandhyaEndHHMM": "19:41",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "05:56", "endHHMM": "06:27" },
-        { "startHHMM": "08:00", "endHHMM": "08:30" },
-        { "startHHMM": "10:32", "endHHMM": "12:26" },
-        { "startHHMM": "12:39", "endHHMM": "14:50" },
-        { "startHHMM": "18:51", "endHHMM": "20:33" },
-        { "startHHMM": "00:00+1", "endHHMM": "02:03+1" },
-        { "startHHMM": "04:54+1", "endHHMM": "05:56+1" }
-      ],
       "auspiciousYogas": ["Vajra", "Siddhi"],
       "inauspiciousYogas": ["Vidaal Yoga", "Bhadra"]
     }
@@ -480,17 +328,6 @@
       "sayahnaSandhyaEndHHMM": "18:55",
       "anandadiYogaName": "Matanga",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:04", "endHHMM": "06:56" },
-        { "startHHMM": "09:08", "endHHMM": "10:35" },
-        { "startHHMM": "11:15", "endHHMM": "13:09" },
-        { "startHHMM": "16:30", "endHHMM": "18:18" },
-        { "startHHMM": "22:32", "endHHMM": "00:41+1" },
-        { "startHHMM": "02:44+1", "endHHMM": "04:46+1" },
-        { "startHHMM": "04:46+1", "endHHMM": "06:04+1" }
-      ],
       "auspiciousYogas": ["Indra"],
       "inauspiciousYogas": ["Vidaal Yoga", "Baana", "Dur Muhurtam"]
     }
@@ -513,17 +350,6 @@
       "sayahnaSandhyaEndHHMM": "18:32",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": true,
-      "gandaMulaStartHHMM": "00:00",
-      "gandaMulaEndHHMM": "23:59",
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:19", "endHHMM": "06:19" },
-        { "startHHMM": "08:06", "endHHMM": "09:40" },
-        { "startHHMM": "12:51", "endHHMM": "14:50" },
-        { "startHHMM": "17:03", "endHHMM": "19:19" },
-        { "startHHMM": "21:30", "endHHMM": "23:40" },
-        { "startHHMM": "01:54+1", "endHHMM": "04:10+1" },
-        { "startHHMM": "05:47+1", "endHHMM": "06:19+1" }
-      ],
       "auspiciousYogas": ["Vriddhi", "Dhruva"],
       "inauspiciousYogas": ["Vidaal Yoga", "Baana"]
     },
@@ -547,16 +373,6 @@
       "sayahnaSandhyaEndHHMM": "19:05",
       "anandadiYogaName": "Padma",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:58", "endHHMM": "08:56" },
-        { "startHHMM": "11:09", "endHHMM": "13:25" },
-        { "startHHMM": "15:22", "endHHMM": "15:36" },
-        { "startHHMM": "20:01", "endHHMM": "22:16" },
-        { "startHHMM": "22:31", "endHHMM": "00:22+1" },
-        { "startHHMM": "02:08+1", "endHHMM": "03:42+1" }
-      ],
       "auspiciousYogas": ["Brahma", "Indra"],
       "inauspiciousYogas": ["Vidaal Yoga", "Bhadra", "Panchaka"]
     }
@@ -579,17 +395,6 @@
       "sayahnaSandhyaEndHHMM": "19:18",
       "anandadiYogaName": "Shrivatsa",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:19", "endHHMM": "08:32" },
-        { "startHHMM": "12:59", "endHHMM": "15:09" },
-        { "startHHMM": "17:23", "endHHMM": "19:39" },
-        { "startHHMM": "21:44", "endHHMM": "23:31" },
-        { "startHHMM": "01:05+1", "endHHMM": "02:36+1" },
-        { "startHHMM": "02:36+1", "endHHMM": "04:08+1" },
-        { "startHHMM": "04:16+1", "endHHMM": "04:53+1" }
-      ],
       "auspiciousYogas": ["Vajra", "Ravi Yoga", "Siddhi"],
       "inauspiciousYogas": ["Aadal Yoga", "Vidaal Yoga"]
     }
@@ -612,17 +417,6 @@
       "sayahnaSandhyaEndHHMM": "19:18",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "05:12", "endHHMM": "05:45" },
-        { "startHHMM": "07:56", "endHHMM": "08:00" },
-        { "startHHMM": "10:06", "endHHMM": "12:21" },
-        { "startHHMM": "12:26", "endHHMM": "14:36" },
-        { "startHHMM": "18:28", "endHHMM": "20:02" },
-        { "startHHMM": "23:14", "endHHMM": "01:12+1" },
-        { "startHHMM": "04:54+1", "endHHMM": "05:12+1" }
-      ],
       "auspiciousYogas": ["Vajra", "Siddhi"],
       "inauspiciousYogas": ["Vidaal Yoga", "Bhadra"]
     }
@@ -645,17 +439,6 @@
       "sayahnaSandhyaEndHHMM": "18:14",
       "anandadiYogaName": "Matanga",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "05:43", "endHHMM": "06:38" },
-        { "startHHMM": "08:54", "endHHMM": "10:35" },
-        { "startHHMM": "10:59", "endHHMM": "12:46" },
-        { "startHHMM": "15:51", "endHHMM": "17:32" },
-        { "startHHMM": "21:43", "endHHMM": "23:59" },
-        { "startHHMM": "02:10+1", "endHHMM": "03:55+1" },
-        { "startHHMM": "04:20+1", "endHHMM": "05:44+1" }
-      ],
       "auspiciousYogas": ["Vaidhriti", "Vishkambha"],
       "inauspiciousYogas": ["Vidaal Yoga", "Baana"]
     }
@@ -678,17 +461,6 @@
       "sayahnaSandhyaEndHHMM": "19:28",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": true,
-      "gandaMulaStartHHMM": "00:00",
-      "gandaMulaEndHHMM": "23:59",
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:46", "endHHMM": "06:46" },
-        { "startHHMM": "08:39", "endHHMM": "10:21" },
-        { "startHHMM": "13:49", "endHHMM": "15:51" },
-        { "startHHMM": "18:03", "endHHMM": "20:12" },
-        { "startHHMM": "22:15", "endHHMM": "00:16+1" },
-        { "startHHMM": "02:23+1", "endHHMM": "04:35+1" },
-        { "startHHMM": "05:47+1", "endHHMM": "06:46+1" }
-      ],
       "auspiciousYogas": ["Vriddhi", "Dhruva"],
       "inauspiciousYogas": ["Vidaal Yoga", "Baana"]
     },
@@ -712,16 +484,6 @@
       "sayahnaSandhyaEndHHMM": "19:42",
       "anandadiYogaName": "Padma",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:55", "endHHMM": "09:57" },
-        { "startHHMM": "12:09", "endHHMM": "14:18" },
-        { "startHHMM": "15:22", "endHHMM": "16:21" },
-        { "startHHMM": "20:29", "endHHMM": "22:31" },
-        { "startHHMM": "22:41", "endHHMM": "00:48+1" },
-        { "startHHMM": "02:41+1", "endHHMM": "04:23+1" }
-      ],
       "auspiciousYogas": ["Brahma", "Indra"],
       "inauspiciousYogas": ["Vishti", "Vidaal Yoga", "Panchaka"]
     },
@@ -745,17 +507,6 @@
       "sayahnaSandhyaEndHHMM": "19:48",
       "anandadiYogaName": "Shrivatsa",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:20", "endHHMM": "09:32" },
-        { "startHHMM": "13:44", "endHHMM": "15:45" },
-        { "startHHMM": "17:52", "endHHMM": "20:04" },
-        { "startHHMM": "22:11", "endHHMM": "00:04+1" },
-        { "startHHMM": "01:46+1", "endHHMM": "03:26+1" },
-        { "startHHMM": "03:26+1", "endHHMM": "04:08+1" },
-        { "startHHMM": "05:10+1", "endHHMM": "05:14+1" }
-      ],
       "auspiciousYogas": ["Ravi Yoga"],
       "inauspiciousYogas": ["Aadal Yoga", "Vidaal Yoga", "Baana"]
     }
@@ -778,17 +529,6 @@
       "sayahnaSandhyaEndHHMM": "19:52",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:07", "endHHMM": "06:38" },
-        { "startHHMM": "08:00", "endHHMM": "08:41" },
-        { "startHHMM": "10:42", "endHHMM": "12:26" },
-        { "startHHMM": "12:49", "endHHMM": "15:01" },
-        { "startHHMM": "19:01", "endHHMM": "20:43" },
-        { "startHHMM": "00:11+1", "endHHMM": "02:14+1" },
-        { "startHHMM": "04:54+1", "endHHMM": "06:07+1" }
-      ],
       "auspiciousYogas": ["Vajra", "Siddhi"],
       "inauspiciousYogas": ["Vidaal Yoga", "Bhadra", "Dur Muhurtam"]
     }
@@ -811,17 +551,6 @@
       "sayahnaSandhyaEndHHMM": "19:06",
       "anandadiYogaName": "Matanga",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:14", "endHHMM": "07:07" },
-        { "startHHMM": "09:19", "endHHMM": "10:35" },
-        { "startHHMM": "11:26", "endHHMM": "13:19" },
-        { "startHHMM": "16:41", "endHHMM": "18:29" },
-        { "startHHMM": "22:43", "endHHMM": "00:52+1" },
-        { "startHHMM": "02:55+1", "endHHMM": "03:55+1" },
-        { "startHHMM": "04:56+1", "endHHMM": "06:15+1" }
-      ],
       "auspiciousYogas": ["Indra", "Vaidhriti", "Vishkambha"],
       "inauspiciousYogas": ["Vidaal Yoga", "Baana"]
     }
@@ -844,17 +573,6 @@
       "sayahnaSandhyaEndHHMM": "19:34",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": true,
-      "gandaMulaStartHHMM": "00:00",
-      "gandaMulaEndHHMM": "23:59",
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:23", "endHHMM": "07:23" },
-        { "startHHMM": "09:10", "endHHMM": "10:43" },
-        { "startHHMM": "13:54", "endHHMM": "15:52" },
-        { "startHHMM": "18:05", "endHHMM": "20:16" },
-        { "startHHMM": "22:33", "endHHMM": "00:44+1" },
-        { "startHHMM": "02:58+1", "endHHMM": "05:14+1" },
-        { "startHHMM": "05:47+1", "endHHMM": "07:23+1" }
-      ],
       "auspiciousYogas": ["Vriddhi"],
       "inauspiciousYogas": ["Vidaal Yoga", "Baana"]
     },
@@ -878,16 +596,6 @@
       "sayahnaSandhyaEndHHMM": "20:08",
       "anandadiYogaName": "Padma",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "08:00", "endHHMM": "09:58" },
-        { "startHHMM": "12:12", "endHHMM": "14:28" },
-        { "startHHMM": "15:22", "endHHMM": "16:39" },
-        { "startHHMM": "21:04", "endHHMM": "22:31" },
-        { "startHHMM": "23:20", "endHHMM": "01:26+1" },
-        { "startHHMM": "03:12+1", "endHHMM": "04:45+1" }
-      ],
       "auspiciousYogas": ["Brahma", "Indra"],
       "inauspiciousYogas": ["Vishti", "Vidaal Yoga"]
     },
@@ -911,17 +619,6 @@
       "sayahnaSandhyaEndHHMM": "20:22",
       "anandadiYogaName": "Shrivatsa",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:21", "endHHMM": "09:34" },
-        { "startHHMM": "14:02", "endHHMM": "16:13" },
-        { "startHHMM": "18:27", "endHHMM": "20:43" },
-        { "startHHMM": "22:48", "endHHMM": "00:35+1" },
-        { "startHHMM": "02:08+1", "endHHMM": "03:38+1" },
-        { "startHHMM": "03:38+1", "endHHMM": "04:08+1" },
-        { "startHHMM": "05:10+1", "endHHMM": "05:19+1" }
-      ],
       "auspiciousYogas": ["Ravi Yoga", "Vajra"],
       "inauspiciousYogas": ["Aadal Yoga", "Vidaal Yoga"]
     }
@@ -944,17 +641,6 @@
       "sayahnaSandhyaEndHHMM": "20:22",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:14", "endHHMM": "06:48" },
-        { "startHHMM": "08:00", "endHHMM": "08:59" },
-        { "startHHMM": "11:10", "endHHMM": "12:26" },
-        { "startHHMM": "13:24", "endHHMM": "15:40" },
-        { "startHHMM": "19:32", "endHHMM": "21:05" },
-        { "startHHMM": "00:16+1", "endHHMM": "02:14+1" },
-        { "startHHMM": "04:54+1", "endHHMM": "06:14+1" }
-      ],
       "auspiciousYogas": ["Vajra", "Siddhi"],
       "inauspiciousYogas": ["Vidaal Yoga", "Vishti", "Baana", "Dur Muhurtam"]
     }
@@ -977,17 +663,6 @@
       "sayahnaSandhyaEndHHMM": "19:16",
       "anandadiYogaName": "Matanga",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:47", "endHHMM": "07:42" },
-        { "startHHMM": "09:58", "endHHMM": "10:35" },
-        { "startHHMM": "12:03", "endHHMM": "13:50" },
-        { "startHHMM": "16:54", "endHHMM": "18:34" },
-        { "startHHMM": "22:46", "endHHMM": "01:02+1" },
-        { "startHHMM": "03:13+1", "endHHMM": "03:55+1" },
-        { "startHHMM": "05:24+1", "endHHMM": "06:47+1" }
-      ],
       "auspiciousYogas": ["Vaidhriti", "Vishkambha"],
       "inauspiciousYogas": ["Vidaal Yoga", "Dur Muhurtam", "Baana"]
     }
@@ -1010,17 +685,6 @@
       "sayahnaSandhyaEndHHMM": "19:35",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": true,
-      "gandaMulaStartHHMM": "00:00",
-      "gandaMulaEndHHMM": "23:59",
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:10", "endHHMM": "07:10" },
-        { "startHHMM": "09:00", "endHHMM": "10:37" },
-        { "startHHMM": "13:56", "endHHMM": "15:56" },
-        { "startHHMM": "18:08", "endHHMM": "20:16" },
-        { "startHHMM": "22:29", "endHHMM": "00:35+1" },
-        { "startHHMM": "02:46+1", "endHHMM": "05:00+1" },
-        { "startHHMM": "05:47+1", "endHHMM": "07:10+1" }
-      ],
       "auspiciousYogas": ["Vriddhi"],
       "inauspiciousYogas": ["Bhadra", "Vidaal Yoga", "Dur Muhurtam", "Baana"]
     },
@@ -1044,16 +708,6 @@
       "sayahnaSandhyaEndHHMM": "20:00",
       "anandadiYogaName": "Padma",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "08:02", "endHHMM": "10:02" },
-        { "startHHMM": "12:15", "endHHMM": "14:27" },
-        { "startHHMM": "15:22", "endHHMM": "16:35" },
-        { "startHHMM": "20:52", "endHHMM": "22:31" },
-        { "startHHMM": "23:06", "endHHMM": "01:12+1" },
-        { "startHHMM": "03:02+1", "endHHMM": "04:39+1" }
-      ],
       "auspiciousYogas": ["Brahma", "Indra"],
       "inauspiciousYogas": ["Vishti", "Panchaka"]
     }
@@ -1076,17 +730,6 @@
       "sayahnaSandhyaEndHHMM": "20:10",
       "anandadiYogaName": "Shrivatsa",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:25", "endHHMM": "09:37" },
-        { "startHHMM": "13:58", "endHHMM": "16:04" },
-        { "startHHMM": "18:15", "endHHMM": "20:29" },
-        { "startHHMM": "22:35", "endHHMM": "00:25+1" },
-        { "startHHMM": "02:02+1", "endHHMM": "03:37+1" },
-        { "startHHMM": "03:37+1", "endHHMM": "04:08+1" },
-        { "startHHMM": "05:10+1", "endHHMM": "05:21+1" }
-      ],
       "auspiciousYogas": ["Ravi Yoga", "Siddhi"],
       "inauspiciousYogas": ["Aadal Yoga", "Vidaal Yoga", "Baana"]
     }
@@ -1109,17 +752,6 @@
       "sayahnaSandhyaEndHHMM": "20:12",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:15", "endHHMM": "06:47" },
-        { "startHHMM": "08:00", "endHHMM": "08:55" },
-        { "startHHMM": "11:01", "endHHMM": "12:26" },
-        { "startHHMM": "13:12", "endHHMM": "15:26" },
-        { "startHHMM": "19:22", "endHHMM": "20:59" },
-        { "startHHMM": "00:18+1", "endHHMM": "02:18+1" },
-        { "startHHMM": "04:54+1", "endHHMM": "06:15+1" }
-      ],
       "auspiciousYogas": ["Vajra", "Siddhi"],
       "inauspiciousYogas": ["Vidaal Yoga", "Bhadra"]
     }
@@ -1142,17 +774,6 @@
       "sayahnaSandhyaEndHHMM": "19:16",
       "anandadiYogaName": "Matanga",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:36", "endHHMM": "07:30" },
-        { "startHHMM": "09:44", "endHHMM": "10:35" },
-        { "startHHMM": "11:50", "endHHMM": "13:40" },
-        { "startHHMM": "16:52", "endHHMM": "18:36" },
-        { "startHHMM": "22:49", "endHHMM": "01:01+1" },
-        { "startHHMM": "03:09+1", "endHHMM": "03:55+1" },
-        { "startHHMM": "05:15+1", "endHHMM": "06:36+1" }
-      ],
       "auspiciousYogas": ["Vaidhriti"],
       "inauspiciousYogas": ["Vidaal Yoga", "Dur Muhurtam", "Baana"]
     }
@@ -1175,17 +796,6 @@
       "sayahnaSandhyaEndHHMM": "19:19",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": true,
-      "gandaMulaStartHHMM": "00:00",
-      "gandaMulaEndHHMM": "23:59",
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:50", "endHHMM": "06:50" },
-        { "startHHMM": "08:40", "endHHMM": "10:18" },
-        { "startHHMM": "13:39", "endHHMM": "15:40" },
-        { "startHHMM": "17:52", "endHHMM": "20:04" },
-        { "startHHMM": "22:11", "endHHMM": "00:16+1" },
-        { "startHHMM": "02:26+1", "endHHMM": "04:40+1" },
-        { "startHHMM": "05:47+1", "endHHMM": "06:50+1" }
-      ],
       "auspiciousYogas": ["Vriddhi", "Abhijit Muhurta"],
       "inauspiciousYogas": ["Vidaal Yoga", "Dur Muhurtam", "Baana"]
     },
@@ -1209,16 +819,6 @@
       "sayahnaSandhyaEndHHMM": "19:41",
       "anandadiYogaName": "Padma",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:45", "endHHMM": "09:46" },
-        { "startHHMM": "11:58", "endHHMM": "14:10" },
-        { "startHHMM": "15:22", "endHHMM": "16:17" },
-        { "startHHMM": "20:32", "endHHMM": "22:31" },
-        { "startHHMM": "22:46", "endHHMM": "00:52+1" },
-        { "startHHMM": "02:42+1", "endHHMM": "04:21+1" }
-      ],
       "auspiciousYogas": ["Brahma", "Indra"],
       "inauspiciousYogas": ["Vidaal Yoga", "Bhadra", "Panchaka"]
     },
@@ -1242,17 +842,6 @@
       "sayahnaSandhyaEndHHMM": "19:50",
       "anandadiYogaName": "Shrivatsa",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:09", "endHHMM": "09:21" },
-        { "startHHMM": "13:40", "endHHMM": "15:45" },
-        { "startHHMM": "17:55", "endHHMM": "20:08" },
-        { "startHHMM": "22:15", "endHHMM": "00:05+1" },
-        { "startHHMM": "01:43+1", "endHHMM": "03:19+1" },
-        { "startHHMM": "03:19+1", "endHHMM": "04:08+1" },
-        { "startHHMM": "05:04+1", "endHHMM": "05:10+1" }
-      ],
       "auspiciousYogas": ["Ravi Yoga", "Vijaya Muhurta"],
       "inauspiciousYogas": ["Aadal Yoga", "Vidaal Yoga", "Baana"]
     }
@@ -1275,17 +864,6 @@
       "sayahnaSandhyaEndHHMM": "19:52",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "05:58", "endHHMM": "06:30" },
-        { "startHHMM": "08:00", "endHHMM": "08:37" },
-        { "startHHMM": "10:42", "endHHMM": "12:26" },
-        { "startHHMM": "12:52", "endHHMM": "15:06" },
-        { "startHHMM": "19:02", "endHHMM": "20:41" },
-        { "startHHMM": "00:01+1", "endHHMM": "02:02+1" },
-        { "startHHMM": "04:54+1", "endHHMM": "05:58+1" }
-      ],
       "auspiciousYogas": ["Vajra", "Siddhi", "Abhijit Muhurta", "Vijaya Muhurta"],
       "inauspiciousYogas": ["Vidaal Yoga", "Bhadra", "Dur Muhurtam", "Baana"]
     }
@@ -1308,17 +886,6 @@
       "sayahnaSandhyaEndHHMM": "18:58",
       "anandadiYogaName": "Matanga",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:16", "endHHMM": "07:10" },
-        { "startHHMM": "09:24", "endHHMM": "10:35" },
-        { "startHHMM": "11:30", "endHHMM": "13:20" },
-        { "startHHMM": "16:34", "endHHMM": "18:19" },
-        { "startHHMM": "22:32", "endHHMM": "00:44+1" },
-        { "startHHMM": "02:51+1", "endHHMM": "03:55+1" },
-        { "startHHMM": "04:56+1", "endHHMM": "06:17+1" }
-      ],
       "auspiciousYogas": ["Indra", "Sarvartha Siddhi Yoga", "Amrit Siddhi Yoga", "Dwipushkar Yoga", "Tripushkar Yoga", "Ravi Pushya Yoga", "Guru Pushya Yoga", "Ravi Yoga"],
       "inauspiciousYogas": ["Vidaal Yoga", "Baana", "Panchaka"]
     },
@@ -1342,17 +909,6 @@
       "sayahnaSandhyaEndHHMM": "19:16",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": true,
-      "gandaMulaStartHHMM": "00:00",
-      "gandaMulaEndHHMM": "23:59",
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:17", "endHHMM": "07:18" },
-        { "startHHMM": "09:02", "endHHMM": "10:31" },
-        { "startHHMM": "13:34", "endHHMM": "15:31" },
-        { "startHHMM": "17:45", "endHHMM": "20:04" },
-        { "startHHMM": "22:20", "endHHMM": "00:34+1" },
-        { "startHHMM": "02:52+1", "endHHMM": "05:10+1" },
-        { "startHHMM": "05:47+1", "endHHMM": "07:17+1" }
-      ],
       "auspiciousYogas": ["Vriddhi", "Dhruva"],
       "inauspiciousYogas": ["Vidaal Yoga", "Baana"]
     },
@@ -1376,16 +932,6 @@
       "sayahnaSandhyaEndHHMM": "19:58",
       "anandadiYogaName": "Padma",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:41", "endHHMM": "09:37" },
-        { "startHHMM": "11:51", "endHHMM": "14:10" },
-        { "startHHMM": "15:22", "endHHMM": "16:26" },
-        { "startHHMM": "20:58", "endHHMM": "22:31" },
-        { "startHHMM": "23:16", "endHHMM": "01:20+1" },
-        { "startHHMM": "03:04+1", "endHHMM": "04:33+1" }
-      ],
       "auspiciousYogas": ["Brahma", "Indra"],
       "inauspiciousYogas": ["Vidaal Yoga"]
     },
@@ -1409,17 +955,6 @@
       "sayahnaSandhyaEndHHMM": "20:15",
       "anandadiYogaName": "Shrivatsa",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:00", "endHHMM": "09:14" },
-        { "startHHMM": "13:48", "endHHMM": "16:03" },
-        { "startHHMM": "18:21", "endHHMM": "20:39" },
-        { "startHHMM": "22:43", "endHHMM": "00:27+1" },
-        { "startHHMM": "01:56+1", "endHHMM": "03:23+1" },
-        { "startHHMM": "03:23+1", "endHHMM": "04:08+1" },
-        { "startHHMM": "04:59+1", "endHHMM": "05:10+1" }
-      ],
       "auspiciousYogas": ["Ravi Yoga"],
       "inauspiciousYogas": ["Aadal Yoga", "Vidaal Yoga", "Vajra", "Baana"]
     }
@@ -1442,17 +977,6 @@
       "sayahnaSandhyaEndHHMM": "20:13",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "05:56", "endHHMM": "06:30" },
-        { "startHHMM": "08:00", "endHHMM": "08:46" },
-        { "startHHMM": "11:00", "endHHMM": "12:26" },
-        { "startHHMM": "13:18", "endHHMM": "15:36" },
-        { "startHHMM": "19:24", "endHHMM": "20:53" },
-        { "startHHMM": "23:57", "endHHMM": "01:53+1" },
-        { "startHHMM": "04:54+1", "endHHMM": "05:56+1" }
-      ],
       "auspiciousYogas": ["Vajra", "Siddhi"],
       "inauspiciousYogas": ["Vidaal Yoga", "Bhadra", "Dur Muhurtam", "Baana"]
     }
@@ -1475,17 +999,6 @@
       "sayahnaSandhyaEndHHMM": "18:59",
       "anandadiYogaName": "Matanga",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:39", "endHHMM": "07:36" },
-        { "startHHMM": "09:54", "endHHMM": "10:35" },
-        { "startHHMM": "11:58", "endHHMM": "13:42" },
-        { "startHHMM": "16:38", "endHHMM": "18:15" },
-        { "startHHMM": "22:25", "endHHMM": "00:44+1" },
-        { "startHHMM": "03:00+1", "endHHMM": "03:55+1" },
-        { "startHHMM": "05:14+1", "endHHMM": "06:40+1" }
-      ],
       "auspiciousYogas": ["Vaidhriti", "Vishkambha"],
       "inauspiciousYogas": ["Vidaal Yoga", "Baana"]
     }
@@ -1508,17 +1021,6 @@
       "sayahnaSandhyaEndHHMM": "18:55",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": true,
-      "gandaMulaStartHHMM": "00:00",
-      "gandaMulaEndHHMM": "23:59",
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:57", "endHHMM": "06:57" },
-        { "startHHMM": "08:41", "endHHMM": "10:10" },
-        { "startHHMM": "13:14", "endHHMM": "15:10" },
-        { "startHHMM": "17:25", "endHHMM": "19:44" },
-        { "startHHMM": "21:59", "endHHMM": "00:13+1" },
-        { "startHHMM": "02:31+1", "endHHMM": "04:49+1" },
-        { "startHHMM": "05:47+1", "endHHMM": "06:57+1" }
-      ],
       "auspiciousYogas": ["Vriddhi", "Abhijit"],
       "inauspiciousYogas": ["Vidaal Yoga", "Baana"]
     },
@@ -1542,16 +1044,6 @@
       "sayahnaSandhyaEndHHMM": "19:37",
       "anandadiYogaName": "Padma",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "07:20", "endHHMM": "09:17" },
-        { "startHHMM": "11:31", "endHHMM": "13:50" },
-        { "startHHMM": "15:22", "endHHMM": "16:05" },
-        { "startHHMM": "20:37", "endHHMM": "22:31" },
-        { "startHHMM": "22:55", "endHHMM": "00:59+1" },
-        { "startHHMM": "02:43+1", "endHHMM": "04:12+1" }
-      ],
       "auspiciousYogas": ["Brahma", "Indra"],
       "inauspiciousYogas": ["Vidaal Yoga", "Bhadra", "Panchaka"]
     },
@@ -1575,17 +1067,6 @@
       "sayahnaSandhyaEndHHMM": "19:54",
       "anandadiYogaName": "Shrivatsa",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:39", "endHHMM": "08:54" },
-        { "startHHMM": "13:28", "endHHMM": "15:42" },
-        { "startHHMM": "18:00", "endHHMM": "20:18" },
-        { "startHHMM": "22:22", "endHHMM": "00:06+1" },
-        { "startHHMM": "01:35+1", "endHHMM": "03:02+1" },
-        { "startHHMM": "03:02+1", "endHHMM": "04:08+1" },
-        { "startHHMM": "04:39+1", "endHHMM": "05:10+1" }
-      ],
       "auspiciousYogas": ["Ravi Yoga"],
       "inauspiciousYogas": ["Aadal Yoga", "Vidaal Yoga", "Baana"]
     }
@@ -1608,17 +1089,6 @@
       "sayahnaSandhyaEndHHMM": "19:53",
       "anandadiYogaName": "Kaladanda",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "05:35", "endHHMM": "06:10" },
-        { "startHHMM": "08:00", "endHHMM": "08:25" },
-        { "startHHMM": "10:40", "endHHMM": "12:26" },
-        { "startHHMM": "12:57", "endHHMM": "15:15" },
-        { "startHHMM": "19:03", "endHHMM": "20:32" },
-        { "startHHMM": "23:36", "endHHMM": "01:33+1" },
-        { "startHHMM": "04:54+1", "endHHMM": "05:36+1" }
-      ],
       "auspiciousYogas": ["Vajra", "Siddhi"],
       "inauspiciousYogas": ["Vidaal Yoga", "Dur Muhurtam", "Baana", "Bhadra"]
     }
@@ -1641,17 +1111,6 @@
       "sayahnaSandhyaEndHHMM": "18:39",
       "anandadiYogaName": "Matanga",
       "gandaMulaActive": false,
-      "gandaMulaStartHHMM": null,
-      "gandaMulaEndHHMM": null,
-      "panchakaRahitaWindows": [
-        { "startHHMM": "06:18", "endHHMM": "07:15" },
-        { "startHHMM": "09:33", "endHHMM": "10:35" },
-        { "startHHMM": "11:37", "endHHMM": "13:21" },
-        { "startHHMM": "16:17", "endHHMM": "17:54" },
-        { "startHHMM": "22:05", "endHHMM": "00:24+1" },
-        { "startHHMM": "02:39+1", "endHHMM": "03:55+1" },
-        { "startHHMM": "04:54+1", "endHHMM": "06:19+1" }
-      ],
       "auspiciousYogas": ["Indra", "Vaidhriti"],
       "inauspiciousYogas": ["Vidaal Yoga", "Baana"]
     }

@@ -768,8 +768,8 @@ export function getDailyPanchang(
     Math.floor(siderealMoonAtSunrise / NAKSHATRA_SPAN),
   );
   const madhyahnaWindowUtc = computeMadhyahna(sunriseUtc, sunsetUtc);
-  const pratahSandhyaUtc = computePratahSandhya(sunriseUtc);
-  const sayahnaSandhyaUtc = computeSayahnaSandhya(sunsetUtc);
+  const pratahSandhyaUtc = computePratahSandhya(sunriseUtc, sunsetUtc, nextSunriseUtc);
+  const sayahnaSandhyaUtc = computeSayahnaSandhya(sunsetUtc, nextSunriseUtc);
 
   // ── 8. Convert all UTC dates to local display ────────
   const toLocal = (d: Date) => utcToLocalDisplay(d, offsetMinutes);

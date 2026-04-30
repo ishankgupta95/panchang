@@ -1,13 +1,13 @@
 import type { TimePeriod } from '../types/elements';
 
 /**
- * Panchaka Rahita Muhurta — windows of the Hindu day FREE of Panchaka.
+ * Windows of the Hindu day during which the Moon is OUTSIDE Panchaka.
  *
  * Panchaka is active when the Moon occupies the last five nakshatras (the
  * sidereal range [300°, 360°)): Dhanishtha 3rd–4th pada (≥300°), Shatabhisha,
  * Purva Bhadrapada, Uttara Bhadrapada, and Revati. The complement of that
- * range — sidereal Moon ∈ [0°, 300°) — is Panchaka Rahita and is the
- * classical answer to "when can I begin construction / housewarming today?"
+ * range — sidereal Moon ∈ [0°, 300°) — is the broader "Panchaka Rahita"
+ * envelope used to answer "when is the Moon out of Panchaka today?"
  *
  * The Moon traverses the 60°-wide Panchaka span at ~13°/day, so Panchaka
  * persists for roughly 4–5 consecutive Hindu days at a time. On the
@@ -16,6 +16,12 @@ import type { TimePeriod } from '../types/elements';
  * (Moon in Panchaka all day). On the two transition days per ~four-week
  * cycle there is exactly one boundary crossing within the Hindu day,
  * yielding a single half-day slice.
+ *
+ * Scope note. DrikPanchang's "Panchak Rahit Muhurat" panel publishes a
+ * multi-window slot derivation (Roga / Raja / Mrityu / Agni / Chora /
+ * Panchak exclusion). This function deliberately exposes only the broader
+ * Moon-out-of-Panchaka envelope; the slot-exclusion overlay is left to
+ * consumers (see PLAN.md Step 28-7 sourcing note).
  *
  * Because the Moon moves monotonically forward in longitude over a 24-hour
  * Hindu day and the Panchaka boundaries are at the fixed points 300° and

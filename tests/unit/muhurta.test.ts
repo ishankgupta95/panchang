@@ -266,57 +266,73 @@ describe('computeMadhyahna', () => {
 });
 
 describe('computePratahSandhya', () => {
-  it('is centered exactly on sunrise', () => {
-    const p = computePratahSandhya(sunrise);
-    const centerMs = (p.start.getTime() + p.end.getTime()) / 2;
-    expect(centerMs).toBe(sunrise.getTime());
+  // Symmetric reference day: sunrise 06:00, sunset 18:00, nextSunrise 06:00.
+  // Night = 12h = 720 min → width = 720/10 = 72 min. Window: [04:48, 06:00].
+  const nextSunriseSym = new Date('2024-01-02T06:00:00Z');
+
+  it('ends exactly at sunrise', () => {
+    const p = computePratahSandhya(sunrise, sunset, nextSunriseSym);
+    expect(p.end.getTime()).toBe(sunrise.getTime());
   });
 
-  it('is 48 minutes wide (sunrise ±24 min)', () => {
-    const p = computePratahSandhya(sunrise);
-    expect(p.end.getTime() - p.start.getTime()).toBe(48 * 60_000);
+  it('width = nightDuration / 10 (72 min for a 12h night)', () => {
+    const p = computePratahSandhya(sunrise, sunset, nextSunriseSym);
+    expect(p.end.getTime() - p.start.getTime()).toBe(72 * 60_000);
   });
 
-  it('start is 24 min before sunrise, end is 24 min after', () => {
-    // sunrise = 06:00 → window 05:36 → 06:24
-    const p = computePratahSandhya(sunrise);
-    expect(p.start.getUTCHours()).toBe(5);
-    expect(p.start.getUTCMinutes()).toBe(36);
-    expect(p.end.getUTCHours()).toBe(6);
-    expect(p.end.getUTCMinutes()).toBe(24);
+  it('start is nightDuration/10 before sunrise', () => {
+    // 06:00 − 72min = 04:48
+    const p = computePratahSandhya(sunrise, sunset, nextSunriseSym);
+    expect(p.start.getUTCHours()).toBe(4);
+    expect(p.start.getUTCMinutes()).toBe(48);
   });
 
-  it('window straddles sunrise', () => {
-    const p = computePratahSandhya(sunrise);
-    expect(p.start.getTime()).toBeLessThan(sunrise.getTime());
-    expect(p.end.getTime()).toBeGreaterThan(sunrise.getTime());
+  it('scales with night length (winter → longer night → wider sandhya)', () => {
+    // Delhi-like winter day from the Phase 28 fixtures: sunrise 07:15 (01:45 UTC),
+    // sunset 17:46 (12:16 UTC), nextSunrise ~07:14 next day. Night ≈ 808 min →
+    // width ≈ 80.8 min, matching DrikPanchang's published 81 min for 2026-01-15.
+    const sr = new Date('2026-01-15T01:45:00Z');
+    const ss = new Date('2026-01-15T12:16:00Z');
+    const nsr = new Date('2026-01-16T01:44:00Z');
+    const p = computePratahSandhya(sr, ss, nsr);
+    const widthMin = (p.end.getTime() - p.start.getTime()) / 60_000;
+    const nightMin = (nsr.getTime() - ss.getTime()) / 60_000;
+    expect(widthMin).toBeCloseTo(nightMin / 10, 4);
+    expect(p.end.getTime()).toBe(sr.getTime());
   });
 });
 
 describe('computeSayahnaSandhya', () => {
-  it('is centered exactly on sunset', () => {
-    const s = computeSayahnaSandhya(sunset);
-    const centerMs = (s.start.getTime() + s.end.getTime()) / 2;
-    expect(centerMs).toBe(sunset.getTime());
+  // Symmetric reference day: sunset 18:00, nextSunrise 06:00.
+  // Night = 12h = 720 min → width = 72 min. Window: [18:00, 19:12].
+  const nextSunriseSym = new Date('2024-01-02T06:00:00Z');
+
+  it('starts exactly at sunset', () => {
+    const s = computeSayahnaSandhya(sunset, nextSunriseSym);
+    expect(s.start.getTime()).toBe(sunset.getTime());
   });
 
-  it('is 48 minutes wide (sunset ±24 min)', () => {
-    const s = computeSayahnaSandhya(sunset);
-    expect(s.end.getTime() - s.start.getTime()).toBe(48 * 60_000);
+  it('width = nightDuration / 10 (72 min for a 12h night)', () => {
+    const s = computeSayahnaSandhya(sunset, nextSunriseSym);
+    expect(s.end.getTime() - s.start.getTime()).toBe(72 * 60_000);
   });
 
-  it('start is 24 min before sunset, end is 24 min after', () => {
-    // sunset = 18:00 → window 17:36 → 18:24
-    const s = computeSayahnaSandhya(sunset);
-    expect(s.start.getUTCHours()).toBe(17);
-    expect(s.start.getUTCMinutes()).toBe(36);
-    expect(s.end.getUTCHours()).toBe(18);
-    expect(s.end.getUTCMinutes()).toBe(24);
+  it('end is nightDuration/10 after sunset', () => {
+    // 18:00 + 72min = 19:12
+    const s = computeSayahnaSandhya(sunset, nextSunriseSym);
+    expect(s.end.getUTCHours()).toBe(19);
+    expect(s.end.getUTCMinutes()).toBe(12);
   });
 
-  it('window straddles sunset', () => {
-    const s = computeSayahnaSandhya(sunset);
-    expect(s.start.getTime()).toBeLessThan(sunset.getTime());
-    expect(s.end.getTime()).toBeGreaterThan(sunset.getTime());
+  it('scales with night length and ends ~3 ghatikas after sunset', () => {
+    // Same fixture day as above; night ≈ 808 min → width ≈ 81 min.
+    const sr = new Date('2026-01-15T01:45:00Z');
+    const ss = new Date('2026-01-15T12:16:00Z');
+    const nsr = new Date('2026-01-16T01:44:00Z');
+    const s = computeSayahnaSandhya(ss, nsr);
+    const widthMin = (s.end.getTime() - s.start.getTime()) / 60_000;
+    const nightMin = (nsr.getTime() - ss.getTime()) / 60_000;
+    expect(widthMin).toBeCloseTo(nightMin / 10, 4);
+    expect(s.start.getTime()).toBe(ss.getTime());
   });
 });

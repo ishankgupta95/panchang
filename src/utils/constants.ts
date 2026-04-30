@@ -35,37 +35,29 @@ export const NAKSHATRA_SEARCH_HOURS = 36;
 export const YOGA_SEARCH_HOURS = 36;
 export const KARANA_SEARCH_HOURS = 18;
 
-// ── Time units ────────────────────────────────────────
-/**
- * Minutes per ghatika. 1 ghatika = 1/60 of an ahoratra (sunrise-to-nextSunrise);
- * the canonical 60-ghatika day approximates 24 hours, so 1 ghatika ≈ 24 minutes
- * in the equinoctial sense. Used by Varjyam (offset from nakshatra start) and
- * Amrit Kala (offset from sunrise, scaled to actual day length).
- */
-export const GHATIKA_MINUTES = 24;
-
 // ── Varjyam (Vishaghati / Nakshatra Thyajyam) offsets ─
 //
 // Classical 27-entry table indexed 0 = Ashwini … 26 = Revati. Each value is
-// the offset, in ghatikas (1 ghatika = 24 min), from the nakshatra's START
-// to the BEGINNING of its Varjyam window. The Varjyam window itself is a
-// fixed 4 ghatikas (96 minutes); see `src/core/varjyam.ts`.
+// the offset, in **elastic ghatikas of the nakshatra's own duration**
+// (1 ghatika = nakshatraDuration / 60), from the nakshatra's START to the
+// BEGINNING of its Varjyam window. The Varjyam window itself spans 4
+// elastic ghatikas — therefore ~84–108 min depending on the nakshatra's
+// real duration that day. See `src/core/varjyam.ts`.
 //
 // Source: DrikPanchang (https://www.drikpanchang.com/tutorials/panchang-utilities/nakshatra-thyajyam.html)
 // — the project's parity oracle for Phase 28 (Dainika Parity). Their printed
 // "Tyajya Ghatis" column gives the START..END ghati labels (e.g. Ashwini
 // "51 to 54"); offset elapsed = (start_label − 1), so Ashwini = 50 ghatikas.
-// This matches the values reproduced in regional Telugu/Tamil panchanga
+// The same numerical labels are reproduced in regional Telugu/Tamil panchanga
 // guides that derive from Muhurta-chintamani Ch. 4 and BPHS Ch. 71.
 //
 // NOTE — the Amrit-Kala offset table in `src/core/muhurta.ts`
 // (`AMRIT_KALA_OFFSET_GHATIKAS`) is structurally similar but anchors on
-// SUNRISE rather than nakshatra start, and uses elastic ghatikas (ahoratra/60)
-// rather than fixed 24-min ghatikas. The two arrays are NOT redundant; their
-// values disagree at indices 3 (Rohini), 18 (Mula), and 26 (Revati). Any
-// future edit to either table should update both — the regression test in
-// `tests/unit/varjyam.test.ts` pins both arrays explicitly so a stray copy
-// across the two will fail loudly.
+// SUNRISE rather than nakshatra start, and its ghatikas are elastic to the
+// AHORATRA (sunrise → nextSunrise), not to the nakshatra. The two arrays
+// disagree at indices 3 (Rohini), 18 (Mula), and 26 (Revati); the regression
+// test in `tests/unit/varjyam.test.ts` pins the divergence so a stray
+// cross-table copy fails loudly.
 export const VARJYAM_OFFSET_GHATIKAS: readonly number[] = [
   50, // 0  Ashwini           — Tyajya 51–54
   24, // 1  Bharani           — Tyajya 25–28
@@ -95,9 +87,6 @@ export const VARJYAM_OFFSET_GHATIKAS: readonly number[] = [
   24, // 25 Uttara Bhadrapada — Tyajya 25–28
   30, // 26 Revati            — Tyajya 31–34
 ];
-
-/** Varjyam window length: 4 ghatikas = 96 minutes. */
-export const VARJYAM_DURATION_MINUTES = 96;
 
 // ── Anandadi Yoga (Vara × Nakshatra) ────────────────────
 //

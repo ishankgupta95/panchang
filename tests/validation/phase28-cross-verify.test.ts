@@ -9,32 +9,22 @@
  *
  * ── Feature-level findings (50/50 fixtures) ──────────────────────────────────
  *
- * STRICT MATCH (asserted at ±1 min, library agrees with Drik):
- *   - Madhyahna midpoint            50/50 within ±1 min
- *   - Anandadi Yoga name (English)  50/50 exact
- *   - Ganda Mula active flag        50/50 exact
+ * STRICT MATCH (asserted at ±2 min for time windows, exact for categorical):
  *   - Sunrise / Sunset baseline     50/50 within ±3 min (existing convention)
- *
- * KNOWN CONVENTION DIVERGENCE (algorithm differs from Drik — asserted as
- * library-internal regression bounds, NOT as Drik agreement):
- *
- *   - Pratah Sandhya — library: sunrise±24min (symmetric, 48-min muhurta).
- *     Drik: sunrise-81min → sunrise (asymmetric, ends at sunrise). Library
- *     start lies ~38–57 min AFTER Drik start across the 50 fixtures.
- *
- *   - Sayahna Sandhya — library: sunset±24min (symmetric). Drik: sunset →
- *     sunset+81min (asymmetric, starts at sunset). Library start lies
- *     ~24 min BEFORE Drik start (very tight cluster — exactly the 24-min
- *     half-width offset from sunset).
- *
- *   - Varjyam — library emits the *sunrise-anchored* nakshatra's window
- *     only (single-window contract per `src/core/varjyam.ts:31-38`). On
- *     nakshatra-transition days Drik may render the second nakshatra's
- *     window instead, so the test allows library to return `null` when
- *     Drik shows a non-sunrise-nakshatra Varjyam. When library DOES
- *     return non-null we assert the canonical 96-min duration. The
- *     offset table itself follows BPHS / Muhurta-chintamani; agreement
- *     with Drik on shared (sunrise-nakshatra) windows is 7–40 min off.
+ *   - Madhyahna midpoint            50/50 within ±1 min
+ *   - Pratah Sandhya start + end    50/50 within ±2 min — elastic ghatika
+ *                                     algorithm (width = nightDuration/10,
+ *                                     end == sunrise) matches DrikPanchang
+ *   - Sayahna Sandhya start + end   50/50 within ±2 min — same algorithm,
+ *                                     start == sunset
+ *   - Varjyam window (sunrise-active nakshatra) within ±2 min — elastic
+ *                                     ghatikas of nakshatra duration. Library
+ *                                     returns null on transition days where
+ *                                     Drik picks the second nakshatra (the
+ *                                     single-window contract is an explicit
+ *                                     limitation, not a parity gap).
+ *   - Anandadi Yoga name            50/50 exact
+ *   - Ganda Mula active flag        50/50 exact
  *
  * SOFT MATCH (one-way superset; library output ⊇ recognized Drik names):
  *   Special yogas. Drik's "Auspicious / Inauspicious Yogas" panels lump
@@ -153,9 +143,6 @@ type Phase28Fixture = {
     sayahnaSandhyaEndHHMM: string | null;
     anandadiYogaName: string | null;
     gandaMulaActive: boolean;
-    gandaMulaStartHHMM: string | null;
-    gandaMulaEndHHMM: string | null;
-    panchakaRahitaWindows: { startHHMM: string; endHHMM: string }[];
     auspiciousYogas: string[];
     inauspiciousYogas: string[];
   };
@@ -209,33 +196,48 @@ describe('Phase 28 cross-validation against DrikPanchang (50 fixtures)', () => {
         expect(result.gandaMula.active).toBe(f.expected.gandaMulaActive);
       });
 
-      // ── LIBRARY INVARIANTS (convention divergence — see file header) ──
-      it('Pratah Sandhya is sunrise ±24 min (library convention)', () => {
-        const sr = result.sunrise.getTime();
-        expect(result.pratahSandhya.start.getTime()).toBe(sr - 24 * 60_000);
-        expect(result.pratahSandhya.end.getTime()).toBe(sr + 24 * 60_000);
-      });
-      it('Sayahna Sandhya is sunset ±24 min (library convention)', () => {
-        const ss = result.sunset.getTime();
-        expect(result.sayahnaSandhya.start.getTime()).toBe(ss - 24 * 60_000);
-        expect(result.sayahnaSandhya.end.getTime()).toBe(ss + 24 * 60_000);
-      });
+      // ── STRICT (Sandhya — elastic ghatikas of nighttime, ±2 min vs Drik) ──
+      const SANDHYA_TOL_MIN = 2;
 
-      // Varjyam: library only emits the sunrise-anchored nakshatra's Varjyam
-      // (single-window contract per `src/core/varjyam.ts:31-38`); Drik may
-      // pick the second nakshatra of a transition day. So when Drik shows a
-      // window we accept either non-null OR null-due-to-nakshatra-transition.
-      // When library DOES return non-null we still assert it's a valid
-      // 96-min window inside the Hindu day.
+      if (f.expected.pratahSandhyaStartHHMM && f.expected.pratahSandhyaEndHHMM) {
+        it(`Pratah Sandhya start within ±${SANDHYA_TOL_MIN} min of Drik`, () => {
+          expect(diffMin(result.pratahSandhya.start, f.expected.pratahSandhyaStartHHMM!, f.date))
+            .toBeLessThanOrEqual(SANDHYA_TOL_MIN);
+        });
+        it(`Pratah Sandhya end within ±${SANDHYA_TOL_MIN} min of Drik`, () => {
+          expect(diffMin(result.pratahSandhya.end, f.expected.pratahSandhyaEndHHMM!, f.date))
+            .toBeLessThanOrEqual(SANDHYA_TOL_MIN);
+        });
+      }
+
+      if (f.expected.sayahnaSandhyaStartHHMM && f.expected.sayahnaSandhyaEndHHMM) {
+        it(`Sayahna Sandhya start within ±${SANDHYA_TOL_MIN} min of Drik`, () => {
+          expect(diffMin(result.sayahnaSandhya.start, f.expected.sayahnaSandhyaStartHHMM!, f.date))
+            .toBeLessThanOrEqual(SANDHYA_TOL_MIN);
+        });
+        it(`Sayahna Sandhya end within ±${SANDHYA_TOL_MIN} min of Drik`, () => {
+          expect(diffMin(result.sayahnaSandhya.end, f.expected.sayahnaSandhyaEndHHMM!, f.date))
+            .toBeLessThanOrEqual(SANDHYA_TOL_MIN);
+        });
+      }
+
+      // ── STRICT (Varjyam — elastic ghatikas of nakshatra, ±2 min vs Drik) ──
+      // Library only emits the sunrise-active nakshatra's Varjyam (single-
+      // window contract). On transition days Drik may pick the second
+      // nakshatra; in those cases the library returns `null`. The cross-
+      // verify accepts that ONLY on multi-nakshatra days — a `null` on a
+      // single-nakshatra day where Drik shows a window is a real failure.
       if (f.expected.varjyamStartHHMM && f.expected.varjyamEndHHMM) {
-        it('Varjyam window (when emitted) is the canonical 96 min', () => {
+        it(`Varjyam matches Drik (or null only on transition days)`, () => {
           if (result.varjyam) {
-            const ms = result.varjyam.end.getTime() - result.varjyam.start.getTime();
-            expect(Math.round(ms / 60_000)).toBe(96);
+            expect(diffMin(result.varjyam.start, f.expected.varjyamStartHHMM!, f.date))
+              .toBeLessThanOrEqual(SANDHYA_TOL_MIN);
+            expect(diffMin(result.varjyam.end, f.expected.varjyamEndHHMM!, f.date))
+              .toBeLessThanOrEqual(SANDHYA_TOL_MIN);
           } else {
-            // Library returned null because Drik's Varjyam falls in the
-            // second nakshatra of a transition day. Accept silently.
-            expect(result.varjyam).toBeNull();
+            // Drik published a window but library returned null. Permitted
+            // only on transition days (multiple nakshatras span the Hindu day).
+            expect(result.nakshatras.length).toBeGreaterThan(1);
           }
         });
       }
@@ -283,43 +285,59 @@ describe('Phase 28 cross-validation — aggregate', () => {
     expect(nonNull).toBe(TYPED.length);
   });
 
-  // Convention-divergence regression bounds (see file header). The library
-  // intentionally uses ±24min Sandhya windows; if these magnitudes drift,
-  // either Drik has changed or the library convention has changed.
-  it('Pratah Sandhya divergence vs Drik stays in expected band', () => {
-    const diffs: number[] = [];
+  // Aggregate parity — every fixture's Sandhya start matches Drik within
+  // ±2 min after the Phase 28 algorithm switch (elastic night ghatikas).
+  // A regression that breaks the convention will fail many fixtures here
+  // *and* in the per-fixture sweep above; this aggregate gives a single
+  // headline-number assertion.
+  it('Pratah + Sayahna Sandhya agree with Drik within ±2 min on every fixture', () => {
+    let pratahMaxDiff = 0;
+    let sayahnaMaxDiff = 0;
     for (const f of TYPED) {
-      if (!f.expected.pratahSandhyaStartHHMM) continue;
       const r = getDailyPanchang(noonUtc(f.date), f.location, {
         timezone: f.timezone,
         language: 'en',
       });
       if (r === null) continue;
-      diffs.push(diffMin(r.pratahSandhya.start, f.expected.pratahSandhyaStartHHMM, f.date));
+      if (f.expected.pratahSandhyaStartHHMM) {
+        pratahMaxDiff = Math.max(
+          pratahMaxDiff,
+          diffMin(r.pratahSandhya.start, f.expected.pratahSandhyaStartHHMM, f.date),
+        );
+      }
+      if (f.expected.sayahnaSandhyaStartHHMM) {
+        sayahnaMaxDiff = Math.max(
+          sayahnaMaxDiff,
+          diffMin(r.sayahnaSandhya.start, f.expected.sayahnaSandhyaStartHHMM, f.date),
+        );
+      }
     }
-    const min = Math.min(...diffs);
-    const max = Math.max(...diffs);
-    // Library start is ALWAYS later than Drik start (sunrise-24min vs
-    // sunrise-81min); diff range is roughly 38–57 min.
-    expect(min).toBeGreaterThan(20);
-    expect(max).toBeLessThan(70);
+    expect(pratahMaxDiff).toBeLessThanOrEqual(2);
+    expect(sayahnaMaxDiff).toBeLessThanOrEqual(2);
   });
 
-  it('Sayahna Sandhya divergence vs Drik clusters at ~24 min', () => {
-    const diffs: number[] = [];
+  it('Varjyam (when emitted) agrees with Drik within ±2 min on every fixture', () => {
+    let maxDiff = 0;
+    let emitted = 0;
     for (const f of TYPED) {
-      if (!f.expected.sayahnaSandhyaStartHHMM) continue;
+      if (!f.expected.varjyamStartHHMM || !f.expected.varjyamEndHHMM) continue;
       const r = getDailyPanchang(noonUtc(f.date), f.location, {
         timezone: f.timezone,
         language: 'en',
       });
-      if (r === null) continue;
-      diffs.push(diffMin(r.sayahnaSandhya.start, f.expected.sayahnaSandhyaStartHHMM, f.date));
+      if (r === null || r.varjyam === null) continue;
+      emitted++;
+      maxDiff = Math.max(
+        maxDiff,
+        diffMin(r.varjyam.start, f.expected.varjyamStartHHMM, f.date),
+        diffMin(r.varjyam.end, f.expected.varjyamEndHHMM, f.date),
+      );
     }
-    // Library start = sunset - 24min; Drik start = sunset; tight 23–25 min.
-    for (const d of diffs) {
-      expect(d).toBeGreaterThanOrEqual(22);
-      expect(d).toBeLessThanOrEqual(26);
-    }
+    // We expect a meaningful share of fixtures to emit a Varjyam window;
+    // Drik publishes one for nearly all 50 dates. Anything below ~30 emitted
+    // suggests the single-window contract is dropping more days than the
+    // ~2 transition-days-per-month rate predicts.
+    expect(emitted).toBeGreaterThanOrEqual(30);
+    expect(maxDiff).toBeLessThanOrEqual(2);
   });
 });

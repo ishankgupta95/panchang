@@ -185,7 +185,7 @@ Tithi, Nakshatra, Yoga, Karana, Vara — with transition times throughout the da
 Chandra Masa with Adhika (leap month) detection, both **Purnimanta** (North Indian, default) and **Amanta** (South Indian) systems, Vikram Samvat, Shaka Samvat.
 
 ### Muhurta & Auspicious Timing
-Brahma Muhurta, Abhijit Muhurta, Vijaya Muhurta (11th day-muhurta), Godhuli (sunset muhurta), Nishita (midnight muhurta, used for Shivaratri), **Madhyahna** (solar noon ±24 min ritual window), **Pratah Sandhya** / **Sayahna Sandhya** (dawn / dusk ±24 min twilight windows), nakshatra-keyed Amrit Kala. Choghadiya (16 slots), Gowri Panchangam / Nalla Neram (16 slots), Hora (24 planetary hours), Dur Muhurta (2 inauspicious windows), **Do Ghati Muhurta** (15 day + 15 night ~48-min slots, deity-keyed), **Panchaka Rahita Muhurta** (slices of the day free of Panchaka), **Anandadi Yoga** (28-name Vara × Nakshatra cycle).
+Brahma Muhurta, Abhijit Muhurta, Vijaya Muhurta (11th day-muhurta), Godhuli (sunset muhurta), Nishita (midnight muhurta, used for Shivaratri), **Madhyahna** (solar noon ±24 min ritual window), **Pratah Sandhya** / **Sayahna Sandhya** (asymmetric dawn / dusk twilight windows, width = `nightDuration / 10` — ~62–81 min depending on season, ending *at* sunrise / starting *at* sunset; matches DrikPanchang within ±2 min), classical aliases `dinamanaMinutes` / `ratrimanaMinutes`, nakshatra-keyed Amrit Kala. Choghadiya (16 slots), Gowri Panchangam / Nalla Neram (16 slots), Hora (24 planetary hours), Dur Muhurta (2 inauspicious windows), **Do Ghati Muhurta** (15 day + 15 night ~48-min slots, deity-keyed, no vara rotation), **Panchaka Rahita Muhurta** (slices of the day free of Panchaka), **Anandadi Yoga** (28-name Vara × Nakshatra cycle).
 
 ### Inauspicious Periods
 Rahu Kalam, Gulika Kalam, Yamaganda, Panchaka detection, Bhadra Kala (Vishti karana window with earth / heaven / paatal location), **Varjyam** (BPHS-keyed forbidden ~96-min window per nakshatra), **Ganda Mula** (Moon in the 6 root nakshatras — Ashwini / Ashlesha / Magha / Jyeshtha / Mula / Revati — with `mild` / `severe` severity).
@@ -282,8 +282,8 @@ const result = getDailyPanchang(
 | `godhuliMuhurta` | `TimePeriod` | Godhuli ("cow-dust") — sunset muhurta, auspicious for ceremonies |
 | `nishitaMuhurta` | `TimePeriod` | Nishita — midnight muhurta, used for Shivaratri and nocturnal rites |
 | `madhyahna` | `TimePeriod` | Madhyahna — solar noon as a ±24-min ritual window (one classical muhurta wide) |
-| `pratahSandhya` | `TimePeriod` | Dawn-twilight ritual window (sunrise ±24 min) |
-| `sayahnaSandhya` | `TimePeriod` | Dusk-twilight ritual window (sunset ±24 min) |
+| `pratahSandhya` | `TimePeriod` | Dawn-twilight ritual window — three nighttime ghatikas ending *at* sunrise (asymmetric; width = `nightDuration / 10` ≈ 62–81 min) |
+| `sayahnaSandhya` | `TimePeriod` | Dusk-twilight ritual window — three nighttime ghatikas starting *at* sunset (asymmetric; width = `nightDuration / 10`) |
 | `dinamanaMinutes` | `number` | Classical alias of `dayDurationMinutes` (sunrise → sunset) |
 | `ratrimanaMinutes` | `number` | Classical alias of `nightDurationMinutes` (sunset → next sunrise) |
 | `amritKala` | `TimePeriod \| null` | Amrit Kala — nakshatra-specific auspicious window (null when nakshatra has none) |
@@ -404,6 +404,10 @@ import {
   computeAbhijitMuhurta, computeBrahmaMuhurta,
   computeVijayaMuhurta, computeGodhuliMuhurta,
   computeNishitaMuhurta, computeAmritKala,
+  // Phase 28 — daily-parity muhurtas + nakshatra-keyed inauspicious windows
+  computeMadhyahna, computePratahSandhya, computeSayahnaSandhya,
+  computeVarjyam, computeGandaMula,
+  computeAnandadiYoga, computePanchakaRahita, computeDoGhati,
   computeGowriPanchangam,
   // Eclipses (signature: (fromUtc, location, withinDays))
   getUpcomingSolarEclipse, getUpcomingLunarEclipse, getEclipseDuringDay,
@@ -411,6 +415,7 @@ import {
   computePlanetaryPositions,
   computeVimshottariDasha, computeVimshottariDashaFromBirth,
   computeChandraBalam,
+  computeTarabala,
   GRAHA_ABBR,
 } from 'panchang-ts';
 
@@ -463,6 +468,13 @@ const cb = computeChandraBalam(3 /* Karka */, 6 /* Tula */);
 console.log(cb.house);        // 4
 console.log(cb.quality);      // "weak"
 console.log(cb.englishName);  // "Ashubha"
+
+// Tarabala — 9-tara cycle from janma nakshatra → transit Moon nakshatra.
+// Inputs are 0-indexed nakshatra (0 = Ashwini ... 26 = Revati).
+const tb = computeTarabala(0 /* janma: Ashwini */, 4 /* transit: Mrigashira */);
+console.log(tb.taraIndex);    // 4
+console.log(tb.englishName);  // "Pratyari"
+console.log(tb.quality);      // "inauspicious"
 ```
 
 ---
@@ -613,8 +625,16 @@ interface HoraInfo {
 
 ```typescript
 interface SpecialYogaInfo {
-  name: string;    // e.g. "Guru Pushya Yoga"
-  type: 'amrit_siddhi' | 'sarvartha_siddhi' | 'ravi_pushya' | 'guru_pushya';
+  name: string;    // e.g. "Guru Pushya Yoga", "Dwipushkar Yoga"
+  type:
+    | 'amrit_siddhi' | 'sarvartha_siddhi' | 'ravi_pushya' | 'guru_pushya'
+    // Phase 28-6 — Vara × Tithi × Nakshatra patterns + Moon-from-Sun distance yogas
+    | 'dwipushkar'   // Bhadra-tithi + Bhadra-vara + nakshatra ∈ {Mrigashira, Chitra, Dhanishtha} — actions doubled
+    | 'tripushkar'   // same Bhadra-tithi/vara + nakshatra ∈ {Krittika, Punarvasu, U.Phalguni, Vishakha, U.Ashadha, P.Bhadrapada} — actions tripled
+    | 'jwalamukhi'   // inauspicious — tithi × nakshatra lookup per Muhurta-chintamani 6.32
+    | 'aadal'        // auspicious — Moon-from-Sun nakshatra-distance (28-scheme) ∈ {2,7,9,14,16,21,23,28}
+    | 'vidaal'       // inauspicious — Moon-from-Sun nakshatra-distance (28-scheme) ∈ {3,6,10,13,17,20,24,27}
+    | 'ravi';        // auspicious — Moon-from-Sun nakshatra-distance (27-scheme) ∈ {4,6,9,10,13,20}
 }
 
 interface FestivalInfo {
@@ -772,6 +792,15 @@ interface ChandraBalamInfo {
   englishName: string;                 // "Shubha" | "Ashubha"
   name: string;                        // localized
 }
+
+interface TarabalaInfo {
+  taraIndex: number;                   // 0..8 — position in the 9-tara cycle from janma nakshatra
+  englishName: string;                 // "Janma" | "Sampat" | "Vipat" | "Kshema" | "Pratyari"
+                                       // | "Sadhaka" | "Vadha" | "Mitra" | "Ati-Mitra"
+  name: string;                        // localized
+  quality: 'auspicious' | 'inauspicious';
+                                       // 'inauspicious' for Vipat (2) / Pratyari (4) / Vadha (6); rest auspicious
+}
 ```
 </details>
 
@@ -807,10 +836,11 @@ InteractionManager.runAfterInteractions(() => {
 
 ## Accuracy
 
-5,905 tests passing across 61 files, including fixtures cross-verified
-against reference panchang calculations spanning 2025–2026 across Delhi,
-Chennai, New York, London, Sydney, Dubai, and Singapore (diaspora
-fixtures cover DST transitions on `America/New_York`).
+6,048 tests passing across 61 files, including fixtures cross-verified
+against reference panchang calculations spanning 2025–2026 across 10
+Indian cities (Phase 28 cross-verify) plus New York, London, Sydney,
+Dubai, and Singapore (diaspora fixtures cover DST transitions on
+`America/New_York`).
 
 | Element | Accuracy | Validation |
 |---------|----------|------------|
@@ -825,8 +855,10 @@ fixtures cover DST transitions on `America/New_York`).
 | Festival dates | 12 cross-verified festivals (2025–2026) — see caveats below | Fixtures |
 | Choghadiya / Hora / Gowri slots | Derived from sunrise/sunset — inherits ±2 min | — |
 | Madhyahna midpoint, Anandadi Yoga name, Ganda Mula active flag | **Exact match across 50 Drik fixtures** (10 cities × 5 dates) | [phase28-cross-verify](tests/validation/phase28-cross-verify.test.ts) |
+| Pratah / Sayahna Sandhya start + end | **±2 min vs Drik** across all 50 fixtures | [phase28-cross-verify](tests/validation/phase28-cross-verify.test.ts) |
+| Varjyam start + end | **±2 min vs Drik** on every fixture where the library emits a non-null window (≥30 of 50 emit; transition days return `null` by design) | [phase28-cross-verify](tests/validation/phase28-cross-verify.test.ts) |
 
-**Phase 28 documented convention divergence** (these match classical sources, not DrikPanchang's specific renderings — see [phase28-cross-verify.test.ts](tests/validation/phase28-cross-verify.test.ts) for per-feature findings): **Pratah / Sayahna Sandhya** are computed as the symmetric ±24-min muhurta per Smarta-prayoga; DrikPanchang renders an asymmetric 81-min twilight (both classically valid). **Aadal / Vidaal** follow the classical Moon-from-Sun nakshatra-distance rule (AstroShastra, HoraSarvam, Ernst Wilhelm), NOT the popular Tamil-Vakya weekday rule used by some online panchangs. **Varjyam** emits the sunrise-anchored nakshatra's window only (single-window contract per [src/core/varjyam.ts:31-38](src/core/varjyam.ts#L31-L38)) — printed panchangs may show a second window on nakshatra-transition days. **Do Ghati Muhurta** does not rotate by weekday: the same 30-name deity-keyed sequence applies every day, verified against drikpanchang.com/muhurat/daily/do-ghati-muhurat.html for two distinct weekdays. Sourcing is cited inline in [src/core/doGhati.ts:3-21](src/core/doGhati.ts#L3-L21).
+**Phase 28 sourcing notes** (see [phase28-cross-verify.test.ts](tests/validation/phase28-cross-verify.test.ts) for per-feature findings): **Aadal / Vidaal** follow the classical Moon-from-Sun nakshatra-distance rule (AstroShastra, HoraSarvam, Ernst Wilhelm), NOT the popular Tamil-Vakya weekday rule used by some online panchangs — Drik publishes no algorithmic rule text for these and may use the weekday rule, so the library's output may differ from Drik's Aadal/Vidaal occurrence pages by design. **Varjyam** emits the sunrise-anchored nakshatra's window only (single-window contract per [src/core/varjyam.ts:31-38](src/core/varjyam.ts#L31-L38)) — printed panchangs may show a second window on nakshatra-transition days. **Do Ghati Muhurta** does not rotate by weekday: the same 30-name deity-keyed sequence applies every day, verified against drikpanchang.com/muhurat/daily/do-ghati-muhurat.html for two distinct weekdays. Sourcing is cited inline in [src/core/doGhati.ts:3-21](src/core/doGhati.ts#L3-L21).
 
 ### Festival Detection — Documented Tradeoff
 
