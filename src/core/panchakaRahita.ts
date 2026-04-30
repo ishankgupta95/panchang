@@ -1,13 +1,13 @@
 import type { TimePeriod } from '../types/elements';
 
 /**
- * Panchaka Rahita Muhurta — windows of the Hindu day FREE of Panchaka.
+ * Windows of the Hindu day during which the Moon is OUTSIDE Panchaka.
  *
  * Panchaka is active when the Moon occupies the last five nakshatras (the
  * sidereal range [300°, 360°)): Dhanishtha 3rd–4th pada (≥300°), Shatabhisha,
  * Purva Bhadrapada, Uttara Bhadrapada, and Revati. The complement of that
- * range — sidereal Moon ∈ [0°, 300°) — is Panchaka Rahita and is the
- * classical answer to "when can I begin construction / housewarming today?"
+ * range — sidereal Moon ∈ [0°, 300°) — is the broader "Panchaka Rahita"
+ * envelope used to answer "when is the Moon out of Panchaka today?"
  *
  * The Moon traverses the 60°-wide Panchaka span at ~13°/day, so Panchaka
  * persists for roughly 4–5 consecutive Hindu days at a time. On the
@@ -17,11 +17,25 @@ import type { TimePeriod } from '../types/elements';
  * cycle there is exactly one boundary crossing within the Hindu day,
  * yielding a single half-day slice.
  *
+ * Scope note. DrikPanchang's "Panchak Rahit Muhurat" panel publishes a
+ * multi-window slot derivation (Roga / Raja / Mrityu / Agni / Chora /
+ * Panchak exclusion). This function deliberately exposes only the broader
+ * Moon-out-of-Panchaka envelope; the slot-exclusion overlay is left to
+ * consumers (see PLAN.md Step 28-7 sourcing note).
+ *
  * Because the Moon moves monotonically forward in longitude over a 24-hour
  * Hindu day and the Panchaka boundaries are at the fixed points 300° and
  * 360°/0°, at most ONE boundary can be crossed within sunrise → nextSunrise.
  * The implementation samples the predicate at the endpoints, and bisects
  * for the crossing time only when the endpoints disagree.
+ *
+ * Boundary convention. Each returned slice is half-open `[start, end)` with
+ * `start` being the first instant the Moon is OUTSIDE Panchaka and `end` the
+ * first instant the Moon (re-)enters Panchaka. In the transition cases the
+ * crossing time produced by bisection equals exactly one of the two
+ * endpoints — the convention is therefore consistent regardless of whether
+ * the transition is panchaka→free (slice begins at the crossing) or
+ * free→panchaka (slice ends at the crossing).
  *
  * @param sunriseUtc       UTC sunrise — start of the Hindu day.
  * @param nextSunriseUtc   UTC of the following day's local sunrise — end of the Hindu day.
@@ -70,7 +84,7 @@ function bisectBoundary(
   let hi = hiUtc.getTime();
 
   for (let i = 0; i < MAX_ITERS && hi - lo > TOL_MS; i++) {
-    const mid = (lo + hi) / 2;
+    const mid = Math.floor((lo + hi) / 2);
     if (predicate(new Date(mid)) === startState) lo = mid;
     else hi = mid;
   }

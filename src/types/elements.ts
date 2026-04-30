@@ -20,7 +20,7 @@ export interface NakshatraInfo extends ElementBase {
   degreesInNakshatra: number;
 }
 
-export interface YogaInfo extends ElementBase {}
+export type YogaInfo = ElementBase;
 
 export interface KaranaInfo extends ElementBase {
   type: 'fixed' | 'movable';
@@ -42,7 +42,7 @@ interface DailyElementBase {
 
 export interface DailyTithiInfo extends TithiInfo, DailyElementBase {}
 export interface DailyNakshatraInfo extends NakshatraInfo, DailyElementBase {}
-export interface DailyYogaInfo extends YogaInfo, DailyElementBase {}
+export type DailyYogaInfo = YogaInfo & DailyElementBase;
 export interface DailyKaranaInfo extends KaranaInfo, DailyElementBase {}
 
 // ── Rashi (zodiac sign) ───────────────────────────────
@@ -237,13 +237,12 @@ export interface BhadraInfo {
  * spanning the Vrischika/Dhanus rashi boundary — are classed *severe*; the
  * other four are *mild*.
  *
- * `nakshatraName` and `severity` are populated only when `active` is true.
+ * Discriminated on `active`: when `active === true`, `nakshatraName` and
+ * `severity` are guaranteed present and the type narrows automatically.
  */
-export interface GandaMulaInfo {
-  active: boolean;
-  nakshatraName?: string;
-  severity?: 'mild' | 'severe';
-}
+export type GandaMulaInfo =
+  | { active: false }
+  | { active: true; nakshatraName: string; severity: 'mild' | 'severe' };
 
 // ── Anandadi Yoga (Vara × Nakshatra) ─────────────────
 

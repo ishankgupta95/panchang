@@ -58,8 +58,11 @@ export type FestivalRegion =
  */
 export type LegacyFestivalRegion = 'tamil' | 'bengal' | 'north-india';
 
-export interface PanchangOptions {
-  timezone: number | string;
+/**
+ * Common options shared by `getInstantPanchang` and `getDailyPanchang`.
+ * `getDailyPanchang` extends this with a required `timezone`.
+ */
+export interface InstantPanchangOptions {
   ayanamsa?: AyanamsaType;
   language?: Language;
   computeEndTimes?: boolean;
@@ -86,29 +89,7 @@ export interface PanchangOptions {
   region?: FestivalRegion | LegacyFestivalRegion;
 }
 
-export interface InstantPanchangOptions {
-  ayanamsa?: AyanamsaType;
-  language?: Language;
-  computeEndTimes?: boolean;
-  precision?: Precision;
-  /** Lunar month naming system. Default: `'purnimanta'` (North Indian). */
-  masaSystem?: MasaSystem;
-  /**
-   * Native's janma (birth) Moon rashi index (0 = Mesha … 11 = Meena). When
-   * provided, the result includes `chandraBalam` computed against the current
-   * chandraRashi. Omit to skip Chandra Balam entirely.
-   */
-  janmaRashi?: number;
-  /**
-   * Native's janma (birth) Moon nakshatra index (0 = Ashwini … 26 = Revati).
-   * When provided, the result includes `tarabala` — the 9-tara cycle position
-   * of the transit Moon's nakshatra relative to janma. Omit to skip Tarabala.
-   */
-  janmaNakshatra?: number;
-  /**
-   * Regional scope for region-specific festival variants. Default `'all'`.
-   * See {@link FestivalRegion} for supported regions; pre-v2.1 values
-   * ({@link LegacyFestivalRegion}) are accepted and mapped internally.
-   */
-  region?: FestivalRegion | LegacyFestivalRegion;
+export interface PanchangOptions extends InstantPanchangOptions {
+  /** UTC offset in minutes (e.g. 330 for IST) or a tz string. Required. */
+  timezone: number | string;
 }

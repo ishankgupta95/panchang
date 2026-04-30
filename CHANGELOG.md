@@ -39,7 +39,7 @@ independent of the day of the week. `computeDoGhati` therefore takes no
 export function computePanchakaRahita(
   sunriseUtc: Date,
   nextSunriseUtc: Date,
-  getMoon: (utc: Date) => { siderealLongitude: number },
+  getMoon: (d: Date) => number, // sidereal Moon longitude in degrees
 ): TimePeriod[];
 
 export function computeDoGhati(
@@ -47,6 +47,7 @@ export function computeDoGhati(
   sunsetUtc: Date,
   nextSunriseUtc: Date,
   nameFn: (slotIndex: number) => string,
+  qualityNameFn: (quality: ChoghadiyaQuality) => string,
 ): DoGhatiInfo;
 ```
 
@@ -72,8 +73,9 @@ None.
 
 ### Test count
 
-**5,441** tests passing across 60 files (was ~5,393 in v2.3.0 →
-**+~48**). New files: `tests/unit/panchakaRahita.test.ts`,
+**6,048** tests passing across 61 files (cumulative across the v2.2 →
+v2.4 Phase 28 work; was 5,149 in v2.1.0 → **+899**). New files added by
+this release: `tests/unit/panchakaRahita.test.ts`,
 `tests/unit/doGhati.test.ts`,
 `tests/integration/panchakaRahita-doGhati-wiring.test.ts`.
 
@@ -101,9 +103,13 @@ Vidaal, Ravi).** Backwards compatible.
     Bhadrapada}. Results tripled.
   - `jwalamukhi` — inauspicious; tithi+nakshatra lookup table per
     classical Muhurta-chintamani.
-  - `aadal` / `vidaal` — Tamil-tradition vara × nakshatra subsets;
-    Aadal auspicious, Vidaal inauspicious.
-  - `ravi` — Sunday + nakshatras 4–12 from current Sun's nakshatra.
+  - `aadal` / `vidaal` — Moon-from-Sun nakshatra-distance in the
+    28-nakshatra scheme (Abhijit between UAshadha and Shravana).
+    Aadal auspicious on distance ∈ {2, 7, 9, 14, 16, 21, 23, 28};
+    Vidaal inauspicious on {3, 6, 10, 13, 17, 20, 24, 27}.
+  - `ravi` — auspicious; Moon-from-Sun nakshatra-distance in the
+    27-nakshatra scheme on {4, 6, 9, 10, 13, 20}. No weekday filter
+    (per DrikPanchang's published occurrence list).
 
 ### New API surface
 
@@ -176,7 +182,9 @@ dainika panchang panel.
 - **Madhyahna** — solar noon as a ±24-min ritual window (one classical
   muhurta wide). New field `DailyPanchangResult.madhyahna: TimePeriod`.
 - **Pratah Sandhya** / **Sayahna Sandhya** — dawn / dusk twilight
-  windows (sunrise ±24min, sunset ±24min). Two new fields.
+  windows. Asymmetric: Pratah ends *at* sunrise, Sayahna starts *at*
+  sunset; both have width = `nightDuration / 10` (three nighttime
+  ghatikas). Matches DrikPanchang's published Sandhya. Two new fields.
 - **Dinamana** / **Ratrimana labels** — classical aliases of
   `dayDurationMinutes` / `nightDurationMinutes` exposed as
   `dinamanaMinutes` / `ratrimanaMinutes` for parity with DrikPanchang
@@ -192,10 +200,10 @@ export function computeTarabala(
 ): TarabalaInfo;
 
 export function computeVarjyam(
-  currentNakshatra: NakshatraInfo,
+  currentNakshatraIndex: number,
   sunriseUtc: Date,
   nextSunriseUtc: Date,
-  getMoon: (utc: Date) => { siderealLongitude: number },
+  getMoon: (d: Date) => number, // sidereal Moon longitude in degrees
 ): TimePeriod | null;
 
 export function computeGandaMula(
@@ -204,8 +212,15 @@ export function computeGandaMula(
 ): GandaMulaInfo;
 
 export function computeMadhyahna(sunriseUtc: Date, sunsetUtc: Date): TimePeriod;
-export function computePratahSandhya(sunriseUtc: Date): TimePeriod;
-export function computeSayahnaSandhya(sunsetUtc: Date): TimePeriod;
+export function computePratahSandhya(
+  sunriseUtc: Date,
+  sunsetUtc: Date,
+  nextSunriseUtc: Date,
+): TimePeriod;
+export function computeSayahnaSandhya(
+  sunsetUtc: Date,
+  nextSunriseUtc: Date,
+): TimePeriod;
 ```
 
 ### Type surface additions

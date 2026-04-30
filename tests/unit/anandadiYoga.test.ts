@@ -10,6 +10,12 @@
 
 import { describe, it, expect } from 'vitest';
 import { computeAnandadiYoga } from '../../src/core/anandadiYoga';
+import {
+  ANANDADI_TABLE,
+  ANANDADI_QUALITY,
+  TOTAL_ANANDADI_YOGAS,
+  TOTAL_NAKSHATRAS,
+} from '../../src/utils/constants';
 
 describe('computeAnandadiYoga — 28 fixtures (one per yoga)', () => {
   // Each fixture is the first (vara, nakshatra) pair that maps to the given yoga
@@ -133,6 +139,39 @@ describe('computeAnandadiYoga — invariants', () => {
     expect(counts.auspicious).toBe(14);
     expect(counts.inauspicious).toBe(14);
     expect(counts.neutral).toBe(0);
+  });
+});
+
+describe('ANANDADI_TABLE / ANANDADI_QUALITY — structural invariants', () => {
+  it('ANANDADI_TABLE has 7 rows, each of length TOTAL_NAKSHATRAS', () => {
+    expect(ANANDADI_TABLE.length).toBe(7);
+    for (const row of ANANDADI_TABLE) {
+      expect(row.length).toBe(TOTAL_NAKSHATRAS);
+    }
+  });
+
+  it('ANANDADI_QUALITY length === TOTAL_ANANDADI_YOGAS', () => {
+    expect(ANANDADI_QUALITY.length).toBe(TOTAL_ANANDADI_YOGAS);
+  });
+
+  it('every cell of ANANDADI_TABLE is a valid index into ANANDADI_QUALITY', () => {
+    for (const row of ANANDADI_TABLE) {
+      for (const cell of row) {
+        expect(Number.isInteger(cell)).toBe(true);
+        expect(cell).toBeGreaterThanOrEqual(0);
+        expect(cell).toBeLessThan(ANANDADI_QUALITY.length);
+      }
+    }
+  });
+
+  it('matches DrikPanchang anchor rows (regression for the build formula)', () => {
+    // Pin the table against the four canonical anchor cells published by
+    // DrikPanchang. Together with the row-length invariants above, these pin
+    // both the per-weekday +4 phasing and the Abhijit elision at n27 ≥ 21.
+    expect(ANANDADI_TABLE[0]![0]).toBe(0);    // Sun × Ashwini → Ananda
+    expect(ANANDADI_TABLE[0]![26]).toBe(27);  // Sun × Revati  → Vardhamana
+    expect(ANANDADI_TABLE[1]![4]).toBe(0);    // Mon × Mrigashira → Ananda
+    expect(ANANDADI_TABLE[6]![23]).toBe(0);   // Sat × Shatabhisha → Ananda
   });
 });
 

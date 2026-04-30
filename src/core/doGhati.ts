@@ -59,14 +59,19 @@ function buildSlots(
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
 ): DoGhatiSlot[] {
+  const refMs = reference.getTime();
   const slotMs = durationMs / 15;
   const slots: DoGhatiSlot[] = [];
   for (let i = 0; i < 15; i++) {
     const idx = indexBase + i;
     const quality = DO_GHATI_QUALITY[idx]!;
+    // Anchor the final slot's `end` to `refMs + durationMs` exactly so the
+    // 15 slots cover the interval without floating-point drift.
+    const startMs = refMs + i * slotMs;
+    const endMs = i === 14 ? refMs + durationMs : refMs + (i + 1) * slotMs;
     slots.push({
-      start: new Date(reference.getTime() + i * slotMs),
-      end: new Date(reference.getTime() + (i + 1) * slotMs),
+      start: new Date(startMs),
+      end: new Date(endMs),
       index: idx,
       name: nameFn(idx),
       quality,

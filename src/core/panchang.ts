@@ -46,7 +46,7 @@ import { computePanchakaRahita } from './panchakaRahita';
 import { computeDoGhati } from './doGhati';
 import { computeSpecialYogas } from './specialYogas';
 import { computeDurMuhurta } from './durMuhurta';
-import { computeFestivals } from './festivals';
+import { computeFestivals, type FestivalDateRule } from './festivals';
 import { resolveRegionAlias } from './regionAlias';
 import { computeBhadraKaal } from './bhadra';
 import { computeVarjyam } from './varjyam';
@@ -142,6 +142,7 @@ export function getInstantPanchang(
 
   const ayanamsaType = options?.ayanamsa ?? 'lahiri';
   const lang = options?.language ?? 'en';
+  const t = getTranslations(lang);
   const doEndTimes = options?.computeEndTimes !== false;
   const maxIter = options?.precision === 'high' ? 25 : 15;
 
@@ -194,7 +195,7 @@ export function getInstantPanchang(
   const vara = computeVara(
     utcToLocalDisplay(date, lmtOffsetMinutes),
     utcToLocalDisplay(sunriseUtc, lmtOffsetMinutes),
-    getTranslations(lang).varaNames,
+    t.varaNames,
   );
   const masaSystem = options?.masaSystem ?? 'purnimanta';
   const chandramasa = computeChandraMasa(
@@ -231,7 +232,6 @@ export function getInstantPanchang(
     );
   }
 
-  const t = getTranslations(lang);
   const specialYogas = computeSpecialYogas(
     vara.index, tithi.index,
     Math.floor(siderealMoon / NAKSHATRA_SPAN),
@@ -352,6 +352,7 @@ export function getDailyPanchang(
   const offsetMinutes = resolveUtcOffset(options.timezone, date);
   const ayanamsaType = options.ayanamsa ?? 'lahiri';
   const lang = options.language ?? 'en';
+  const t = getTranslations(lang);
   const doEndTimes = options.computeEndTimes !== false;
   const maxIter = options.precision === 'high' ? 25 : 15;
 
@@ -409,7 +410,7 @@ export function getDailyPanchang(
   // sunrises whose UTC instant falls on the previous calendar day (e.g. India in
   // summer, all of Asia/Australia year-round) get the wrong weekday.
   const sunriseLocal = utcToLocalDisplay(sunriseUtc, offsetMinutes);
-  const vara = computeVara(sunriseLocal, sunriseLocal, getTranslations(lang).varaNames);
+  const vara = computeVara(sunriseLocal, sunriseLocal, t.varaNames);
   const masa = computeMasa(siderealSunAtSunrise, (idx) => resolveMasaName(idx, lang));
   const masaSystem = options.masaSystem ?? 'purnimanta';
   const chandramasa = computeChandraMasa(
@@ -427,19 +428,19 @@ export function getDailyPanchang(
     (idx) => resolveNakshatraName(idx, lang),
   );
   const brahmaMuhurta = computeBrahmaMuhurta(sunriseUtc, sunsetUtc);
-  const qualityNameFn = (q: ChoghadiyaQuality) => getTranslations(lang).qualityNames[q];
+  const qualityNameFn = (q: ChoghadiyaQuality) => t.qualityNames[q];
   const choghadiya = computeChoghadiya(
     sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
-    (idx) => getTranslations(lang).choghadiyaNames[idx]!,
+    (idx) => t.choghadiyaNames[idx]!,
     qualityNameFn,
   );
   const hora = computeHora(
     sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
-    (idx) => getTranslations(lang).grahaNames[idx]!,
+    (idx) => t.grahaNames[idx]!,
   );
   const gowriPanchangam = computeGowriPanchangam(
     sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
-    (idx) => getTranslations(lang).gowriNames[idx]!,
+    (idx) => t.gowriNames[idx]!,
     qualityNameFn,
   );
   // Moonrise: first rise after local midnight (the moon may not rise on a given
@@ -455,11 +456,10 @@ export function getDailyPanchang(
   const panchakaRahitaUtc = computePanchakaRahita(sunriseUtc, nextSunriseUtc, getMoon);
   const doGhatiMuhurta = computeDoGhati(
     sunriseUtc, sunsetUtc, nextSunriseUtc,
-    (idx) => getTranslations(lang).doGhatiNames[idx]!,
+    (idx) => t.doGhatiNames[idx]!,
     qualityNameFn,
   );
 
-  const t = getTranslations(lang);
   const specialYogas = computeSpecialYogas(
     vara.index, tithiAtSunrise.index,
     Math.floor(siderealMoonAtSunrise / NAKSHATRA_SPAN),
@@ -497,19 +497,14 @@ export function getDailyPanchang(
   const pradoshaStartUtc = sunsetUtc;
   const nishitaStartUtc = new Date(sunsetUtc.getTime() + (nextSunriseUtc.getTime() - sunsetUtc.getTime()) * 0.3);
 
-  const tithiByRule: Partial<Record<
-    'madhyahna' | 'aparahna' | 'pradosha' | 'nishita' | 'chandrodaya',
-    number
-  >> = {
+  type TithiByRule = Partial<Record<FestivalDateRule, number>>;
+  const tithiByRule: TithiByRule = {
     madhyahna: tithiAt(madhyahnaUtc),
     aparahna:  tithiAt(aparahnaUtc),
     pradosha:  tithiAt(pradoshaUtc),
     nishita:   tithiAt(nishitaUtc),
   };
-  const tithiByRuleStart: Partial<Record<
-    'madhyahna' | 'aparahna' | 'pradosha' | 'nishita' | 'chandrodaya',
-    number
-  >> = {
+  const tithiByRuleStart: TithiByRule = {
     madhyahna: tithiAt(madhyahnaStartUtc),
     aparahna:  tithiAt(aparahnaStartUtc),
     pradosha:  tithiAt(pradoshaStartUtc),
@@ -550,10 +545,7 @@ export function getDailyPanchang(
   const yesterdayPradoshaUtc = new Date(yesterdaySunsetUtc.getTime() + 60 * 60_000);
   const yesterdayNishitaUtc = new Date((yesterdaySunsetUtc.getTime() + sunriseUtc.getTime()) / 2);
 
-  const priorDayTithiByRule: Partial<Record<
-    'madhyahna' | 'aparahna' | 'pradosha' | 'nishita' | 'chandrodaya',
-    number
-  >> = {
+  const priorDayTithiByRule: TithiByRule = {
     madhyahna: tithiAt(yesterdayMadhyahnaUtc),
     aparahna:  tithiAt(yesterdayAparahnaUtc),
     pradosha:  tithiAt(yesterdayPradoshaUtc),
@@ -776,8 +768,8 @@ export function getDailyPanchang(
     Math.floor(siderealMoonAtSunrise / NAKSHATRA_SPAN),
   );
   const madhyahnaWindowUtc = computeMadhyahna(sunriseUtc, sunsetUtc);
-  const pratahSandhyaUtc = computePratahSandhya(sunriseUtc);
-  const sayahnaSandhyaUtc = computeSayahnaSandhya(sunsetUtc);
+  const pratahSandhyaUtc = computePratahSandhya(sunriseUtc, sunsetUtc, nextSunriseUtc);
+  const sayahnaSandhyaUtc = computeSayahnaSandhya(sunsetUtc, nextSunriseUtc);
 
   // ── 8. Convert all UTC dates to local display ────────
   const toLocal = (d: Date) => utcToLocalDisplay(d, offsetMinutes);
@@ -786,6 +778,15 @@ export function getDailyPanchang(
     start: toLocal(tp.start),
     end: toLocal(tp.end),
   });
+  /**
+   * Localize a slot array (Choghadiya / Hora / Do-Ghati / Gowri shapes) by
+   * converting `start`/`end` to local display while preserving every other
+   * field on the slot. The destructure-then-spread shape is what makes this
+   * type-safe across slot variants — `convertTimePeriod` returns only
+   * `{start,end}` and would otherwise drop name/quality/etc.
+   */
+  const localizeSlots = <T extends TimePeriod>(slots: readonly T[]): T[] =>
+    slots.map(s => ({ ...s, ...convertTimePeriod(s) }));
 
   const dayDurationMs = sunsetUtc.getTime() - sunriseUtc.getTime();
   const nightDurationMs = nextSunriseUtc.getTime() - sunsetUtc.getTime();
@@ -847,27 +848,27 @@ export function getDailyPanchang(
     suryaNakshatra,
     brahmaMuhurta: convertTimePeriod(brahmaMuhurta),
     choghadiya: {
-      day:   choghadiya.day.map(s   => ({ ...s, ...convertTimePeriod(s) })),
-      night: choghadiya.night.map(s => ({ ...s, ...convertTimePeriod(s) })),
+      day:   localizeSlots(choghadiya.day),
+      night: localizeSlots(choghadiya.night),
     },
     hora: {
-      day:   hora.day.map(s   => ({ ...s, ...convertTimePeriod(s) })),
-      night: hora.night.map(s => ({ ...s, ...convertTimePeriod(s) })),
+      day:   localizeSlots(hora.day),
+      night: localizeSlots(hora.night),
     },
     moonrise: moonriseUtc ? toLocal(moonriseUtc) : null,
     moonset:  moonsetUtc  ? toLocal(moonsetUtc)  : null,
     panchaka,
     panchakaRahita: panchakaRahitaUtc.map(convertTimePeriod),
     doGhatiMuhurta: {
-      day:   doGhatiMuhurta.day.map(s   => ({ ...s, ...convertTimePeriod(s) })),
-      night: doGhatiMuhurta.night.map(s => ({ ...s, ...convertTimePeriod(s) })),
+      day:   localizeSlots(doGhatiMuhurta.day),
+      night: localizeSlots(doGhatiMuhurta.night),
     },
     specialYogas,
     durMuhurta: [convertTimePeriod(durMuhurtaUtc[0]), convertTimePeriod(durMuhurtaUtc[1])],
     festivals,
     gowriPanchangam: {
-      day:   gowriPanchangam.day.map(s   => ({ ...s, ...convertTimePeriod(s) })),
-      night: gowriPanchangam.night.map(s => ({ ...s, ...convertTimePeriod(s) })),
+      day:   localizeSlots(gowriPanchangam.day),
+      night: localizeSlots(gowriPanchangam.night),
     },
     bhadra: bhadraUtc
       ? {

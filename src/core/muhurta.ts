@@ -1,3 +1,4 @@
+import { assertNakshatraIndex } from '../utils/validation';
 import type { TimePeriod } from '../types/elements';
 
 /**
@@ -130,7 +131,7 @@ export function computeAmritKala(
   nextSunrise: Date,
   nakshatraAtSunrise: number,
 ): TimePeriod | null {
-  if (nakshatraAtSunrise < 0 || nakshatraAtSunrise > 26) return null;
+  assertNakshatraIndex(nakshatraAtSunrise, 'nakshatraAtSunrise');
 
   const offsetGhatikas = AMRIT_KALA_OFFSET_GHATIKAS[nakshatraAtSunrise]!;
   const ahoratraMs = nextSunrise.getTime() - sunrise.getTime();
@@ -165,42 +166,64 @@ export function computeMadhyahna(sunrise: Date, sunset: Date): TimePeriod {
 }
 
 /**
- * Pratah Sandhya: dawn-twilight ritual window — 24 min before sunrise to
- * 24 min after sunrise (one classical muhurta = 48 min, symmetric about
- * sunrise). The Smarta-prayoga sandhyavandanam window per Dharmashastra.
+ * Pratah Sandhya: dawn-twilight ritual window — three nighttime ghatikas
+ * ending at sunrise. Width = `nightDuration / 10` (where `nightDuration` is
+ * sunset → nextSunrise, and one nighttime ghatika = `nightDuration / 30`).
  *
- * @param sunrise Sunrise UTC Date.
- * @returns       `{ start, end }` UTC Dates spanning sunrise ±24 min.
+ * Matches DrikPanchang's published Pratah Sandhya. The window is asymmetric:
+ * it begins ~3 ghatikas before sunrise and ends *at* sunrise — the classical
+ * Smarta-prayoga sandhyavandanam convention as rendered by DrikPanchang.
+ *
+ * @param sunrise      Sunrise UTC Date.
+ * @param sunset       Sunset UTC Date (used with `nextSunrise` to derive the
+ *                     night length that scales the sandhya).
+ * @param nextSunrise  Next day's sunrise UTC Date.
+ * @returns            `{ start, end }` UTC Dates with `end === sunrise`.
  */
-export function computePratahSandhya(sunrise: Date): TimePeriod {
-  const halfMs = 24 * 60_000;
+export function computePratahSandhya(
+  sunrise: Date,
+  sunset: Date,
+  nextSunrise: Date,
+): TimePeriod {
+  const widthMs = (nextSunrise.getTime() - sunset.getTime()) / 10;
   return {
-    start: new Date(sunrise.getTime() - halfMs),
-    end: new Date(sunrise.getTime() + halfMs),
+    start: new Date(sunrise.getTime() - widthMs),
+    end: sunrise,
   };
 }
 
 /**
- * Sayahna Sandhya: dusk-twilight ritual window — 24 min before sunset to
- * 24 min after sunset (one classical muhurta = 48 min, symmetric about
- * sunset). Counterpart of Pratah Sandhya for the evening sandhyavandanam.
+ * Sayahna Sandhya: dusk-twilight ritual window — three nighttime ghatikas
+ * starting at sunset. Width = `nightDuration / 10`. Matches DrikPanchang's
+ * published Sayahna Sandhya (asymmetric, begins *at* sunset).
  *
- * @param sunset Sunset UTC Date.
- * @returns      `{ start, end }` UTC Dates spanning sunset ±24 min.
+ * @param sunset       Sunset UTC Date.
+ * @param nextSunrise  Next day's sunrise UTC Date.
+ * @returns            `{ start, end }` UTC Dates with `start === sunset`.
  */
-export function computeSayahnaSandhya(sunset: Date): TimePeriod {
-  const halfMs = 24 * 60_000;
+export function computeSayahnaSandhya(
+  sunset: Date,
+  nextSunrise: Date,
+): TimePeriod {
+  const widthMs = (nextSunrise.getTime() - sunset.getTime()) / 10;
   return {
-    start: new Date(sunset.getTime() - halfMs),
-    end: new Date(sunset.getTime() + halfMs),
+    start: sunset,
+    end: new Date(sunset.getTime() + widthMs),
   };
 }
 
 /**
  * Amrita Ghatika offsets (in ghatikas from sunrise) for each of 27 nakshatras,
  * drawn from Muhurta Chintamani. Each window is 4 ghatikas long.
+ *
+ * The "ghatika" here is elastic — `ahoratra / 60` — not the fixed 24-minute
+ * Varjyam ghatika; see `computeAmritKala` above. Compared with
+ * `VARJYAM_OFFSET_GHATIKAS` (offset from nakshatra start, fixed 24-min
+ * ghatikas) the values disagree at indices 3 (Rohini), 18 (Mula), 26 (Revati).
+ * The arrays are independently sourced — accidental cross-pollination is
+ * caught by the regression test in `tests/unit/varjyam.test.ts`.
  */
-const AMRIT_KALA_OFFSET_GHATIKAS: readonly number[] = [
+export const AMRIT_KALA_OFFSET_GHATIKAS: readonly number[] = [
   50, // 0  Ashwini
   24, // 1  Bharani
   30, // 2  Krittika

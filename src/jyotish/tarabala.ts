@@ -1,4 +1,6 @@
 import { getTranslations } from '../i18n/resolver';
+import { TOTAL_NAKSHATRAS } from '../utils/constants';
+import { assertNakshatraIndex } from '../utils/validation';
 import type { Language } from '../types/options';
 import type { TarabalaInfo } from '../types/jyotish';
 
@@ -32,8 +34,9 @@ const TARA_KEYS = [
  * to the native's janma (birth) nakshatra.
  *
  * The 27 nakshatras starting from janma are partitioned into nine taras that
- * repeat three times. Three taras — Vipat (3rd), Pratyari (5th), Vadha (7th) —
- * are classed as inauspicious; the other six are auspicious.
+ * repeat three times. Three taras — Vipat (`taraIndex` 2), Pratyari
+ * (`taraIndex` 4), Vadha (`taraIndex` 6) — are classed as inauspicious;
+ * the other six are auspicious.
  *
  * @param janmaNakshatraIndex      Nakshatra the Moon occupied at birth (0 = Ashwini … 26 = Revati).
  * @param transitNakshatraIndex    Nakshatra the Moon currently occupies (0 = Ashwini … 26 = Revati).
@@ -52,14 +55,11 @@ export function computeTarabala(
   transitNakshatraIndex: number,
   lang: Language = 'en',
 ): TarabalaInfo {
-  if (!Number.isInteger(janmaNakshatraIndex) || janmaNakshatraIndex < 0 || janmaNakshatraIndex > 26) {
-    throw new RangeError(`janmaNakshatraIndex must be integer in [0, 26], got ${janmaNakshatraIndex}`);
-  }
-  if (!Number.isInteger(transitNakshatraIndex) || transitNakshatraIndex < 0 || transitNakshatraIndex > 26) {
-    throw new RangeError(`transitNakshatraIndex must be integer in [0, 26], got ${transitNakshatraIndex}`);
-  }
+  assertNakshatraIndex(janmaNakshatraIndex, 'janmaNakshatraIndex');
+  assertNakshatraIndex(transitNakshatraIndex, 'transitNakshatraIndex');
 
-  const taraIndex = ((transitNakshatraIndex - janmaNakshatraIndex + 27) % 27) % 9;
+  // 27 % 9 == 0, so the +27 only handles negative remainders before % 9.
+  const taraIndex = (transitNakshatraIndex - janmaNakshatraIndex + TOTAL_NAKSHATRAS) % 9;
   const englishName = TARA_ENGLISH_NAMES[taraIndex]!;
   const quality: TarabalaInfo['quality'] = INAUSPICIOUS_TARAS.has(taraIndex) ? 'inauspicious' : 'auspicious';
   const t = getTranslations(lang);

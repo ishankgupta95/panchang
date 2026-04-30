@@ -2,9 +2,8 @@ import { resolveAnandadiYogaName } from '../i18n/resolver';
 import {
   ANANDADI_TABLE,
   ANANDADI_QUALITY,
-  TOTAL_ANANDADI_YOGAS,
-  TOTAL_NAKSHATRAS,
 } from '../utils/constants';
+import { assertNakshatraIndex, assertVaraIndex } from '../utils/validation';
 import type { Language } from '../types/options';
 import type { AnandadiYogaInfo } from '../types/elements';
 
@@ -37,24 +36,10 @@ export function computeAnandadiYoga(
   nakshatraIndex: number,
   lang: Language = 'en',
 ): AnandadiYogaInfo {
-  if (!Number.isInteger(varaIndex) || varaIndex < 0 || varaIndex >= 7) {
-    throw new RangeError(`varaIndex must be integer in [0, 6], got ${varaIndex}`);
-  }
-  if (
-    !Number.isInteger(nakshatraIndex) ||
-    nakshatraIndex < 0 ||
-    nakshatraIndex >= TOTAL_NAKSHATRAS
-  ) {
-    throw new RangeError(
-      `nakshatraIndex must be integer in [0, ${TOTAL_NAKSHATRAS - 1}], got ${nakshatraIndex}`,
-    );
-  }
+  assertVaraIndex(varaIndex);
+  assertNakshatraIndex(nakshatraIndex);
 
   const index = ANANDADI_TABLE[varaIndex]![nakshatraIndex]!;
-  if (index < 0 || index >= TOTAL_ANANDADI_YOGAS) {
-    throw new Error(`ANANDADI_TABLE returned out-of-range index ${index}`);
-  }
-
   return {
     index,
     name: resolveAnandadiYogaName(index, lang),

@@ -1,6 +1,7 @@
 /**
- * Unit tests for Varjyam (Vishaghati / Nakshatra Thyajyam) — the forbidden
- * ~96-minute window per day, keyed to the day's nakshatra.
+ * Unit tests for Varjyam (Vishaghati / Nakshatra Thyajyam) — a forbidden
+ * ~84–108 min window per day (elastic to the active nakshatra's duration),
+ * keyed to the day's nakshatra.
  *
  * Classical reference: Muhurta-chintamani Ch. 4 / BPHS Ch. 71. Offset table
  * sourced from DrikPanchang (the project's Phase 28 parity oracle); see
@@ -11,25 +12,27 @@ import { describe, it, expect } from 'vitest';
 import { computeVarjyam } from '../../src/core/varjyam';
 import {
   VARJYAM_OFFSET_GHATIKAS,
-  VARJYAM_DURATION_MINUTES,
   NAKSHATRA_SPAN,
 } from '../../src/utils/constants';
+import { AMRIT_KALA_OFFSET_GHATIKAS } from '../../src/core/muhurta';
 import { LongitudeCache } from '../../src/astronomy/cache';
 import { computeSunrise, computeSunset } from '../../src/astronomy/sunrise';
 
 const DELHI = { latitude: 28.6139, longitude: 77.2090 };
 
 /**
- * Synthetic Moon longitude getter: the Moon advances at a steady
- * 360°/(27.3 d) and is at the start of `startNakshatraIndex` at `epochUtc`.
- * Used to create deterministic nakshatra-start times that tests can reason
- * about without depending on real astronomy.
+ * Synthetic Moon longitude getter. The Moon advances at a steady
+ * `360° / periodDays` and sits at the start of `startNakshatraIndex` at
+ * `epochUtc`. Period defaults to **27 days** (not the physical 27.32166)
+ * so each synthetic nakshatra spans exactly 24 h, making 1 elastic ghatika
+ * = 24 min and the 4-ghatika Varjyam window = 96 min — handy for tests
+ * that reason about offsets in round numbers. The integration sweep at the
+ * bottom of the file uses real ephemeris where the elastic ghatika varies.
  */
 function syntheticMoon(
   epochUtc: Date,
   startNakshatraIndex: number,
-  /** Sidereal lunar period in days; classical value 27.32166. */
-  periodDays: number = 27.32166,
+  periodDays: number = 27,
 ): (d: Date) => number {
   const startLon = startNakshatraIndex * NAKSHATRA_SPAN;
   const degPerMs = 360 / (periodDays * 86_400_000);
@@ -57,9 +60,12 @@ describe('computeVarjyam — input validation', () => {
   });
 });
 
-describe('computeVarjyam — synthetic Moon (deterministic offsets)', () => {
-  // Place Ashwini's start exactly at sunrise. Offset = 50 ghatikas = 20 h.
-  // Window: [sunrise + 20:00, sunrise + 21:36].
+describe('computeVarjyam — synthetic Moon (deterministic offsets, 24-min ghatikas)', () => {
+  // Default synthetic period (27 days) → 24h nakshatras → 24-min ghatikas →
+  // 4-ghatika window = 96 min. These tests pin offset arithmetic and the
+  // bisection in nice round minutes.
+
+  // Ashwini (0): offset 50 ghatikas = 20 h. Window: [sunrise+20:00, sunrise+21:36].
   it('Ashwini starting at sunrise → window 20:00 to 21:36 after sunrise', () => {
     const sunrise = new Date('2025-06-01T00:00:00Z');
     const nextSunrise = new Date('2025-06-02T00:00:00Z');
@@ -70,13 +76,12 @@ describe('computeVarjyam — synthetic Moon (deterministic offsets)', () => {
     if (!window) return;
 
     const expectedStartMs = sunrise.getTime() + VARJYAM_OFFSET_GHATIKAS[0]! * 24 * 60_000;
-    const expectedEndMs = expectedStartMs + VARJYAM_DURATION_MINUTES * 60_000;
-    // findStartTime resolves to within ~30 s tolerance.
+    const expectedEndMs = expectedStartMs + 96 * 60_000;
     expect(Math.abs(window.start.getTime() - expectedStartMs)).toBeLessThan(60_000);
     expect(Math.abs(window.end.getTime() - expectedEndMs)).toBeLessThan(60_000);
   });
 
-  // Anuradha (16): offset 10 ghatikas = 4 h, duration 96 min.
+  // Anuradha (16): offset 10 ghatikas = 4 h, width 96 min.
   // If nakshatra started 2 h before sunrise, window starts +2:00 after sunrise.
   it('Anuradha started 2h before sunrise → window 2:00 to 3:36 after sunrise', () => {
     const nakshatraStart = new Date('2025-06-01T00:00:00Z');
@@ -92,12 +97,12 @@ describe('computeVarjyam — synthetic Moon (deterministic offsets)', () => {
     const expectedStartFromSunrise = (offsetH - 2) * 3600_000; // 2h after sunrise
     const expectedStartMs = sunrise.getTime() + expectedStartFromSunrise;
     expect(Math.abs(window.start.getTime() - expectedStartMs)).toBeLessThan(60_000);
-    expect(window.end.getTime() - window.start.getTime())
-      .toBe(VARJYAM_DURATION_MINUTES * 60_000);
+    expect(Math.abs((window.end.getTime() - window.start.getTime()) - 96 * 60_000))
+      .toBeLessThan(60_000);
   });
 
-  // Mula (18): offset 56 ghatikas = 22.4 h. With nakshatra started right at
-  // sunrise, the window lands deep inside the Hindu day (22:24 to 24:00).
+  // Mula (18): offset 56 ghatikas = 22:24. With nakshatra starting at sunrise,
+  // the window lands at +22:24 → +24:00 (clipped naturally by nakshatra end).
   it('Mula starting at sunrise → window 22:24 to 24:00 after sunrise', () => {
     const sunrise = new Date('2025-06-01T00:00:00Z');
     const nextSunrise = new Date(sunrise.getTime() + 24 * 3600_000);
@@ -109,21 +114,29 @@ describe('computeVarjyam — synthetic Moon (deterministic offsets)', () => {
 
     const expectedStartMs = sunrise.getTime() + 56 * 24 * 60_000; // 22:24 after sunrise
     expect(Math.abs(window.start.getTime() - expectedStartMs)).toBeLessThan(60_000);
-    // End coincides with nextSunrise (22:24 + 1:36 = 24:00).
     expect(Math.abs(window.end.getTime() - nextSunrise.getTime())).toBeLessThan(60_000);
   });
 
-  it('window length is always exactly 96 minutes', () => {
+  it('window length is 96 min for every nakshatra under 24h-per-nakshatra synthetic Moon', () => {
+    // Stagger each nakshatra's start so its Varjyam window lands inside the
+    // Hindu day regardless of offset. With offset∈[10,56] ghatikas and a
+    // 24h nakshatra, starting the nakshatra (offset+2)h before sunrise puts
+    // the window center at +2h after sunrise — well inside any Hindu day.
     const sunrise = new Date('2025-06-01T00:00:00Z');
     const nextSunrise = new Date(sunrise.getTime() + 24 * 3600_000);
+    let asserted = 0;
     for (let n = 0; n < 27; n++) {
-      const moon = syntheticMoon(sunrise, n);
+      const offsetH = VARJYAM_OFFSET_GHATIKAS[n]! * 24 / 60;
+      const nakshatraStart = new Date(sunrise.getTime() - (offsetH - 2) * 3600_000);
+      const moon = syntheticMoon(nakshatraStart, n);
       const w = computeVarjyam(n, sunrise, nextSunrise, moon);
-      if (w) {
-        expect(w.end.getTime() - w.start.getTime())
-          .toBe(VARJYAM_DURATION_MINUTES * 60_000);
-      }
+      expect(w).not.toBeNull();
+      if (!w) continue;
+      const widthMin = (w.end.getTime() - w.start.getTime()) / 60_000;
+      expect(Math.abs(widthMin - 96)).toBeLessThan(1);
+      asserted++;
     }
+    expect(asserted).toBe(27);
   });
 
   it('returns null when window falls entirely before sunrise', () => {
@@ -165,6 +178,81 @@ describe('VARJYAM_OFFSET_GHATIKAS table sanity', () => {
   });
 });
 
+describe('VARJYAM_OFFSET_GHATIKAS vs AMRIT_KALA_OFFSET_GHATIKAS — cross-table pin', () => {
+  // The two tables are NOT redundant — they anchor on different reference
+  // points (nakshatra start vs sunrise) and their ghatikas are elastic to
+  // different reference durations (nakshatra duration vs ahoratra). They
+  // share most values by classical-source coincidence but disagree at
+  // exactly three indices: Rohini (3), Mula (18), Revati (26). This test
+  // pins the divergence so an accidental copy from one table to the other
+  // fails immediately.
+
+  it('both tables have 27 entries', () => {
+    expect(VARJYAM_OFFSET_GHATIKAS.length).toBe(27);
+    expect(AMRIT_KALA_OFFSET_GHATIKAS.length).toBe(27);
+  });
+
+  it('tables disagree at exactly indices 3, 18, 26', () => {
+    const disagreements: number[] = [];
+    for (let i = 0; i < 27; i++) {
+      if (VARJYAM_OFFSET_GHATIKAS[i] !== AMRIT_KALA_OFFSET_GHATIKAS[i]) {
+        disagreements.push(i);
+      }
+    }
+    expect(disagreements).toEqual([3, 18, 26]);
+  });
+
+  it('AMRIT_KALA values at the three divergent indices', () => {
+    expect(AMRIT_KALA_OFFSET_GHATIKAS[3]).toBe(26);   // Rohini
+    expect(AMRIT_KALA_OFFSET_GHATIKAS[18]).toBe(20);  // Mula
+    expect(AMRIT_KALA_OFFSET_GHATIKAS[26]).toBe(20);  // Revati
+  });
+});
+
+describe('computeVarjyam — elastic ghatikas (synthetic varying nakshatra duration)', () => {
+  // A synthetic 25-day Moon period gives each nakshatra a uniform 25*24/27 ≈
+  // 22.22h duration, so 1 elastic ghatika ≈ 22.22 min and a 4-ghatika
+  // Varjyam window ≈ 88.89 min. Verifies the elastic algorithm responds to
+  // nakshatra-duration changes (the fixed-ghatika algorithm would still emit
+  // 96 min — this test fails under the old implementation).
+  it('25-day synthetic period → window width ≈ 88.89 min (Anuradha — offset 10)', () => {
+    // Nakshatra duration = 25 × 24 / 27 ≈ 22.22 h → 1 ghatika ≈ 22.22 min →
+    // 4-ghatika window ≈ 88.89 min. Anuradha (offset 10 ghatikas ≈ 3.7 h) is
+    // chosen because high-offset nakshatras (e.g. Ashwini @ 50 g ≈ 18.5 h)
+    // would push the window past nextSunrise under this shorter period.
+    const sunrise = new Date('2025-06-01T00:00:00Z');
+    const nextSunrise = new Date(sunrise.getTime() + 24 * 3600_000);
+    const moon = syntheticMoon(sunrise, 16, 25);
+    const w = computeVarjyam(16, sunrise, nextSunrise, moon);
+    expect(w).not.toBeNull();
+    if (!w) return;
+
+    const widthMin = (w.end.getTime() - w.start.getTime()) / 60_000;
+    const expectedNakshatraDurMin = (25 * 24 * 60) / 27;
+    const expectedWidthMin = (4 * expectedNakshatraDurMin) / 60;
+    expect(Math.abs(widthMin - expectedWidthMin)).toBeLessThan(1);
+
+    // Sanity: 25-day period nakshatras are shorter than 24h, so width < 96 min.
+    expect(widthMin).toBeLessThan(96);
+  });
+
+  it('29-day synthetic period → window width ≈ 25.78 × 4 ≈ 103 min (longer than 96)', () => {
+    const sunrise = new Date('2025-06-01T00:00:00Z');
+    const nextSunrise = new Date(sunrise.getTime() + 24 * 3600_000);
+    const moon = syntheticMoon(sunrise, 16, 29);
+
+    const window = computeVarjyam(16, sunrise, nextSunrise, moon);
+    expect(window).not.toBeNull();
+    if (!window) return;
+
+    const widthMin = (window.end.getTime() - window.start.getTime()) / 60_000;
+    const expectedNakshatraDurMin = (29 * 24 * 60) / 27;
+    const expectedWidthMin = (4 * expectedNakshatraDurMin) / 60;
+    expect(Math.abs(widthMin - expectedWidthMin)).toBeLessThan(1);
+    expect(widthMin).toBeGreaterThan(96);
+  });
+});
+
 describe('computeVarjyam — real ephemeris (smoke tests)', () => {
   it('does not crash for a normal Delhi day and respects window length', () => {
     const cache = new LongitudeCache('lahiri');
@@ -176,8 +264,11 @@ describe('computeVarjyam — real ephemeris (smoke tests)', () => {
     const nakshatraIndex = Math.floor(getMoon(sunrise) / NAKSHATRA_SPAN);
     const window = computeVarjyam(nakshatraIndex, sunrise, nextSunrise, getMoon);
     if (window) {
-      expect(window.end.getTime() - window.start.getTime())
-        .toBe(VARJYAM_DURATION_MINUTES * 60_000);
+      // Real-ephemeris window width is elastic — between ~84 and ~108 min
+      // depending on the nakshatra's actual duration that day.
+      const widthMin = (window.end.getTime() - window.start.getTime()) / 60_000;
+      expect(widthMin).toBeGreaterThan(80);
+      expect(widthMin).toBeLessThan(115);
       // Window must overlap the Hindu day (returning non-null is the contract).
       expect(window.end.getTime()).toBeGreaterThan(sunrise.getTime());
       expect(window.start.getTime()).toBeLessThan(nextSunrise.getTime());

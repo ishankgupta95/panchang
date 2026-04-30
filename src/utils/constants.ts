@@ -38,16 +38,26 @@ export const KARANA_SEARCH_HOURS = 18;
 // ── Varjyam (Vishaghati / Nakshatra Thyajyam) offsets ─
 //
 // Classical 27-entry table indexed 0 = Ashwini … 26 = Revati. Each value is
-// the offset, in ghatikas (1 ghatika = 24 min), from the nakshatra's START
-// to the BEGINNING of its Varjyam window. The Varjyam window itself is a
-// fixed 4 ghatikas (96 minutes); see `src/core/varjyam.ts`.
+// the offset, in **elastic ghatikas of the nakshatra's own duration**
+// (1 ghatika = nakshatraDuration / 60), from the nakshatra's START to the
+// BEGINNING of its Varjyam window. The Varjyam window itself spans 4
+// elastic ghatikas — therefore ~84–108 min depending on the nakshatra's
+// real duration that day. See `src/core/varjyam.ts`.
 //
 // Source: DrikPanchang (https://www.drikpanchang.com/tutorials/panchang-utilities/nakshatra-thyajyam.html)
 // — the project's parity oracle for Phase 28 (Dainika Parity). Their printed
 // "Tyajya Ghatis" column gives the START..END ghati labels (e.g. Ashwini
 // "51 to 54"); offset elapsed = (start_label − 1), so Ashwini = 50 ghatikas.
-// This matches the values reproduced in regional Telugu/Tamil panchanga
+// The same numerical labels are reproduced in regional Telugu/Tamil panchanga
 // guides that derive from Muhurta-chintamani Ch. 4 and BPHS Ch. 71.
+//
+// NOTE — the Amrit-Kala offset table in `src/core/muhurta.ts`
+// (`AMRIT_KALA_OFFSET_GHATIKAS`) is structurally similar but anchors on
+// SUNRISE rather than nakshatra start, and its ghatikas are elastic to the
+// AHORATRA (sunrise → nextSunrise), not to the nakshatra. The two arrays
+// disagree at indices 3 (Rohini), 18 (Mula), and 26 (Revati); the regression
+// test in `tests/unit/varjyam.test.ts` pins the divergence so a stray
+// cross-table copy fails loudly.
 export const VARJYAM_OFFSET_GHATIKAS: readonly number[] = [
   50, // 0  Ashwini           — Tyajya 51–54
   24, // 1  Bharani           — Tyajya 25–28
@@ -78,9 +88,6 @@ export const VARJYAM_OFFSET_GHATIKAS: readonly number[] = [
   30, // 26 Revati            — Tyajya 31–34
 ];
 
-/** Varjyam window length: 4 ghatikas = 96 minutes. */
-export const VARJYAM_DURATION_MINUTES = 96;
-
 // ── Anandadi Yoga (Vara × Nakshatra) ────────────────────
 //
 // Anandadi Yoga is a 28-name cycle formed by the day-of-week × nakshatra
@@ -96,16 +103,13 @@ export const VARJYAM_DURATION_MINUTES = 96;
 //
 // Phasing per weekday (DrikPanchang convention, also Muhurta-chintamani):
 // Ananda (yoga 0) anchors at Ashwini on Sunday and advances +4 nakshatras
-// per weekday in the *28-nakshatra* system that includes Abhijit:
-//   Sun→Ashwini (28-naks 0), Mon→Mrigashira (4), Tue→Ashlesha (8),
-//   Wed→Hasta (12),         Thu→Anuradha (16), Fri→Uttara Ashadha (20),
-//   Sat→Shatabhisha (24). The cycle closes: (24+4) mod 28 = 0.
+// per weekday in the *28-nakshatra* system that includes Abhijit. The
+// classical lookup is published in 28-naks form (Abhijit between Uttara
+// Ashadha and Shravana). This codebase uses 27 nakshatras throughout, so we
+// derive the table programmatically with Abhijit's row elided — i.e. for
+// n_27 ∈ [21, 26] the 28-naks index is n_27 + 1.
 //
-// The classical lookup is published in 28-nakshatra form (Abhijit between
-// Uttara Ashadha and Shravana). This codebase uses 27 nakshatras throughout,
-// so the table below is the 28-naks classical lookup with Abhijit's row
-// elided — i.e. for n_27 ∈ [21, 26] we use the 28-naks index n_27 + 1.
-// Equivalent formula:
+// The closed-form rule:
 //   const n28 = n27 < 21 ? n27 : n27 + 1;
 //   ANANDADI_TABLE[v][n27] = (n28 - 4*v + 28) % 28;
 //
@@ -121,29 +125,20 @@ export const VARJYAM_DURATION_MINUTES = 96;
 // occasionally substitute **Pravardhamana**. Sources (e.g. astrosagga.com)
 // that list 27 yogas with a different name set (Sankata/Ghatotkacha/...)
 // describe a different system and are not used here.
-export const ANANDADI_TABLE: readonly (readonly number[])[] = [
-  // Sunday (v=0)
-  [ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
-   15, 16, 17, 18, 19, 20, 22, 23, 24, 25, 26, 27],
-  // Monday (v=1)
-  [24, 25, 26, 27,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10,
-   11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22, 23],
-  // Tuesday (v=2)
-  [20, 21, 22, 23, 24, 25, 26, 27,  0,  1,  2,  3,  4,  5,  6,
-    7,  8,  9, 10, 11, 12, 14, 15, 16, 17, 18, 19],
-  // Wednesday (v=3)
-  [16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27,  0,  1,  2,
-    3,  4,  5,  6,  7,  8, 10, 11, 12, 13, 14, 15],
-  // Thursday (v=4)
-  [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
-   27,  0,  1,  2,  3,  4,  6,  7,  8,  9, 10, 11],
-  // Friday (v=5)
-  [ 8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-   23, 24, 25, 26, 27,  0,  2,  3,  4,  5,  6,  7],
-  // Saturday (v=6)
-  [ 4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
-   19, 20, 21, 22, 23, 24, 26, 27,  0,  1,  2,  3],
-];
+function buildAnandadiTable(): readonly (readonly number[])[] {
+  const rows: number[][] = [];
+  for (let v = 0; v < 7; v++) {
+    const row: number[] = new Array(27);
+    for (let n27 = 0; n27 < 27; n27++) {
+      const n28 = n27 < 21 ? n27 : n27 + 1;
+      row[n27] = (n28 - 4 * v + 28) % 28;
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+
+export const ANANDADI_TABLE: readonly (readonly number[])[] = buildAnandadiTable();
 
 /**
  * Auspicious / inauspicious classification per Anandadi yoga, indexed
