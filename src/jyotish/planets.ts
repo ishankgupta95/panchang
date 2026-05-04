@@ -78,6 +78,47 @@ function getMeanRahuLongitudeTropical(date: Date): number {
   );
 }
 
+/**
+ * Tropical longitude of the Moon's *true* (apparent) ascending node — Rahu.
+ *
+ * The true node oscillates around the mean node by up to ±1.5° due to the
+ * periodic perturbations from the Sun. This implementation adds the dominant
+ * correction term from Meeus *Astronomical Algorithms* 2nd ed. Ch. 47:
+ *
+ *   Ω_true = Ω_mean − 1.4979° · sin(2D − 2F)
+ *
+ * where D is the Moon's mean elongation from the Sun and F is the Moon's
+ * argument of latitude. Higher-order perturbations (sub-arcminute) are
+ * neglected — adequate for Vedic transit purposes (sub-degree accuracy).
+ */
+function getTrueRahuLongitudeTropical(date: Date): number {
+  const T = (dateToJulianDay(date) - 2451545.0) / 36525.0;
+  const meanΩ =
+    125.0445479
+    - 1934.1362891 * T
+    + 0.0020754 * T * T
+    + (T * T * T) / 467441
+    - (T * T * T * T) / 60616000;
+
+  // Meeus Ch. 47 fundamental arguments (mean elongation D, mean arg of latitude F).
+  const D =
+    297.8501921
+    + 445267.1114034 * T
+    - 0.0018819 * T * T
+    + (T * T * T) / 545868
+    - (T * T * T * T) / 113065000;
+  const F =
+    93.2720950
+    + 483202.0175233 * T
+    - 0.0036539 * T * T
+    - (T * T * T) / 3526000
+    + (T * T * T * T) / 863310000;
+
+  const argRad = ((2 * D - 2 * F) * Math.PI) / 180;
+  const correction = -1.4979 * Math.sin(argRad);
+  return normalize360(meanΩ + correction);
+}
+
 function buildGrahaPosition(
   planet: GrahaName,
   siderealLon: number,
@@ -127,6 +168,7 @@ export function computePlanetaryPositions(
   ayanamsaType: AyanamsaType,
   nakshatraName: (idx: number) => string = identity,
   rashiName: (idx: number) => string = identity,
+  nodeType: 'mean' | 'true' = 'mean',
 ): PlanetaryPositions {
   const ayanamsa = computeAyanamsa(date, ayanamsaType);
 
@@ -145,8 +187,10 @@ export function computePlanetaryPositions(
   const venTrop = getTropicalPlanetLongitude(Body.Venus, date);
   const satTrop = getTropicalPlanetLongitude(Body.Saturn, date);
 
-  // Rahu (Moon's mean ascending node; typ. ±0.5° of true node, ~±2° worst-case) — Ketu opposite
-  const rahuTrop = getMeanRahuLongitudeTropical(date);
+  // Rahu — opt-in 'true' node uses Meeus periodic correction (typ. ±0.6°)
+  // vs 'mean' node default (typ. ±0.5°, worst-case ±2°). Ketu always opposite.
+  const rahuTrop =
+    nodeType === 'true' ? getTrueRahuLongitudeTropical(date) : getMeanRahuLongitudeTropical(date);
   const ketuTrop = normalize360(rahuTrop + 180);
 
   // Retrograde: not applicable to Sun/Moon/nodes

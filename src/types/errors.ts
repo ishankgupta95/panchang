@@ -14,7 +14,9 @@ export type PanchangErrorCode =
   | 'TIMEZONE_RESOLUTION_FAILED'
   | 'NO_SUNRISE'
   | 'NO_SUNSET'
-  | 'SEARCH_DIVERGED';
+  | 'SEARCH_DIVERGED'
+  | 'CIRCUMPOLAR'
+  | 'PLACIDUS_DIVERGED';
 
 /**
  * Typed error thrown by panchang-ts when input validation fails or a numerical

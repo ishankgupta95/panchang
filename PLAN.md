@@ -68,6 +68,7 @@ JSDoc with `@param` / `@returns` / `@example`.
 | 26 | Diaspora & API polish — non-IST cross-verification (NYC/London/Sydney/Dubai/Singapore + DST), `getInstantPanchang` limitations documented | v2.0.0 | ✅ |
 | 27 | Regional festival expansion — state-slug `FestivalRegion` (21 states + nepal), allow-list `regions[]` on rules, transit-adjacent emissions (Lohri, Raja arc), 10 new regional festivals (Gudi Padwa, Gangaur, Karaga, Bonalu, Teej variants, Govardhan, Bhai Dooj, Phagli, Rath Yatra, Varamahalakshmi via `tithiRange` gate), Bathukamma markers, orphan-region sweep | v2.1.0 | ✅ |
 | 28 | DrikPanchang dainika parity — Tarabala, Varjyam, Ganda Mula, Madhyahna, Pratah/Sayahna Sandhya, Dinamana/Ratrimana, Anandadi Yoga, 6 special yogas (Dwipushkar/Tripushkar/Jwalamukhi/Aadal/Vidaal/Ravi), Panchaka Rahita, Do Ghati Muhurta | v2.2 → v2.4 | ✅ |
+| 29 | Birth Chart Foundation — Lagna, Bhava (3 house systems), D1/D9 charts, Ashtakoot 36-pt matching, Mangal Dosha, Sade Sati, Pratyantar dashas, planetary dignity, true Rahu node, True Chitra + Thirukanitham ayanamsas | v3.0 (pending external validation) | 🟡 impl done |
 
 Final state after Phase 28: **6,048 tests** passing across 61 files. Festival
 registry has grown from ~25 entries (Phase 14) to 80+. Diaspora cross-verified
@@ -242,11 +243,19 @@ Asserted in [tests/validation/phase28-cross-verify.test.ts](tests/validation/pha
 
 ---
 
-## Phase 29 — Birth Chart Foundation (Wave 2) — 📐 PLANNED (scoped 2026-04-25)
+## Phase 29 — Birth Chart Foundation (Wave 2) — ✅ IMPLEMENTATION DONE (2026-05-04)
 
 **Goal.** Add the kundli foundation that unlocks rashifal, marriage matching, and Sade Sati features in the consumer apps. **Major release v3.0.** Estimated **8–12 engineering days**.
 
 **Critical decision (locked).** House system is **configurable** via `options.houseSystem: 'whole-sign' | 'equal' | 'placidus-kp'`. Default is **`'whole-sign'`** (classical Vedic).
+
+**Status.** All six steps implemented as additive API surface (no v2.x breakage). **6,205 tests passing** (+157 new). External cross-validation against Jagannath Hora / DrikPanchang horoscope-match still pending — see "Phase 29 Exit Criteria" below — and is the gate before tagging v3.0. Bundle size: ~262 KB (was ~200 KB). Hermes JS-syntax check ✅.
+
+**New API surface (all re-exported from `src/index.ts`):** `computeLagna`, `computeBhava`, `computeRashiChart`, `computeNavamsa`, `computeAshtakoot`, `computeMangalDosha`, `computeSadeSati`, `computeDignity`, `computeVimshottariPratyantar`.
+
+**New types:** `LagnaInfo`, `HouseInfo`, `BhavaChart`, `BirthChart`, `DivisionalChart`, `PlanetPlacement`, `MangalDoshaInfo`, `SadeSatiInfo`, `PratyantarDasha`, `Dignity`, `HouseSystem`, `BirthChartOptions`, `NatalMoon`, `KootName`, `KootScore`, `AshtakootResult`.
+
+**New options:** `'true-chitra'` and `'thirukanitham'` ayanamsas; `nodeType: 'mean' | 'true'` on `computePlanetaryPositions` (Meeus periodic correction; ±0.6° vs ±2° worst-case for 'mean').
 
 ### Step 29-1 — Lagna (Ascendant) calculation
 

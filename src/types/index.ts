@@ -1,5 +1,9 @@
 export type { GeoLocation } from './location';
-export type { PanchangOptions, InstantPanchangOptions, AyanamsaType, Language, Precision, MasaSystem, FestivalRegion, LegacyFestivalRegion } from './options';
+export type {
+  PanchangOptions, InstantPanchangOptions, BirthChartOptions,
+  AyanamsaType, Language, Precision, MasaSystem, FestivalRegion, LegacyFestivalRegion,
+  HouseSystem,
+} from './options';
 export type {
   TimePeriod, TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo,
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
@@ -18,6 +22,9 @@ export { PanchangError } from './errors';
 export type { PanchangErrorCode } from './errors';
 export type {
   GrahaName, GrahaPosition, PlanetaryPositions,
-  DashaLord, AntarDasha, MahaDasha, VimshottariDashaResult,
+  DashaLord, AntarDasha, PratyantarDasha, MahaDasha, VimshottariDashaResult,
   ChandraBalamInfo, TarabalaInfo,
+  LagnaInfo, HouseInfo, BhavaChart,
+  PlanetPlacement, BirthChart, DivisionalChart,
+  MangalDoshaInfo, SadeSatiInfo,
 } from './jyotish';

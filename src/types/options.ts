@@ -1,7 +1,49 @@
-export type AyanamsaType = 'lahiri' | 'raman' | 'krishnamurti';
+export type AyanamsaType =
+  | 'lahiri'
+  | 'raman'
+  | 'krishnamurti'
+  | 'true-chitra'
+  | 'thirukanitham';
 export type Language = 'en' | 'hi';
 export type Precision = 'standard' | 'high';
 export type MasaSystem = 'purnimanta' | 'amanta';
+
+/**
+ * House (bhava) system used to derive the 12 house cusps from the lagna.
+ *
+ * - `'whole-sign'` (default, classical Vedic) — each rashi is exactly one
+ *    house starting from the lagna's sign. House cusps fall at 0° of each
+ *    rashi.
+ * - `'equal'` — each house spans exactly 30°, starting at the lagna's exact
+ *    degree. House cusps are lagna, lagna+30°, lagna+60°, …
+ * - `'placidus-kp'` — Placidus cusps (used in KP astrology). The above-
+ *    horizon ecliptic arc between Asc and MC is divided into thirds in
+ *    semi-arc time, with the same partitioning mirrored below the horizon.
+ *    Undefined for circumpolar latitudes (|φ| ≳ 66.5°); the API throws
+ *    `PanchangError` ('CIRCUMPOLAR') in that case.
+ */
+export type HouseSystem = 'whole-sign' | 'equal' | 'placidus-kp';
+
+/**
+ * Options for birth-chart computations (lagna, bhava, divisional charts,
+ * planetary positions). Distinct from {@link InstantPanchangOptions} because
+ * birth-chart APIs do not depend on a panchang's daily window — only on the
+ * birth instant and location.
+ */
+export interface BirthChartOptions {
+  /** Sidereal system. Defaults to `'lahiri'`. */
+  ayanamsa?: AyanamsaType;
+  /** Output language for `name` fields. Defaults to `'en'`. */
+  language?: Language;
+  /** House system for `computeBhava` / chart helpers. Defaults to `'whole-sign'`. */
+  houseSystem?: HouseSystem;
+  /**
+   * Rahu/Ketu node calculation:
+   *   - `'mean'` (default) — fast Meeus polynomial; ±0.5° typical, ±2° worst.
+   *   - `'true'` — Meeus + dominant periodic correction; ±0.6° typical.
+   */
+  nodeType?: 'mean' | 'true';
+}
 
 /**
  * Regional scope for region-specific festival variants. Default `'all'` emits
