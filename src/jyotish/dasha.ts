@@ -1,7 +1,7 @@
 import { NAKSHATRA_SPAN } from '../utils/constants';
 import { getSiderealMoonLongitude } from '../astronomy/moon';
 import type { AyanamsaType } from '../types/options';
-import type { DashaLord, MahaDasha, AntarDasha, VimshottariDashaResult } from '../types/jyotish';
+import type { DashaLord, MahaDasha, AntarDasha, PratyantarDasha, VimshottariDashaResult } from '../types/jyotish';
 
 // ── Vimshottari cycle constants ──────────────────────────────────────────────
 
@@ -135,6 +135,44 @@ export function computeVimshottariDashaFromBirth(
 ): VimshottariDashaResult {
   const moonSid = getSiderealMoonLongitude(birthDate, ayanamsaType);
   return computeVimshottariDasha(birthDate, moonSid);
+}
+
+/**
+ * Compute the 9 pratyantar (third-level) dashas inside an antardasha.
+ *
+ * Same proportional split as antardasha within a mahadasha:
+ *   pratyantar.lord cycles 9 planets starting from the antardasha lord,
+ *   each pratyantar's duration = (lord_years / 120) × antardasha duration.
+ *
+ * @param antardasha   The antardasha to subdivide.
+ * @returns            9 pratyantar periods covering the full antardasha.
+ *
+ * @example
+ * ```typescript
+ * const dasha = computeVimshottariDashaFromBirth(birthDate);
+ * const ad = dasha.mahaDashas[0].antarDashas[0];
+ * const pratyantars = computeVimshottariPratyantar(ad);
+ * pratyantars.forEach(p => console.log(p.lord, p.startDate, p.endDate));
+ * ```
+ */
+export function computeVimshottariPratyantar(antardasha: AntarDasha): PratyantarDasha[] {
+  const lordIdx = DASHA_ORDER.indexOf(antardasha.lord);
+  if (lordIdx < 0) {
+    throw new Error(`Invalid antardasha lord: ${antardasha.lord}`);
+  }
+  const totalMs = antardasha.endDate.getTime() - antardasha.startDate.getTime();
+  const out: PratyantarDasha[] = [];
+  let cursor = new Date(antardasha.startDate.getTime());
+  for (let i = 0; i < 9; i++) {
+    const subLord = DASHA_ORDER[(lordIdx + i) % 9]!;
+    const subYears = DASHA_YEARS[subLord];
+    const subMs = (subYears / 120) * totalMs;
+    const startDate = new Date(cursor.getTime());
+    const endDate = new Date(cursor.getTime() + subMs);
+    out.push({ lord: subLord, startDate, endDate });
+    cursor = endDate;
+  }
+  return out;
 }
 
 function buildAntarDashas(

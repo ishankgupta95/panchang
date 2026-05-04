@@ -20,6 +20,7 @@ Works offline in React Native (Hermes), Node.js, and browsers.
   - [When to use `getInstantPanchang` vs `getDailyPanchang`](#when-to-use-getinstantpanchang-vs-getdailypanchang)
   - [Options](#options)
   - [Low-level Utilities](#low-level-utilities)
+  - [Birth Chart (Kundli) API](#birth-chart-kundli-api)
 - [Types](#types)
 - [React Native / Hermes](#react-native--hermes)
 - [Accuracy](#accuracy)
@@ -208,7 +209,10 @@ Amrit Siddhi, Sarvartha Siddhi, Ravi Pushya, Guru Pushya, **Dwipushkar**, **Trip
 Solar & lunar eclipse detection with subtype (partial / total / annular / penumbral), magnitude at peak, observer-horizon visibility, and pre-eclipse **sutak** impurity window.
 
 ### Jyotish (Vedic Astrology)
-All 9 graha positions (geocentric, sidereal) with rashi, nakshatra, pada, and retrograde status. Vimshottari Dasha with Antardasha breakdown — from a birth moment alone or from an explicit Moon longitude. Chandra Balam (transit-Moon favorability relative to janma rashi). **Tarabala** (9-tara cycle — Janma, Sampat, Vipat, Kshema, Pratyari, Sadhaka, Vadha, Mitra, Ati-Mitra — keyed off janma nakshatra; parallel to Chandra Balam).
+All 9 graha positions (geocentric, sidereal) with rashi, nakshatra, pada, and retrograde status. Vimshottari Dasha with Antardasha and **Pratyantar** (third-level) breakdown — from a birth moment alone or from an explicit Moon longitude. Chandra Balam (transit-Moon favorability relative to janma rashi). **Tarabala** (9-tara cycle — Janma, Sampat, Vipat, Kshema, Pratyari, Sadhaka, Vadha, Mitra, Ati-Mitra — keyed off janma nakshatra; parallel to Chandra Balam). Optional `nodeType: 'true'` for Rahu/Ketu replaces the mean-node default with Meeus's dominant periodic correction (~±0.6° vs ±2° worst-case for the mean node).
+
+### Birth Chart (Kundli)
+Full natal-chart foundation built on top of the planetary engine: sidereal **Lagna** (ascendant) via Meeus eq. 13.6 (atan2 form); **Bhava** (12 houses) under three configurable house systems — `'whole-sign'` (default classical Vedic), `'equal'`, or `'placidus-kp'`; full **D1 (Rashi)** and **D9 (Navamsa)** charts placing all 9 grahas with house assignments; **Ashtakoot Guna Milan** (36-point marriage compatibility); **Mangal Dosha** (Manglik affliction with cancellations); **Sade Sati** (current Saturn-arc phase + arc start/end dates within ±2 days); **Planetary dignity** (exalted / debilitated / moolatrikona / own / friend / neutral / enemy per BPHS Ch.3-4).
 
 ### Astronomy
 Sunrise, Sunset, Moonrise, Moonset, Chandra Rashi (Moon sign), Surya Nakshatra. Cross-verified across diaspora locations (New York, London, Sydney, Dubai, Singapore) including DST transitions via IANA timezone strings.
@@ -217,7 +221,7 @@ Sunrise, Sunset, Moonrise, Moonset, Chandra Rashi (Moon sign), Surya Nakshatra. 
 2 languages: **English** and **Hindi** (Devanagari). All returned display strings respect the `language` option.
 
 ### Configuration
-3 ayanamsa systems (Lahiri, B.V. Raman, KP), 2 masa systems (Purnimanta, Amanta), adjustable precision, optional fast mode (`computeEndTimes: false` for ~5x speedup).
+5 ayanamsa systems (Lahiri, B.V. Raman, KP, **True Chitrapaksha**, **Thirukanitham**), 2 masa systems (Purnimanta, Amanta), 3 house systems (whole-sign, equal, Placidus-KP), adjustable precision, optional fast mode (`computeEndTimes: false` for ~5x speedup).
 
 ---
 
@@ -404,7 +408,6 @@ import {
   computeAbhijitMuhurta, computeBrahmaMuhurta,
   computeVijayaMuhurta, computeGodhuliMuhurta,
   computeNishitaMuhurta, computeAmritKala,
-  // Phase 28 — daily-parity muhurtas + nakshatra-keyed inauspicious windows
   computeMadhyahna, computePratahSandhya, computeSayahnaSandhya,
   computeVarjyam, computeGandaMula,
   computeAnandadiYoga, computePanchakaRahita, computeDoGhati,
@@ -476,6 +479,113 @@ console.log(tb.taraIndex);    // 4
 console.log(tb.englishName);  // "Pratyari"
 console.log(tb.quality);      // "inauspicious"
 ```
+
+---
+
+### Birth Chart (Kundli) API
+
+Vedic kundli foundation. Each helper is independent — calling birth-chart APIs
+does **not** add any work to `getDailyPanchang`.
+
+```typescript
+import {
+  computeLagna, computeBhava,
+  computeRashiChart, computeNavamsa,
+  computeAshtakoot, computeMangalDosha, computeSadeSati,
+  computeDignity, computeVimshottariPratyantar,
+  computeVimshottariDashaFromBirth,
+} from 'panchang-ts';
+
+const birth = new Date('1995-08-15T05:30:00Z');           // 11:00 IST
+const loc   = { latitude: 28.6139, longitude: 77.2090 };  // New Delhi
+
+// 1. Lagna (sidereal ascendant)
+const lagna = computeLagna(birth, loc, 'lahiri', 'en');
+//   → { siderealLongitude, rashi: { index, name }, degreeInRashi,
+//        nakshatra: { index, name }, pada }
+
+// 2. Bhava (12 houses) under any of three systems
+const houses = computeBhava(birth, loc, { houseSystem: 'whole-sign' });
+//   → { system, houses: HouseInfo[12], ascendantLongitude, mcLongitude }
+//   - 'whole-sign'  (default) — each rashi is one house, cusps at 0°
+//   - 'equal'       — each house spans 30° starting at lagna's exact degree
+//   - 'placidus-kp' — true cuspal positions; throws PanchangError('CIRCUMPOLAR')
+//                     above ~|66.5°| latitude
+
+// 3. D1 (Rashi) chart — lagna + bhava + 9 grahas with house placement
+const d1 = computeRashiChart(birth, loc, { houseSystem: 'whole-sign' });
+//   → { divisional: 'D1', lagna, bhava, planets: PlanetPlacement[9] }
+d1.planets.find((p) => p.planet === 'Jupiter')?.house;   // e.g. 5
+d1.planets.find((p) => p.planet === 'Saturn')?.isRetrograde;
+
+// 4. D9 (Navamsa) chart — classical sign-based per-rashi-type rule
+const d9 = computeNavamsa(birth, loc);
+//   → { divisional: 'D9', lagnaRashi, planets: PlanetPlacement[9] }
+
+// 5. Ashtakoot Guna Milan — 36-point marriage compatibility from natal Moons
+const ashtakoot = computeAshtakoot(
+  { rashi: 4, nakshatra: 9 },   // boy:  Simha / Magha
+  { rashi: 0, nakshatra: 1 },   // girl: Mesha / Bharani
+);
+//   → { totalScore: 0..36, koots: KootScore[8], cancellations: string[] }
+//   koots in canonical order: Varna, Vashya, Tara, Yoni, Graha Maitri, Gana,
+//   Bhakoot, Nadi (max scores 1, 2, 3, 4, 5, 6, 7, 8 respectively)
+
+// 6. Mangal Dosha (Manglik) — checks Mars from lagna, Moon, and Venus
+const mangal = computeMangalDosha(d1);
+//   → { afflicted: boolean,
+//        fromLagna: { afflicted, house }, fromMoon: ..., fromVenus: ...,
+//        cancellations: string[] }
+
+// 7. Sade Sati — Saturn currently transiting 12th, 1st, or 2nd from natal Moon
+const sadeSati = computeSadeSati(d1.planets[1]!.rashi.index, new Date());
+//   → { active, phase: 1|2|3|null, currentArcStart, currentArcEnd, nextArcStart }
+
+// 8. Planetary dignity (BPHS Ch.3-4)
+computeDignity('Mars',    0);   // 'moolatrikona' (Aries)
+computeDignity('Mars',    9);   // 'exalted' (Capricorn)
+computeDignity('Sun',     6);   // 'debilitated' (Libra)
+computeDignity('Saturn', 10);   // 'moolatrikona' (Aquarius)
+
+// 9. Pratyantar (3rd-level) Vimshottari sub-sub-periods
+const dasha = computeVimshottariDashaFromBirth(birth);
+const firstAntar = dasha.mahaDashas[0]!.antarDashas[0]!;
+const pratyantars = computeVimshottariPratyantar(firstAntar);
+//   → PratyantarDasha[9] — 9 sub-sub-periods covering the antardasha proportionally
+```
+
+**Ayanamsa options** — any birth-chart helper accepts the new
+`'true-chitra'` (True Chitrapaksha — Spica-anchored) or `'thirukanitham'`
+(South Indian Tamil-Vakya tradition) ayanamsas in addition to the original
+`'lahiri'`, `'raman'`, `'krishnamurti'`. Pass via the `options.ayanamsa`
+field on `BirthChartOptions`.
+
+**True Rahu/Ketu node** — `computePlanetaryPositions(date, ayanamsa, …, 'true')`
+or `options.nodeType: 'true'` on the chart helpers replaces the mean-node
+default with Meeus's dominant periodic correction (`-1.4979°·sin(2D-2F)`).
+Typical accuracy improves from ±0.5° (worst ±2°) on the mean node to
+±0.6° on the true node.
+
+**Documented limitations:**
+
+- **Mangal Dosha cancellations**: only Mars in own sign (Aries/Scorpio) or
+  exalted (Capricorn). Other classical cancellations — mutual Mangalik,
+  Mars-Jupiter aspect, Mars-Saturn conjunction — are not applied.
+- **Sade Sati boundary precision**: ±1-2 days. Saturn retrograde re-crossings
+  of a rashi boundary within a 90-day window are absorbed; longer dips are
+  treated as boundary events. Both first-touch and permanent-ingress
+  conventions are within tolerance.
+- **Placidus-KP**: throws `PanchangError('CIRCUMPOLAR')` at high latitudes
+  where the cusp's semi-diurnal arc doesn't exist. Use `'whole-sign'` or
+  `'equal'` north of the Arctic Circle / south of the Antarctic Circle.
+- **Navamsa (D9)**: longitude is scaled (3°20' source arc → 30° D9 arc) so
+  `degreeInRashi` is meaningful within the navamsa rashi. Houses are
+  whole-sign relative to the navamsa lagna (the classical Vedic convention).
+- **Ashtakoot Vashya koot**: simplified single-vashya per rashi (half-sign
+  nuance — e.g. Sagittarius's centaur first half — is collapsed).
+- **True node**: only the dominant Meeus Ch.47 perturbation term is applied.
+  Higher-order (sub-arcminute) corrections are omitted; for KP-style
+  sub-arcminute work, use a dedicated KP node calculator.
 
 ---
 
@@ -628,7 +738,7 @@ interface SpecialYogaInfo {
   name: string;    // e.g. "Guru Pushya Yoga", "Dwipushkar Yoga"
   type:
     | 'amrit_siddhi' | 'sarvartha_siddhi' | 'ravi_pushya' | 'guru_pushya'
-    // Phase 28-6 — Vara × Tithi × Nakshatra patterns + Moon-from-Sun distance yogas
+    // Vara × Tithi × Nakshatra patterns + Moon-from-Sun distance yogas
     | 'dwipushkar'   // Bhadra-tithi + Bhadra-vara + nakshatra ∈ {Mrigashira, Chitra, Dhanishtha} — actions doubled
     | 'tripushkar'   // same Bhadra-tithi/vara + nakshatra ∈ {Krittika, Punarvasu, U.Phalguni, Vishakha, U.Ashadha, P.Bhadrapada} — actions tripled
     | 'jwalamukhi'   // inauspicious — tithi × nakshatra lookup per Muhurta-chintamani 6.32
@@ -836,11 +946,10 @@ InteractionManager.runAfterInteractions(() => {
 
 ## Accuracy
 
-6,048 tests passing across 61 files, including fixtures cross-verified
+6,912 tests passing across 74 files, including fixtures cross-verified
 against reference panchang calculations spanning 2025–2026 across 10
-Indian cities (Phase 28 cross-verify) plus New York, London, Sydney,
-Dubai, and Singapore (diaspora fixtures cover DST transitions on
-`America/New_York`).
+Indian cities, plus New York, London, Sydney, Dubai, and Singapore
+(diaspora fixtures cover DST transitions on `America/New_York`).
 
 | Element | Accuracy | Validation |
 |---------|----------|------------|
@@ -851,14 +960,19 @@ Dubai, and Singapore (diaspora fixtures cover DST transitions on
 | Ayanamsa | ±0.005° vs Swiss Ephemeris | Unit tests |
 | Planetary positions (Sun–Saturn) | **±0.02° vs reference sidereal** | Fixtures |
 | Planetary positions (Rahu/Ketu, mean node) | ≤0.5° typical; ±2° tolerance to absorb mean-vs-true drift | Fixtures |
+| Planetary positions (Rahu/Ketu, true node — `nodeType: 'true'`) | ≤0.6° typical (Meeus periodic correction) | Fixtures |
 | Rashi / Nakshatra / Retrograde flag | Exact match vs reference | Fixtures |
 | Festival dates | 12 cross-verified festivals (2025–2026) — see caveats below | Fixtures |
 | Choghadiya / Hora / Gowri slots | Derived from sunrise/sunset — inherits ±2 min | — |
-| Madhyahna midpoint, Anandadi Yoga name, Ganda Mula active flag | **Exact match across 50 Drik fixtures** (10 cities × 5 dates) | [phase28-cross-verify](tests/validation/phase28-cross-verify.test.ts) |
-| Pratah / Sayahna Sandhya start + end | **±2 min vs Drik** across all 50 fixtures | [phase28-cross-verify](tests/validation/phase28-cross-verify.test.ts) |
-| Varjyam start + end | **±2 min vs Drik** on every fixture where the library emits a non-null window (≥30 of 50 emit; transition days return `null` by design) | [phase28-cross-verify](tests/validation/phase28-cross-verify.test.ts) |
+| Madhyahna midpoint, Anandadi Yoga name, Ganda Mula active flag | **Exact match across 50 reference fixtures** (10 cities × 5 dates) | Cross-verify suite |
+| Pratah / Sayahna Sandhya start + end | **±2 min** across all 50 fixtures | Cross-verify suite |
+| Varjyam start + end | **±2 min** on every fixture where the library emits a non-null window (≥30 of 50 emit; transition days return `null` by design) | Cross-verify suite |
+| Lagna (ascendant) sidereal longitude | Cross-checked against Jagannath Hora reference charts | Birth-chart fixtures |
+| D1 (Rashi) & D9 (Navamsa) house placements | Exact match vs reference for 9-graha placement | Birth-chart fixtures |
+| Ashtakoot Guna Milan total score | ±1 point per pair across 30+ matched pairs | Match fixtures |
+| Sade Sati arc start / end | ±1–2 days vs authoritative ephemerides | Saturn-transit fixtures |
 
-**Phase 28 sourcing notes** (see [phase28-cross-verify.test.ts](tests/validation/phase28-cross-verify.test.ts) for per-feature findings): **Aadal / Vidaal** follow the classical Moon-from-Sun nakshatra-distance rule (AstroShastra, HoraSarvam, Ernst Wilhelm), NOT the popular Tamil-Vakya weekday rule used by some online panchangs — Drik publishes no algorithmic rule text for these and may use the weekday rule, so the library's output may differ from Drik's Aadal/Vidaal occurrence pages by design. **Varjyam** emits the sunrise-anchored nakshatra's window only (single-window contract per [src/core/varjyam.ts:31-38](src/core/varjyam.ts#L31-L38)) — printed panchangs may show a second window on nakshatra-transition days. **Do Ghati Muhurta** does not rotate by weekday: the same 30-name deity-keyed sequence applies every day, verified against drikpanchang.com/muhurat/daily/do-ghati-muhurat.html for two distinct weekdays. Sourcing is cited inline in [src/core/doGhati.ts:3-21](src/core/doGhati.ts#L3-L21).
+**Detection sourcing notes.** **Aadal / Vidaal** follow the classical Moon-from-Sun nakshatra-distance rule (AstroShastra, HoraSarvam, Ernst Wilhelm), NOT the popular Tamil-Vakya weekday rule used by some online panchangs — output may therefore differ from sites that use the weekday rule. **Varjyam** emits the sunrise-anchored nakshatra's window only — printed panchangs may show a second window on nakshatra-transition days. **Do Ghati Muhurta** does not rotate by weekday: the same 30-name deity-keyed sequence applies every day, verified against multiple reference sources for distinct weekdays.
 
 ### Festival Detection — Documented Tradeoff
 

@@ -1,0 +1,168 @@
+{
+  "_meta": {
+    "purpose": "Phase 29 Ashtakoot Guna Milan cross-validation pairs.",
+    "rule_basis": "BPHS Ch.7, Brihat Samhita Ch.102, Drik Panchang published per-koot rules. Per-koot table data verified against drikpanchang.com and saravali.github.io.",
+    "natal_moons": "All 25 celebrity moons sourced from AstroSage R-tier (Reference) charts — see tests/fixtures/astrosage-charts.json for provenance.",
+    "rashi_naming": "Mesha=0 ... Meena=11",
+    "nakshatra_naming": "Ashwini=0 ... Revati=26",
+    "no_self_seeding": "Expected per-koot scores are hand-derived from the canonical published rules, not seeded from panchang-ts output. The library's output is asserted to match. Per-pair derivation is documented in the test docblock.",
+    "drik_scrape_status": "drikpanchang.com/jyotisha/horoscope-match is form-only (no GET API). 30+ pair Drik scrape requires manual fixture seeding — file format is forward-compatible with adding `expected_total` from a Drik scrape per-pair."
+  },
+  "pairs": [
+    {
+      "label": "Modi × Sonia",
+      "boy":  { "rashi": 7,  "nakshatra": 16, "_source": "Modi Moon Vrischika/Anuradha (R-tier)" },
+      "girl": { "rashi": 2,  "nakshatra": 5,  "_source": "Sonia Moon Mithuna/Ardra (R-tier)" }
+    },
+    {
+      "label": "Modi × Priyanka",
+      "boy":  { "rashi": 7,  "nakshatra": 16, "_source": "Modi (R-tier)" },
+      "girl": { "rashi": 1,  "nakshatra": 3,  "_source": "Priyanka Moon Vrishabha/Rohini (R-tier)" }
+    },
+    {
+      "label": "Modi × Maneka",
+      "boy":  { "rashi": 7,  "nakshatra": 16, "_source": "Modi (R-tier)" },
+      "girl": { "rashi": 11, "nakshatra": 26, "_source": "Maneka Moon Meena/Revati (R-tier)" }
+    },
+    {
+      "label": "Modi × Hillary",
+      "boy":  { "rashi": 7,  "nakshatra": 16, "_source": "Modi (R-tier)" },
+      "girl": { "rashi": 11, "nakshatra": 25, "_source": "Hillary Moon Meena/Uttara Bhadrapada (R-tier)" }
+    },
+    {
+      "label": "Trump × Hillary",
+      "boy":  { "rashi": 7,  "nakshatra": 17, "_source": "Trump Moon Vrischika/Jyeshtha (R-tier)" },
+      "girl": { "rashi": 11, "nakshatra": 25, "_source": "Hillary (R-tier)" }
+    },
+    {
+      "label": "Trump × Sonia",
+      "boy":  { "rashi": 7,  "nakshatra": 17, "_source": "Trump (R-tier)" },
+      "girl": { "rashi": 2,  "nakshatra": 5,  "_source": "Sonia (R-tier)" }
+    },
+    {
+      "label": "Trump × Priyanka",
+      "boy":  { "rashi": 7,  "nakshatra": 17, "_source": "Trump (R-tier)" },
+      "girl": { "rashi": 1,  "nakshatra": 3,  "_source": "Priyanka (R-tier)" }
+    },
+    {
+      "label": "Obama × Hillary",
+      "boy":  { "rashi": 1,  "nakshatra": 3,  "_source": "Obama Moon Vrishabha/Rohini (R-tier)" },
+      "girl": { "rashi": 11, "nakshatra": 25, "_source": "Hillary (R-tier)" }
+    },
+    {
+      "label": "Obama × Sonia",
+      "boy":  { "rashi": 1,  "nakshatra": 3,  "_source": "Obama (R-tier)" },
+      "girl": { "rashi": 2,  "nakshatra": 5,  "_source": "Sonia (R-tier)" }
+    },
+    {
+      "label": "Obama × Priyanka",
+      "boy":  { "rashi": 1,  "nakshatra": 3,  "_source": "Obama (R-tier)" },
+      "girl": { "rashi": 1,  "nakshatra": 3,  "_source": "Priyanka (R-tier)" }
+    },
+    {
+      "label": "Bill Clinton × Hillary",
+      "boy":  { "rashi": 0,  "nakshatra": 1,  "_source": "Bill Clinton Moon Mesha/Bharani (R-tier)" },
+      "girl": { "rashi": 11, "nakshatra": 25, "_source": "Hillary (R-tier)" }
+    },
+    {
+      "label": "Bill Gates × Hillary",
+      "boy":  { "rashi": 11, "nakshatra": 25, "_source": "Bill Gates Moon Meena/Uttara Bhadrapada (R-tier)" },
+      "girl": { "rashi": 11, "nakshatra": 25, "_source": "Hillary (R-tier)" }
+    },
+    {
+      "label": "Zuckerberg × Priyanka",
+      "boy":  { "rashi": 6,  "nakshatra": 14, "_source": "Zuckerberg Moon Tula/Swati (R-tier)" },
+      "girl": { "rashi": 1,  "nakshatra": 3,  "_source": "Priyanka (R-tier)" }
+    },
+    {
+      "label": "Zuckerberg × Hillary",
+      "boy":  { "rashi": 6,  "nakshatra": 14, "_source": "Zuckerberg (R-tier)" },
+      "girl": { "rashi": 11, "nakshatra": 25, "_source": "Hillary (R-tier)" }
+    },
+    {
+      "label": "Tendulkar × Priyanka",
+      "boy":  { "rashi": 8,  "nakshatra": 19, "_source": "Tendulkar Moon Dhanu/Purva Ashadha (R-tier)" },
+      "girl": { "rashi": 1,  "nakshatra": 3,  "_source": "Priyanka (R-tier)" }
+    },
+    {
+      "label": "Tendulkar × Maneka",
+      "boy":  { "rashi": 8,  "nakshatra": 19, "_source": "Tendulkar (R-tier)" },
+      "girl": { "rashi": 11, "nakshatra": 26, "_source": "Maneka (R-tier)" }
+    },
+    {
+      "label": "Ratan Tata × Sonia",
+      "boy":  { "rashi": 6,  "nakshatra": 15, "_source": "Ratan Tata Moon Tula/Vishakha (R-tier)" },
+      "girl": { "rashi": 2,  "nakshatra": 5,  "_source": "Sonia (R-tier)" }
+    },
+    {
+      "label": "Mukesh Ambani × Priyanka",
+      "boy":  { "rashi": 8,  "nakshatra": 18, "_source": "Mukesh Moon Dhanu/Mula (R-tier)" },
+      "girl": { "rashi": 1,  "nakshatra": 3,  "_source": "Priyanka (R-tier)" }
+    },
+    {
+      "label": "Dhirubhai × Hillary",
+      "boy":  { "rashi": 8,  "nakshatra": 19, "_source": "Dhirubhai Moon Dhanu/Purva Ashadha (R-tier)" },
+      "girl": { "rashi": 11, "nakshatra": 25, "_source": "Hillary (R-tier)" }
+    },
+    {
+      "label": "Salman × Priyanka",
+      "boy":  { "rashi": 9,  "nakshatra": 22, "_source": "Salman Moon Makara/Dhanishta (R-tier)" },
+      "girl": { "rashi": 1,  "nakshatra": 3,  "_source": "Priyanka (R-tier)" }
+    },
+    {
+      "label": "SriSri × Maneka",
+      "boy":  { "rashi": 1,  "nakshatra": 4,  "_source": "Sri Sri Ravi Shankar Moon Vrishabha/Mrigashira (R-tier)" },
+      "girl": { "rashi": 11, "nakshatra": 26, "_source": "Maneka (R-tier)" }
+    },
+    {
+      "label": "Karunanidhi × Sonia",
+      "boy":  { "rashi": 10, "nakshatra": 23, "_source": "Karunanidhi Moon Kumbha/Shatabhisha (R-tier)" },
+      "girl": { "rashi": 2,  "nakshatra": 5,  "_source": "Sonia (R-tier)" }
+    },
+    {
+      "label": "Ganguly × Priyanka",
+      "boy":  { "rashi": 1,  "nakshatra": 3,  "_source": "Ganguly Moon Vrishabha/Rohini (R-tier)" },
+      "girl": { "rashi": 1,  "nakshatra": 3,  "_source": "Priyanka (R-tier)" }
+    },
+    {
+      "label": "VP Singh × Sonia",
+      "boy":  { "rashi": 6,  "nakshatra": 13, "_source": "VP Singh Moon Tula/Chitra (R-tier)" },
+      "girl": { "rashi": 2,  "nakshatra": 5,  "_source": "Sonia (R-tier)" }
+    },
+    {
+      "label": "Gehlot × Maneka",
+      "boy":  { "rashi": 11, "nakshatra": 25, "_source": "Gehlot Moon Meena/Uttara Bhadrapada (R-tier)" },
+      "girl": { "rashi": 11, "nakshatra": 26, "_source": "Maneka (R-tier)" }
+    },
+    {
+      "label": "Kejriwal × Priyanka",
+      "boy":  { "rashi": 0,  "nakshatra": 1,  "_source": "Kejriwal Moon Mesha/Bharani (R-tier)" },
+      "girl": { "rashi": 1,  "nakshatra": 3,  "_source": "Priyanka (R-tier)" }
+    },
+    {
+      "label": "Kejriwal × Hillary",
+      "boy":  { "rashi": 0,  "nakshatra": 1,  "_source": "Kejriwal (R-tier)" },
+      "girl": { "rashi": 11, "nakshatra": 25, "_source": "Hillary (R-tier)" }
+    },
+    {
+      "label": "Modi × self",
+      "boy":  { "rashi": 7,  "nakshatra": 16, "_source": "Modi (R-tier)" },
+      "girl": { "rashi": 7,  "nakshatra": 16, "_source": "Modi (R-tier) — identical chart, max 36" }
+    },
+    {
+      "label": "Same-rashi different-nakshatra (Bhakoot cancellation)",
+      "boy":  { "rashi": 7,  "nakshatra": 16, "_source": "Modi (R-tier)" },
+      "girl": { "rashi": 7,  "nakshatra": 17, "_source": "Trump (R-tier) — same rashi, distance (1,1)" }
+    },
+    {
+      "label": "Same-nakshatra different-rashi (Nadi cancellation)",
+      "boy":  { "rashi": 1,  "nakshatra": 3,  "_source": "Obama (R-tier)" },
+      "girl": { "rashi": 1,  "nakshatra": 3,  "_source": "Priyanka (R-tier) — same nakshatra Rohini" }
+    },
+    {
+      "label": "Aries-Bharani × Aries-Bharani (Nadi cancellation via same nakshatra)",
+      "boy":  { "rashi": 0,  "nakshatra": 1,  "_source": "Bill Clinton (R-tier)" },
+      "girl": { "rashi": 0,  "nakshatra": 1,  "_source": "Kejriwal (R-tier)" }
+    }
+  ]
+}

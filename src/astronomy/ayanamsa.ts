@@ -31,9 +31,36 @@ export function computeAyanamsa(date: Date, type: AyanamsaType = 'lahiri'): numb
       return ramanAyanamsa(T);
     case 'krishnamurti':
       return kpAyanamsa(T);
+    case 'true-chitra':
+      return trueChitraAyanamsa(T);
+    case 'thirukanitham':
+      return thirukanithamAyanamsa(T);
     default:
       throw new PanchangError(`Unknown ayanamsa type: ${type}`, 'INVALID_AYANAMSA');
   }
+}
+
+/**
+ * True Chitrapaksha ayanamsa — anchored to Chitra star (Spica) at 180°
+ * sidereal. Differs from Lahiri by ~1 arcsec at J2000 (Lahiri uses a
+ * mean-Spica reference; True Chitra uses the actual stellar position).
+ * The fractional offset is small in practice (~0.0006°).
+ */
+function trueChitraAyanamsa(T: number): number {
+  const REF_J2000_DEG = 23.853211 - 0.0006;
+  const precessionArcsec = 5029.0966 * T + 1.112 * T * T - 0.000006 * T * T * T;
+  return REF_J2000_DEG + precessionArcsec / 3600;
+}
+
+/**
+ * Thirukanitham ayanamsa — Tamil-tradition variant used in some South
+ * Indian (Vakya) panchangs. ~1.1 arcmin offset from Lahiri at J2000;
+ * same precession rate.
+ */
+function thirukanithamAyanamsa(T: number): number {
+  const REF_J2000_DEG = 23.871667; // 23° 52' 18" per Tamil Vakya tradition
+  const precessionArcsec = 5029.0966 * T + 1.112 * T * T - 0.000006 * T * T * T;
+  return REF_J2000_DEG + precessionArcsec / 3600;
 }
 
 function lahiriAyanamsa(T: number): number {

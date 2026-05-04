@@ -20,6 +20,16 @@ export { computePlanetaryPositions, GRAHA_ABBR } from './jyotish/planets';
 export { computeVimshottariDasha, computeVimshottariDashaFromBirth } from './jyotish/dasha';
 export { computeChandraBalam } from './jyotish/chandraBalam';
 export { computeTarabala } from './jyotish/tarabala';
+export { computeLagna } from './jyotish/lagna';
+export { computeBhava } from './jyotish/bhava';
+export { computeRashiChart, computeNavamsa } from './jyotish/charts';
+export { computeAshtakoot } from './jyotish/matching';
+export type { NatalMoon, KootName, KootScore, AshtakootResult } from './jyotish/matching';
+export { computeMangalDosha } from './jyotish/doshas';
+export { computeSadeSati } from './jyotish/sadeSati';
+export { computeDignity } from './jyotish/dignity';
+export type { Dignity } from './jyotish/dignity';
+export { computeVimshottariPratyantar } from './jyotish/dasha';
 
 // Astronomy utilities
 export { computeSunrise as getSunrise, computeSunset as getSunset } from './astronomy/sunrise';
@@ -51,8 +61,9 @@ export {
 // Types
 export type {
   GeoLocation,
-  PanchangOptions, InstantPanchangOptions,
+  PanchangOptions, InstantPanchangOptions, BirthChartOptions,
   AyanamsaType, Language, Precision, MasaSystem, FestivalRegion, LegacyFestivalRegion,
+  HouseSystem,
   DailyPanchangResult, InstantPanchangResult,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, MasaInfo,
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
@@ -69,8 +80,11 @@ export type {
   PanchangErrorCode,
   // Jyotish types
   GrahaName, GrahaPosition, PlanetaryPositions,
-  DashaLord, AntarDasha, MahaDasha, VimshottariDashaResult,
+  DashaLord, AntarDasha, PratyantarDasha, MahaDasha, VimshottariDashaResult,
   ChandraBalamInfo, TarabalaInfo,
+  LagnaInfo, HouseInfo, BhavaChart,
+  PlanetPlacement, BirthChart, DivisionalChart,
+  MangalDoshaInfo, SadeSatiInfo,
 } from './types';
 
 // Errors
