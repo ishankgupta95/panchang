@@ -2,31 +2,10 @@
 
 [![npm version](https://img.shields.io/npm/v/panchang-ts)](https://www.npmjs.com/package/panchang-ts)
 
-Pure TypeScript Hindu Panchang (almanac) calculations. Zero native dependencies.
-Works offline in React Native (Hermes), Node.js, and browsers.
+Pure TypeScript Hindu Panchang (almanac), Jyotish, and Birth Chart calculations.
+Zero native dependencies. Works offline in React Native (Hermes), Node.js, and browsers.
 
-**Fast** (~0.1 ms names-only, ~0.5 ms full) | **Typed** (full TypeScript types) | **Offline** (pure JS math, no network)
-
----
-
-## Table of Contents
-
-- [Install](#install)
-- [Quick Start](#quick-start)
-- [Features](#features)
-- [API Reference](#api-reference)
-  - [`getDailyPanchang`](#getdailypanchangdate-location-options)
-  - [`getInstantPanchang`](#getinstantpanchangdate-location-options)
-  - [When to use `getInstantPanchang` vs `getDailyPanchang`](#when-to-use-getinstantpanchang-vs-getdailypanchang)
-  - [Options](#options)
-  - [Low-level Utilities](#low-level-utilities)
-  - [Birth Chart (Kundli) API](#birth-chart-kundli-api)
-- [Types](#types)
-- [React Native / Hermes](#react-native--hermes)
-- [Accuracy](#accuracy)
-- [Performance](#performance)
-- [Error Handling](#error-handling)
-- [Compatibility](#compatibility)
+**Fast** (~0.1 ms names-only, ~0.5 ms full) | **Typed** (full TypeScript types) | **Offline** (pure JS math, no network) | **6,912 tests**
 
 ---
 
@@ -39,6 +18,41 @@ pnpm add panchang-ts
 # or
 yarn add panchang-ts
 ```
+
+---
+
+## Features at a Glance
+
+Every category below is implemented end-to-end, cross-verified against reference panchang
+sources, and exposed through the public API. Click a row to jump to its usage example.
+
+| Category | Features | Jump to |
+|----------|----------|---------|
+| **Pancha Anga (5 limbs)** | Tithi, Nakshatra, Yoga, Karana, Vara — with all transitions through the day | [↓](#1-pancha-anga--the-five-limbs) |
+| **Lunar Calendar** | Chandra Masa (Purnimanta + Amanta), Adhika (leap-month) detection, Vikram Samvat, Shaka Samvat | [↓](#2-lunar-calendar) |
+| **Solar Calendar** | Saura Masa, Surya Nakshatra, Sankranti (transit-based) | [↓](#3-solar-calendar) |
+| **Sun & Moon** | Sunrise, Sunset, Moonrise, Moonset, Chandra Rashi (Moon sign) | [↓](#4-sun--moon) |
+| **Auspicious Muhurta** | Brahma, Abhijit, Vijaya, Godhuli, Nishita, Madhyahna, Pratah / Sayahna Sandhya, Amrit Kala | [↓](#5-auspicious-muhurta) |
+| **Inauspicious Periods** | Rahu Kalam, Gulika Kalam, Yamaganda, Dur Muhurta, Varjyam, Ganda Mula, Bhadra Kala, Panchaka | [↓](#6-inauspicious-periods) |
+| **Time-Slot Systems** | Choghadiya (16), Gowri Panchangam / Nalla Neram (16), Hora (24), Do Ghati (30), Panchaka Rahita | [↓](#7-time-slot-systems) |
+| **Special Yogas** | Anandadi (28-name cycle), Amrit Siddhi, Sarvartha Siddhi, Ravi / Guru Pushya, Dwipushkar, Tripushkar, Jwalamukhi, Aadal, Vidaal, Ravi | [↓](#8-special-yogas) |
+| **Festivals (80+)** | Ekadashi (Smarta + Vaishnava split), Pradosha, Sankranti variants, classical festivals (Diwali, Holi, Shivaratri…), regional festivals across 21 states + Nepal | [↓](#9-festivals) |
+| **Eclipses (Grahan)** | Solar + lunar detection, subtype, magnitude, observer-horizon visibility, sutak window | [↓](#10-eclipses) |
+| **Planetary Positions** | All 9 grahas (sidereal) with rashi, nakshatra, pada, retrograde — mean or true Rahu/Ketu | [↓](#11-planetary-positions) |
+| **Vimshottari Dasha** | Maha → Antar → Pratyantar (3-level) breakdown from birth | [↓](#12-vimshottari-dasha) |
+| **Personal Transits** | Chandra Balam, Tarabala (9-tara cycle), Sade Sati (Saturn arc) | [↓](#13-personal-transits) |
+| **Birth Chart (Kundli)** | Lagna (sidereal), Bhava under 3 house systems, D1 (Rashi), D9 (Navamsa), Planetary Dignity | [↓](#14-birth-chart-kundli) |
+| **Compatibility & Doshas** | Ashtakoot Guna Milan (36-point), Mangal Dosha (Manglik) | [↓](#15-compatibility--doshas) |
+| **Localization** | English + Hindi (Devanagari) on every returned name | [↓](#16-localization) |
+| **Configuration** | 5 ayanamsas (Lahiri, Raman, KP, True Chitrapaksha, Thirukanitham), 2 masa systems, 3 house systems, 21 regional festival scopes | [↓](#17-configuration) |
+
+---
+
+## Used By
+
+- [dharmagya.app](https://dharmagya.app) — Daily Panchang and Hindu calendar
+
+---
 
 ## Quick Start
 
@@ -53,57 +67,17 @@ const result = getDailyPanchang(
 // result is `DailyPanchangResult | null` — null only at polar latitudes
 // where sunrise can't be computed. Anywhere else, narrow with `if (!result) return;`
 
-// Pancha Anga
 console.log(result.tithis[0].name);           // "Krishna Chaturdashi"
 console.log(result.nakshatras[0].name);       // "Mrigashira"
 console.log(result.vara.name);                // "Mangalawara"
-
-// Lunar calendar (Purnimanta by default)
 console.log(result.chandramasa.name);         // "Magha"
-console.log(result.chandramasa.amantaName);   // "Pausha" (South Indian)
 console.log(result.samvat.vikramSamvat);      // 2081
-
-// Zodiac
-console.log(result.chandraRashi.name);        // "Mithuna" (Moon in Gemini)
-console.log(result.suryaNakshatra.name);      // "Uttara Ashadha"
-
-// Astronomical events
-console.log(result.sunrise);                  // Date (read via getUTC*)
-console.log(result.moonrise);                 // Date | null
-
-// Muhurta & inauspicious periods
-console.log(result.brahmaMuhurta);            // { start: Date, end: Date }
-console.log(result.madhyahna);                // solar noon ±24 min
-console.log(result.rahuKalam);                // { start: Date, end: Date }
-console.log(result.anandadiYoga.name);        // "Ananda" (Vara × Nakshatra cycle)
-console.log(result.gandaMula.active);         // false (or true with severity)
-console.log(result.varjyam);                  // { start, end } | null
-
-// Choghadiya — 8 daytime slots
-result.choghadiya.day.forEach(slot => {
-  console.log(slot.name, slot.qualityName);   // "Amrit", "Auspicious"
-});
-
-// Gowri Panchangam — 8 daytime slots
-result.gowriPanchangam.day.forEach(slot => {
-  console.log(slot.name, slot.qualityName);   // "Amrit", "Auspicious"
-});
-
-// Special Yogas active today
-result.specialYogas.forEach(yoga => {
-  console.log(yoga.name, yoga.type);          // "Guru Pushya Yoga", "guru_pushya"
-});
-
-// Festivals today
-result.festivals.forEach(f => {
-  console.log(f.name, f.type);               // "Makar Sankranti", "major"
-});
 ```
 
 ### Reading Output Times
 
-All `Date` objects in the result are **offset-adjusted** to the requested timezone.
-Always read time components via `getUTC*` methods:
+All `Date` objects in the result are **offset-adjusted** to the requested timezone. Always
+read time components via `getUTC*` methods — `.getHours()` would use your system zone:
 
 ```typescript
 const sunrise = result.sunrise;
@@ -111,7 +85,6 @@ const h = sunrise.getUTCHours();    // 7
 const m = sunrise.getUTCMinutes();  // 4
 // → Sunrise at 07:04 local time
 
-// Format helper:
 function fmt(d: Date) {
   const h = d.getUTCHours(), m = d.getUTCMinutes();
   return `${h}:${String(m).padStart(2, '0')}`;
@@ -119,477 +92,494 @@ function fmt(d: Date) {
 fmt(result.rahuKalam.start); // "09:04"
 ```
 
-Do **not** use `.getHours()` — it uses your system timezone, which may differ.
+`moonrise` and `moonset` can be `null` — the Moon occasionally does not rise or set on a
+given calendar day, which is normal.
 
-`moonrise` and `moonset` can be `null` — the Moon occasionally does not rise or set
-on a given calendar day, which is normal.
+### `getDailyPanchang` vs `getInstantPanchang`
 
-### Language & Masa System
+| Use case | Recommended | Why |
+|----------|-------------|-----|
+| "What Panchang elements are active right now?" | `getInstantPanchang` | Single-moment snapshot; no sunrise needed |
+| Birth chart / muhurta picking at a specific instant | `getInstantPanchang` | Exact element at that UTC moment |
+| Daily calendar / almanac row for a date | `getDailyPanchang` | Lists all element transitions for the day |
+| Today's festivals & observances | `getDailyPanchang` | Full canonical-time festival refinement |
+| Rahu Kalam / Choghadiya / Gowri / Hora / muhurtas | `getDailyPanchang` | Computed from sunrise, sunset, day length |
+| Eclipse detection with sutak window | `getDailyPanchang` | Overlapping the day needs the day window |
+
+`getInstantPanchang` does emit `festivals`, but evaluates rules against the elements at the
+given instant only. It does not run canonical-time refinements (madhyahna / pradosha /
+nishita / chandrodaya), transit-based Sankranti, Ekadashi viddha (Smarta/Vaishnava split),
+or Bhadra-aware Raksha Bandhan exclusion. For reliable festival dating, use
+`getDailyPanchang`.
+
+---
+
+# Feature Reference
+
+Each section below shows how to access one feature category. Every feature is also
+returned as a field on the unified `DailyPanchangResult` from `getDailyPanchang(…)` if you
+prefer one call over the per-feature helpers.
+
+## 1. Pancha Anga — the Five Limbs
+
+Tithi, Nakshatra, Yoga, Karana, Vara — with start / end times for every transition during
+the Hindu day.
 
 ```typescript
-// Hindi names (Devanagari)
-const hi = getDailyPanchang(date, location, {
-  timezone: 330,
-  language: 'hi',
-});
-console.log(hi.tithis[0].name);              // "कृष्ण चतुर्दशी"
-console.log(hi.vara.name);                   // "मंगलवार"
+import { getDailyPanchang } from 'panchang-ts';
 
-// Amanta (South Indian) masa system
-const amanta = getDailyPanchang(date, location, {
-  timezone: 330,
-  masaSystem: 'amanta',
+const r = getDailyPanchang(date, location, { timezone: 330 })!;
+
+// Tithis active during the day (usually 1-2)
+r.tithis.forEach(t => {
+  console.log(t.name, t.paksha, t.completionPercentage, t.endTime);
 });
-console.log(amanta.chandramasa.name);         // Amanta month name
-console.log(amanta.chandramasa.system);       // "amanta"
+
+// Nakshatras (with pada)
+r.nakshatras.forEach(n => console.log(n.name, n.pada, n.endTime));
+
+// Yogas (27-name lunisolar cycle)
+r.yogas.forEach(y => console.log(y.name, y.endTime));
+
+// Karanas (half-tithi; usually 2-4 per day)
+r.karanas.forEach(k => console.log(k.name, k.type, k.endTime));
+
+// Vara (weekday)
+console.log(r.vara.name, r.vara.englishName);  // "Mangalawara", "Tuesday"
 ```
 
-### Regional Festival Filtering
+For a single-instant snapshot use `getInstantPanchang`:
 
-The `region` option scopes regional festival variants to one Indian state.
-Pan-Indian festivals (Diwali, Holi, Raksha Bandhan, the canonical
-`sankranti` event, …) emit regardless.
+```typescript
+import { getInstantPanchang } from 'panchang-ts';
+
+const i = getInstantPanchang(new Date(), location)!;
+console.log(i.tithi.name, i.nakshatra.name, i.yoga.name, i.karana.name, i.vara.name);
+```
+
+## 2. Lunar Calendar
+
+Chandra Masa with **Purnimanta** (North Indian, default) and **Amanta** (South Indian)
+naming, **Adhika** (leap-month) detection, **Vikram** and **Shaka** samvat year numbers.
+
+```typescript
+const r = getDailyPanchang(date, loc, { timezone: 330, masaSystem: 'purnimanta' })!;
+
+console.log(r.chandramasa.name);           // "Magha"   (active system)
+console.log(r.chandramasa.amantaName);     // "Pausha"  (South Indian)
+console.log(r.chandramasa.purnimantaName); // "Magha"   (North Indian)
+console.log(r.chandramasa.isAdhika);       // false (true during leap months)
+
+console.log(r.samvat.vikramSamvat);        // 2081
+console.log(r.samvat.shakaSamvat);         // 1946
+```
+
+## 3. Solar Calendar
+
+Saura Masa (solar month), Surya Nakshatra (the Sun's nakshatra, ~13–14 day transit),
+Sankranti (solar-month boundary, transit-based — emitted as a festival).
+
+```typescript
+const r = getDailyPanchang(date, loc, { timezone: 330 })!;
+
+console.log(r.masa.name);              // "Makara" (current solar month)
+console.log(r.suryaNakshatra.name);    // "Uttara Ashadha"
+console.log(r.chandraRashi.name);      // "Mithuna" (Moon sign)
+
+// Sankranti and its regional variants emit through r.festivals — see §9.
+```
+
+## 4. Sun & Moon
+
+Sunrise, sunset, moonrise, moonset (Meeus apparent-upper-limb), plus Chandra Rashi
+(Moon's zodiac sign).
+
+```typescript
+import { getSunrise, getSunset, getMoonrise, getMoonset } from 'panchang-ts';
+
+const loc = { latitude: 28.6139, longitude: 77.2090 };  // New Delhi
+
+const sunrise = getSunrise(localMidnightUtc, loc);
+const sunset  = getSunset(sunrise, loc);
+
+// Moonrise / moonset can be null on days the Moon doesn't rise/set
+const moonrise = getMoonrise(localMidnightUtc, loc);
+const moonset  = getMoonset(localMidnightUtc, loc);
+
+// Or read all of them off the daily result:
+const r = getDailyPanchang(date, loc, { timezone: 330 })!;
+console.log(r.sunrise, r.sunset, r.moonrise, r.moonset, r.nextSunrise);
+console.log(r.dayDurationMinutes, r.nightDurationMinutes);
+```
+
+## 5. Auspicious Muhurta
+
+Classical auspicious time windows: Brahma, Abhijit, Vijaya, Godhuli, Nishita, Madhyahna,
+Pratah / Sayahna Sandhya, and nakshatra-keyed Amrit Kala.
+
+```typescript
+const r = getDailyPanchang(date, loc, { timezone: 330 })!;
+
+r.brahmaMuhurta;     // two muhurtas before sunrise
+r.abhijitMuhurta;    // 8th day-muhurta — universally auspicious
+r.vijayaMuhurta;     // 11th day-muhurta — auspicious for success
+r.godhuliMuhurta;    // "cow-dust" — sunset muhurta
+r.nishitaMuhurta;    // midnight muhurta (Shivaratri)
+r.madhyahna;         // solar noon ±24 min
+r.pratahSandhya;     // dawn twilight, ends *at* sunrise
+r.sayahnaSandhya;    // dusk twilight, starts *at* sunset
+r.amritKala;         // nakshatra-specific window (null when nakshatra has none)
+
+// Direct helpers:
+import {
+  computeBrahmaMuhurta, computeAbhijitMuhurta, computeVijayaMuhurta,
+  computeGodhuliMuhurta, computeNishitaMuhurta, computeMadhyahna,
+  computePratahSandhya, computeSayahnaSandhya, computeAmritKala,
+} from 'panchang-ts';
+```
+
+`pratahSandhya` and `sayahnaSandhya` are asymmetric — width = `nightDuration / 10`
+(~62–81 min depending on season), matching DrikPanchang within ±2 min.
+
+## 6. Inauspicious Periods
+
+Rahu Kalam, Gulika Kalam, Yamaganda, Dur Muhurta (2 windows), Varjyam (BPHS-keyed
+~96-min forbidden window), Ganda Mula (Moon in root nakshatras), Bhadra Kala (Vishti
+karana with earth/heaven/paatal location), Panchaka.
+
+```typescript
+const r = getDailyPanchang(date, loc, { timezone: 330 })!;
+
+r.rahuKalam;       // { start, end }
+r.gulikaKalam;     // { start, end }
+r.yamaganda;       // { start, end }
+r.durMuhurta;      // [TimePeriod, TimePeriod] — two ~48-min windows
+r.varjyam;         // { start, end } | null
+r.gandaMula;       // { active: boolean, severity: 'mild' | 'severe' | null, ... }
+r.bhadra;          // { start, end, location: 'earth'|'heaven'|'paatal', isActive } | null
+r.panchaka;        // boolean — Moon in last 5 nakshatras
+
+// Direct helpers (varaIndex: 0=Sun ... 6=Sat):
+import {
+  computeRahuKalam, computeGulikaKalam, computeYamaganda,
+  computeVarjyam, computeGandaMula,
+} from 'panchang-ts';
+
+const rahu = computeRahuKalam(sunrise, sunset, varaIndex);
+```
+
+## 7. Time-Slot Systems
+
+Four parallel slot systems covering the Hindu day:
+
+```typescript
+const r = getDailyPanchang(date, loc, { timezone: 330 })!;
+
+// Choghadiya — 8 day + 8 night slots, each named (Amrit, Kaal, Shubh, Rog, ...) and rated
+r.choghadiya.day.forEach(s => console.log(s.name, s.qualityName, s.start, s.end));
+r.choghadiya.night.forEach(s => console.log(s.name, s.qualityName));
+
+// Gowri Panchangam (Tamil "Nalla Neram") — 8 day + 8 night slots
+r.gowriPanchangam.day.forEach(s => console.log(s.name, s.qualityName));
+
+// Hora — 12 day + 12 night planetary hours (Chaldean order)
+r.hora.day.forEach(h => console.log(h.planet, h.start, h.end));
+
+// Do Ghati Muhurta — 15 day + 15 night ~48-min deity-keyed slots (no vara rotation)
+r.doGhatiMuhurta.day.forEach(g => console.log(g.name, g.start, g.end));
+
+// Panchaka Rahita — slices of the day FREE of Panchaka ([] when Panchaka pervades)
+r.panchakaRahita.forEach(slice => console.log(slice.start, slice.end));
+```
+
+## 8. Special Yogas
+
+Auspicious / inauspicious yogas formed by Vara × Tithi × Nakshatra combinations and
+Moon-from-Sun nakshatra-distance rules. The 28-name **Anandadi Yoga** cycle is also
+returned at sunrise.
+
+```typescript
+const r = getDailyPanchang(date, loc, { timezone: 330 })!;
+
+// Anandadi Yoga (Vara × Nakshatra cycle of 28 names)
+console.log(r.anandadiYoga.name);   // "Ananda"
+
+// Special yogas active today
+r.specialYogas.forEach(y => {
+  console.log(y.name, y.type);
+  // type: 'amrit_siddhi' | 'sarvartha_siddhi' | 'ravi_pushya' | 'guru_pushya'
+  //     | 'dwipushkar' | 'tripushkar'   ← actions doubled / tripled
+  //     | 'jwalamukhi'                  ← inauspicious (Muhurta-chintamani 6.32)
+  //     | 'aadal' | 'vidaal' | 'ravi'   ← Moon-from-Sun nakshatra-distance rules
+});
+```
+
+## 9. Festivals
+
+**80+ festivals** spanning pan-Indian, regional, and classical observances:
+
+- **Ekadashi** — 26 named variants (Putrada, Shat Tila, Nirjala, Devshayani, …) with
+  **Smarta / Vaishnava split** via Dashami-viddha rule; Smarta fast emits a `deferralDate`
+  for Dwadashi.
+- **Pradosha** — 7 weekday-qualified variants (Som, Bhauma, Shani, …) on both pakshas.
+- **Sankranti** — transit-based detection plus regional variants (Pongal, Vishu, Baisakhi,
+  Pohela Boishakh, Bohag / Magh / Kati Bihu, Uttarayan, Ayyappa Makara Jyothi, Raja
+  Sankranti, Harela, Sair, Singh Sankranti). **Lohri** fires on the Hindu day immediately
+  preceding Makara Sankranti under Punjab / Haryana / Himachal scopes.
+- **Canonical-time classical festivals** — Ganesh Chaturthi (madhyahna), Shivaratri
+  (nishita), Diwali, Holi, Raksha Bandhan (Bhadra-aware), Karva Chauth (chandrodaya),
+  Janmashtami, Dussehra, Navaratri, Ram Navami, Hanuman Jayanti, Akshaya Tritiya &
+  Parashurama Jayanti (madhyahna-vyapini), Makar Sankranti.
+- **Regional festivals** — Gudi Padwa, Gangaur, Karaga, Bonalu, Varamahalakshmi,
+  Bathukamma, Hariyali / Kajari / Hartalika Teej, Govardhan Puja, Bhai Dooj, Phagli,
+  Jagannath Rath Yatra, Raja Parba 3-day arc.
+- **Regional & seasonal** — Chhath (4-day sequence), Vat Savitri, Upakarma, Onam.
+- **Monthly observances** — Masik Shivaratri, Vinayaka Chaturthi, Masik Karthigai, Pushya
+  days, Shravan Somvar, and other month + weekday patterns.
+
+```typescript
+const r = getDailyPanchang(date, loc, { timezone: 330 })!;
+
+r.festivals.forEach(f => {
+  console.log(f.name, f.type, f.deferralDate);
+  // type: 'major' | 'minor' | 'ekadashi'
+  //     | 'smarta_ekadashi' | 'vaishnava_ekadashi'   ← Smarta sets deferralDate
+  //     | 'pradosha' | 'sankranti' | 'eclipse'
+});
+```
+
+### Regional festival scoping
+
+The `region` option scopes regional festival variants to one Indian state. Pan-Indian
+festivals (Diwali, Holi, Raksha Bandhan, the canonical `sankranti` event) emit regardless.
 
 ```typescript
 // Default — every regional variant emits on Makar Sankranti day:
-const all = getDailyPanchang(jan14, chennai, { timezone: 330 });
+const all = getDailyPanchang(jan14, chennai, { timezone: 330 })!;
 all.festivals.map(f => f.name);
 // → ["Sankranti", "Makar Sankranti", "Pongal", "Uttarayan",
 //    "Magh Bihu", "Ayyappa Makara Jyothi"]
 
 // Scope to Tamil Nadu — drops Bihu/Ayyappa/Uttarayan:
-const tn = getDailyPanchang(jan14, chennai, { timezone: 330, region: 'tamil-nadu' });
+const tn = getDailyPanchang(jan14, chennai, { timezone: 330, region: 'tamil-nadu' })!;
 tn.festivals.map(f => f.name);
 // → ["Sankranti", "Makar Sankranti", "Pongal"]
 
-// Lohri fires on the Hindu day BEFORE Makara transit, scoped to Punjab/
-// Haryana/Himachal — no extra wiring required, just the region option:
-const lohri = getDailyPanchang(jan13, amritsar, { timezone: 330, region: 'punjab' });
+// Lohri fires on the Hindu day BEFORE Makara transit, scoped to Punjab/Haryana/Himachal
+const lohri = getDailyPanchang(jan13, amritsar, { timezone: 330, region: 'punjab' })!;
 lohri.festivals.some(f => f.name === 'Lohri');  // true
-
-// Pre-v2.1 region values still work but log a one-shot deprecation warning:
-getDailyPanchang(date, loc, { timezone: 330, region: 'tamil' });
-// console.warn: [panchang-ts] FestivalRegion 'tamil' is deprecated;
-//               use 'tamil-nadu'. Legacy value will be removed in v3.
 ```
 
-See [`FestivalRegion`](#types) for the full state-slug list (21 states + `'nepal'`).
+`FestivalRegion` covers 21 Indian states + `'nepal'` + `'all'` (default). See
+[Types](#types--exports) for the full slug list.
 
----
+## 10. Eclipses
 
-## Features
-
-### Pancha Anga (5 Limbs)
-Tithi, Nakshatra, Yoga, Karana, Vara — with transition times throughout the day.
-
-### Lunar Calendar
-Chandra Masa with Adhika (leap month) detection, both **Purnimanta** (North Indian, default) and **Amanta** (South Indian) systems, Vikram Samvat, Shaka Samvat.
-
-### Muhurta & Auspicious Timing
-Brahma Muhurta, Abhijit Muhurta, Vijaya Muhurta (11th day-muhurta), Godhuli (sunset muhurta), Nishita (midnight muhurta, used for Shivaratri), **Madhyahna** (solar noon ±24 min ritual window), **Pratah Sandhya** / **Sayahna Sandhya** (asymmetric dawn / dusk twilight windows, width = `nightDuration / 10` — ~62–81 min depending on season, ending *at* sunrise / starting *at* sunset; matches DrikPanchang within ±2 min), classical aliases `dinamanaMinutes` / `ratrimanaMinutes`, nakshatra-keyed Amrit Kala. Choghadiya (16 slots), Gowri Panchangam / Nalla Neram (16 slots), Hora (24 planetary hours), Dur Muhurta (2 inauspicious windows), **Do Ghati Muhurta** (15 day + 15 night ~48-min slots, deity-keyed, no vara rotation), **Panchaka Rahita Muhurta** (slices of the day free of Panchaka), **Anandadi Yoga** (28-name Vara × Nakshatra cycle).
-
-### Inauspicious Periods
-Rahu Kalam, Gulika Kalam, Yamaganda, Panchaka detection, Bhadra Kala (Vishti karana window with earth / heaven / paatal location), **Varjyam** (BPHS-keyed forbidden ~96-min window per nakshatra), **Ganda Mula** (Moon in the 6 root nakshatras — Ashwini / Ashlesha / Magha / Jyeshtha / Mula / Revati — with `mild` / `severe` severity).
-
-### Special Yogas & Festivals
-Amrit Siddhi, Sarvartha Siddhi, Ravi Pushya, Guru Pushya, **Dwipushkar**, **Tripushkar**, **Jwalamukhi**, **Aadal**, **Vidaal**, **Ravi** yoga detection.
-
-**80+ festivals** spanning pan-Indian, regional, and classical observances:
-
-- **Ekadashi** — 26 named variants (Putrada, Shat Tila, Nirjala, Devshayani, etc.) with **Smarta / Vaishnava split** via Dashami-viddha rule; Smarta fast emits a `deferralDate` for Dwadashi.
-- **Pradosha** — 7 weekday-qualified variants (Som Pradosh, Bhauma Pradosh, Shani Pradosh, etc.) firing on both Shukla & Krishna paksha.
-- **Sankranti** — transit-based solar-month boundary detection plus regional variants (**Pongal**, **Vishu**, **Baisakhi**, **Pohela Boishakh**, **Bohag Bihu**, **Magh Bihu**, **Kati Bihu**, **Uttarayan**, **Ayyappa Makara Jyothi**, **Raja Sankranti**, **Harela**, **Sair**, **Singh Sankranti**) scoped by the `region` option. **Lohri** fires on the Hindu day immediately preceding Makara Sankranti under Punjab/Haryana/Himachal scopes.
-- **Canonical-time classical festivals** — Ganesh Chaturthi (madhyahna), Shivaratri (nishita), Diwali, Holi, Raksha Bandhan (Bhadra-aware, suppressed when Bhadra straddles Purnima), Karva Chauth (chandrodaya), Janmashtami, Dussehra, Navaratri, Ram Navami, Hanuman Jayanti, **Akshaya Tritiya & Parashurama Jayanti** (madhyahna-vyapini, co-emitted on Vaishakha Shukla Tritiya), Makar Sankranti.
-- **Regional festivals (v2.1)** — **Gudi Padwa** (Maharashtra/Goa), **Gangaur** (Rajasthan), **Karaga** (Karnataka), **Bonalu** (Telangana, recurring Sundays in Ashadha), **Varamahalakshmi** (last Friday of Shravana Shukla before Purnima, Karnataka/AP/Telangana/Tamil Nadu), **Bathukamma** (Telangana — Engili Pula + Saddula markers), **Hariyali / Kajari / Hartalika Teej**, **Govardhan Puja**, **Bhai Dooj**, **Phagli** (Himachal), **Jagannath Rath Yatra** (pan-Indian, Ashadha Shukla Dwitiya), **Raja Parba** 3-day arc (Odisha — Pahili / Sankranti / Basi) — all filtered by per-state allow-lists on the rule.
-- **Regional & seasonal** — Chhath (4-day sequence), Vat Savitri, Upakarma (3 shakha variants via nakshatra+chandraMasa), Onam (nakshatra+solarMasa).
-- **Monthly observances** — Masik Shivaratri, Vinayaka Chaturthi (suppressed in Maha-month), **Masik Karthigai** (any day Krittika nakshatra prevails — sampled at sunrise / midday / sunset / nishita), Pushya days, Shravan Somvar and other month+weekday patterns.
-- Adhika (leap) months auto-skipped for tithi-based rules; Purnimanta naming respected.
-
-### Eclipses (Grahan)
-Solar & lunar eclipse detection with subtype (partial / total / annular / penumbral), magnitude at peak, observer-horizon visibility, and pre-eclipse **sutak** impurity window.
-
-### Jyotish (Vedic Astrology)
-All 9 graha positions (geocentric, sidereal) with rashi, nakshatra, pada, and retrograde status. Vimshottari Dasha with Antardasha and **Pratyantar** (third-level) breakdown — from a birth moment alone or from an explicit Moon longitude. Chandra Balam (transit-Moon favorability relative to janma rashi). **Tarabala** (9-tara cycle — Janma, Sampat, Vipat, Kshema, Pratyari, Sadhaka, Vadha, Mitra, Ati-Mitra — keyed off janma nakshatra; parallel to Chandra Balam). Optional `nodeType: 'true'` for Rahu/Ketu replaces the mean-node default with Meeus's dominant periodic correction (~±0.6° vs ±2° worst-case for the mean node).
-
-### Birth Chart (Kundli)
-Full natal-chart foundation built on top of the planetary engine: sidereal **Lagna** (ascendant) via Meeus eq. 13.6 (atan2 form); **Bhava** (12 houses) under three configurable house systems — `'whole-sign'` (default classical Vedic), `'equal'`, or `'placidus-kp'`; full **D1 (Rashi)** and **D9 (Navamsa)** charts placing all 9 grahas with house assignments; **Ashtakoot Guna Milan** (36-point marriage compatibility); **Mangal Dosha** (Manglik affliction with cancellations); **Sade Sati** (current Saturn-arc phase + arc start/end dates within ±2 days); **Planetary dignity** (exalted / debilitated / moolatrikona / own / friend / neutral / enemy per BPHS Ch.3-4).
-
-### Astronomy
-Sunrise, Sunset, Moonrise, Moonset, Chandra Rashi (Moon sign), Surya Nakshatra. Cross-verified across diaspora locations (New York, London, Sydney, Dubai, Singapore) including DST transitions via IANA timezone strings.
-
-### Localization
-2 languages: **English** and **Hindi** (Devanagari). All returned display strings respect the `language` option.
-
-### Configuration
-5 ayanamsa systems (Lahiri, B.V. Raman, KP, **True Chitrapaksha**, **Thirukanitham**), 2 masa systems (Purnimanta, Amanta), 3 house systems (whole-sign, equal, Placidus-KP), adjustable precision, optional fast mode (`computeEndTimes: false` for ~5x speedup).
-
----
-
-## API Reference
-
-### `getDailyPanchang(date, location, options)`
-
-Returns the full Hindu day from sunrise to next sunrise, with all element transitions.
+Solar / lunar eclipse detection with subtype, magnitude, observer-horizon visibility, and
+classical pre-eclipse **sutak** impurity window.
 
 ```typescript
-import { getDailyPanchang } from 'panchang-ts';
+const r = getDailyPanchang(date, loc, { timezone: 330 })!;
 
-const result = getDailyPanchang(
-  date,      // Date — any moment within the local calendar day
-  location,  // GeoLocation — { latitude, longitude, elevation? }
-  options,   // PanchangOptions — { timezone, ayanamsa?, language?, ... }
-);
+if (r.eclipse) {
+  console.log(r.eclipse.kind);                 // 'solar' | 'lunar'
+  console.log(r.eclipse.subtype);              // 'partial' | 'total' | 'annular' | 'penumbral'
+  console.log(r.eclipse.magnitude);            // 0..1 fraction of disc obscured at peak
+  console.log(r.eclipse.visibleFromLocation);  // body above horizon at peak?
+  console.log(r.eclipse.start, r.eclipse.peak, r.eclipse.end);
+  console.log(r.eclipse.sutakStart, r.eclipse.sutakEnd);
+  // Sutak: 12 h (4 prahara) before solar, 9 h (3 prahara) before lunar
+}
+
+// Or look ahead:
+import { getUpcomingSolarEclipse, getUpcomingLunarEclipse } from 'panchang-ts';
+const next = getUpcomingSolarEclipse(new Date(), loc, /* withinDays */ 365);
 ```
 
-**Returns: `DailyPanchangResult | null`**
+## 11. Planetary Positions
 
-`null` is returned for polar locations on dates where sunrise or sunset cannot be computed (midnight sun, polar night). On every other location/date the function returns a populated result.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `date` | `Date` | Input date |
-| `location` | `GeoLocation` | Input location |
-| `timezone` | `number` | Resolved UTC offset in minutes |
-| `sunrise` | `Date` | Sunrise (offset-adjusted) |
-| `sunset` | `Date` | Sunset (offset-adjusted) |
-| `nextSunrise` | `Date` | Following day's sunrise (offset-adjusted) |
-| `dayDurationMinutes` | `number` | Length of daytime in minutes |
-| `nightDurationMinutes` | `number` | Length of night in minutes |
-| `tithis` | `DailyTithiInfo[]` | Tithis active during the day (usually 1-2) |
-| `nakshatras` | `DailyNakshatraInfo[]` | Nakshatras active during the day |
-| `yogas` | `DailyYogaInfo[]` | Yogas active during the day |
-| `karanas` | `DailyKaranaInfo[]` | Karanas active during the day (usually 2-4) |
-| `vara` | `VaraInfo` | Weekday (Vara) |
-| `rahuKalam` | `TimePeriod` | Rahu Kalam start/end |
-| `gulikaKalam` | `TimePeriod` | Gulika Kalam start/end |
-| `yamaganda` | `TimePeriod` | Yamaganda start/end |
-| `abhijitMuhurta` | `TimePeriod` | Abhijit Muhurta start/end |
-| `brahmaMuhurta` | `TimePeriod` | Brahma Muhurta — two muhurtas before sunrise |
-| `masa` | `MasaInfo` | Solar month (Saura Masa) |
-| `chandramasa` | `ChandraMasaInfo` | Lunar month + Adhika (leap) flag |
-| `samvat` | `SamvatInfo` | Vikram Samvat and Shaka Samvat year numbers |
-| `chandraRashi` | `RashiInfo` | Moon's zodiac sign (changes every ~2.5 days) |
-| `suryaNakshatra` | `RashiInfo` | Sun's nakshatra (changes every ~13-14 days) |
-| `choghadiya` | `ChoghadiyaInfo` | 8 day + 8 night slots, each named and rated |
-| `gowriPanchangam` | `GowriInfo` | 8 day + 8 night Gowri Nalla Neram slots |
-| `hora` | `HoraInfo` | 12 day + 12 night horas, each with ruling planet |
-| `moonrise` | `Date \| null` | Moonrise; `null` if none that day |
-| `moonset` | `Date \| null` | Moonset; `null` if none that day |
-| `panchaka` | `boolean` | `true` when Moon is in last 5 nakshatras |
-| `panchakaRahita` | `TimePeriod[]` | Slices of the Hindu day FREE of Panchaka; `[]` when Panchaka pervades the entire day |
-| `doGhatiMuhurta` | `DoGhatiInfo` | 15 day + 15 night ~48-min deity-keyed slots covering sunrise→sunset and sunset→nextSunrise |
-| `gandaMula` | `GandaMulaInfo` | Moon-in-root-nakshatra detection at sunrise; `active: false` for the 21 non-root nakshatras |
-| `anandadiYoga` | `AnandadiYogaInfo` | Vara × Nakshatra 28-name cycle yoga at sunrise |
-| `specialYogas` | `SpecialYogaInfo[]` | Auspicious yogas active today |
-| `durMuhurta` | `[TimePeriod, TimePeriod]` | Two inauspicious ~48-min windows |
-| `vijayaMuhurta` | `TimePeriod` | Vijaya Muhurta — 11th day-muhurta, auspicious for success |
-| `godhuliMuhurta` | `TimePeriod` | Godhuli ("cow-dust") — sunset muhurta, auspicious for ceremonies |
-| `nishitaMuhurta` | `TimePeriod` | Nishita — midnight muhurta, used for Shivaratri and nocturnal rites |
-| `madhyahna` | `TimePeriod` | Madhyahna — solar noon as a ±24-min ritual window (one classical muhurta wide) |
-| `pratahSandhya` | `TimePeriod` | Dawn-twilight ritual window — three nighttime ghatikas ending *at* sunrise (asymmetric; width = `nightDuration / 10` ≈ 62–81 min) |
-| `sayahnaSandhya` | `TimePeriod` | Dusk-twilight ritual window — three nighttime ghatikas starting *at* sunset (asymmetric; width = `nightDuration / 10`) |
-| `dinamanaMinutes` | `number` | Classical alias of `dayDurationMinutes` (sunrise → sunset) |
-| `ratrimanaMinutes` | `number` | Classical alias of `nightDurationMinutes` (sunset → next sunrise) |
-| `amritKala` | `TimePeriod \| null` | Amrit Kala — nakshatra-specific auspicious window (null when nakshatra has none) |
-| `varjyam` | `TimePeriod \| null` | Varjyam (Vishaghati / Nakshatra Thyajyam) — BPHS-keyed forbidden ~96-min window; `null` when none overlaps the Hindu day |
-| `bhadra` | `BhadraInfo \| null` | Bhadra Kala (Vishti karana) window overlapping this Hindu day, or `null` |
-| `eclipse` | `EclipseInfo \| null` | Solar/lunar eclipse overlapping this Hindu day with sutak window, or `null` |
-| `festivals` | `FestivalInfo[]` | Festivals / observances today (filtered by `region` option) |
-| `chandraBalam` | `ChandraBalamInfo?` | Transit-Moon favorability — only present when `janmaRashi` option is passed |
-| `tarabala` | `TarabalaInfo?` | 9-tara cycle position — only present when `janmaNakshatra` option is passed |
-| `ayanamsa` | `number` | Ayanamsa in degrees at sunrise |
-| `siderealSunAtSunrise` | `number` | Sun sidereal longitude at sunrise (degrees) |
-| `siderealMoonAtSunrise` | `number` | Moon sidereal longitude at sunrise (degrees) |
-
----
-
-### `getInstantPanchang(date, location, options?)`
-
-Returns the single Panchang element active at an exact UTC moment.
+All 9 grahas (Sun → Saturn + Rahu / Ketu) — geocentric, sidereal — with rashi, nakshatra,
+pada, retrograde flag. Optional `nodeType: 'true'` upgrades Rahu / Ketu from mean node
+(±2° worst-case) to Meeus's dominant periodic correction (~±0.6°).
 
 ```typescript
-import { getInstantPanchang } from 'panchang-ts';
+import { computePlanetaryPositions, GRAHA_ABBR } from 'panchang-ts';
 
-const result = getInstantPanchang(
-  new Date('2025-01-14T03:00:00Z'),           // UTC moment
-  { latitude: 18.5204, longitude: 73.8567 },
-  { language: 'hi' },                          // Hindi (Devanagari) names
-);
+const grahas = computePlanetaryPositions(new Date(), 'lahiri');
+console.log(grahas.jupiter.rashi.name);       // "Dhanu"
+console.log(grahas.jupiter.degreeInRashi);    // 18.42
+console.log(grahas.jupiter.nakshatra.name);   // "Purva Ashadha"
+console.log(grahas.jupiter.nakshatra.pada);   // 3
+console.log(grahas.saturn.isRetrograde);      // true / false
+console.log(GRAHA_ABBR['Jupiter']);           // "Ju"
 
-console.log(result.tithi.name);              // "कृष्ण चतुर्दशी"
-console.log(result.nakshatra.name);          // "मृगशिरा"
-console.log(result.chandramasa.name);        // "माघ"
-console.log(result.chandraRashi.name);       // "मिथुन"
-console.log(result.samvat.vikramSamvat);     // 2081
-console.log(result.panchaka);               // false
+// True node (more accurate Rahu / Ketu)
+const grahasTrue = computePlanetaryPositions(new Date(), 'lahiri', undefined, 'true');
 ```
 
-**Returns: `InstantPanchangResult | null`**
+## 12. Vimshottari Dasha
 
-`null` is returned for polar locations where sunrise can't be computed (the Hindu-day weekday is undefined). On every other location/date the function returns a populated result.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `timestamp` | `Date` | Input UTC moment |
-| `location` | `GeoLocation` | Input location |
-| `tithi` | `TithiInfo` | Active Tithi with paksha, number, completion % |
-| `nakshatra` | `NakshatraInfo` | Active Nakshatra with pada, degrees |
-| `yoga` | `YogaInfo` | Active Yoga |
-| `karana` | `KaranaInfo` | Active Karana (movable or fixed) |
-| `vara` | `VaraInfo` | Active Vara (weekday) |
-| `chandramasa` | `ChandraMasaInfo` | Lunar month + Adhika flag |
-| `samvat` | `SamvatInfo` | Vikram Samvat and Shaka Samvat year numbers |
-| `chandraRashi` | `RashiInfo` | Moon's zodiac sign |
-| `suryaNakshatra` | `RashiInfo` | Sun's nakshatra |
-| `panchaka` | `boolean` | `true` when Moon is in last 5 nakshatras |
-| `gandaMula` | `GandaMulaInfo` | Moon-in-root-nakshatra detection at the queried instant |
-| `anandadiYoga` | `AnandadiYogaInfo` | Vara × Nakshatra 28-name cycle yoga at the queried instant |
-| `specialYogas` | `SpecialYogaInfo[]` | Auspicious yogas at this moment |
-| `festivals` | `FestivalInfo[]` | Festivals / observances at this moment (see caveat below) |
-| `chandraBalam` | `ChandraBalamInfo?` | Transit-Moon favorability — only present when `janmaRashi` option is passed |
-| `tarabala` | `TarabalaInfo?` | 9-tara cycle position — only present when `janmaNakshatra` option is passed |
-| `ayanamsa` | `number` | Ayanamsa in degrees |
-| `siderealSun` | `number` | Sun sidereal longitude (degrees) |
-| `siderealMoon` | `number` | Moon sidereal longitude (degrees) |
-
----
-
-### When to use `getInstantPanchang` vs `getDailyPanchang`
-
-Both functions share the same core astronomy, but `getDailyPanchang` operates on the full Vedic day (local sunrise → next sunrise) while `getInstantPanchang` samples a single UTC moment. That distinction matters most for **festivals** and classical rules that reference a specific canonical time of the Hindu day.
-
-| Use case | Recommended | Why |
-|----------|-------------|-----|
-| "What Panchang elements are active right now?" | `getInstantPanchang` | Single-moment snapshot; no sunrise needed. |
-| Birth chart / muhurta picking at a specific instant | `getInstantPanchang` | Exact element at that UTC moment. |
-| Daily calendar / almanac row for a date | `getDailyPanchang` | Lists all element transitions for the day. |
-| Displaying today's festivals & observances | `getDailyPanchang` | Full canonical-time festival refinement. |
-| Sankranti / solar-month boundary dates | `getDailyPanchang` | Uses sunrise-to-next-sunrise transit detection. |
-| Ekadashi (Smarta vs Vaishnava), Shivaratri, Ganesh Chaturthi, Karva Chauth | `getDailyPanchang` | Requires madhyahna / pradosha / nishita / chandrodaya refinement. |
-| Raksha Bandhan date (Bhadra-aware) / long-tithi dedupe | `getDailyPanchang` | Rules key off the Hindu day window, not an instant. |
-| Rahu Kalam / Gulika / Choghadiya / Gowri / Hora / Durmuhurta | `getDailyPanchang` | Computed from sunrise, sunset, and day length. |
-| Eclipse (Grahan) detection with sutak window | `getDailyPanchang` | Overlapping the day needs the day window. |
-
-**Instant-mode festival caveat:** `getInstantPanchang` does emit `festivals`, but it evaluates rules against the tithi / nakshatra / chandraMasa at the given instant only. It **does not** run the canonical-time refinements (madhyahna / pradosha / nishita / chandrodaya), transit-based Sankranti, Ekadashi viddha (Smarta/Vaishnava split), or Bhadra-aware Raksha Bandhan exclusion — those require the full sunrise-to-next-sunrise Hindu day window and are only available in `getDailyPanchang`. If you need reliable festival dating, use `getDailyPanchang`.
-
----
-
-### Options
-
-**`PanchangOptions`** (required for `getDailyPanchang`):
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `timezone` | `number \| string` | **required** | UTC offset in minutes (330 for IST) **or** IANA zone name (`'America/New_York'`). IANA strings require `Intl` — use a number on older Hermes. DST resolves automatically for IANA zones via the reference date. |
-| `ayanamsa` | `'lahiri' \| 'raman' \| 'krishnamurti'` | `'lahiri'` | Ayanamsa system |
-| `language` | `'en' \| 'hi'` | `'en'` | Language for all element names (English or Hindi Devanagari). |
-| `computeEndTimes` | `boolean` | `true` | Set `false` for ~5x faster, names-only output |
-| `precision` | `'standard' \| 'high'` | `'standard'` | Binary-search iterations (15 vs 25). High precision is rarely needed. |
-| `masaSystem` | `'purnimanta' \| 'amanta'` | `'purnimanta'` | Lunar month naming system. Purnimanta (North Indian) or Amanta (South Indian). |
-| `region` | `FestivalRegion` | `'all'` | Scopes regional festival variants (Pongal, Vishu, Gudi Padwa, Lohri, Govardhan Puja, Bonalu, …) to a specific Indian state. See [`FestivalRegion`](#types) for the full list. Pre-v2.1 values (`'tamil'`, `'bengal'`, `'north-india'`) are still accepted but emit a deprecation warning; removal in v3. Pan-Indian festivals and the canonical `sankranti` event emit regardless of this setting. |
-| `janmaRashi` | `number` | _(omitted)_ | Native's birth Moon rashi index (0 = Mesha … 11 = Meena). When provided, the result includes `chandraBalam`. |
-| `janmaNakshatra` | `number` | _(omitted)_ | Native's birth Moon nakshatra index (0 = Ashwini … 26 = Revati). When provided, the result includes `tarabala`. |
-
-**`InstantPanchangOptions`** (optional for `getInstantPanchang`): same as above but without `timezone` (instant mode works in UTC).
-
----
-
-### Low-level Utilities
-
-Exported for advanced use cases — building custom tools, visualizations, or Jyotish applications.
+Maha → Antar → Pratyantar (3-level) breakdown, derived from a birth moment alone or from
+an explicit Moon longitude.
 
 ```typescript
 import {
-  getSunrise, getSunset,
-  getMoonrise, getMoonset,
-  getSiderealSunLongitude, getSiderealMoonLongitude,
-  getAyanamsa,
-  computeRahuKalam, computeGulikaKalam, computeYamaganda,
-  computeAbhijitMuhurta, computeBrahmaMuhurta,
-  computeVijayaMuhurta, computeGodhuliMuhurta,
-  computeNishitaMuhurta, computeAmritKala,
-  computeMadhyahna, computePratahSandhya, computeSayahnaSandhya,
-  computeVarjyam, computeGandaMula,
-  computeAnandadiYoga, computePanchakaRahita, computeDoGhati,
-  computeGowriPanchangam,
-  // Eclipses (signature: (fromUtc, location, withinDays))
-  getUpcomingSolarEclipse, getUpcomingLunarEclipse, getEclipseDuringDay,
-  // Jyotish
-  computePlanetaryPositions,
   computeVimshottariDasha, computeVimshottariDashaFromBirth,
-  computeChandraBalam,
-  computeTarabala,
-  GRAHA_ABBR,
+  computeVimshottariPratyantar, getSiderealMoonLongitude,
 } from 'panchang-ts';
 
-// Sunrise/sunset
-const sunrise = getSunrise(localMidnightUtc, { latitude: 28.6, longitude: 77.2 });
-const sunset  = getSunset(sunrise, { latitude: 28.6, longitude: 77.2 });
-
-// Moonrise/moonset — return null when the Moon doesn't rise/set that day
-const moonrise = getMoonrise(localMidnightUtc, { latitude: 28.6, longitude: 77.2 });
-const moonset  = getMoonset(localMidnightUtc, { latitude: 28.6, longitude: 77.2 });
-
-// Sidereal longitudes
-const moonLon = getSiderealMoonLongitude(new Date(), 'lahiri'); // degrees [0, 360)
-const sunLon  = getSiderealSunLongitude(new Date(), 'lahiri');
-
-// Ayanamsa
-const ayan = getAyanamsa(new Date(), 'lahiri');  // e.g. 24.10
-
-// Inauspicious periods (varaIndex: 0=Sun ... 6=Sat)
-const rahu   = computeRahuKalam(sunrise, sunset, varaIndex);   // { start, end }
-const gulika = computeGulikaKalam(sunrise, sunset, varaIndex);
-const yama   = computeYamaganda(sunrise, sunset, varaIndex);
-
-// Muhurta
-const abhijit = computeAbhijitMuhurta(sunrise, sunset);    // { start, end }
-const brahma  = computeBrahmaMuhurta(sunrise, sunset);     // { start, end }
-```
-
-**Jyotish (Vedic Astrology):**
-
-```typescript
-// All 9 graha positions (sidereal — Rahu/Ketu use mean node)
-const grahas = computePlanetaryPositions(birthDate, 'lahiri');
-console.log(grahas.jupiter.rashi.name);   // "Dhanu"
-console.log(grahas.saturn.isRetrograde);  // true/false
-console.log(GRAHA_ABBR['Jupiter']);       // "Ju"
-
-// Vimshottari Dasha — convenience form: birth date only (Moon longitude derived)
+// Convenience: from birth date alone (Moon longitude derived)
 const dasha = computeVimshottariDashaFromBirth(birthDate, 'lahiri');
-console.log(dasha.currentMahaDashaLord);                   // "Rahu"
-console.log(dasha.mahaDashas[0]!.antarDashas[0]!.lord);    // "Rahu"
+console.log(dasha.currentMahaDashaLord);                // "Rahu"
+console.log(dasha.mahaDashas[0]!.antarDashas[0]!.lord); // "Rahu"
 
-// Or pass an explicit Moon sidereal longitude (useful when you already have one)
+// Or pass an explicit Moon sidereal longitude
 const moonLon = getSiderealMoonLongitude(birthDate, 'lahiri');
 const dasha2  = computeVimshottariDasha(birthDate, moonLon);
 
-// Chandra Balam — transit Moon's favorability vs. janma rashi
-// janmaRashi and transitMoonRashi are 0-indexed (0 = Mesha ... 11 = Meena)
-const cb = computeChandraBalam(3 /* Karka */, 6 /* Tula */);
-console.log(cb.house);        // 4
-console.log(cb.quality);      // "weak"
-console.log(cb.englishName);  // "Ashubha"
-
-// Tarabala — 9-tara cycle from janma nakshatra → transit Moon nakshatra.
-// Inputs are 0-indexed nakshatra (0 = Ashwini ... 26 = Revati).
-const tb = computeTarabala(0 /* janma: Ashwini */, 4 /* transit: Mrigashira */);
-console.log(tb.taraIndex);    // 4
-console.log(tb.englishName);  // "Pratyari"
-console.log(tb.quality);      // "inauspicious"
+// Pratyantar — third-level sub-sub-periods within an Antardasha
+const firstAntar  = dasha.mahaDashas[0]!.antarDashas[0]!;
+const pratyantars = computeVimshottariPratyantar(firstAntar);  // PratyantarDasha[9]
 ```
 
----
+## 13. Personal Transits
 
-### Birth Chart (Kundli) API
+Daily transit-based favorability relative to the native's birth Moon. Pass `janmaRashi`
+or `janmaNakshatra` to `getDailyPanchang` and the corresponding field is added to the
+result; or call the helpers directly.
 
-Vedic kundli foundation. Each helper is independent — calling birth-chart APIs
-does **not** add any work to `getDailyPanchang`.
+```typescript
+const r = getDailyPanchang(date, loc, {
+  timezone: 330,
+  janmaRashi: 3,        // 0 = Mesha ... 11 = Meena
+  janmaNakshatra: 0,    // 0 = Ashwini ... 26 = Revati
+})!;
+
+r.chandraBalam!;  // { house, quality: 'strong' | 'weak', name, englishName }
+r.tarabala!;      // { taraIndex, name, englishName, quality }
+
+// Direct helpers:
+import { computeChandraBalam, computeTarabala, computeSadeSati } from 'panchang-ts';
+
+computeChandraBalam(3 /* janma */, 6 /* transit Moon rashi */);
+computeTarabala(0 /* janma nakshatra */, 4 /* transit Moon nakshatra */);
+
+// Sade Sati — Saturn currently transiting 12th, 1st, or 2nd from natal Moon
+const sadeSati = computeSadeSati(natalMoonRashiIndex, new Date());
+// → { active, phase: 1|2|3|null, currentArcStart, currentArcEnd, nextArcStart }
+```
+
+## 14. Birth Chart (Kundli)
+
+Sidereal **Lagna**, **Bhava** under three house systems, **D1 (Rashi)** and **D9
+(Navamsa)** charts placing all 9 grahas, and **Planetary Dignity**.
 
 ```typescript
 import {
-  computeLagna, computeBhava,
-  computeRashiChart, computeNavamsa,
-  computeAshtakoot, computeMangalDosha, computeSadeSati,
-  computeDignity, computeVimshottariPratyantar,
-  computeVimshottariDashaFromBirth,
+  computeLagna, computeBhava, computeRashiChart, computeNavamsa,
+  computeDignity,
 } from 'panchang-ts';
 
-const birth = new Date('1995-08-15T05:30:00Z');           // 11:00 IST
-const loc   = { latitude: 28.6139, longitude: 77.2090 };  // New Delhi
+const birth = new Date('1995-08-15T05:30:00Z');
+const loc   = { latitude: 28.6139, longitude: 77.2090 };
 
 // 1. Lagna (sidereal ascendant)
 const lagna = computeLagna(birth, loc, 'lahiri', 'en');
-//   → { siderealLongitude, rashi: { index, name }, degreeInRashi,
-//        nakshatra: { index, name }, pada }
+//   → { siderealLongitude, rashi, degreeInRashi, nakshatra, pada }
 
-// 2. Bhava (12 houses) under any of three systems
-const houses = computeBhava(birth, loc, { houseSystem: 'whole-sign' });
-//   → { system, houses: HouseInfo[12], ascendantLongitude, mcLongitude }
-//   - 'whole-sign'  (default) — each rashi is one house, cusps at 0°
+// 2. Bhava (12 houses)
+//   - 'whole-sign'  (default classical Vedic) — each rashi is one house
 //   - 'equal'       — each house spans 30° starting at lagna's exact degree
-//   - 'placidus-kp' — true cuspal positions; throws PanchangError('CIRCUMPOLAR')
-//                     above ~|66.5°| latitude
+//   - 'placidus-kp' — true cuspal positions; throws PanchangError('CIRCUMPOLAR') > ±66.5°
+const houses = computeBhava(birth, loc, { houseSystem: 'whole-sign' });
 
 // 3. D1 (Rashi) chart — lagna + bhava + 9 grahas with house placement
 const d1 = computeRashiChart(birth, loc, { houseSystem: 'whole-sign' });
-//   → { divisional: 'D1', lagna, bhava, planets: PlanetPlacement[9] }
-d1.planets.find((p) => p.planet === 'Jupiter')?.house;   // e.g. 5
-d1.planets.find((p) => p.planet === 'Saturn')?.isRetrograde;
+d1.planets.find(p => p.planet === 'Jupiter')?.house;          // e.g. 5
+d1.planets.find(p => p.planet === 'Saturn')?.isRetrograde;
 
 // 4. D9 (Navamsa) chart — classical sign-based per-rashi-type rule
 const d9 = computeNavamsa(birth, loc);
-//   → { divisional: 'D9', lagnaRashi, planets: PlanetPlacement[9] }
 
-// 5. Ashtakoot Guna Milan — 36-point marriage compatibility from natal Moons
-const ashtakoot = computeAshtakoot(
-  { rashi: 4, nakshatra: 9 },   // boy:  Simha / Magha
-  { rashi: 0, nakshatra: 1 },   // girl: Mesha / Bharani
-);
-//   → { totalScore: 0..36, koots: KootScore[8], cancellations: string[] }
-//   koots in canonical order: Varna, Vashya, Tara, Yoni, Graha Maitri, Gana,
-//   Bhakoot, Nadi (max scores 1, 2, 3, 4, 5, 6, 7, 8 respectively)
-
-// 6. Mangal Dosha (Manglik) — checks Mars from lagna, Moon, and Venus
-const mangal = computeMangalDosha(d1);
-//   → { afflicted: boolean,
-//        fromLagna: { afflicted, house }, fromMoon: ..., fromVenus: ...,
-//        cancellations: string[] }
-
-// 7. Sade Sati — Saturn currently transiting 12th, 1st, or 2nd from natal Moon
-const sadeSati = computeSadeSati(d1.planets[1]!.rashi.index, new Date());
-//   → { active, phase: 1|2|3|null, currentArcStart, currentArcEnd, nextArcStart }
-
-// 8. Planetary dignity (BPHS Ch.3-4)
+// 5. Planetary dignity (BPHS Ch.3-4)
 computeDignity('Mars',    0);   // 'moolatrikona' (Aries)
 computeDignity('Mars',    9);   // 'exalted' (Capricorn)
 computeDignity('Sun',     6);   // 'debilitated' (Libra)
-computeDignity('Saturn', 10);   // 'moolatrikona' (Aquarius)
-
-// 9. Pratyantar (3rd-level) Vimshottari sub-sub-periods
-const dasha = computeVimshottariDashaFromBirth(birth);
-const firstAntar = dasha.mahaDashas[0]!.antarDashas[0]!;
-const pratyantars = computeVimshottariPratyantar(firstAntar);
-//   → PratyantarDasha[9] — 9 sub-sub-periods covering the antardasha proportionally
 ```
 
-**Ayanamsa options** — any birth-chart helper accepts the new
-`'true-chitra'` (True Chitrapaksha — Spica-anchored) or `'thirukanitham'`
-(South Indian Tamil-Vakya tradition) ayanamsas in addition to the original
-`'lahiri'`, `'raman'`, `'krishnamurti'`. Pass via the `options.ayanamsa`
-field on `BirthChartOptions`.
+Birth-chart helpers accept the full ayanamsa set including `'true-chitra'` (True
+Chitrapaksha) and `'thirukanitham'` (Tamil-Vakya). Pass via `options.ayanamsa` or the
+ayanamsa positional arg.
 
-**True Rahu/Ketu node** — `computePlanetaryPositions(date, ayanamsa, …, 'true')`
-or `options.nodeType: 'true'` on the chart helpers replaces the mean-node
-default with Meeus's dominant periodic correction (`-1.4979°·sin(2D-2F)`).
-Typical accuracy improves from ±0.5° (worst ±2°) on the mean node to
-±0.6° on the true node.
+## 15. Compatibility & Doshas
 
-**Documented limitations:**
+**Ashtakoot Guna Milan** (36-point marriage compatibility) and **Mangal Dosha** (Manglik
+affliction with cancellations).
 
-- **Mangal Dosha cancellations**: only Mars in own sign (Aries/Scorpio) or
-  exalted (Capricorn). Other classical cancellations — mutual Mangalik,
-  Mars-Jupiter aspect, Mars-Saturn conjunction — are not applied.
-- **Sade Sati boundary precision**: ±1-2 days. Saturn retrograde re-crossings
-  of a rashi boundary within a 90-day window are absorbed; longer dips are
-  treated as boundary events. Both first-touch and permanent-ingress
-  conventions are within tolerance.
-- **Placidus-KP**: throws `PanchangError('CIRCUMPOLAR')` at high latitudes
-  where the cusp's semi-diurnal arc doesn't exist. Use `'whole-sign'` or
-  `'equal'` north of the Arctic Circle / south of the Antarctic Circle.
-- **Navamsa (D9)**: longitude is scaled (3°20' source arc → 30° D9 arc) so
-  `degreeInRashi` is meaningful within the navamsa rashi. Houses are
-  whole-sign relative to the navamsa lagna (the classical Vedic convention).
-- **Ashtakoot Vashya koot**: simplified single-vashya per rashi (half-sign
-  nuance — e.g. Sagittarius's centaur first half — is collapsed).
-- **True node**: only the dominant Meeus Ch.47 perturbation term is applied.
-  Higher-order (sub-arcminute) corrections are omitted; for KP-style
-  sub-arcminute work, use a dedicated KP node calculator.
+```typescript
+import { computeAshtakoot, computeMangalDosha } from 'panchang-ts';
+
+// Ashtakoot — from natal Moons
+const match = computeAshtakoot(
+  { rashi: 4, nakshatra: 9 },   // boy:  Simha / Magha
+  { rashi: 0, nakshatra: 1 },   // girl: Mesha / Bharani
+);
+// → { totalScore: 0..36, koots: KootScore[8], cancellations: string[] }
+// Koots in canonical order: Varna, Vashya, Tara, Yoni, Graha Maitri, Gana, Bhakoot, Nadi
+// (max scores 1, 2, 3, 4, 5, 6, 7, 8 respectively)
+
+// Mangal Dosha — checks Mars from lagna, Moon, and Venus
+const mangal = computeMangalDosha(d1);
+// → { afflicted, fromLagna, fromMoon, fromVenus, cancellations }
+```
+
+**Documented limitations** — Mangal Dosha cancellations only cover Mars in own sign
+(Aries / Scorpio) or exalted (Capricorn); other classical cancellations (mutual Mangalik,
+Mars-Jupiter aspect, Mars-Saturn conjunction) are not applied. Ashtakoot Vashya koot is
+simplified to single-vashya per rashi.
+
+## 16. Localization
+
+All returned display names respect the `language` option. **English** and **Hindi
+(Devanagari)** are supported.
+
+```typescript
+const hi = getDailyPanchang(date, loc, { timezone: 330, language: 'hi' })!;
+
+console.log(hi.tithis[0].name);              // "कृष्ण चतुर्दशी"
+console.log(hi.vara.name);                   // "मंगलवार"
+console.log(hi.chandramasa.name);            // "माघ"
+console.log(hi.choghadiya.day[0].name);      // "अमृत"
+
+// englishName is always English on Vara / Tarabala / Chandra Balam
+console.log(hi.vara.englishName);            // "Tuesday"
+```
+
+## 17. Configuration
+
+```typescript
+const r = getDailyPanchang(date, loc, {
+  timezone: 330,                          // number (UTC offset in min) or IANA string
+  ayanamsa: 'lahiri',                     // 'lahiri' | 'raman' | 'krishnamurti'
+                                          //   | 'true-chitra' | 'thirukanitham'
+  language: 'en',                         // 'en' | 'hi'
+  masaSystem: 'purnimanta',               // 'purnimanta' | 'amanta'
+  region: 'all',                          // 21 state slugs + 'nepal' + 'all'
+  computeEndTimes: true,                  // false → ~5x speedup, names only
+  precision: 'standard',                  // 'standard' (15 iter) | 'high' (25 iter)
+  janmaRashi: undefined,                  // pass to add r.chandraBalam
+  janmaNakshatra: undefined,              // pass to add r.tarabala
+});
+```
+
+**Timezone handling** — `timezone` accepts either a number (UTC offset in minutes, e.g.
+`330` for IST) or an IANA zone name (e.g. `'America/New_York'`). IANA strings need `Intl`,
+which older Hermes versions don't fully support — pass a number on those targets. DST
+resolves automatically for IANA zones via the reference date.
 
 ---
 
-## Types
+## Types & Exports
 
 <details>
 <summary><strong>Core Types</strong> — GeoLocation, TimePeriod</summary>
@@ -615,7 +605,7 @@ interface TimePeriod {
 interface TithiInfo {
   index: number;               // 0-29
   name: string;                // e.g. "Shukla Pratipada"
-  paksha: string;              // "Shukla"/"Krishna" (en), "शुक्ल"/"कृष्ण" (sa/hi)
+  paksha: string;              // "Shukla"/"Krishna" (en), "शुक्ल"/"कृष्ण" (hi)
   number: number;              // 1-15 within the paksha
   completionPercentage: number;
   endTime: Date | null;
@@ -632,10 +622,10 @@ interface NakshatraInfo {
 
 interface DailyTithiInfo extends TithiInfo {
   startTime: Date | null;      // null when isActiveAtSunrise is true
-  isActiveAtSunrise: boolean;  // true = present at sunrise; false = started mid-day
+  isActiveAtSunrise: boolean;
 }
 
-// DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo follow the same pattern
+// DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo follow the same pattern.
 
 interface VaraInfo {
   index: number;       // 0 = Sunday ... 6 = Saturday
@@ -652,12 +642,12 @@ interface KaranaInfo {
   type: 'fixed' | 'movable';
 }
 
-// Note: endTime and startTime are null when computeEndTimes: false.
+// endTime / startTime are null when computeEndTimes: false.
 ```
 </details>
 
 <details>
-<summary><strong>Lunar Calendar</strong> — ChandraMasaInfo, SamvatInfo, MasaInfo</summary>
+<summary><strong>Lunar Calendar</strong> — ChandraMasaInfo, SamvatInfo, MasaInfo, RashiInfo</summary>
 
 ```typescript
 interface ChandraMasaInfo {
@@ -665,10 +655,10 @@ interface ChandraMasaInfo {
   name: string;             // follows masaSystem option
   isAdhika: boolean;        // true = leap/intercalary month
   system: 'purnimanta' | 'amanta';
-  amantaIndex: number;      // month index in Amanta system
-  amantaName: string;       // month name in Amanta system
-  purnimantaIndex: number;  // month index in Purnimanta system
-  purnimantaName: string;   // month name in Purnimanta system
+  amantaIndex: number;
+  amantaName: string;
+  purnimantaIndex: number;
+  purnimantaName: string;
 }
 
 interface SamvatInfo {
@@ -689,7 +679,7 @@ interface RashiInfo {
 </details>
 
 <details>
-<summary><strong>Time Slots</strong> — Choghadiya, Gowri Panchangam, Hora</summary>
+<summary><strong>Time Slots</strong> — Choghadiya, Gowri, Hora, Do Ghati</summary>
 
 ```typescript
 type ChoghadiyaQuality = 'auspicious' | 'inauspicious' | 'neutral';
@@ -698,34 +688,29 @@ interface ChoghadiyaSlot extends TimePeriod {
   index: number;
   name: string;              // e.g. "Amrit", "Kaal" (localized)
   quality: ChoghadiyaQuality;
-  qualityName: string;       // localized: "Auspicious", "शुभ", "शुभम्"
+  qualityName: string;       // localized: "Auspicious", "शुभ"
 }
 
 interface ChoghadiyaInfo {
-  day: ChoghadiyaSlot[];    // 8 slots (sunrise -> sunset)
-  night: ChoghadiyaSlot[];  // 8 slots (sunset -> next sunrise)
+  day: ChoghadiyaSlot[];     // 8 slots (sunrise -> sunset)
+  night: ChoghadiyaSlot[];   // 8 slots (sunset -> next sunrise)
 }
 
-interface GowriSlot extends TimePeriod {
-  index: number;              // 0-7 within the 8-name cycle
-  name: string;               // e.g. "Amrit", "Kaal" (localized)
-  quality: ChoghadiyaQuality;
-  qualityName: string;
-}
-
-interface GowriInfo {
-  day: GowriSlot[];    // 8 slots (sunrise -> sunset)
-  night: GowriSlot[];  // 8 slots (sunset -> next sunrise)
-}
+// GowriSlot / GowriInfo mirror Choghadiya.
 
 interface HoraSlot extends TimePeriod {
-  planet: string;       // e.g. "Sun", "Venus", "Mercury"
+  planet: string;       // "Sun", "Venus", "Mercury", ...
   planetIndex: number;  // 0-6 in Chaldean order
 }
 
 interface HoraInfo {
-  day: HoraSlot[];    // 12 slots (sunrise -> sunset)
-  night: HoraSlot[];  // 12 slots (sunset -> next sunrise)
+  day: HoraSlot[];      // 12 slots (sunrise -> sunset)
+  night: HoraSlot[];    // 12 slots (sunset -> next sunrise)
+}
+
+interface DoGhatiInfo {
+  day: DoGhatiSlot[];   // 15 ~48-min deity-keyed slots
+  night: DoGhatiSlot[]; // 15 ~48-min deity-keyed slots
 }
 ```
 </details>
@@ -735,37 +720,28 @@ interface HoraInfo {
 
 ```typescript
 interface SpecialYogaInfo {
-  name: string;    // e.g. "Guru Pushya Yoga", "Dwipushkar Yoga"
+  name: string;
   type:
     | 'amrit_siddhi' | 'sarvartha_siddhi' | 'ravi_pushya' | 'guru_pushya'
-    // Vara × Tithi × Nakshatra patterns + Moon-from-Sun distance yogas
-    | 'dwipushkar'   // Bhadra-tithi + Bhadra-vara + nakshatra ∈ {Mrigashira, Chitra, Dhanishtha} — actions doubled
-    | 'tripushkar'   // same Bhadra-tithi/vara + nakshatra ∈ {Krittika, Punarvasu, U.Phalguni, Vishakha, U.Ashadha, P.Bhadrapada} — actions tripled
-    | 'jwalamukhi'   // inauspicious — tithi × nakshatra lookup per Muhurta-chintamani 6.32
-    | 'aadal'        // auspicious — Moon-from-Sun nakshatra-distance (28-scheme) ∈ {2,7,9,14,16,21,23,28}
-    | 'vidaal'       // inauspicious — Moon-from-Sun nakshatra-distance (28-scheme) ∈ {3,6,10,13,17,20,24,27}
-    | 'ravi';        // auspicious — Moon-from-Sun nakshatra-distance (27-scheme) ∈ {4,6,9,10,13,20}
+    | 'dwipushkar'   // Bhadra-tithi + vara + nakshatra ∈ {Mrig, Chitra, Dhan} — doubled
+    | 'tripushkar'   // same Bhadra rules + nakshatra ∈ {Krit, Punar, U.Phal, Vish, U.Ash, P.Bhad} — tripled
+    | 'jwalamukhi'   // inauspicious — tithi × nakshatra (Muhurta-chintamani 6.32)
+    | 'aadal'        // auspicious — Moon-from-Sun nakshatra distance
+    | 'vidaal'       // inauspicious — Moon-from-Sun nakshatra distance
+    | 'ravi';        // auspicious — Moon-from-Sun nakshatra distance (27-scheme)
 }
 
 interface FestivalInfo {
-  name: string;         // e.g. "Diwali", "Putrada Ekadashi", "Som Pradosh"
+  name: string;
   type:
-    | 'major'              // Diwali, Holi, Raksha Bandhan, Navaratri, Sankranti variants ...
-    | 'minor'              // Masik Shivaratri, Vinayaka Chaturthi, Pushya days, Shravan Somvar ...
-    | 'ekadashi'           // Generic Ekadashi (when Smarta/Vaishnava split doesn't apply)
-    | 'smarta_ekadashi'    // Smarta fast day; emits `deferralDate` when Dashami-viddha
-    | 'vaishnava_ekadashi' // Vaishnava fast day (observed on following day if Smarta defers)
-    | 'pradosha'           // Weekday-qualified Pradosha (Som / Bhauma / Shani / etc.)
-    | 'sankranti'          // Solar-month boundary (pan-Indian + regional variants)
-    | 'eclipse';           // Solar or lunar Grahan
+    | 'major' | 'minor'
+    | 'ekadashi' | 'smarta_ekadashi' | 'vaishnava_ekadashi'
+    | 'pradosha' | 'sankranti' | 'eclipse';
   description?: string;
   /** Smarta-only: when Ekadashi is Dashami-viddha, the Dwadashi fast date. */
   deferralDate?: Date;
 }
 
-// State-slug scheme. A caller sets `region` to limit regional variants to
-// their state; pan-Indian festivals (Holi, Diwali, Sankranti itself, …)
-// emit regardless.
 type FestivalRegion =
   | 'all'             // default — emits every regional variant
   // South
@@ -780,21 +756,19 @@ type FestivalRegion =
   // Neighbour
   | 'nepal';
 
-// Pre-v2.1 identifiers. Accepted as input and mapped at call time; a
-// one-shot console warning fires per distinct legacy value. Removal in v3.
+// Pre-v2.1 identifiers — accepted with a one-shot deprecation warning. Removed in v3.
 //   'tamil'       → 'tamil-nadu'
 //   'bengal'      → 'west-bengal'
-//   'north-india' → 'all'       (Makar Sankranti is pan-Indian; use state
-//                                slugs for Lohri / Govardhan / Bhai Dooj)
+//   'north-india' → 'all'
 type LegacyFestivalRegion = 'tamil' | 'bengal' | 'north-india';
 ```
 
-**Region-scoped festivals** (non-exhaustive — see `src/core/festivals.ts`):
+**Region-scoped festivals** (non-exhaustive):
 
 | Region | Festival names (keys) |
 |---|---|
 | `tamil-nadu` | pongal, puthandu, varamahalakshmi |
-| `kerala` | vishu, ayyappa_makara_jyothi, onam *(solar-nakshatra)* |
+| `kerala` | vishu, ayyappa_makara_jyothi, onam |
 | `karnataka` | karaga, varamahalakshmi |
 | `andhra-pradesh` | varamahalakshmi |
 | `telangana` | bonalu, varamahalakshmi, bathukamma_start, bathukamma_saddula |
@@ -827,9 +801,9 @@ interface EclipseInfo {
   start: Date;              // UTC — observable phase begins
   peak: Date;               // UTC — greatest eclipse
   end: Date;                // UTC — observable phase ends
-  visibleFromLocation: boolean;  // body above horizon at peak for observer
+  visibleFromLocation: boolean;
   magnitude: number;        // fraction of disc obscured at peak, [0, 1]
-  sutakStart: Date;         // pre-eclipse impurity window begins — 12 h (4 prahara) before for solar, 9 h (3 prahara) before for lunar, per classical Smarta convention
+  sutakStart: Date;         // 12 h before solar / 9 h before lunar
   sutakEnd: Date;           // coincides with eclipse end (moksha)
   description: string;
 }
@@ -843,7 +817,7 @@ interface EclipseInfo {
 interface BhadraInfo {
   start: Date;
   end: Date;
-  /** Loka: 'earth' = malefic for all work; 'heaven' / 'paatal' = non-terrestrial, milder. */
+  /** 'earth' = malefic for all work; 'heaven' / 'paatal' = non-terrestrial, milder. */
   location: 'earth' | 'heaven' | 'paatal';
   /** True when Bhadra is active at some point during the Hindu day window. */
   isActive: boolean;
@@ -852,7 +826,7 @@ interface BhadraInfo {
 </details>
 
 <details>
-<summary><strong>Jyotish (Vedic Astrology)</strong> — Graha positions, Vimshottari Dasha</summary>
+<summary><strong>Jyotish</strong> — Graha positions, Vimshottari Dasha, Chandra Balam, Tarabala</summary>
 
 ```typescript
 type GrahaName = 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter'
@@ -861,9 +835,9 @@ type GrahaName = 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter'
 interface GrahaPosition {
   planet: GrahaName;
   siderealLongitude: number;   // degrees [0, 360)
-  rashi: RashiInfo;            // zodiac sign
-  degreeInRashi: number;       // degrees within sign [0, 30)
-  nakshatra: NakshatraInfo;    // nakshatra + pada + completion %
+  rashi: RashiInfo;
+  degreeInRashi: number;       // [0, 30)
+  nakshatra: NakshatraInfo;
   isRetrograde: boolean;       // always false for Sun/Moon; always true for Rahu/Ketu
 }
 
@@ -876,24 +850,13 @@ interface PlanetaryPositions {
 type DashaLord = 'Ketu' | 'Venus' | 'Sun' | 'Moon' | 'Mars'
               | 'Rahu' | 'Jupiter' | 'Saturn' | 'Mercury';
 
-interface AntarDasha {
-  lord: DashaLord;
-  startDate: Date;
-  endDate: Date;
-}
-
-interface MahaDasha {
-  lord: DashaLord;
-  startDate: Date;
-  endDate: Date;
-  years: number;
-  antarDashas: AntarDasha[];
-}
-
+interface AntarDasha   { lord: DashaLord; startDate: Date; endDate: Date; }
+interface MahaDasha    { lord: DashaLord; startDate: Date; endDate: Date;
+                         years: number; antarDashas: AntarDasha[]; }
 interface VimshottariDashaResult {
   currentMahaDashaLord: DashaLord;
   currentIndex: number;
-  mahaDashas: MahaDasha[];  // 9-entry sequence starting from birth
+  mahaDashas: MahaDasha[];   // 9-entry sequence starting from birth
 }
 
 interface ChandraBalamInfo {
@@ -904,23 +867,54 @@ interface ChandraBalamInfo {
 }
 
 interface TarabalaInfo {
-  taraIndex: number;                   // 0..8 — position in the 9-tara cycle from janma nakshatra
+  taraIndex: number;                   // 0..8 in the 9-tara cycle from janma nakshatra
   englishName: string;                 // "Janma" | "Sampat" | "Vipat" | "Kshema" | "Pratyari"
                                        // | "Sadhaka" | "Vadha" | "Mitra" | "Ati-Mitra"
-  name: string;                        // localized
+  name: string;
   quality: 'auspicious' | 'inauspicious';
-                                       // 'inauspicious' for Vipat (2) / Pratyari (4) / Vadha (6); rest auspicious
 }
 ```
 </details>
+
+### Full export list
+
+```typescript
+// Primary entry points
+getDailyPanchang, getInstantPanchang
+
+// Astronomy
+getSunrise, getSunset, getMoonrise, getMoonset
+getSiderealSunLongitude, getSiderealMoonLongitude, getAyanamsa
+
+// Inauspicious / Muhurta
+computeRahuKalam, computeGulikaKalam, computeYamaganda
+computeVarjyam, computeGandaMula, computeAnandadiYoga
+computePanchakaRahita, computeDoGhati, computeGowriPanchangam
+computeAbhijitMuhurta, computeBrahmaMuhurta, computeVijayaMuhurta
+computeGodhuliMuhurta, computeNishitaMuhurta, computeAmritKala
+computeMadhyahna, computePratahSandhya, computeSayahnaSandhya
+
+// Eclipses
+getUpcomingSolarEclipse, getUpcomingLunarEclipse, getEclipseDuringDay
+
+// Jyotish
+computePlanetaryPositions, GRAHA_ABBR
+computeVimshottariDasha, computeVimshottariDashaFromBirth, computeVimshottariPratyantar
+computeChandraBalam, computeTarabala
+computeLagna, computeBhava, computeRashiChart, computeNavamsa
+computeAshtakoot, computeMangalDosha, computeSadeSati, computeDignity
+
+// Errors
+PanchangError
+```
 
 ---
 
 ## React Native / Hermes
 
-Works with Expo and bare React Native (Hermes engine). Pass `timezone` as a **number**
-— IANA timezone strings (`'Asia/Kolkata'`) require `Intl`, which older Hermes versions
-don't fully support.
+Works with Expo and bare React Native (Hermes engine). Pass `timezone` as a **number** —
+IANA timezone strings (`'Asia/Kolkata'`) require `Intl`, which older Hermes versions don't
+fully support.
 
 **Two-pass rendering** for smooth UI:
 
@@ -946,42 +940,47 @@ InteractionManager.runAfterInteractions(() => {
 
 ## Accuracy
 
-6,912 tests passing across 74 files, including fixtures cross-verified
-against reference panchang calculations spanning 2025–2026 across 10
-Indian cities, plus New York, London, Sydney, Dubai, and Singapore
-(diaspora fixtures cover DST transitions on `America/New_York`).
+6,912 tests passing across 74 files, including fixtures cross-verified against reference
+panchang calculations spanning 2025–2026 across 10 Indian cities, plus New York, London,
+Sydney, Dubai, and Singapore (diaspora fixtures cover DST transitions on
+`America/New_York`).
 
 | Element | Accuracy | Validation |
 |---------|----------|------------|
-| Sunrise / Sunset | **≤29 s observed vs reference minute-midpoint** (±45 s tolerance) | 16 assertions |
-| Moonrise / Moonset | Meeus apparent-upper-limb convention (refraction + parallax); ~3–5 min disagreement vs panchang authorities that use a simpler horizon model is expected and documented | Strict fixtures |
+| Sunrise / Sunset | ≤29 s observed vs reference minute-midpoint (±45 s tolerance) | 16 assertions |
+| Moonrise / Moonset | Meeus apparent-upper-limb (refraction + parallax); ~3–5 min vs simpler-horizon authorities is expected | Strict fixtures |
 | Tithi, Nakshatra, Yoga, Karana names | Exact match vs reference | Strict fixtures |
-| Tithi / Nakshatra / Yoga / Karana end-times | **±3 min tolerance, max 2.01 min observed** | 20 assertions |
+| Tithi / Nakshatra / Yoga / Karana end-times | ±3 min tolerance, max 2.01 min observed | 20 assertions |
 | Ayanamsa | ±0.005° vs Swiss Ephemeris | Unit tests |
-| Planetary positions (Sun–Saturn) | **±0.02° vs reference sidereal** | Fixtures |
-| Planetary positions (Rahu/Ketu, mean node) | ≤0.5° typical; ±2° tolerance to absorb mean-vs-true drift | Fixtures |
-| Planetary positions (Rahu/Ketu, true node — `nodeType: 'true'`) | ≤0.6° typical (Meeus periodic correction) | Fixtures |
+| Planetary positions (Sun–Saturn) | ±0.02° vs reference sidereal | Fixtures |
+| Planetary positions (Rahu/Ketu, mean node) | ≤0.5° typical; ±2° tolerance | Fixtures |
+| Planetary positions (Rahu/Ketu, true node) | ≤0.6° typical (Meeus periodic correction) | Fixtures |
 | Rashi / Nakshatra / Retrograde flag | Exact match vs reference | Fixtures |
 | Festival dates | 12 cross-verified festivals (2025–2026) — see caveats below | Fixtures |
 | Choghadiya / Hora / Gowri slots | Derived from sunrise/sunset — inherits ±2 min | — |
-| Madhyahna midpoint, Anandadi Yoga name, Ganda Mula active flag | **Exact match across 50 reference fixtures** (10 cities × 5 dates) | Cross-verify suite |
-| Pratah / Sayahna Sandhya start + end | **±2 min** across all 50 fixtures | Cross-verify suite |
-| Varjyam start + end | **±2 min** on every fixture where the library emits a non-null window (≥30 of 50 emit; transition days return `null` by design) | Cross-verify suite |
-| Lagna (ascendant) sidereal longitude | Cross-checked against Jagannath Hora reference charts | Birth-chart fixtures |
+| Madhyahna midpoint, Anandadi Yoga, Ganda Mula active flag | Exact match across 50 reference fixtures | Cross-verify suite |
+| Pratah / Sayahna Sandhya start + end | ±2 min across all 50 fixtures | Cross-verify suite |
+| Varjyam start + end | ±2 min on every emit (transition days return `null` by design) | Cross-verify suite |
+| Lagna sidereal longitude | Cross-checked against Jagannath Hora reference charts | Birth-chart fixtures |
 | D1 (Rashi) & D9 (Navamsa) house placements | Exact match vs reference for 9-graha placement | Birth-chart fixtures |
 | Ashtakoot Guna Milan total score | ±1 point per pair across 30+ matched pairs | Match fixtures |
 | Sade Sati arc start / end | ±1–2 days vs authoritative ephemerides | Saturn-transit fixtures |
 
-**Detection sourcing notes.** **Aadal / Vidaal** follow the classical Moon-from-Sun nakshatra-distance rule (AstroShastra, HoraSarvam, Ernst Wilhelm), NOT the popular Tamil-Vakya weekday rule used by some online panchangs — output may therefore differ from sites that use the weekday rule. **Varjyam** emits the sunrise-anchored nakshatra's window only — printed panchangs may show a second window on nakshatra-transition days. **Do Ghati Muhurta** does not rotate by weekday: the same 30-name deity-keyed sequence applies every day, verified against multiple reference sources for distinct weekdays.
+**Detection sourcing notes.** **Aadal / Vidaal** follow the classical Moon-from-Sun
+nakshatra-distance rule (AstroShastra, HoraSarvam, Ernst Wilhelm), NOT the popular
+Tamil-Vakya weekday rule used by some online panchangs — output may differ from sites that
+use the weekday rule. **Varjyam** emits the sunrise-anchored nakshatra's window only —
+printed panchangs may show a second window on nakshatra-transition days. **Do Ghati
+Muhurta** does not rotate by weekday: the same 30-name deity-keyed sequence applies every
+day, verified against multiple reference sources for distinct weekdays.
 
 ### Festival Detection — Documented Tradeoff
 
-The library uses **tithi-at-sunrise** to resolve a festival to a calendar
-day. Some traditional panchang authorities apply other classical rules
-(tithi-at-midnight, madhyahna-vyapini, kshaya-tithi handling) for certain
-festivals; where those rules pick a different day, our output can drift
-±1 day. This is a rule-choice tradeoff, not a computation bug — it is
-documented and deliberately surfaced rather than hidden.
+The library uses **tithi-at-sunrise** to resolve a festival to a calendar day. Some
+traditional panchang authorities apply other classical rules (tithi-at-midnight,
+madhyahna-vyapini, kshaya-tithi handling) for certain festivals; where those rules pick a
+different day, our output can drift ±1 day. This is a rule-choice tradeoff, not a
+computation bug.
 
 | Alternative classical rule | Festivals affected |
 |----------------------------|--------------------|
@@ -989,11 +988,11 @@ documented and deliberately surfaced rather than hidden.
 | Madhyahna-vyapini (tithi overlapping noon) | Ganesh Chaturthi on edge years, Akshaya Tritiya 2026 |
 | Kshaya-tithi handling (tithi never at sunrise) | Ugadi 2026-03-19 (Pratipada is Kshaya) |
 
-If strict parity with a specific panchang authority matters for your use
-case, cross-check the above festival set for the target year. Everything
-else — Holi, Ugadi (non-Kshaya years), Rama Navami, Raksha Bandhan,
-Ganesh Chaturthi (normal years), Navaratri, Dussehra, Karva Chauth,
-Hanuman Jayanti — matches the canonical date across 2025 and 2026 fixtures.
+If strict parity with a specific panchang authority matters for your use case, cross-check
+the above festival set for the target year. Everything else — Holi, Ugadi (non-Kshaya
+years), Rama Navami, Raksha Bandhan, Ganesh Chaturthi (normal years), Navaratri,
+Dussehra, Karva Chauth, Hanuman Jayanti — matches the canonical date across 2025 and 2026
+fixtures.
 
 ---
 
@@ -1003,6 +1002,9 @@ Hanuman Jayanti — matches the canonical date across 2025 and 2026 fixtures.
 |------|---------|------------------------|
 | Names-only (`computeEndTimes: false`) | ~0.1 ms | <100 ms |
 | Full with end-times | ~0.5 ms | <500 ms |
+
+Birth-chart helpers are independent — calling them does not add work to
+`getDailyPanchang`.
 
 ---
 
@@ -1021,15 +1023,15 @@ try {
 }
 ```
 
-Error codes: `INVALID_DATE`, `INVALID_LATITUDE`, `INVALID_LONGITUDE`,
-`INVALID_ELEVATION`, `INVALID_TIMEZONE`, `INVALID_AYANAMSA`, `TIMEZONE_RESOLUTION_FAILED`,
-`NO_SUNRISE`, `NO_SUNSET`, `SEARCH_DIVERGED`.
+Error codes: `INVALID_DATE`, `INVALID_LATITUDE`, `INVALID_LONGITUDE`, `INVALID_ELEVATION`,
+`INVALID_TIMEZONE`, `INVALID_AYANAMSA`, `TIMEZONE_RESOLUTION_FAILED`, `NO_SUNRISE`,
+`NO_SUNSET`, `SEARCH_DIVERGED`, `CIRCUMPOLAR` (Placidus-KP houses above ±66.5°).
 
 **Polar locations (no sunrise / no sunset):** `getDailyPanchang` and `getInstantPanchang`
 return `null` rather than throwing — the Hindu day is undefined when sunrise can't be
-computed. The low-level `computeSunrise` / `computeSunset` primitives still throw
-`PanchangError(NO_SUNRISE)` / `PanchangError(NO_SUNSET)` for direct callers who need
-the precise reason. `getMoonrise` / `getMoonset` return `null` (normal for the Moon).
+computed. The low-level `getSunrise` / `getSunset` primitives still throw
+`PanchangError(NO_SUNRISE)` / `PanchangError(NO_SUNSET)` for direct callers who need the
+precise reason. `getMoonrise` / `getMoonset` return `null` (normal for the Moon).
 
 ---
 
@@ -1045,13 +1047,10 @@ the precise reason. `getMoonrise` / `getMoonset` return `null` (normal for the M
 
 ---
 
-## Used By
-
-- [dharmagya.app](https://dharmagya.app) — Daily Panchang and Hindu calendar
-
 ## Acknowledgements
 
-[astronomy-engine](https://github.com/cosinekitty/astronomy) by Don Cross — the sole runtime dependency. MIT licensed.
+[astronomy-engine](https://github.com/cosinekitty/astronomy) by Don Cross — the sole
+runtime dependency. MIT licensed.
 
 ## License
 
