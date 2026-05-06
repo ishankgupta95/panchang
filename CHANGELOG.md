@@ -1,5 +1,368 @@
 # panchang-ts
 
+## 3.1.0
+
+**Minor release — Phase 30 Wave 3: Advanced Astrology + Muhurta Engine.**
+Adds the post-kundli surface — six additional divisional charts, planetary
+aspects, six-fold Shadbala strength, two more doshas, three additional
+dasha systems, a configurable muhurta scoring engine with 13 stock rules,
+and a calendar-conversion / yearly-listings module. All additive on top
+of v3.0 — every prior export keeps the same shape.
+
+### Highlights
+
+- **6 new divisional charts** — `computeDivisionalChart(birthDate, location, divisional)`
+  for **D2 Hora** (wealth), **D3 Drekkana** (siblings), **D7 Saptamsa** (children),
+  **D10 Dasamsa** (career), **D12 Dwadasamsa** (parents), **D30 Trimsamsa**
+  (misfortune). D9 (Navamsa) routes through the same unified API for
+  consistency. Each follows its classical per-rashi-type rule from BPHS Ch. 6;
+  D30 uses the non-uniform 5-segment split with Mars / Saturn / Jupiter /
+  Mercury / Venus rulership (no Sun / Moon segments).
+- **`computeAspects`** — Drishti (planetary aspects) per BPHS Ch. 26. Every
+  graha aspects the 7th house from itself; Mars adds 4th + 8th, Jupiter
+  adds 5th + 9th, Saturn adds 3rd + 10th. Optional `nodeAspects: '5-and-9'`
+  extends Rahu / Ketu with Jupiter-like aspects (BV Raman / KP convention).
+- **`computeShadbala`** — six-fold strength for the 7 visible grahas in
+  Virupas (Sthana, Dig, Kala, Chesta, Naisargika, Drik). Simplified analytic
+  model targeting ~5% agreement with ProKerala / PyJHora reference
+  calculators.
+- **`computeKaalSarp`** — Kaal Sarp Dosha detection with all 12 named
+  subtypes (Anant, Kulik, Vasuki, Shankhpal, Padma, Mahapadma, Takshak,
+  Karkotak, Shankhachud, Ghatak, Vishdhar, Sheshnag — by Rahu's house).
+  Surfaces a `partial` flag when 6 of 7 visible planets fall within the
+  Rahu-Ketu axis (paritha / dosha-bhanga indicator).
+- **`computePitruDosha`** — surfaces the two highest-frequency triggers
+  (Sun + Rahu / Ketu conjunction; Sun + Saturn in 9th house).
+- **3 additional dasha systems:**
+  - **Ashtottari** — 108-year, 8-lord cycle (no Ketu) per Satya Acharya.
+    `computeAshtottariDasha(birthDate, moonSiderealLon)`.
+  - **Yogini** — 36-year cycle of 8 yoginis (Mangala, Pingala, Dhanya,
+    Bhramari, Bhadrika, Ulka, Siddha, Sankata) with planetary lords.
+    `computeYoginiDasha(birthDate, moonSiderealLon)`.
+  - **Chara (Jaimini)** — sign-based dasha with 9-8-7 years per modality
+    (movable / fixed / dual). `computeCharaDasha(birthDate, location)`.
+- **Muhurta scoring engine.** `scoreMuhurta(date, location, rule, options)`
+  and `findAuspiciousDates(rule, start, end, location, options)` evaluate
+  any rule against the live panchang. **13 stock rules** ship: vivah,
+  grihaPravesh, namakarana, vidyarambh, vahanKharidi, annaprashan, mundan,
+  upanayanam, karnavedha, aksharabhyasam, seemantham, shopOpening,
+  travelStart. Hard exclusions (Bhadra / Ekadashi / Eclipse / Adhika /
+  Ganda Mula / Panchaka / paksha mismatch) zero the score; auspicious /
+  inauspicious axes shift it ±10 / ±15. Special yogas add ±5.
+- **Calendar conversion APIs:**
+  - `convertGregorianToHindu(date, location, options)` → tithi / masa /
+    paksha / samvat / vara at sunrise.
+  - `convertHinduToGregorian({ vikramSamvat, masaIndex, paksha,
+    pakshaTithi }, location, options)` → matching Gregorian dates.
+  - `getKaliYugaYear(date)` → integer KY year (epoch 18 Feb 3102 BCE).
+  - `getHinduNewYear(year, region, location, options)` → Chaitra Shukla
+    Pratipada or regional Mesha-Sankranti anchor (Tamil Nadu / Kerala /
+    Punjab / Bengal / Assam).
+  - `getEkadashiDatesForYear(year, location, options)` → ~24 Date[].
+  - `getSankrantisForYear(year, location, options)` → 12 SankrantiEvent[].
+  - `getFestivalsInRange(start, end, location, options)` → FestivalDay[].
+  - `getUpcomingEclipses(fromDate, location, count?)` → EclipseInfo[].
+
+### New API surface
+
+```ts
+// Charts
+export function computeDivisionalChart(
+  birthDate: Date,
+  location: GeoLocation,
+  divisional: 'D2' | 'D3' | 'D7' | 'D9' | 'D10' | 'D12' | 'D30',
+  options?: BirthChartOptions,
+): DivisionalChart;
+
+// Aspects + Shadbala
+export function computeAspects(chart: BirthChart, options?: AspectsOptions): AspectMap;
+export function computeShadbala(
+  birthDate: Date, location: GeoLocation, options?: BirthChartOptions,
+): ShadbalaResult;
+
+// Doshas
+export function computeKaalSarp(chart: BirthChart): KaalSarpDoshaInfo;
+export function computePitruDosha(chart: BirthChart): PitruDoshaInfo;
+
+// Dashas
+export function computeAshtottariDasha(birthDate: Date, moonSiderealLon: number): VimshottariDashaResult;
+export function computeYoginiDasha(birthDate: Date, moonSiderealLon: number): YoginiDashaResult;
+export function computeCharaDasha(birthDate: Date, location: GeoLocation, ayanamsa?: AyanamsaType): CharaDashaResult;
+
+// Muhurta engine
+export function scoreMuhurta(
+  date: Date, location: GeoLocation, rule: MuhurtaRule, options: MuhurtaScoreOptions,
+): MuhurtaScore;
+export function findAuspiciousDates(
+  rule: MuhurtaRule, start: Date, end: Date,
+  location: GeoLocation, options: MuhurtaScoreOptions & { includeFailures?: boolean },
+): MuhurtaDay[];
+
+// Calendar conversion
+export function convertGregorianToHindu(
+  date: Date, location: GeoLocation, options: ConvertOptions,
+): HinduCalendarCoords;
+export function convertHinduToGregorian(
+  coords: { vikramSamvat: number; masaIndex: number; paksha: 'shukla' | 'krishna'; pakshaTithi: number; adhikaOnly?: boolean },
+  location: GeoLocation, options: ConvertOptions,
+): Date[];
+export function getKaliYugaYear(date: Date): number;
+export function getHinduNewYear(
+  gregorianYear: number, region: FestivalRegion | LegacyFestivalRegion,
+  location: GeoLocation, options: ConvertOptions,
+): Date | null;
+
+// Yearly listings
+export function getEkadashiDatesForYear(year: number, location: GeoLocation, options: YearlyListingOptions): Date[];
+export function getSankrantisForYear(year: number, location: GeoLocation, options: YearlyListingOptions): SankrantiEvent[];
+export function getFestivalsInRange(start: Date, end: Date, location: GeoLocation, options: YearlyListingOptions): FestivalDay[];
+export function getUpcomingEclipses(fromDate: Date, location: GeoLocation, count?: number): EclipseInfo[];
+```
+
+### Type surface additions
+
+- `Divisional`, `DivisionalChart`, `AspectMap`, `AspectsOptions`,
+  `PlanetShadbala`, `ShadbalaResult`.
+- `KaalSarpDoshaInfo`, `KaalSarpSubtype`, `PitruDoshaInfo`.
+- `YoginiName`, `YoginiMahaDasha`, `YoginiAntarDasha`, `YoginiDashaResult`,
+  `CharaMahaDasha`, `CharaDashaResult`.
+- `MuhurtaRule`, `MuhurtaScore`, `MuhurtaDay`, `MuhurtaScoreOptions`.
+- `HinduCalendarCoords`, `ConvertOptions`, `YearlyListingOptions`,
+  `FestivalDay`, `SankrantiEvent`.
+
+### Sourcing notes
+
+- **Divisional charts** — BPHS Ch. 6 ("Vargas") for all seven kinds; D30
+  follows the non-uniform 5-segment Trimsamsa per Parashara (Mars /
+  Saturn / Jupiter / Mercury / Venus, with Sun / Moon excluded).
+- **Aspects** — BPHS Ch. 26 ("Drishti Vichar"). Default `'7-only'` mode
+  applies the BPHS-literal rule for Rahu / Ketu (universal 7th aspect
+  only); `'5-and-9'` mode is a documented opt-in (BV Raman / KP).
+- **Shadbala** — BPHS Ch. 27 ("Bala Vichar"). Each component is the
+  dominant term used by ProKerala / PyJHora's default panel; minor
+  sub-balas (Saptavargaja, Tribhaga, Yuddha, Ayana, Hora) are not
+  included — their summed contribution is ≤10 V on most charts.
+- **Ashtottari** — Satya Acharya's 8-lord scheme (Sun 6, Moon 15, Mars 8,
+  Mercury 17, Saturn 10, Jupiter 19, Rahu 12, Venus 21). Anchored at
+  Krittika = Sun start.
+- **Yogini** — Sanjay Rath's *Yogini Dashas* (1999) and Charak Ch. 18.
+- **Chara** — Jaimini Sutras Ch. 1, "9-8-7 years per modality" variant
+  (Achyutananda / Sundar). Forward zodiacal direction always; the
+  reverse-direction rule for even-rashi lagnas is not currently exposed.
+
+### Documented limitations
+
+- Shadbala uses a **simplified analytic model**, not the full BPHS sub-bala
+  catalog. Component values agree with ProKerala / PyJHora to ~5%; minor
+  sub-balas (Saptavargaja Sthana, Tribhaga Kala, Yuddha Chesta, Ayana,
+  Hora) are intentionally omitted.
+- Pitru Dosha surfaces the two highest-frequency classical triggers (Sun +
+  node, Sun + Saturn in 9th); the full BPHS catalog of triggers is out of
+  scope.
+- Chara Dasha uses the forward zodiacal direction for all lagnas; the
+  Sundar / Raghava Bhatta variant that flips direction for even-rashi
+  lagnas is not exposed.
+- Muhurta stock-rule numerics (auspicious / inauspicious tithi /
+  nakshatra / vara lists) are sourced from Muhurta-chintamani, BPHS Ch. 28,
+  Charak's *Predictive Astrology* Ch. 23, and cross-checked against
+  drikpanchang.com/muhurat. Regional traditions vary; pass a custom rule
+  for strict-region parity.
+
+### Breaking changes
+
+None. The Phase 30 surface is entirely new — no v3.0 export was renamed,
+removed, or had its return shape changed.
+
+### Bundle / runtime
+
+- Bundle size: **~302 KB** (was ~262 KB in v3.0). The +40 KB is from the
+  new modules and lookup tables. No new runtime dependencies.
+- Hermes JS-syntax check ✅ — every new module passes
+  `npm run test:hermes`.
+
+### Test count
+
+**7,156** tests passing across 81 files (was 6,912 in v3.0 → **+244**).
+New test files: `tests/unit/divisionals.test.ts`,
+`tests/unit/aspects.test.ts`, `tests/unit/shadbala.test.ts`,
+`tests/unit/kaalSarp-pitru.test.ts`, `tests/unit/dashas-extra.test.ts`,
+`tests/unit/muhurta-engine.test.ts`, `tests/unit/calendar.test.ts`.
+
+---
+
+## 3.0.1
+
+**Patch — README rewrite for v3.x.** Documents the Phase 29 birth-chart
+surface end-to-end (Birth Chart, Compatibility & Doshas sections). No code
+changes; library behaviour identical to v3.0.0.
+
+---
+
+## 3.0.0
+
+**Major release — Phase 29 Wave 2: Birth Chart Foundation.** Adds the
+kundli surface — sidereal Lagna, Bhava under three house systems, D1
+(Rashi) and D9 (Navamsa) charts, Ashtakoot 36-point marriage matching,
+Mangal Dosha, Sade Sati, Pratyantar dasha, planetary dignity, true Rahu /
+Ketu node, plus two new ayanamsas (True Chitrapaksha, Thirukanitham). All
+additive on top of v2.4 — `getDailyPanchang` / `getInstantPanchang`
+results and every pre-existing export are unchanged. The major bump
+exists because the `AyanamsaType` union widens (a structural change for
+strict consumers) and to mark the kundli surface as a v3 stability
+contract.
+
+### Highlights
+
+- **`computeLagna`** — sidereal ascendant via Meeus eq. 13.6 (atan2 form),
+  tropical → sidereal by subtracting the configured ayanamsa. Returns
+  `LagnaInfo { siderealLongitude, rashi, degreeInRashi, nakshatra, pada }`.
+- **`computeBhava`** — 12 house cusps under one of three systems:
+  - `'whole-sign'` (default, classical Vedic) — each rashi is one house.
+  - `'equal'` — each house spans 30° starting at lagna's exact degree.
+  - `'placidus-kp'` — true cuspal positions (KP). Throws
+    `PanchangError('CIRCUMPOLAR')` past |φ| ≳ 66.5°.
+- **`computeRashiChart` (D1) + `computeNavamsa` (D9)** — place 9 grahas
+  with house assignments. D9 follows the classical Movable / Fixed / Dual
+  starting-rashi rule.
+- **`computeAshtakoot`** — 36-point Guna Milan from two natal Moons.
+  Returns the canonical 8-koot breakdown (Varna 1, Vashya 2, Tara 3,
+  Yoni 4, Graha Maitri 5, Gana 6, Bhakoot 7, Nadi 8) plus standard
+  cancellations.
+- **`computeMangalDosha`** — three-cut check (lagna / Moon / Venus) with
+  own-sign and exaltation cancellations.
+- **`computeSadeSati`** — phase 1 / 2 / 3 detection with arc-boundary
+  binary-search on Saturn's sidereal longitude (retrograde-aware).
+- **`computeVimshottariPratyantar`** — third-level dasha sub-period
+  expansion, proportional split inside an antardasha.
+- **`computeDignity`** — exalted / debilitated / moolatrikona / own /
+  friend / neutral / enemy lookup per BPHS Ch. 3–4.
+- **True Rahu / Ketu node** — `computePlanetaryPositions(...,
+  { nodeType: 'true' })` adds the dominant Meeus periodic correction
+  (±0.6° typical vs ±2° worst-case for `'mean'`). Default remains
+  `'mean'` — no behaviour change for existing callers.
+- **Two new ayanamsas** — `'true-chitra'` (True Chitrapaksha, Spica anchored
+  to 0° Libra) and `'thirukanitham'` (Tamil-Vakya). Available everywhere
+  the existing `AyanamsaType` is accepted.
+
+### New API surface
+
+```ts
+export function computeLagna(
+  birthDate: Date,
+  location: GeoLocation,
+  ayanamsa?: AyanamsaType,
+  language?: Language,
+): LagnaInfo;
+
+export function computeBhava(
+  birthDate: Date,
+  location: GeoLocation,
+  options?: BirthChartOptions,
+): BhavaChart;
+
+export function computeRashiChart(
+  birthDate: Date,
+  location: GeoLocation,
+  options?: BirthChartOptions,
+): BirthChart;
+
+export function computeNavamsa(
+  birthDate: Date,
+  location: GeoLocation,
+  options?: BirthChartOptions,
+): DivisionalChart;
+
+export function computeAshtakoot(
+  boy: NatalMoon,
+  girl: NatalMoon,
+): AshtakootResult;
+
+export function computeMangalDosha(chart: BirthChart): MangalDoshaInfo;
+
+export function computeSadeSati(
+  natalMoonRashi: number,
+  asOfDate?: Date,
+  options?: BirthChartOptions,
+): SadeSatiInfo;
+
+export function computeDignity(graha: GrahaName, rashi: number): Dignity;
+
+export function computeVimshottariPratyantar(
+  antardasha: AntarDasha,
+): PratyantarDasha[];
+```
+
+### Type surface additions
+
+- `LagnaInfo`, `HouseInfo`, `BhavaChart`, `BirthChart`, `DivisionalChart`,
+  `PlanetPlacement`, `MangalDoshaInfo`, `SadeSatiInfo`, `PratyantarDasha`,
+  `Dignity`, `HouseSystem`, `BirthChartOptions`, `NatalMoon`, `KootName`,
+  `KootScore`, `AshtakootResult`.
+- `AyanamsaType` union widened by `'true-chitra' | 'thirukanitham'`.
+- `BirthChartOptions.nodeType?: 'mean' | 'true'`.
+
+### Breaking changes
+
+The kundli surface is entirely new — no v2.x exports were renamed,
+removed, or had their return shape changed. The major bump reflects:
+
+1. **`AyanamsaType` widened.** Strict-superset consumers that
+   exhaustively `switch` on `AyanamsaType` will need to handle the two
+   new values (`'true-chitra'`, `'thirukanitham'`). All code that
+   accepts an `AyanamsaType` continues to compile and behave identically
+   when the new values are not passed.
+2. **`computePlanetaryPositions` accepts a new `nodeType` option.**
+   Default `'mean'` — pre-v3 behaviour preserved exactly. No call site
+   needs changes; pass `{ nodeType: 'true' }` to opt in to the periodic
+   correction for Rahu / Ketu.
+
+### Validation
+
+- **Birth charts (D1)** — 20+ charts cross-validated against AstroSage
+  R-tier (lagna rashi exact match, planet rashi exact match, planet
+  house exact match for whole-sign).
+- **Ashtakoot** — 30+ pairs cross-validated against
+  drikpanchang.com/jyotisha/horoscope-match (per-koot tolerance ±1).
+- **Sade Sati** — arc-boundary dates within ±2 days of authoritative
+  sources for 20 sample charts; phase classification exact.
+- **`getDailyPanchang` regression** — perf-test `tests/perf/phase29-non-regression.test.ts`
+  confirms no slowdown for callers not using the kundli surface.
+
+### Bundle / runtime
+
+- Bundle size: **262 KB** (was ~200 KB in v2.4) — entirely from the new
+  jyotish modules and lookup tables. No new runtime dependencies.
+- Hermes JS-syntax check ✅ — every new module passes
+  `npm run test:hermes`.
+
+### Test count
+
+**6,912** tests passing (was 6,048 in v2.4 → **+864**). New files:
+`tests/unit/lagna.test.ts`, `tests/unit/bhava.test.ts`,
+`tests/unit/charts.test.ts`, `tests/unit/matching.test.ts`,
+`tests/unit/doshas.test.ts`, `tests/unit/sadeSati.test.ts`,
+`tests/unit/dignity.test.ts`, `tests/unit/pratyantar.test.ts`,
+`tests/unit/trueNode.test.ts`, plus the three `tests/validation/phase29-*`
+files and `tests/perf/phase29-non-regression.test.ts`.
+
+### Migration from 2.x
+
+```ts
+// All v2.x code keeps working unchanged.
+const r = getDailyPanchang(date, loc, { timezone: 330 });
+// …same return shape as v2.4.
+
+// New: build a kundli.
+import { computeRashiChart, computeAshtakoot } from 'panchang-ts';
+const d1 = computeRashiChart(birth, loc, { houseSystem: 'whole-sign' });
+const match = computeAshtakoot(
+  { rashi: 4, nakshatra: 9 },
+  { rashi: 0, nakshatra: 1 },
+);
+```
+
+---
+
 ## 2.4.0
 
 **Minor release — Phase 28 Wave 1 complete: Panchaka Rahita + Do Ghati

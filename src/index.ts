@@ -17,19 +17,33 @@ export { getDailyPanchang, getInstantPanchang } from './core/panchang';
 
 // Jyotish (Vedic astrology) — planetary positions, dasha, Chandra Balam
 export { computePlanetaryPositions, GRAHA_ABBR } from './jyotish/planets';
-export { computeVimshottariDasha, computeVimshottariDashaFromBirth } from './jyotish/dasha';
+export {
+  computeVimshottariDasha, computeVimshottariDashaFromBirth,
+  computeAshtottariDasha, computeYoginiDasha, computeCharaDasha,
+  ASHTOTTARI_ORDER, ASHTOTTARI_YEARS,
+  YOGINI_ORDER, YOGINI_YEARS, YOGINI_PLANET,
+  CHARA_RASHI_YEARS,
+} from './jyotish/dasha';
+export type {
+  YoginiName, YoginiMahaDasha, YoginiAntarDasha, YoginiDashaResult,
+  CharaMahaDasha, CharaDashaResult,
+} from './jyotish/dasha';
 export { computeChandraBalam } from './jyotish/chandraBalam';
 export { computeTarabala } from './jyotish/tarabala';
 export { computeLagna } from './jyotish/lagna';
 export { computeBhava } from './jyotish/bhava';
 export { computeRashiChart, computeNavamsa } from './jyotish/charts';
+export { computeDivisionalChart } from './jyotish/divisionals';
 export { computeAshtakoot } from './jyotish/matching';
 export type { NatalMoon, KootName, KootScore, AshtakootResult } from './jyotish/matching';
-export { computeMangalDosha } from './jyotish/doshas';
+export { computeMangalDosha, computeKaalSarp, computePitruDosha } from './jyotish/doshas';
 export { computeSadeSati } from './jyotish/sadeSati';
 export { computeDignity } from './jyotish/dignity';
 export type { Dignity } from './jyotish/dignity';
 export { computeVimshottariPratyantar } from './jyotish/dasha';
+export { computeAspects } from './jyotish/aspects';
+export type { AspectsOptions } from './jyotish/aspects';
+export { computeShadbala } from './jyotish/shadbala';
 
 // Astronomy utilities
 export { computeSunrise as getSunrise, computeSunset as getSunset } from './astronomy/sunrise';
@@ -58,6 +72,32 @@ export {
   getUpcomingSolarEclipse, getUpcomingLunarEclipse, getEclipseDuringDay,
 } from './astronomy/eclipse';
 
+// Muhurta scoring engine + stock rules
+export { scoreMuhurta, findAuspiciousDates } from './muhurta/engine';
+export type {
+  MuhurtaRule, MuhurtaScore, MuhurtaDay, MuhurtaScoreOptions,
+} from './muhurta/engine';
+export {
+  vivahRule, grihaPraveshRule, namakaranaRule, vidyarambhRule,
+  vahanKharidiRule, annaprashanRule, mundanRule, upanayanamRule,
+  karnavedhaRule, aksharabhyasamRule, seemanthamRule, shopOpeningRule,
+  travelStartRule, STOCK_MUHURTA_RULES,
+} from './muhurta/rules';
+
+// Calendar conversion + yearly listings
+export {
+  convertGregorianToHindu, convertHinduToGregorian,
+  getKaliYugaYear, getHinduNewYear, computeSamvat,
+} from './calendar/convert';
+export type { HinduCalendarCoords, ConvertOptions } from './calendar/convert';
+export {
+  getEkadashiDatesForYear, getSankrantisForYear,
+  getFestivalsInRange, getUpcomingEclipses,
+} from './calendar/yearly';
+export type {
+  YearlyListingOptions, FestivalDay, SankrantiEvent,
+} from './calendar/yearly';
+
 // Types
 export type {
   GeoLocation,
@@ -83,8 +123,10 @@ export type {
   DashaLord, AntarDasha, PratyantarDasha, MahaDasha, VimshottariDashaResult,
   ChandraBalamInfo, TarabalaInfo,
   LagnaInfo, HouseInfo, BhavaChart,
-  PlanetPlacement, BirthChart, DivisionalChart,
+  PlanetPlacement, BirthChart, DivisionalChart, Divisional,
   MangalDoshaInfo, SadeSatiInfo,
+  AspectMap, PlanetShadbala, ShadbalaResult,
+  KaalSarpDoshaInfo, KaalSarpSubtype, PitruDoshaInfo,
 } from './types';
 
 // Errors

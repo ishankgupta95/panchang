@@ -5,7 +5,7 @@
 Pure TypeScript Hindu Panchang (almanac), Jyotish, and Birth Chart calculations.
 Zero native dependencies. Works offline in React Native (Hermes), Node.js, and browsers.
 
-**Fast** (~0.1 ms names-only, ~0.5 ms full) | **Typed** (full TypeScript types) | **Offline** (pure JS math, no network) | **6,912 tests**
+**Fast** (~0.1 ms names-only, ~0.5 ms full) | **Typed** (full TypeScript types) | **Offline** (pure JS math, no network) | **7,156 tests**
 
 ---
 
@@ -41,10 +41,14 @@ sources, and exposed through the public API. Click a row to jump to its usage ex
 | **Planetary Positions** | All 9 grahas (sidereal) with rashi, nakshatra, pada, retrograde — mean or true Rahu/Ketu | [↓](#11-planetary-positions) |
 | **Vimshottari Dasha** | Maha → Antar → Pratyantar (3-level) breakdown from birth | [↓](#12-vimshottari-dasha) |
 | **Personal Transits** | Chandra Balam, Tarabala (9-tara cycle), Sade Sati (Saturn arc) | [↓](#13-personal-transits) |
-| **Birth Chart (Kundli)** | Lagna (sidereal), Bhava under 3 house systems, D1 (Rashi), D9 (Navamsa), Planetary Dignity | [↓](#14-birth-chart-kundli) |
-| **Compatibility & Doshas** | Ashtakoot Guna Milan (36-point), Mangal Dosha (Manglik) | [↓](#15-compatibility--doshas) |
-| **Localization** | English + Hindi (Devanagari) on every returned name | [↓](#16-localization) |
-| **Configuration** | 5 ayanamsas (Lahiri, Raman, KP, True Chitrapaksha, Thirukanitham), 2 masa systems, 3 house systems, 21 regional festival scopes | [↓](#17-configuration) |
+| **Birth Chart (Kundli)** | Lagna (sidereal), Bhava under 3 house systems, D1 / D2 / D3 / D7 / D9 / D10 / D12 / D30 charts, Planetary Dignity | [↓](#14-birth-chart-kundli) |
+| **Compatibility & Doshas** | Ashtakoot Guna Milan (36-point), Mangal Dosha, Kaal Sarp Dosha (12 subtypes), Pitru Dosha | [↓](#15-compatibility--doshas) |
+| **Aspects & Strength** | Drishti (graha aspects), Shadbala (six-fold strength) | [↓](#16-aspects--strength) |
+| **Dasha Systems** | Vimshottari (Maha→Antar→Pratyantar), Ashtottari, Yogini, Chara (Jaimini) | [↓](#17-dasha-systems) |
+| **Muhurta Engine** | Configurable scoring + 13 stock occasions (vivah, griha pravesh, namakarana, …) | [↓](#18-muhurta-engine) |
+| **Calendar Conversion** | Gregorian↔Hindu, Kali Yuga year, Hindu New Year, yearly Ekadashi / Sankranti / festival listings | [↓](#19-calendar-conversion) |
+| **Localization** | English + Hindi (Devanagari) on every returned name | [↓](#20-localization) |
+| **Configuration** | 5 ayanamsas (Lahiri, Raman, KP, True Chitrapaksha, Thirukanitham), 2 masa systems, 3 house systems, 21 regional festival scopes | [↓](#21-configuration) |
 
 ---
 
@@ -471,13 +475,15 @@ const sadeSati = computeSadeSati(natalMoonRashiIndex, new Date());
 
 ## 14. Birth Chart (Kundli)
 
-Sidereal **Lagna**, **Bhava** under three house systems, **D1 (Rashi)** and **D9
-(Navamsa)** charts placing all 9 grahas, and **Planetary Dignity**.
+Sidereal **Lagna**, **Bhava** under three house systems, **D1 (Rashi)** + six classical
+divisional charts (**D2 Hora**, **D3 Drekkana**, **D7 Saptamsa**, **D9 Navamsa**, **D10
+Dasamsa**, **D12 Dwadasamsa**, **D30 Trimsamsa**) placing all 9 grahas, and **Planetary
+Dignity**.
 
 ```typescript
 import {
   computeLagna, computeBhava, computeRashiChart, computeNavamsa,
-  computeDignity,
+  computeDivisionalChart, computeDignity,
 } from 'panchang-ts';
 
 const birth = new Date('1995-08-15T05:30:00Z');
@@ -501,11 +507,22 @@ d1.planets.find(p => p.planet === 'Saturn')?.isRetrograde;
 // 4. D9 (Navamsa) chart — classical sign-based per-rashi-type rule
 const d9 = computeNavamsa(birth, loc);
 
-// 5. Planetary dignity (BPHS Ch.3-4)
+// 5. Divisional charts (D2/D3/D7/D10/D12/D30) via the unified API
+const d10 = computeDivisionalChart(birth, loc, 'D10');   // career
+const d30 = computeDivisionalChart(birth, loc, 'D30');   // misfortune
+//   → { divisional: 'D10', lagnaRashi, planets[] }
+
+// 6. Planetary dignity (BPHS Ch.3-4)
 computeDignity('Mars',    0);   // 'moolatrikona' (Aries)
 computeDignity('Mars',    9);   // 'exalted' (Capricorn)
 computeDignity('Sun',     6);   // 'debilitated' (Libra)
 ```
+
+The seven divisional kinds are: **D2 Hora** (wealth), **D3 Drekkana** (siblings),
+**D7 Saptamsa** (children), **D9 Navamsa** (partner / dharma), **D10 Dasamsa** (career),
+**D12 Dwadasamsa** (parents), **D30 Trimsamsa** (misfortune). Each follows its classical
+per-rashi-type mapping per BPHS Ch. 6; D30 uses the non-uniform 5-segment split with
+Mars / Saturn / Jupiter / Mercury / Venus rulership (no Sun / Moon segments).
 
 Birth-chart helpers accept the full ayanamsa set including `'true-chitra'` (True
 Chitrapaksha) and `'thirukanitham'` (Tamil-Vakya). Pass via `options.ayanamsa` or the
@@ -513,11 +530,15 @@ ayanamsa positional arg.
 
 ## 15. Compatibility & Doshas
 
-**Ashtakoot Guna Milan** (36-point marriage compatibility) and **Mangal Dosha** (Manglik
-affliction with cancellations).
+**Ashtakoot Guna Milan** (36-point marriage compatibility), **Mangal Dosha** (Manglik
+with cancellations), **Kaal Sarp Dosha** (12 named subtypes by Rahu's house), and
+**Pitru Dosha** (ancestral affliction triggers).
 
 ```typescript
-import { computeAshtakoot, computeMangalDosha } from 'panchang-ts';
+import {
+  computeAshtakoot, computeMangalDosha,
+  computeKaalSarp, computePitruDosha,
+} from 'panchang-ts';
 
 // Ashtakoot — from natal Moons
 const match = computeAshtakoot(
@@ -531,14 +552,181 @@ const match = computeAshtakoot(
 // Mangal Dosha — checks Mars from lagna, Moon, and Venus
 const mangal = computeMangalDosha(d1);
 // → { afflicted, fromLagna, fromMoon, fromVenus, cancellations }
+
+// Kaal Sarp Dosha — all 7 visible planets between Rahu and Ketu axis
+const ksd = computeKaalSarp(d1);
+// → { afflicted, subtype, partial, rahuHouse, ketuHouse }
+// subtype is one of: anant, kulik, vasuki, shankhpal, padma, mahapadma,
+// takshak, karkotak, shankhachud, ghatak, vishdhar, sheshnag — by Rahu's house.
+
+// Pitru Dosha — Sun + Rahu/Ketu in same house, OR Sun + Saturn in 9th
+const pitru = computePitruDosha(d1);
+// → { afflicted, reasons: string[] }
 ```
 
 **Documented limitations** — Mangal Dosha cancellations only cover Mars in own sign
 (Aries / Scorpio) or exalted (Capricorn); other classical cancellations (mutual Mangalik,
 Mars-Jupiter aspect, Mars-Saturn conjunction) are not applied. Ashtakoot Vashya koot is
-simplified to single-vashya per rashi.
+simplified to single-vashya per rashi. Pitru Dosha surfaces the two highest-frequency
+classical triggers (Sun + node, Sun + Saturn in 9th); the full BPHS catalog of triggers
+(debilitated 9th lord, 9th lord in dusthana, etc.) is out of scope.
 
-## 16. Localization
+## 16. Aspects & Strength
+
+**Drishti** (planetary aspects per BPHS Ch. 26) and **Shadbala** (six-fold strength per
+BPHS Ch. 27).
+
+```typescript
+import { computeAspects, computeShadbala } from 'panchang-ts';
+
+// Aspects — every graha aspects the 7th house from itself; malefics gain
+// extra special aspects (Mars 4 + 8, Jupiter 5 + 9, Saturn 3 + 10).
+const aspects = computeAspects(d1);
+// → { Sun: [houses…], Moon: [...], …, Saturn: [...], Rahu: [...], Ketu: [...] }
+//
+// Default treats Rahu/Ketu with the 7th-only BPHS-literal rule. Pass
+// { nodeAspects: '5-and-9' } to extend nodes with Jupiter-like 5/9 aspects
+// (BV Raman / KP convention).
+
+// Shadbala — 7 visible grahas, 6 components per planet, in Virupas (60 V = 1 Rupa).
+const bala = computeShadbala(birth, loc);
+// → { Sun: { sthana, dig, kala, chesta, naisargika, drik, total }, Moon: …, … }
+//
+// Components implemented at the simplified-model level used by ProKerala /
+// PyJHora — Uchcha-only Sthana, Dig from directional cusp, Nathonatha + Paksha
+// for Kala, retrograde-bucket Chesta, fixed Naisargika rank, weighted Drik.
+```
+
+Both functions return additive surface — they do **not** modify the
+`getDailyPanchang` / birth-chart pipelines. Call them on demand.
+
+## 17. Dasha Systems
+
+Four classical dasha systems are exposed:
+
+```typescript
+import {
+  computeVimshottariDashaFromBirth, computeVimshottariPratyantar,
+  computeAshtottariDasha, computeYoginiDasha, computeCharaDasha,
+} from 'panchang-ts';
+
+const birth = new Date('1995-08-15T05:30:00Z');
+const loc   = { latitude: 28.6139, longitude: 77.2090 };
+
+// 1. Vimshottari (120-year, 9-lord) — already in v1; pratyantar (3-level) added in v3
+const vim = computeVimshottariDashaFromBirth(birth);
+const pratyantars = computeVimshottariPratyantar(vim.mahaDashas[0].antarDashas[0]);
+
+// 2. Ashtottari (108-year, 8-lord, no Ketu) — used when Moon in Krishna Paksha
+const moonLon = /* sidereal Moon longitude */ 145.7;
+const ash = computeAshtottariDasha(birth, moonLon);
+//   → mahaDashas[0..7], lord cycle Sun(6)→Moon(15)→Mars(8)→Mercury(17)→
+//     Saturn(10)→Jupiter(19)→Rahu(12)→Venus(21)
+
+// 3. Yogini (36-year, 8 yoginis with planetary lords)
+const yog = computeYoginiDasha(birth, moonLon);
+yog.mahaDashas[0].yogini;   // 'Dhanya' (Magha → nakshatra 10, 10 % 8 = 2)
+yog.mahaDashas[0].lord;     // 'Jupiter' (Dhanya's planet)
+
+// 4. Chara (Jaimini, sign-based, 9-8-7 years per modality)
+const cha = computeCharaDasha(birth, loc);
+cha.mahaDashas[0].rashi;    // lagna's rashi
+cha.mahaDashas[0].lord;     // sign-lord planet
+cha.mahaDashas[0].years;    // 9 (movable) | 8 (fixed) | 7 (dual)
+```
+
+**Sourcing:** Vimshottari per Parashara (BPHS Ch. 51); Ashtottari per Satya Acharya;
+Yogini per Sanjay Rath (1999) / Charak; Chara per Jaimini Sutras Ch. 1 (9-8-7 years
+variant). Documented limitations: Chara uses the forward zodiacal direction
+unconditionally (Sundar / Achyutananda variant); the reverse-direction rule for
+even-rashi lagnas is not currently exposed.
+
+## 18. Muhurta Engine
+
+A configurable rule + scoring engine for picking auspicious dates. Ships with **13 stock
+rules** (vivah, griha pravesh, namakarana, vidyarambh, vahan kharidi, annaprashan,
+mundan, upanayanam, karnavedha, aksharabhyasam, seemantham, shop opening, travel
+start). Each rule is a pure data declaration — write your own without touching the
+engine.
+
+```typescript
+import { scoreMuhurta, findAuspiciousDates, vivahRule } from 'panchang-ts';
+
+// Score a single date
+const r = scoreMuhurta(new Date('2026-05-12'), DELHI, vivahRule, { timezone: 330 });
+// → { date, score: 0..100, passes: boolean, reasons: string[] }
+
+// Find all auspicious dates in a range, sorted by score descending
+const dates = findAuspiciousDates(
+  vivahRule,
+  new Date('2026-05-01'),
+  new Date('2026-05-31'),
+  DELHI,
+  { timezone: 330 },
+);
+// → MuhurtaDay[] with full panchang attached for each result
+
+// Custom rule
+const myRule: MuhurtaRule = {
+  occasion: 'launch_party',
+  auspiciousVaras: [3, 4, 5],          // Wed/Thu/Fri
+  auspiciousNakshatras: [11, 12, 21],  // Uttara Phalguni / Hasta / Shravana
+  excludeBhadra: true,
+  excludeEkadashi: true,
+  excludeAdhikaMasa: true,
+};
+```
+
+Scoring model: starts at 50 (neutral), +10 per matching auspicious axis (tithi,
+nakshatra, vara, yoga), -15 per matching inauspicious axis, hard exclusions
+(`excludeBhadra` / `excludeEkadashi` / `excludeEclipse` / `excludeAdhikaMasa` /
+`excludeGandaMula` / `excludePanchaka` / `requirePaksha` mismatch) zero the score.
+Special yogas — Amrit Siddhi, Sarvartha Siddhi, Ravi Pushya, Guru Pushya — add +5;
+Jwalamukhi yoga subtracts -10. Final score clamped to 0..100; `passes: true` when
+score ≥ 50.
+
+## 19. Calendar Conversion
+
+Gregorian↔Hindu lunar coordinates, Kali Yuga year, regional Hindu New Year, and
+yearly listings of Ekadashis / Sankrantis / festivals / eclipses.
+
+```typescript
+import {
+  convertGregorianToHindu, convertHinduToGregorian,
+  getKaliYugaYear, getHinduNewYear,
+  getEkadashiDatesForYear, getSankrantisForYear,
+  getFestivalsInRange, getUpcomingEclipses,
+} from 'panchang-ts';
+
+// Gregorian → Hindu coordinates at sunrise
+const h = convertGregorianToHindu(new Date('2026-04-15'), DELHI, { timezone: 330 });
+// → { tithiName, tithi (1..30), pakshaTithi (1..15), paksha,
+//     masaName, masaIndex, isAdhika, vikramSamvat, shakaSamvat,
+//     varaName, varaIndex }
+
+// Hindu → Gregorian: which Gregorian dates correspond to a (samvat, masa, paksha, tithi)?
+const dates = convertHinduToGregorian(
+  { vikramSamvat: 2083, masaIndex: 0, paksha: 'shukla', pakshaTithi: 9 },
+  DELHI, { timezone: 330 },
+);
+// dates[0] → Rama Navami in VS 2083
+
+getKaliYugaYear(new Date('2026-04-01'));         // 5127
+getHinduNewYear(2026, 'tamil-nadu', DELHI, { timezone: 330 });  // Puthandu
+
+// Yearly listings
+getEkadashiDatesForYear(2026, DELHI, { timezone: 330 });   // ~24 Date[]
+getSankrantisForYear(2026, DELHI, { timezone: 330 });      // 12 SankrantiEvent[]
+getFestivalsInRange(start, end, DELHI, { timezone: 330 }); // FestivalDay[]
+getUpcomingEclipses(new Date(), DELHI, 5);                  // 5 EclipseInfo[]
+```
+
+`getHinduNewYear` is region-aware: Tamil Nadu / Kerala / Punjab / Bengal / Assam use
+the **solar** (Mesha Sankranti) anchor; everywhere else uses **Chaitra Shukla Pratipada**
+(Ugadi / Gudi Padwa / Cheti Chand). When the Pratipada is a kshaya tithi (e.g. Ugadi
+2026), the function falls back to the Amanta-Chaitra-masa boundary.
+
+## 20. Localization
 
 All returned display names respect the `language` option. **English** and **Hindi
 (Devanagari)** are supported.
@@ -555,7 +743,7 @@ console.log(hi.choghadiya.day[0].name);      // "अमृत"
 console.log(hi.vara.englishName);            // "Tuesday"
 ```
 
-## 17. Configuration
+## 21. Configuration
 
 ```typescript
 const r = getDailyPanchang(date, loc, {
@@ -900,9 +1088,23 @@ getUpcomingSolarEclipse, getUpcomingLunarEclipse, getEclipseDuringDay
 // Jyotish
 computePlanetaryPositions, GRAHA_ABBR
 computeVimshottariDasha, computeVimshottariDashaFromBirth, computeVimshottariPratyantar
+computeAshtottariDasha, computeYoginiDasha, computeCharaDasha
 computeChandraBalam, computeTarabala
-computeLagna, computeBhava, computeRashiChart, computeNavamsa
-computeAshtakoot, computeMangalDosha, computeSadeSati, computeDignity
+computeLagna, computeBhava, computeRashiChart, computeNavamsa, computeDivisionalChart
+computeAspects, computeShadbala
+computeAshtakoot, computeMangalDosha, computeKaalSarp, computePitruDosha
+computeSadeSati, computeDignity
+
+// Muhurta engine
+scoreMuhurta, findAuspiciousDates, STOCK_MUHURTA_RULES
+vivahRule, grihaPraveshRule, namakaranaRule, vidyarambhRule, vahanKharidiRule
+annaprashanRule, mundanRule, upanayanamRule, karnavedhaRule
+aksharabhyasamRule, seemanthamRule, shopOpeningRule, travelStartRule
+
+// Calendar conversion + yearly listings
+convertGregorianToHindu, convertHinduToGregorian
+getKaliYugaYear, getHinduNewYear, computeSamvat
+getEkadashiDatesForYear, getSankrantisForYear, getFestivalsInRange, getUpcomingEclipses
 
 // Errors
 PanchangError
@@ -940,7 +1142,7 @@ InteractionManager.runAfterInteractions(() => {
 
 ## Accuracy
 
-6,912 tests passing across 74 files, including fixtures cross-verified against reference
+7,156 tests passing across 81 files, including fixtures cross-verified against reference
 panchang calculations spanning 2025–2026 across 10 Indian cities, plus New York, London,
 Sydney, Dubai, and Singapore (diaspora fixtures cover DST transitions on
 `America/New_York`).

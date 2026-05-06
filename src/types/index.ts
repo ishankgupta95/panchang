@@ -25,6 +25,8 @@ export type {
   DashaLord, AntarDasha, PratyantarDasha, MahaDasha, VimshottariDashaResult,
   ChandraBalamInfo, TarabalaInfo,
   LagnaInfo, HouseInfo, BhavaChart,
-  PlanetPlacement, BirthChart, DivisionalChart,
+  PlanetPlacement, BirthChart, DivisionalChart, Divisional,
   MangalDoshaInfo, SadeSatiInfo,
+  AspectMap, PlanetShadbala, ShadbalaResult,
+  KaalSarpDoshaInfo, KaalSarpSubtype, PitruDoshaInfo,
 } from './jyotish';

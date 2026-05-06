@@ -204,12 +204,21 @@ export interface BirthChart {
 }
 
 /**
- * Divisional chart (D9 / Navamsa, future D2/D3/…). Always whole-sign anchored
- * to the divisional lagna — divisional charts in classical Vedic practice are
+ * Identifier for a divisional (varga) chart kind. The value names follow the
+ * classical D-N convention (D2 = Hora, D3 = Drekkana, D7 = Saptamsa,
+ * D9 = Navamsa, D10 = Dasamsa, D12 = Dwadasamsa, D30 = Trimsamsa). Each
+ * divisional applies its own per-classical-rule mapping from natal sidereal
+ * longitude to the chart's frame.
+ */
+export type Divisional = 'D2' | 'D3' | 'D7' | 'D9' | 'D10' | 'D12' | 'D30';
+
+/**
+ * Divisional chart (D2/D3/D7/D9/D10/D12/D30). Always whole-sign anchored to
+ * the divisional lagna — divisional charts in classical Vedic practice are
  * sign-based, not cuspal.
  */
 export interface DivisionalChart {
-  divisional: 'D9';
+  divisional: Divisional;
   /** Divisional lagna rashi (chart-relative house 1). */
   lagnaRashi: RashiInfo;
   /** 9 grahas placed in divisional rashis with whole-sign house numbers. */
@@ -299,4 +308,125 @@ export interface TarabalaInfo {
   name: string;
   /** 'inauspicious' for Vipat (2) / Pratyari (4) / Vadha (6); 'auspicious' otherwise */
   quality: 'auspicious' | 'inauspicious';
+}
+
+// ── Drishti (Aspects) ─────────────────────────────────
+
+/**
+ * The set of houses (1..12) aspected by every graha in a chart.
+ *
+ * Classical rule (BPHS Ch. 26): every graha aspects the 7th house from itself.
+ * The four malefics gain extra "special" aspects:
+ *
+ *   - Mars: 4th and 8th from itself.
+ *   - Jupiter: 5th and 9th from itself.
+ *   - Saturn: 3rd and 10th from itself.
+ *
+ * Rahu and Ketu are taken to mirror Saturn / Jupiter respectively in some
+ * traditions (also producing 5th and 9th aspects); the simpler form here
+ * follows BPHS literally and gives them only the 7th aspect. Set
+ * `nodeAspects: '5-and-9'` on `computeAspects` to enable the extended rule
+ * if your tradition uses it.
+ *
+ * Houses are computed from the graha's own house in the chart — NOT from
+ * the lagna — so a graha in house H aspects houses H+6, plus the special
+ * houses for malefics. House numbers are 1..12 modulo 12.
+ */
+export interface AspectMap {
+  /** Houses (1..12) aspected by Sun, in ascending order. */
+  Sun: number[];
+  Moon: number[];
+  Mars: number[];
+  Mercury: number[];
+  Jupiter: number[];
+  Venus: number[];
+  Saturn: number[];
+  Rahu: number[];
+  Ketu: number[];
+}
+
+// ── Shadbala (Six-fold strength) ──────────────────────
+
+/**
+ * Six-fold strength components for one planet, expressed in **Virupa units**
+ * (1 Rupa = 60 Virupas; classical convention). Higher values indicate greater
+ * strength under that source. The six sub-strengths follow BPHS Ch. 27:
+ *
+ *   - **Sthana Bala** — positional strength (dignity, ucchabala, etc.).
+ *   - **Dig Bala** — directional strength based on the kendra of the chart.
+ *   - **Kala Bala** — temporal strength (day/night, paksha, varsha, hora …).
+ *   - **Chesta Bala** — motional strength from retrogression / acceleration.
+ *   - **Naisargika Bala** — natural strength ranking (Sun strongest, Saturn
+ *     weakest, fixed independent of the chart).
+ *   - **Drik Bala** — aspectual strength (sum of friendly minus unfriendly
+ *     aspects from the other grahas, weighted by orb).
+ *
+ * `total` is the sum of the six components; classical "minimum required"
+ * thresholds vary per planet and are not enforced here — the caller decides
+ * how to interpret the totals.
+ *
+ * The implementation is a *simplified* analytic model targeting ~5%
+ * agreement with ProKerala / PyJHora reference calculators. The classical
+ * Parashara model has many sub-cases (e.g. Ojha-Yugma, Trikon Bala,
+ * Kendra Bala, Drekkana Bala for Sthana; Yuddha Bala for Chesta) that
+ * introduce small additive contributions; the simplified model exposes
+ * the dominant terms and is documented per-component in
+ * [src/jyotish/shadbala.ts](src/jyotish/shadbala.ts).
+ */
+export interface PlanetShadbala {
+  sthana: number;
+  dig: number;
+  kala: number;
+  chesta: number;
+  naisargika: number;
+  drik: number;
+  /** Sum of the six sub-strengths in Virupas. */
+  total: number;
+}
+
+/** Shadbala for the 7 visible grahas (Rahu and Ketu have no classical Shadbala). */
+export interface ShadbalaResult {
+  Sun: PlanetShadbala;
+  Moon: PlanetShadbala;
+  Mars: PlanetShadbala;
+  Mercury: PlanetShadbala;
+  Jupiter: PlanetShadbala;
+  Venus: PlanetShadbala;
+  Saturn: PlanetShadbala;
+}
+
+// ── Kaal Sarp + Pitru Doshas ──────────────────────────
+
+/**
+ * Kaal Sarp Dosha — every visible planet (Sun..Saturn) lies between Rahu
+ * and Ketu on the same side of the nodal axis. There are 12 named subtypes,
+ * one per Rahu-house axis (BPHS, Brihat Samhita commentaries).
+ */
+export type KaalSarpSubtype =
+  | 'anant' | 'kulik' | 'vasuki' | 'shankhpal'
+  | 'padma' | 'mahapadma' | 'takshak' | 'karkotak'
+  | 'shankhachud' | 'ghatak' | 'vishdhar' | 'sheshnag';
+
+export interface KaalSarpDoshaInfo {
+  /** True only when all 7 visible planets are between Rahu and Ketu. */
+  afflicted: boolean;
+  /** Subtype name, set when `afflicted` is true. */
+  subtype: KaalSarpSubtype | null;
+  /** Whether the dosha is *paritha* — partial — i.e. one planet outside the axis. */
+  partial: boolean;
+  /** Houses of Rahu and Ketu (1..12). */
+  rahuHouse: number;
+  ketuHouse: number;
+}
+
+/**
+ * Pitru Dosha — affliction by ancestors. Triggered by Sun + Rahu/Ketu
+ * conjunction in the same house, OR Sun + Saturn conjunction in the 9th
+ * house. Several other classical rules (Sun debilitated in 9th, etc.) are
+ * not folded in here — the two highest-frequency triggers are surfaced.
+ */
+export interface PitruDoshaInfo {
+  afflicted: boolean;
+  /** Reasons the dosha was flagged; empty when `afflicted` is false. */
+  reasons: string[];
 }
