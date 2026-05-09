@@ -7,18 +7,38 @@ import type { TimePeriod } from '../types/elements';
  *
  * For a 12-hour day: each muhurta = 48 min. Abhijit = ~11:36 AM to 12:24 PM.
  *
- * @param sunrise Sunrise UTC Date.
- * @param sunset  Sunset UTC Date.
- * @returns       `{ start, end }` UTC Dates for Abhijit Muhurta.
+ * **Wednesday exception.** Classical Smarta convention (followed by
+ * DrikPanchang and most published almanacs) holds that Abhijit Muhurta is
+ * not auspicious on Wednesday — Buddha's day already carries its own
+ * benefic quality, so the noon Abhijit window is dropped from the day's
+ * muhurta list. When `varaIndex === 3` (Wednesday) this function returns
+ * `null` so callers can render the day's "Abhijit: —" cell consistently
+ * with Drik. Pass no `varaIndex` (or any other value) to compute the
+ * window unconditionally.
+ *
+ * @param sunrise   Sunrise UTC Date.
+ * @param sunset    Sunset UTC Date.
+ * @param varaIndex Optional weekday: 0 = Sunday … 6 = Saturday. When `3`
+ *                  (Wednesday) the function returns `null`.
+ * @returns         `{ start, end }` UTC Dates for Abhijit Muhurta, or
+ *                  `null` on Wednesday when `varaIndex === 3`.
  *
  * @example
  * ```typescript
  * import { computeAbhijitMuhurta } from 'panchang-ts';
- * const am = computeAbhijitMuhurta(sunrise, sunset);
- * // am.start ≈ 11:36, am.end ≈ 12:24 local clock
+ * const am = computeAbhijitMuhurta(sunrise, sunset, vara.index);
+ * if (am !== null) {
+ *   // am.start ≈ 11:36, am.end ≈ 12:24 local clock
+ * }
  * ```
  */
-export function computeAbhijitMuhurta(sunrise: Date, sunset: Date): TimePeriod {
+export function computeAbhijitMuhurta(
+  sunrise: Date,
+  sunset: Date,
+  varaIndex?: number,
+): TimePeriod | null {
+  if (varaIndex === 3) return null;
+
   const dayDurationMs = sunset.getTime() - sunrise.getTime();
   const muhurtaDurationMs = dayDurationMs / 15;
 

@@ -1,10 +1,12 @@
 import { computeRashiChart } from './charts';
+import { RASHI_LORD } from './matchingTables';
 import { computeSunrise, computeSunset } from '../astronomy/sunrise';
 import { validateLocation, validateDate } from '../utils/validation';
 import { normalize360 } from '../utils/angle';
 import type { GeoLocation } from '../types/location';
 import type { BirthChartOptions } from '../types/options';
 import type {
+  BhavaBalaPerHouse, BhavaBalaResult,
   BirthChart, GrahaName, PlanetPlacement,
   PlanetShadbala, ShadbalaResult,
 } from '../types/jyotish';
@@ -78,6 +80,20 @@ export function computeShadbala(
   validateLocation(location);
 
   const chart = computeRashiChart(birthDate, location, options);
+  return shadbalaForChart(chart, birthDate, location);
+}
+
+/**
+ * Internal Shadbala implementation that reuses an already-computed natal
+ * chart. Used by both `computeShadbala` (which builds the chart from
+ * inputs) and `computeBhavaBala` (which needs the chart for its own
+ * algorithm and shares it to avoid the duplicate planetary-position work).
+ */
+function shadbalaForChart(
+  chart: BirthChart,
+  birthDate: Date,
+  location: GeoLocation,
+): ShadbalaResult {
   // Sunrise / sunset for Nathonatha Bala. Compute at local midnight context.
   // Use a 12h-back anchor so `computeSunrise` returns the *current* sunrise
   // for the birth instant rather than the next one.
@@ -361,3 +377,158 @@ function drikBala(graha: GrahaName, chart: BirthChart): number {
   }
   return net;
 }
+
+// ── Bhava Bala (House strength) ───────────────────────
+
+/**
+ * Graha names indexed by the 7-planet RASHI_LORD scheme (0=Sun..6=Saturn).
+ * Used to translate `RASHI_LORD[rashi]` → `GrahaName` for Bhavadhipati Bala
+ * lookup against the precomputed Shadbala table.
+ */
+const GRAHA_BY_INDEX: readonly Exclude<GrahaName, 'Rahu' | 'Ketu'>[] = [
+  'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn',
+];
+
+/**
+ * Bhava Dik Bala — directional strength of the bhava itself, in Virupas.
+ * Twelve fixed values keyed by bhava number. Cardinal bhavas (1, 4, 7, 10)
+ * anchor the table at 60 / 0 / 15 / 30 V (East / North / West / South); the
+ * intervening bhavas are filled by **linear interpolation** around the
+ * wheel.
+ *
+ * **This is a simplified scheme** — not the canonical BPHS Ch. 27 table.
+ * Classical recensions (Santhanam, Sharma, Iyer) publish slightly
+ * different per-bhava values, and many include a non-zero floor at every
+ * bhava. The cardinal-anchor / linear-interpolation form here matches the
+ * reduced scheme described in Sanjay Rath *Crux of Vedic Astrology* Ch. 6
+ * and is the form used by several modern calculators when full Ch. 27
+ * values are unavailable. The 12 numbers below are the algorithm's only
+ * tunable input for this component and are pinned by the bhava-bala test
+ * suite as a deterministic regression detector.
+ */
+const BHAVA_DIK_VALUES: readonly number[] = Object.freeze([
+  60, // bhava 1  (East — cardinal anchor)
+  40, // bhava 2  (interp 1→4: 60 → 0, step −20)
+  20, // bhava 3
+  0,  // bhava 4  (North — cardinal anchor)
+  5,  // bhava 5  (interp 4→7: 0 → 15, step +5)
+  10, // bhava 6
+  15, // bhava 7  (West — cardinal anchor)
+  20, // bhava 8  (interp 7→10: 15 → 30, step +5)
+  25, // bhava 9
+  30, // bhava 10 (South — cardinal anchor)
+  40, // bhava 11 (interp 10→1: 30 → 60, step +10)
+  50, // bhava 12
+]);
+
+/**
+ * Compute Bhava Bala — the four-source classical house strength for the 12
+ * bhavas of a natal chart, in Virupas (60 V = 1 Rupa). BPHS Ch. 27, second
+ * half ("Bhava-bala-vichar"), supplements the Shadbala of the seven visible
+ * grahas with a per-house strength built from four contributions:
+ *
+ *   - **Bhavadhipati Bala** — total Shadbala (`PlanetShadbala.total`) of
+ *     the rashi-lord of the bhava cusp. Reuses {@link computeShadbala}; no
+ *     recomputation.
+ *   - **Bhava Dik Bala** — fixed 12-cell directional table (cardinal bhavas
+ *     anchor at 60 / 0 / 15 / 30 V; intermediates linearly interpolated
+ *     around the wheel). Simplified scheme; see the constant
+ *     `BHAVA_DIK_VALUES` in this file for sourcing notes. Independent of
+ *     the chart.
+ *   - **Bhava Drik Bala** — net aspectual strength on the bhava cusp from
+ *     the 7 visible grahas. Each aspecting graha contributes ±(weight × 60
+ *     V) using the same drishti weights as `PlanetShadbala.drik`
+ *     (full 7th = 1, Mars 4/8 = ½, Jupiter 5/9 = ¾, Saturn 3/10 = ¼);
+ *     benefics (Moon, Mercury, Jupiter, Venus) add, malefics (Sun, Mars,
+ *     Saturn) subtract. Clamped to ≥ 0 so the per-bhava component cannot
+ *     be negative.
+ *   - **Bhavasthana Bala** — sum of {@link PlanetShadbala} natural strength
+ *     (Naisargika) of the visible grahas occupying the bhava: positive for
+ *     benefics, negative for malefics. Mercury is treated as benefic per
+ *     BPHS — the "associated benefic" nuance (Mercury becomes malefic when
+ *     conjunct a malefic) is intentionally out of scope and matches the
+ *     `BENEFICS` / `MALEFICS` sets used by `computeShadbala`. Rahu and Ketu
+ *     do not contribute.
+ *
+ * `total` for each bhava is the arithmetic sum of the four sub-strengths.
+ *
+ * Implementation note: this function lives next to `computeShadbala`
+ * because it shares the natural-strength table, the drishti-weight table,
+ * and the benefic/malefic classification. Internally it computes the natal
+ * chart **once** and reuses it for both the Shadbala lookup and the
+ * Drik / Sthana sums.
+ *
+ * @param birthDate Instant of birth in UTC.
+ * @param location  Geographic location of birth.
+ * @param options   Birth-chart options. Defaults: ayanamsa `'lahiri'`,
+ *                  language `'en'`, house system `'whole-sign'`.
+ *
+ * @example
+ * ```typescript
+ * import { computeBhavaBala } from 'panchang-ts';
+ *
+ * const bhavaBala = computeBhavaBala(
+ *   new Date('1995-08-15T05:30:00Z'),
+ *   { latitude: 28.6139, longitude: 77.2090 },
+ * );
+ * bhavaBala.houses[0].total;          // 1st-bhava total in Virupas
+ * bhavaBala.houses[9].bhavadhipati;   // 10th-bhava lord's Shadbala total
+ * ```
+ */
+export function computeBhavaBala(
+  birthDate: Date,
+  location: GeoLocation,
+  options: BirthChartOptions = {},
+): BhavaBalaResult {
+  validateDate(birthDate);
+  validateLocation(location);
+
+  const chart = computeRashiChart(birthDate, location, options);
+  const shadbala = shadbalaForChart(chart, birthDate, location);
+
+  const houses: BhavaBalaPerHouse[] = [];
+  for (let i = 0; i < 12; i++) {
+    const bhavaNumber = i + 1;
+    const cuspRashi = chart.bhava.houses[i]!.rashi.index;
+    const lord = GRAHA_BY_INDEX[RASHI_LORD[cuspRashi]!]!;
+    const bhavadhipati = shadbala[lord].total;
+
+    const dik = BHAVA_DIK_VALUES[i]!;
+
+    let drikRaw = 0;
+    for (const aspector of chart.planets) {
+      if (aspector.planet === 'Rahu' || aspector.planet === 'Ketu') continue;
+      const offset = (bhavaNumber - aspector.house + 12) % 12;
+      if (offset === 0) continue;
+      const isUniversal = offset === 6;
+      const isSpecial = SPECIAL[aspector.planet].has(offset);
+      if (!isUniversal && !isSpecial) continue;
+      const weight = ASPECT_WEIGHTS[offset] ?? 0;
+      const sign = BENEFICS.has(aspector.planet) ? 1 : -1;
+      drikRaw += sign * weight * 60;
+    }
+    const drik = Math.max(0, drikRaw);
+
+    let sthana = 0;
+    for (const p of chart.planets) {
+      if (p.planet === 'Rahu' || p.planet === 'Ketu') continue;
+      if (p.house !== bhavaNumber) continue;
+      const sign = BENEFICS.has(p.planet) ? 1 : -1;
+      sthana += sign * NAISARGIKA[p.planet];
+    }
+
+    const total = bhavadhipati + dik + drik + sthana;
+    houses.push({ bhavadhipati, dik, drik, sthana, total });
+  }
+
+  return { houses };
+}
+
+/**
+ * The frozen 12-cell BPHS Bhava Dik Bala table. Exposed for tests so the
+ * pinned values stay in lockstep with the implementation; not part of the
+ * public API.
+ *
+ * @internal
+ */
+export const _BHAVA_DIK_VALUES_FOR_TEST = BHAVA_DIK_VALUES;

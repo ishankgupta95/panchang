@@ -83,9 +83,16 @@ describe('242-day structural regression (Pune, Sep 2025 – Apr 2026)', () => {
         expect(r.yamaganda.start.getTime()).toBeLessThan(r.yamaganda.end.getTime());
       });
 
-      it('abhijitMuhurta is within daytime', () => {
-        expect(r.abhijitMuhurta.start.getTime()).toBeGreaterThan(r.sunrise.getTime());
-        expect(r.abhijitMuhurta.end.getTime()).toBeLessThan(r.sunset.getTime());
+      // Drik convention: Abhijit is null on Wednesday (Buddha-vara). On
+      // every other day the window must lie strictly within daytime.
+      it('abhijitMuhurta is null on Wednesday, within daytime otherwise', () => {
+        if (expected.varaEnglish === 'Wednesday') {
+          expect(r.abhijitMuhurta).toBeNull();
+        } else {
+          expect(r.abhijitMuhurta).not.toBeNull();
+          expect(r.abhijitMuhurta!.start.getTime()).toBeGreaterThan(r.sunrise.getTime());
+          expect(r.abhijitMuhurta!.end.getTime()).toBeLessThan(r.sunset.getTime());
+        }
       });
 
       it('choghadiya has 8 day + 8 night slots covering sunrise→nextSunrise', () => {

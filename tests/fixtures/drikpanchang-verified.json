@@ -31,7 +31,7 @@
     }
   },
   {
-    "_source": "DrikPanchang.com — verified 2025-01-01, Delhi",
+    "_source": "DrikPanchang.com — verified 2025-01-01, Delhi. Wednesday → Abhijit Muhurta is null per Drik / Smarta Buddha-vara convention.",
     "date": "2025-01-01",
     "city": "Delhi",
     "location": { "latitude": 28.6139, "longitude": 77.209 },
@@ -52,8 +52,8 @@
       "rahuKalamEndHHMM": "13:42",
       "yamagandaStartHHMM": "08:31",
       "yamagandaEndHHMM": "09:49",
-      "abhijitMuhurtaStartHHMM": "12:04",
-      "abhijitMuhurtaEndHHMM": "12:45",
+      "abhijitMuhurtaStartHHMM": null,
+      "abhijitMuhurtaEndHHMM": null,
       "festivals": [],
       "tithiEndHHMM": "02:24+1",
       "nakshatraEndHHMM": "23:46",
@@ -62,7 +62,7 @@
     }
   },
   {
-    "_source": "DrikPanchang.com — verified 2025-03-26, Delhi",
+    "_source": "DrikPanchang.com — verified 2025-03-26, Delhi. Wednesday → Abhijit Muhurta is null per Drik / Smarta Buddha-vara convention.",
     "date": "2025-03-26",
     "city": "Delhi",
     "location": { "latitude": 28.6139, "longitude": 77.209 },
@@ -83,8 +83,8 @@
       "rahuKalamEndHHMM": "13:59",
       "yamagandaStartHHMM": "07:50",
       "yamagandaEndHHMM": "09:22",
-      "abhijitMuhurtaStartHHMM": "12:02",
-      "abhijitMuhurtaEndHHMM": "12:51",
+      "abhijitMuhurtaStartHHMM": null,
+      "abhijitMuhurtaEndHHMM": null,
       "festivals": [],
       "tithiEndHHMM": "01:42+1",
       "nakshatraEndHHMM": "02:30+1",

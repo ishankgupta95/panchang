@@ -33,7 +33,12 @@ export interface DailyPanchangResult {
   rahuKalam: TimePeriod;
   gulikaKalam: TimePeriod;
   yamaganda: TimePeriod;
-  abhijitMuhurta: TimePeriod;
+  /**
+   * Abhijit Muhurta — the 8th of 15 day-muhurtas, centered on solar noon.
+   * `null` on Wednesday (Buddha-vara), per classical Smarta convention
+   * followed by DrikPanchang and most published almanacs.
+   */
+  abhijitMuhurta: TimePeriod | null;
 
   ayanamsa: number;
   siderealSunAtSunrise: number;

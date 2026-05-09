@@ -1,6 +1,3 @@
-// TODO: Phase 2 — Full Lahiri/Raman/KP polynomial implementation
-// See plan Section 6 for complete code
-
 import { PanchangError } from '../types/errors';
 import type { AyanamsaType } from '../types/options';
 

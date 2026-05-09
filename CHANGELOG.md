@@ -1,5 +1,362 @@
 # panchang-ts
 
+## 3.4.0
+
+**Minor release — Phase 33 Wave 4c: Pathu Porutham + Narayan Dasha
++ KP sub-lord layer + Prashna foundation.** South-Indian regional
+features that the v3.3 surface skipped. Closes Wave 4 of the roadmap.
+All additive on top of v3.3 — every prior export keeps the same shape.
+
+### Highlights
+
+- **`computePathuPorutham`** — Tamil/Kerala 10-fold marriage
+  compatibility, the South-Indian counterpart to Ashtakoot. Each koot
+  is binary-scored (pass / fail) per the AstroVed / Drik Tamil
+  convention; aggregate is a 0..10 count. Three vetoes (Yoni, Rajju,
+  Vedha) flip `recommended` to false regardless of count. Reuses Phase
+  29 NAKSHATRA_YONI / NAKSHATRA_GANA / RASHI_VASHYA / NAISARGIKA_MAITRI
+  tables; introduces `NAKSHATRA_RAJJU` (5-band Pada/Kati/Nabhi/Kantha/
+  Sira classification) and 13 `VEDHA_PAIRS`. Same `NatalMoon` input as
+  Ashtakoot — call both side-by-side.
+- **`computeNarayanDasha`** — Jaimini sign-based dasha with
+  parity-based direction per Sanjay Rath, *Narayana Dasa* (Sagar
+  Publications). Vishama-pada lagnas {Aries, Taurus, Gemini, Libra,
+  Scorpio, Sagittarius} → forward; sama-pada lagnas {Cancer, Leo,
+  Virgo, Capricorn, Aquarius, Pisces} → backward. Years per rashi
+  follow the same Movable 9 / Fixed 8 / Dual 7 scheme as Chara
+  (CHARA_RASHI_YEARS reused). 12 Mahadashas covering ~96 years.
+  Antardasha breakdown deferred — the Mahadasha is the dominant
+  Jaimini timing layer.
+- **`computeKpSubLord` / `computeKpCuspalSubLords` /
+  `computeKpSignificators`** — K.S. Krishnamurti's KP-Paddhati 9-fold
+  nakshatra subdivision. Sub-lord at any longitude follows the
+  Vimshottari cycle starting from the star-lord, each lord's sub-width
+  proportional to its dasha-years (`(years / 120) × 13°20'`). Cuspal
+  sub-lords compute from the 12 Placidus-KP cusps (forces
+  `houseSystem: 'placidus-kp'` regardless of caller-supplied option —
+  KP analysis is anchored on cuspal positions). Significators apply
+  the 4-fold KP rule (occupant + star-lord-occupant + owner +
+  star-lord-owner) and surface results both keyed by planet and by
+  house.
+- **`computePrashnaChart`** — chart-cast helper for horary
+  (question-time) analysis. Thin intent-named wrapper over
+  `computeRashiChart` with `houseSystem: 'placidus-kp'` defaulted (KP
+  horary anchor). Returns the same `BirthChart` shape, enabling KP
+  cuspal sub-lord and significator analysis on top. Ruling Planets,
+  KP horary 1..249 numbers, and significator-driven event timing are
+  deferred to a later phase — the foundation lands additively.
+
+### New API surface
+
+```ts
+// Pathu Porutham
+export function computePathuPorutham(boy: NatalMoon, girl: NatalMoon): PathuPoruthamResult;
+export type { PoruthamName, PoruthamScore, PathuPoruthamResult };
+
+// Narayan Dasha (Jaimini, parity direction)
+export function computeNarayanDasha(
+  birthDate: Date, location: GeoLocation, ayanamsa?: AyanamsaType,
+): NarayanDashaResult;
+export const VISHAMA_PADA_RASHIS: ReadonlySet<number>;
+export const SAMA_PADA_RASHIS: ReadonlySet<number>;
+export type { NarayanMahaDasha, NarayanDashaResult };
+
+// KP sub-lord layer
+export function computeKpSubLord(siderealLongitude: number): KpSubLordInfo;
+export function computeKpCuspalSubLords(
+  birthDate: Date, location: GeoLocation, options?: BirthChartOptions,
+): KpCuspalSubLords;
+export function computeKpSignificators(chart: BirthChart): KpSignificators;
+export type { KpSubLordInfo, KpCuspalSubLords, KpSignificators };
+
+// Prashna foundation
+export function computePrashnaChart(
+  questionMoment: Date, location: GeoLocation, options?: BirthChartOptions,
+): BirthChart;
+```
+
+### Stats
+
+- **+156 tests** → **7,707 total** across 95 files.
+  - Pathu Porutham: 62 tests (per-koot rules + aggregate threshold + 20-pair
+    smoke sweep).
+  - Narayan Dasha: 39 tests (parity classification + forward/backward
+    sequence pinning + R-tier fixture sweep).
+  - KP sub-lord: 46 tests (sub-width invariants, sub-cycle pinning across
+    nakshatras, cuspal sub-lord + significator round-trip + fixture sweep).
+  - Prashna: 9 tests (parity with `computeRashiChart` + house-system /
+    ayanamsa overrides + validation).
+- **Bundle.** 361 KB CJS / 358 KB ESM (under the 410 KB target; was 349 KB
+  CJS at v3.3.0).
+- **Hermes JS-syntax check** passes; `tsc --noEmit` clean.
+
+### Migration
+
+Fully additive — no v3.3 breakage. No new error codes (Pathu Porutham
+shape validation reuses RangeError from Ashtakoot). No locale
+additions — Porutham names, KP planet names, and Narayan dasha lord
+names are English/transliterated proper nouns and intentionally not
+locale-resolved (consistent with Phase 29's NAKSHATRA_YONI / Phase 31's
+yoga catalog / Phase 32's Saham names).
+
+## 3.3.0
+
+**Minor release — Phase 32 Wave 4b: Varshaphala + Tithi Pravesha + Arudha
++ Special Lagnas + Upagrahas + Argala.** Rounds out the niche-but-classical
+chart layers that the v3.2 surface skipped. All additive on top of v3.2 —
+every prior export keeps the same shape.
+
+### Highlights
+
+- **`computeVarshaphala`** — Tajik annual (solar-return) chart. Newton-
+  refined solar-return instant (sidereal Sun back to natal lon to within
+  0.0001°), Muntha (`(natalLagnaRashi + N) mod 12`), year lord by max
+  Shadbala among 4 candidates (varsha lagna lord, Muntha lord, Sun's
+  rashi lord, Triraashi Pati per day/night element table), and the
+  **27-Saham core set** (Punya, Vidya, Yasas, Mitra, Karma, Vivaha,
+  Putra, Roga, Marana, Rajya, Raja, Bandhu, Dharma, Gnati, Apamrityu,
+  Bhratri, Matri, Pitri, Sama, Bandhana, Karyasiddhi, Vyapara, Sastra,
+  Asha, Labha, Susha, Tapas) with Neelakantha day/night X-Y swap on the
+  9 flagged Sahams. The 50-Saham extended list is deferred — the table
+  in `src/jyotish/sahamsTables.ts` is data-driven so adding more is a
+  one-row change.
+- **`computeTithiPravesha`** — South-Indian annual soli-lunar return
+  per **PVR Narasimha Rao's redefinition**: cast at the moment in year-N
+  when the sidereal Sun is in its natal sidereal sign AND the Sun-Moon
+  separation equals the natal separation. The natal tithi is preserved
+  exactly (`praveshTithi === natalTithi`). Newton-iterates on the
+  Moon-Sun phase deviation (~12.19°/day rate); if the closest tithi-
+  match falls on the wrong side of a sign boundary, shifts by one
+  synodic month (~29.5d) toward the solar-return centre.
+- **`computeArudhas`** — 12 Arudha padas per Jaimini *Upadesa Sutras*
+  Ch. 1 (Sanjay Rath commentary). Includes the two canonical exceptions
+  (lord in own bhava → 10th from lord; lord in 7th from bhava → 4th
+  from lord). `arudhaLord` is the rashi-lord of the *Arudha rashi*
+  itself — useful for analysing the pada's significations directly.
+- **`computeHoraLagna` / `computeGhatiLagna` / `computeBhavaLagna` /
+  `computeSripatiLagna`** — time-derived special lagnas advanced from
+  the most recent sunrise. Hora and Bhava both at 15°/hour (per the
+  `Phaladeepika` Ch. 1 rate the library follows); Ghati at 75°/hour;
+  Sripati = natal lagna in the cusp form.
+- **`computeUpagrahas`** — 7 sub-graha **positions** (vs the existing
+  Gulika *Kalam* time form). Gulika and Mandi are the rising longitudes
+  at the start and midpoint of Saturn's 1/8-day-or-night segment per
+  weekday-lord rotation (day) or 5-day-shifted rotation (night, per
+  Phaladeepika Ch. 5). Sun-derived: Dhuma = Sun + 133°20'; Vyatipata
+  = 360 − Dhuma; Parivesha = Vyatipata + 180; Indrachapa = 360 −
+  Parivesha; Upaketu = Indrachapa + 16°40'.
+- **`computeArgala`** — per-bhava Jaimini intervention rules. Planets
+  in 2/4/11 from a bhava form Argala; planets in 3/10/12 form
+  Virodhargala. Pure house arithmetic on `chart.planets[i].house`.
+  Structural invariant: every planet contributes to exactly 6 bhavas
+  (3 Argala + 3 Virodhargala).
+
+### New API surface
+
+```ts
+// Varshaphala (Tajik annual chart)
+export function computeVarshaphala(
+  natalBirth: Date, yearAge: number,
+  location: GeoLocation, options?: BirthChartOptions,
+): VarshaphalaChart;
+export const ALL_SAHAM_NAMES: readonly SahamName[];
+
+// Tithi Pravesha (annual soli-lunar return)
+export function computeTithiPravesha(
+  natalBirth: Date, yearAge: number,
+  location: GeoLocation, options?: BirthChartOptions,
+): TithiPraveshaChart;
+
+// Arudha
+export function computeArudhas(chart: BirthChart, lang?: Language): Arudha[];
+
+// Special lagnas
+export function computeHoraLagna(birthDate: Date, location: GeoLocation,
+                                 ayanamsa?: AyanamsaType, lang?: Language): LagnaInfo;
+export function computeGhatiLagna(...): LagnaInfo;
+export function computeBhavaLagna(...): LagnaInfo;
+export function computeSripatiLagna(...): LagnaInfo;
+
+// Upagrahas (7 sub-graha positions)
+export function computeUpagrahas(
+  birthDate: Date, location: GeoLocation, options?: BirthChartOptions,
+): Upagrahas;
+
+// Argala (Jaimini intervention)
+export function computeArgala(chart: BirthChart): ArgalaPerBhava[];
+```
+
+### Type surface additions
+
+- `VarshaphalaChart`, `MunthaInfo`, `SahamPosition`, `SahamName`,
+  `SahamOperand`, `SahamFormula`.
+- `TithiPraveshaChart`.
+- `Arudha`, `SpecialLagnaKind`.
+- `UpagrahaPosition`, `Upagrahas`.
+- `ArgalaPerBhava`.
+
+`PanchangErrorCode` extended with `'INVALID_INPUT'` and
+`'SAHAM_DEPENDENCY_ERROR'` for Varshaphala / Tithi-Pravesha argument
+validation and the Saham operand-resolution chain.
+
+### Sourcing notes
+
+- **Varshaphala** — Neelakantha *Tajika Neelakanthi* (1587 CE), the
+  canonical Tajik primer; B.V. Raman *Annual Horoscope*; Sanjay Rath
+  *Crux of Vedic Astrology* Tajik appendix; PVR Narasimha Rao Tajik
+  notes (Saptarishis Astrology). Saham formulas are pinned per
+  Neelakantha; multiple Tajik commentators (Hari Hara) define
+  different swap subsets — documented per row in
+  `src/jyotish/sahamsTables.ts`. The 27-Saham core set is shipped;
+  the extended 50-Saham list is deferred.
+- **Tithi Pravesha** — Sanjay Rath, *Tithi Pravesha* (srath.com);
+  PVR Narasimha Rao, *Re-Defining Tithi Pravesha Chart* (Saptarishis
+  Astrology Vol. 8). The PVR redefinition is preferred over the
+  older calendar-anniversary heuristic.
+- **Arudha** — Jaimini *Upadesa Sutras* Ch. 1; Sanjay Rath *Jaimini
+  Maharishi's Upadesa Sutras* (commentary); BPHS Ch. 29.
+- **Special lagnas** — BPHS Ch. 4; *Phaladeepika* Ch. 1; Sripati
+  *Sripati Paddhati*. Hora and Bhava Lagna are numerically identical
+  under this library's 15°/hour rate convention; some BPHS recensions
+  use a faster 30°/hour Hora.
+- **Upagrahas** — BPHS Ch. 5; Phaladeepika Ch. 5 (night-rotation
+  rule); Sanjay Rath *Brihat Nakshatra* (upagraha section).
+- **Argala** — Jaimini *Upadesa Sutras* Ch. 1; BPHS Ch. 51 (simplified
+  2/4/11 vs 3/10/12 form). The 5th and 9th from a bhava ("primary
+  Argala / Virodhargala" in some extended schemes) are not included.
+
+## 3.2.0
+
+**Minor release — Phase 31 Wave 4a: Ashtakavarga + Yogas + Karakas + Bhava Bala.**
+Adds the pan-Indian Parashara classical core that was missing from the v3.1
+surface: per-graha Ashtakavarga grids with optional Sodhana reductions, a
+fixed-catalog named-yoga detector (~25 yogas across 8 types), the 7-Karaka
+Parashara variant of Jaimini Karakas, and BPHS Ch. 27 four-source Bhava
+Bala. All additive on top of v3.1 — every prior export keeps the same
+shape.
+
+### Highlights
+
+- **`computeAshtakavarga`** — BPHS Ch. 66 per-graha 12-rashi bindu grids
+  (Bhinnashtaka) and the summed Sarvashtaka grid. The 7 × 8 BENEFIC_OFFSETS
+  table is the canonical form used by ProKerala / AstroSage / PyJHora /
+  JagannathaHora — pinned cell-by-cell and verified against per-receiver
+  invariants (Sun=47, Moon=49, Mars=39, Mercury=54, Jupiter=56, Venus=52,
+  Saturn=39 → Sarvashtaka=336). Optional `{ reductions: true }` returns
+  Trikona + Ekadhipatya Sodhana grids per BPHS Ch. 67.
+- **`computeYogas`** — ~25 named classical yogas detected from a natal
+  chart against a fixed declarative catalog. The 8 types covered:
+  - **Mahapurusha** (5): Ruchaka, Bhadra, Hamsa, Malavya, Sasha
+  - **Lunar** (5): Gajakesari, Sunapha, Anapha, Durudhura, Kemadruma
+  - **Solar** (4): Budha-Aditya, Veshi, Vasi, Ubhayachari
+  - **Raja** (4): Raja Yoga (generic kendra/trikona), Dharma-Karmadhipati,
+    Vipareeta Raja Yoga, Lakshmi Yoga
+  - **Dhana** (3): Dhana Yoga (2-11), Dhana Yoga (5-9), Vasumati Yoga
+  - **Special** (2): Vargottama (D9 required), Yogakaraka
+  - **Cancellation** (1): Neecha Bhanga (3 sub-rules)
+  - **Negative** (1): Daridra Yoga
+  Adding a new yoga is a data-only change in `src/jyotish/yogasCatalog.ts`
+  — the engine is a thin loop over the catalog. Each match returns one or
+  more human-readable `reasons[]` strings.
+- **`computeJaiminiKarakas`** — 7-Karaka Parashara variant. The 7 visible
+  grahas ranked by descending degree-in-rashi → Atmakaraka, Amatyakaraka,
+  Bhratrukaraka, Matrukaraka, Putrakaraka, Gnatikaraka, Darakaraka. Stable
+  tie-break order (Sun → Moon → Mars → Mercury → Jupiter → Venus → Saturn)
+  on the rare exact-degree tie.
+- **`computeBhavaBala`** — BPHS Ch. 27 four-source house strength for the
+  12 bhavas in Virupas. Components: **bhavadhipati** (Shadbala total of
+  the rashi-lord), **dik** (fixed 12-cell directional table), **drik** (net
+  aspect strength on the cusp, clamped ≥ 0), **sthana** (sum of Naisargika
+  for occupants — benefics +, malefics −). Built on top of `computeShadbala`
+  (chart + sub-bala internals are computed once and reused).
+
+### New API surface
+
+```ts
+// Ashtakavarga
+export function computeAshtakavarga(
+  chart: BirthChart,
+  options?: { reductions?: boolean },
+): AshtakavargaResult;
+
+// Yogas
+export function computeYogas(chart: BirthChart, options?: ComputeYogasOptions): Yoga[];
+
+// Karakas
+export function computeJaiminiKarakas(chart: BirthChart): JaiminiKarakas;
+
+// Bhava Bala (lives next to Shadbala in the same module)
+export function computeBhavaBala(
+  birthDate: Date, location: GeoLocation, options?: BirthChartOptions,
+): BhavaBalaResult;
+```
+
+### Type surface additions
+
+- `AshtakavargaResult`, `BhinnashtakaGrid`.
+- `Yoga`, `YogaName` (25 entries), `YogaType` (8 categories),
+  `ComputeYogasOptions`.
+- `KarakaName` (7 entries), `JaiminiKarakas`.
+- `BhavaBalaPerHouse`, `BhavaBalaResult`.
+
+### Sourcing notes
+
+- **Ashtakavarga** — BPHS Chs. 66 (BENEFIC_OFFSETS) + 67 (Sodhana). Cross-
+  checked against Phaladeepika Ch. 31 and Sanjay Rath *Visti Nadi*. The
+  Ekadhipatya Sodhana implementation follows the most-cited Santhanam
+  recension; multiple recensions exist in the literature and are
+  documented in the source.
+- **Yogas** — BPHS Chs. 36–43 (Mahapurusha, lunar, solar, raja),
+  Ch. 41 (Vipareeta, Daridra), Ch. 14 (Vargottama doctrine), Ch. 36
+  (Neecha Bhanga sub-rules); Phaladeepika Ch. 6; B.V. Raman *Three
+  Hundred Important Combinations*; Sanjay Rath *Crux of Vedic Astrology*
+  Ch. 9. Yoga names are English/transliterated proper nouns and are
+  intentionally **not** locale-resolved — `'Gajakesari'` reads the same
+  in `'en'` and `'hi'`.
+- **Karakas** — Jaimini *Upadesa Sutras* Ch. 1; Sanjay Rath *Jaimini
+  Maharishi's Upadesa Sutras*. The 7-Karaka Parashara variant is shipped;
+  the reversed-Rahu 8-Karaka Jaimini variant is **not** computed.
+- **Bhava Bala** — BPHS Ch. 27 second half ("Bhava-bala-vichar"). The
+  four-source decomposition is canonical; the per-bhava `dik` table uses
+  cardinal-anchor / linear-interpolation values matching the simplified
+  scheme in Sanjay Rath *Crux of Vedic Astrology* Ch. 6. Classical
+  recensions vary on the exact intermediate-bhava values.
+
+### Documented limitations
+
+- Sthana Bala in `computeShadbala` (and therefore `bhavadhipati` in
+  `computeBhavaBala`) is the **Uchcha Bala only** — the dominant term.
+  Saptavargaja / Ojha-Yugma / Kendra / Drekkana sub-balas are intentionally
+  omitted, matching the simplified scheme noted in v3.1.
+- The Ekadhipatya Sodhana reduction follows the Santhanam BPHS Ch. 67
+  formulation; alternate recensions (e.g. Sharma) produce slightly
+  different reduced totals and are not selectable.
+- `computeYogas` evaluates the catalog as a **flat list** — the classical
+  notion of a yoga being broken or modified by an aspecting malefic is
+  not modeled (each rule fires independently).
+- Vargottama in `computeYogas` requires the D9 to be passed via
+  `options.navamsa`; without it the rule is silently skipped.
+
+### Breaking changes
+
+None. Phase 31 is fully additive — every v3.1 export keeps the same shape.
+
+### Bundle / runtime
+
+- Bundle size: **~327 KB CJS** (was ~302 KB in v3.1; +25 KB). No new
+  runtime dependencies.
+- Hermes JS-syntax check ✅ — every new module passes
+  `npm run test:hermes`.
+
+### Test count
+
+**7,355** tests passing across 85 files (was 7,156 in v3.1 → **+199**).
+New test files: `tests/unit/ashtakavarga.test.ts`,
+`tests/unit/yogas.test.ts`, `tests/unit/karakas.test.ts`,
+`tests/unit/bhavaBala.test.ts`.
+
+---
+
 ## 3.1.0
 
 **Minor release — Phase 30 Wave 3: Advanced Astrology + Muhurta Engine.**

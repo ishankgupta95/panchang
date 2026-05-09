@@ -617,3 +617,145 @@ export function computeCharaDasha(
     mahaDashas,
   };
 }
+
+// ── Narayan Dasha (Jaimini sign-dasha with padi direction) ─
+
+/**
+ * Vishama-pada (odd-padi) rashis — those whose Narayan-Dasha cycle
+ * proceeds **forward** (zodiacal) from lagna.
+ *
+ * Per Sanjay Rath, *Narayana Dasa* (Sagar Publications): a rashi is
+ * vishama-pada iff its first navamsa falls in a movable sign. The
+ * resulting set is Aries, Taurus, Gemini, Libra, Scorpio, Sagittarius.
+ */
+export const VISHAMA_PADA_RASHIS: ReadonlySet<number> = new Set([0, 1, 2, 6, 7, 8]);
+
+/**
+ * Sama-pada (even-padi) rashis — those whose Narayan-Dasha cycle
+ * proceeds **backward** (anti-zodiacal) from lagna. Cancer, Leo,
+ * Virgo, Capricorn, Aquarius, Pisces.
+ */
+export const SAMA_PADA_RASHIS: ReadonlySet<number> = new Set([3, 4, 5, 9, 10, 11]);
+
+/** One Mahadasha period in the Narayan (Jaimini) system. */
+export interface NarayanMahaDasha {
+  /** Rashi index 0..11 (0 = Mesha … 11 = Meena). */
+  rashi: number;
+  /** Sign-lord planet (parallel to Vimshottari's `lord`). */
+  lord: DashaLord;
+  startDate: Date;
+  endDate: Date;
+  /** Duration in years (7, 8, or 9 — same as Chara). */
+  years: number;
+}
+
+export interface NarayanDashaResult {
+  /** Direction the cycle advances from `startingRashi`. */
+  direction: 'forward' | 'backward';
+  /** Lagna's rashi — first dasha begins here. */
+  startingRashi: number;
+  /** Index 0..11 (into `mahaDashas`) of the dasha active at the evaluation time. */
+  currentIndex: number;
+  /** Rashi active at the evaluation time. */
+  currentRashi: number;
+  /** 12 mahadasha periods covering ~96 years from birth. */
+  mahaDashas: NarayanMahaDasha[];
+}
+
+/**
+ * Compute a **simplified Narayan-style Jaimini Dasha** from the birth
+ * moment.
+ *
+ * **What this implements.** A Chara-Dasha skeleton with the
+ * Narayan-style **vishama-pada / sama-pada** parity-direction rule
+ * applied:
+ *
+ *   - **Vishama-pada (odd-padi)** lagna in {Aries, Taurus, Gemini, Libra,
+ *     Scorpio, Sagittarius} → cycle proceeds **forward** (zodiacal).
+ *   - **Sama-pada (even-padi)** lagna in {Cancer, Leo, Virgo, Capricorn,
+ *     Aquarius, Pisces} → cycle proceeds **backward** (anti-zodiacal).
+ *
+ * Years per rashi follow {@link CHARA_RASHI_YEARS} (Movable 9, Fixed 8,
+ * Dual 7) — the **fixed Chara-modality durations**, NOT the variable
+ * sign-to-lord-distance durations of the full Sanjay-Rath / BPHS
+ * Narayan Dasa. Lord assignment is the rashi's natural lord.
+ *
+ * Antardasha breakdown is not exposed.
+ *
+ * **NOT modelled (vs the full Sanjay-Rath standard from *Narayana Dasa*
+ * Sagar Publications):**
+ *
+ *   - **Variable Mahadasha duration.** The canonical Narayan rule is
+ *     `years = count of signs from rashi to its lord, counted zodiacal
+ *     for Vishama-pada and anti-zodiacal for Sama-pada`. This
+ *     implementation substitutes the simpler 9/8/7 Chara durations.
+ *     For most rashis the two diverge.
+ *   - **Strength-based starting rashi.** The classical rule starts from
+ *     the *stronger of Lagna or 7th house* (decided by 8 hierarchical
+ *     strength criteria). This implementation always starts from Lagna.
+ *   - **Scorpio/Aquarius dual-lord handling.** Scorpio (Mars/Ketu) and
+ *     Aquarius (Saturn/Rahu) need a 3-rule selection between dual lords
+ *     before `years = sign-to-lord-count` resolves. Skipped here.
+ *
+ * Use this function for the *parity-direction* layer on top of Chara
+ * Dasha; it is **not** a faithful Narayan implementation. A future
+ * release may add a strict-mode flag for the full algorithm.
+ *
+ * @param birthDate Instant of birth in UTC.
+ * @param location  Geographic location of birth.
+ * @param ayanamsa  Ayanamsa system (default `'lahiri'`).
+ *
+ * @example
+ * ```typescript
+ * import { computeNarayanDasha } from 'panchang-ts';
+ * const narayan = computeNarayanDasha(birthDate, location);
+ * narayan.direction;            // 'forward' | 'backward'
+ * narayan.mahaDashas[0].rashi;  // lagna rashi
+ * narayan.mahaDashas[1].rashi;  // 2nd or 12th from lagna depending on direction
+ * ```
+ *
+ * **Sources.** *Jaimini Upadesa Sutras* Ch. 2 (parity rule).
+ * Variable-duration full algorithm: Sanjay Rath, *Narayana Dasa* (Sagar
+ * Publications) — not implemented here.
+ */
+export function computeNarayanDasha(
+  birthDate: Date,
+  location: GeoLocation,
+  ayanamsa: AyanamsaType = 'lahiri',
+): NarayanDashaResult {
+  validateDate(birthDate);
+  validateLocation(location);
+
+  const lagna = computeLagna(birthDate, location, ayanamsa);
+  const startingRashi = lagna.rashi.index;
+  const direction: 'forward' | 'backward' = VISHAMA_PADA_RASHIS.has(startingRashi)
+    ? 'forward'
+    : 'backward';
+
+  const mahaDashas: NarayanMahaDasha[] = [];
+  let cursor = new Date(birthDate.getTime());
+  for (let i = 0; i < 12; i++) {
+    const rashi = direction === 'forward'
+      ? (startingRashi + i) % 12
+      : (startingRashi - i + 12) % 12;
+    const years = CHARA_RASHI_YEARS[rashi]!;
+    const lord = CHARA_RASHI_LORD[rashi]!;
+    const startDate = new Date(cursor.getTime());
+    const endDate = new Date(cursor.getTime() + years * MS_PER_YEAR);
+    mahaDashas.push({ rashi, lord, startDate, endDate, years });
+    cursor = endDate;
+  }
+
+  const now = new Date();
+  const currentIndex = mahaDashas.findIndex(
+    (md) => now >= md.startDate && now < md.endDate,
+  );
+  const idx = Math.max(0, currentIndex);
+  return {
+    direction,
+    startingRashi,
+    currentIndex: idx,
+    currentRashi: mahaDashas[idx]!.rashi,
+    mahaDashas,
+  };
+}

@@ -29,4 +29,11 @@ export type {
   MangalDoshaInfo, SadeSatiInfo,
   AspectMap, PlanetShadbala, ShadbalaResult,
   KaalSarpDoshaInfo, KaalSarpSubtype, PitruDoshaInfo,
+  AshtakavargaResult, BhinnashtakaGrid,
+  Yoga, YogaName, YogaType,
+  KarakaName, JaiminiKarakas,
+  BhavaBalaPerHouse, BhavaBalaResult,
+  Arudha, SpecialLagnaKind,
+  UpagrahaPosition, Upagrahas,
+  ArgalaPerBhava,
 } from './jyotish';

@@ -55,8 +55,15 @@ function runFixtureSuite(fixtures: Fixture[]) {
         expect(result.rahuKalam.start.getTime()).toBeLessThan(result.rahuKalam.end.getTime());
       });
 
-      it('abhijitMuhurta.start < abhijitMuhurta.end', () => {
-        expect(result.abhijitMuhurta.start.getTime()).toBeLessThan(result.abhijitMuhurta.end.getTime());
+      // Drik convention: Abhijit is dropped on Wednesday (Buddha-vara).
+      // Non-Wednesday days carry the full noon window.
+      it('abhijitMuhurta is null on Wednesday, ordered otherwise', () => {
+        if (expected.varaEnglish === 'Wednesday') {
+          expect(result.abhijitMuhurta).toBeNull();
+        } else {
+          expect(result.abhijitMuhurta).not.toBeNull();
+          expect(result.abhijitMuhurta!.start.getTime()).toBeLessThan(result.abhijitMuhurta!.end.getTime());
+        }
       });
 
       it('dayDurationMinutes is in (0, 1440)', () => {

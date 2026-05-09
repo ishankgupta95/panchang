@@ -759,7 +759,7 @@ export function getDailyPanchang(
   const rahuKalam = computeRahuKalam(sunriseUtc, sunsetUtc, vara.index);
   const gulikaKalam = computeGulikaKalam(sunriseUtc, sunsetUtc, vara.index);
   const yamaganda = computeYamaganda(sunriseUtc, sunsetUtc, vara.index);
-  const abhijitMuhurta = computeAbhijitMuhurta(sunriseUtc, sunsetUtc);
+  const abhijitMuhurta = computeAbhijitMuhurta(sunriseUtc, sunsetUtc, vara.index);
   const vijayaMuhurtaUtc = computeVijayaMuhurta(sunriseUtc, sunsetUtc);
   const godhuliMuhurtaUtc = computeGodhuliMuhurta(sunsetUtc);
   const nishitaMuhurtaUtc = computeNishitaMuhurta(sunsetUtc, nextSunriseUtc);
@@ -837,7 +837,7 @@ export function getDailyPanchang(
     rahuKalam: convertTimePeriod(rahuKalam),
     gulikaKalam: convertTimePeriod(gulikaKalam),
     yamaganda: convertTimePeriod(yamaganda),
-    abhijitMuhurta: convertTimePeriod(abhijitMuhurta),
+    abhijitMuhurta: abhijitMuhurta === null ? null : convertTimePeriod(abhijitMuhurta),
     ayanamsa: ayanamsaValue,
     siderealSunAtSunrise,
     siderealMoonAtSunrise,
