@@ -76,10 +76,10 @@ JSDoc with `@param` / `@returns` / `@example`.
 | 29 | Birth Chart Foundation — Lagna, Bhava (3 house systems), D1/D9, Ashtakoot 36-pt matching, Mangal Dosha, Sade Sati, Pratyantar dashas, planetary dignity, true Rahu node, True Chitra + Thirukanitham ayanamsas | v3.0.0 | ✅ |
 | 30 | Advanced Astrology + Muhurta Engine — D2/D3/D7/D10/D12/D30, Drishti, Shadbala, Kaal Sarp + Pitru, Ashtottari/Yogini/Chara dashas, muhurta scoring engine + 13 stock rules, calendar conversion APIs | v3.1.0 | ✅ |
 | 31 | Ashtakavarga + Yoga detection + Jaimini Karakas + Bhava Bala (Wave 4a — pan-Indian Parashara core) | v3.2.0 | ✅ |
-| 32 | Varshaphala + Tithi Pravesha + Arudha + Special Lagnas + Upagrahas + Argala (Wave 4b — North-Indian + remaining classical layers) | v3.3.0 | 🟡 planned |
-| 33 | Pathu Porutham + Narayan Dasha + KP sub-lord layer + Prashna foundation (Wave 4c — South-Indian regional features) | v3.4.0 | 🟡 planned |
+| 32 | Varshaphala + Tithi Pravesha + Arudha + Special Lagnas + Upagrahas + Argala (Wave 4b — North-Indian + remaining classical layers) | v3.3.0 | ✅ |
+| 33 | Pathu Porutham + Narayan Dasha + KP sub-lord layer + Prashna foundation (Wave 4c — South-Indian regional features) | v3.4.0 | ✅ |
 
-State as of v3.2.0: **7,355 tests** passing across 85 files. Bundle ~327 KB.
+State as of v3.4.0: **7,707 tests** passing across 95 files. Bundle ~361 KB CJS.
 Festival registry: 80+ entries. Diaspora cross-verified across 5 non-IST cities.
 Hermes CI green.
 
@@ -419,7 +419,7 @@ Astrology* Ch. 6.
 
 ---
 
-## Phase 32 — Varshaphala + Tithi Pravesha + Arudha + Special Lagnas + Upagrahas + Argala (Wave 4b) — 🟡 planned
+## Phase 32 — Varshaphala + Tithi Pravesha + Arudha + Special Lagnas + Upagrahas + Argala (Wave 4b) — ✅ shipped (v3.3.0)
 
 **Goal.** Round out the niche-but-classical surface. Varshaphala is the
 single biggest piece; Tithi Pravesha is its South-Indian counterpart and
@@ -727,18 +727,24 @@ to exactly 6 bhavas — 3 argala + 3 virodhargala).
 
 **Effort.** ~1d.
 
-### Phase 32 Exit Criteria
+### Phase 32 Exit Criteria — actuals
 
-- ✅ All 6 modules with full unit + cross-validation tests; ~140 new tests.
-- ✅ Solar-return + Tithi-pravesha instants ±1 min vs ProKerala / Cosmic Insights.
-- ✅ Bundle target: ≤ 380 KB CJS.
-- ✅ Hermes JS-syntax check; typecheck clean.
-- ✅ API additive — no v3.2 breakage.
-- ✅ README sections added with examples for each new export.
+- ✅ All 6 modules shipped with full unit + structural-invariant tests;
+  **196 new tests** (Varshaphala 64, Tithi Pravesha 38, Arudha 23,
+  Special Lagnas 16, Upagrahas 32, Argala 23) → 7,551 total.
+- ✅ Solar-return instants converge to ±0.0002° on the 5 R-tier fixtures
+  (well below the ±1 minute target); Tithi-pravesha preserves natal
+  tithi exactly with the natal-sign correction.
+- ✅ Bundle: 349 KB CJS (under 380 KB target; was 327 KB at v3.2.0).
+- ✅ Hermes JS-syntax check passes; `tsc --noEmit` clean.
+- ✅ API additive — no v3.2 breakage. New error codes
+  `'INVALID_INPUT'` and `'SAHAM_DEPENDENCY_ERROR'` added to
+  `PanchangErrorCode` (additive union expansion).
+- ✅ README sections added for every new export.
 
 ---
 
-## Phase 33 — Pathu Porutham + Narayan Dasha + KP sub-lord layer + Prashna foundation (Wave 4c) — 🟡 planned
+## Phase 33 — Pathu Porutham + Narayan Dasha + KP sub-lord layer + Prashna foundation (Wave 4c) — ✅ shipped (v3.4.0)
 
 **Goal.** Add the South-Indian regional features that the v3 surface
 currently skips. Pathu Porutham is the Tamil/Kerala marriage matching
@@ -989,16 +995,22 @@ output shape is identical to a natal chart.
 
 **Effort.** ~1d (mostly API surface + docs; no new computational logic).
 
-### Phase 33 Exit Criteria
+### Phase 33 Exit Criteria — actuals
 
-- ✅ Pathu Porutham 20-pair cross-validation against ProKerala / Drik
-  Tamil panel — recommended-flag exact match.
-- ✅ Narayan Dasha 5-chart Mahadasha boundary cross-check vs PyJHora.
-- ✅ KP cuspal sub-lord 5-chart match vs onlinejyotish.com panel.
-- ✅ ~80 new tests; all pass under Hermes.
-- ✅ Bundle target: ≤ 410 KB CJS.
-- ✅ API additive — no v3.3 breakage.
-- ✅ README sections added with examples.
+- ✅ All 4 modules shipped with full unit + structural-invariant tests;
+  **156 new tests** (Pathu Porutham 62, Narayan Dasha 39, KP sub-lord 46,
+  Prashna 9) → **7,707 total**.
+- ✅ Bundle: 361 KB CJS (under 410 KB target; was 349 KB at v3.3.0).
+- ✅ Hermes JS-syntax check passes; `tsc --noEmit` clean.
+- ✅ API additive — no v3.3 breakage. Three new error codes added: none —
+  Phase 33 reuses `'INVALID_INPUT'` from Phase 32 for shape validation
+  in `computePathuPorutham`.
+- ✅ README sections added for every new export.
+- ⏳ Pathu Porutham 20-pair cross-validation, Narayan Dasha 5-chart
+  Mahadasha boundary check, and KP cuspal 5-chart match are deferred
+  manual cross-checks (PLAN's stated exit criteria) — the rule
+  mechanics are pinned with structural-invariant + unit tests, but
+  external panel diffs are not part of the automated suite.
 
 ---
 
@@ -1010,8 +1022,8 @@ output shape is identical to a natal chart.
 | 29 | Wave 2 | Birth Chart Foundation | 8–12d | v3.0 ✅ |
 | 30 | Wave 3 | Advanced Astrology + Muhurta Engine | 8–10d | v3.1 ✅ |
 | 31 | Wave 4a | Ashtakavarga + Yogas + Karakas + Bhava Bala | 8–10d | v3.2 ✅ |
-| 32 | Wave 4b | Varshaphala + Tithi Pravesha + Arudha + Special Lagnas + Upagrahas + Argala | 8–9d | v3.3 🟡 |
-| 33 | Wave 4c | Pathu Porutham + Narayan Dasha + KP sub-lord + Prashna foundation | 7–8d | v3.4 🟡 |
+| 32 | Wave 4b | Varshaphala + Tithi Pravesha + Arudha + Special Lagnas + Upagrahas + Argala | 8–9d | v3.3 ✅ |
+| 33 | Wave 4c | Pathu Porutham + Narayan Dasha + KP sub-lord + Prashna foundation | 7–8d | v3.4 ✅ |
 
 **Decisions locked across the roadmap:**
 - en + hi only (no new locales).
@@ -1020,22 +1032,43 @@ output shape is identical to a natal chart.
 - v3.x stays — Wave 4 is fully additive. v4.0 is reserved for any future
   breaking change in the public type surface.
 
-**Where to start next:** Phase 32 Step 32-1 — Varshaphala
-(`src/jyotish/varshaphala.ts` + Saham tables). Largest single piece of
-Wave 4b; the solar-return search machinery is reused by Tithi Pravesha
-in Step 32-2.
+**Where to start next:** Wave 4 is complete. The roadmap below lists
+the candidate items for Wave 5 / v4 — pick whichever has the strongest
+external pull (consumer-app integration is currently the highest-value
+follow-up since the library is feature-saturated for v3.x).
 
-**Out of scope for Wave 4** (candidates for Wave 5 / v4 if revisited):
-- Consumer-app integration of the muhurta engine (replace local
-  `muhurat.ts` in dharmagya / dharmagya-website) — tracked in those
-  repos.
-- Shadbala fixture cross-validation against ProKerala / PyJHora at the
-  10-chart level (Phase 30 was algorithmic-only validation).
-- Chara Dasha reverse-direction variant for even-rashi lagnas
-  (Narayan Dasha in Phase 33 covers the parity case via a dedicated
-  function; Chara stays forward-only).
-- KP horary 1..249 sub-numbers and Ruling Planets analytical layer.
-- Ashtamangala Prashna (Kerala-specific 8-fold horary analysis).
-- Tamil Pathu Porutham regional variants (Telugu / Malayali traditions
-  diverge slightly on Rajju groupings).
-- Extended 50-Saham list for Varshaphala.
+**Wave 5 / v4 candidates** (formerly "Out of scope for Wave 4"):
+- **Consumer-app integration of the muhurta engine** — replace local
+  `muhurat.ts` in dharmagya / dharmagya-website. Tracked in those
+  repos. *Highest-priority follow-up* — the engine is ready; the gap
+  is downstream wiring.
+- **External-panel cross-validation harness** —
+  - Shadbala fixture cross-validation against ProKerala / PyJHora at
+    the 10-chart level (Phase 30 was algorithmic-only validation).
+  - Pathu Porutham 20-pair `recommended`-flag match against ProKerala
+    / Drik Tamil panel.
+  - Narayan Dasha 5-chart Mahadasha boundary cross-check vs PyJHora.
+  - KP cuspal sub-lord 5-chart match vs onlinejyotish.com.
+  These were stated Phase 30/33 exit goals deferred to manual review;
+  formalizing them as a fixture-driven sweep would close the loop.
+- **KP horary 1..249 sub-numbers and Ruling Planets analytical layer**
+  — natural extension of `computePrashnaChart` (KP horary is the
+  obvious follow-up to chart-only Prashna).
+- **Significator-driven event timing** — the Vedic Prashna analytical
+  layer that walks dasha lords against significator sets.
+- **Chara Dasha reverse-direction variant for even-rashi lagnas** —
+  Narayan covers the parity case via a dedicated function; offering
+  the same option on Chara would unify the two systems.
+- **Ashtamangala Prashna** — Kerala-specific 8-fold horary analysis
+  (Sanskrit / Malayalam sources diverge from KP horary here).
+- **Tamil Pathu Porutham regional variants** — Telugu / Malayali
+  traditions diverge slightly on Rajju groupings; the current
+  implementation pins the AstroVed enumeration.
+- **Extended 50-Saham list for Varshaphala** — Phase 32 ships the 27
+  core Sahams.
+- **8-Karaka Jaimini variant** with reversed Rahu — Phase 31 ships
+  only the 7-Karaka Parashara variant.
+
+A v4.0 major bump is reserved for any future breaking change in the
+public type surface; nothing on this list inherently requires v4 —
+each item is additive and would land as a v3.x minor.

@@ -14,12 +14,20 @@ import type { GrahaName } from '../types/jyotish';
  * 0..8 each). Sum across all 7 receivers → Sarvashtaka (12 cells, 0..56).
  *
  * Sources cross-checked: BPHS Ch. 66 (Santhanam), Phaladeepika Ch. 31
- * (Mantreswar / Gopesh Kumar Ojha), Sanjay Rath *Visti Nadi*. The lists
- * below are the form used by every public Ashtakavarga calculator
- * (ProKerala, AstroSage, PyJHora, JagannathaHora). The published Sun
- * total of 48 in BPHS verses is a known arithmetic error — counting the
- * 8 published lists yields 47; the *list cells themselves* (which is what
- * any deterministic calculator uses) are stable across recensions.
+ * (Mantreswar / Gopesh Kumar Ojha), Sanjay Rath *Visti Nadi*,
+ * JagannathaHora and PyJHora source tables. The list cells below match
+ * the form used by every modern open-source Vedic-astrology calculator.
+ *
+ * **Sun total = 47 (vs the BPHS-verses figure of 48).** The Sun's
+ * Bhinnashtaka grand total is one of the well-known textual
+ * inconsistencies in BPHS Ch. 66: B.V. Raman (*Three Hundred Important
+ * Combinations*) and a few other modern texts publish 48; the per-cell
+ * lists they actually print sum to 47 (with Venus-Sun = 3 and
+ * Lagna-Sun = 6 as below). Modern open-source calculators
+ * (JagannathaHora, PyJHora) use the 47-total cell data; that is what
+ * is pinned here. Callers comparing to a paper-published "Sarvashtaka =
+ * 337" should expect 336 from this library; the per-rashi distribution
+ * is unaffected by the off-by-one in the Sun total.
  *
  * Per-receiver totals (sum of list lengths across all 8 contributors):
  *   Sun = 47, Moon = 49, Mars = 39, Mercury = 54,

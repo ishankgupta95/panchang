@@ -11,12 +11,14 @@ export type PanchangErrorCode =
   | 'INVALID_DATE'
   | 'INVALID_TIMEZONE'
   | 'INVALID_AYANAMSA'
+  | 'INVALID_INPUT'
   | 'TIMEZONE_RESOLUTION_FAILED'
   | 'NO_SUNRISE'
   | 'NO_SUNSET'
   | 'SEARCH_DIVERGED'
   | 'CIRCUMPOLAR'
-  | 'PLACIDUS_DIVERGED';
+  | 'PLACIDUS_DIVERGED'
+  | 'SAHAM_DEPENDENCY_ERROR';
 
 /**
  * Typed error thrown by panchang-ts when input validation fails or a numerical

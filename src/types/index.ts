@@ -33,4 +33,7 @@ export type {
   Yoga, YogaName, YogaType,
   KarakaName, JaiminiKarakas,
   BhavaBalaPerHouse, BhavaBalaResult,
+  Arudha, SpecialLagnaKind,
+  UpagrahaPosition, Upagrahas,
+  ArgalaPerBhava,
 } from './jyotish';

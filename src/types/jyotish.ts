@@ -625,3 +625,128 @@ export interface BhavaBalaResult {
   /** 12 entries in bhava order (index 0 = bhava 1 = lagna). */
   houses: BhavaBalaPerHouse[];
 }
+
+// ── Arudha Lagna + 12 Arudha Padas ────────────────────
+
+/**
+ * One Arudha pada — the **image / reflection** of a bhava in the chart.
+ *
+ * Per Jaimini *Upadesa Sutras* Ch. 1: "the lord (of the bhava) is counted
+ * from the bhava as many houses as the bhava is from the lord". With two
+ * canonical exceptions to avoid the Arudha collapsing onto the bhava
+ * itself or its 7th:
+ *
+ *   - If `D == 1` (lord is in its own bhava) → Arudha = 10th from lord.
+ *   - If `D == 7` (lord is in 7th from bhava) → Arudha = 4th from lord.
+ *
+ * Bhava 1's Arudha is **Arudha Lagna (AL)** — the social / public-facing
+ * image of the native, distinct from Lagna (the inner / soul-rooted self).
+ */
+export interface Arudha {
+  /** Bhava number 1..12 whose Arudha this is. */
+  bhava: number;
+  /** Rashi (0..11) the Arudha pada falls in. */
+  arudhaRashi: number;
+  /** Localized rashi name (`en` or `hi`) — same locale as the source chart. */
+  arudhaRashiName: string;
+  /** Rashi-lord of `arudhaRashi` — one of the 7 visible grahas. */
+  arudhaLord: Exclude<GrahaName, 'Rahu' | 'Ketu'>;
+}
+
+// ── Special Lagnas (Hora / Ghati / Bhava / Sripati) ───
+
+/**
+ * Special-lagna kind. Each lagna advances at a different rate from
+ * sunrise; together they form the classical timing-sensitive frame
+ * around the natal ascendant:
+ *
+ *   - `'hora'`   — advances 1 rashi per 2 hours (15°/h).
+ *   - `'ghati'`  — advances 1 rashi per ghatika (24 min) → 75°/h.
+ *   - `'bhava'` — advances 1 rashi per 5 ghatikas (2 hours) → 15°/h.
+ *     Mathematically identical to Hora Lagna in advance-rate but the two
+ *     are conceptually distinct anchors in classical practice.
+ *   - `'sripati'` — Sripati cuspal lagna; classical Indian variant of
+ *     Placidus (currently identical to the Placidus-KP cusp 1 in the
+ *     simplified mapping).
+ */
+export type SpecialLagnaKind = 'hora' | 'ghati' | 'bhava' | 'sripati';
+
+// ── Upagrahas (sub-grahas) ─────────────────────────────
+
+/**
+ * Sub-graha (upagraha) sensitive points used in Vedic and Tajik
+ * analysis. The 7 upagrahas carried by `Upagrahas`:
+ *
+ *   - **Gulika** — rising longitude at the *start* of Saturn's segment
+ *     (1/8 of day or night, weekday-rotated). Day birth: divide
+ *     sunrise→sunset into 8 equal arcs; the segment ruled by the day-
+ *     lord begins, then Sun → Moon → Mars → Mercury → Jupiter → Venus →
+ *     Saturn rotation; the Saturn segment marks Gulika's onset. Night
+ *     birth: divide sunset→next-sunrise into 8; rotation starts from
+ *     the planet 5th from the day-lord (per Phaladeepika Ch. 5).
+ *   - **Mandi** — Gulika's variant computed at the *midpoint* of
+ *     Saturn's segment.
+ *   - **Dhuma** — Sun + 133°20'.
+ *   - **Vyatipata** — 360° − Dhuma.
+ *   - **Parivesha** — Vyatipata + 180°.
+ *   - **Indrachapa** — 360° − Parivesha.
+ *   - **Upaketu** — Indrachapa + 16°40'.
+ *
+ * Sources: BPHS Ch. 5; Sanjay Rath *Brihat Nakshatra* (upagraha section);
+ * Phaladeepika Ch. 5.
+ */
+export interface UpagrahaPosition {
+  /** Sidereal longitude in degrees, [0, 360). */
+  longitude: number;
+  /** Rashi index 0..11 (Mesha … Meena). */
+  rashi: number;
+  /** Localized rashi name (`en` or `hi`). */
+  rashiName: string;
+  /** Whole-sign house 1..12 from the natal lagna. */
+  house: number;
+}
+
+/** All 7 upagrahas at a given instant. */
+export interface Upagrahas {
+  /** Rising longitude at the start of Saturn's day/night segment. */
+  gulika: UpagrahaPosition;
+  /** Rising longitude at the midpoint of Saturn's day/night segment. */
+  mandi: UpagrahaPosition;
+  /** `Sun + 133°20'` mod 360. */
+  dhuma: UpagrahaPosition;
+  /** `360° − Dhuma`. */
+  vyatipata: UpagrahaPosition;
+  /** `Vyatipata + 180°` mod 360. */
+  parivesha: UpagrahaPosition;
+  /** `360° − Parivesha`. */
+  indrachapa: UpagrahaPosition;
+  /** `Indrachapa + 16°40'` mod 360. */
+  upaketu: UpagrahaPosition;
+}
+
+// ── Argala (Jaimini intervention) ─────────────────────
+
+/**
+ * Per-bhava Argala (intervention / help) and Virodhargala (counter-
+ * intervention) in the Jaimini sign-based scheme.
+ *
+ * Per Jaimini *Upadesa Sutras* Ch. 1 and BPHS Ch. 51: planets in the
+ * **2nd, 4th, and 11th** from a bhava form *Argala* (positive influence
+ * on the bhava); planets in the **3rd, 10th, and 12th** form
+ * *Virodhargala* (negation). The 5th from a bhava ("primary Argala")
+ * and the 9th ("primary Virodhargala") are sometimes added to the
+ * respective lists in extended classical schemes; the simplified BPHS
+ * Ch. 51 form pinned here uses the 2/4/11 vs 3/10/12 split exclusively.
+ *
+ * A planet in any chart contributes to **exactly 6 of the 12 bhavas**
+ * (3 Argala + 3 Virodhargala) — the structural invariant the test
+ * suite asserts.
+ */
+export interface ArgalaPerBhava {
+  /** Bhava number 1..12. */
+  bhava: number;
+  /** Planets that form Argala on this bhava (occupants of 2nd / 4th / 11th from bhava). */
+  argala: PlanetPlacement[];
+  /** Planets that form Virodhargala (counter) — occupants of 3rd / 10th / 12th from bhava. */
+  virodhargala: PlanetPlacement[];
+}

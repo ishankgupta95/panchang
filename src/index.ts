@@ -20,13 +20,16 @@ export { computePlanetaryPositions, GRAHA_ABBR } from './jyotish/planets';
 export {
   computeVimshottariDasha, computeVimshottariDashaFromBirth,
   computeAshtottariDasha, computeYoginiDasha, computeCharaDasha,
+  computeNarayanDasha,
   ASHTOTTARI_ORDER, ASHTOTTARI_YEARS,
   YOGINI_ORDER, YOGINI_YEARS, YOGINI_PLANET,
   CHARA_RASHI_YEARS,
+  VISHAMA_PADA_RASHIS, SAMA_PADA_RASHIS,
 } from './jyotish/dasha';
 export type {
   YoginiName, YoginiMahaDasha, YoginiAntarDasha, YoginiDashaResult,
   CharaMahaDasha, CharaDashaResult,
+  NarayanMahaDasha, NarayanDashaResult,
 } from './jyotish/dasha';
 export { computeChandraBalam } from './jyotish/chandraBalam';
 export { computeTarabala } from './jyotish/tarabala';
@@ -48,6 +51,31 @@ export { computeAshtakavarga } from './jyotish/ashtakavarga';
 export { computeYogas } from './jyotish/yogas';
 export type { ComputeYogasOptions } from './jyotish/yogas';
 export { computeJaiminiKarakas } from './jyotish/karakas';
+export { computeVarshaphala } from './jyotish/varshaphala';
+export type {
+  VarshaphalaChart, MunthaInfo, SahamPosition,
+} from './jyotish/varshaphala';
+export type { SahamName, SahamOperand, SahamFormula } from './jyotish/sahamsTables';
+export { ALL_SAHAM_NAMES } from './jyotish/sahamsTables';
+export { computeTithiPravesha } from './jyotish/tithiPravesha';
+export type { TithiPraveshaChart } from './jyotish/tithiPravesha';
+export { computeArudhas } from './jyotish/arudha';
+export {
+  computeHoraLagna, computeGhatiLagna, computeBhavaLagna, computeSripatiLagna,
+} from './jyotish/lagna';
+export { computeUpagrahas } from './jyotish/upagrahas';
+export { computeArgala } from './jyotish/argala';
+export { computePathuPorutham } from './jyotish/pathuPorutham';
+export type {
+  PoruthamName, PoruthamScore, PathuPoruthamResult,
+} from './jyotish/pathuPorutham';
+export {
+  computeKpSubLord, computeKpCuspalSubLords, computeKpSignificators,
+} from './jyotish/kpSubLord';
+export type {
+  KpSubLordInfo, KpCuspalSubLords, KpSignificators,
+} from './jyotish/kpSubLord';
+export { computePrashnaChart } from './jyotish/prashna';
 
 // Astronomy utilities
 export { computeSunrise as getSunrise, computeSunset as getSunset } from './astronomy/sunrise';
@@ -135,6 +163,9 @@ export type {
   Yoga, YogaName, YogaType,
   KarakaName, JaiminiKarakas,
   BhavaBalaPerHouse, BhavaBalaResult,
+  Arudha, SpecialLagnaKind,
+  UpagrahaPosition, Upagrahas,
+  ArgalaPerBhava,
 } from './types';
 
 // Errors
