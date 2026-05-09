@@ -43,7 +43,11 @@ export type { Dignity } from './jyotish/dignity';
 export { computeVimshottariPratyantar } from './jyotish/dasha';
 export { computeAspects } from './jyotish/aspects';
 export type { AspectsOptions } from './jyotish/aspects';
-export { computeShadbala } from './jyotish/shadbala';
+export { computeShadbala, computeBhavaBala } from './jyotish/shadbala';
+export { computeAshtakavarga } from './jyotish/ashtakavarga';
+export { computeYogas } from './jyotish/yogas';
+export type { ComputeYogasOptions } from './jyotish/yogas';
+export { computeJaiminiKarakas } from './jyotish/karakas';
 
 // Astronomy utilities
 export { computeSunrise as getSunrise, computeSunset as getSunset } from './astronomy/sunrise';
@@ -127,6 +131,10 @@ export type {
   MangalDoshaInfo, SadeSatiInfo,
   AspectMap, PlanetShadbala, ShadbalaResult,
   KaalSarpDoshaInfo, KaalSarpSubtype, PitruDoshaInfo,
+  AshtakavargaResult, BhinnashtakaGrid,
+  Yoga, YogaName, YogaType,
+  KarakaName, JaiminiKarakas,
+  BhavaBalaPerHouse, BhavaBalaResult,
 } from './types';
 
 // Errors

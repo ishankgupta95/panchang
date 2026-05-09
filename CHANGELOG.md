@@ -1,5 +1,137 @@
 # panchang-ts
 
+## 3.2.0
+
+**Minor release — Phase 31 Wave 4a: Ashtakavarga + Yogas + Karakas + Bhava Bala.**
+Adds the pan-Indian Parashara classical core that was missing from the v3.1
+surface: per-graha Ashtakavarga grids with optional Sodhana reductions, a
+fixed-catalog named-yoga detector (~25 yogas across 8 types), the 7-Karaka
+Parashara variant of Jaimini Karakas, and BPHS Ch. 27 four-source Bhava
+Bala. All additive on top of v3.1 — every prior export keeps the same
+shape.
+
+### Highlights
+
+- **`computeAshtakavarga`** — BPHS Ch. 66 per-graha 12-rashi bindu grids
+  (Bhinnashtaka) and the summed Sarvashtaka grid. The 7 × 8 BENEFIC_OFFSETS
+  table is the canonical form used by ProKerala / AstroSage / PyJHora /
+  JagannathaHora — pinned cell-by-cell and verified against per-receiver
+  invariants (Sun=47, Moon=49, Mars=39, Mercury=54, Jupiter=56, Venus=52,
+  Saturn=39 → Sarvashtaka=336). Optional `{ reductions: true }` returns
+  Trikona + Ekadhipatya Sodhana grids per BPHS Ch. 67.
+- **`computeYogas`** — ~25 named classical yogas detected from a natal
+  chart against a fixed declarative catalog. The 8 types covered:
+  - **Mahapurusha** (5): Ruchaka, Bhadra, Hamsa, Malavya, Sasha
+  - **Lunar** (5): Gajakesari, Sunapha, Anapha, Durudhura, Kemadruma
+  - **Solar** (4): Budha-Aditya, Veshi, Vasi, Ubhayachari
+  - **Raja** (4): Raja Yoga (generic kendra/trikona), Dharma-Karmadhipati,
+    Vipareeta Raja Yoga, Lakshmi Yoga
+  - **Dhana** (3): Dhana Yoga (2-11), Dhana Yoga (5-9), Vasumati Yoga
+  - **Special** (2): Vargottama (D9 required), Yogakaraka
+  - **Cancellation** (1): Neecha Bhanga (3 sub-rules)
+  - **Negative** (1): Daridra Yoga
+  Adding a new yoga is a data-only change in `src/jyotish/yogasCatalog.ts`
+  — the engine is a thin loop over the catalog. Each match returns one or
+  more human-readable `reasons[]` strings.
+- **`computeJaiminiKarakas`** — 7-Karaka Parashara variant. The 7 visible
+  grahas ranked by descending degree-in-rashi → Atmakaraka, Amatyakaraka,
+  Bhratrukaraka, Matrukaraka, Putrakaraka, Gnatikaraka, Darakaraka. Stable
+  tie-break order (Sun → Moon → Mars → Mercury → Jupiter → Venus → Saturn)
+  on the rare exact-degree tie.
+- **`computeBhavaBala`** — BPHS Ch. 27 four-source house strength for the
+  12 bhavas in Virupas. Components: **bhavadhipati** (Shadbala total of
+  the rashi-lord), **dik** (fixed 12-cell directional table), **drik** (net
+  aspect strength on the cusp, clamped ≥ 0), **sthana** (sum of Naisargika
+  for occupants — benefics +, malefics −). Built on top of `computeShadbala`
+  (chart + sub-bala internals are computed once and reused).
+
+### New API surface
+
+```ts
+// Ashtakavarga
+export function computeAshtakavarga(
+  chart: BirthChart,
+  options?: { reductions?: boolean },
+): AshtakavargaResult;
+
+// Yogas
+export function computeYogas(chart: BirthChart, options?: ComputeYogasOptions): Yoga[];
+
+// Karakas
+export function computeJaiminiKarakas(chart: BirthChart): JaiminiKarakas;
+
+// Bhava Bala (lives next to Shadbala in the same module)
+export function computeBhavaBala(
+  birthDate: Date, location: GeoLocation, options?: BirthChartOptions,
+): BhavaBalaResult;
+```
+
+### Type surface additions
+
+- `AshtakavargaResult`, `BhinnashtakaGrid`.
+- `Yoga`, `YogaName` (25 entries), `YogaType` (8 categories),
+  `ComputeYogasOptions`.
+- `KarakaName` (7 entries), `JaiminiKarakas`.
+- `BhavaBalaPerHouse`, `BhavaBalaResult`.
+
+### Sourcing notes
+
+- **Ashtakavarga** — BPHS Chs. 66 (BENEFIC_OFFSETS) + 67 (Sodhana). Cross-
+  checked against Phaladeepika Ch. 31 and Sanjay Rath *Visti Nadi*. The
+  Ekadhipatya Sodhana implementation follows the most-cited Santhanam
+  recension; multiple recensions exist in the literature and are
+  documented in the source.
+- **Yogas** — BPHS Chs. 36–43 (Mahapurusha, lunar, solar, raja),
+  Ch. 41 (Vipareeta, Daridra), Ch. 14 (Vargottama doctrine), Ch. 36
+  (Neecha Bhanga sub-rules); Phaladeepika Ch. 6; B.V. Raman *Three
+  Hundred Important Combinations*; Sanjay Rath *Crux of Vedic Astrology*
+  Ch. 9. Yoga names are English/transliterated proper nouns and are
+  intentionally **not** locale-resolved — `'Gajakesari'` reads the same
+  in `'en'` and `'hi'`.
+- **Karakas** — Jaimini *Upadesa Sutras* Ch. 1; Sanjay Rath *Jaimini
+  Maharishi's Upadesa Sutras*. The 7-Karaka Parashara variant is shipped;
+  the reversed-Rahu 8-Karaka Jaimini variant is **not** computed.
+- **Bhava Bala** — BPHS Ch. 27 second half ("Bhava-bala-vichar"). The
+  four-source decomposition is canonical; the per-bhava `dik` table uses
+  cardinal-anchor / linear-interpolation values matching the simplified
+  scheme in Sanjay Rath *Crux of Vedic Astrology* Ch. 6. Classical
+  recensions vary on the exact intermediate-bhava values.
+
+### Documented limitations
+
+- Sthana Bala in `computeShadbala` (and therefore `bhavadhipati` in
+  `computeBhavaBala`) is the **Uchcha Bala only** — the dominant term.
+  Saptavargaja / Ojha-Yugma / Kendra / Drekkana sub-balas are intentionally
+  omitted, matching the simplified scheme noted in v3.1.
+- The Ekadhipatya Sodhana reduction follows the Santhanam BPHS Ch. 67
+  formulation; alternate recensions (e.g. Sharma) produce slightly
+  different reduced totals and are not selectable.
+- `computeYogas` evaluates the catalog as a **flat list** — the classical
+  notion of a yoga being broken or modified by an aspecting malefic is
+  not modeled (each rule fires independently).
+- Vargottama in `computeYogas` requires the D9 to be passed via
+  `options.navamsa`; without it the rule is silently skipped.
+
+### Breaking changes
+
+None. Phase 31 is fully additive — every v3.1 export keeps the same shape.
+
+### Bundle / runtime
+
+- Bundle size: **~327 KB CJS** (was ~302 KB in v3.1; +25 KB). No new
+  runtime dependencies.
+- Hermes JS-syntax check ✅ — every new module passes
+  `npm run test:hermes`.
+
+### Test count
+
+**7,355** tests passing across 85 files (was 7,156 in v3.1 → **+199**).
+New test files: `tests/unit/ashtakavarga.test.ts`,
+`tests/unit/yogas.test.ts`, `tests/unit/karakas.test.ts`,
+`tests/unit/bhavaBala.test.ts`.
+
+---
+
 ## 3.1.0
 
 **Minor release — Phase 30 Wave 3: Advanced Astrology + Muhurta Engine.**

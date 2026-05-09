@@ -430,3 +430,198 @@ export interface PitruDoshaInfo {
   /** Reasons the dosha was flagged; empty when `afflicted` is false. */
   reasons: string[];
 }
+
+// ── Ashtakavarga ──────────────────────────────────────
+
+/**
+ * Per-receiver Bhinnashtaka grid: 12 cells (one per rashi, 0 = Mesha …
+ * 11 = Meena), each holding the count of bindus contributed to that rashi
+ * by all 8 contributors (the 7 visible grahas + Lagna). Range 0..8 per cell.
+ */
+export type BhinnashtakaGrid = number[];
+
+/**
+ * Ashtakavarga result — per-graha Bhinnashtaka grids and the summed
+ * Sarvashtaka grid. Computed per BPHS Ch. 66.
+ *
+ *   - **Bhinnashtaka** — for each receiver graha (Sun..Saturn), a 12-cell
+ *     grid of bindu counts (0..8 per cell). Sum across the 12 cells of
+ *     receiver G is invariant: Sun=47, Moon=49, Mars=39, Mercury=54,
+ *     Jupiter=56, Venus=52, Saturn=39 (per the canonical BPHS table).
+ *   - **Sarvashtaka** — the cell-wise sum of the 7 Bhinnashtaka grids.
+ *     12 cells, 0..56 per cell, total 336 across all cells.
+ *   - **reduced** (only when `{ reductions: true }` is requested) —
+ *     the Trikona-and-Ekadhipatya-Sodhana-reduced grids per BPHS Ch. 67.
+ *     Reduced cell totals are ≤ unreduced.
+ *
+ * Rahu and Ketu are not included — Ashtakavarga in the classical scheme
+ * applies to the 7 visible grahas only.
+ */
+export interface AshtakavargaResult {
+  /** 12-cell Sarvashtaka grid (sum of 7 Bhinnashtakas). Range 0..56. */
+  sarvashtaka: BhinnashtakaGrid;
+  /** Per-receiver Bhinnashtaka grids. Each is 12 cells. */
+  bhinnashtaka: Record<Exclude<GrahaName, 'Rahu' | 'Ketu'>, BhinnashtakaGrid>;
+  /** Reduced grids (Trikona + Ekadhipatya Sodhana per BPHS Ch. 67). */
+  reduced?: {
+    sarvashtaka: BhinnashtakaGrid;
+    bhinnashtaka: Record<Exclude<GrahaName, 'Rahu' | 'Ketu'>, BhinnashtakaGrid>;
+  };
+}
+
+// ── Yogas (named classical combinations) ──────────────
+
+/**
+ * Classification of a named yoga by its general flavor:
+ *
+ *   - **mahapurusha** — Pancha Mahapurusha (Ruchaka, Bhadra, Hamsa, Malavya,
+ *     Sasha): one of Mars/Mercury/Jupiter/Venus/Saturn in own/exalted in a
+ *     kendra.
+ *   - **lunar** — yogas read from the Moon's environment (Gajakesari,
+ *     Sunapha, Anapha, Durudhura, Kemadruma).
+ *   - **solar** — yogas read from the Sun's environment (Budha-Aditya,
+ *     Veshi, Vasi, Ubhayachari).
+ *   - **raja** — kingship / status combinations (kendra-trikona lord
+ *     conjunctions, Dharma-Karmadhipati, Vipareeta Raja, Lakshmi).
+ *   - **dhana** — wealth combinations (2nd–11th, 5th–9th, Vasumati).
+ *   - **special** — Vargottama, Yogakaraka and other lagna-conditional
+ *     classifications.
+ *   - **cancellation** — Neecha Bhanga and other dosha-cancellation rules.
+ *   - **negative** — Daridra and other malefic combinations.
+ */
+export type YogaType =
+  | 'mahapurusha'
+  | 'lunar'
+  | 'solar'
+  | 'raja'
+  | 'dhana'
+  | 'special'
+  | 'cancellation'
+  | 'negative';
+
+/**
+ * Names of the named yogas detected by `computeYogas`. The catalog is fixed
+ * at ~25 entries — adding a new yoga is a data-only change in
+ * `src/jyotish/yogasCatalog.ts`. Names are English/transliterated proper
+ * nouns and intentionally **not** locale-resolved.
+ */
+export type YogaName =
+  | 'Ruchaka'
+  | 'Bhadra'
+  | 'Hamsa'
+  | 'Malavya'
+  | 'Sasha'
+  | 'Gajakesari'
+  | 'Sunapha'
+  | 'Anapha'
+  | 'Durudhura'
+  | 'Kemadruma'
+  | 'Budha-Aditya'
+  | 'Veshi'
+  | 'Vasi'
+  | 'Ubhayachari'
+  | 'Raja Yoga'
+  | 'Dharma-Karmadhipati'
+  | 'Vipareeta Raja Yoga'
+  | 'Lakshmi Yoga'
+  | 'Dhana Yoga (2-11)'
+  | 'Dhana Yoga (5-9)'
+  | 'Vasumati Yoga'
+  | 'Vargottama'
+  | 'Yogakaraka'
+  | 'Neecha Bhanga'
+  | 'Daridra Yoga';
+
+/**
+ * One detected yoga in a natal chart.
+ *
+ *   - `name` — canonical English/transliterated name from the fixed catalog.
+ *   - `type` — broad classification (see {@link YogaType}).
+ *   - `reasons` — 1-or-more human-readable strings describing *why* the
+ *     yoga matched (e.g. `'Jupiter in 4th from Moon (kendra)'`). For
+ *     yogas with multiple BPHS sub-rules (e.g. Neecha Bhanga) every
+ *     triggered sub-rule contributes its own entry.
+ */
+export interface Yoga {
+  name: YogaName;
+  type: YogaType;
+  reasons: string[];
+}
+
+// ── Jaimini Karakas ───────────────────────────────────
+
+/**
+ * The 7 Chara (movable) Karakas in the Parashara variant. Order is the
+ * canonical Atmakaraka → Darakaraka ranking — index 0 is the karaka
+ * derived from the highest degree-in-rashi, index 6 from the lowest.
+ *
+ *   - **Atmakaraka**     — significator of the Self.
+ *   - **Amatyakaraka**   — minister / mind / livelihood.
+ *   - **Bhratrukaraka**  — siblings, courage.
+ *   - **Matrukaraka**    — mother, conveyance.
+ *   - **Putrakaraka**    — children, intellect.
+ *   - **Gnatikaraka**    — relatives, struggle.
+ *   - **Darakaraka**     — spouse.
+ */
+export type KarakaName =
+  | 'Atmakaraka'
+  | 'Amatyakaraka'
+  | 'Bhratrukaraka'
+  | 'Matrukaraka'
+  | 'Putrakaraka'
+  | 'Gnatikaraka'
+  | 'Darakaraka';
+
+/**
+ * Mapping from each of the 7 Karaka roles to the graha that fills it for
+ * a given chart. Uses the 7-Karaka Parashara variant — the 7 visible
+ * grahas (Sun..Saturn) ranked by descending degree-in-rashi. The reversed-
+ * Rahu 8-Karaka Jaimini variant is **not** computed here.
+ */
+export type JaiminiKarakas = Record<KarakaName, GrahaName>;
+
+// ── Bhava Bala (House strength) ───────────────────────
+
+/**
+ * Four-source strength contributions for one bhava (1..12), expressed in
+ * **Virupa units** (1 Rupa = 60 Virupas). BPHS Ch. 27 (second half) decomposes
+ * Bhava Bala into:
+ *
+ *   - **bhavadhipati** — total Shadbala of the rashi-lord of the bhava cusp.
+ *     Reuses {@link PlanetShadbala} `total` from `computeShadbala`.
+ *   - **dik** — directional strength of the bhava itself, from a fixed
+ *     12-cell table keyed by bhava number. Simplified cardinal-anchor
+ *     scheme (not the canonical BPHS Ch. 27 table); see `BHAVA_DIK_VALUES`
+ *     in [src/jyotish/shadbala.ts](src/jyotish/shadbala.ts). Independent
+ *     of the chart.
+ *   - **drik** — net aspectual strength on the bhava cusp from the 7 visible
+ *     grahas. Each aspect contributes ± a fraction of 60 V using the same
+ *     drishti weights as `PlanetShadbala.drik` (full 7th = 1, Mars 4/8 = ½,
+ *     Jupiter 5/9 = ¾, Saturn 3/10 = ¼); benefics add, malefics subtract.
+ *     Clamped to ≥ 0.
+ *   - **sthana** — sum of {@link PlanetShadbala} natural strength
+ *     (Naisargika) for grahas occupying the bhava: positive for benefics
+ *     (Moon, Mercury, Jupiter, Venus), negative for malefics (Sun, Mars,
+ *     Saturn). Rahu and Ketu are excluded.
+ *
+ * `total` is the arithmetic sum of the four sub-strengths.
+ */
+export interface BhavaBalaPerHouse {
+  bhavadhipati: number;
+  dik: number;
+  drik: number;
+  sthana: number;
+  total: number;
+}
+
+/**
+ * Bhava Bala — four-source house strength for the 12 bhavas of a natal
+ * chart, BPHS Ch. 27. Implemented as an additive companion to
+ * {@link ShadbalaResult}; both share the natural-strength table, the
+ * benefic/malefic classification, and the drishti-weight table from
+ * `computeShadbala`.
+ */
+export interface BhavaBalaResult {
+  /** 12 entries in bhava order (index 0 = bhava 1 = lagna). */
+  houses: BhavaBalaPerHouse[];
+}

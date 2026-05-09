@@ -43,7 +43,7 @@ sources, and exposed through the public API. Click a row to jump to its usage ex
 | **Personal Transits** | Chandra Balam, Tarabala (9-tara cycle), Sade Sati (Saturn arc) | [↓](#13-personal-transits) |
 | **Birth Chart (Kundli)** | Lagna (sidereal), Bhava under 3 house systems, D1 / D2 / D3 / D7 / D9 / D10 / D12 / D30 charts, Planetary Dignity | [↓](#14-birth-chart-kundli) |
 | **Compatibility & Doshas** | Ashtakoot Guna Milan (36-point), Mangal Dosha, Kaal Sarp Dosha (12 subtypes), Pitru Dosha | [↓](#15-compatibility--doshas) |
-| **Aspects & Strength** | Drishti (graha aspects), Shadbala (six-fold strength) | [↓](#16-aspects--strength) |
+| **Aspects & Strength** | Drishti (graha aspects), Shadbala (six-fold strength), Ashtakavarga (Bhinnashtaka + Sarvashtaka) | [↓](#16-aspects--strength) |
 | **Dasha Systems** | Vimshottari (Maha→Antar→Pratyantar), Ashtottari, Yogini, Chara (Jaimini) | [↓](#17-dasha-systems) |
 | **Muhurta Engine** | Configurable scoring + 13 stock occasions (vivah, griha pravesh, namakarana, …) | [↓](#18-muhurta-engine) |
 | **Calendar Conversion** | Gregorian↔Hindu, Kali Yuga year, Hindu New Year, yearly Ekadashi / Sankranti / festival listings | [↓](#19-calendar-conversion) |
@@ -600,6 +600,130 @@ const bala = computeShadbala(birth, loc);
 Both functions return additive surface — they do **not** modify the
 `getDailyPanchang` / birth-chart pipelines. Call them on demand.
 
+### Ashtakavarga
+
+**Ashtakavarga** (BPHS Ch. 66) — per-graha 12-rashi bindu grids
+(Bhinnashtaka) and the summed Sarvashtaka grid. Each cell counts how many
+of the 8 contributors (the 7 visible grahas + the lagna) donate a benefic
+dot to that rashi for the given receiver.
+
+```typescript
+import { computeRashiChart, computeAshtakavarga } from 'panchang-ts';
+
+const chart = computeRashiChart(birth, loc);
+const av = computeAshtakavarga(chart);
+
+av.sarvashtaka;
+// → 12-cell grid (Mesha … Meena), each 0..56, total 336.
+
+av.bhinnashtaka.Jupiter;
+// → Jupiter's 12-cell grid; total = 56 (chart-invariant per BPHS).
+//   Other invariant totals: Sun=47, Moon=49, Mars=39, Mercury=54,
+//   Venus=52, Saturn=39.
+
+// Opt in to Trikona + Ekadhipatya Sodhana reductions (BPHS Ch. 67):
+const reduced = computeAshtakavarga(chart, { reductions: true });
+reduced.reduced!.sarvashtaka;          // post-reduction Sarvashtaka
+reduced.reduced!.bhinnashtaka.Jupiter; // post-reduction Bhinnashtaka
+```
+
+The BENEFIC_OFFSETS lookup table is the canonical BPHS Ch. 66 form used by
+every public Ashtakavarga calculator (ProKerala, AstroSage, PyJHora). Rahu
+and Ketu are not Ashtakavarga receivers or contributors in the classical
+Parashara scheme.
+
+### Yogas (named classical combinations)
+
+**Yogas** (BPHS Chs. 36–43) — detect ~25 classical combinations from a
+natal chart against a fixed declarative catalog. Each entry returns a
+`name`, a `type` (one of `mahapurusha | lunar | solar | raja | dhana |
+special | cancellation | negative`), and one-or-more `reasons[]` strings
+describing why the rule matched.
+
+```typescript
+import { computeRashiChart, computeNavamsa, computeYogas } from 'panchang-ts';
+
+const chart = computeRashiChart(birth, loc);
+const yogas = computeYogas(chart);
+// → [{ name: 'Gajakesari', type: 'lunar',
+//      reasons: ['Jupiter in 4th from Moon (kendra)'] }, …]
+
+// Filter by type — restricts evaluation to a subset of the catalog.
+const raja = computeYogas(chart, { types: ['raja', 'dhana'] });
+
+// Vargottama needs the D9 — pass it via options.
+const d9 = computeNavamsa(birth, loc);
+const all = computeYogas(chart, { navamsa: d9 });
+```
+
+The catalog covers Pancha Mahapurusha (Ruchaka / Bhadra / Hamsa / Malavya
+/ Sasha), lunar yogas (Gajakesari, Sunapha, Anapha, Durudhura, Kemadruma),
+solar yogas (Budha-Aditya, Veshi, Vasi, Ubhayachari), Raja yogas (generic
+kendra/trikona-lord rule, Dharma-Karmadhipati, Vipareeta Raja, Lakshmi),
+Dhana yogas (2–11, 5–9, Vasumati), Vargottama, Yogakaraka, Neecha Bhanga,
+and Daridra. Yoga names are English/transliterated proper nouns and are
+intentionally **not** locale-resolved — `'Gajakesari'` reads the same in
+`'en'` and `'hi'`.
+
+Adding a new yoga is a data-only change in
+[src/jyotish/yogasCatalog.ts](src/jyotish/yogasCatalog.ts) — the engine
+is a thin loop over the catalog. Each rule receives the chart plus
+precomputed `dignity` / `aspects` (and optionally a D9 chart) and returns
+a `YogaMatch | null`.
+
+### Jaimini Karakas
+
+**Karakas** (Jaimini *Upadesa Sutras* Ch. 1, Parashara variant) — the 7
+Chara Karakas ranked by descending degree-in-rashi of the visible grahas.
+Atmakaraka (highest) signifies the Self; Darakaraka (lowest) signifies
+spouse.
+
+```typescript
+import { computeRashiChart, computeJaiminiKarakas } from 'panchang-ts';
+
+const chart = computeRashiChart(birth, loc);
+const k = computeJaiminiKarakas(chart);
+k.Atmakaraka;     // graha at the highest degree-in-rashi (e.g. 'Saturn')
+k.Amatyakaraka;   // 2nd-highest
+k.Darakaraka;     // graha at the lowest degree-in-rashi
+```
+
+The 7 visible grahas are ranked — Rahu and Ketu are not included (this is
+the **7-Karaka Parashara variant**, not the reversed-Rahu 8-Karaka Jaimini
+variant). On the rare exact tie in degree-in-rashi, the canonical order
+Sun → Moon → Mars → Mercury → Jupiter → Venus → Saturn breaks the tie
+(stable sort) — the earlier graha wins the more-significant Karaka role.
+
+Karaka names are English/transliterated proper nouns and intentionally
+**not** locale-resolved.
+
+### Bhava Bala
+
+**Bhava Bala** (BPHS Ch. 27) — four-source house strength for the 12 bhavas
+of a natal chart, in Virupas (60 V = 1 Rupa). Built on top of `computeShadbala`
+— the natural-strength table, drishti weights, and benefic/malefic
+classification are all shared.
+
+```typescript
+import { computeBhavaBala } from 'panchang-ts';
+
+const bhavaBala = computeBhavaBala(birth, loc);
+bhavaBala.houses.length;             // 12 (one entry per bhava, index 0 = bhava 1)
+bhavaBala.houses[0].total;           // 1st-bhava total in Virupas
+bhavaBala.houses[9].bhavadhipati;    // 10th-bhava lord's Shadbala total
+// → each entry: { bhavadhipati, dik, drik, sthana, total }
+```
+
+`bhavadhipati` is the total Shadbala of the rashi-lord of the bhava cusp;
+`dik` is a fixed directional value from a simplified cardinal-anchor table
+(cardinal bhavas anchor at 60 / 0 / 15 / 30 V; intermediates linearly
+interpolated around the wheel — not the canonical BPHS Ch. 27 numbers);
+`drik` is the net aspect strength on the cusp from the 7 visible grahas
+(benefics +, malefics −, clamped ≥ 0); `sthana` sums the natural strength
+of grahas occupying the bhava (Mercury counted as benefic per BPHS — the
+"associated benefic" nuance is intentionally out of scope). Rahu and Ketu
+do not contribute. `total` is the arithmetic sum of the four components.
+
 ## 17. Dasha Systems
 
 Four classical dasha systems are exposed:
@@ -1091,7 +1215,8 @@ computeVimshottariDasha, computeVimshottariDashaFromBirth, computeVimshottariPra
 computeAshtottariDasha, computeYoginiDasha, computeCharaDasha
 computeChandraBalam, computeTarabala
 computeLagna, computeBhava, computeRashiChart, computeNavamsa, computeDivisionalChart
-computeAspects, computeShadbala
+computeAspects, computeShadbala, computeBhavaBala, computeAshtakavarga
+computeYogas, computeJaiminiKarakas
 computeAshtakoot, computeMangalDosha, computeKaalSarp, computePitruDosha
 computeSadeSati, computeDignity
 
