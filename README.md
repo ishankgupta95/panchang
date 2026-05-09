@@ -227,7 +227,7 @@ Pratah / Sayahna Sandhya, and nakshatra-keyed Amrit Kala.
 const r = getDailyPanchang(date, loc, { timezone: 330 })!;
 
 r.brahmaMuhurta;     // two muhurtas before sunrise
-r.abhijitMuhurta;    // 8th day-muhurta — universally auspicious
+r.abhijitMuhurta;    // 8th day-muhurta, or null on Wednesday (Buddha-vara, Drik convention)
 r.vijayaMuhurta;     // 11th day-muhurta — auspicious for success
 r.godhuliMuhurta;    // "cow-dust" — sunset muhurta
 r.nishitaMuhurta;    // midnight muhurta (Shivaratri)
@@ -891,7 +891,7 @@ import {
 const birth = new Date('1995-08-15T05:30:00Z');
 const loc   = { latitude: 28.6139, longitude: 77.2090 };
 
-const hora    = computeHoraLagna(birth, loc);     // 1 rashi / 2 hours from sunrise
+const hora    = computeHoraLagna(birth, loc);     // 1 rashi / 1 hour from sunrise
 const ghati   = computeGhatiLagna(birth, loc);    // 1 rashi / 1 ghatika (24 min)
 const bhava   = computeBhavaLagna(birth, loc);    // 1 rashi / 5 ghatikas (2 hours)
 const sripati = computeSripatiLagna(birth, loc);  // Sripati cusp 1 = natal lagna
@@ -900,18 +900,17 @@ hora.rashi.name;       // each returns a `LagnaInfo` with rashi / nakshatra / pa
 
 | Lagna | Rate | Period |
 |-------|------|--------|
-| Hora | 15°/hour (1 rashi / 2 hours) | 24 hours |
+| Hora | 30°/hour (1 rashi / 1 hour) | 12 hours |
 | Ghati | 75°/hour (1 rashi / 24 min) | 4 h 48 min |
 | Bhava | 15°/hour (1 rashi / 2 hours) | 24 hours |
 | Sripati | n/a (= natal lagna) | n/a |
 
-> **Note.** Hora and Bhava Lagna are numerically identical under this
-> library's rate convention (both 15°/hour from sunrise, per
-> *Phaladeepika* Ch. 1). They remain separate accessors because
-> classical commentaries treat them as conceptually distinct timing
-> anchors. Some BPHS recensions give Hora a faster 30°/hour rate (1
-> rashi/hour); the library follows the slower rate documented in PLAN
-> spec.
+> **Note.** Hora Lagna advances at 30°/hour (1 rashi / hour) per BPHS
+> Ch. 4 and *Phaladeepika* Ch. 1 — twice the rate of Bhava Lagna,
+> which advances at 15°/hour (1 rashi / 5 ghatikas). The two are
+> numerically distinct timing anchors, not interchangeable. Sripati
+> Lagna currently returns the natal ascendant (Sripati cusp-1 by
+> construction); the bhava-midpoint form is a future extension.
 
 **Sourcing:** BPHS Ch. 4; *Phaladeepika* Ch. 1; Sripati, *Sripati Paddhati*.
 

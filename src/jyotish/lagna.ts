@@ -229,9 +229,8 @@ export function computeGhatiLagna(
 
 /**
  * **Bhava Lagna** — advances 1 rashi per **5 ghatikas** (2 hours) from
- * sunrise. Same advance-rate as Hora Lagna under this library's
- * definition (15°/hour); the two are conceptually distinct anchors in
- * classical practice but produce identical longitudes here.
+ * sunrise — half the rate of Hora Lagna (which advances 1 rashi per
+ * hour, 30°/hour). Bhava Lagna completes a full zodiac in 24 hours.
  *
  * ```
  * bhavaLagna = ascAtSunrise + (hoursSinceSunrise × 15°) mod 360°
@@ -256,16 +255,19 @@ export function computeBhavaLagna(
 }
 
 /**
- * **Sripati Lagna** — the cusp-1 of the *Sripati Paddhati* (a classical
- * Indian house system closely related to Placidus). Currently exposed
- * as the Placidus-KP first cusp, which equals the natal lagna by
- * construction in that system.
+ * **Sripati Lagna** — cusp-1 of the *Sripati Paddhati*, a classical
+ * Indian house system closely related to Placidus.
  *
- * The Sripati Paddhati distinguishes between *cusps* (the boundaries
- * computed by Placidus) and *bhavas* (whose midpoints fall at adjacent
- * Placidus midpoints). This function returns the **cusp** form for
- * lagna analysis; the midpoint-of-cusps interpretation is a future
- * extension.
+ * **Returned value is identical to {@link computeLagna} — the natal
+ * ascendant.** This is correct for cusp-1 by construction (the first
+ * Placidus / Sripati cusp coincides with the lagna), but the *bhava*
+ * (house-midpoint) interpretation of Sripati Paddhati is **not** computed
+ * here. The midpoint-of-cusps form, which differs from the natal lagna
+ * for the intervening houses, is deferred to a future release.
+ *
+ * Callers needing only the lagna can use {@link computeLagna} directly;
+ * this wrapper exists for API symmetry with the other special-lagna
+ * helpers.
  *
  * **Sources.** Sripati, *Sripati Paddhati* (~12th century); BPHS Ch. 4;
  * *Phaladeepika* Ch. 1.
@@ -278,6 +280,6 @@ export function computeSripatiLagna(
 ): LagnaInfo {
   // Sripati cusp 1 = natal lagna (the ascendant at the moment of birth).
   // The Sripati Paddhati's distinction is in the bhava midpoints, not in
-  // the lagna itself.
+  // the lagna itself — see the JSDoc above for the documented limitation.
   return computeLagna(birthDate, location, ayanamsaType, lang);
 }

@@ -22,37 +22,37 @@ const MUHURTA_MS = DAY_MS / 15; // 48 minutes
 
 describe('computeAbhijitMuhurta', () => {
   it('starts at 11:36 for a 12-hour day', () => {
-    const abhijit = computeAbhijitMuhurta(sunrise, sunset);
+    const abhijit = computeAbhijitMuhurta(sunrise, sunset)!;
     expect(abhijit.start.getUTCHours()).toBe(11);
     expect(abhijit.start.getUTCMinutes()).toBe(36);
   });
 
   it('ends at 12:24 for a 12-hour day', () => {
-    const abhijit = computeAbhijitMuhurta(sunrise, sunset);
+    const abhijit = computeAbhijitMuhurta(sunrise, sunset)!;
     expect(abhijit.end.getUTCHours()).toBe(12);
     expect(abhijit.end.getUTCMinutes()).toBe(24);
   });
 
   it('duration is exactly 1/15 of daytime', () => {
-    const abhijit = computeAbhijitMuhurta(sunrise, sunset);
+    const abhijit = computeAbhijitMuhurta(sunrise, sunset)!;
     const duration = abhijit.end.getTime() - abhijit.start.getTime();
     expect(duration).toBe(MUHURTA_MS);
   });
 
   it('is centered around local noon (within 1 minute)', () => {
-    const abhijit = computeAbhijitMuhurta(sunrise, sunset);
+    const abhijit = computeAbhijitMuhurta(sunrise, sunset)!;
     const noonMs = (sunrise.getTime() + sunset.getTime()) / 2;
     const centerMs = (abhijit.start.getTime() + abhijit.end.getTime()) / 2;
     expect(Math.abs(centerMs - noonMs)).toBeLessThan(60_000);
   });
 
   it('start is after sunrise', () => {
-    const abhijit = computeAbhijitMuhurta(sunrise, sunset);
+    const abhijit = computeAbhijitMuhurta(sunrise, sunset)!;
     expect(abhijit.start.getTime()).toBeGreaterThan(sunrise.getTime());
   });
 
   it('end is before sunset', () => {
-    const abhijit = computeAbhijitMuhurta(sunrise, sunset);
+    const abhijit = computeAbhijitMuhurta(sunrise, sunset)!;
     expect(abhijit.end.getTime()).toBeLessThan(sunset.getTime());
   });
 
@@ -60,7 +60,7 @@ describe('computeAbhijitMuhurta', () => {
     // 9-hour day: sunrise 07:00, sunset 16:00
     const shortSunrise = new Date('2024-12-21T07:00:00Z');
     const shortSunset = new Date('2024-12-21T16:00:00Z');
-    const abhijit = computeAbhijitMuhurta(shortSunrise, shortSunset);
+    const abhijit = computeAbhijitMuhurta(shortSunrise, shortSunset)!;
 
     // muhurta = 9h/15 = 36 min; start = 07:00 + 7*36min = 07:00 + 252min = 11:12
     expect(abhijit.start.getUTCHours()).toBe(11);
@@ -68,6 +68,25 @@ describe('computeAbhijitMuhurta', () => {
     // end = 11:12 + 36min = 11:48
     expect(abhijit.end.getUTCHours()).toBe(11);
     expect(abhijit.end.getUTCMinutes()).toBe(48);
+  });
+
+  // ── Wednesday (Buddha-vara) exception ───────────────────────────────
+  // Drik / Smarta convention: Abhijit is dropped on Wednesday. The function
+  // returns null when varaIndex === 3 so the daily-panchang result mirrors
+  // Drik's "Abhijit Muhurta: —" cell on Wednesday.
+  it('returns null on Wednesday (varaIndex === 3)', () => {
+    expect(computeAbhijitMuhurta(sunrise, sunset, 3)).toBeNull();
+  });
+
+  it.each([0, 1, 2, 4, 5, 6])(
+    'returns a window on non-Wednesday vara %i',
+    (vara) => {
+      expect(computeAbhijitMuhurta(sunrise, sunset, vara)).not.toBeNull();
+    },
+  );
+
+  it('omitted varaIndex computes the window unconditionally', () => {
+    expect(computeAbhijitMuhurta(sunrise, sunset)).not.toBeNull();
   });
 });
 

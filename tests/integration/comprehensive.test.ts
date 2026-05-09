@@ -172,14 +172,17 @@ describe('getDailyPanchang — comprehensive field validation', () => {
   });
 
   describe('muhurta periods', () => {
+    // Fixture date 2025-04-12 is a Saturday → Abhijit window is non-null.
     it('abhijitMuhurta is within daytime', () => {
-      expect(r.abhijitMuhurta.start.getTime()).toBeGreaterThan(r.sunrise.getTime());
-      expect(r.abhijitMuhurta.end.getTime()).toBeLessThan(r.sunset.getTime());
+      expect(r.abhijitMuhurta).not.toBeNull();
+      expect(r.abhijitMuhurta!.start.getTime()).toBeGreaterThan(r.sunrise.getTime());
+      expect(r.abhijitMuhurta!.end.getTime()).toBeLessThan(r.sunset.getTime());
     });
 
     it('abhijitMuhurta is around noon', () => {
+      expect(r.abhijitMuhurta).not.toBeNull();
       const midDay = r.sunrise.getTime() + (r.sunset.getTime() - r.sunrise.getTime()) / 2;
-      const muhurtaMid = (r.abhijitMuhurta.start.getTime() + r.abhijitMuhurta.end.getTime()) / 2;
+      const muhurtaMid = (r.abhijitMuhurta!.start.getTime() + r.abhijitMuhurta!.end.getTime()) / 2;
       // Should be within 1 hour of midday
       expect(Math.abs(muhurtaMid - midDay)).toBeLessThan(3600_000);
     });

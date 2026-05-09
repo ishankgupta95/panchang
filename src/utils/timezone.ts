@@ -25,10 +25,23 @@ export function resolveUtcOffset(timezone: number | string, referenceDate: Date)
   }
 }
 
+/**
+ * Return UTC instant of local midnight for the calendar day that `date`
+ * falls on **in the configured timezone** (`offsetMinutes`).
+ *
+ * The calendar day is read from the timezone-shifted instant via UTC
+ * accessors, so the result is independent of the JS runtime's host
+ * timezone. The previous implementation used `getFullYear/Month/Date`,
+ * which read the host system's TZ — causing off-by-one calendar days
+ * for inputs whose UTC instant straddled midnight (e.g. NY system,
+ * `new Date('2025-01-14T00:00:00Z')` resolved to Jan 13 since 00:00 UTC
+ * = 19:00 EST the previous day).
+ */
 export function getLocalMidnightUtc(date: Date, offsetMinutes: number): Date {
-  const y = date.getFullYear();
-  const m = date.getMonth();
-  const d = date.getDate();
+  const localDisplay = new Date(date.getTime() + offsetMinutes * 60_000);
+  const y = localDisplay.getUTCFullYear();
+  const m = localDisplay.getUTCMonth();
+  const d = localDisplay.getUTCDate();
   const midnightUtc = Date.UTC(y, m, d, 0, 0, 0, 0);
   return new Date(midnightUtc - offsetMinutes * 60_000);
 }

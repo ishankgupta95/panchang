@@ -186,16 +186,25 @@ describe('DrikPanchang cross-verification', () => {
       }
 
       // ── Abhijit Muhurta ──
-      if (expected.abhijitMuhurtaStartHHMM) {
+      // Drik convention: Abhijit is dropped on Wednesday (Buddha-vara) — fixture
+      // entries for Wednesdays set both fields to null and we assert the library
+      // also returns null. On other days both should match Drik within ±5 min.
+      if (expected.abhijitMuhurtaStartHHMM === null) {
+        it('abhijitMuhurta is null (Wednesday — Drik convention)', () => {
+          expect(r.abhijitMuhurta).toBeNull();
+        });
+      } else if (expected.abhijitMuhurtaStartHHMM) {
         it(`abhijitMuhurta start within ±5 min of ${expected.abhijitMuhurtaStartHHMM}`, () => {
+          expect(r.abhijitMuhurta).not.toBeNull();
           expect(
-            diffMinutes(fmtHHMM(r.abhijitMuhurta.start), expected.abhijitMuhurtaStartHHMM!),
+            diffMinutes(fmtHHMM(r.abhijitMuhurta!.start), expected.abhijitMuhurtaStartHHMM!),
           ).toBeLessThanOrEqual(5);
         });
 
         it(`abhijitMuhurta end within ±5 min of ${expected.abhijitMuhurtaEndHHMM}`, () => {
+          expect(r.abhijitMuhurta).not.toBeNull();
           expect(
-            diffMinutes(fmtHHMM(r.abhijitMuhurta.end), expected.abhijitMuhurtaEndHHMM!),
+            diffMinutes(fmtHHMM(r.abhijitMuhurta!.end), expected.abhijitMuhurtaEndHHMM!),
           ).toBeLessThanOrEqual(5);
         });
       }
