@@ -217,31 +217,27 @@ const GRAHA_NAME_BY_INDEX: readonly GrahaName[] = [
   'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn',
 ];
 
-/** Dusthana houses — houses of suffering in classical literature. */
-const DUSTHANA_HOUSES: ReadonlySet<number> = new Set([6, 8, 12]);
-
 /**
  * Compute Pitru Dosha — affliction by ancestors. Drik panchang does not
- * publish a Pitru Dosha calculator, so the reference set is multi-pandit
- * consensus across ProKerala, AstroSage, AstroNidan, Vinay Bajrangi, and
- * the classical BPHS Ch. 37 9th-lord rules. Nine triggers are tested:
+ * publish a Pitru Dosha calculator, so the reference set is the
+ * pandit-consensus subset (rules cited by ≥3 of 6 surveyed pandit
+ * sources: AstroTalk, PujaYagna, MyPandit, Astrobix, Vinay Bajrangi,
+ * GaneshaSpeaks). Four triggers are tested:
  *
  *   A. Sun + Rahu conjunction (any house) — the most universally cited
- *      Pitru Dosha rule.
- *   B. Sun + Ketu conjunction (any house) — same axial principle.
+ *      Pitru Dosha rule; Sun (pitru karaka) shadowed by Rahu.
  *   C. Sun + Saturn conjunction (any house) — classical malefic
  *      affliction of the pitru karaka.
- *   D. Sun in the 9th house (pitru bhava) — Sun karaka of the father
- *      in the house of ancestors.
  *   E. Rahu in the 9th house — Rahu directly afflicting pitru bhava.
- *   F. Ketu in the 4th house — matri/pitri axis affliction.
  *   G. 9th-house lord conjunct Rahu — pitru-bhava lord afflicted by
  *      Rahu. Skipped when the 9th lord is Sun (already covered by A).
- *   H. 9th-house lord conjunct Saturn — pitru-bhava lord afflicted by
- *      Saturn. Skipped when the 9th lord is Sun (covered by C) or
- *      Saturn itself (vacuous).
- *   I. 9th-house lord in a dusthana (6, 8, or 12) — classical BPHS
- *      Ch. 37 rule for an afflicted 9th lord.
+ *
+ * Rules dropped relative to earlier expansive readings (each cited by
+ * ≤1 surveyed pandit source): Sun + Ketu conjunction, Sun in 9th alone
+ * (Sun in own pitru bhava is often considered favorable), Ketu in 4th
+ * (commonly classed as Matri Dosha, not Pitru), 9th lord + Saturn, and
+ * 9th lord in dusthana (a generic weak-9th-lord rule, not a Pitru
+ * Dosha rule per pandit consensus).
  *
  * Any one trigger sets `afflicted: true`; all matching triggers are
  * surfaced in `reasons`.
@@ -257,7 +253,6 @@ const DUSTHANA_HOUSES: ReadonlySet<number> = new Set([6, 8, 12]);
 export function computePitruDosha(chart: BirthChart): PitruDoshaInfo {
   const sun = chart.planets.find((p) => p.planet === 'Sun')!;
   const rahu = chart.planets.find((p) => p.planet === 'Rahu')!;
-  const ketu = chart.planets.find((p) => p.planet === 'Ketu')!;
   const saturn = chart.planets.find((p) => p.planet === 'Saturn')!;
 
   const ninthRashi = chart.bhava.houses[8]!.rashi.index;
@@ -266,40 +261,21 @@ export function computePitruDosha(chart: BirthChart): PitruDoshaInfo {
 
   const reasons: string[] = [];
 
-  // A, B, C — Sun conjunct a malefic (Rahu/Ketu/Saturn) in any house.
+  // A — Sun + Rahu conjunction.
   if (sun.house === rahu.house) {
     reasons.push(`Sun + Rahu conjunction in house ${sun.house}`);
   }
-  if (sun.house === ketu.house) {
-    reasons.push(`Sun + Ketu conjunction in house ${sun.house}`);
-  }
+  // C — Sun + Saturn conjunction.
   if (sun.house === saturn.house) {
     reasons.push(`Sun + Saturn conjunction in house ${sun.house}`);
   }
-
-  // D, E, F — single-planet placements in pitru-relevant houses.
-  if (sun.house === 9) {
-    reasons.push('Sun in the 9th house (pitru bhava)');
-  }
+  // E — Rahu in the 9th house.
   if (rahu.house === 9) {
     reasons.push('Rahu in the 9th house');
   }
-  if (ketu.house === 4) {
-    reasons.push('Ketu in the 4th house');
-  }
-
-  // G, H, I — 9th-lord affliction. Skip G/H when the 9th lord is Sun
-  // (covered by A/C) or itself the named afflicting planet (vacuous).
-  if (ninthLordName !== 'Sun') {
-    if (ninthLordName !== 'Saturn' && ninthLord.house === rahu.house) {
-      reasons.push(`9th-lord ${ninthLordName} conjunct Rahu in house ${ninthLord.house}`);
-    }
-    if (ninthLordName !== 'Saturn' && ninthLord.house === saturn.house) {
-      reasons.push(`9th-lord ${ninthLordName} conjunct Saturn in house ${ninthLord.house}`);
-    }
-  }
-  if (DUSTHANA_HOUSES.has(ninthLord.house)) {
-    reasons.push(`9th-lord ${ninthLordName} in dusthana (house ${ninthLord.house})`);
+  // G — 9th-lord conjunct Rahu. Skip when 9th lord is Sun (covered by A).
+  if (ninthLordName !== 'Sun' && ninthLord.house === rahu.house) {
+    reasons.push(`9th-lord ${ninthLordName} conjunct Rahu in house ${ninthLord.house}`);
   }
 
   return {

@@ -7,9 +7,8 @@
  *     / Venus; Mars aspected by Jupiter (5th / 7th / 9th sign-aspect).
  *
  * Algorithm under test (Pitru):
- *   - 9 trigger rules: Sun+Rahu / Sun+Ketu / Sun+Saturn conjunctions (any
- *     house); Sun-in-9th; Rahu-in-9th; Ketu-in-4th; 9th-lord conjunct
- *     Rahu/Saturn; 9th-lord in dusthana (6/8/12).
+ *   - 4 trigger rules (pandit-consensus subset): Sun+Rahu conjunction,
+ *     Sun+Saturn conjunction, Rahu in 9th house, 9th-lord conjunct Rahu.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -393,16 +392,6 @@ describe('computePitruDosha — conjunction triggers', () => {
     expect(info.reasons.some((r) => r.includes('Sun + Rahu'))).toBe(true);
   });
 
-  it('Sun + Ketu conjunction flags affliction', () => {
-    const chart = makeChart({
-      lagnaRashi: 0, sunRashi: 6, moonRashi: 0, marsRashi: 3,
-      rahuRashi: 0, ketuRashi: 6,
-    });
-    const info = computePitruDosha(chart);
-    expect(info.afflicted).toBe(true);
-    expect(info.reasons.some((r) => r.includes('Sun + Ketu'))).toBe(true);
-  });
-
   it('Sun + Saturn conjunction (any house) flags affliction', () => {
     // Both Sun and Saturn in house 5 (Leo, with lagna Aries).
     const chart = makeChart({
@@ -416,18 +405,6 @@ describe('computePitruDosha — conjunction triggers', () => {
 });
 
 describe('computePitruDosha — house-placement triggers', () => {
-  it('Sun in 9th house flags affliction', () => {
-    // Lagna Aries → 9th = Sagittarius (rashi 8). Sun there.
-    const chart = makeChart({
-      lagnaRashi: 0, sunRashi: 8, moonRashi: 1, marsRashi: 2,
-      saturnRashi: 1, rahuRashi: 5, ketuRashi: 11,
-      jupiterRashi: 6,
-    });
-    const info = computePitruDosha(chart);
-    expect(info.afflicted).toBe(true);
-    expect(info.reasons.some((r) => r.includes('Sun in the 9th house'))).toBe(true);
-  });
-
   it('Rahu in 9th house flags affliction', () => {
     // Lagna Aries → 9th = Sagittarius. Rahu there.
     const chart = makeChart({
@@ -438,18 +415,6 @@ describe('computePitruDosha — house-placement triggers', () => {
     const info = computePitruDosha(chart);
     expect(info.afflicted).toBe(true);
     expect(info.reasons.some((r) => r.includes('Rahu in the 9th house'))).toBe(true);
-  });
-
-  it('Ketu in 4th house flags affliction', () => {
-    // Lagna Aries → 4th = Cancer (rashi 3). Ketu there.
-    const chart = makeChart({
-      lagnaRashi: 0, sunRashi: 1, moonRashi: 2, marsRashi: 4,
-      saturnRashi: 5, rahuRashi: 9, ketuRashi: 3,
-      jupiterRashi: 6,
-    });
-    const info = computePitruDosha(chart);
-    expect(info.afflicted).toBe(true);
-    expect(info.reasons.some((r) => r.includes('Ketu in the 4th house'))).toBe(true);
   });
 });
 
@@ -465,32 +430,6 @@ describe('computePitruDosha — 9th-lord triggers', () => {
     expect(info.afflicted).toBe(true);
     expect(info.reasons.some((r) =>
       r.includes('9th-lord Jupiter conjunct Rahu'),
-    )).toBe(true);
-  });
-
-  it('9th-lord conjunct Saturn flags affliction', () => {
-    // 9th lord Jupiter conjunct Saturn in Pisces (rashi 11, 12th house).
-    const chart = makeChart({
-      lagnaRashi: 0, sunRashi: 1, moonRashi: 4, marsRashi: 5,
-      saturnRashi: 11, jupiterRashi: 11, rahuRashi: 2, ketuRashi: 8,
-    });
-    const info = computePitruDosha(chart);
-    expect(info.afflicted).toBe(true);
-    expect(info.reasons.some((r) =>
-      r.includes('9th-lord Jupiter conjunct Saturn'),
-    )).toBe(true);
-  });
-
-  it('9th-lord in dusthana (6/8/12) flags affliction', () => {
-    // Lagna Aries → 9th lord Jupiter. Jupiter in Virgo (rashi 5 = 6th house).
-    const chart = makeChart({
-      lagnaRashi: 0, sunRashi: 1, moonRashi: 2, marsRashi: 3,
-      saturnRashi: 9, jupiterRashi: 5, rahuRashi: 10, ketuRashi: 4,
-    });
-    const info = computePitruDosha(chart);
-    expect(info.afflicted).toBe(true);
-    expect(info.reasons.some((r) =>
-      r.includes('9th-lord Jupiter in dusthana'),
     )).toBe(true);
   });
 });

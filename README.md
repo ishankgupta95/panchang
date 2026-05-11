@@ -434,9 +434,12 @@ computeKaalSarp(d1);
 //   mahapadma, takshak, karkotak, shankhachud, ghatak, vishdhar, sheshnag.
 
 computePitruDosha(d1);
-//   9-rule classical catalog: Sun+Rahu/Ketu/Saturn in 9th; 9th lord
-//   debilitated/combust/dusthana; Saturn or nodes in 9th from natal Moon;
-//   malefics (Mars/Saturn/Rahu/Ketu) in 5th from natal Moon.
+//   Pandit-consensus 4-trigger set (rules cited by ≥3 of 6 surveyed
+//   pandit sources): Sun+Rahu conjunction (any house), Sun+Saturn
+//   conjunction (any house), Rahu in 9th house, 9th-lord conjunct Rahu.
+//   Drik panchang publishes no Pitru calculator; minority/expansive
+//   rules (Sun in 9th alone, Ketu in 4th, 9th lord in dusthana, etc.)
+//   are intentionally excluded.
 ```
 
 **Limitations.** Ashtakoot Vashya koot uses single-vashya per rashi.

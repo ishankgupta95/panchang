@@ -198,17 +198,6 @@ describe('computePitruDosha — Sun + node conjunction', () => {
     expect(p.reasons.some((r) => r.includes('Rahu'))).toBe(true);
   });
 
-  it('Sun + Ketu in same house → afflicted', () => {
-    const chart = makeChart({
-      Sun: 220,       // rashi 7, house 8
-      Rahu: 35,
-      Ketu: 225,      // rashi 7, house 8
-    });
-    const p = computePitruDosha(chart);
-    expect(p.afflicted).toBe(true);
-    expect(p.reasons.some((r) => r.includes('Ketu'))).toBe(true);
-  });
-
   it('Sun + Saturn in 9th house → afflicted', () => {
     // lagna 0; 9th house is rashi 8.
     const chart = makeChart({
@@ -222,17 +211,14 @@ describe('computePitruDosha — Sun + node conjunction', () => {
     expect(p.reasons.some((r) => r.includes('Saturn'))).toBe(true);
   });
 
-  it('Sun + Saturn in 9th but not in same house — Saturn rule does NOT trigger', () => {
-    // Sun in 9th, Saturn elsewhere.
+  it('Sun and Saturn in different houses → Saturn rule does NOT trigger', () => {
     const chart = makeChart({
       Sun: 245,    // rashi 8, house 9
-      Saturn: 100,
+      Saturn: 100, // rashi 3, house 4
       Rahu: 60,
       Ketu: 240,
     });
     const p = computePitruDosha(chart);
-    // Sun-Ketu conjunction will still trigger here since Ketu is in house 9.
-    // But specifically: the "Sun + Saturn in 9th" rule should NOT trigger.
     expect(p.reasons.some((r) => r.includes('Saturn'))).toBe(false);
   });
 });
