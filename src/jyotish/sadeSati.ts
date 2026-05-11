@@ -55,6 +55,15 @@ function saturnRashi(date: Date, ayanamsa: AyanamsaType): number {
  * Boundary precision: ±7 days (the coarse step). Use `computePlanetaryPositions`
  * directly for higher-precision Saturn transit dates.
  *
+ * Cancellations: none surfaced. This matches drik panchang's published
+ * Shani Sadesati calculator, which reports active phases and arc dates
+ * only and notes "whether Sadesati proves auspicious or inauspicious
+ * depends entirely on Shani's position in one's Janma Kundali" as
+ * qualitative narrative rather than a programmatic cancellation rule.
+ * Classical mitigations (strong natal Saturn, Saturn–Jupiter aspects,
+ * etc.) are intentionally not modelled here so that this output stays
+ * in lockstep with drik panchang's panel.
+ *
  * @param natalMoonRashi  Native's Moon rashi at birth (0..11).
  * @param asOfDate        Evaluation date (defaults to now).
  * @param ayanamsa        Sidereal system (defaults to `'lahiri'`).

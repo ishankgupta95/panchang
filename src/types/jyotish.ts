@@ -127,6 +127,34 @@ export interface LagnaInfo {
   pada: number;
 }
 
+/**
+ * `SripatiLagnaInfo` extends {@link LagnaInfo} with the 12 *Sripati Paddhati*
+ * bhava-madhya cusps. Returned by `computeSripatiLagna` only when
+ * `options.includeCusps` is `true`; the default no-options call still
+ * returns `LagnaInfo` (cusp 1 only) for backwards compatibility.
+ *
+ * Each `cusps[i]` is the sidereal ecliptic longitude (degrees, [0, 360))
+ * of the *bhava madhya* (mid-point) of bhava `i+1`. By construction
+ * `cusps[0]` equals `siderealLongitude`, `cusps[3]` equals the sidereal
+ * IC (MC + 180°), `cusps[6]` equals the descendant (lagna + 180°), and
+ * `cusps[9]` equals the sidereal MC. Opposite cusps differ by exactly
+ * 180° (Sripati Paddhati invariant — see BPHS Ch. 5).
+ *
+ * The non-angular cusps (2, 3, 5, 6, 8, 9, 11, 12) are computed by
+ * trisecting each of the four ASC→IC→DSC→MC→ASC ecliptic-arc quadrants
+ * — the classical formula attributed to Sripati (12th c.) and unanimous
+ * across modern Vedic sources (Jothishi, planetarypositions.com,
+ * astrologershukla, Lalitha Anamika's substack, etc.). At the equator
+ * the four arcs are exactly 90° each and the Sripati chart degenerates
+ * to the Equal House chart; at higher latitudes the arcs become
+ * asymmetric (e.g. at 47°N the ASC→IC arc can be ~63° while IC→DSC
+ * is ~117°).
+ */
+export interface SripatiLagnaInfo extends LagnaInfo {
+  /** 12 bhava-madhya longitudes; `cusps[i]` is the madhya of bhava `i+1`. */
+  cusps: number[];
+}
+
 // ── Bhava (Houses) ───────────────────────────────────
 
 /**
@@ -228,18 +256,61 @@ export interface DivisionalChart {
 // ── Mangal Dosha (Manglik) ────────────────────────────
 
 /**
- * Mangal Dosha (Manglik) is the classical malefic affliction caused by Mars
- * in houses 1, 2, 4, 7, 8, or 12 from any of three reference points: lagna,
- * Moon, or Venus. The "three cuts" are scored independently; if any flags
- * affliction the native is considered manglik unless a cancellation applies.
+ * Severity classification of Mangal Dosha based on how many of the three
+ * reference charts (Lagna, Moon, Venus) show Mars in a manglik house.
+ * The classification is computed from the **raw** per-chart flags, before
+ * cancellations are applied, so it always reflects the natural strength
+ * of the dosha presence in the chart.
  *
- * Common cancellations: Mars in its own sign (Aries / Scorpio) or exalted
- * (Capricorn). Other cancellations (mutual mangalik, Mars/Jupiter aspect,
- * etc.) are not applied here — see README for the documented scope.
+ *   - `'none'`  — 0 of 3 charts flag.
+ *   - `'anshik'` — partial Manglik: 1 or 2 of 3 charts flag.
+ *   - `'purna'` — full Manglik: all 3 charts flag.
+ *
+ * Per AstroSage's published rule: "If Mars is placed in 1st, 2nd, 4th,
+ * 7th, 8th or 12th houses from Natal Chart, Moon Chart and Venus Chart,
+ * then it will be considered as High Manglik Dosha. If Mars is placed in
+ * those houses from any one of these three charts, then it will be
+ * considered as Low Manglik Dosha or 'Partial Manglik Dosha'."
+ */
+export type MangalDoshaSeverity = 'none' | 'anshik' | 'purna';
+
+/**
+ * Mangal Dosha (Manglik) is the classical malefic affliction caused by Mars
+ * in houses 1, 2, 4, 7, 8, or 12 from lagna, Moon, or Venus. All three
+ * reference points are scored independently; if any flags, the native is
+ * considered manglik unless a cancellation applies.
+ *
+ * Reference rule set follows drik panchang's stated algorithm (Lagna +
+ * Moon + Venus charts) and the cancellation set used by mainstream pandits.
+ * Drik panchang itself does not enumerate cancellations on its calculator
+ * page — these are sourced from the multi-pandit consensus that drik
+ * panchang's results agree with. Cancellations applied:
+ *
+ *   - Mars in own sign (Aries / Scorpio) or exalted (Capricorn).
+ *   - Mars conjunct Jupiter (same house) — Jupiter's benefic presence
+ *     neutralizes the affliction.
+ *   - Mars conjunct Moon (same house) — Moon's softening effect.
+ *   - Mars conjunct Venus (same house) — Venus's benefic conjunction
+ *     softens Mars. Notably this also self-cancels the from-Venus check
+ *     trivially (Mars in 1st from Venus).
+ *   - Mars aspected by Jupiter — Jupiter's 5th, 7th, or 9th sign-aspect
+ *     onto Mars (whole-sign aspect, i.e. Mars rashi is 5th/7th/9th from
+ *     Jupiter rashi).
+ *
+ * The `severity` field surfaces the Anshik / Purna classification used by
+ * AstroSage and many pandits — it is independent of cancellations, so a
+ * chart can be `severity: 'anshik'` but `afflicted: false` when
+ * cancellations apply.
  */
 export interface MangalDoshaInfo {
   /** Final affliction status after applying cancellations. */
   afflicted: boolean;
+  /**
+   * Anshik (partial) / Purna (full) severity classification, computed
+   * from the raw per-chart flags before cancellations. See
+   * {@link MangalDoshaSeverity}.
+   */
+  severity: MangalDoshaSeverity;
   fromLagna: { afflicted: boolean; house: number };
   fromMoon:  { afflicted: boolean; house: number };
   fromVenus: { afflicted: boolean; house: number };
@@ -541,11 +612,25 @@ export type YogaName =
  *     yoga matched (e.g. `'Jupiter in 4th from Moon (kendra)'`). For
  *     yogas with multiple BPHS sub-rules (e.g. Neecha Bhanga) every
  *     triggered sub-rule contributes its own entry.
+ *   - `bhanga` — optional classical cancellation annotation. Present
+ *     only on yogas that carry a multi-source-cited bhanga rule:
+ *       - **Pancha Mahapurusha** (Ruchaka / Bhadra / Hamsa / Malavya /
+ *         Sasha): Sun-or-Moon conjunction with the yoga-causing planet.
+ *       - **Gajakesari**: Jupiter combust within 10° of Sun, or Jupiter
+ *         debilitated in Capricorn.
+ *     Yogas without a catalog bhanga rule (Raja Yoga, Lakshmi Yoga,
+ *     Dhana Yoga, etc.) omit the field entirely — see
+ *     `notes/phase34c-research.md` §4 for the BPHS Vipareeta-Raja-Yoga
+ *     conflict that motivates the Raja Yoga deferral. The positive
+ *     `name` detection is **independent** of `bhanga` — a yoga can be
+ *     both detected and bhanga-cancelled (`bhanga.applies: true`);
+ *     callers choose whether to honor the annotation.
  */
 export interface Yoga {
   name: YogaName;
   type: YogaType;
   reasons: string[];
+  bhanga?: { applies: boolean; reasons: string[] };
 }
 
 // ── Jaimini Karakas ───────────────────────────────────
@@ -576,9 +661,43 @@ export type KarakaName =
  * Mapping from each of the 7 Karaka roles to the graha that fills it for
  * a given chart. Uses the 7-Karaka Parashara variant — the 7 visible
  * grahas (Sun..Saturn) ranked by descending degree-in-rashi. The reversed-
- * Rahu 8-Karaka Jaimini variant is **not** computed here.
+ * Rahu 8-Karaka Jaimini variant uses {@link Jaimini8Karakas} instead.
  */
 export type JaiminiKarakas = Record<KarakaName, GrahaName>;
+
+/**
+ * 8 Karaka role names for the Jaimini variant. Extends the Parashara
+ * 7-role set with **Pitrukaraka** (father) inserted at position 5 of
+ * the canonical ordering:
+ *
+ *     Atmakaraka → Amatyakaraka → Bhratrukaraka → Matrukaraka →
+ *     **Pitrukaraka** → Putrakaraka → Gnatikaraka → Darakaraka
+ *
+ * **Source.** Jaimini *Upadesa Sutras* Ch.1 First Foot (Adhikaar Sutras)
+ * V.10; Sanjay Rath, *Jaimini Maharishi's Upadesa Sutras* (Sagar
+ * Publications). Multi-pandit consensus across Sanjay Rath / Komilla
+ * Sutton / Sarvatobhadra / Wikipedia traditions; K.N. Rao + Narasimha
+ * Rao traditions retain the 7-role Parashara variant via
+ * {@link KarakaName}.
+ */
+export type Karaka8Name = KarakaName | 'Pitrukaraka';
+
+/**
+ * Mapping from each of the 8 Karaka roles to the graha that fills it for
+ * a given chart. Uses the 8-Karaka Jaimini variant — the 7 visible
+ * grahas (Sun..Saturn) **plus Rahu** ranked by descending effective
+ * degree-in-rashi, where Rahu's effective degree is `30 − degreeInRashi`
+ * (reversed because Rahu is permanently retrograde).
+ *
+ * Tie-break extends the canonical Parashara order one slot:
+ *
+ *     Sun > Moon > Mars > Mercury > Jupiter > Venus > Saturn > Rahu
+ *
+ * Returned by `computeJaiminiKarakas(chart, { variant: '8-jaimini' })`.
+ * The default {@link JaiminiKarakas} (no options arg) returns the 7-role
+ * Parashara variant unchanged.
+ */
+export type Jaimini8Karakas = Record<Karaka8Name, GrahaName>;
 
 // ── Bhava Bala (House strength) ───────────────────────
 
@@ -749,4 +868,32 @@ export interface ArgalaPerBhava {
   argala: PlanetPlacement[];
   /** Planets that form Virodhargala (counter) — occupants of 3rd / 10th / 12th from bhava. */
   virodhargala: PlanetPlacement[];
+  /**
+   * **Trikonargala** (the 5/9 trine Argala variant, multi-source classical
+   * Jaimini concept). Populated only when `computeArgala` is called with
+   * `{ includeTrikonargala: true }`.
+   *
+   * - `sources` — planets in the **5th from this bhava** form the
+   *   secondary trine Argala (positive sign-based influence on the bhava).
+   * - `virodhakas` — planets in the **9th from this bhava** counter
+   *   the Trikonargala (Trikona Virodhargala).
+   *
+   * **Ketu reversal**. For Ketu specifically, the role is swapped: Ketu in
+   * 5th-from-bhava counts as a *virodhaka* (not a source), and Ketu in
+   * 9th-from-bhava counts as a *source*. Three independent classical
+   * sources attest this Ketu-specific reversal in the trine context
+   * (sutramritam.blogspot.com, anandamoyee.home.blog, Sanjay Rath via
+   * srath.com — the latter as a generalised "Argala reversed from Ketu"
+   * rule).
+   *
+   * Default callers (no options arg) receive `trikona === undefined` to
+   * preserve byte-for-byte backwards compatibility with pre-Phase-34e
+   * `ArgalaPerBhava` consumers.
+   */
+  trikona?: {
+    /** Planets in the 5th from bhava (or 9th from bhava if planet is Ketu). */
+    sources: PlanetPlacement[];
+    /** Planets in the 9th from bhava (or 5th from bhava if planet is Ketu). */
+    virodhakas: PlanetPlacement[];
+  };
 }

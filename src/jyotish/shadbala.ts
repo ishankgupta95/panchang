@@ -1,13 +1,16 @@
 import { computeRashiChart } from './charts';
+import { computeDivisionalChart } from './divisionals';
+import { computeDignity } from './dignity';
 import { RASHI_LORD } from './matchingTables';
 import { computeSunrise, computeSunset } from '../astronomy/sunrise';
 import { validateLocation, validateDate } from '../utils/validation';
 import { normalize360 } from '../utils/angle';
 import type { GeoLocation } from '../types/location';
 import type { BirthChartOptions } from '../types/options';
+import type { Divisional } from '../types/jyotish';
 import type {
   BhavaBalaPerHouse, BhavaBalaResult,
-  BirthChart, GrahaName, PlanetPlacement,
+  BirthChart, DivisionalChart, GrahaName, PlanetPlacement,
   PlanetShadbala, ShadbalaResult,
 } from '../types/jyotish';
 
@@ -25,8 +28,14 @@ import type {
  * by most popular calculators (ProKerala, AstroSage's free tier, PyJHora's
  * default rule-set). It exposes the dominant term of each component:
  *
- *   - **Sthana Bala** — Uchcha (exaltation) component only. Linear ramp
- *     between exaltation (60 V) and debilitation (0 V) along ecliptic arc.
+ *   - **Sthana Bala** — Uchcha + Saptavargaja + Ojha-Yugma + Drekkana
+ *     (Phase 34e item 5; pre-34e shipped Uchcha alone). Uchcha is the
+ *     linear ramp between exaltation (60 V) and debilitation (0 V).
+ *     Saptavargaja sums dignity-Virupas across 7 vargas (D1, D2, D3,
+ *     D7, D9, D12, D30) — max 7 × 45 = 315 V. Ojha-Yugma adds 0/15/30 V
+ *     based on rashi+navamsa parity. Drekkana adds 0/15 V based on the
+ *     decanate. Kendradi Bala (by-house position) and additional
+ *     classical sub-balas remain out of scope.
  *   - **Dig Bala** — distance from the planet's "directional house" cusp.
  *     Strong-cusp houses: Sun/Mars 10th, Jupiter/Mercury 1st, Moon/Venus
  *     4th, Saturn 7th. 60 V at cusp, 0 V at the opposite kendra.
@@ -107,12 +116,21 @@ function shadbalaForChart(
   const sunPlanet = chart.planets.find((p) => p.planet === 'Sun')!;
   const moonPlanet = chart.planets.find((p) => p.planet === 'Moon')!;
 
+  // Compute the 6 divisional charts needed by Saptavargaja (D2, D3, D7,
+  // D9, D12, D30 — D1 is `chart`). Done once for the entire Shadbala
+  // call to amortize the per-graha divisional lookups.
+  const VARGAS: readonly Divisional[] = ['D2', 'D3', 'D7', 'D9', 'D12', 'D30'];
+  const divisionalCharts: Record<Divisional, DivisionalChart> = {} as Record<Divisional, DivisionalChart>;
+  for (const v of VARGAS) {
+    divisionalCharts[v] = computeDivisionalChart(birthDate, location, v);
+  }
+
   const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
   const partials: Record<GrahaName, PlanetShadbala> = {} as Record<GrahaName, PlanetShadbala>;
 
   for (const g of grahas) {
     const placement = chart.planets.find((p) => p.planet === g)!;
-    const sthana = sthanaBala(g, placement.longitude);
+    const sthana = sthanaBala(g, placement, chart, divisionalCharts);
     const dig = digBala(g, placement.longitude, chart.lagna.siderealLongitude);
     const kala = kalaBala(g, birthDate, sunriseUtc, sunsetUtc, nextSunriseUtc,
       sunPlanet.longitude, moonPlanet.longitude);
@@ -148,19 +166,127 @@ const UCHCHA_DEG: Record<Exclude<GrahaName, 'Rahu' | 'Ketu'>, number> = {
 };
 
 /**
- * Uchcha Bala — 60 V at exact exaltation, 0 V at exact debilitation, linear
- * along the shorter arc. Total Sthana Bala in BPHS combines this with
- * Saptavargaja, Ojha-Yugma, Kendra, and Drekkana sub-balas; the simplified
- * model used by ProKerala / PyJHora exposes Uchcha alone, which is the
- * dominant term and the only one with significant chart-to-chart variance.
+ * **Sthana Bala** = Uchcha + Saptavargaja + Ojha-Yugma + Drekkana
+ * (post Phase 34e item 5).
+ *
+ * Uchcha Bala: 60 V at exact exaltation, 0 V at exact debilitation,
+ * linear along the shorter arc — same as pre-34e behaviour.
+ *
+ * Saptavargaja Bala: sum of dignity values across 7 vargas (D1, D2,
+ * D3, D7, D9, D12, D30) per BPHS Ch.27 verse 16-17. Range per varga:
+ * 1.875 V (debilitated / great-enemy) to 45 V (own / moolatrikona /
+ * exalted). Library-mapping note: `computeDignity` does not
+ * distinguish great-friend vs friend (or great-enemy vs enemy); the
+ * library uses the lower bound for ambiguous cases (15 V for friend,
+ * 3.75 V for enemy) — see notes/phase34e-shadbala-research.md §2.1.
+ *
+ * Ojha-Yugma Bala: per BPHS Ch.27 verse 18-19. Masculine grahas
+ * (Sun, Mars, Jupiter) get +15 V each for odd Rashi (D1) and odd
+ * Navamsa (D9). Feminine + eunuch (Moon, Mercury, Venus, Saturn)
+ * get +15 V for even Rashi and even Navamsa. Max 30 V per graha.
+ *
+ * Drekkana Bala: per BPHS Ch.27 verse 20. Male grahas (Sun, Mars,
+ * Jupiter) get +15 V in the 1st decanate (0-10°); Eunuch (Mercury,
+ * Saturn) in the 2nd decanate (10-20°); Female (Moon, Venus) in
+ * the 3rd decanate (20-30°). Max 15 V per graha.
+ *
+ * Kendradi Bala (Kendra/Panaphara/Apoklim by house) and additional
+ * Sthana sub-balas remain out of scope. Returns 0 for Rahu/Ketu
+ * (classical Shadbala applies to 7 visible grahas only).
+ *
+ * Sources: BPHS Ch.27 verse 16-22 (Santhanam translation);
+ * notes/phase34e-shadbala-research.md.
  */
-function sthanaBala(graha: GrahaName, siderealLon: number): number {
+function sthanaBala(
+  graha: GrahaName,
+  placement: PlanetPlacement,
+  chart: BirthChart,
+  divisionalCharts: Record<Divisional, DivisionalChart>,
+): number {
   if (graha === 'Rahu' || graha === 'Ketu') return 0;
-  const uchcha = UCHCHA_DEG[graha];
-  // Shortest arc from exaltation: 0..180.
+  const uchcha = uchchaBala(graha, placement.longitude);
+  const saptavargaja = saptavargajaBala(graha, chart, divisionalCharts);
+  const ojhaYugma = ojhaYugmaBala(graha, chart, divisionalCharts);
+  const drekkana = drekkanaBala(graha, placement.degreeInRashi);
+  return uchcha + saptavargaja + ojhaYugma + drekkana;
+}
+
+/** Uchcha Bala (formerly the entirety of Sthana Bala). 60 V at exact
+ *  exaltation longitude, 0 V at exact debilitation, linear in between. */
+function uchchaBala(graha: GrahaName, siderealLon: number): number {
+  const uchcha = UCHCHA_DEG[graha as Exclude<GrahaName, 'Rahu' | 'Ketu'>];
   const arc = Math.abs(((siderealLon - uchcha + 540) % 360) - 180);
-  // Linear: 60 V at arc=0 (uchcha), 0 V at arc=180 (debilitation).
   return ((180 - arc) / 180) * 60;
+}
+
+/** Saptavargaja dignity → Virupas mapping per BPHS Ch.27 verse 17. */
+const SAPT_VIRUPAS: Record<string, number> = {
+  exalted:      45,
+  moolatrikona: 45,
+  own:          30,
+  friend:       15,    // great-friend distinction collapsed; see JSDoc.
+  neutral:       7.5,
+  enemy:         3.75, // great-enemy distinction collapsed.
+  debilitated:   1.875,
+};
+
+/** The 7 vargas summed in Saptavargaja: Rashi + Hora + Drekkana +
+ *  Saptamsa + Navamsa + Dwadasamsa + Trimsamsa. */
+const SAPT_VARGAS: readonly Divisional[] = ['D2', 'D3', 'D7', 'D9', 'D12', 'D30'];
+
+function saptavargajaBala(
+  graha: GrahaName,
+  chart: BirthChart,
+  divisionalCharts: Record<Divisional, DivisionalChart>,
+): number {
+  // D1 (Rashi) contribution.
+  const d1Rashi = chart.planets.find((p) => p.planet === graha)!.rashi.index;
+  let total = SAPT_VIRUPAS[computeDignity(graha, d1Rashi)]!;
+  // D2..D30 contributions.
+  for (const v of SAPT_VARGAS) {
+    const rashi = divisionalCharts[v].planets.find((p) => p.planet === graha)!.rashi.index;
+    total += SAPT_VIRUPAS[computeDignity(graha, rashi)]!;
+  }
+  return total;
+}
+
+const OJHA_MASCULINE: ReadonlySet<GrahaName> = new Set(['Sun', 'Mars', 'Jupiter']);
+const OJHA_FEMININE: ReadonlySet<GrahaName> = new Set(['Moon', 'Mercury', 'Venus', 'Saturn']);
+
+function ojhaYugmaBala(
+  graha: GrahaName,
+  chart: BirthChart,
+  divisionalCharts: Record<Divisional, DivisionalChart>,
+): number {
+  const d1Rashi = chart.planets.find((p) => p.planet === graha)!.rashi.index;
+  const d9Rashi = divisionalCharts.D9.planets.find((p) => p.planet === graha)!.rashi.index;
+  // Rashi index 0 (Aries = 1st sign) → "1st" is conventionally ODD.
+  // Odd-indexed rashis are the "even-numbered" signs (2nd, 4th, ...).
+  const d1Odd = (d1Rashi % 2) === 0;
+  const d9Odd = (d9Rashi % 2) === 0;
+  let total = 0;
+  if (OJHA_MASCULINE.has(graha)) {
+    if (d1Odd) total += 15;
+    if (d9Odd) total += 15;
+  } else if (OJHA_FEMININE.has(graha)) {
+    if (!d1Odd) total += 15;
+    if (!d9Odd) total += 15;
+  }
+  return total;
+}
+
+/** Drekkana gender grouping per BPHS Ch.27 verse 20:
+ *  0 = Male → 1st decanate, 1 = Eunuch → 2nd, 2 = Female → 3rd. */
+const DREKKANA_GROUP: Record<Exclude<GrahaName, 'Rahu' | 'Ketu'>, number> = {
+  Sun: 0, Mars: 0, Jupiter: 0,
+  Mercury: 1, Saturn: 1,
+  Moon: 2, Venus: 2,
+};
+
+function drekkanaBala(graha: GrahaName, degreeInRashi: number): number {
+  if (graha === 'Rahu' || graha === 'Ketu') return 0;
+  const decanate = Math.floor(degreeInRashi / 10); // 0, 1, or 2
+  return decanate === DREKKANA_GROUP[graha as Exclude<GrahaName, 'Rahu' | 'Ketu'>] ? 15 : 0;
 }
 
 // ── Dig Bala (directional) ────────────────────────────
@@ -296,10 +422,11 @@ function chestaBala(graha: GrahaName, placement: PlanetPlacement, sunLon: number
   if (graha === 'Moon') return 30;
   if (graha === 'Rahu' || graha === 'Ketu') return 0;
   if (placement.isRetrograde) return 60;
-  // Combust check — angular distance to Sun ≤ 10°.
-  const sep = Math.abs(((placement.longitude - sunLon + 540) % 360) - 180);
-  const distToSun = 180 - sep; // 0 at conjunction, 180 at opposition
-  if (distToSun <= 10) return 15;
+  // Combust check — unsigned angular distance to Sun ≤ 10°.
+  // `((diff + 540) % 360) - 180` wraps to (-180, 180]; `abs` gives the
+  // unsigned distance in [0, 180]: 0 at conjunction, 180 at opposition.
+  const angularDistance = Math.abs(((placement.longitude - sunLon + 540) % 360) - 180);
+  if (angularDistance <= 10) return 15;
   return 30;
 }
 

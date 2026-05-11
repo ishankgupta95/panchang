@@ -1,0 +1,46 @@
+{
+  "_meta": {
+    "purpose": "Phase 34d Ashtakoot Guna Milan parity fixtures.",
+    "scope": "Three structurally-determinate (perfect-36) pairs to lock the koot-summation + cancellation logic as a regression net. Complex pairs without trivially-derivable totals remain in tests/fixtures/ashtakoot-pairs.json (per-pair structural sweep) — drik form-only output prevents auditable per-pair total scraping for non-trivial pairs.",
+    "rule_basis": "BPHS Ch.7 + Drik per-koot rules. Each perfect-36 case is hand-derived: same rashi → Varna 1 / Vashya 2 / Bhakoot 7 / Graha Maitri 5 (same rashi-lord); same nakshatra → Tara 3 (Janma) / Yoni 4 / Gana 6 / Nadi 8 (cancelled by same-nakshatra rule).",
+    "natal_moons": "Sourced from AstroSage R-tier corpus (tests/fixtures/astrosage-charts.json)."
+  },
+  "pairs": [
+    {
+      "label": "Modi × Modi (identity)",
+      "_source": "Phase 29 hand-derived; identical natal moon → perfect 36",
+      "boy":  { "rashi": 7, "nakshatra": 16 },
+      "girl": { "rashi": 7, "nakshatra": 16 },
+      "expectedTotal": 36,
+      "expectedKoots": {
+        "Varna": 1, "Vashya": 2, "Tara": 3, "Yoni": 4,
+        "Graha Maitri": 5, "Gana": 6, "Bhakoot": 7, "Nadi": 8
+      },
+      "expectedNadiCancellation": true
+    },
+    {
+      "label": "Obama × Priyanka (both Vrishabha/Rohini)",
+      "_source": "Phase 29 hand-derived; same natal rashi+nakshatra → perfect 36 (Nadi cancellation triggers)",
+      "boy":  { "rashi": 1, "nakshatra": 3 },
+      "girl": { "rashi": 1, "nakshatra": 3 },
+      "expectedTotal": 36,
+      "expectedKoots": {
+        "Varna": 1, "Vashya": 2, "Tara": 3, "Yoni": 4,
+        "Graha Maitri": 5, "Gana": 6, "Bhakoot": 7, "Nadi": 8
+      },
+      "expectedNadiCancellation": true
+    },
+    {
+      "label": "Bill Clinton × Kejriwal (both Mesha/Bharani)",
+      "_source": "Phase 29 hand-derived; same rashi+nakshatra → perfect 36",
+      "boy":  { "rashi": 0, "nakshatra": 1 },
+      "girl": { "rashi": 0, "nakshatra": 1 },
+      "expectedTotal": 36,
+      "expectedKoots": {
+        "Varna": 1, "Vashya": 2, "Tara": 3, "Yoni": 4,
+        "Graha Maitri": 5, "Gana": 6, "Bhakoot": 7, "Nadi": 8
+      },
+      "expectedNadiCancellation": true
+    }
+  ]
+}

@@ -1,7 +1,8 @@
 import type {
-  BirthChart, MangalDoshaInfo,
+  BirthChart, GrahaName, MangalDoshaInfo, MangalDoshaSeverity,
   KaalSarpDoshaInfo, KaalSarpSubtype, PitruDoshaInfo,
 } from '../types/jyotish';
+import { RASHI_LORD } from './matchingTables';
 
 /** Houses (1..12) where Mars classically afflicts the chart. */
 const MANGAL_HOUSES: ReadonlySet<number> = new Set([1, 2, 4, 7, 8, 12]);
@@ -13,11 +14,22 @@ const MARS_EXALTED_RASHI = 9; // Capricorn
 /**
  * Compute Mangal Dosha (Manglik) status for a birth chart.
  *
- * Mars is checked from three classical reference points — lagna, Moon, and
- * Venus. Houses 1, 2, 4, 7, 8, 12 from any of the three flag affliction.
- * Cancellations applied: Mars in Aries / Scorpio (own) or Capricorn
- * (exalted). Other classical cancellations (mutual mangalik, planetary
- * aspect) are out of scope here.
+ * Reference rule set follows drik panchang's stated algorithm (Lagna +
+ * Moon + Venus charts) and the cancellation set used by mainstream
+ * pandits. Mars in houses 1, 2, 4, 7, 8, or 12 from any of the three
+ * reference points flags affliction. Cancellations applied:
+ *
+ *   - Mars in own sign (Aries / Scorpio) or exalted (Capricorn).
+ *   - Mars conjunct Jupiter (same house) — Jupiter's benefic presence.
+ *   - Mars conjunct Moon (same house) — Moon's softening effect.
+ *   - Mars conjunct Venus (same house) — Venus's benefic conjunction.
+ *     Note: this trivially cancels the "Mars in 1st from Venus" trigger,
+ *     so any Mars–Venus conjunction self-cancels.
+ *   - Mars aspected by Jupiter — Jupiter's 5th, 7th, or 9th sign-aspect
+ *     onto Mars (whole-sign: Mars rashi is 5th/7th/9th from Jupiter rashi).
+ *
+ * Mutual-mangalik cancellation (both partners afflicted) is a matching
+ * rule, not a chart-only rule, and is not applied here.
  *
  * @param chart  Natal D1 chart from `computeRashiChart`.
  *
@@ -32,6 +44,7 @@ export function computeMangalDosha(chart: BirthChart): MangalDoshaInfo {
   const mars = chart.planets.find((p) => p.planet === 'Mars')!;
   const moon = chart.planets.find((p) => p.planet === 'Moon')!;
   const venus = chart.planets.find((p) => p.planet === 'Venus')!;
+  const jupiter = chart.planets.find((p) => p.planet === 'Jupiter')!;
 
   const marsRashi = mars.rashi.index;
   const houseFrom = (refRashi: number): number =>
@@ -45,7 +58,16 @@ export function computeMangalDosha(chart: BirthChart): MangalDoshaInfo {
   const fromMoonAfflicted = MANGAL_HOUSES.has(fromMoonHouse);
   const fromVenusAfflicted = MANGAL_HOUSES.has(fromVenusHouse);
 
-  let afflicted = fromLagnaAfflicted || fromMoonAfflicted || fromVenusAfflicted;
+  const flaggedCount =
+    (fromLagnaAfflicted ? 1 : 0) +
+    (fromMoonAfflicted ? 1 : 0) +
+    (fromVenusAfflicted ? 1 : 0);
+  const severity: MangalDoshaSeverity =
+    flaggedCount === 0 ? 'none'
+    : flaggedCount === 3 ? 'purna'
+    : 'anshik';
+
+  let afflicted = flaggedCount > 0;
   const cancellations: string[] = [];
 
   if (afflicted) {
@@ -56,10 +78,33 @@ export function computeMangalDosha(chart: BirthChart): MangalDoshaInfo {
       cancellations.push('Mars exalted in Capricorn');
       afflicted = false;
     }
+
+    if (mars.house === jupiter.house) {
+      cancellations.push(`Mars conjunct Jupiter in house ${mars.house}`);
+      afflicted = false;
+    }
+    if (mars.house === moon.house) {
+      cancellations.push(`Mars conjunct Moon in house ${mars.house}`);
+      afflicted = false;
+    }
+    if (mars.house === venus.house) {
+      cancellations.push(`Mars conjunct Venus in house ${mars.house}`);
+      afflicted = false;
+    }
+
+    // Jupiter's whole-sign aspects fall on the 5th, 7th, and 9th rashis
+    // from Jupiter. Equivalently, Mars is aspected by Jupiter iff Mars's
+    // rashi is the 5th, 7th, or 9th from Jupiter's rashi.
+    const marsFromJupiter = ((marsRashi - jupiter.rashi.index + 12) % 12) + 1;
+    if (marsFromJupiter === 5 || marsFromJupiter === 7 || marsFromJupiter === 9) {
+      cancellations.push(`Mars aspected by Jupiter (${marsFromJupiter}th aspect)`);
+      afflicted = false;
+    }
   }
 
   return {
     afflicted,
+    severity,
     fromLagna: { afflicted: fromLagnaAfflicted, house: fromLagnaHouse },
     fromMoon: { afflicted: fromMoonAfflicted, house: fromMoonHouse },
     fromVenus: { afflicted: fromVenusAfflicted, house: fromVenusHouse },
@@ -110,6 +155,13 @@ const KAAL_SARP_BY_RAHU_HOUSE: readonly KaalSarpSubtype[] = [
  * dosha-bhanga ("broken dosha") signal in this case — treat it as a soft
  * indicator, not a strict affliction.
  *
+ * Drik panchang explicitly does **not** surface partial Kaal Sarp in its
+ * calculator ("As partial Kaal Sarpa Dosha is not widely accepted, Drik
+ * Panchang does not list them"). The `partial` flag here is informational
+ * only — the canonical `afflicted` flag and `subtype` always match drik
+ * panchang's behavior. Callers wanting strict drik-panchang parity should
+ * ignore `partial`.
+ *
  * @param chart  Natal D1 chart from `computeRashiChart`.
  *
  * @example
@@ -157,18 +209,42 @@ export function computeKaalSarp(chart: BirthChart): KaalSarpDoshaInfo {
 // ── Pitru Dosha ───────────────────────────────────────
 
 /**
- * Compute Pitru Dosha — affliction by ancestors. Two highest-frequency
- * triggers are tested (further classical rules exist; this surfaces the
- * dominant ones used by public calculators):
+ * Map from the 7-graha index used in `RASHI_LORD` (Sun=0..Saturn=6) to the
+ * `GrahaName` used in chart.planets. Rashi-lord lookup never returns Rahu
+ * or Ketu (they don't lord any rashi in the Parashara scheme).
+ */
+const GRAHA_NAME_BY_INDEX: readonly GrahaName[] = [
+  'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn',
+];
+
+/** Dusthana houses — houses of suffering in classical literature. */
+const DUSTHANA_HOUSES: ReadonlySet<number> = new Set([6, 8, 12]);
+
+/**
+ * Compute Pitru Dosha — affliction by ancestors. Drik panchang does not
+ * publish a Pitru Dosha calculator, so the reference set is multi-pandit
+ * consensus across ProKerala, AstroSage, AstroNidan, Vinay Bajrangi, and
+ * the classical BPHS Ch. 37 9th-lord rules. Nine triggers are tested:
  *
- *   1. Sun + Rahu in the same house — the most-cited Pitru Dosha rule.
- *   2. Sun + Ketu in the same house — same axial principle.
- *   3. Sun + Saturn conjunction in the 9th house — bhagya bhava affliction.
+ *   A. Sun + Rahu conjunction (any house) — the most universally cited
+ *      Pitru Dosha rule.
+ *   B. Sun + Ketu conjunction (any house) — same axial principle.
+ *   C. Sun + Saturn conjunction (any house) — classical malefic
+ *      affliction of the pitru karaka.
+ *   D. Sun in the 9th house (pitru bhava) — Sun karaka of the father
+ *      in the house of ancestors.
+ *   E. Rahu in the 9th house — Rahu directly afflicting pitru bhava.
+ *   F. Ketu in the 4th house — matri/pitri axis affliction.
+ *   G. 9th-house lord conjunct Rahu — pitru-bhava lord afflicted by
+ *      Rahu. Skipped when the 9th lord is Sun (already covered by A).
+ *   H. 9th-house lord conjunct Saturn — pitru-bhava lord afflicted by
+ *      Saturn. Skipped when the 9th lord is Sun (covered by C) or
+ *      Saturn itself (vacuous).
+ *   I. 9th-house lord in a dusthana (6, 8, or 12) — classical BPHS
+ *      Ch. 37 rule for an afflicted 9th lord.
  *
- * The full Parashara catalog includes additional rules (debilitated Sun in
- * 9th, 9th lord in dusthana, malefic 9th lord, etc.) — those are out of
- * scope here. The two surfaced rules account for the majority of Pitru
- * Dosha flags returned by ProKerala / DrikPanchang's free panels.
+ * Any one trigger sets `afflicted: true`; all matching triggers are
+ * surfaced in `reasons`.
  *
  * @param chart  Natal D1 chart from `computeRashiChart`.
  *
@@ -184,15 +260,46 @@ export function computePitruDosha(chart: BirthChart): PitruDoshaInfo {
   const ketu = chart.planets.find((p) => p.planet === 'Ketu')!;
   const saturn = chart.planets.find((p) => p.planet === 'Saturn')!;
 
+  const ninthRashi = chart.bhava.houses[8]!.rashi.index;
+  const ninthLordName = GRAHA_NAME_BY_INDEX[RASHI_LORD[ninthRashi]!]!;
+  const ninthLord = chart.planets.find((p) => p.planet === ninthLordName)!;
+
   const reasons: string[] = [];
+
+  // A, B, C — Sun conjunct a malefic (Rahu/Ketu/Saturn) in any house.
   if (sun.house === rahu.house) {
     reasons.push(`Sun + Rahu conjunction in house ${sun.house}`);
   }
   if (sun.house === ketu.house) {
     reasons.push(`Sun + Ketu conjunction in house ${sun.house}`);
   }
-  if (sun.house === 9 && saturn.house === 9) {
-    reasons.push('Sun + Saturn conjunction in the 9th house (bhagya bhava)');
+  if (sun.house === saturn.house) {
+    reasons.push(`Sun + Saturn conjunction in house ${sun.house}`);
+  }
+
+  // D, E, F — single-planet placements in pitru-relevant houses.
+  if (sun.house === 9) {
+    reasons.push('Sun in the 9th house (pitru bhava)');
+  }
+  if (rahu.house === 9) {
+    reasons.push('Rahu in the 9th house');
+  }
+  if (ketu.house === 4) {
+    reasons.push('Ketu in the 4th house');
+  }
+
+  // G, H, I — 9th-lord affliction. Skip G/H when the 9th lord is Sun
+  // (covered by A/C) or itself the named afflicting planet (vacuous).
+  if (ninthLordName !== 'Sun') {
+    if (ninthLordName !== 'Saturn' && ninthLord.house === rahu.house) {
+      reasons.push(`9th-lord ${ninthLordName} conjunct Rahu in house ${ninthLord.house}`);
+    }
+    if (ninthLordName !== 'Saturn' && ninthLord.house === saturn.house) {
+      reasons.push(`9th-lord ${ninthLordName} conjunct Saturn in house ${ninthLord.house}`);
+    }
+  }
+  if (DUSTHANA_HOUSES.has(ninthLord.house)) {
+    reasons.push(`9th-lord ${ninthLordName} in dusthana (house ${ninthLord.house})`);
   }
 
   return {

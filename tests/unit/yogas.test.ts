@@ -177,6 +177,67 @@ describe('Mahapurusha — Hamsa (Jupiter own/exalted in kendra)', () => {
   });
 });
 
+// ── Mahapurusha bhanga (Phase 34c) ────────────────────
+
+describe('Mahapurusha bhanga (Phase 34c) — Sun/Moon conjunction', () => {
+  it('Ruchaka + Sun conjunct Mars → bhanga.applies = true (Sun only)', () => {
+    // Aries lagna. Mars at Aries (own, kendra-1). Sun at Aries (conjunct).
+    // Moon parked at Cancer (away from Mars).
+    const chart = synthChart({ lagnaRashi: 0, Mars: 0, Sun: 0, Moon: 3 });
+    const m = find(computeYogas(chart), 'Ruchaka')!;
+    expect(m.bhanga).toBeDefined();
+    expect(m.bhanga!.applies).toBe(true);
+    expect(m.bhanga!.reasons).toEqual(['Mars conjunct Sun in Mesha']);
+  });
+
+  it('Bhadra + Moon conjunct Mercury → bhanga.applies = true (Moon only)', () => {
+    // Pisces lagna. Mercury at Gemini (own, kendra-4). Moon at Gemini.
+    // Sun parked at Aries (away from Mercury).
+    const chart = synthChart({ lagnaRashi: 11, Mercury: 2, Moon: 2, Sun: 0 });
+    const m = find(computeYogas(chart), 'Bhadra')!;
+    expect(m.bhanga).toBeDefined();
+    expect(m.bhanga!.applies).toBe(true);
+    expect(m.bhanga!.reasons).toEqual(['Mercury conjunct Moon in Mithuna']);
+  });
+
+  it('Hamsa + neither Sun nor Moon conjunct → bhanga.applies = false', () => {
+    // Sagittarius lagna. Jupiter at Sag (own, kendra-1). Sun at Aries
+    // (5th house, away). Moon at Cancer (8th house, away).
+    const chart = synthChart({ lagnaRashi: 8, Jupiter: 8, Sun: 0, Moon: 3 });
+    const m = find(computeYogas(chart), 'Hamsa')!;
+    expect(m.bhanga).toBeDefined();
+    expect(m.bhanga!.applies).toBe(false);
+    expect(m.bhanga!.reasons).toEqual([]);
+  });
+
+  it('Malavya + both Sun and Moon conjunct Venus → bhanga has both reasons', () => {
+    // Libra lagna. Venus at Libra (own, kendra-1). Sun at Libra. Moon at Libra.
+    const chart = synthChart({ lagnaRashi: 6, Venus: 6, Sun: 6, Moon: 6 });
+    const m = find(computeYogas(chart), 'Malavya')!;
+    expect(m.bhanga).toBeDefined();
+    expect(m.bhanga!.applies).toBe(true);
+    expect(m.bhanga!.reasons).toEqual([
+      'Venus conjunct Sun in Tula',
+      'Venus conjunct Moon in Tula',
+    ]);
+  });
+
+  it('Sasha + Sun conjunct → bhanga reason format pin', () => {
+    // Aries lagna. Saturn exalted in Libra (kendra-7). Sun at Libra.
+    // Moon parked at Aries (away from Saturn).
+    const chart = synthChart({ lagnaRashi: 0, Saturn: 6, Sun: 6, Moon: 0 });
+    const m = find(computeYogas(chart), 'Sasha')!;
+    expect(m.bhanga!.reasons).toEqual(['Saturn conjunct Sun in Tula']);
+  });
+
+  it('Mahapurusha yoga absent → no Yoga emitted; bhanga field not surfaced', () => {
+    // Mars in Taurus (enemy) — no Ruchaka. Sun conjunct Mars (would-be
+    // bhanga trigger) is moot because the yoga itself doesn't fire.
+    const chart = synthChart({ lagnaRashi: 0, Mars: 1, Sun: 1 });
+    expect(find(computeYogas(chart), 'Ruchaka')).toBeUndefined();
+  });
+});
+
 describe('Mahapurusha — Bhadra / Malavya / Sasha smoke', () => {
   it('Bhadra — Mercury in Virgo at 6th house, Aries lagna (not kendra) → no match', () => {
     const chart = synthChart({ lagnaRashi: 0, Mercury: 5 });
@@ -220,6 +281,75 @@ describe('Gajakesari (Jupiter in 1/4/7/10 from Moon)', () => {
   it('boundary — offset 10 (Moon Aries, Jupiter Capricorn)', () => {
     const chart = synthChart({ lagnaRashi: 0, Moon: 0, Jupiter: 9 });
     expect(find(computeYogas(chart), 'Gajakesari')).toBeDefined();
+  });
+});
+
+describe('Gajakesari bhanga (Phase 34c) — combust / debilitated Jupiter', () => {
+  it('Jupiter combust → bhanga applies with combust reason', () => {
+    // Sun + Jupiter at the same longitude (15° Aries) → 0° apart → combust.
+    // Moon at Aries (conjunct → Gajakesari fires from offset 1).
+    const chart = synthChart({ lagnaRashi: 0, Moon: 0, Jupiter: 0, Sun: 0 });
+    const m = find(computeYogas(chart), 'Gajakesari')!;
+    expect(m.bhanga).toBeDefined();
+    expect(m.bhanga!.applies).toBe(true);
+    expect(m.bhanga!.reasons).toContain('Jupiter combust (within 10° of Sun)');
+  });
+
+  it('Jupiter debilitated (Capricorn) → bhanga applies with debilitated reason', () => {
+    // Moon + Jupiter at Capricorn (conjunct → Gajakesari fires). Sun at
+    // Aries (longitude 15) — distance to Jupiter at Capricorn 15° (long
+    // 270) = min(255, 105) = 105° → not combust.
+    const chart = synthChart({ lagnaRashi: 0, Moon: 9, Jupiter: 9, Sun: 0 });
+    const m = find(computeYogas(chart), 'Gajakesari')!;
+    expect(m.bhanga).toBeDefined();
+    expect(m.bhanga!.applies).toBe(true);
+    expect(m.bhanga!.reasons).toEqual(['Jupiter debilitated in Makara']);
+  });
+
+  it('Jupiter combust AND debilitated (Sun in Capricorn) → both reasons fire', () => {
+    // Sun + Moon + Jupiter all in Capricorn (Sun conjunct Jupiter →
+    // combust; Jupiter in Capricorn → debilitated; Jupiter conjunct
+    // Moon → Gajakesari).
+    const chart = synthChart({ lagnaRashi: 0, Moon: 9, Jupiter: 9, Sun: 9 });
+    const m = find(computeYogas(chart), 'Gajakesari')!;
+    expect(m.bhanga!.applies).toBe(true);
+    expect(m.bhanga!.reasons).toEqual([
+      'Jupiter combust (within 10° of Sun)',
+      'Jupiter debilitated in Makara',
+    ]);
+  });
+
+  it('Jupiter exalted (Cancer), not combust → bhanga.applies = false', () => {
+    // Sun at Aries (long 15), Jupiter at Cancer (long 105) — 90° apart,
+    // not combust. Jupiter exalted in Cancer. Moon at Cancer → conjunct
+    // Jupiter → Gajakesari fires.
+    const chart = synthChart({ lagnaRashi: 0, Moon: 3, Jupiter: 3, Sun: 0 });
+    const m = find(computeYogas(chart), 'Gajakesari')!;
+    expect(m.bhanga).toBeDefined();
+    expect(m.bhanga!.applies).toBe(false);
+    expect(m.bhanga!.reasons).toEqual([]);
+  });
+
+  it('Combustion boundary — Jupiter 10° from Sun (boundary inclusive)', () => {
+    // Sun at 0° Aries (long 0), Jupiter at 10° Aries (long 10). Exactly
+    // 10° apart → at the inclusive threshold → combust.
+    const chart = synthChart({
+      lagnaRashi: 0, Moon: 0, Jupiter: 0, Sun: 0,
+      degrees: { Sun: 0, Jupiter: 10 },
+    });
+    const m = find(computeYogas(chart), 'Gajakesari')!;
+    expect(m.bhanga!.applies).toBe(true);
+    expect(m.bhanga!.reasons).toContain('Jupiter combust (within 10° of Sun)');
+  });
+
+  it('Combustion boundary — Jupiter 11° from Sun (just outside)', () => {
+    // 11° apart → above threshold → not combust.
+    const chart = synthChart({
+      lagnaRashi: 0, Moon: 0, Jupiter: 0, Sun: 0,
+      degrees: { Sun: 0, Jupiter: 11 },
+    });
+    const m = find(computeYogas(chart), 'Gajakesari')!;
+    expect(m.bhanga!.applies).toBe(false);
   });
 });
 
@@ -511,15 +641,91 @@ describe('Neecha Bhanga (cancellation)', () => {
     expect(find(yogas, 'Neecha Bhanga')).toBeDefined();
   });
 
-  it('negative — Sun debilitated, Venus in 3rd house (not kendra) and no exalted helper', () => {
-    // Aries lagna; Sun in Libra; Venus in Gemini (3rd house, not kendra).
-    // No exalted graha; lord of Sun's exaltation rashi (Aries=Mars) not
-    // in kendra either → no cancellation.
+  it('negative — Sun debilitated, no rule fires from Lagna OR Moon, no exalted helper', () => {
+    // Aries lagna; Sun in Libra (debilitated). Setup chosen so every
+    // post-34c rule fails for the Sun debilitation:
+    //   - Venus (dispositor) at Gemini → 3rd from Lagna (not kendra);
+    //     with Moon at Aries (lagna), kendra-from-Moon = kendra-from-Lagna
+    //     so Venus is also 3rd from Moon → Rule A doesn't fire.
+    //   - Venus's 7th aspect targets house 9 (not Sun's house 7) → Rule D
+    //     doesn't fire.
+    //   - Mars (exalt-lord) at Taurus → 2nd from both Lagna and Moon →
+    //     Rule B doesn't fire.
+    //   - No exalted graha anywhere → Rule C doesn't fire.
+    //   - Saturn moved out of Aries (default debilitation) to Sag so no
+    //     second-order Saturn-Neecha-Bhanga rule fires either.
     const chart = synthChart({
-      lagnaRashi: 0, Sun: 6, Venus: 2,
-      Mars: 1, Jupiter: 0, Saturn: 0, Mercury: 0, Moon: 5,
+      lagnaRashi: 0, Sun: 6, Venus: 2, Mars: 1,
+      Jupiter: 0, Saturn: 8, Mercury: 0, Moon: 0,
     });
     expect(find(computeYogas(chart), 'Neecha Bhanga')).toBeUndefined();
+  });
+});
+
+describe('Neecha Bhanga — Moon-kendra extension (Phase 34c)', () => {
+  it('Rule A from Moon — dispositor kendra from Moon only (not from Lagna)', () => {
+    // Pisces lagna. Sun debilitated in Libra. Dispositor = Venus.
+    // Venus at Aries (Aries from Pisces = 2nd house, NOT kendra from Lagna).
+    // Moon at Aries (same rashi as Venus → Venus 1st from Moon → kendra).
+    // Mars (Sun's exalt-lord) parked at Taurus (3rd from Lagna, 2nd from Moon)
+    // — neither kendra → Rule B doesn't fire.
+    const chart = synthChart({
+      lagnaRashi: 11, Sun: 6, Moon: 0, Venus: 0, Mars: 1,
+      Mercury: 0, Jupiter: 0, Saturn: 0,
+    });
+    const m = find(computeYogas(chart), 'Neecha Bhanga')!;
+    expect(m).toBeDefined();
+    expect(m.reasons.some((r) =>
+      r.includes('dispositor Venus in kendra from Moon'),
+    )).toBe(true);
+    // Defensive: assert the Lagna-kendra phrase is NOT in this case's reasons
+    // (would indicate Rule A from Lagna fired by accident).
+    expect(m.reasons.some((r) =>
+      r.includes('dispositor Venus in kendra from Lagna'),
+    )).toBe(false);
+  });
+
+  it('Rule B from Moon — exaltation-lord kendra from Moon only (not from Lagna)', () => {
+    // Pisces lagna. Sun debilitated in Libra. Exalt-lord = Mars (Aries lord).
+    // Mars at Cancer (5th from Pisces, NOT kendra; 4th from Moon-at-Aries,
+    // kendra). Venus (dispositor) parked at Taurus (3rd from Lagna,
+    // 2nd from Moon) — neither kendra → Rule A doesn't fire.
+    const chart = synthChart({
+      lagnaRashi: 11, Sun: 6, Moon: 0, Mars: 3, Venus: 1,
+      Mercury: 0, Jupiter: 0, Saturn: 0,
+    });
+    const m = find(computeYogas(chart), 'Neecha Bhanga')!;
+    expect(m).toBeDefined();
+    expect(m.reasons.some((r) =>
+      r.includes('lord of exaltation rashi Mars in kendra from Moon'),
+    )).toBe(true);
+  });
+
+  it('Rule D — dispositor aspects the debilitated planet (no kendra firing)', () => {
+    // Pisces lagna. Sun debilitated in Libra (house 8). Dispositor = Venus.
+    // Venus at Aries (house 2). Venus's universal 7th aspect → house 8 →
+    // aspects Sun. Venus is NOT in kendra from Lagna (house 2) and we place
+    // Moon at Pisces (same as Lagna) so kendra-from-Moon = kendra-from-Lagna
+    // → Rule A from Moon also doesn't fire. Rule D should be the sole hit.
+    const chart = synthChart({
+      lagnaRashi: 11, Sun: 6, Moon: 11, Venus: 0, Mars: 1,
+      Mercury: 7, Jupiter: 4, Saturn: 8,
+    });
+    const m = find(computeYogas(chart), 'Neecha Bhanga')!;
+    expect(m).toBeDefined();
+    expect(m.reasons.some((r) =>
+      r.includes('dispositor Venus aspects Sun'),
+    )).toBe(true);
+  });
+
+  it('Pre-34c reason format pin — Rule A from Lagna uses "from Lagna" label', () => {
+    // Aries lagna; Sun in Libra (kendra-7); Venus in Capricorn (kendra-10).
+    // The pre-34c rule "dispositor in kendra (house Y)" is renamed to
+    // "dispositor in kendra from Lagna (house Y)" in the post-34c output.
+    // This pin locks the post-34c phrasing for the dominant case.
+    const chart = synthChart({ lagnaRashi: 0, Sun: 6, Venus: 9, Moon: 0 });
+    const m = find(computeYogas(chart), 'Neecha Bhanga')!;
+    expect(m.reasons[0]).toContain('dispositor Venus in kendra from Lagna');
   });
 });
 

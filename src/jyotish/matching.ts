@@ -16,6 +16,32 @@ export interface NatalMoon {
   rashi: number;
   /** Moon's nakshatra at birth (0 = Ashwini … 26 = Revati). */
   nakshatra: number;
+  /**
+   * Optional: lagna (ascendant) rashi (0..11). When BOTH natives carry it,
+   * `computeAshtakoot` enables two additional Bhakoot cancellations from
+   * the published pandit corpus:
+   *   - **Same lagna-lord** — both ascendants share a rashi-lord.
+   *   - **Same 7th-house lord** — the rashi-lord of the 7th from each
+   *     lagna is identical (the 7th from rashi `r` is `(r + 6) % 12`).
+   *
+   * Default behaviour with `lagnaRashi` omitted on either native is
+   * unchanged from v3.5.0 (no lagna-derived cancellations fire).
+   */
+  lagnaRashi?: number;
+  /**
+   * Optional: rashi the Moon falls in within the Navamsa (D9) chart
+   * (0..11). When BOTH natives carry it, `computeAshtakoot` enables the
+   * **same Navamsa-lord** Bhakoot cancellation — well-cited across
+   * AstroSight, AstroKaya, and AstrologyMag.
+   *
+   * Default behaviour with `navamsaRashi` omitted is unchanged.
+   */
+  navamsaRashi?: number;
+  /**
+   * Optional: Moon's nakshatra pada (1..4). Reserved for future Nadi-pada
+   * refinements; not used in the current cancellation set.
+   */
+  nakshatraPada?: number;
 }
 
 export type KootName = 'Varna' | 'Vashya' | 'Tara' | 'Yoni' | 'Graha Maitri' | 'Gana' | 'Bhakoot' | 'Nadi';
@@ -59,10 +85,27 @@ export interface AshtakootResult {
  * | Bhakoot       | 7   | Emotional/financial bond (rashi distance)     |
  * | Nadi          | 8   | Health/genetics (nakshatra-nadi grouping)     |
  *
- * Standard cancellations applied to Bhakoot 0 / Nadi 0:
- *   - Same rashi but different nakshatras (Bhakoot)
- *   - Same nakshatra-lord (Nadi)
- *   - Mutual rashi-lords are friends (Bhakoot)
+ * Cancellations applied to Bhakoot 0 / Nadi 0:
+ *
+ *   **Bhakoot** (default, from rashi alone):
+ *     - Same rashi-lord (e.g. Aries/Scorpio both ruled by Mars)
+ *     - Mutual rashi-lord friendship (Naisargika Maitri)
+ *
+ *   **Bhakoot** (opt-in, when caller supplies `lagnaRashi` /
+ *   `navamsaRashi` on **both** natives):
+ *     - Same lagna-lord
+ *     - Same 7th-house lord
+ *     - Same Navamsa (D9) lord
+ *
+ *   **Nadi** (default):
+ *     - Boy & girl share the same nakshatra (different padas)
+ *     - Boy & girl share the same rashi
+ *
+ * The opt-in Bhakoot cancellations match the cancellation set surfaced by
+ * AstroSight, AstroKaya, and AstrologyMag (see
+ * `notes/phase34b-research.md`); they fire only when the optional fields
+ * are supplied so the default behaviour stays aligned with drik panchang's
+ * published Ashtakoot output for the bare rashi+nakshatra signature.
  *
  * @example
  * ```typescript
@@ -100,6 +143,18 @@ function validateNatalMoon(m: NatalMoon, label: string): void {
     throw new RangeError(`${label}.rashi must be integer in [0, 11], got ${m.rashi}`);
   }
   assertNakshatraIndex(m.nakshatra, `${label}.nakshatra`);
+  if (m.lagnaRashi !== undefined &&
+      (!Number.isInteger(m.lagnaRashi) || m.lagnaRashi < 0 || m.lagnaRashi >= 12)) {
+    throw new RangeError(`${label}.lagnaRashi must be integer in [0, 11], got ${m.lagnaRashi}`);
+  }
+  if (m.navamsaRashi !== undefined &&
+      (!Number.isInteger(m.navamsaRashi) || m.navamsaRashi < 0 || m.navamsaRashi >= 12)) {
+    throw new RangeError(`${label}.navamsaRashi must be integer in [0, 11], got ${m.navamsaRashi}`);
+  }
+  if (m.nakshatraPada !== undefined &&
+      (!Number.isInteger(m.nakshatraPada) || m.nakshatraPada < 1 || m.nakshatraPada > 4)) {
+    throw new RangeError(`${label}.nakshatraPada must be integer in [1, 4], got ${m.nakshatraPada}`);
+  }
 }
 
 // ── Per-koot scoring ──────────────────────────────────
@@ -204,9 +259,12 @@ function scoreBhakoot(boy: NatalMoon, girl: NatalMoon, cancellations: string[]):
     ? `Doshic distance (${dBoyToGirl}, ${dGirlToBoy})`
     : `Distance (${dBoyToGirl}, ${dGirlToBoy})`;
 
-  // Cancellations on Bhakoot dosha:
-  //   - Same rashi (distance 1, 1) — Bhakoot doesn't apply; full marks.
-  //   - Mutual rashi-lord friendship (or same lord).
+  // Cancellations on Bhakoot dosha (evaluation order):
+  //   1. Same rashi-lord — boy and girl Moons share a sign-lord (e.g. Aries/Scorpio both Mars).
+  //   2. Mutual rashi-lord friendship — Naisargika Maitri shows both lords as friends.
+  //   3. Same lagna-lord — opt-in: requires both natives to provide `lagnaRashi`.
+  //   4. Same 7th-house lord — opt-in: 7th-from-lagna lord identical for both.
+  //   5. Same Navamsa lord — opt-in: requires both natives to provide `navamsaRashi`.
   if (isDoshic) {
     const boyLord = RASHI_LORD[boy.rashi]!;
     const girlLord = RASHI_LORD[girl.rashi]!;
@@ -219,6 +277,37 @@ function scoreBhakoot(boy: NatalMoon, girl: NatalMoon, cancellations: string[]):
       const reason = sameLord ? 'same rashi-lord' : 'mutual friendship of rashi-lords';
       description += ` — cancelled by ${reason}`;
       cancellations.push(`Bhakoot: ${reason}`);
+    } else {
+      // Opt-in chart-derived cancellations. Fire only when BOTH natives
+      // carry the relevant optional field — if either is omitted the rule
+      // is silently skipped (callers who pass only rashi+nakshatra get
+      // v3.5.0 behaviour exactly).
+      if (boy.lagnaRashi !== undefined && girl.lagnaRashi !== undefined) {
+        const boyLagnaLord = RASHI_LORD[boy.lagnaRashi]!;
+        const girlLagnaLord = RASHI_LORD[girl.lagnaRashi]!;
+        if (boyLagnaLord === girlLagnaLord) {
+          score = 7;
+          description += ' — cancelled by same lagna-lord';
+          cancellations.push('Bhakoot: same lagna-lord');
+        } else {
+          const boySeventhLord = RASHI_LORD[(boy.lagnaRashi + 6) % 12]!;
+          const girlSeventhLord = RASHI_LORD[(girl.lagnaRashi + 6) % 12]!;
+          if (boySeventhLord === girlSeventhLord) {
+            score = 7;
+            description += ' — cancelled by same 7th-house lord';
+            cancellations.push('Bhakoot: same 7th-house lord');
+          }
+        }
+      }
+      if (score === 0 && boy.navamsaRashi !== undefined && girl.navamsaRashi !== undefined) {
+        const boyNavLord = RASHI_LORD[boy.navamsaRashi]!;
+        const girlNavLord = RASHI_LORD[girl.navamsaRashi]!;
+        if (boyNavLord === girlNavLord) {
+          score = 7;
+          description += ' — cancelled by same Navamsa lord';
+          cancellations.push('Bhakoot: same Navamsa lord');
+        }
+      }
     }
   }
   return { name: 'Bhakoot', score, maxScore: 7, description };

@@ -391,39 +391,52 @@ function computeSyntheticSthanaBala(chart: BirthChart, bhavaNumber: number): num
  * Bhava-Bala sums.
  */
 const FIXTURE_PINS: ReadonlyArray<{ name: string; totals: readonly number[] }> = [
+  // Re-pinned 2026-05-11 post-Phase-34e item 5 (Shadbala Saptavargaja +
+  // Ojha-Yugma + Drekkana sub-components added to Sthana Bala). Each
+  // per-house delta below is exactly Δshadbala[cuspLord].total, which
+  // is the sum of the new sub-component virupas accruing to the bhava
+  // cusp lord — see notes/phase34e-shadbala-derive.mjs for the
+  // first-principles delta computation. The new totals were verified
+  // against the derive-script predictions (observed-vs-predicted
+  // match to all 4 decimal places per the locked anti-circular
+  // re-pinning workflow in memory/feedback_fixture_repinning.md).
+  // The Mukesh Ambani chart in particular exercises the full delta
+  // range (Jupiter +206.25 V from heavy saptavargaja+ojha, Saturn
+  // +120 V, Sun +183.75 V) so several previously-negative bhavaBala
+  // totals (-53, -65, -40, -16) now turn positive after the increase.
   {
     name: 'Narendra Modi',
     totals: [
-      254.6948, 240.0252, 234.5015, 248.7915, 205.0252, 170.4048,
-      234.2618, 298.9738, 179.3806, 359.1504, 269.6838, 299.2618,
+      378.4448, 367.5252, 330.1265, 344.4165, 332.5252, 294.1548,
+      283.0118, 492.0988, 310.6306, 434.1504, 462.8088, 348.0118,
     ],
   },
   {
     name: 'Sachin Tendulkar',
     totals: [
-      331.2607, 312.0077, 230.3955, 177.5473, 207.1475, 185.9591,
-      173.8091, 196.4275, 185.4073, 276.8255, 267.0077, 242.5026,
+      563.7607, 424.5077, 247.2705, 350.0473, 310.2725, 330.3341,
+      318.1841, 299.5525, 357.9073, 293.7005, 379.5077, 386.8776,
     ],
   },
   {
     name: 'Ratan Tata',
     totals: [
-      365.9111, 94.8089, 23.3789, 288.7711, 108.9007, 321.0965,
-      320.9519, 91.8893, 372.2073, 275.9519, 402.5265, 93.9007,
+      482.1611, 207.3089, 135.8789, 405.0211, 258.9007, 399.8465,
+      433.4519, 204.3893, 540.9573, 388.4519, 481.2765, 243.9007,
     ],
   },
   {
     name: 'Dhirubhai Ambani',
     totals: [
-      356.4762, 157.5771, 101.1471, 320.0462, 69.8205, 458.2439,
-      228.3524, 50.7057, 368.3313, 277.6424, 323.2439, 183.3905,
+      463.3512, 283.2021, 226.7721, 426.9212, 232.9455, 630.7439,
+      318.3524, 163.2057, 537.0813, 367.6424, 495.7439, 346.5155,
     ],
   },
   {
     name: 'Mukesh Ambani',
     totals: [
-      -53.0899, 613.3799, -65.7566, -25.7566, 511.9499, -40.9499,
-      540.7574, 294.1471, -16.4962, 594.1428, 254.1471, 652.8974,
+      70.6601, 819.6299, 54.2434, 94.2434, 718.1999, 82.8001,
+      619.5074, 417.8971, 81.0038, 777.8928, 377.8971, 731.6474,
     ],
   },
 ];

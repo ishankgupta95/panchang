@@ -43,6 +43,42 @@ describe('computePathuPorutham — input validation', () => {
       computePathuPorutham({ rashi: 0, nakshatra: 27 }, { rashi: 0, nakshatra: 0 }),
     ).toThrow();
   });
+
+  it('rejects out-of-range optional lagnaRashi', () => {
+    expect(() =>
+      computePathuPorutham(
+        { rashi: 0, nakshatra: 0, lagnaRashi: 12 },
+        { rashi: 0, nakshatra: 0 },
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it('rejects out-of-range optional navamsaRashi', () => {
+    expect(() =>
+      computePathuPorutham(
+        { rashi: 0, nakshatra: 0 },
+        { rashi: 0, nakshatra: 0, navamsaRashi: -1 },
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it('rejects out-of-range optional nakshatraPada', () => {
+    expect(() =>
+      computePathuPorutham(
+        { rashi: 0, nakshatra: 0, nakshatraPada: 5 },
+        { rashi: 0, nakshatra: 0 },
+      ),
+    ).toThrow(RangeError);
+  });
+
+  it('accepts optional fields in valid range without error', () => {
+    expect(() =>
+      computePathuPorutham(
+        { rashi: 0, nakshatra: 0, lagnaRashi: 5, navamsaRashi: 7, nakshatraPada: 2 },
+        { rashi: 6, nakshatra: 17, lagnaRashi: 11, navamsaRashi: 0, nakshatraPada: 4 },
+      ),
+    ).not.toThrow();
+  });
 });
 
 describe('computePathuPorutham — output shape', () => {
@@ -204,6 +240,40 @@ describe('Sthree Deergha', () => {
     // Girl Ashwini (0), Boy Anuradha (13) — girl→boy = 14.
     const r = computePathuPorutham(
       { rashi: 4, nakshatra: 13 },
+      { rashi: 0, nakshatra: 0 },
+    );
+    expect(findKoot(r, 'SthreeDeergha').passes).toBe(true);
+  });
+
+  // Phase 34b: defend the locked > 13 threshold against the two variant
+  // thresholds (>9 and >15) surfaced during Phase 34b research. See
+  // notes/phase34b-research.md §3.
+  it('fails for girl→boy distance 9 (defends against the >9 variant threshold)', () => {
+    // Girl Ashwini (0), Boy Ashlesha (8) — girl→boy = 9. Some
+    // South-Indian Vakya sources accept this; Tamil drik consensus does
+    // not.
+    const r = computePathuPorutham(
+      { rashi: 3, nakshatra: 8 },
+      { rashi: 0, nakshatra: 0 },
+    );
+    expect(findKoot(r, 'SthreeDeergha').passes).toBe(false);
+  });
+
+  it('passes for girl→boy distance 15 (defends against the >15 variant threshold)', () => {
+    // Girl Ashwini (0), Boy Swati (14) — girl→boy = 15. The minority
+    // AstroVed-English >15 article would fail this; Tamil drik consensus
+    // passes it.
+    const r = computePathuPorutham(
+      { rashi: 6, nakshatra: 14 },
+      { rashi: 0, nakshatra: 0 },
+    );
+    expect(findKoot(r, 'SthreeDeergha').passes).toBe(true);
+  });
+
+  it('passes for girl→boy distance 16 (well above threshold)', () => {
+    // Girl Ashwini (0), Boy Vishakha (15) — girl→boy = 16.
+    const r = computePathuPorutham(
+      { rashi: 6, nakshatra: 15 },
       { rashi: 0, nakshatra: 0 },
     );
     expect(findKoot(r, 'SthreeDeergha').passes).toBe(true);
