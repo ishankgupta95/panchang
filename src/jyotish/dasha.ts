@@ -1,10 +1,11 @@
 import { NAKSHATRA_SPAN } from '../utils/constants';
 import { getSiderealMoonLongitude } from '../astronomy/moon';
 import { computeLagna } from './lagna';
+import { computeRashiChart } from './charts';
 import { validateLocation, validateDate } from '../utils/validation';
 import type { AyanamsaType } from '../types/options';
 import type { GeoLocation } from '../types/location';
-import type { DashaLord, MahaDasha, AntarDasha, PratyantarDasha, VimshottariDashaResult } from '../types/jyotish';
+import type { DashaLord, GrahaName, MahaDasha, AntarDasha, PratyantarDasha, VimshottariDashaResult } from '../types/jyotish';
 
 // ── Vimshottari cycle constants ──────────────────────────────────────────────
 
@@ -682,24 +683,42 @@ export interface NarayanDashaResult {
  *
  * Antardasha breakdown is not exposed.
  *
- * **NOT modelled (vs the full Sanjay-Rath standard from *Narayana Dasa*
- * Sagar Publications):**
+ * **Opt-in variable durations** (Phase 34e item 4). Pass
+ * `{ duration: 'variable' }` as the fourth argument to switch to the
+ * full Sanjay Rath rule set per *Narayana Dasa* (Sagar Publications):
  *
- *   - **Variable Mahadasha duration.** The canonical Narayan rule is
- *     `years = count of signs from rashi to its lord, counted zodiacal
- *     for Vishama-pada and anti-zodiacal for Sama-pada`. This
- *     implementation substitutes the simpler 9/8/7 Chara durations.
- *     For most rashis the two diverge.
+ *   - **Rule 2** — `years = count(rashi → lord_rashi, direction) − 1`,
+ *     direction zodiacal for vimsapada / anti-zodiacal for samapada.
+ *   - **Rule 3** — exaltation of the lord adds +1 year; debilitation
+ *     subtracts 1; result capped at 12 (floored at 0). Exaltation /
+ *     debilitation uses the **Manteswara convention** for Rahu/Ketu
+ *     (Rahu exalted in Gemini, Ketu in Sagittarius — NOT Parashara's
+ *     Taurus/Scorpio variant, which Sanjay Rath explicitly excludes
+ *     for Phalita Dasa).
+ *   - **Rule 4** — Scorpio (Mars+Ketu) and Aquarius (Saturn+Rahu)
+ *     dual-lord cases: (a) both in dasha sign → 12 years; (b) both
+ *     jointly elsewhere → apply Rule 2 to that joint sign; (c) one
+ *     in dasha sign, other elsewhere → apply Rule 2 to the *other*
+ *     lord; (d) both elsewhere in different signs → use the
+ *     **stronger** sign's lord for the count, with strength compared
+ *     by Source 1 Rule 2 (planet count) and Source 2 Rule 1 (M/J/
+ *     own-lord Rasi-Drishti aspect factors). Final deterministic
+ *     tiebreak: natural Manteswara lord (Mars for Scorpio, Saturn
+ *     for Aquarius). The rarer Strength Source 1 Rules 3, 4, 6, 7,
+ *     8 (planet status, modality, lord degrees, even/odd, higher
+ *     dasha period) are documented in
+ *     `notes/phase34e-narayan-research.md` as deferred — they are
+ *     vanishingly rare in practice.
+ *
+ * **Still NOT modelled (vs the full Sanjay-Rath standard):**
+ *
  *   - **Strength-based starting rashi.** The classical rule starts from
  *     the *stronger of Lagna or 7th house* (decided by 8 hierarchical
- *     strength criteria). This implementation always starts from Lagna.
- *   - **Scorpio/Aquarius dual-lord handling.** Scorpio (Mars/Ketu) and
- *     Aquarius (Saturn/Rahu) need a 3-rule selection between dual lords
- *     before `years = sign-to-lord-count` resolves. Skipped here.
- *
- * Use this function for the *parity-direction* layer on top of Chara
- * Dasha; it is **not** a faithful Narayan implementation. A future
- * release may add a strict-mode flag for the full algorithm.
+ *     strength criteria). This implementation always starts from Lagna
+ *     regardless of `options.duration`.
+ *   - **Second cycle of dashas** (Rule 5 — years_2nd = 12 − years_1st
+ *     for the 13th..24th dashas). The library always returns exactly
+ *     12 mahadashas.
  *
  * @param birthDate Instant of birth in UTC.
  * @param location  Geographic location of birth.
@@ -721,16 +740,38 @@ export interface NarayanDashaResult {
 export function computeNarayanDasha(
   birthDate: Date,
   location: GeoLocation,
+  ayanamsa?: AyanamsaType,
+): NarayanDashaResult;
+export function computeNarayanDasha(
+  birthDate: Date,
+  location: GeoLocation,
+  ayanamsa: AyanamsaType | undefined,
+  options: { duration: 'variable' },
+): NarayanDashaResult;
+export function computeNarayanDasha(
+  birthDate: Date,
+  location: GeoLocation,
   ayanamsa: AyanamsaType = 'lahiri',
+  options?: { duration?: 'fixed' | 'variable' },
 ): NarayanDashaResult {
   validateDate(birthDate);
   validateLocation(location);
 
+  const variable = options?.duration === 'variable';
+
+  // ASC + planet placements (only needed in variable mode, but we already
+  // call computeLagna anyway for starting rashi + direction).
   const lagna = computeLagna(birthDate, location, ayanamsa);
   const startingRashi = lagna.rashi.index;
   const direction: 'forward' | 'backward' = VISHAMA_PADA_RASHIS.has(startingRashi)
     ? 'forward'
     : 'backward';
+
+  // Build the duration computer: fixed (existing 9/8/7) or variable
+  // (Sanjay Rath Rules 2 + 3 + 4 + Source-1-Rule-2 + Source-2-Rule-1).
+  const durationFor = variable
+    ? buildVariableDurationFn(birthDate, location, ayanamsa)
+    : (rashi: number) => CHARA_RASHI_YEARS[rashi]!;
 
   const mahaDashas: NarayanMahaDasha[] = [];
   let cursor = new Date(birthDate.getTime());
@@ -738,7 +779,7 @@ export function computeNarayanDasha(
     const rashi = direction === 'forward'
       ? (startingRashi + i) % 12
       : (startingRashi - i + 12) % 12;
-    const years = CHARA_RASHI_YEARS[rashi]!;
+    const years = durationFor(rashi);
     const lord = CHARA_RASHI_LORD[rashi]!;
     const startDate = new Date(cursor.getTime());
     const endDate = new Date(cursor.getTime() + years * MS_PER_YEAR);
@@ -758,4 +799,187 @@ export function computeNarayanDasha(
     currentRashi: mahaDashas[idx]!.rashi,
     mahaDashas,
   };
+}
+
+// ── Narayan variable-duration helpers (Sanjay Rath, *Narayana Dasa*) ─
+
+/**
+ * Exaltation rashi per graha — Manteswara convention (used by Sanjay
+ * Rath specifically for Phalita Dasa like Narayan; NOT Parashara's
+ * convention which has Rahu exalted in Taurus).
+ */
+const NARAYAN_EXALTATION_RASHI: Record<GrahaName, number> = {
+  Sun: 0, Moon: 1, Mars: 9, Mercury: 5, Jupiter: 3,
+  Venus: 11, Saturn: 6, Rahu: 2, Ketu: 8,
+};
+const NARAYAN_DEBILITATION_RASHI: Record<GrahaName, number> = {
+  Sun: 6, Moon: 7, Mars: 3, Mercury: 11, Jupiter: 9,
+  Venus: 5, Saturn: 0, Rahu: 8, Ketu: 2,
+};
+
+/** Primary (non-dual) sign lord per rashi index. */
+const RASHI_PRIMARY_LORD: GrahaName[] = [
+  'Mars', 'Venus', 'Mercury', 'Moon', 'Sun', 'Mercury',
+  'Venus', 'Mars', 'Jupiter', 'Saturn', 'Saturn', 'Jupiter',
+];
+
+/** Modality per rashi: 0=movable, 1=fixed, 2=dual. */
+const RASHI_MODALITY: readonly number[] = [
+  0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2,
+];
+
+/**
+ * Rasi Drishti (sign sight) per Sanjay Rath, *Narayana Dasa* Table 4
+ * (chapter II note: "Only Rasi drishti should be used"). Each sign
+ * aspects exactly 3 other signs:
+ *
+ *   - Movable signs aspect the 3 fixed signs (excluding adjacent fixed).
+ *   - Fixed signs aspect the 3 movable signs (excluding adjacent movable).
+ *   - Dual signs aspect the other 3 dual signs.
+ *
+ * @returns `true` iff `aspectingRashi` aspects `targetRashi` by Rasi
+ *          Drishti. Returns `false` when both rashis are the same.
+ */
+function rasiDrishti(aspectingRashi: number, targetRashi: number): boolean {
+  if (aspectingRashi === targetRashi) return false;
+  const aMod = RASHI_MODALITY[aspectingRashi]!;
+  const tMod = RASHI_MODALITY[targetRashi]!;
+  if (aMod === 2) return tMod === 2;        // dual → dual
+  if (aMod === 0) return tMod === 1;        // movable → fixed
+  if (aMod === 1) return tMod === 0;        // fixed → movable
+  return false;
+}
+
+/**
+ * Inclusive count from `src` to `dst` in the given direction.
+ * - `zodiacal` (vimsapada): forward, wraps mod 12.
+ * - `anti` (samapada): backward, wraps mod 12.
+ *
+ * Inclusive: src counts as 1. So count(src=src) = 1.
+ */
+function inclusiveSignCount(src: number, dst: number, anti: boolean): number {
+  return anti ? ((src - dst + 12) % 12) + 1 : ((dst - src + 12) % 12) + 1;
+}
+
+/**
+ * Count "more planets in sign" (Strength Source 1 Rule 2). Includes
+ * the lord itself if placed in the sign.
+ */
+function planetsInRashi(planetRashi: Map<GrahaName, number>, rashi: number): number {
+  let n = 0;
+  for (const r of planetRashi.values()) if (r === rashi) n++;
+  return n;
+}
+
+/**
+ * Count "aspect factors" for Strength Source 2 Rule 1 — number of
+ * sign-aspects by Mercury, Jupiter, or the sign's own dispositor
+ * (rashi-lord), measured by Rasi Drishti. Each contributing factor
+ * adds 1. Max 3 factors (one per planet); two of M/J/Lord may overlap
+ * (e.g. Mercury is the natural lord of Gemini, so for the Gemini
+ * sign the Mercury factor and own-lord factor would coincide — they
+ * are counted separately to match Sanjay Rath's example reasoning).
+ */
+function countMJLAspectFactors(
+  rashi: number,
+  planetRashi: Map<GrahaName, number>,
+): number {
+  let factors = 0;
+  const mercuryRashi = planetRashi.get('Mercury');
+  const jupiterRashi = planetRashi.get('Jupiter');
+  const ownLord = RASHI_PRIMARY_LORD[rashi]!;
+  const ownLordRashi = planetRashi.get(ownLord);
+  if (mercuryRashi !== undefined && rasiDrishti(mercuryRashi, rashi)) factors++;
+  if (jupiterRashi !== undefined && rasiDrishti(jupiterRashi, rashi)) factors++;
+  if (ownLordRashi !== undefined && rasiDrishti(ownLordRashi, rashi)) factors++;
+  return factors;
+}
+
+/**
+ * Compare strength of two rashis per Sanjay Rath's stated priority:
+ *
+ *   1. Source 1 Rule 2 — more planets → stronger.
+ *   2. Source 2 Rule 1 — more M/J/own-lord aspect factors → stronger.
+ *
+ * Returns `1` if A stronger, `-1` if B stronger, `0` if tied (caller
+ * falls back to deterministic natural-lord tiebreak). Three further
+ * strength rules (modality, planet status, lord degrees) are
+ * documented in `notes/phase34e-narayan-research.md` as deferred.
+ */
+function compareRashiStrength(
+  rashiA: number,
+  rashiB: number,
+  planetRashi: Map<GrahaName, number>,
+): -1 | 0 | 1 {
+  const pa = planetsInRashi(planetRashi, rashiA);
+  const pb = planetsInRashi(planetRashi, rashiB);
+  if (pa > pb) return 1;
+  if (pa < pb) return -1;
+  const fa = countMJLAspectFactors(rashiA, planetRashi);
+  const fb = countMJLAspectFactors(rashiB, planetRashi);
+  if (fa > fb) return 1;
+  if (fa < fb) return -1;
+  return 0;
+}
+
+/**
+ * Build a per-rashi → years function implementing the full Sanjay
+ * Rath variable-duration rules (Rules 2 + 3 + 4(a–d)). Closed over a
+ * fresh `BirthChart` so it can be re-invoked per dasha rashi without
+ * recomputing planet positions.
+ */
+function buildVariableDurationFn(
+  birthDate: Date,
+  location: GeoLocation,
+  ayanamsa: AyanamsaType,
+): (rashi: number) => number {
+  const chart = computeRashiChart(birthDate, location, { ayanamsa, houseSystem: 'whole-sign' });
+  const planetRashi = new Map<GrahaName, number>();
+  for (const p of chart.planets) planetRashi.set(p.planet, p.rashi.index);
+
+  function durationFor(rashi: number): number {
+    // Rule 4 dispatch for the two dual-lord rashis (Scorpio + Aquarius).
+    if (rashi === 7 || rashi === 10) {
+      const [lordA, lordB]: [GrahaName, GrahaName] = rashi === 7
+        ? ['Mars', 'Ketu']
+        : ['Saturn', 'Rahu'];
+      const ra = planetRashi.get(lordA)!;
+      const rb = planetRashi.get(lordB)!;
+
+      if (ra === rashi && rb === rashi) return 12;          // Rule 4(a)
+      if (ra === rb)                    return baseAndAdjust(rashi, lordA, ra);  // Rule 4(b)
+      if (ra === rashi)                 return baseAndAdjust(rashi, lordB, rb);  // Rule 4(c)
+      if (rb === rashi)                 return baseAndAdjust(rashi, lordA, ra);  // Rule 4(c)
+
+      // Rule 4(d) — both lords in different non-dasha signs.
+      const cmp = compareRashiStrength(ra, rb, planetRashi);
+      if (cmp > 0)  return baseAndAdjust(rashi, lordA, ra);
+      if (cmp < 0)  return baseAndAdjust(rashi, lordB, rb);
+      // Final deterministic fallback — natural Manteswara lord wins.
+      // (Mars for Scorpio, Saturn for Aquarius — both = lordA in the
+      // ordering above.)
+      return baseAndAdjust(rashi, lordA, ra);
+    }
+
+    const lord = RASHI_PRIMARY_LORD[rashi]!;
+    const lordRashi = planetRashi.get(lord)!;
+    return baseAndAdjust(rashi, lord, lordRashi);
+  }
+
+  /**
+   * Rule 2 base count − 1, then Rule 3 (exalt +1 / debilit −1 / cap 12).
+   * The result is also floored at 0 to prevent a degenerate-negative
+   * dasha (count=1, lord-in-rashi-itself, debilitated → base=0, adj=−1
+   * → floor to 0).
+   */
+  function baseAndAdjust(rashi: number, lord: GrahaName, lordRashi: number): number {
+    const anti = !VISHAMA_PADA_RASHIS.has(rashi);
+    const base = inclusiveSignCount(rashi, lordRashi, anti) - 1;
+    let years = base;
+    if (NARAYAN_EXALTATION_RASHI[lord] === lordRashi) years += 1;
+    else if (NARAYAN_DEBILITATION_RASHI[lord] === lordRashi) years -= 1;
+    return Math.min(12, Math.max(0, years));
+  }
+
+  return durationFor;
 }

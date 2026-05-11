@@ -1014,6 +1014,953 @@ output shape is identical to a natal chart.
 
 ---
 
+## Phase 34 — Drik Panchang / Pandit Parity Sweep (Wave 5) — 🚧 in progress
+
+**Status (2026-05-11).** Phase 34a + 34b + 34c + 34d all code-complete.
+**Phase 34e (Wave 5 final sub-phase) code-complete** — 5 of 6 items
+shipped (item 2 Arudha bhanga DEFERRED on ≥2-source bar; items
+1 Sripati cusps, 3 Trikonargala 5/9, 4 Narayan variable-duration, 5
+Shadbala Saptavargaja/Ojha-Yugma/Drekkana, 6 8-Karaka Jaimini all
+landed). All sit on top of package.json `4.0.0` (the next release
+version — user assigns the specific tag at release time).
+
+Phase 34e item 1 — research at `notes/phase34e-sripati-research.md`,
+derivation script at `notes/phase34e-sripati-derive.mjs`. Same drik-
+silent pattern as 34a-d / 34e-item-6: drik panchang publishes no
+Sripati cusp table (re-confirmed enumeration of the 18 jyotish
+calculators), and ProKerala's birth-chart endpoint is form-only POST
+per the 34d empirical pattern with no GET-style cusp query. The
+Sripati Paddhati trisection formula is **unanimous across 8
+independent secondary sources** (Wikipedia, Jothishi,
+planetarypositions.com, prosperitynjoy, nikhilworld, astrologershukla,
+Lalitha Anamika substack, astrologyofbharat) — no competing
+intermediate-cusp algorithm proposed under the Sripati name. Operative
+authority is **BPHS Ch.5 + Sripati Paddhati (~12th c.)** with
+multi-source modern cross-confirmation. Resolution:
+`computeSripatiLagna` gained function overloads accepting an opt-in
+`{ includeCusps: true }` fifth argument. The cusps path returns a
+new `SripatiLagnaInfo = LagnaInfo & { cusps: number[] }` extension
+with all 12 bhava-madhya longitudes; `cusps[0]` equals the lagna
+(unchanged from cusp-1-only behaviour), `cusps[3]` is sidereal IC,
+`cusps[6]` is descendant, `cusps[9]` is sidereal MC, and the 8
+intermediate cusps are obtained by trisecting each ASC→IC→DSC→MC→ASC
+ecliptic-arc quadrant. Output shape is **purely additive**: existing
+`LagnaInfo` type unchanged, no-options call byte-for-byte identical
+to pre-34e-item-1, and the four-iterator-pattern test (`for (const fn
+of [computeHoraLagna, …, computeSripatiLagna])`) continues to type-
+check. Fixture sweep: 5 R-tier charts spanning lat 8.77°N (Sri Sri
+Ravi Shankar) to 47.60°N (Bill Gates), each chart's 12 cusps pinned
+to within 1e-4° against hand-derived predictions from the derive
+script. Anti-circular: derive script uses already-verified ASC + MC
+from `computeBhava`, applies the trisection inline (NOT via new
+library code), and the implementation is then checked against those
+pinned predictions per `memory/feedback_fixture_repinning.md`.
+
+Suite at **8,053 tests** (+25 new across no-options-backwards-compat,
+output-shape, antipodal-invariant × 5 charts, quadrant-sum-invariant ×
+5 charts, trisection-prediction × 5 charts, computeBhava-cross-check,
+fixture-pin-sweep × 5 charts, and equator structural regression).
+CJS bundle **371.11 KB** (+1.54 KB from item-6's 369.57 KB).
+
+Phase 34a — research at `notes/phase34a-research.md`. Mangal Dosha
+re-revised after research showed drik panchang **does** use the Venus
+chart (the initial Phase 34 fix wrongly removed it); the final algorithm
+is Lagna + Moon + Venus with the Mars–Venus conjunction itself as a
+cancellation, which makes the from-Venus trigger self-cancel for any
+Mars–Venus conjunction. Pitru Dosha expanded from 3 rules to 9
+(multi-pandit consensus; drik panchang has no Pitru calculator). Sade
+Sati and Kaal Sarp are doc-only updates — their current behavior already
+matches drik panchang's panel.
+
+Phase 34b — research at `notes/phase34b-research.md`. Key surprise:
+drik panchang's published pages and ProKerala's published pages **do not
+enumerate Bhakoot or Nadi cancellation rules** beyond mentioning the
+koots themselves. The user-hypothesised additions (same-lagna-lord,
+same-7th-lord, parivartana) are not surfaced by any primary source.
+Resolution: keep the existing two Bhakoot cancellations (same rashi-lord,
+mutual rashi-lord friendship) as the default, and add three **opt-in**
+cancellations gated on new optional fields on `NatalMoon` —
+`lagnaRashi?` (enables same-lagna-lord and same-7th-house-lord) and
+`navamsaRashi?` (enables same-Navamsa-lord, the best-cited tertiary
+addition). Default callers (rashi + nakshatra only) get pre-34b behavior
+exactly; callers who can supply chart-derived data get the additional
+parity. Nadi cancellation set unchanged — research shows current rules
+already match the permissive mainstream reading. Pathu Porutham Sthree
+Deergha threshold locked at `> 13` (girl→boy, Tamil-Drik consensus); the
+minority `> 15` and graduated-band variants are explicitly rejected by
+new boundary tests.
+
+Phase 34c — research at `notes/phase34c-research.md`. Same pattern as
+34b: drik panchang does **not** surface birth-chart yoga panels at all
+(its `/yoga/` page covers only the 8 panchang yogas like Sarvarthasiddhi,
+not Gajakesari / Mahapurusha / Raja Yoga / Neecha Bhanga). Pandit
+consensus + BPHS becomes the operative authority. Resolution: **6 yogas
+gain a `bhanga: { applies, reasons }` annotation** — the 5 Pancha
+Mahapurusha yogas (Sun-or-Moon conjunction with the yoga-causing
+planet, BPHS-attributed multi-source) and Gajakesari (Jupiter combust
+within 10° of Sun OR Jupiter debilitated in Capricorn, multi-source +
+classical). Raja Yoga bhanga is **deferred entirely** — the often-cited
+"lord debilitated cancels Raja Yoga" rule directly contradicts BPHS Ch.
+39's *Great Parashara Exception* (Vipareeta Raja Yoga foundation
+verses), and no rule survives the conflict check. Neecha Bhanga
+extension: Rules A & B now check kendra from Moon as well as Lagna
+(Phaladeepika 7.26 explicit "from Lagna OR Moon"), and a new Rule D
+fires when the dispositor aspects the debilitated planet (Phaladeepika
+7.28). Output shape is **purely additive** — `Yoga.bhanga?` is
+optional, and the 19 yogas without bhanga rules keep their pre-34c
+output exactly. Fixture-chart verification: Ratan Tata's Gajakesari now
+correctly annotates as cancelled (`Jupiter debilitated in Makara`), and
+4 of 10 Mahapurusha cases on the existing fixture set surface
+`bhanga.applies: true` for the canonical Moon-conjunct cases (Modi
+Ruchaka, Salman Khan Ruchaka, Zuckerberg Sasha, plus the Tata Gajakesari).
+
+**Bug fix in scope (also 34c).** While implementing Gajakesari
+combustion, an inverted `distToSun = 180 - sep` line in
+`shadbala.ts`'s Chesta Bala combust check was surfaced — the
+formula was firing combust near opposition rather than near
+conjunction. Fixed; 4 regression tests added pinning the corrected
+behavior at known Jupiter / Mercury conjunction dates. Cascade: the
+five Bhava Bala fixture pins were re-pinned (each delta is −15V on
+houses whose pre-fix Chesta was inflated by a not-yet-detected combust
+planet).
+
+Phase 34d — research at `notes/phase34d-research.md`. Same pattern as
+34b/34c surfaced again: drik panchang's birth-chart calculators
+(`/jyotisha/{kundali,mangal-dosha,kalasarpa-yoga,sadesati}.html`) are
+**all form-only POST pages** (empirically verified 2026-05-11) — no
+GET-style query interface and no public REST API. Per-chart drik
+verdict scraping requires manual form entry. Two surfaces are also
+flat-out absent from drik's URL space: **Pitru Dosha** (no calculator)
+and **birth-chart yoga panels** (Gajakesari / Mahapurusha / Neecha
+Bhanga / Raja Yoga — none surfaced; drik's `/yoga/yoga.html` covers
+only the 8 *daily* panchang yogas). Both are deferred from Phase 34d's
+drik-cross-validated scope and remain covered by their own unit/
+integration suites (Phase 34a's 9-rule Pitru, Phase 34c's yoga
+catalog with `bhanga` annotations). Resolution: a **12-chart
+consolidated fixture file** at `tests/fixtures/drik-parity/charts.json`
+with **structurally-derived** expected values (via
+`notes/phase34d-derive-fixtures.mjs` — drik's stated rule sets applied
+to the AstroSage R-tier natal positions from Phase 29). Each fixture
+entry pins `MangalDoshaInfo` (afflicted / severity / per-chart
+breakdown / cancellations-superset), `KaalSarpDoshaInfo` (afflicted /
+subtype / rahu+ketu houses), `SadeSatiInfo` at `2026-05-04` (active /
+phase / arc-boundary ±2 days), plus a birth-date panchang smoke
+slice. A small 3-pair Ashtakoot regression net pins the perfect-36
+cases (Modi×Modi / Obama×Priyanka / Clinton×Kejriwal — all same-rashi
+same-nakshatra). Anti-circular: every expected value cites either
+`structural-derivation`, `phase29-aligned`, or `drik-form-trace` in
+its `_source` field; none cite library output.
+
+Phase 34e item 6 — research at `notes/phase34e-jaimini-research.md`.
+Same drik-silent pattern as 34a §Pitru / 34c §yoga / 34d §Pitru-and-yoga:
+drik panchang publishes **no Chara Karaka panel** anywhere in its 18
+jyotish calculators, and its Janma Kundali form-output skips karakas
+entirely. Operative authority is therefore Jaimini Upadesa Sutras Ch.1
+First Foot V.10 + Sanjay Rath commentary, with multi-pandit
+cross-confirmation (Wikipedia, Sarvatobhadra, vedicmarga, Bhawana
+Verma, vaya.so all agree on the 8-karaka order). Resolution:
+`computeJaiminiKarakas` gains an opt-in `{ variant: '8-jaimini' }`
+options arg via function overloads. The 8-variant ranks Sun..Saturn
+**plus Rahu**, where Rahu's effective degree is `30 − degreeInRashi`
+(reversed — Rahu is permanently retrograde) and inserts a new
+**Pitrukaraka** (father) role at position 5 of the karaka ordering.
+Tie-break extends the canonical Parashara order one slot
+(Sun > Moon > … > Saturn > Rahu — Rahu loses every tie). Output shape
+is **purely additive**: new `Karaka8Name = KarakaName | 'Pitrukaraka'`
+and `Jaimini8Karakas = Record<Karaka8Name, GrahaName>` types; existing
+`KarakaName` and `JaiminiKarakas` unchanged; pre-34e callers continue
+returning identical `JaiminiKarakas` byte-for-byte. Fixture cross-
+validation: 9 R-tier charts (Modi / Sachin / Tata / Dhirubhai / Mukesh
+/ Zuckerberg / Obama / Gates / Trump) pinned with hand-derived 8-K
+predictions (Rahu's insertion point spans k∈{1,5,6,7}); Sachin's
+predicted AK=Mars, AmK=Moon matches independently-published Jaimini
+analysis (astrosaxena.com).
+
+Suite at **8,028 tests** (+19 new across Rahu-reversal, Pitrukaraka-
+insertion, tie-break, output-shape, backwards-compat default,
+monotonic invariant, and 9-fixture pin sweep). CJS bundle **369.57 KB**
+(+0.64 KB from 34d's 368.93 KB).
+
+**Trigger.** A user-supplied real chart (30 Jul 1998, Agra, 23:56 IST) was
+flagged Manglik by the library but **not** by drik panchang or three
+independent pandits — because Mangal Dosha was using a stricter
+"from Venus" reference (any Mars–Venus conjunction trips it) and was
+missing the Jupiter-conjunction / Jupiter-aspect cancellations pandits
+routinely apply. The fix (already landed: Lagna+Moon only, plus Jupiter /
+Moon conjunction + Jupiter 5/7/9 sign-aspect cancellations) exposed a
+broader divergence pattern across the library: many computations are
+either using a non-mainstream rule selection or missing standard
+cancellations that drik panchang and pandit consensus apply.
+
+**Goal.** Bring every public computation to **drik panchang and
+mainstream-pandit parity** as the reference behavior. Mathematical
+correctness alone is not the bar — calling convention and rule selection
+must match what users will compare against. Where drik panchang and
+classical BPHS diverge, **drik panchang wins** (this is locked).
+
+**Release scope.** Wave 5 is a behavioral-parity wave, mostly fixes and
+additions to rule sets. Output **shape** changes only where a divergent
+reference needs to be removed (e.g., the recent `fromVenus` removal from
+`MangalDoshaInfo`). Each sub-phase ships a minor release (package.json
+currently sits at `4.0.0`; user assigns the specific tag at release).
+
+**Critical principles (locked across Phase 34).**
+- Reference order of authority: **(1) drik panchang published output**,
+  then **(2) pandit consensus** (ProKerala / AstroSage / AstroVed
+  agreement), then **(3) classical BPHS / Parashara**. Where (1) and (3)
+  conflict, (1) wins.
+- "More rules" is **not** automatically better. If drik panchang doesn't
+  apply a rule, the library shouldn't either — unless it's gated behind
+  an explicit opt-in option.
+- **Research before fix.** Every sub-phase begins with a documented
+  ground-truth lookup against drik panchang (and 1–2 corroborating
+  pandit calculators) for 5–10 known charts. Diffs drive the fix list.
+  Implementation only starts after the divergence list is pinned.
+- Validation is **fixture-driven**: golden outputs from drik panchang
+  for a fixed reference-chart suite become regression tests. No more
+  "our unit tests pass but pandits disagree" failure mode.
+- API surface stays additive where possible; breaking removals (like the
+  Manglik `fromVenus` field) are clearly called out per sub-phase.
+
+### Audit baseline — gaps the library has today
+
+This is the divergence inventory feeding the sub-phase split. Compiled
+from a full source audit of `src/jyotish/*` and `src/core/*` on
+2026-05-11.
+
+**Doshas.**
+- ✅ **Mangal Dosha** — fixed pre-Phase-34: Lagna+Moon only; Jupiter /
+  Moon conjunction + Jupiter 5/7/9 aspect cancellations added.
+- ❌ **Sade Sati** — no cancellations applied. Classical exceptions
+  (Saturn–Moon conjunction, Saturn aspected by Jupiter, natal Saturn
+  strong in own/exalt, etc.) not modelled. Drik panchang's published
+  Sade Sati panel only labels the phase; **need to confirm whether it
+  also surfaces cancellations or simply lists active periods**.
+- ❌ **Pitru Dosha** — only 3 trigger rules (Sun+Rahu, Sun+Ketu,
+  Sun+Saturn in 9th). Drik panchang's free Pitru Dosha panel surfaces
+  additional rules (debilitated Sun in 9th, 9th lord in dusthana,
+  malefic 9th lord). Audit and align.
+- ⚠️ **Kaal Sarp Dosha** — algorithmic 180°-arc check is correct; verify
+  drik panchang's partial / paritha handling matches our `partial`
+  flag, and verify subtype naming.
+
+**Marriage matching.**
+- ✅ **Ashtakoot Bhakoot** — same-rashi-lord and mutual rashi-lord
+  friendship retained as default. Phase 34b research showed drik
+  panchang and ProKerala do not enumerate the user-hypothesised
+  additions (same-lagna-lord, same-7th-lord, parivartana) on any
+  reachable page. Resolution: three new **opt-in** cancellations
+  (same-lagna-lord, same-7th-house-lord, same-Navamsa-lord) gated on
+  new optional `NatalMoon.lagnaRashi` and `NatalMoon.navamsaRashi`
+  fields. Parivartana deferred — requires per-graha positional data
+  the `NatalMoon` signature does not carry and is unsupported by any
+  tertiary source.
+- ✅ **Ashtakoot Nadi** — research showed current same-nakshatra +
+  same-rashi cancellations already match the permissive mainstream
+  reading. Jupiter / planetary-conjunction Nadi-bhanga rules require
+  graha positional data not in `NatalMoon` and are only weakly cited
+  (single-source). No change in 34b; revisit if a future API expansion
+  surfaces birth-chart data to the matching functions.
+- ✅ **Pathu Porutham** — Sthree Deergha threshold locked at `> 13`
+  (girl→boy, Tamil-Drik consensus). The minority `> 15` boy→girl
+  variant (one AstroVed-English article) and the graduated-band
+  `>= 7 acceptable, > 13 ideal` variant are explicitly rejected by new
+  boundary tests (distances 9, 15, 16).
+
+**Yogas.**
+- ✅ **Yoga bhanga** (Phase 34c) — `Yoga` gained an optional
+  `bhanga: { applies: boolean; reasons: string[] }` annotation. Six
+  catalog rules now compute classical cancellations: the five Pancha
+  Mahapurusha yogas (Ruchaka / Bhadra / Hamsa / Malavya / Sasha) on
+  Sun-or-Moon conjunction with the yoga-causing planet (BPHS-attributed
+  multi-source) and Gajakesari on Jupiter combust within 10° of Sun OR
+  Jupiter debilitated in Capricorn (multi-pandit consensus + classical).
+  Phase 34c research found that drik panchang does **not** surface
+  birth-chart yoga panels at all — its `/yoga/` URL covers only the 8
+  *panchang* daily yogas (Sarvarthasiddhi etc.). Raja Yoga bhanga is
+  **explicitly deferred** because the often-cited "lord debilitated
+  cancels Raja Yoga" rule contradicts BPHS Ch. 39's Great Parashara
+  Exception (Vipareeta Raja Yoga foundation, verses 39.51+). Other
+  yogas (Sunapha / Anapha / Durudhura / Kemadruma / Budha-Aditya /
+  Veshi / Vasi / Ubhayachari / Lakshmi / Dhana / Vasumati / Vargottama /
+  Yogakaraka / Daridra / Dharma-Karmadhipati / Vipareeta Raja) are
+  documented as defer-set in `notes/phase34c-research.md` §6.
+- ✅ **Neecha Bhanga** (Phase 34c) — Rules A and B extended to check
+  kendra from Moon as well as from Lagna (Phaladeepika 7.26 "Lagna OR
+  Moon"). New Rule D fires when the dispositor aspects the debilitated
+  planet (Phaladeepika 7.28). Retrograde-based and Navamsa-based
+  classical rules deferred (single-source / require D9-on-dispositor
+  data not in current ctx).
+
+**Other specialist gaps (lower user-facing priority).**
+- ⚠️ **Arudha** — two cardinal exceptions (D=1, D=7) applied; the
+  initially-audited "lord-in-6/8/12 strength reduction" was researched
+  in Phase 34e item 2 (`notes/phase34e-arudha-research.md`) and
+  **deferred 2026-05-11** — Sanjay Rath's own canonical Arudha article
+  excludes the rule and ≥2-source classical attestation could not be
+  obtained. Intentionally not modelled (matches drik-silent surface).
+- ✅ **Argala** (Phase 34e item 3) — primary Argala unchanged;
+  Trikonargala (5/9 trine) added as opt-in via
+  `{ includeTrikonargala: true }` on `computeArgala`, including the
+  Ketu-reversal rule. Output additive — pre-34e callers see no shape
+  change.
+- ✅ **Sripati Lagna** (Phase 34e item 1) — `computeSripatiLagna`
+  gained an opt-in `{ includeCusps: true }` argument that returns
+  the new `SripatiLagnaInfo` extension with all 12 bhava-madhya
+  cusps (classical Sripati Paddhati trisection of the four
+  ASC→IC→DSC→MC ecliptic quadrants).
+- ✅ **Narayan Dasha** (Phase 34e item 4) — fixed 9/8/7 durations
+  unchanged as default; Sanjay Rath variable-duration variant added
+  as opt-in via `{ duration: 'variable' }` (Rules 2 + 3 + 4(a-d) with
+  planet-count + Rasi-Drishti aspect strength tiebreak; remaining
+  rare Source-1 strength rules and second-cycle dashas documented as
+  deferred).
+- ✅ **Shadbala Sthana** (Phase 34e item 5) — Uchcha + Saptavargaja
+  (sum of dignity virupas across D1+D2+D3+D7+D9+D12+D30 vargas) +
+  Ojha-Yugma (parity bonus in Rashi + Navamsa) + Drekkana
+  (decanate-gender bonus). Kala Bala sub-components (Tribhaga,
+  Varsha, Masa, Dina, Hora, Ayana, Yuddha) and Sthana Kendradi
+  remain out of scope per the user-named Phase 34e item-5 surface.
+
+### Sub-phase split
+
+The audit groups cleanly into five sub-phases, ordered by user-facing
+impact. Each ships as its own minor release. Sub-phase **34a** is the
+direct extension of the Manglik fix and starts immediately.
+
+| Sub-phase | Focus | Effort | Release |
+|-----------|-------|--------|---------|
+| 34a | Doshas (Sade Sati cancellations, Pitru rule set, Kaal Sarp parity) | 2–3d | ✅ on top of `4.0.0` |
+| 34b | Marriage matching (Ashtakoot Bhakoot/Nadi cancellations, Pathu Porutham threshold lock) | 2–3d | ✅ next minor after 34a |
+| 34c | Yoga bhanga (per-yoga cancellation rules + Neecha Bhanga extensions) | 3–4d | ✅ next minor after 34b |
+| 34d | Drik panchang fixture-driven cross-validation harness (12 reference charts; golden outputs for Mangal Dosha, Kaal Sarp, Sade Sati, Ashtakoot perfect-36 set; Pitru + birth-chart yogas explicitly deferred — drik does not publish them) | 2–3d | ✅ next minor after 34c |
+| 34e | Specialist completeness (Arudha cancellations, Trikonargala, Sripati cusps, Narayan full variant, Shadbala remaining components, 8-Karaka Jaimini) | 4–6d | next minor after 34d |
+
+Note: package.json sits at `4.0.0` (last released git tag is `v2.0.1`).
+User assigns the specific tag at release time — do not assume a v3.x
+sequence; that was prior-session fiction that did not match the actual
+`package.json` state.
+
+**Total Wave 5 effort estimate.** 13–19 days end-to-end. Each sub-phase
+is independently shippable.
+
+### Step 34a-1 — Sade Sati: research drik panchang cancellation surfacing
+
+**What.** Cast 5 charts with natal Moon spread across rashis, query
+drik panchang's Sade Sati panel for each at a date inside an active
+phase, and record whether the panel surfaces any cancellation /
+mitigation labels. If yes, enumerate the trigger conditions. If no,
+the library's "active/inactive" model is already aligned.
+
+**Output.** A `notes/phase34a-sadesati-drik-research.md` listing the
+5 chart inputs, drik panchang's panel verdict, and the cancellation
+delta (if any). No code change in this step.
+
+**Effort.** ~3h.
+
+### Step 34a-2 — Sade Sati: implement cancellations (if research surfaces any)
+
+**What.** If 34a-1 surfaces cancellation conditions, add them to
+`computeSadeSati` with the same `cancellations: string[]` pattern used
+in `computeMangalDosha`. If 34a-1 confirms drik panchang only labels
+phases, this step is a no-op and the audit gap is marked as
+"intentionally not modelled (drik panchang doesn't surface it either)"
+in the doc comment.
+
+**Tests.** Add 1 case per cancellation rule + 1 negative; extend
+existing `tests/unit/sadeSati.test.ts`.
+
+**Effort.** ~4h (skipped if 34a-1 returns empty).
+
+### Step 34a-3 — Pitru Dosha: align rule set with drik panchang panel
+
+**What.** Query drik panchang's Pitru Dosha panel for 8 charts spanning
+the trigger conditions in our audit (Sun+Rahu, Sun+Ketu, Sun+Saturn in
+9th) and 3–4 additional classical rules (debilitated Sun in 9th, 9th
+lord in dusthana, malefic 9th lord). Record which rules drik panchang
+flags and which it ignores. Add the flagged-by-drik rules; **do not
+add** classical rules drik panchang skips.
+
+**Files.** `src/jyotish/doshas.ts`, `tests/unit/doshas.test.ts`.
+
+**Effort.** ~6h research + ~4h implementation.
+
+### Step 34a-4 — Kaal Sarp: verify partial / subtype parity
+
+**What.** Cast 6 charts: 3 with all 7 grahas inside Rahu–Ketu arc, 3
+with exactly 1 outside (paritha). For each, compare our output
+(`afflicted`, `partial`, `subtype`) against drik panchang's Kaal Sarp
+panel. Fix any divergence (likely in `partial` flag interpretation or
+subtype naming for boundary cases).
+
+**Effort.** ~4h research + ~2h fix if needed.
+
+**Exit criteria for Phase 34a.**
+- ✅ Sade Sati / Pitru / Kaal Sarp outputs match drik panchang for the
+  research chart set.
+- ✅ Each fix has a unit test + one golden-output integration test
+  against a recorded drik panchang chart.
+- ✅ Doc comments updated to cite "drik panchang published rule set" as
+  the reference (matching the pattern already in
+  `computeMangalDosha`).
+
+### Step 34b-1 — Ashtakoot Bhakoot cancellations: align with ProKerala / drik panchang
+
+**What.** Compute Bhakoot score for 12 boy/girl pairs spanning every
+classical cancellation trigger (same lagna-lord, same 7th-lord,
+rashi-lord parivartana, mutual friendship, same lord, same rashi).
+Compare against ProKerala's free Ashtakoot panel + drik panchang's
+Guna Milan panel. Add the cancellations that **both** external panels
+surface; defer any that only one applies (variant territory).
+
+**Files.** `src/jyotish/matching.ts`, `tests/unit/matching.test.ts`.
+
+**Effort.** ~6h research + ~4h implementation.
+
+### Step 34b-2 — Ashtakoot Nadi cancellations: Jupiter / planetary bhanga
+
+**What.** Add Nadi bhanga rules surfaced by ProKerala: Jupiter aspect
+on either Moon, same nakshatra-lord, etc. Same research-then-implement
+pattern as 34b-1.
+
+**Effort.** ~4h research + ~3h implementation.
+
+### Step 34b-3 — Pathu Porutham Sthree Deerkha threshold lock
+
+**What.** Query drik panchang's Tamil porutham panel for 5 pairs near
+the threshold boundary (distance 9–14). Lock the threshold to match
+drik (likely > 13, current default). Add option only if drik exposes
+the variant.
+
+**Effort.** ~2h research + ~1h fix.
+
+**Exit criteria for Phase 34b.** ≥18/20 of a fixture pair set matches
+the `recommended` verdict from ProKerala + drik Tamil panels.
+
+### Step 34c-1 — Yoga bhanga: catalog audit and per-yoga rule sourcing
+
+**What.** For each of the ~25 yogas in `yogasCatalog.ts`, query drik
+panchang's yoga panel (where available) and ProKerala's published yoga
+list for 3–5 charts that trigger the yoga. Record what cancellation /
+strength conditions external sources surface. Output: a per-yoga
+cancellation table.
+
+**Effort.** ~2d research (catalog-scale).
+
+### Step 34c-2 — Yoga bhanga: implementation
+
+**What.** Extend `Yoga` type with `bhanga?: { applies: boolean; reasons:
+string[] }` (additive). For each yoga with cancellations from 34c-1,
+add the rule to `yogasCatalog.ts`. Pancha Mahapurusha bhanga
+(dispositor in 6/8/12) and Gajakesari bhanga (Jupiter combust /
+debilitated) are the first targets.
+
+**Files.** `src/jyotish/yogas.ts`, `src/jyotish/yogasCatalog.ts`,
+`src/types/jyotish.ts`, `tests/unit/yogas.test.ts`.
+
+**Effort.** ~2d implementation.
+
+### Step 34c-3 — Neecha Bhanga extension
+
+**What.** Audit `computeYogas`' Neecha Bhanga implementation against
+the classical 6-rule set (BPHS Ch. 39) AND drik panchang's published
+Neecha Bhanga calculator. Add the rules drik panchang surfaces;
+explicitly skip BPHS-only ones unless flagged by user.
+
+**Effort.** ~1d.
+
+**Exit criteria for Phase 34c.** Every yoga that has a cancellation
+condition in mainstream calculators surfaces `bhanga.applies` with
+matching reasons for the fixture chart set.
+
+### Step 34d — Drik panchang fixture-driven cross-validation harness ✅
+
+**Status.** Code-complete 2026-05-11. Tests in
+`tests/integration/drik-parity.test.ts` walk
+`tests/fixtures/drik-parity/charts.json` (12 charts) and
+`tests/fixtures/drik-parity/pairs.json` (3 pairs). +229 tests added.
+
+**Scope landed.**
+
+Per `notes/phase34d-research.md`, drik panchang's birth-chart
+calculators (`kundali`, `mangal-dosha`, `kalasarpa-yoga`, `sadesati`,
+`horoscope-match`) are **all form-only POST pages** with no GET-style
+query interface, empirically verified 2026-05-11. Two computations
+are also absent from drik's URL space entirely:
+
+- **Pitru Dosha** — no drik calculator; multi-pandit consensus is the
+  operative authority. Phase 34a's 9-rule expansion is the regression
+  net; explicitly NOT cross-validated in 34d.
+- **Birth-chart yoga panels** (Gajakesari / Mahapurusha / Neecha
+  Bhanga / Raja Yoga) — drik's `/yoga/yoga.html` covers only the 8
+  *daily* panchang yogas (Sarvarthasiddhi etc.), not birth-chart
+  yogas. Phase 34c §1 confirmed this. Yoga catalog regression net
+  stays at `tests/unit/yogas.test.ts` + the Phase 29 birthchart
+  validation suite.
+
+The Phase 34d harness cross-validates the four surfaces drik does
+publish, plus a panchang smoke slice:
+
+- **MangalDoshaInfo** — `afflicted`, `severity`, per-chart breakdown
+  (`fromLagna` / `fromMoon` / `fromVenus`), cancellation
+  set-superset.
+- **KaalSarpDoshaInfo** — `afflicted`, `subtype`, `rahuHouse`,
+  `ketuHouse`. `partial` is informational-only per drik's own
+  statement and is not asserted.
+- **SadeSatiInfo** evaluated at `2026-05-04` — `active`, `phase`,
+  `currentArcStart` / `currentArcEnd` within ±2 days of the canonical
+  Saturn-ingress reference table reused from Phase 29 sadesati
+  validation (Barbara Pijan Shani Gochara, drik-aligned).
+- **Ashtakoot perfect-36 pairs** — 3 same-rashi+same-nakshatra pairs
+  (Modi × Modi, Obama × Priyanka, Clinton × Kejriwal) pin the koot-
+  summation logic with hand-derived expected values from BPHS Ch.7
+  + Drik per-koot rules.
+- **Birth-date panchang slice** — for each chart, on the birth
+  instant + birth location, `getDailyPanchang` returns a non-null
+  result with all major fields populated (smoke check; the heavy
+  drik-vs-library panchang parity sweep stays at Phase 28's
+  50-fixture suite).
+
+**Anti-circular fixture derivation.** Per the locked Phase 34c
+methodology rule (memory/feedback_fixture_repinning.md), every
+expected value in the fixture files is sourced from one of three
+audit-trail paths:
+
+1. `structural-derivation` — drik's stated rule set manually applied
+   to AstroSage R-tier natal positions via
+   `notes/phase34d-derive-fixtures.mjs`. The script implements the
+   same rule set the library does, *independently* from the library
+   code path. Auditable by re-running the script.
+2. `phase29-aligned` — re-uses the canonical Saturn-transit reference
+   table from `tests/validation/phase29-sadesati-validate.test.ts`.
+   No new scrape needed.
+3. `drik-form-trace` — reserved field for manual form-entry
+   recordings. The schema is forward-compatible with adding these on
+   a per-chart basis; no entries currently carry this source.
+
+Library output is **never** a fixture seed. Future cross-check diffs
+must follow the fix-then-predict-then-confirm rule before any
+re-pin.
+
+**Tolerance schedule.**
+
+| Field | Tolerance |
+|---|---|
+| MangalDoshaInfo bool/int/severity | exact |
+| MangalDoshaInfo.cancellations | set-superset (library may surface extras) |
+| KaalSarpDoshaInfo bool/int/subtype | exact |
+| KaalSarpDoshaInfo.partial | not asserted |
+| SadeSatiInfo.active / phase | exact |
+| SadeSatiInfo arc boundaries | ±2 days vs Phase 29 ingress table |
+| Ashtakoot total + per-koot (perfect-36 pairs) | exact (all 36) |
+| Panchang slice | smoke only (non-null + non-empty arrays) |
+
+**Deferred from 34d (with rationale).**
+
+- Hillary Clinton's arc-end (Saturn into Vrishabha ~2030) is omitted
+  from the rashi-bounded assertion — no published reference table I
+  audit-trust pins this to ±2 days. Phase 29's table stops at Mesha
+  2028. Fixture asserts active + phase + arc start only.
+- Pair-level Ashtakoot cross-validation for complex (non-perfect-36)
+  pairs stays at `tests/fixtures/ashtakoot-pairs.json` (the Phase 29
+  31-pair structural sweep). Drik's form-only output prevents
+  auditable per-pair total scraping; perfect-36 pairs are the only
+  cases with hand-derivable totals.
+
+**Files added.**
+
+- `notes/phase34d-research.md` — research notes (scoping + fixture-
+  chart list + tolerance schedule + source list).
+- `notes/phase34d-derive-fixtures.mjs` — one-off derivation script
+  (audit trail for the structural-derivation expected values).
+- `tests/fixtures/drik-parity/charts.json` — 12-chart consolidated
+  fixture.
+- `tests/fixtures/drik-parity/pairs.json` — 3-pair Ashtakoot
+  perfect-36 regression net.
+- `tests/integration/drik-parity.test.ts` — 229-test harness.
+
+**Net suite delta.** 7,780 → **8,009 tests** (+229). CJS bundle
+`dist/index.cjs` unchanged at **368.93 KB** (no library source
+modified).
+
+**Effort.** 2–3d planned; landed in 1d (most cost was research +
+fixture-schema design; harness mechanical).
+
+### Step 34e — Specialist completeness (lowest priority)
+
+**What.** Land the items the audit flagged as specialist gaps:
+- ❌ Arudha lord-in-6/8/12 cancellation. *(deferred 2026-05-11 —
+  ≥2-source bar unmet; Sanjay Rath's own canonical Arudha Pada article
+  excludes the rule. See `notes/phase34e-arudha-research.md`.)*
+- ✅ **Trikonargala (5/9)** in `computeArgala` (additive opt-in via
+  `{ includeTrikonargala: true }` second arg → populates the new
+  optional `trikona: { sources, virodhakas }` field on each
+  `ArgalaPerBhava`). *(code-complete 2026-05-11.)*
+- ✅ **Sripati cusp 2–12 midpoints** in `computeSripatiLagna` (additive
+  opt-in via `{ includeCusps: true }` fifth arg → returns the new
+  `SripatiLagnaInfo` extension with all 12 bhava-madhya longitudes).
+  *(code-complete 2026-05-11.)*
+- ✅ **Narayan Dasha variable-duration variant** in
+  `computeNarayanDasha` (additive opt-in via `{ duration: 'variable' }`
+  fourth arg → returns Mahadashas with per-rashi computed durations
+  per Sanjay Rath Rules 2 + 3 + 4(a-d), with Strength Source 1 Rule 2
+  + Source 2 Rule 1 for dual-lord tiebreak). *(code-complete 2026-05-11.)*
+- ✅ **Shadbala Saptavargaja / Ojha-Yugma / Drekkana subcomponents**
+  added to Sthana Bala (always-on; the simplification was a known
+  pre-34e gap, not a feature). Predicted-then-verified-then-repinned
+  the 5 Phase 31 / 34c Bhava Bala fixture pins per the locked
+  anti-circular workflow in `memory/feedback_fixture_repinning.md`.
+  *(code-complete 2026-05-11.)*
+- ✅ **8-Karaka Jaimini variant** (additive option on
+  `computeJaiminiKarakas`). *(code-complete 2026-05-11.)*
+
+Each is independently shippable; bundle into one minor if all done
+together, or split if any one slips.
+
+**8-Karaka Jaimini variant — what landed.** Research at
+`notes/phase34e-jaimini-research.md`. Drik panchang publishes no
+karaka surface (confirmed by enumeration of all 18 jyotish
+calculators), so the operative authority is Jaimini *Upadesa Sutras*
+Ch.1 First Foot V.10 with Sanjay Rath's commentary as modern
+canonical, cross-confirmed by 4 independent secondary sources on the
+8-karaka order and 3 on the Rahu-reversal rule. Code additions:
+- New types `Karaka8Name = KarakaName | 'Pitrukaraka'` and
+  `Jaimini8Karakas = Record<Karaka8Name, GrahaName>` in
+  `src/types/jyotish.ts` (re-exported from `src/types/index.ts` +
+  `src/index.ts`). Existing `KarakaName` and `JaiminiKarakas`
+  unchanged.
+- `computeJaiminiKarakas(chart, options?)` gained function overloads:
+  no-options or `{ variant: '7-parashara' }` → `JaiminiKarakas`
+  (existing behavior byte-for-byte); `{ variant: '8-jaimini' }` →
+  `Jaimini8Karakas` adding Rahu as 8th planet with effective degree
+  `30 − degreeInRashi` (retrograde reversal) and a new **Pitrukaraka**
+  (father) role at position 5 of the karaka order.
+- Tie-break extends the canonical Parashara order one slot:
+  Sun > Moon > Mars > Mercury > Jupiter > Venus > Saturn > Rahu —
+  Rahu loses every effective-degree tie.
+- 19 new tests across Rahu-reversal (Rahu at degreeInRashi=29° → DK,
+  Rahu at 1° → AK), Pitrukaraka-insertion at exact position 4,
+  effective-degree tie-break (Sun vs Rahu at 15°/15°, all-8-tied
+  canonical-order pin), output shape (8 unique grahas, Pitrukaraka
+  present), monotonic-degree invariant across all 20 R-tier fixtures,
+  backwards-compat (no-options = explicit `'7-parashara'` for all 5
+  pinned charts), and a 9-fixture sweep with hand-derived 8-K
+  predictions (Modi / Sachin / Tata / Dhirubhai / Mukesh / Zuckerberg
+  / Obama / Gates / Trump).
+
+**8-Karaka — what was deferred.** None — the Sanjay Rath / Jaimini
+variant is the only widely-cited 8-karaka tradition. The BPHS
+"conditional Rahu" variant (Parashara Ch.32 — include Rahu only as a
+tie-breaker for the 7-karaka system) is **not** implemented because
+the library's existing 7-karaka stable-sort tie-break (canonical
+Parashara order) deterministically resolves every degree collision,
+rendering the conditional Rahu fallback structurally unreachable.
+Ketu remains excluded from both variants per unanimous secondary-
+source convention.
+
+**Sripati cusps — what landed.** Research at
+`notes/phase34e-sripati-research.md`. Drik publishes no Sripati cusp
+table on any of its 18 jyotish calculators (re-confirmed inventory);
+ProKerala's birth-chart endpoint is form-only POST per the 34d
+empirical pattern with no GET-style cusp query; AstroLinked native
+pages render empty placeholders without auth. Operative authority is
+therefore **BPHS Ch.5 + Sripati Paddhati (~12th c.) + 8-source
+modern multi-pandit consensus** (Wikipedia, Jothishi,
+planetarypositions.com, prosperitynjoy, nikhilworld,
+astrologershukla, Lalitha Anamika substack, astrologyofbharat) —
+the formula is uncontested across every surveyed source. Code
+additions:
+- New type `SripatiLagnaInfo extends LagnaInfo` adding `cusps:
+  number[]` (length 12) in `src/types/jyotish.ts` (re-exported from
+  `src/types/index.ts` + `src/index.ts`). Existing `LagnaInfo`
+  unchanged.
+- `computeSripatiLagna(birthDate, location, ayanamsa?, lang?,
+  options?)` gained function overloads: no-options or
+  `{ includeCusps: false }` → `LagnaInfo` (existing behavior byte-
+  for-byte); `{ includeCusps: true }` → `SripatiLagnaInfo` with all
+  12 bhava-madhya longitudes (cusps[0]=lagna, cusps[3]=IC,
+  cusps[6]=descendant, cusps[9]=MC, opposite cusps differ by
+  exactly 180° by construction). Sidereal MC derived inline via
+  Meeus' `λ_MC = atan2(sin θ, cos θ · cos ε)` formula (avoids the
+  `bhava.ts → lagna.ts` back-edge that would cause a circular
+  import).
+- Quadrant trisection: arc_q1 = (IC−ASC) mod 360 and arc_q2 =
+  (DSC−IC) mod 360 (with arc_q3 = arc_q1 and arc_q4 = arc_q2 by
+  Sripati's antipodal symmetry); intermediate cusps placed at the
+  1/3 and 2/3 marks of each arc. Works at every latitude with no
+  circumpolar exception (unlike Placidus).
+- 25 new tests across no-options-backwards-compat (cusps field
+  absent), explicit `{ includeCusps: false }` byte-for-byte
+  equivalence, output shape (12 finite cusps in [0,360),
+  cusps[0]=siderealLongitude), antipodal-180° invariant per chart,
+  quadrant-sum=360° invariant per chart, trisection-prediction
+  per chart, computeBhava-cross-check (cusps[0]=ascendantLongitude,
+  cusps[9]=mcLongitude), 5-chart fixture pin sweep with hand-
+  derived predictions (Narendra Modi 23.78°N / Sachin Tendulkar
+  18.97°N / Mark Zuckerberg 40.70°N / Bill Gates 47.60°N / Sri
+  Sri Ravi Shankar 8.77°N — spanning low to high latitude with
+  asymmetric quadrant arcs from 63° to 117°), and a φ=0 equator
+  structural regression (12 finite cusps + antipodal symmetry).
+
+**Arudha bhanga — DEFERRED 2026-05-11.** Research at
+`notes/phase34e-arudha-research.md`. Same drik-silent pattern as
+34a-d / 34e-items-1+6, but with a different outcome: this time the
+≥2-source pandit-confirmation bar (locked precondition for items
+where drik is silent) is **not met**. Specifically:
+- **Sanjay Rath's own canonical Arudha article** (`srath.com/jyotiṣa/
+  amateur/arudha-pada-images-of-world/`) lists ONLY the 4 calculation
+  rules + the two D=1/D=7 exceptions (both already shipped pre-34e).
+  No lord-in-dusthana strength-reduction rule appears.
+- **Only well-cited related rule** is Upapada-Lagna-specific
+  (Freedom Vidya, single-source, no classical attribution); cannot
+  generalize to all 12 Arudha padas without inventing the rule.
+- **Saptarishis BPHS Ch.13** commentaries (Madura Krishnamurthi
+  Sastri + Jagdish Raj Ratra) are HTTP 403 on the open web; cannot
+  verify classical text directly.
+- **Audit-line "Arudha" assumed** a canonical rule exists; research
+  surfaced that the assumed rule has no ≥2-source attestation, and
+  the most authoritative modern source (Sanjay Rath's own published
+  Arudha calculation article) excludes it. The Phase 34c Raja-Yoga
+  bhanga deferral is the canonical precedent for this outcome
+  (defer entirely when classical sources cannot be reconciled).
+
+User decision recorded 2026-05-11 (4-option ask): "Defer item 2
+entirely (Phase 34c Raja-Yoga precedent)". No code change shipped;
+audit-baseline ⚠️ line stays ⚠️ with refreshed reasoning. Suite +
+bundle unchanged from item-1 (8,053 tests / 371.11 KB CJS).
+
+**Re-open path** (if revisited later): single-source UL-only variant
+(implement bhanga only for bhava-12's Arudha = UL when its lord falls
+in 6/8/12 from UL — one Freedom-Vidya source attestation), OR two-
+source generic variant (requires Sanjay Rath's print *Jaimini
+Maharishi's Upadesa Sutras* + an accessible Saptarishis BPHS Ch.13
+commentary).
+
+**Trikonargala (5/9) — what landed.** Research at
+`notes/phase34e-trikonargala-research.md`, derivation script at
+`notes/phase34e-trikonargala-derive.mjs`. Drik silent (no Argala
+calculator on any of its 18 utilities). Pandit / classical consensus
+is operative authority. ≥2-source bar met with margin:
+- **5/9 trine formulation** attested by 4 independent sources
+  (sutramritam.blogspot.com explicitly using "Trikona Argala" with
+  5/9 pair; anandamoyee.home.blog; existing library JSDoc citing
+  Iranganti Rangacharya / AstroVeda Wikidot / IndianAstrologyArticles;
+  Parashara via summary citation that 5th house causes secondary
+  argala).
+- **Ketu reversal** attested by 3 independent sources
+  (sutramritam.blogspot.com — "reversed for Ketu"; anandamoyee.home.blog
+  — "anti-zodiacal for Ketu"; Sanjay Rath via srath.com — "Argalā
+  reckoning from Ketu is in the reverse direction").
+- **Competing variant explicitly NOT implemented**: Sanjay Rath's
+  "Secondary Argala" 5/8 formulation (obstructed by 9/6) is a
+  **different named concept**, not a contradicting variant of the
+  same concept. The user prompt unambiguously chose the 5/9
+  Trikonargala (trine) framing; the 5/8 "Secondary Argala" variant
+  is documented in the research notes but not shipped.
+
+Code additions:
+- New optional field `trikona?: { sources: PlanetPlacement[];
+  virodhakas: PlanetPlacement[] }` added to `ArgalaPerBhava` in
+  `src/types/jyotish.ts`. Existing `argala` and `virodhargala`
+  primary-Argala fields unchanged.
+- `computeArgala(chart, options?)` gained function overloads:
+  no-options → existing `ArgalaPerBhava[]` byte-for-byte (trikona
+  field absent); `{ includeTrikonargala: true }` → same return type
+  but with `trikona` populated on each entry.
+- Ketu reversal handled inline: when iterating planets within the
+  trikona branch, Ketu in 5th-from-bhava lands in `virodhakas`
+  (NOT sources) and Ketu in 9th-from-bhava lands in `sources`
+  (NOT virodhakas). All other 8 grahas (including Rahu) follow the
+  standard 5th→source / 9th→virodhaka rule.
+- 20 new tests across no-options default (trikona absent), opt-in
+  trikona shape (12 entries, sources + virodhakas arrays),
+  single-planet synthetic in 5th / 9th, Ketu-reversal synthetic ×
+  2 (Ketu in 5th → virodhaka; Ketu in 9th → source), Rahu
+  sanity-check (Rahu in 5th remains a source — only Ketu reverses),
+  per-graha 2-list invariant × 5 R-tier fixture charts, and a
+  fixture pin sweep with 13 hand-derived per-bhava entries across
+  Modi / Sachin / Tata (including 2 Ketu-reversal cases: Modi
+  bhava 3 sources=[Ketu] and Modi bhava 7 virodhakas=[Ketu]).
+
+**Trikonargala — what was deferred.** The benefic-malefic
+qualification ("only benefic planets in 5th or 9th constitute
+benefic Argala") and the "Virodhargala obstructs only when
+equal-or-stronger" qualifier are not applied — the calculation
+ships positional Trikonargala lists; downstream consumers can
+filter by benefic/malefic if their tradition requires. Sanjay
+Rath's 5/8 "Secondary Argala" formulation (a different concept
+under a different name) is documented as a future-scope variant
+but not implemented. The "all argala reversed for Ketu" rule
+(which would also reverse the primary 2/4/11 Argala for Ketu)
+is out of this sub-phase's scope; only the trine-specific 5↔9
+swap is applied.
+
+**Sripati cusps — what was deferred.** Withdrawn-claim correction:
+the prior-draft assertion that "Sripati degenerates to Equal House
+at the equator" is **incorrect** — ASC and MC are 90° apart in
+*right ascension* at φ=0 but not in *ecliptic longitude* (due to
+ecliptic obliquity ε ≈ 23.4°). The corrected analysis shows
+asymmetric quadrant arcs at every latitude including φ=0; the
+implementation handles this without special-casing. No external
+ProKerala / drik numerical cross-validation was possible (no
+gettable Sripati cusp endpoint on the open web); validation relies
+on first-principles hand-derivation against the unanimous
+classical formula, which matches the Phase 34a-d / 34e-item-6
+fallback pattern when drik panchang publishes nothing on a
+surface. *Bhava sandhi* (bhava-boundary) longitudes — the
+midpoints between adjacent Sripati cusps, used by some
+KP/Placidus-trained astrologers as their notion of "cusp" — are
+not exposed as a separate field, because under the Sripati
+naming convention (unanimous across surveyed sources) "cusp"
+already refers to the bhava-madhya. Callers needing sandhis can
+trivially derive them from the cusps array.
+
+**Narayan variable-duration — what landed.** Research at
+`notes/phase34e-narayan-research.md`. Drik silent (no Narayan
+calculator). Primary source: **Sanjay Rath, *Narayana Dasa* (Sagar
+Publications)** — full canonical PDF retrieved and analyzed. Drik's
+absence + Sanjay Rath's role as the rule's author makes this an
+unambiguous single-authoritative-source case (the user's prompt
+explicitly licensed siding with Sanjay Rath over PyJHora on
+conflicts; Sanjay Rath's own published PDF is the operative
+reference). Implementation reach:
+- `computeNarayanDasha(birthDate, location, ayanamsa?, options?)`
+  gained function overloads. Default (no options) returns
+  `NarayanDashaResult` with fixed 9/8/7 Chara durations byte-for-byte
+  pre-34e. `{ duration: 'variable' }` switches to the full Sanjay
+  Rath rule set.
+- **Rule 2** (base count = signs-from-rashi-to-lord, zodiacal for
+  vimsapada / anti-zodiacal for samapada, inclusive count minus 1).
+- **Rule 3** (lord exalted +1; debilitated −1; cap at 12, floor at 0).
+  **Manteswara convention** for Rahu/Ketu exaltation (Rahu exalts in
+  Gemini, Ketu in Sagittarius) — explicitly used by Sanjay Rath for
+  Phalita Dasa, NOT Parashara's Taurus/Scorpio variant.
+- **Rule 4 (Scorpio + Aquarius dual lord)**:
+  - 4(a) both lords in dasha sign → 12 years (terminal, no adjust).
+  - 4(b) both lords jointly elsewhere → apply Rule 2 to joint sign.
+  - 4(c) one lord in dasha sign, other elsewhere → apply Rule 2 to
+    the OTHER lord's sign.
+  - 4(d) both elsewhere in different signs → use stronger lord's
+    sign for the count, with strength compared by Source 1 Rule 2
+    (planet count) then Source 2 Rule 1 (Mercury / Jupiter / own-
+    sign-lord Rasi-Drishti aspect factors). Deterministic final
+    tiebreak: natural Manteswara lord (Mars for Scorpio, Saturn for
+    Aquarius).
+- **Rasi Drishti** helper added (per Sanjay Rath's note "only Rasi
+  Drishti should be used"): movable signs aspect 3 fixed (excluding
+  adjacency); fixed aspect 3 movable; dual aspect 3 other dual.
+- 22 new tests across backwards-compat default × 3 charts (no
+  options → fixed 9/8/7 byte-for-byte); fixture sweep with first-
+  principles cross-check per-non-dual-rashi × 3 charts; total-years
+  bounds (12 ≤ Σ ≤ 144) × 3 charts; per-mahadasha continuity ×
+  3 charts; Rule 2 zodiacal/anti-zodiac unit cases (Modi-derived);
+  Rule 3 exaltation/debilitation/cap unit cases; Rule 4(c) Modi
+  Scorpio dasha (Mars in Scorpio → use Ketu in Kanya); Rule 4(d)
+  Modi Aquarius dasha (Saturn-in-Simha wins by planet count over
+  Rahu-in-Meena); Sanjay-Rath worked Einstein table algorithmic
+  validation × 4 rows (Aries / Cancer / Libra / Sagittarius), with
+  one row (Cancer) explicitly noting the §3.1-documented divergence
+  between Sanjay Rath's published-table value (12) and the algorithm-
+  correct value (7) — the test pins the algorithm output per the
+  locked "side with the algorithm's mathematical correctness when
+  publication arithmetic has typos" stance.
+
+**Narayan variable-duration — what was deferred.** The remaining
+Strength Source 1 Rules 3, 4, 6, 7, 8 (planet status / modality /
+lord degrees / even-odd / higher-dasa-period tiebreaks) are
+explicitly NOT implemented — Source 1 Rule 2 + Source 2 Rule 1
+resolve the strength comparison in the overwhelming majority of
+natal charts; the further rules are vanishingly rare in practice
+(documented in §2.5 of the research notes). Also deferred:
+**strength-based starting rashi** (the canonical rule starts from
+the stronger of Lagna or 7th house; current implementation always
+starts from Lagna regardless of `options.duration`) and **second
+cycle of dashas** (Rule 5 with years_2nd = 12 − years_1st for the
+13th..24th dashas — library returns exactly 12 mahadashas).
+
+**Shadbala sub-components — what landed.** Research at
+`notes/phase34e-shadbala-research.md`; delta-prediction derive script
+at `notes/phase34e-shadbala-derive.mjs`. Drik silent (no Shadbala
+calculator); ProKerala's `/astrology/shadbala.php` is form-only POST
+and cannot be queried for the AstroSage R-tier inputs. Operative
+authority is **BPHS Ch.27 verses 16–20** (R. Santhanam translation),
+with the user-prompt-stated reference order "ProKerala/PyJHora
+numerics > BPHS" applied as a documentation note (one explicit
+approximation: the library's `computeDignity` does not surface the
+temporal great-friend / great-enemy distinction, so the
+Saptavargaja mapping collapses friend/great-friend → 15 V and
+enemy/great-enemy → 3.75 V; ~5–20 V per-graha under-shoot vs
+ProKerala's full temporal-friendship Saptavargaja documented in
+research §2.1). Code additions:
+- `sthanaBala` (refactored): now `Uchcha + Saptavargaja + Ojha-Yugma
+  + Drekkana` instead of Uchcha-only. Pre-34e callers see a larger
+  number on the existing `sthana` field; field type unchanged.
+- `saptavargajaBala`: sums `SAPT_VIRUPAS[computeDignity(graha,
+  varga.rashi)]` across D1 + D2 + D3 + D7 + D9 + D12 + D30. Max
+  theoretical 7 × 45 = 315 V (unreachable; realistic 30–150 V per
+  graha).
+- `ojhaYugmaBala`: +15 V each for D1-parity + D9-parity match.
+  Masculine (Sun/Mars/Jupiter) match odd; feminine + eunuch
+  (Moon/Mercury/Venus/Saturn) match even. Max 30 V per graha.
+- `drekkanaBala`: +15 V if the planet is in its gender-group
+  decanate (Sun/Mars/Jupiter → 1st 0–10°; Mercury/Saturn → 2nd
+  10–20°; Moon/Venus → 3rd 20–30°). Max 15 V per graha.
+- `shadbalaForChart` now computes the 6 additional divisional charts
+  (D2, D3, D7, D9, D12, D30) once and reuses them across the 7
+  visible grahas — amortizes the per-graha divisional lookups.
+- Fixture pin re-derivation: the 5 Phase 31 / 34c Bhava Bala
+  fixture pins were re-pinned to predicted post-item-5 totals.
+  **Anti-circular workflow followed exactly**:
+  1. Derived per-graha shadbala deltas via inline BPHS formulas
+     in `notes/phase34e-shadbala-derive.mjs` (NOT via any new
+     library code).
+  2. Computed per-house bhavaBala delta = Δshadbala[cusp-lord].total.
+  3. Ran tests, observed 5 fixture failures.
+  4. Verified observed per-house deltas EXACTLY MATCH predicted
+     per-house deltas to 4 decimal places across all 5 charts × 12
+     houses (60 cells). Worked example: Mukesh Ambani bhava 7
+     (Mars-ruled): predicted Δ=123.75 V (Saptavargaja 123.75 + Ojha
+     0 + Drekkana 0), observed Δ=123.75 V. ✓
+  5. Re-pinned to predicted totals with explicit comment citing
+     the derive script as audit trail.
+- 3 new shadbala unit tests verifying sub-components are wired in
+  (at-least-one-graha exceeds pre-34e 60 V Uchcha ceiling;
+  Saptavargaja minimum 7 × 1.875 = 13.125 V floor per graha;
+  monotonic non-decrease vs hypothetical Uchcha-only baseline).
+- 1 updated shadbala unit test: `Sthana ∈ [0, 60]` → `Sthana ∈ [0,
+  420]` (new theoretical max = 60 Uchcha + 315 Saptavargaja + 30
+  Ojha + 15 Drekkana).
+- Net suite delta: +3 new shadbala tests, 5 bhavaBala fixture pins
+  re-pinned (same count, new values). Suite total 8,100 → **8,103
+  tests**. CJS bundle **377.73 KB** (+2.23 KB from item-4's
+  375.50 KB).
+
+**Shadbala sub-components — what was deferred.** Sanjay Rath's
+temporal Tatkalika friendship layer (which would split friend →
+great-friend 22.5 V and enemy → great-enemy 1.875 V in Saptavargaja
+— the ~5–20 V per-graha gap documented in research §2.1). Kendradi
+Bala (the Kendra/Panaphara/Apoklim by-house Sthana sub-component)
+remains out of this sub-phase's scope. Full Kala Bala
+sub-components (Tribhaga, Varsha, Masa, Dina, Hora, Ayana, Yuddha)
+remain unimplemented — the user-named Phase 34e item-5 surface was
+"Sthana sub-components", not Kala.
+
+---
+
+**Phase 34e complete.** Of 6 items planned: 5 shipped (1 Sripati, 3
+Trikonargala, 4 Narayan variable, 5 Shadbala Sthana sub-components,
+6 8-Karaka Jaimini), 1 deferred (item 2 Arudha bhanga — ≥2-source
+bar unmet). Suite: **8,103 tests** (up from 8,009 at Phase 34d
+landing; +94 tests across the 5 shipped items). CJS bundle:
+**377.73 KB** (+8.80 KB from Phase 34d's 368.93 KB). All landed on
+top of `package.json` 4.0.0; user assigns release tag.
+
+**Effort.** 4–6d planned for the full step; total ~3d combined
+(8-Karaka ~½d, Sripati ~½d, Arudha defer ~½h, Trikonargala ~½d,
+Narayan variable ~1d, Shadbala sub-components ~1d).
+
+---
+
 ## Wave Roadmap Summary
 
 | Phase | Wave | Focus | Effort | Releases |
@@ -1024,6 +1971,7 @@ output shape is identical to a natal chart.
 | 31 | Wave 4a | Ashtakavarga + Yogas + Karakas + Bhava Bala | 8–10d | v3.2 ✅ |
 | 32 | Wave 4b | Varshaphala + Tithi Pravesha + Arudha + Special Lagnas + Upagrahas + Argala | 8–9d | v3.3 ✅ |
 | 33 | Wave 4c | Pathu Porutham + Narayan Dasha + KP sub-lord + Prashna foundation | 7–8d | v3.4 ✅ |
+| 34 | Wave 5 | Drik Panchang / Pandit Parity Sweep (doshas, matching, yogas, fixtures, specialist completeness) | 13–19d | one minor per sub-phase on top of `package.json` 4.0.0 🚧 |
 
 **Decisions locked across the roadmap:**
 - en + hi only (no new locales).

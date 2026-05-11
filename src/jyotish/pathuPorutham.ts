@@ -146,6 +146,18 @@ function validateNatalMoon(m: NatalMoon, label: string): void {
     throw new RangeError(`${label}.rashi must be integer in [0, 11], got ${m.rashi}`);
   }
   assertNakshatraIndex(m.nakshatra, `${label}.nakshatra`);
+  if (m.lagnaRashi !== undefined &&
+      (!Number.isInteger(m.lagnaRashi) || m.lagnaRashi < 0 || m.lagnaRashi >= 12)) {
+    throw new RangeError(`${label}.lagnaRashi must be integer in [0, 11], got ${m.lagnaRashi}`);
+  }
+  if (m.navamsaRashi !== undefined &&
+      (!Number.isInteger(m.navamsaRashi) || m.navamsaRashi < 0 || m.navamsaRashi >= 12)) {
+    throw new RangeError(`${label}.navamsaRashi must be integer in [0, 11], got ${m.navamsaRashi}`);
+  }
+  if (m.nakshatraPada !== undefined &&
+      (!Number.isInteger(m.nakshatraPada) || m.nakshatraPada < 1 || m.nakshatraPada > 4)) {
+    throw new RangeError(`${label}.nakshatraPada must be integer in [1, 4], got ${m.nakshatraPada}`);
+  }
 }
 
 // ── Per-koot scoring ───────────────────────────────────
@@ -199,11 +211,21 @@ function scoreMahendra(boy: NatalMoon, girl: NatalMoon): PoruthamScore {
 }
 
 function scoreSthreeDeergha(boy: NatalMoon, girl: NatalMoon): PoruthamScore {
-  // Classical Tamil rule: count from GIRL → BOY. Per FindYourFate /
-  // AstroVed / AstrologyLover the favourable threshold is > 13 (the
-  // boy's star should be at least the 14th from the girl's). Some
-  // South-Indian Vakya sources accept > 9; we follow the more
-  // restrictive standard rule.
+  // Classical Tamil rule: count from GIRL → BOY (nakshatra distance, 1-indexed).
+  // Threshold is locked at > 13 ("Uthamam" / best). This matches the
+  // dominant Tamil-Drik consensus: AstroVed Tamil article, mpanchang
+  // Thirumana Porutham, epanchang Stree Deergha, dheivegam Tamil match,
+  // and the "Marriage Matching Tips" Tamil reference all use the same
+  // > 13 boundary. Phase 34b explicitly rejects two competing variants
+  // surfaced in the corpus:
+  //   - The minority > 15 boy→girl threshold from one AstroVed English
+  //     article (the rest of the AstroVed family uses > 13).
+  //   - The graduated band reading (>= 7 acceptable, > 13 ideal) — the
+  //     "Mathiyamam" / medium band — which doesn't fit Pathu Porutham's
+  //     binary pass/fail scheme.
+  // Since drik panchang does not surface a Mathiyamam variant flag, we
+  // keep this as a single locked threshold per the Phase 34 principle
+  // ("don't expose variants drik doesn't expose").
   const distance = ((boy.nakshatra - girl.nakshatra + 27) % 27) + 1;
   const passes = distance > 13;
   return {

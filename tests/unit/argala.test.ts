@@ -374,3 +374,177 @@ describe('Fixture sweep — Argala invariants on R-tier charts', () => {
     }
   });
 });
+
+// ── 6. Trikonargala (5/9) opt-in (Phase 34e item 3) ────
+//
+// Multi-source consensus: planets in the 5th from bhava are Trikonargala
+// sources; 9th from bhava are Trikona virodhakas. Ketu reverses the role
+// (5th-from = virodhaka; 9th-from = source) per sutramritam +
+// anandamoyee + Sanjay Rath. Drik publishes nothing on Argala. Hand-
+// derived predictions in notes/phase34e-trikonargala-derive.mjs.
+
+describe('computeArgala — trikona option (Phase 34e item 3)', () => {
+  it('default (no options) does NOT populate trikona on any bhava', () => {
+    const chart = synthChart({ lagnaRashi: 0, rashis: { Sun: 4, Moon: 8 } });
+    const argala = computeArgala(chart);
+    for (const ab of argala) {
+      expect(ab.trikona).toBeUndefined();
+    }
+  });
+
+  it('explicit { includeTrikonargala: true } populates trikona on every bhava', () => {
+    const chart = synthChart({ lagnaRashi: 0, rashis: { Sun: 4, Moon: 8 } });
+    const argala = computeArgala(chart, { includeTrikonargala: true });
+    expect(argala).toHaveLength(12);
+    for (const ab of argala) {
+      expect(ab.trikona).toBeDefined();
+      expect(Array.isArray(ab.trikona!.sources)).toBe(true);
+      expect(Array.isArray(ab.trikona!.virodhakas)).toBe(true);
+    }
+  });
+});
+
+describe('computeArgala — trikona 5/9 placement rule (synthetic)', () => {
+  it('Sun in 5th from lagna: forms Trikonargala source on bhava 1', () => {
+    // Lagna Aries (rashi 0). Sun in Leo (rashi 4, house 5). Other planets
+    // in Aries (house 1) → for bhava 1, only Sun is in offset 4.
+    const chart = synthChart({
+      lagnaRashi: 0,
+      rashis: {
+        Sun: 4,
+        Moon: 0, Mars: 0, Mercury: 0, Jupiter: 0, Venus: 0,
+        Saturn: 0, Rahu: 0, Ketu: 0,
+      },
+    });
+    const argala = computeArgala(chart, { includeTrikonargala: true });
+    const bhava1Sources = argala[0]!.trikona!.sources.map((p) => p.planet);
+    expect(bhava1Sources).toContain('Sun');
+  });
+
+  it('Mars in 9th from lagna: forms Trikona virodhaka on bhava 1', () => {
+    const chart = synthChart({
+      lagnaRashi: 0,
+      rashis: {
+        Mars: 8,            // house 9 from Aries
+        Sun: 0, Moon: 0, Mercury: 0, Jupiter: 0, Venus: 0,
+        Saturn: 0, Rahu: 0, Ketu: 0,
+      },
+    });
+    const argala = computeArgala(chart, { includeTrikonargala: true });
+    const bhava1Virodhakas = argala[0]!.trikona!.virodhakas.map((p) => p.planet);
+    expect(bhava1Virodhakas).toContain('Mars');
+  });
+});
+
+describe('computeArgala — Ketu reversal in Trikonargala', () => {
+  it('Ketu in 5th from lagna: lands in trikona.virodhakas (NOT sources) for bhava 1', () => {
+    // Ketu in Leo (rashi 4, house 5 from Aries lagna).
+    const chart = synthChart({
+      lagnaRashi: 0,
+      rashis: {
+        Ketu: 4,
+        Sun: 0, Moon: 0, Mars: 0, Mercury: 0, Jupiter: 0, Venus: 0,
+        Saturn: 0, Rahu: 10,    // Rahu opposite Ketu (rashi 10, house 11)
+      },
+    });
+    const argala = computeArgala(chart, { includeTrikonargala: true });
+    expect(argala[0]!.trikona!.sources.map((p) => p.planet)).not.toContain('Ketu');
+    expect(argala[0]!.trikona!.virodhakas.map((p) => p.planet)).toContain('Ketu');
+  });
+
+  it('Ketu in 9th from lagna: lands in trikona.sources (NOT virodhakas) for bhava 1', () => {
+    const chart = synthChart({
+      lagnaRashi: 0,
+      rashis: {
+        Ketu: 8,            // house 9 from Aries
+        Sun: 0, Moon: 0, Mars: 0, Mercury: 0, Jupiter: 0, Venus: 0,
+        Saturn: 0, Rahu: 2, // Rahu opposite Ketu (rashi 2, house 3)
+      },
+    });
+    const argala = computeArgala(chart, { includeTrikonargala: true });
+    expect(argala[0]!.trikona!.virodhakas.map((p) => p.planet)).not.toContain('Ketu');
+    expect(argala[0]!.trikona!.sources.map((p) => p.planet)).toContain('Ketu');
+  });
+
+  it('Rahu does NOT reverse — Rahu in 5th remains a Trikonargala source', () => {
+    // Sanity: only Ketu is reversed; Rahu (the other node) follows the
+    // standard rule. Three classical sources attest the Ketu-specific
+    // reversal; none attest a parallel Rahu reversal in the trine context.
+    const chart = synthChart({
+      lagnaRashi: 0,
+      rashis: {
+        Rahu: 4,            // house 5 from Aries
+        Sun: 0, Moon: 0, Mars: 0, Mercury: 0, Jupiter: 0, Venus: 0,
+        Saturn: 0, Ketu: 10,
+      },
+    });
+    const argala = computeArgala(chart, { includeTrikonargala: true });
+    expect(argala[0]!.trikona!.sources.map((p) => p.planet)).toContain('Rahu');
+    expect(argala[0]!.trikona!.virodhakas.map((p) => p.planet)).not.toContain('Rahu');
+  });
+});
+
+describe('Trikonargala — 2-list-per-planet structural invariant', () => {
+  // Each planet (including Ketu) sits in exactly ONE house, so it satisfies
+  // offset=4 from exactly one bhava and offset=8 from exactly one bhava.
+  // Therefore each planet contributes to exactly 2 trikona lists across
+  // all 12 bhavas — total (sources count + virodhakas count) = 2.
+  it.each(FIXTURE_NAMES)('%s: each graha contributes to exactly 2 trikona lists', (name) => {
+    const f = FIXTURE_CHARTS.find((c) => c.name === name)!;
+    const chart = computeRashiChart(
+      localToUtc(f.dateLocal, f.tzh),
+      { latitude: f.lat, longitude: f.lon },
+    );
+    const argala = computeArgala(chart, { includeTrikonargala: true });
+    for (const planet of ALL_GRAHAS) {
+      let count = 0;
+      for (const ab of argala) {
+        if (ab.trikona!.sources.find((p) => p.planet === planet)) count++;
+        if (ab.trikona!.virodhakas.find((p) => p.planet === planet)) count++;
+      }
+      expect(count).toBe(2);
+    }
+  });
+});
+
+describe('Trikonargala — fixture pin sweep (hand-derived)', () => {
+  // Hand-derived in notes/phase34e-trikonargala-derive.mjs. The library
+  // implementation is verified against these pins; pins are NOT
+  // regenerated from implementation output.
+  type Pin = { name: string; bhava: number; sources: GrahaName[]; virodhakas: GrahaName[] };
+  const PINS: Pin[] = [
+    // Narendra Modi (Vrischika lagna). Ketu in house 11 → 5th-from-7 →
+    // Ketu reversal → bhava 7 virodhakas: [Ketu]; bhava 3 sources: [Ketu].
+    { name: 'Narendra Modi', bhava:  1, sources: ['Rahu'],            virodhakas: [] },
+    { name: 'Narendra Modi', bhava:  3, sources: ['Ketu'],            virodhakas: ['Sun', 'Mercury'] },
+    { name: 'Narendra Modi', bhava:  5, sources: [],                  virodhakas: ['Moon', 'Mars'] },
+    { name: 'Narendra Modi', bhava:  7, sources: ['Sun', 'Mercury'],  virodhakas: ['Ketu'] },
+    { name: 'Narendra Modi', bhava:  9, sources: ['Moon', 'Mars'],    virodhakas: ['Rahu'] },
+    { name: 'Narendra Modi', bhava: 12, sources: ['Jupiter'],         virodhakas: [] },
+    // Sachin Tendulkar (Simha lagna). Ketu in house 11 → bhava-7 virodhaka.
+    { name: 'Sachin Tendulkar', bhava: 1, sources: ['Moon', 'Rahu'],  virodhakas: ['Sun', 'Venus'] },
+    { name: 'Sachin Tendulkar', bhava: 3, sources: ['Ketu'],          virodhakas: [] },
+    { name: 'Sachin Tendulkar', bhava: 7, sources: [],                virodhakas: ['Ketu'] },
+    // Ratan Tata (Dhanus lagna). Ketu in house 6 → 5th-from-2 → bhava-2 virodhaka; 9th-from-10 → bhava-10 source.
+    { name: 'Ratan Tata',    bhava:  2, sources: [],                              virodhakas: ['Ketu'] },
+    { name: 'Ratan Tata',    bhava:  5, sources: [],                              virodhakas: ['Sun', 'Mercury', 'Venus'] },
+    { name: 'Ratan Tata',    bhava:  9, sources: ['Sun', 'Mercury', 'Venus'],     virodhakas: [] },
+    { name: 'Ratan Tata',    bhava: 10, sources: ['Jupiter', 'Ketu'],             virodhakas: [] },
+  ];
+
+  for (const pin of PINS) {
+    it(`${pin.name} bhava ${pin.bhava}: sources=${JSON.stringify(pin.sources)} virodhakas=${JSON.stringify(pin.virodhakas)}`, () => {
+      const f = FIXTURE_CHARTS.find((c) => c.name === pin.name)!;
+      const chart = computeRashiChart(
+        localToUtc(f.dateLocal, f.tzh),
+        { latitude: f.lat, longitude: f.lon },
+      );
+      const argala = computeArgala(chart, { includeTrikonargala: true });
+      const entry = argala[pin.bhava - 1]!;
+      const sources = entry.trikona!.sources.map((p) => p.planet).sort();
+      const virodhakas = entry.trikona!.virodhakas.map((p) => p.planet).sort();
+      expect(sources).toEqual([...pin.sources].sort());
+      expect(virodhakas).toEqual([...pin.virodhakas].sort());
+    });
+  }
+});

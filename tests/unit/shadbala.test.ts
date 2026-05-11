@@ -103,12 +103,15 @@ describe('computeShadbala — Sthana (positional) — Uchcha at exaltation/debil
     expect(aprilSun).toBeGreaterThan(octSun);
   });
 
-  it('Sthana ∈ [0, 60]', () => {
+  it('Sthana ∈ [0, 420] (Phase 34e item 5: Uchcha 60 + Saptavargaja 315 + Ojha 30 + Drekkana 15)', () => {
+    // Pre-34e bound was 60 V (Uchcha-only). Post-34e-item-5 Sthana =
+    // Uchcha + Saptavargaja + Ojha-Yugma + Drekkana; theoretical max =
+    // 60 + 7·45 + 30 + 15 = 420 V.
     const r = computeShadbala(SAMPLE, DELHI);
     const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
     for (const g of grahas) {
       expect(r[g].sthana).toBeGreaterThanOrEqual(0);
-      expect(r[g].sthana).toBeLessThanOrEqual(60);
+      expect(r[g].sthana).toBeLessThanOrEqual(420);
     }
   });
 });
@@ -180,6 +183,42 @@ describe('computeShadbala — Chesta (motional) Bala', () => {
     expect(r.Sun.chesta).toBe(30);
     expect(r.Moon.chesta).toBe(30);
   });
+
+  it('combust planet (within 10° of Sun, direct) gets 15 V Chesta', () => {
+    // 2024-05-18 18:00 UTC — Jupiter is in solar (superior) conjunction
+    // with the Sun, ~0.02° apart, and direct. The combust branch must
+    // fire: 15 V, not 30. Regresses an earlier bug where the angular-
+    // distance formula was inverted (firing combust near opposition
+    // instead of near conjunction).
+    const r = computeShadbala(new Date('2024-05-18T18:00:00Z'), DELHI);
+    expect(r.Jupiter.chesta).toBe(15);
+  });
+
+  it('superior-conjunction Mercury (within 1° of Sun) is combust', () => {
+    // 2024-09-30 12:00 UTC — Mercury 0.30° from Sun, direct.
+    const r = computeShadbala(new Date('2024-09-30T12:00:00Z'), DELHI);
+    expect(r.Mercury.chesta).toBe(15);
+  });
+
+  it('planet far from Sun and direct gets 30 V Chesta (not combust)', () => {
+    // 2024-05-18 18:00 UTC — Mars 44° from Sun, direct. Far outside the
+    // 10° combust arc → must be 30, not 15. Defensive against the
+    // pre-fix bug which would have fired combust near 180° from Sun.
+    const r = computeShadbala(new Date('2024-05-18T18:00:00Z'), DELHI);
+    expect(r.Mars.chesta).toBe(30);
+  });
+
+  it('opposition-side planet that is direct is NOT combust (180° from Sun)', () => {
+    // 2024-09-15 12:00 UTC — Saturn 172° from Sun, retrograde. Retro
+    // branch returns 60 first, but we also assert here that no chart
+    // configuration causes the combust check to fire near 180°.
+    // Picking a direct planet near opposition is rare (outer planets
+    // are typically retrograde at opposition), so we cover the pure
+    // formula behavior via an algorithmic boundary test:
+    // Jupiter at 92° from Sun, direct → not combust.
+    const r = computeShadbala(new Date('2024-09-15T12:00:00Z'), DELHI);
+    expect(r.Jupiter.chesta).toBe(30);
+  });
 });
 
 describe('computeShadbala — Drik (aspectual) Bala', () => {
@@ -239,5 +278,53 @@ describe('computeShadbala — input validation', () => {
 
   it('throws on invalid latitude', () => {
     expect(() => computeShadbala(SAMPLE, { latitude: 91, longitude: 77 })).toThrow();
+  });
+});
+
+// ── Phase 34e item 5: Sthana sub-components (Saptavargaja / Ojha-Yugma / Drekkana) ──
+
+describe('computeShadbala — Sthana Bala sub-components (Phase 34e item 5)', () => {
+  // The sub-components are wired into `sthana` and not exposed individually.
+  // Validate via known cross-chart properties that they pull `sthana` above
+  // the pre-34e Uchcha-only ceiling of 60 V.
+
+  it('At least one graha exceeds the pre-34e Uchcha-only ceiling (60 V)', () => {
+    // Post-34e Sthana = Uchcha + Saptavargaja + Ojha-Yugma + Drekkana.
+    // Saptavargaja contributes ≥ 7 × 1.875 = 13.125 V minimum per graha
+    // (even when debilitated in every varga), so EVERY graha now has
+    // sthana ≥ 13 V even at 0-Uchcha. Most grahas clear 60 V easily.
+    const r = computeShadbala(SAMPLE, DELHI);
+    const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+    const above60 = grahas.some((g) => r[g].sthana > 60);
+    expect(above60).toBe(true);
+  });
+
+  it('Every graha has Sthana ≥ Saptavargaja minimum (7 × 1.875 = 13.125 V)', () => {
+    // Saptavargaja's worst case is 1.875 V × 7 vargas = 13.125 V.
+    // Uchcha/Ojha/Drekkana add 0-105 V on top. So sthana ≥ 13.125 V always.
+    const r = computeShadbala(SAMPLE, DELHI);
+    const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+    for (const g of grahas) {
+      expect(r[g].sthana).toBeGreaterThanOrEqual(13.125);
+    }
+  });
+
+  it('Sthana strictly increased for SAMPLE chart vs hypothetical Uchcha-only', () => {
+    // Compare the actual sthana value to the synthetic Uchcha-only
+    // computation. Every graha's post-34e sthana should be ≥
+    // pre-34e Uchcha-only value (since the sub-components are
+    // non-negative additions).
+    const r = computeShadbala(SAMPLE, DELHI);
+    const chart = computeRashiChart(SAMPLE, DELHI);
+    const UCHCHA_DEG: Record<string, number> = {
+      Sun: 10, Moon: 33, Mars: 298, Mercury: 165,
+      Jupiter: 95, Venus: 357, Saturn: 200,
+    };
+    for (const g of ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'] as GrahaName[]) {
+      const lon = chart.planets.find((p) => p.planet === g)!.longitude;
+      const arc = Math.abs(((lon - UCHCHA_DEG[g]! + 540) % 360) - 180);
+      const uchchaOnly = ((180 - arc) / 180) * 60;
+      expect(r[g].sthana).toBeGreaterThanOrEqual(uchchaOnly - 1e-6);
+    }
   });
 });

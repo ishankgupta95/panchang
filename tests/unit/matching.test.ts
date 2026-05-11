@@ -164,6 +164,112 @@ describe('Bhakoot koot', () => {
   });
 });
 
+describe('Bhakoot opt-in cancellations (Phase 34b)', () => {
+  it('same lagna-lord cancels Bhakoot when both natives supply lagnaRashi', () => {
+    // Cancer (3) ↔ Aquarius (10): distance (8, 6) is doshic.
+    // Rashi lords Moon vs Saturn are not mutual friends → default rule
+    // leaves Bhakoot at 0. Adding lagnaRashi 9 (Cap) / 10 (Aqua) — both
+    // ruled by Saturn — fires the opt-in same-lagna-lord cancellation.
+    const r = computeAshtakoot(
+      { rashi: 3, nakshatra: 0, lagnaRashi: 9 },
+      { rashi: 10, nakshatra: 0, lagnaRashi: 10 },
+    );
+    expect(r.koots[6]!.score).toBe(7);
+    expect(r.cancellations).toContain('Bhakoot: same lagna-lord');
+  });
+
+  it('same 7th-house lord cancels Bhakoot when lagna lords differ', () => {
+    // Aries(0) ↔ Virgo(5): distance (6, 8) doshic, Mars vs Mercury — no
+    // default cancel. Lagna Cancer (3, lord Moon) and lagna Leo (4, lord
+    // Sun) differ, but 7th-from-each is Cap (Saturn) and Aqua (Saturn) —
+    // SAME 7th-house lord.
+    const r = computeAshtakoot(
+      { rashi: 0, nakshatra: 0, lagnaRashi: 3 },
+      { rashi: 5, nakshatra: 0, lagnaRashi: 4 },
+    );
+    expect(r.koots[6]!.score).toBe(7);
+    expect(r.cancellations).toContain('Bhakoot: same 7th-house lord');
+  });
+
+  it('same Navamsa lord cancels Bhakoot when lagnaRashi omitted', () => {
+    // Cancer(3) ↔ Aquarius(10) doshic distance, no default cancel.
+    // Navamsa rashis 0 (Aries, Mars) and 7 (Scorpio, Mars) share Mars.
+    const r = computeAshtakoot(
+      { rashi: 3, nakshatra: 0, navamsaRashi: 0 },
+      { rashi: 10, nakshatra: 0, navamsaRashi: 7 },
+    );
+    expect(r.koots[6]!.score).toBe(7);
+    expect(r.cancellations).toContain('Bhakoot: same Navamsa lord');
+  });
+
+  it('opt-in cancellations do not fire when only one native provides the field', () => {
+    // Lagna provided on the boy only — same-lagna-lord must NOT fire.
+    const r = computeAshtakoot(
+      { rashi: 3, nakshatra: 0, lagnaRashi: 9 },
+      { rashi: 10, nakshatra: 0 },
+    );
+    expect(r.koots[6]!.score).toBe(0);
+    expect(r.cancellations.some((c) => c.includes('lagna-lord'))).toBe(false);
+  });
+
+  it('opt-in cancellations do not fire when lagna and 7th and Navamsa lords all differ', () => {
+    // Pair at (6,8): Aries lagna+navamsa+Moon vs Gemini lagna+navamsa+Virgo Moon.
+    // Boy lagna 0 (Mars), girl lagna 2 (Mercury) — differ.
+    // Boy 7th = Libra(Venus), girl 7th = Sagittarius(Jupiter) — differ.
+    // Boy navamsa 0 (Mars), girl navamsa 2 (Mercury) — differ.
+    const r = computeAshtakoot(
+      { rashi: 0, nakshatra: 0, lagnaRashi: 0, navamsaRashi: 0 },
+      { rashi: 5, nakshatra: 0, lagnaRashi: 2, navamsaRashi: 2 },
+    );
+    expect(r.koots[6]!.score).toBe(0);
+    expect(r.cancellations.some((c) => c.startsWith('Bhakoot'))).toBe(false);
+  });
+
+  it('default cancellation precedence: same rashi-lord wins over opt-in rules', () => {
+    // Aries(0) ↔ Scorpio(7) — same rashi-lord Mars, already cancels.
+    // Even with mismatched lagnaRashi, the existing same-rashi-lord
+    // reason is pushed (not the lagna one).
+    const r = computeAshtakoot(
+      { rashi: 0, nakshatra: 0, lagnaRashi: 3 },
+      { rashi: 7, nakshatra: 0, lagnaRashi: 8 },
+    );
+    expect(r.koots[6]!.score).toBe(7);
+    expect(r.cancellations).toContain('Bhakoot: same rashi-lord');
+    expect(r.cancellations.some((c) => c.includes('lagna-lord'))).toBe(false);
+  });
+
+  it('backward compat: omitting all optional fields preserves v3.5.0 behavior', () => {
+    // Aries Moon ↔ Virgo Moon — distance (6,8) doshic with no default
+    // cancellation. Picked different nakshatras (Ashwini vs Mrigashira)
+    // so the existing Nadi same-nakshatra cancellation doesn't fire and
+    // the cancellations array stays cleanly empty.
+    const r = computeAshtakoot(
+      { rashi: 0, nakshatra: 0 },
+      { rashi: 5, nakshatra: 4 },
+    );
+    expect(r.koots[6]!.score).toBe(0);
+    expect(r.cancellations).toEqual([]);
+  });
+
+  it('throws on out-of-range lagnaRashi', () => {
+    expect(() =>
+      computeAshtakoot({ rashi: 0, nakshatra: 0, lagnaRashi: 12 }, { rashi: 0, nakshatra: 0 }),
+    ).toThrow(RangeError);
+  });
+
+  it('throws on out-of-range navamsaRashi', () => {
+    expect(() =>
+      computeAshtakoot({ rashi: 0, nakshatra: 0 }, { rashi: 0, nakshatra: 0, navamsaRashi: -1 }),
+    ).toThrow(RangeError);
+  });
+
+  it('throws on out-of-range nakshatraPada', () => {
+    expect(() =>
+      computeAshtakoot({ rashi: 0, nakshatra: 0, nakshatraPada: 0 }, { rashi: 0, nakshatra: 0 }),
+    ).toThrow(RangeError);
+  });
+});
+
 describe('Nadi koot', () => {
   it('zero when both natives share the same nadi', () => {
     // Both Adi nadi (Ashwini × Ardra). Different rashis to avoid same-rashi

@@ -112,6 +112,13 @@ export interface YogaContext {
 /** Result of a positive rule evaluation. */
 export interface YogaMatch {
   reasons: string[];
+  /**
+   * Optional bhanga (cancellation) annotation produced by rules that
+   * carry classical cancellation logic. Surfaced on the output `Yoga`
+   * verbatim by the engine in `yogas.ts`. See
+   * `notes/phase34c-research.md` for the per-yoga rule sourcing.
+   */
+  bhanga?: { applies: boolean; reasons: string[] };
 }
 
 /** Single rule entry — a name + type + evaluator. */
@@ -156,6 +163,12 @@ const HOUSE_ORDINAL: readonly string[] = [
 /**
  * Generic Mahapurusha rule constructor. Fires when the named planet is
  * own/moolatrikona/exalted AND in a kendra (1, 4, 7, 10) from lagna.
+ *
+ * Carries a bhanga rule (M1): if Sun OR Moon is in the same rashi as the
+ * yoga-causing planet, the yoga is classically cancelled. Source: BPHS-
+ * attributed multi-pandit consensus (mypandit, powerofastro, BPHS
+ * shloka cited via search summaries). See
+ * `notes/phase34c-research.md` §2.
  */
 function mahapurushaRule(name: YogaName, planet: GrahaName): YogaRule {
   return {
@@ -168,12 +181,43 @@ function mahapurushaRule(name: YogaName, planet: GrahaName): YogaRule {
       if (!KENDRA_HOUSES.includes(p.house)) return null;
       return {
         reasons: [`${planet} ${dignity} in ${p.rashi.name}, in kendra (house ${p.house})`],
+        bhanga: mahapurushaBhanga(ctx, planet, p.rashi.index, p.rashi.name),
       };
     },
   };
 }
 
+/**
+ * Bhanga (Rule M1) — Sun or Moon conjunct (same rashi as) the
+ * yoga-causing planet. Returns the bhanga annotation in the
+ * `{ applies, reasons }` shape regardless of trigger; `applies: false`
+ * with empty `reasons` signals "rule was evaluated and did not fire".
+ */
+function mahapurushaBhanga(
+  ctx: YogaContext,
+  planet: GrahaName,
+  planetRashi: number,
+  planetRashiName: string,
+): { applies: boolean; reasons: string[] } {
+  const reasons: string[] = [];
+  for (const luminary of ['Sun', 'Moon'] as const) {
+    if (ctx.planetByName[luminary].rashi.index === planetRashi) {
+      reasons.push(`${planet} conjunct ${luminary} in ${planetRashiName}`);
+    }
+  }
+  return { applies: reasons.length > 0, reasons };
+}
+
 // ── Lunar yogas (Moon-based) ──────────────────────────
+
+/**
+ * Combustion threshold (degrees) for the Gajakesari bhanga check.
+ * Matches the Chesta Bala combustion threshold convention
+ * documented in `src/jyotish/shadbala.ts`. BPHS / Phaladeepika split
+ * between 10° and 12°; the 10° anchor matches our internal
+ * convention for consistency.
+ */
+const JUPITER_COMBUSTION_ARC_DEG = 10;
 
 const GAJAKESARI_RULE: YogaRule = {
   name: 'Gajakesari',
@@ -182,11 +226,29 @@ const GAJAKESARI_RULE: YogaRule = {
     const moon = ctx.planetByName.Moon;
     const jup = ctx.planetByName.Jupiter;
     const offset = rashiOffsetFromTo(moon.rashi.index, jup.rashi.index);
-    if (offset === 1 || offset === 4 || offset === 7 || offset === 10) {
-      const desc = offset === 1 ? '1st (conjunct)' : `${HOUSE_ORDINAL[offset]}`;
-      return { reasons: [`Jupiter in ${desc} from Moon (kendra)`] };
+    if (offset !== 1 && offset !== 4 && offset !== 7 && offset !== 10) return null;
+    const desc = offset === 1 ? '1st (conjunct)' : `${HOUSE_ORDINAL[offset]}`;
+
+    // Bhanga (Rules G1 + G2). Multi-pandit consensus + BPHS attribution:
+    // Jupiter combust (within 10° of Sun) OR Jupiter debilitated cancels
+    // Gajakesari. Both can fire simultaneously (Jupiter combust AND
+    // debilitated when Sun + Jupiter conjunct in Capricorn). See
+    // `notes/phase34c-research.md` §3.
+    const bhangaReasons: string[] = [];
+    const sun = ctx.planetByName.Sun;
+    // Angular distance to Sun, wrapped to [0, 180]. 0 = conjunction.
+    const angularDistance = Math.abs(((jup.longitude - sun.longitude + 540) % 360) - 180);
+    if (angularDistance <= JUPITER_COMBUSTION_ARC_DEG) {
+      bhangaReasons.push(`Jupiter combust (within ${JUPITER_COMBUSTION_ARC_DEG}° of Sun)`);
     }
-    return null;
+    if (ctx.dignity.Jupiter === 'debilitated') {
+      bhangaReasons.push(`Jupiter debilitated in ${jup.rashi.name}`);
+    }
+
+    return {
+      reasons: [`Jupiter in ${desc} from Moon (kendra)`],
+      bhanga: { applies: bhangaReasons.length > 0, reasons: bhangaReasons },
+    };
   },
 };
 
@@ -499,28 +561,55 @@ const YOGAKARAKA_RULE: YogaRule = {
 
 // ── Cancellation: Neecha Bhanga ───────────────────────
 
+/**
+ * Kendra offsets (1-indexed houses 1/4/7/10) for the Phase-34c
+ * Moon-kendra extension to Rules A and B.
+ */
+const KENDRA_OFFSETS_FROM_MOON: ReadonlySet<number> = new Set([1, 4, 7, 10]);
+
+/**
+ * Offset (1..12) from `sourceRashi` to `targetRashi`, identical to
+ * `rashiOffsetFromTo`. Aliased here for readability inside the
+ * Neecha Bhanga rule, where the source is consistently the Moon's
+ * rashi.
+ */
+function houseFromMoon(moonRashi: number, planetRashi: number): number {
+  return rashiOffsetFromTo(moonRashi, planetRashi);
+}
+
 const NEECHA_BHANGA_RULE: YogaRule = {
   name: 'Neecha Bhanga',
   type: 'cancellation',
   evaluate: (ctx) => {
     const reasons: string[] = [];
+    const moonRashi = ctx.planetByName.Moon.rashi.index;
 
     for (const g of VISIBLE_GRAHAS) {
       if (ctx.dignity[g] !== 'debilitated') continue;
       const p = ctx.planetByName[g];
 
-      // Rule A — dispositor (lord of debilitation rashi) in a kendra from lagna.
+      // Rule A — dispositor (lord of debilitation rashi) in a kendra
+      // from Lagna OR from Moon. Phaladeepika 7.26 specifies "from
+      // Lagna OR Moon"; the pre-34c implementation only checked Lagna.
       const dispositor = RASHI_LORDS[p.rashi.index]!;
       if (dispositor !== g) {
         const dpp = ctx.planetByName[dispositor];
         if (KENDRA_HOUSES.includes(dpp.house)) {
           reasons.push(
-            `${g} debilitated in ${p.rashi.name}; dispositor ${dispositor} in kendra (house ${dpp.house})`,
+            `${g} debilitated in ${p.rashi.name}; dispositor ${dispositor} in kendra from Lagna (house ${dpp.house})`,
           );
+        } else {
+          const moonHouse = houseFromMoon(moonRashi, dpp.rashi.index);
+          if (KENDRA_OFFSETS_FROM_MOON.has(moonHouse)) {
+            reasons.push(
+              `${g} debilitated in ${p.rashi.name}; dispositor ${dispositor} in kendra from Moon (${HOUSE_ORDINAL[moonHouse]} from Moon)`,
+            );
+          }
         }
       }
 
-      // Rule B — lord of the planet's exaltation rashi is in a kendra from lagna.
+      // Rule B — lord of the planet's exaltation rashi in a kendra
+      // from Lagna OR from Moon. Same Phaladeepika 7.26 source.
       const exRashi = EXALTATION_RASHI[g];
       if (exRashi !== null) {
         const exLord = RASHI_LORDS[exRashi]!;
@@ -528,14 +617,22 @@ const NEECHA_BHANGA_RULE: YogaRule = {
           const exp = ctx.planetByName[exLord];
           if (KENDRA_HOUSES.includes(exp.house)) {
             reasons.push(
-              `${g} debilitated in ${p.rashi.name}; lord of exaltation rashi ${exLord} in kendra (house ${exp.house})`,
+              `${g} debilitated in ${p.rashi.name}; lord of exaltation rashi ${exLord} in kendra from Lagna (house ${exp.house})`,
             );
+          } else {
+            const moonHouse = houseFromMoon(moonRashi, exp.rashi.index);
+            if (KENDRA_OFFSETS_FROM_MOON.has(moonHouse)) {
+              reasons.push(
+                `${g} debilitated in ${p.rashi.name}; lord of exaltation rashi ${exLord} in kendra from Moon (${HOUSE_ORDINAL[moonHouse]} from Moon)`,
+              );
+            }
           }
         }
       }
 
       // Rule C — an exalted graha sits in a kendra (1/4/7/10) from the
-      // debilitated planet's house.
+      // debilitated planet's house. Heritage rule (covers the
+      // "conjunct exalted" classical sub-case at offset 1).
       for (const other of VISIBLE_GRAHAS) {
         if (other === g) continue;
         if (ctx.dignity[other] !== 'exalted') continue;
@@ -544,6 +641,18 @@ const NEECHA_BHANGA_RULE: YogaRule = {
         if (off === 1 || off === 4 || off === 7 || off === 10) {
           reasons.push(
             `${g} debilitated in ${p.rashi.name}; exalted ${other} in ${HOUSE_ORDINAL[off]} from ${g} (kendra)`,
+          );
+        }
+      }
+
+      // Rule D (Phase 34c) — dispositor of the debilitated planet
+      // aspects the debilitated planet's house. Phaladeepika 7.28,
+      // corroborated by aaps.space + pratulogy.
+      if (dispositor !== g) {
+        const aspectedHouses = ctx.aspects[dispositor];
+        if (aspectedHouses && aspectedHouses.includes(p.house)) {
+          reasons.push(
+            `${g} debilitated in ${p.rashi.name}; dispositor ${dispositor} aspects ${g}`,
           );
         }
       }

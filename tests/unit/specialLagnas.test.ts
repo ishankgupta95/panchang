@@ -29,7 +29,9 @@ import {
   computeBhavaLagna, computeSripatiLagna,
   _findSunriseBeforeForTest,
 } from '../../src/jyotish/lagna';
+import { computeBhava } from '../../src/jyotish/bhava';
 import { computeSunrise } from '../../src/astronomy/sunrise';
+import type { SripatiLagnaInfo } from '../../src/types/jyotish';
 
 const DELHI = { latitude: 28.6139, longitude: 77.2090 };
 
@@ -260,5 +262,237 @@ describe('Special lagnas — 2-hour cross-check', () => {
     let delta = gl - expected;
     delta = ((delta + 540) % 360) - 180;
     expect(Math.abs(delta)).toBeLessThan(0.05);
+  });
+});
+
+// ── 9. Sripati cusp 2–12 midpoints (Phase 34e item 1) ──
+//
+// Sripati Paddhati trisects each ASC → IC → DSC → MC → ASC ecliptic-arc
+// quadrant to produce all 12 bhava-madhya cusps. Drik panchang publishes
+// no Sripati cusp table on any of its 18 jyotish calculators; the formula
+// is unanimous across surveyed secondary sources. The 5-chart prediction
+// table below was hand-derived in `notes/phase34e-sripati-derive.mjs`
+// from the library's already-verified ASC + MC (Meeus eq. 13.6 form),
+// with the trisection implemented INLINE in the derive script, NOT in
+// the library. The library implementation is checked AGAINST these
+// pinned predictions — see notes/phase34e-sripati-research.md and
+// memory/feedback_fixture_repinning.md for the anti-circular workflow.
+
+function mod360(x: number): number { return ((x % 360) + 360) % 360; }
+function angularDelta(a: number, b: number): number {
+  return mod360(a - b + 540) - 180;
+}
+
+describe('Sripati Lagna — includeCusps option (Phase 34e item 1)', () => {
+  it('default call (no options) still returns a plain LagnaInfo — no cusps field', () => {
+    const date = new Date('1995-08-15T05:30:00Z');
+    const result = computeSripatiLagna(date, DELHI);
+    expect(result.siderealLongitude).toBeCloseTo(
+      computeLagna(date, DELHI).siderealLongitude, 6,
+    );
+    expect((result as Partial<SripatiLagnaInfo>).cusps).toBeUndefined();
+  });
+
+  it('explicit { includeCusps: false } is identical to the default', () => {
+    const date = new Date('1995-08-15T05:30:00Z');
+    const a = computeSripatiLagna(date, DELHI);
+    const b = computeSripatiLagna(date, DELHI, 'lahiri', 'en',
+                                  { includeCusps: false });
+    expect(a).toEqual(b);
+    expect((b as Partial<SripatiLagnaInfo>).cusps).toBeUndefined();
+  });
+
+  it('{ includeCusps: true } returns 12 finite cusps in [0, 360)', () => {
+    const date = new Date('1995-08-15T05:30:00Z');
+    const r = computeSripatiLagna(date, DELHI, 'lahiri', 'en',
+                                  { includeCusps: true });
+    expect(r.cusps).toHaveLength(12);
+    for (const c of r.cusps) {
+      expect(Number.isFinite(c)).toBe(true);
+      expect(c).toBeGreaterThanOrEqual(0);
+      expect(c).toBeLessThan(360);
+    }
+    // cusp[0] is the lagna by construction.
+    expect(r.cusps[0]).toBeCloseTo(r.siderealLongitude, 8);
+  });
+});
+
+describe('Sripati cusps — antipodal + quadrant-sum invariants', () => {
+  // BPHS Ch.5 invariant: opposite cusps differ by exactly 180°
+  // (since cusp_4 = cusp_10+180 and cusp_7 = cusp_1+180 by construction,
+  // and the trisected intermediates inherit the antipodal symmetry).
+  const CHARTS: Array<[string, Date, { latitude: number; longitude: number }]> = [
+    ['Modi-natal',         new Date('1950-09-17T05:30:00Z'), { latitude:  23.78,  longitude:  72.63   }],
+    ['Sachin-natal',       new Date('1973-04-24T08:55:00Z'), { latitude:  18.966, longitude:  72.833  }],
+    ['Zuckerberg-natal',   new Date('1984-05-14T05:00:00Z'), { latitude:  40.70,  longitude: -74.00   }],
+    ['Gates-natal',        new Date('1955-10-29T04:58:00Z'), { latitude:  47.60,  longitude: -122.333 }],
+    ['SriSriRaviShankar',  new Date('1956-05-12T18:30:00Z'), { latitude:   8.767, longitude:  77.383  }],
+  ];
+
+  for (const [name, date, loc] of CHARTS) {
+    it(`${name}: opposite cusps differ by exactly 180°`, () => {
+      const { cusps } = computeSripatiLagna(date, loc, 'lahiri', 'en',
+                                            { includeCusps: true });
+      for (let i = 0; i < 6; i++) {
+        const delta = angularDelta(cusps[i + 6], cusps[i]);
+        expect(Math.abs(Math.abs(delta) - 180)).toBeLessThan(1e-9);
+      }
+    });
+
+    it(`${name}: quadrant arcs sum to 360°`, () => {
+      const { cusps } = computeSripatiLagna(date, loc, 'lahiri', 'en',
+                                            { includeCusps: true });
+      const arcQ1 = mod360(cusps[3]  - cusps[0]);
+      const arcQ2 = mod360(cusps[6]  - cusps[3]);
+      const arcQ3 = mod360(cusps[9]  - cusps[6]);
+      const arcQ4 = mod360(cusps[0]  + 360 - cusps[9]);
+      expect(arcQ1 + arcQ2 + arcQ3 + arcQ4).toBeCloseTo(360, 9);
+      // Sripati symmetry: q1 == q3 and q2 == q4 (mod 360).
+      expect(angularDelta(arcQ1, arcQ3)).toBeCloseTo(0, 9);
+      expect(angularDelta(arcQ2, arcQ4)).toBeCloseTo(0, 9);
+    });
+
+    it(`${name}: each non-angular cusp lies at the predicted trisection point`, () => {
+      // Re-derive arc trisection: cusp_2 should be cusp_1 + arc_q1/3 etc.
+      // This re-derives the formula from first principles inside the test
+      // and pins the implementation to it — the implementation is allowed
+      // to compute arc_q1 however it likes (e.g. internally), but the
+      // *result* must match the trisection prediction.
+      const { cusps } = computeSripatiLagna(date, loc, 'lahiri', 'en',
+                                            { includeCusps: true });
+      const arcQ1 = mod360(cusps[3]  - cusps[0]);
+      const arcQ2 = mod360(cusps[6]  - cusps[3]);
+      const arcQ3 = mod360(cusps[9]  - cusps[6]);
+      const arcQ4 = mod360(cusps[0]  + 360 - cusps[9]);
+      expect(angularDelta(cusps[1],  mod360(cusps[0] + arcQ1 / 3))).toBeCloseTo(0, 9);
+      expect(angularDelta(cusps[2],  mod360(cusps[0] + 2 * arcQ1 / 3))).toBeCloseTo(0, 9);
+      expect(angularDelta(cusps[4],  mod360(cusps[3] + arcQ2 / 3))).toBeCloseTo(0, 9);
+      expect(angularDelta(cusps[5],  mod360(cusps[3] + 2 * arcQ2 / 3))).toBeCloseTo(0, 9);
+      expect(angularDelta(cusps[7],  mod360(cusps[6] + arcQ3 / 3))).toBeCloseTo(0, 9);
+      expect(angularDelta(cusps[8],  mod360(cusps[6] + 2 * arcQ3 / 3))).toBeCloseTo(0, 9);
+      expect(angularDelta(cusps[10], mod360(cusps[9] + arcQ4 / 3))).toBeCloseTo(0, 9);
+      expect(angularDelta(cusps[11], mod360(cusps[9] + 2 * arcQ4 / 3))).toBeCloseTo(0, 9);
+    });
+  }
+});
+
+describe('Sripati cusps — angular cusps match computeBhava ASC / MC', () => {
+  // Structural cross-check: cusps[0] = lagna, cusps[9] = sidereal MC,
+  // both already exposed by computeBhava on every BhavaChart.
+  it('cusps[0] equals BhavaChart.ascendantLongitude and cusps[9] equals BhavaChart.mcLongitude', () => {
+    const date = new Date('1984-05-14T05:00:00Z'); // Zuckerberg-natal (mid latitude)
+    const loc = { latitude: 40.70, longitude: -74.00 };
+    const bhava = computeBhava(date, loc, { houseSystem: 'whole-sign' });
+    const { cusps } = computeSripatiLagna(date, loc, 'lahiri', 'en',
+                                          { includeCusps: true });
+    expect(angularDelta(cusps[0], bhava.ascendantLongitude)).toBeCloseTo(0, 8);
+    expect(angularDelta(cusps[9], bhava.mcLongitude)).toBeCloseTo(0, 8);
+    // cusp[3] (IC) = MC + 180; cusp[6] (DSC) = ASC + 180.
+    expect(angularDelta(cusps[3], mod360(bhava.mcLongitude + 180))).toBeCloseTo(0, 8);
+    expect(angularDelta(cusps[6], mod360(bhava.ascendantLongitude + 180))).toBeCloseTo(0, 8);
+  });
+});
+
+describe('Sripati cusps — fixture pin sweep (hand-derived predictions)', () => {
+  // Hand-derived in notes/phase34e-sripati-derive.mjs. The implementation
+  // is verified against these pins; the pins are NOT regenerated from
+  // implementation output. Tolerance 1e-4° absorbs any float-equality
+  // wobble in the ASC/MC inputs.
+  const TOL = 1e-4;
+
+  type Pin = { name: string; utc: string; lat: number; lon: number; cusps: number[] };
+  const PINS: Pin[] = [
+    {
+      name: 'Narendra Modi',
+      utc: '1950-09-17T05:30:00.000Z',
+      lat: 23.78, lon: 72.63,
+      cusps: [
+        211.249651, 242.632157, 274.014663, 305.397169,
+        334.014663,   2.632157,  31.249651,  62.632157,
+         94.014663, 125.397169, 154.014663, 182.632157,
+      ],
+    },
+    {
+      name: 'Sachin Tendulkar',
+      utc: '1973-04-24T08:55:00.000Z',
+      lat: 18.966, lon: 72.833,
+      cusps: [
+        127.204619, 157.300056, 187.395492, 217.490929,
+        247.395492, 277.300056, 307.204619, 337.300056,
+          7.395492,  37.490929,  67.395492,  97.300056,
+      ],
+    },
+    {
+      name: 'Mark Zuckerberg',
+      utc: '1984-05-14T05:00:00.000Z',
+      lat: 40.70, lon: -74.00,
+      cusps: [
+        279.500257, 316.942082, 354.383907,  31.825732,
+         54.383907,  76.942082,  99.500257, 136.942082,
+        174.383907, 211.825732, 234.383907, 256.942082,
+      ],
+    },
+    {
+      name: 'Bill Gates',
+      utc: '1955-10-29T04:58:00.000Z',
+      lat: 47.60, lon: -122.333,
+      cusps: [
+         81.572615, 102.620934, 123.669252, 144.717571,
+        183.669252, 222.620934, 261.572615, 282.620934,
+        303.669252, 324.717571,   3.669252,  42.620934,
+      ],
+    },
+    {
+      name: 'Sri Sri Ravi Shankar',
+      utc: '1956-05-12T18:30:00.000Z',
+      lat: 8.767, lon: 77.383,
+      cusps: [
+        286.866209, 319.444550, 352.022892,  24.601233,
+         52.022892,  79.444550, 106.866209, 139.444550,
+        172.022892, 204.601233, 232.022892, 259.444550,
+      ],
+    },
+  ];
+
+  for (const pin of PINS) {
+    it(`${pin.name}: 12 cusps match hand-derived predictions to within ${TOL}°`, () => {
+      const date = new Date(pin.utc);
+      const loc = { latitude: pin.lat, longitude: pin.lon };
+      const { cusps } = computeSripatiLagna(date, loc, 'lahiri', 'en',
+                                            { includeCusps: true });
+      for (let i = 0; i < 12; i++) {
+        const delta = Math.abs(angularDelta(cusps[i], pin.cusps[i]));
+        expect(delta).toBeLessThan(TOL);
+      }
+    });
+  }
+});
+
+describe('Sripati cusps — equator (φ=0) regression', () => {
+  // At φ=0 the ASC and MC are 90° apart in *right ascension* (always),
+  // but their *ecliptic longitude* separation varies with LST because
+  // the ecliptic is tilted ε ≈ 23.4° from the equator. So Sripati does
+  // NOT degenerate to Equal House at the equator — that earlier claim
+  // in this test was incorrect. The actual invariant at every latitude
+  // (including φ=0) is the antipodal + quadrant-sum symmetry, which is
+  // already covered by the fixture-sweep tests above. This test just
+  // pins that the implementation returns well-formed cusps at φ=0
+  // without any special-casing or numerical blow-up.
+  it('returns 12 well-formed cusps at the equator (no special-case path)', () => {
+    const date = new Date('2025-03-21T12:00:00Z');
+    const loc = { latitude: 0, longitude: 0 };
+    const { cusps } = computeSripatiLagna(date, loc, 'lahiri', 'en',
+                                          { includeCusps: true });
+    expect(cusps).toHaveLength(12);
+    for (const c of cusps) {
+      expect(Number.isFinite(c)).toBe(true);
+      expect(c).toBeGreaterThanOrEqual(0);
+      expect(c).toBeLessThan(360);
+    }
+    // Antipodal symmetry survives at φ=0.
+    for (let i = 0; i < 6; i++) {
+      const delta = angularDelta(cusps[i + 6], cusps[i]);
+      expect(Math.abs(Math.abs(delta) - 180)).toBeLessThan(1e-9);
+    }
   });
 });

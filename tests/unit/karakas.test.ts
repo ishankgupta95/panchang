@@ -21,8 +21,8 @@ import { describe, it, expect } from 'vitest';
 import { computeJaiminiKarakas } from '../../src/jyotish/karakas';
 import { computeRashiChart } from '../../src/jyotish/charts';
 import type {
-  BhavaChart, BirthChart, GrahaName, HouseInfo, JaiminiKarakas,
-  KarakaName, LagnaInfo, PlanetPlacement,
+  BhavaChart, BirthChart, GrahaName, HouseInfo, Jaimini8Karakas,
+  JaiminiKarakas, Karaka8Name, KarakaName, LagnaInfo, PlanetPlacement,
 } from '../../src/types/jyotish';
 import fixtures from '../fixtures/astrosage-charts.json';
 
@@ -405,6 +405,345 @@ describe('Fixture sweep — pinned karaka mappings', () => {
     it(`${pin.name}`, () => {
       const chart = fixtureChart(pin.name);
       const k = computeJaiminiKarakas(chart);
+      expect(k).toEqual(pin.expected);
+    });
+  }
+});
+
+// ── Phase 34e — 8-Karaka Jaimini variant ──────────────
+
+const KARAKA_8_ORDER: readonly Karaka8Name[] = [
+  'Atmakaraka', 'Amatyakaraka', 'Bhratrukaraka', 'Matrukaraka',
+  'Pitrukaraka', 'Putrakaraka', 'Gnatikaraka', 'Darakaraka',
+];
+
+/**
+ * Effective degree for the 8-Karaka variant: Rahu reversed
+ * (30 − degreeInRashi), every other graha unchanged.
+ */
+function effective8(chart: BirthChart, g: GrahaName): number {
+  const p = chart.planets.find((x) => x.planet === g)!;
+  return g === 'Rahu' ? 30 - p.degreeInRashi : p.degreeInRashi;
+}
+
+describe('computeJaiminiKarakas (8-jaimini) — Rahu reversal rule', () => {
+  it('Rahu at degreeInRashi = 29° → reversed = 1° → Darakaraka (lowest)', () => {
+    // Visible grahas all > 1°. Rahu reversed at 1° must take the
+    // lowest rank.
+    const chart = synthChart({
+      lagnaRashi: 0,
+      degrees: {
+        Sun: 5, Moon: 6, Mars: 7, Mercury: 8,
+        Jupiter: 9, Venus: 10, Saturn: 11,
+        Rahu: 29, // reversed = 1°
+      },
+    });
+    const k = computeJaiminiKarakas(chart, { variant: '8-jaimini' });
+    expect(k.Darakaraka).toBe('Rahu');
+    // Highest visible degree is Saturn @ 11°, so Atmakaraka = Saturn.
+    expect(k.Atmakaraka).toBe('Saturn');
+  });
+
+  it('Rahu at degreeInRashi = 1° → reversed = 29° → Atmakaraka (highest)', () => {
+    // Visible grahas all < 29°. Rahu reversed at 29° must take the
+    // highest rank.
+    const chart = synthChart({
+      lagnaRashi: 0,
+      degrees: {
+        Sun: 5, Moon: 6, Mars: 7, Mercury: 8,
+        Jupiter: 9, Venus: 10, Saturn: 11,
+        Rahu: 1, // reversed = 29°
+      },
+    });
+    const k = computeJaiminiKarakas(chart, { variant: '8-jaimini' });
+    expect(k.Atmakaraka).toBe('Rahu');
+    // Lowest visible degree is Sun @ 5°, and the 7 visible grahas
+    // shift down one slot, so Darakaraka = Sun.
+    expect(k.Darakaraka).toBe('Sun');
+  });
+
+  it('Ketu is excluded from the 8-Jaimini variant', () => {
+    // Set Ketu's degreeInRashi to 0° (would be Darakaraka if included)
+    // and confirm Ketu doesn't appear in any assigned role.
+    const chart = synthChart({
+      lagnaRashi: 0,
+      degrees: {
+        Sun: 5, Moon: 6, Mars: 7, Mercury: 8,
+        Jupiter: 9, Venus: 10, Saturn: 11,
+        Rahu: 15, Ketu: 0,
+      },
+    });
+    const k = computeJaiminiKarakas(chart, { variant: '8-jaimini' });
+    const assigned = new Set(Object.values(k));
+    expect(assigned.has('Ketu')).toBe(false);
+    expect(assigned.has('Rahu')).toBe(true);
+  });
+});
+
+describe('computeJaiminiKarakas (8-jaimini) — Pitrukaraka insertion', () => {
+  it('Rahu lands at exactly position 4 → Pitrukaraka = Rahu, 7-K names unchanged for AK..MK and PK..DK', () => {
+    // Visible grahas at 7°, 8°, 9°, 10°, 3°, 2°, 1°
+    // → sorted: 10°, 9°, 8°, 7°, 3°, 2°, 1° (positions 0-6 of 7-K)
+    // Insert Rahu reversed at 5° (degreeInRashi=25°) → slots at position 4
+    // (between 7° and 3°). So Rahu = Pitrukaraka.
+    const chart = synthChart({
+      lagnaRashi: 0,
+      degrees: {
+        Mercury: 10, Jupiter: 9, Venus: 8, Saturn: 7,
+        Sun: 3, Moon: 2, Mars: 1,
+        Rahu: 25, // reversed = 5°
+      },
+    });
+    const k = computeJaiminiKarakas(chart, { variant: '8-jaimini' });
+    expect(k.Atmakaraka).toBe('Mercury');     // pos 0: 10°
+    expect(k.Amatyakaraka).toBe('Jupiter');   // pos 1: 9°
+    expect(k.Bhratrukaraka).toBe('Venus');    // pos 2: 8°
+    expect(k.Matrukaraka).toBe('Saturn');     // pos 3: 7°
+    expect(k.Pitrukaraka).toBe('Rahu');       // pos 4: 5° (reversed)
+    expect(k.Putrakaraka).toBe('Sun');        // pos 5: 3°
+    expect(k.Gnatikaraka).toBe('Moon');       // pos 6: 2°
+    expect(k.Darakaraka).toBe('Mars');        // pos 7: 1°
+  });
+});
+
+describe('computeJaiminiKarakas (8-jaimini) — tie-break (Rahu loses)', () => {
+  it('Rahu reversed degree exactly equals a visible graha → visible graha wins', () => {
+    // Sun at 15° and Rahu at degreeInRashi=15° (reversed=15°) — exact tie.
+    // Canonical 8-graha order: Sun > Moon > … > Saturn > Rahu.
+    // Sun must win (higher role).
+    const chart = synthChart({
+      lagnaRashi: 0,
+      degrees: {
+        Sun: 15, Moon: 1, Mars: 2, Mercury: 3,
+        Jupiter: 4, Venus: 5, Saturn: 6,
+        Rahu: 15, // reversed = 15° — tied with Sun
+      },
+    });
+    const k = computeJaiminiKarakas(chart, { variant: '8-jaimini' });
+    expect(k.Atmakaraka).toBe('Sun');
+    expect(k.Amatyakaraka).toBe('Rahu');
+  });
+
+  it('all 8 grahas at effective 15° → canonical order preserved (Rahu last)', () => {
+    // Every visible graha at 15°. Rahu at degreeInRashi=15° → reversed = 15°.
+    // All 8 effective degrees equal → canonical Parashara order:
+    // Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu.
+    const chart = synthChart({
+      lagnaRashi: 0,
+      degrees: {
+        Sun: 15, Moon: 15, Mars: 15, Mercury: 15,
+        Jupiter: 15, Venus: 15, Saturn: 15,
+        Rahu: 15,
+      },
+    });
+    const k = computeJaiminiKarakas(chart, { variant: '8-jaimini' });
+    expect(k).toEqual({
+      Atmakaraka: 'Sun',
+      Amatyakaraka: 'Moon',
+      Bhratrukaraka: 'Mars',
+      Matrukaraka: 'Mercury',
+      Pitrukaraka: 'Jupiter',
+      Putrakaraka: 'Venus',
+      Gnatikaraka: 'Saturn',
+      Darakaraka: 'Rahu',
+    });
+  });
+});
+
+describe('computeJaiminiKarakas (8-jaimini) — output shape', () => {
+  it('returns exactly 8 unique grahas, one per role, including Pitrukaraka', () => {
+    const chart = synthChart({
+      lagnaRashi: 0,
+      degrees: {
+        Sun: 1, Moon: 2, Mars: 3, Mercury: 4,
+        Jupiter: 5, Venus: 6, Saturn: 7,
+        Rahu: 15,
+      },
+    });
+    const k = computeJaiminiKarakas(chart, { variant: '8-jaimini' });
+    const keys = Object.keys(k).sort();
+    expect(keys).toEqual([...KARAKA_8_ORDER].sort());
+    const grahas = Object.values(k);
+    expect(new Set(grahas).size).toBe(8);
+    expect(grahas).toContain('Rahu');
+  });
+});
+
+describe('computeJaiminiKarakas — backwards-compat with 7-Parashara default', () => {
+  it('calling with no options returns identical result as { variant: "7-parashara" }', () => {
+    for (const pin of FIXTURE_PINS) {
+      const chart = fixtureChart(pin.name);
+      const kDefault: JaiminiKarakas = computeJaiminiKarakas(chart);
+      const k7: JaiminiKarakas = computeJaiminiKarakas(chart, { variant: '7-parashara' });
+      expect(kDefault).toEqual(k7);
+      // Belt-and-braces: also matches the pinned 7-K expected.
+      expect(kDefault).toEqual(pin.expected);
+    }
+  });
+
+  it('the 7-Parashara return type has exactly 7 keys (no Pitrukaraka)', () => {
+    const chart = fixtureChart('Narendra Modi');
+    const k = computeJaiminiKarakas(chart);
+    expect(Object.keys(k)).toHaveLength(7);
+    expect((k as Record<string, unknown>).Pitrukaraka).toBeUndefined();
+  });
+});
+
+describe('computeJaiminiKarakas (8-jaimini) — monotonic-degree invariant', () => {
+  /**
+   * For every chart, the assigned grahas' effective degrees must be
+   * non-increasing across positions 0..7 (Atmakaraka..Darakaraka).
+   */
+  function assertMonotonic8(chart: BirthChart, k: Jaimini8Karakas): void {
+    const degrees = KARAKA_8_ORDER.map((role) => effective8(chart, k[role]));
+    for (let i = 0; i < degrees.length - 1; i++) {
+      expect(degrees[i]).toBeGreaterThanOrEqual(degrees[i + 1]!);
+    }
+  }
+
+  it('holds across every R-tier fixture chart (sweep)', () => {
+    for (const f of FIXTURE_CHARTS) {
+      const chart = fixtureChart(f.name);
+      const k = computeJaiminiKarakas(chart, { variant: '8-jaimini' });
+      assertMonotonic8(chart, k);
+    }
+  });
+});
+
+/**
+ * Pinned expected 8-karaka mappings for 9 R-tier fixture charts. The
+ * predictions are derived by hand from the raw `degreeInRashi` values
+ * (extracted from `computeRashiChart`) — Rahu's effective degree
+ * `30 − degreeInRashi` slotted into the sorted-by-descending-degree
+ * 7-graha list, with the Parashara stable-sort tie-break extended one
+ * slot (Rahu loses every tie). Full derivation in
+ * `notes/phase34e-jaimini-research.md` §7.
+ */
+const FIXTURE_PINS_8: ReadonlyArray<{ name: string; expected: Jaimini8Karakas }> = [
+  {
+    name: 'Narendra Modi',
+    expected: {
+      Atmakaraka: 'Saturn',
+      Amatyakaraka: 'Rahu',
+      Bhratrukaraka: 'Venus',
+      Matrukaraka: 'Moon',
+      Pitrukaraka: 'Jupiter',
+      Putrakaraka: 'Mars',
+      Gnatikaraka: 'Mercury',
+      Darakaraka: 'Sun',
+    },
+  },
+  {
+    name: 'Sachin Tendulkar',
+    expected: {
+      Atmakaraka: 'Mars',
+      Amatyakaraka: 'Moon',
+      Bhratrukaraka: 'Saturn',
+      Matrukaraka: 'Mercury',
+      Pitrukaraka: 'Jupiter',
+      Putrakaraka: 'Venus',
+      Gnatikaraka: 'Rahu',
+      Darakaraka: 'Sun',
+    },
+  },
+  {
+    name: 'Ratan Tata',
+    expected: {
+      Atmakaraka: 'Moon',
+      Amatyakaraka: 'Rahu',
+      Bhratrukaraka: 'Mercury',
+      Matrukaraka: 'Sun',
+      Pitrukaraka: 'Mars',
+      Putrakaraka: 'Jupiter',
+      Gnatikaraka: 'Saturn',
+      Darakaraka: 'Venus',
+    },
+  },
+  {
+    name: 'Dhirubhai Ambani',
+    expected: {
+      Atmakaraka: 'Mars',
+      Amatyakaraka: 'Mercury',
+      Bhratrukaraka: 'Moon',
+      Matrukaraka: 'Venus',
+      Pitrukaraka: 'Sun',
+      Putrakaraka: 'Rahu',
+      Gnatikaraka: 'Saturn',
+      Darakaraka: 'Jupiter',
+    },
+  },
+  {
+    name: 'Mukesh Ambani',
+    expected: {
+      Atmakaraka: 'Jupiter',
+      Amatyakaraka: 'Mars',
+      Bhratrukaraka: 'Mercury',
+      Matrukaraka: 'Saturn',
+      Pitrukaraka: 'Moon',
+      Putrakaraka: 'Venus',
+      Gnatikaraka: 'Sun',
+      Darakaraka: 'Rahu',
+    },
+  },
+  {
+    name: 'Mark Zuckerberg',
+    expected: {
+      Atmakaraka: 'Sun',
+      Amatyakaraka: 'Mars',
+      Bhratrukaraka: 'Venus',
+      Matrukaraka: 'Jupiter',
+      Pitrukaraka: 'Saturn',
+      Putrakaraka: 'Moon',
+      Gnatikaraka: 'Rahu',
+      Darakaraka: 'Mercury',
+    },
+  },
+  {
+    name: 'Barack Obama',
+    expected: {
+      Atmakaraka: 'Mars',
+      Amatyakaraka: 'Rahu',
+      Bhratrukaraka: 'Sun',
+      Matrukaraka: 'Moon',
+      Pitrukaraka: 'Mercury',
+      Putrakaraka: 'Venus',
+      Gnatikaraka: 'Jupiter',
+      Darakaraka: 'Saturn',
+    },
+  },
+  {
+    name: 'Bill Gates',
+    expected: {
+      Atmakaraka: 'Saturn',
+      Amatyakaraka: 'Venus',
+      Bhratrukaraka: 'Mercury',
+      Matrukaraka: 'Mars',
+      Pitrukaraka: 'Moon',
+      Putrakaraka: 'Sun',
+      Gnatikaraka: 'Jupiter',
+      Darakaraka: 'Rahu',
+    },
+  },
+  {
+    name: 'Donald Trump',
+    expected: {
+      Atmakaraka: 'Sun',
+      Amatyakaraka: 'Moon',
+      Bhratrukaraka: 'Jupiter',
+      Matrukaraka: 'Mercury',
+      Pitrukaraka: 'Mars',
+      Putrakaraka: 'Venus',
+      Gnatikaraka: 'Rahu',
+      Darakaraka: 'Saturn',
+    },
+  },
+];
+
+describe('Fixture sweep — pinned 8-Jaimini karaka mappings (9 R-tier charts)', () => {
+  for (const pin of FIXTURE_PINS_8) {
+    it(`${pin.name}`, () => {
+      const chart = fixtureChart(pin.name);
+      const k = computeJaiminiKarakas(chart, { variant: '8-jaimini' });
       expect(k).toEqual(pin.expected);
     });
   }

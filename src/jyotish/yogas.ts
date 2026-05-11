@@ -83,7 +83,9 @@ export function computeYogas(chart: BirthChart, options: ComputeYogasOptions = {
     if (typeFilter && !typeFilter.has(rule.type)) continue;
     const match = rule.evaluate(ctx);
     if (match) {
-      out.push({ name: rule.name, type: rule.type, reasons: match.reasons });
+      const yoga: Yoga = { name: rule.name, type: rule.type, reasons: match.reasons };
+      if (match.bhanga) yoga.bhanga = match.bhanga;
+      out.push(yoga);
     }
   }
   return out;
