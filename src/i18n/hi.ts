@@ -217,6 +217,12 @@ export const hi: PanchangTranslations = {
     // Eclipse (Grahan)
     surya_grahan: 'सूर्य ग्रहण',
     chandra_grahan: 'चंद्र ग्रहण',
+    // Festival description templates ({name}/{masa}/{time} substituted at use)
+    desc_ekadashi_deferred_to_dwadashi: '{name} — द्वादशी को व्रत (दशमी-विद्धा)',
+    desc_ekadashi_viddha_smarta_next: 'दशमी-विद्धा: स्मार्त व्रत अगले दिन (द्वादशी); वैष्णव व्रत आज।',
+    desc_ekadashi_viddha_smarta_today: 'दशमी-विद्धा एकादशी: स्मार्त व्रत आज (द्वादशी)।',
+    desc_purnimanta_krishna_paksha: 'पूर्णिमांत: {masa} कृष्ण पक्ष',
+    desc_bhadra_observe_after: 'भद्रा समाप्ति के बाद ({time})',
   },
   misc: {
     purnima: 'पूर्णिमा',

@@ -1,6 +1,6 @@
 {
   "name": "panchang-ts",
-  "version": "4.1.1",
+  "version": "4.2.0",
   "description": "Pure TypeScript Hindu Panchang calculations. Tithi, Nakshatra, Yoga, Karana, Vara, and more. Offline-first, React Native compatible.",
   "author": "Ishank",
   "license": "MIT",
@@ -31,6 +31,16 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
+    },
+    "./festivals": {
+      "import": {
+        "types": "./dist/calendar/festivalsTable.d.ts",
+        "default": "./dist/calendar/festivalsTable.js"
+      },
+      "require": {
+        "types": "./dist/calendar/festivalsTable.d.cts",
+        "default": "./dist/calendar/festivalsTable.cjs"
+      }
     }
   },
   "files": [
@@ -54,6 +64,7 @@
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build",
+    "festivals:gen": "npm run build && node --experimental-strip-types scripts/generate-festivals-json.ts",
     "changeset": "changeset",
     "release": "changeset publish"
   },

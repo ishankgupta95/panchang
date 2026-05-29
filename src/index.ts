@@ -129,6 +129,13 @@ export {
 export type {
   YearlyListingOptions, FestivalDay, SankrantiEvent,
 } from './calendar/yearly';
+export { buildFestivalsTable } from './calendar/buildFestivalsTable';
+export type { BuildFestivalsTableOptions } from './calendar/buildFestivalsTable';
+export type {
+  FestivalsFile, FestivalsTableLanguage, FestivalsTableType,
+  FestivalTableMeta, FestivalTableDay, FestivalTableEntry,
+  FestivalTableEntryRaw, RawFestivalTableDay, LocalizedString,
+} from './calendar/festivalsTableTypes';
 
 // Types
 export type {

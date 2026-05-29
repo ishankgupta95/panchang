@@ -5,6 +5,21 @@ import type { FestivalRegion } from '../../src/types/options';
 const resolver = (key: string) => key;
 const rashiResolver = (idx: number) => `Rashi ${idx}`;
 
+// Resolver that returns the canonical English templates for the
+// description i18n keys (so {name}/{masa}/{time} substitution can be
+// tested end-to-end). Falls back to key-passthrough for everything else.
+const DESCRIPTION_TEMPLATES_EN: Record<string, string> = {
+  desc_purnimanta_krishna_paksha: 'Purnimanta: {masa} Krishna Paksha',
+  desc_bhadra_observe_after: 'Observe after Bhadra ends at {time}',
+  desc_ekadashi_deferred_to_dwadashi: '{name} — deferred to Dwadashi (Dashami-viddha)',
+  desc_ekadashi_viddha_smarta_next:
+    'Dashami-viddha: Smarta fast observed next day (Dwadashi); Vaishnava fast today.',
+  desc_ekadashi_viddha_smarta_today:
+    'Dashami-viddha Ekadashi: Smarta fast observed today (Dwadashi).',
+};
+const enDescResolver = (key: string): string =>
+  DESCRIPTION_TEMPLATES_EN[key] ?? key;
+
 /**
  * Build a default festival context; override only what the test cares about.
  * Other fields get inert defaults that won't match any rule.
@@ -188,7 +203,7 @@ describe('computeFestivals', () => {
     it('annotates Dashami-viddha Ekadashi with Smarta/Vaishnava note', () => {
       const r = computeFestivals(
         ctx({ tithiIndex: 10, ekadashiDashamiViddha: true }),
-        resolver,
+        enDescResolver,
       );
       const ekadashi = r.find(f => f.type === 'ekadashi');
       expect(ekadashi?.description).toMatch(/Dashami-viddha/);
@@ -204,7 +219,7 @@ describe('computeFestivals', () => {
     it('on viddha day: Vaishnava today, Smarta deferred to Dwadashi', () => {
       const r = computeFestivals(
         ctx({ tithiIndex: 10, ekadashiDashamiViddha: true }),
-        resolver,
+        enDescResolver,
       );
       const smarta = r.find(f => f.type === 'smarta_ekadashi');
       const vaishnava = r.find(f => f.type === 'vaishnava_ekadashi');
@@ -317,7 +332,7 @@ describe('computeFestivals', () => {
           bhadra: { start: new Date('2025-08-09T01:00:00.000Z'), end: bhadraEnd },
           formatClock: (d) => `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`,
         }),
-        resolver,
+        enDescResolver,
       );
       const rb = r.find(f => f.name === 'raksha_bandhan');
       expect(rb).toBeDefined();
@@ -402,7 +417,7 @@ describe('computeFestivals', () => {
           amantaMasaName: 'Ashwin',
           purnimantaMasaName: 'Kartika',
         }),
-        resolver,
+        enDescResolver,
       );
       const d = r.find(f => f.name === 'diwali');
       expect(d?.description).toBe('Purnimanta: Kartika Krishna Paksha');

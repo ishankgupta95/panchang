@@ -262,6 +262,79 @@ getDailyPanchang(jan13, amritsar, { timezone: 330, region: 'punjab' })!
 legacy slugs `'tamil'`, `'bengal'`, `'north-india'` are still accepted and
 mapped internally.
 
+### Pre-computed table (bundled, India / IST)
+
+If you want festival *dates* without running the engine, import the static
+table at `panchang-ts/festivals`. It bundles a rolling **2-years-past /
+5-years-future** window pre-computed against Varanasi (IST). Within India
+these dates are essentially universal.
+
+```typescript
+import {
+  getFestivalsForYear,
+  getFestivalsForDate,
+  FESTIVALS_META,
+  FESTIVALS_YEAR_RANGE,
+} from 'panchang-ts/festivals';
+
+const yr = FESTIVALS_YEAR_RANGE.start;          // e.g. { start: 2024, end: 2031 }
+getFestivalsForYear(yr)!.length;                // ~150 festival days
+const diwali = getFestivalsForYear(yr)!
+  .find(d => d.festivals.some(f => f.name === 'Diwali'))!.date;
+getFestivalsForDate(diwali);                    // [Narak Chaturdashi, Diwali]
+getFestivalsForDate(diwali, 'hi');              // [नरक चतुर्दशी, दिवाली]
+FESTIVALS_META.referenceLocation;               // "Varanasi"
+FESTIVALS_META.languages;                       // ["en", "hi"]
+```
+
+This entry point is engine-free — it ships only the JSON + accessors, so
+importing it won't pull the calculation engine into your bundle. Both `en`
+and `hi` are bundled (names *and* descriptions); pass the locale as the
+second argument. Eclipses are excluded (visibility is location-dependent —
+use `getUpcomingEclipses`).
+
+### Festivals outside India — build a location table and cache it
+
+The bundled table is **IST-only**. Elsewhere (Europe, North America, rest
+of world) festival dates can shift by ±1 day, because canonical times
+(nishita / pradosha / chandrodaya …) are observer-dependent — and the shift
+tracks the timezone offset, not the "region", so a single per-continent
+table would mis-date boundary-day festivals.
+
+For an offline app serving users worldwide, the right pattern is
+**compute-once-then-cache for the user's actual location**. Build a
+location-specific table with `buildFestivalsTable` (from the main entry —
+it uses the engine), persist the returned JSON, then read it back through
+the same accessors via their `source` argument:
+
+```typescript
+import { buildFestivalsTable } from 'panchang-ts';
+import { getFestivalsForYear, getFestivalsForDate } from 'panchang-ts/festivals';
+
+// On first use at the user's location (a few seconds on-device — run it in
+// the background / chunk by year), then cache `table` to disk/MMKV.
+const table = buildFestivalsTable({
+  location: { latitude: 40.7128, longitude: -74.006 },
+  timezoneOffsetMinutes: -300,   // US Eastern (EST); 0 = UK, 330 = IST
+  startYear: 2024,
+  endYear: 2031,
+  languages: ['en'],             // omit hi to halve the size
+});
+
+// Later reads are instant lookups against the cached table:
+getFestivalsForYear(2026, 'en', table);
+getFestivalsForDate('2026-11-08', 'en', table);  // key is in the table's tz
+```
+
+`buildFestivalsTable` returns the same `FestivalsFile` shape as the bundled
+data, so a cached table and the bundled India table are interchangeable as
+the `source` argument. India-majority apps can lean on the bundled table for
+zero first-load latency and only compute-and-cache for non-IST users.
+
+**Other notes:** Karva Chauth / Dhanteras / Diwali emit with Purnimanta
+paksha naming. To regenerate the bundled India table after a registry
+change, run `npm run festivals:gen` (rolling window, no constants to edit).
+
 ## Eclipses
 
 ```typescript

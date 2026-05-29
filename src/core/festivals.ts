@@ -569,13 +569,15 @@ export function computeFestivals(
       ctx.purnimantaMasaName &&
       ctx.amantaMasaName
     ) {
-      festival.description = `Purnimanta: ${ctx.purnimantaMasaName} Krishna Paksha`;
+      festival.description = nameResolver('desc_purnimanta_krishna_paksha')
+        .replace('{masa}', ctx.purnimantaMasaName);
     }
 
     // Bhadra exclusion notice (Raksha Bandhan).
     if (rule.bhadraExclude && ctx.bhadra && ctx.formatClock) {
       const bhadraEndStr = ctx.formatClock(ctx.bhadra.end);
-      festival.description = `Observe after Bhadra ends at ${bhadraEndStr}`;
+      festival.description = nameResolver('desc_bhadra_observe_after')
+        .replace('{time}', bhadraEndStr);
     }
 
     results.push(festival);
@@ -602,14 +604,15 @@ export function computeFestivals(
       const deferral: FestivalInfo = {
         name: nameResolver('smarta_ekadashi'),
         type: 'smarta_ekadashi',
-        description: `${namedDescription} — deferred to Dwadashi (Dashami-viddha)`,
+        description: nameResolver('desc_ekadashi_deferred_to_dwadashi')
+          .replace('{name}', namedDescription),
       };
       results.push(deferral);
       // Generic `ekadashi` with note for ergonomics.
       results.push({
         name: nameResolver('ekadashi'),
         type: 'ekadashi',
-        description: 'Dashami-viddha: Smarta fast observed next day (Dwadashi); Vaishnava fast today.',
+        description: nameResolver('desc_ekadashi_viddha_smarta_next'),
       });
     } else {
       // Non-viddha: Smarta and Vaishnava coincide.
@@ -629,7 +632,7 @@ export function computeFestivals(
     results.push({
       name: nameResolver('smarta_ekadashi'),
       type: 'smarta_ekadashi',
-      description: 'Dashami-viddha Ekadashi: Smarta fast observed today (Dwadashi).',
+      description: nameResolver('desc_ekadashi_viddha_smarta_today'),
     });
   }
 
