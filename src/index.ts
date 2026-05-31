@@ -102,7 +102,12 @@ export { computeGowriPanchangam } from './core/gowri';
 // Eclipses (Grahan)
 export {
   getUpcomingSolarEclipse, getUpcomingLunarEclipse, getEclipseDuringDay,
+  isEclipseVisibleAnyPhase,
 } from './astronomy/eclipse';
+
+// Lunar phases (Tithi-instants: new / quarters / full)
+export { getMoonPhasesInRange } from './astronomy/moonPhase';
+export type { MoonPhaseName, MoonPhaseEvent } from './astronomy/moonPhase';
 
 // Muhurta scoring engine + stock rules
 export { scoreMuhurta, findAuspiciousDates } from './muhurta/engine';
@@ -124,7 +129,7 @@ export {
 export type { HinduCalendarCoords, ConvertOptions } from './calendar/convert';
 export {
   getEkadashiDatesForYear, getSankrantisForYear,
-  getFestivalsInRange, getUpcomingEclipses,
+  getFestivalsInRange, getUpcomingEclipses, getEclipsesInRange,
 } from './calendar/yearly';
 export type {
   YearlyListingOptions, FestivalDay, SankrantiEvent,
@@ -136,6 +141,20 @@ export type {
   FestivalTableMeta, FestivalTableDay, FestivalTableEntry,
   FestivalTableEntryRaw, RawFestivalTableDay, LocalizedString,
 } from './calendar/festivalsTableTypes';
+export { buildEclipsesTable } from './calendar/buildEclipsesTable';
+export type { BuildEclipsesTableOptions } from './calendar/buildEclipsesTable';
+export type {
+  EclipsesFile, EclipsesTableLanguage, EclipseTableKind, EclipseTableSubtype,
+  EclipseTableMeta, EclipseTableDay, EclipseTableEntry,
+  EclipseTableEntryRaw, RawEclipseTableDay, EclipseSutak,
+} from './calendar/eclipsesTableTypes';
+export { buildMoonPhasesTable } from './calendar/buildMoonPhasesTable';
+export type { BuildMoonPhasesTableOptions } from './calendar/buildMoonPhasesTable';
+export type {
+  MoonPhasesFile, MoonPhasesTableLanguage, MoonPhaseTableName,
+  MoonPhaseTableMeta, MoonPhaseTableDay, MoonPhaseTableEntry,
+  MoonPhaseTableEntryRaw, RawMoonPhaseTableDay,
+} from './calendar/moonPhasesTableTypes';
 
 // Types
 export type {

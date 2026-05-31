@@ -78,10 +78,17 @@ JSDoc with `@param` / `@returns` / `@example`.
 | 31 | Ashtakavarga + Yoga detection + Jaimini Karakas + Bhava Bala (Wave 4a — pan-Indian Parashara core) | v3.2.0 | ✅ |
 | 32 | Varshaphala + Tithi Pravesha + Arudha + Special Lagnas + Upagrahas + Argala (Wave 4b — North-Indian + remaining classical layers) | v3.3.0 | ✅ |
 | 33 | Pathu Porutham + Narayan Dasha + KP sub-lord layer + Prashna foundation (Wave 4c — South-Indian regional features) | v3.4.0 | ✅ |
+| 34 | Drik Panchang / pandit parity sweep — doshas, marriage-matching cancellations, yoga bhanga, fixture harness, specialist completeness (sub-phases 34a–34e) | v4.x (4.0.0 baseline) | ✅ code-complete |
+| 35 | Static data tables (engine-free subpaths) — festivals, eclipses, moon-phases; bundled JSON + runtime builders (Wave 6 — offline distribution) | v4.2.0 → v4.3.0 | 🚧 eclipses + moon-phases code-complete, uncommitted |
 
 State as of v3.4.0: **7,707 tests** passing across 95 files. Bundle ~361 KB CJS.
 Festival registry: 80+ entries. Diaspora cross-verified across 5 non-IST cities.
 Hermes CI green.
+
+State as of Phase 35 (static tables, 2026-05-30): **8,164 tests** passing across
+100 files; typecheck clean. Three engine-free data subpaths: `panchang-ts/festivals`
+(shipped v4.2.0), `panchang-ts/eclipses` + `panchang-ts/moon-phases` (pending the
+next minor). Each ships bundled JSON + a runtime `build*Table` for other locations.
 
 ---
 
@@ -1961,6 +1968,76 @@ Narayan variable ~1d, Shadbala sub-components ~1d).
 
 ---
 
+## Phase 35 — Static Data Tables (Wave 6, offline distribution) — 🚧 in progress
+
+**Status (2026-05-30).** Festivals table shipped (v4.2.0). Eclipses +
+moon-phases tables code-complete and verified, **uncommitted** (user commits
+manually — [[feedback_no_commit]]). Proposed next release **v4.3.0** (additive
+minor).
+
+**Why.** Mobile / offline / RN consumers want festival dates, eclipse timings,
+and lunar phases without pulling the calculation engine (astronomy-engine) into
+their bundle. The answer is a family of **engine-free subpath exports**, each
+shipping a pre-computed JSON for India (IST) plus a runtime `build*Table` (main
+entry, uses the engine) to generate and cache a table for any other location.
+
+**Critical principle (locked).** drik panchang + pandit consensus is the
+reference ([[feedback_drikpanchang_parity]]); narrower classical rules over
+expansive ones.
+
+### Shipped / ready modules
+
+| Subpath | Accessors | Builder | Generator | Bundled JSON |
+|---------|-----------|---------|-----------|--------------|
+| `panchang-ts/festivals` | `getFestivalsForYear` / `…ForDate` | `buildFestivalsTable` | `festivals:gen` | `src/data/festivals.json` (v4.2.0) |
+| `panchang-ts/eclipses` | `getEclipsesForYear` / `…ForDate` | `buildEclipsesTable` | `eclipses:gen` | `src/data/eclipses.json` |
+| `panchang-ts/moon-phases` | `getMoonPhasesForYear` / `…ForDate` | `buildMoonPhasesTable` | `moon-phases:gen` | `src/data/moonPhases.json` |
+
+All three: rolling **2-past / 5-future** window, en + hi, `_meta` + `years`
+shape, `source` arg on accessors so a runtime-built table is a drop-in for the
+bundled one. Each is bundled into its own tsup entry, so importing one never
+drags in the engine or the other tables' data.
+
+### Eclipses (`getEclipsesInRange`, `isEclipseVisibleAnyPhase`)
+
+- **Any-phase visibility** (not peak-only): an eclipse is listed if the eclipsed
+  body clears the horizon during *any* phase between first and last contact —
+  catches moonrise/sunset-edge eclipses (e.g. 2026-03-03 total lunar, Moon rises
+  already eclipsed). `visibleFromLocation` = any-phase (inclusion criterion);
+  `visibleAtPeak` = body above horizon at greatest eclipse.
+- **Solar eclipses report the local subtype** (`SearchLocalSolarEclipse`) — a
+  globally-total eclipse shows as `partial` from Varanasi.
+- **Penumbral lunar eclipses carry no `sutak`** (drik / pandit consensus — not
+  religiously observed); enforced at the table layer, core `eclipse.ts`
+  unchanged. 12 India-visible eclipses in the 2024–2031 window.
+
+### Moon phases (`getMoonPhasesInRange`)
+
+- The 4 quarter instants (new=Amavasya / first quarter / full=Purnima / last
+  quarter) via `SearchMoonQuarter`. **Location-independent instants** — the
+  builder takes only `timezoneOffsetMinutes` (no coordinates); "for India" means
+  each instant mapped to its IST date. Distinct from the same-named *tithis*
+  (~24h windows). ~49 events/year.
+
+### Bootstrap gotcha (all three tables)
+
+`*:gen` runs `npm run build` first (inlining the *previous* JSON), then writes
+the new JSON — so `dist/` lags one generation until the next plain
+`npm run build`. Harmless at publish (`prepublishOnly` builds from the committed
+src/data JSON); run a final `npm run build` after a fresh-table `:gen` if testing
+dist locally.
+
+### Phase 35 deferred / future-scope
+
+- **Eclipse phase timeline** per entry (contact-by-contact local times +
+  visibility) — engine already exposes the data (solar via `EclipseEvent`
+  altitudes; lunar via semi-durations). User opted for the simpler `visibleAtPeak`
+  flag over the full array; revisit if a consumer needs the timeline.
+- **Tithi/Nakshatra/Yoga static tables** — the same engine-free pattern could
+  extend to daily-panchang elements if an offline consumer asks.
+
+---
+
 ## Wave Roadmap Summary
 
 | Phase | Wave | Focus | Effort | Releases |
@@ -1971,7 +2048,8 @@ Narayan variable ~1d, Shadbala sub-components ~1d).
 | 31 | Wave 4a | Ashtakavarga + Yogas + Karakas + Bhava Bala | 8–10d | v3.2 ✅ |
 | 32 | Wave 4b | Varshaphala + Tithi Pravesha + Arudha + Special Lagnas + Upagrahas + Argala | 8–9d | v3.3 ✅ |
 | 33 | Wave 4c | Pathu Porutham + Narayan Dasha + KP sub-lord + Prashna foundation | 7–8d | v3.4 ✅ |
-| 34 | Wave 5 | Drik Panchang / Pandit Parity Sweep (doshas, matching, yogas, fixtures, specialist completeness) | 13–19d | one minor per sub-phase on top of `package.json` 4.0.0 🚧 |
+| 34 | Wave 5 | Drik Panchang / Pandit Parity Sweep (doshas, matching, yogas, fixtures, specialist completeness) | 13–19d | one minor per sub-phase on top of `package.json` 4.0.0 ✅ code-complete |
+| 35 | Wave 6 | Static Data Tables — festivals / eclipses / moon-phases (engine-free subpaths + runtime builders) | 2–3d | v4.2.0 (festivals) → v4.3.0 (eclipses + moon-phases) 🚧 |
 
 **Decisions locked across the roadmap:**
 - en + hi only (no new locales).
@@ -1980,10 +2058,13 @@ Narayan variable ~1d, Shadbala sub-components ~1d).
 - v3.x stays — Wave 4 is fully additive. v4.0 is reserved for any future
   breaking change in the public type surface.
 
-**Where to start next:** Wave 4 is complete. The roadmap below lists
-the candidate items for Wave 5 / v4 — pick whichever has the strongest
-external pull (consumer-app integration is currently the highest-value
-follow-up since the library is feature-saturated for v3.x).
+**Where to start next:** Waves 4 + 5 are complete, and Wave 6 (static data
+tables) is landing the eclipses + moon-phases release (v4.3.0). For the next
+*feature*, the highest-confidence in-repo pick is the **external-panel
+cross-validation harness** (hardens shipped Shadbala / Pathu Porutham / Narayan
+/ KP layers against ProKerala / PyJHora to the drik-parity standard). The
+plan's nominal #1 — muhurta-engine consumer integration — lives in the
+dharmagya / dharmagya-website repos, not here.
 
 **Wave 5 / v4 candidates** (formerly "Out of scope for Wave 4"):
 - **Consumer-app integration of the muhurta engine** — replace local

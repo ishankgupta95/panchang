@@ -5,7 +5,7 @@
 Pure TypeScript Hindu Panchang (almanac), Jyotish, and Birth Chart calculations.
 Zero native dependencies. Works offline in React Native (Hermes), Node.js, and browsers.
 
-**Fast** (~0.1 ms names-only, ~0.5 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,103 tests across 96 files**
+**Fast** (~0.1 ms names-only, ~0.5 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,164 tests across 100 files**
 
 ---
 
@@ -290,8 +290,9 @@ FESTIVALS_META.languages;                       // ["en", "hi"]
 This entry point is engine-free — it ships only the JSON + accessors, so
 importing it won't pull the calculation engine into your bundle. Both `en`
 and `hi` are bundled (names *and* descriptions); pass the locale as the
-second argument. Eclipses are excluded (visibility is location-dependent —
-use `getUpcomingEclipses`).
+second argument. Eclipses are excluded here (visibility is location-dependent)
+— they ship as their own bundled table at `panchang-ts/eclipses` (see
+[Eclipses](#eclipses)).
 
 ### Festivals outside India — build a location table and cache it
 
@@ -352,6 +353,117 @@ if (r.eclipse) {
 import { getUpcomingSolarEclipse, getUpcomingLunarEclipse } from 'panchang-ts';
 const next = getUpcomingSolarEclipse(new Date(), loc, 365 /* days */);
 ```
+
+### Pre-computed table (bundled, India / IST)
+
+Like the festivals table, eclipse data ships as a static, engine-free entry
+at `panchang-ts/eclipses` — a rolling **2-years-past / 5-years-future** window
+pre-computed against Varanasi (IST). It lists every eclipse **visible from
+there during any phase** (so an eclipse already in progress at moon/sunrise or
+moon/sunset is included); the `visibleAtPeak` flag tells you whether greatest
+eclipse itself is observable. Within India visibility is essentially uniform.
+
+```typescript
+import {
+  getEclipsesForYear,
+  getEclipsesForDate,
+  ECLIPSES_META,
+  ECLIPSES_YEAR_RANGE,
+} from 'panchang-ts/eclipses';
+
+const e = getEclipsesForYear(2025)![0].eclipses[0];
+e.kind;                 // 'lunar'
+e.subtype;              // 'total'
+e.start; e.peak; e.end; // ISO UTC strings
+e.magnitude;            // 0..1 obscuration at peak
+e.visibleFromLocation;  // visible during any phase? (always true in bundled table)
+e.visibleAtPeak;        // is greatest eclipse itself above the horizon?
+e.sutak;                // { start, end } — see note below
+getEclipsesForDate('2025-09-07', 'hi');  // [पूर्ण चंद्र ग्रहण]
+ECLIPSES_META.referenceLocation;         // "Varanasi"
+```
+
+Each entry carries `en` + `hi` text. Solar eclipses report the subtype seen
+**locally** (a globally-total eclipse may read `partial` from Varanasi). The
+`sutak` window is present only where it applies — all visible solar eclipses
+and visible **umbral** (partial/total) lunar eclipses; **penumbral** lunar
+eclipses carry no `sutak` and are not religiously observed (drik / pandit
+consensus). For full astronomical detail (e.g. eclipses *not* visible in
+India), use `getUpcomingEclipses` / `getEclipsesInRange` from the main entry.
+
+**Outside India:** which eclipses are visible — and thus carry `sutak` —
+differs by location. Build and cache a location-specific table with
+`buildEclipsesTable` (main entry, uses the engine), then read it back via the
+same accessors' `source` argument — the same compute-once-then-cache pattern
+as festivals:
+
+```typescript
+import { buildEclipsesTable } from 'panchang-ts';
+import { getEclipsesForYear } from 'panchang-ts/eclipses';
+
+const table = buildEclipsesTable({
+  location: { latitude: 51.5074, longitude: -0.1278 },
+  timezoneOffsetMinutes: 0,        // UK / GMT
+  startYear: 2024,
+  endYear: 2031,
+  // visibleOnly: false → also include eclipses below the horizon (no sutak)
+});
+getEclipsesForYear(2025, 'en', table);
+```
+
+To regenerate the bundled India table, run `npm run eclipses:gen` (rolling
+window, no constants to edit).
+
+## Moon Phases
+
+The four principal lunar phases — **new** (Amavasya), **first quarter**,
+**full** (Purnima), **last quarter** — as precise instants. (These are the
+astronomical quarter moments, distinct from the same-named *tithis*, which are
+~24h windows.)
+
+```typescript
+import { getMoonPhasesInRange } from 'panchang-ts';
+const phases = getMoonPhasesInRange(new Date('2026-01-01'), new Date('2026-12-31'));
+phases.forEach(p => console.log(p.phase, p.time.toISOString()));  // ~49 / year
+```
+
+### Pre-computed table (bundled, India / IST)
+
+Same engine-free pattern as festivals and eclipses, at `panchang-ts/moon-phases`
+— a rolling **2-years-past / 5-years-future** window. Phases are global
+instants; the bundled table maps each onto its **IST** calendar date (so a new
+moon at 19:52 UTC on Jan 18 is listed under Jan 19 in India).
+
+```typescript
+import {
+  getMoonPhasesForYear,
+  getMoonPhasesForDate,
+  MOON_PHASES_META,
+  MOON_PHASES_YEAR_RANGE,
+} from 'panchang-ts/moon-phases';
+
+getMoonPhasesForYear(2026)!.length;            // ~49 phase days
+getMoonPhasesForDate('2026-01-03');            // [{ phase: 'full', name: 'Full Moon', ... }]
+getMoonPhasesForDate('2026-01-03', 'hi');      // [{ phase: 'full', name: 'पूर्णिमा', ... }]
+```
+
+Each entry carries `phase`, the phase `time` (ISO UTC), and `en` + `hi` text.
+For another timezone, build and cache a table with `buildMoonPhasesTable` (main
+entry) and pass it as the accessors' `source` argument — it takes only a
+`timezoneOffsetMinutes` (no coordinates, since phases are location-independent):
+
+```typescript
+import { buildMoonPhasesTable } from 'panchang-ts';
+import { getMoonPhasesForYear } from 'panchang-ts/moon-phases';
+
+const table = buildMoonPhasesTable({
+  timezoneOffsetMinutes: -300,   // US Eastern
+  startYear: 2024, endYear: 2031,
+});
+getMoonPhasesForYear(2026, 'en', table);
+```
+
+Regenerate the bundled India table with `npm run moon-phases:gen`.
 
 ## Planetary Positions
 
@@ -730,7 +842,7 @@ import {
   convertGregorianToHindu, convertHinduToGregorian,
   getKaliYugaYear, getHinduNewYear,
   getEkadashiDatesForYear, getSankrantisForYear,
-  getFestivalsInRange, getUpcomingEclipses,
+  getFestivalsInRange, getUpcomingEclipses, getEclipsesInRange,
 } from 'panchang-ts';
 
 // Gregorian → Hindu coords at sunrise
@@ -927,6 +1039,10 @@ computeMadhyahna, computePratahSandhya, computeSayahnaSandhya
 
 // Eclipses
 getUpcomingSolarEclipse, getUpcomingLunarEclipse, getEclipseDuringDay
+isEclipseVisibleAnyPhase
+
+// Moon phases (new / quarters / full as precise instants)
+getMoonPhasesInRange
 
 // Jyotish — planets, dashas, transits
 computePlanetaryPositions, GRAHA_ABBR
@@ -961,7 +1077,12 @@ aksharabhyasamRule, seemanthamRule, shopOpeningRule, travelStartRule
 // Calendar conversion + yearly listings
 convertGregorianToHindu, convertHinduToGregorian
 getKaliYugaYear, getHinduNewYear, computeSamvat
-getEkadashiDatesForYear, getSankrantisForYear, getFestivalsInRange, getUpcomingEclipses
+getEkadashiDatesForYear, getSankrantisForYear, getFestivalsInRange
+getUpcomingEclipses, getEclipsesInRange
+
+// Static data tables (engine-using runtime builders; bundled JSON at
+// panchang-ts/festivals, panchang-ts/eclipses, panchang-ts/moon-phases)
+buildFestivalsTable, buildEclipsesTable, buildMoonPhasesTable
 
 // Errors
 PanchangError
@@ -999,7 +1120,7 @@ InteractionManager.runAfterInteractions(() => {
 
 ## Accuracy
 
-8,103 tests across 96 files, including fixtures cross-verified against reference
+8,164 tests across 100 files, including fixtures cross-verified against reference
 panchang calculations spanning 2025–2026 across 10 Indian cities plus New York,
 London, Sydney, Dubai, Singapore (diaspora fixtures cover DST on
 `America/New_York`).

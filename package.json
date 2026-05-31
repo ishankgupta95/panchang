@@ -1,6 +1,6 @@
 {
   "name": "panchang-ts",
-  "version": "4.2.0",
+  "version": "4.3.0",
   "description": "Pure TypeScript Hindu Panchang calculations. Tithi, Nakshatra, Yoga, Karana, Vara, and more. Offline-first, React Native compatible.",
   "author": "Ishank",
   "license": "MIT",
@@ -41,6 +41,26 @@
         "types": "./dist/calendar/festivalsTable.d.cts",
         "default": "./dist/calendar/festivalsTable.cjs"
       }
+    },
+    "./eclipses": {
+      "import": {
+        "types": "./dist/calendar/eclipsesTable.d.ts",
+        "default": "./dist/calendar/eclipsesTable.js"
+      },
+      "require": {
+        "types": "./dist/calendar/eclipsesTable.d.cts",
+        "default": "./dist/calendar/eclipsesTable.cjs"
+      }
+    },
+    "./moon-phases": {
+      "import": {
+        "types": "./dist/calendar/moonPhasesTable.d.ts",
+        "default": "./dist/calendar/moonPhasesTable.js"
+      },
+      "require": {
+        "types": "./dist/calendar/moonPhasesTable.d.cts",
+        "default": "./dist/calendar/moonPhasesTable.cjs"
+      }
     }
   },
   "files": [
@@ -61,10 +81,12 @@
     "test:coverage": "vitest run --coverage",
     "test:hermes": "bash scripts/hermes-check.sh",
     "bench": "vitest bench",
-    "lint": "eslint src --ext .ts",
+    "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build",
     "festivals:gen": "npm run build && node --experimental-strip-types scripts/generate-festivals-json.ts",
+    "eclipses:gen": "npm run build && node --experimental-strip-types scripts/generate-eclipses-json.ts",
+    "moon-phases:gen": "npm run build && node --experimental-strip-types scripts/generate-moon-phases-json.ts",
     "changeset": "changeset",
     "release": "changeset publish"
   },
@@ -78,6 +100,7 @@
     "hermes-parser": "^0.35.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.60.0",
     "vitest": "^4.1.0"
   }
 }

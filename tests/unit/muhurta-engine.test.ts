@@ -218,22 +218,25 @@ describe('findAuspiciousDates', () => {
 });
 
 describe('Vivah rule — scoring sanity', () => {
-  // Use a short May 2026 window (2 weeks) instead of a full month to keep
-  // the parallel CPU footprint small.
+  // Use a short Apr–May 2026 window (2 weeks) instead of a full month to keep
+  // the parallel CPU footprint small. This window is deliberately *outside*
+  // Adhik Jyeshtha (17 May – 15 Jun 2026): Vivah excludes the entire Adhika
+  // month, so a window inside it yields zero passes and can't exercise both
+  // branches.
   const dates = findAuspiciousDates(
     vivahRule,
-    new Date('2026-05-10'),
-    new Date('2026-05-24'),
+    new Date('2026-04-21'),
+    new Date('2026-05-04'),
     DELHI,
     { timezone: TZ, includeFailures: true },
   );
 
-  it('scoring 2026-05-10 through 2026-05-24 produces some passes and some fails', () => {
+  it('scoring 2026-04-21 through 2026-05-04 produces some passes and some fails', () => {
     const passes = dates.filter((d) => d.passes);
     const fails = dates.filter((d) => !d.passes);
     // Vivah is restrictive (excludes ekadashi, bhadra, adhika) — expect both
     // across a 14-day window which always contains at least one Bhadra and
-    // one Ekadashi day.
+    // one Ganda-Mula day.
     expect(passes.length).toBeGreaterThan(0);
     expect(fails.length).toBeGreaterThan(0);
   });

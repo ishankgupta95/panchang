@@ -1,5 +1,67 @@
 # panchang-ts
 
+<!--
+  Note: 4.0.0 and 4.1.0 entries are not yet backfilled here (the CHANGELOG
+  jumped from 3.4.0). See git history for their scope; 4.2.0 below is
+  reconstructed from the festivals-table release.
+-->
+
+## 4.3.0
+
+**Minor release — eclipses + moon-phases static tables (Wave 6), plus an
+eclipse visibility refinement.** Two new engine-free subpath exports join
+`panchang-ts/festivals`. All additive — every prior export keeps its shape.
+
+### Highlights
+
+- **`panchang-ts/eclipses`** — bundled, engine-free eclipse table for India
+  (Varanasi / IST), a rolling 2-years-past / 5-years-future window. Accessors
+  `getEclipsesForYear` / `getEclipsesForDate`, plus `ECLIPSES_META` /
+  `ECLIPSES_YEAR_RANGE`. Each entry carries `kind` / `subtype` / `start` /
+  `peak` / `end` (ISO UTC) / `magnitude` / `visibleFromLocation` /
+  `visibleAtPeak` / `sutak`, in en + hi. Solar eclipses report the subtype seen
+  locally (a globally-total eclipse may read `partial`); penumbral lunar
+  eclipses carry no `sutak` and are not religiously observed (drik / pandit
+  consensus).
+- **Eclipse any-phase visibility** — the table lists an eclipse if the eclipsed
+  body is above the horizon during *any* phase (not just at peak), so one
+  already in progress at moon/sunrise or moon/sunset is included (e.g. the
+  2026-03-03 total lunar, which rises already eclipsed). `visibleFromLocation`
+  now means any-phase-visible; the new `visibleAtPeak` flags whether greatest
+  eclipse itself is observable. New helper
+  `isEclipseVisibleAnyPhase(eclipse, location)`.
+- **`panchang-ts/moon-phases`** — bundled, engine-free lunar-phase table (new /
+  first quarter / full / last quarter) for India (IST). Accessors
+  `getMoonPhasesForYear` / `getMoonPhasesForDate`, plus `MOON_PHASES_META` /
+  `MOON_PHASES_YEAR_RANGE`. ~49 events/year as precise instants, en + hi (new =
+  Amavasya, full = Purnima) — distinct from the same-named *tithis*, which are
+  ~24h windows. Phases are location-independent instants, so the bundled table
+  only maps each onto its IST calendar date.
+- **Runtime builders** (main entry, use the engine) for non-IST locations:
+  `buildEclipsesTable`, `buildMoonPhasesTable`, plus range enumerators
+  `getEclipsesInRange` and `getMoonPhasesInRange`. Build once, cache the JSON,
+  pass it as the `source` argument to the accessors — interchangeable with the
+  bundled table.
+
+### Fixes
+
+- **Adhika (leap) masa detection** — `getDailyPanchang`'s `chandraMasa.isAdhika`
+  and masa naming are now derived from the **true bounding new-moon instants**
+  and the sidereal Sun's rashi at each (new internal `newMoon` helper;
+  `computeChandraMasa` gained `refDate` + `getSiderealSun` parameters),
+  replacing the prior approximation. Corrects masa output around adhik-masa
+  boundaries — e.g. Adhik Jyeshtha (17 May – 15 Jun 2026). Internal change only;
+  the public type surface is unchanged.
+
+## 4.2.0
+
+**Minor release — festivals static table.** New engine-free
+`panchang-ts/festivals` subpath: a bundled, pre-computed festival table for
+India (Varanasi / IST, rolling 2-past / 5-future window), plus
+`buildFestivalsTable` to compute and cache a table for any location at runtime.
+Accessors `getFestivalsForYear` / `getFestivalsForDate`, en + hi; eclipses are
+excluded (location-dependent — now served by `panchang-ts/eclipses`).
+
 ## 3.4.0
 
 **Minor release — Phase 33 Wave 4c: Pathu Porutham + Narayan Dasha

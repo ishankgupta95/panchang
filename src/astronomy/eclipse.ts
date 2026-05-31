@@ -58,11 +58,38 @@ function makeObserver(location: GeoLocation): Observer {
  * Uses topocentric equatorial coordinates converted to horizontal coordinates
  * with atmospheric refraction correction.
  */
-function isBodyAboveHorizon(date: Date, location: GeoLocation, body: Body): boolean {
+export function isBodyAboveHorizon(date: Date, location: GeoLocation, body: Body): boolean {
   const observer = makeObserver(location);
   const eq = Equator(body, date, observer, true, true);
   const hor = Horizon(date, observer, eq.ra, eq.dec, 'normal');
   return hor.altitude > 0;
+}
+
+/**
+ * Whether an eclipse is observable from `location` during *any* phase — the
+ * eclipsed body (Sun for solar, Moon for lunar) above the horizon at any point
+ * between first and last contact. Broader than `EclipseInfo.visibleFromLocation`,
+ * which checks only the peak: this catches an eclipse already in progress at
+ * moonrise/sunrise or still in progress at moonset/sunset (e.g. a total lunar
+ * eclipse whose Moon rises already eclipsed).
+ *
+ * The contact window `[start, end]` is sampled at a fixed cadence; at the
+ * latitudes where eclipses are observed the body's altitude is unimodal over
+ * the few-hour window, so a dozen samples reliably detect any visible portion.
+ */
+export function isEclipseVisibleAnyPhase(
+  eclipse: EclipseInfo,
+  location: GeoLocation,
+): boolean {
+  const body = eclipse.kind === 'solar' ? Body.Sun : Body.Moon;
+  const startMs = eclipse.start.getTime();
+  const endMs = eclipse.end.getTime();
+  const SAMPLES = 12;
+  for (let i = 0; i <= SAMPLES; i++) {
+    const t = new Date(startMs + ((endMs - startMs) * i) / SAMPLES);
+    if (isBodyAboveHorizon(t, location, body)) return true;
+  }
+  return false;
 }
 
 /**

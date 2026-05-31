@@ -202,6 +202,7 @@ export function getInstantPanchang(
     siderealSun, siderealMoon,
     (idx, isAdhika) => resolveChandraMasaName(idx, lang, isAdhika),
     masaSystem,
+    date, getSun,
   );
   const samvat = computeSamvat(date);
   const chandraRashi = computeChandraRashi(
@@ -417,6 +418,7 @@ export function getDailyPanchang(
     siderealSunAtSunrise, siderealMoonAtSunrise,
     (idx, isAdhika) => resolveChandraMasaName(idx, lang, isAdhika),
     masaSystem,
+    sunriseUtc, getSun,
   );
   const samvat = computeSamvat(sunriseUtc);
   const chandraRashi = computeChandraRashi(
@@ -624,6 +626,7 @@ export function getDailyPanchang(
     yesterdaySun, yesterdayMoon,
     (idx, isAdhika) => resolveChandraMasaName(idx, lang, isAdhika),
     masaSystem,
+    yesterdaySunriseUtc, getSun,
   );
   const priorMasaWasAdhika =
     yesterdayChandramasa.amantaIndex === chandramasa.amantaIndex &&

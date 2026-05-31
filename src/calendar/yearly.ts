@@ -220,3 +220,75 @@ export function getUpcomingEclipses(
 
   return collected;
 }
+
+/**
+ * Collect every eclipse whose peak falls within a date range, as observed
+ * from `location`, sorted by `peak` ascending. The range counterpart to
+ * {@link getUpcomingEclipses}, intended for building an eclipse calendar or
+ * the static eclipse table (see `buildEclipsesTable`).
+ *
+ * Solar eclipses are found via *local* search, so only those whose path
+ * touches `location` appear, and each carries the subtype seen locally
+ * (e.g. a globally-total eclipse seen as `partial` from `location`). Lunar
+ * eclipses are global; the `visibleFromLocation` flag reports whether the
+ * Moon is above the horizon at peak. Filter on that flag for an
+ * observable-only list.
+ *
+ * Each entry is a full {@link EclipseInfo} (timing, magnitude, visibility,
+ * sutak window).
+ *
+ * @param start    Inclusive start date.
+ * @param end      Inclusive end date.
+ * @param location Observer coordinates.
+ *
+ * @example
+ * ```typescript
+ * const eclipses = getEclipsesInRange(
+ *   new Date('2026-01-01'),
+ *   new Date('2026-12-31'),
+ *   DELHI,
+ * );
+ * eclipses.forEach(e => console.log(e.kind, e.subtype, e.peak.toISOString()));
+ * ```
+ */
+export function getEclipsesInRange(
+  start: Date,
+  end: Date,
+  location: GeoLocation,
+): EclipseInfo[] {
+  validateDate(start);
+  validateDate(end);
+  validateLocation(location);
+  if (start.getTime() > end.getTime()) {
+    throw new RangeError(
+      `start (${start.toISOString()}) must be ≤ end (${end.toISOString()})`,
+    );
+  }
+
+  const spanDays = Math.ceil((end.getTime() - start.getTime()) / (24 * 3600_000)) + 1;
+  const endMs = end.getTime();
+  // Each step jumps past one eclipse's end, and eclipses of a given kind are
+  // months apart, so the real count is ~spanDays/60. This cap is several
+  // times that — a runaway-loop backstop, never the exit (the null / past-end
+  // check below ends the walk first).
+  const maxSteps = Math.ceil(spanDays / 20) + 50;
+
+  const walk = (next: (from: Date) => EclipseInfo | null): EclipseInfo[] => {
+    const acc: EclipseInfo[] = [];
+    let cursor = new Date(start.getTime());
+    for (let step = 0; step < maxSteps; step++) {
+      const e = next(cursor);
+      if (!e || e.peak.getTime() > endMs) break;
+      acc.push(e);
+      cursor = new Date(e.end.getTime() + 1000);
+    }
+    return acc;
+  };
+
+  // `spanDays` as the search window keeps `from + spanDays ≥ end` for every
+  // cursor ≥ start, so the underlying searches never stop short of `end`.
+  const solar = walk(from => getUpcomingSolarEclipse(from, location, spanDays));
+  const lunar = walk(from => getUpcomingLunarEclipse(from, location, spanDays));
+
+  return [...solar, ...lunar].sort((a, b) => a.peak.getTime() - b.peak.getTime());
+}

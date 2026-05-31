@@ -1,7 +1,12 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/calendar/festivalsTable.ts'],
+  entry: [
+    'src/index.ts',
+    'src/calendar/festivalsTable.ts',
+    'src/calendar/eclipsesTable.ts',
+    'src/calendar/moonPhasesTable.ts',
+  ],
   format: ['cjs', 'esm'],
   dts: true,
   splitting: false,

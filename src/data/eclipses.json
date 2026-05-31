@@ -1,0 +1,346 @@
+{
+  "_meta": {
+    "referenceLocation": "Varanasi",
+    "latitude": 25.3176,
+    "longitude": 82.9739,
+    "timezoneOffsetMinutes": 330,
+    "visibleOnly": true,
+    "languages": [
+      "en",
+      "hi"
+    ],
+    "startYear": 2024,
+    "endYear": 2031,
+    "generatedAt": "2026-05-30T14:11:40.371Z",
+    "note": "Eclipses pre-computed for Varanasi (IST), visible from there during any phase (eclipsed body above the horizon between first and last contact — so an eclipse in progress at moon/sunrise or moon/sunset is included). visibleAtPeak flags whether greatest eclipse itself is observable. Within India visibility is essentially uniform; elsewhere it differs, so build a location-specific table at runtime with buildEclipsesTable and cache it. Solar eclipses carry the subtype seen from Varanasi (a globally-total eclipse may show as partial). Times are ISO UTC. Sutak: 4 prahara (12h) before first contact for solar, 3 prahara (9h) for umbral (partial/total) lunar, ending at moksha; penumbral lunar eclipses carry no sutak and are not religiously observed (drik / pandit consensus). Each entry carries both en and hi text."
+  },
+  "years": {
+    "2024": [],
+    "2025": [
+      {
+        "date": "2025-09-07",
+        "eclipses": [
+          {
+            "name": {
+              "en": "Total Lunar Eclipse",
+              "hi": "पूर्ण चंद्र ग्रहण"
+            },
+            "kind": "lunar",
+            "subtype": "total",
+            "start": "2025-09-07T15:28:02.515Z",
+            "peak": "2025-09-07T18:11:41.501Z",
+            "end": "2025-09-07T20:55:20.486Z",
+            "magnitude": 1,
+            "visibleFromLocation": true,
+            "visibleAtPeak": true,
+            "description": {
+              "en": "Total Lunar Eclipse — 100% obscuration.",
+              "hi": "पूर्ण चंद्र ग्रहण — 100% ग्रास।"
+            },
+            "sutak": {
+              "start": "2025-09-07T06:28:02.515Z",
+              "end": "2025-09-07T20:55:20.486Z"
+            }
+          }
+        ]
+      }
+    ],
+    "2026": [
+      {
+        "date": "2026-03-03",
+        "eclipses": [
+          {
+            "name": {
+              "en": "Total Lunar Eclipse",
+              "hi": "पूर्ण चंद्र ग्रहण"
+            },
+            "kind": "lunar",
+            "subtype": "total",
+            "start": "2026-03-03T08:44:01.948Z",
+            "peak": "2026-03-03T11:33:40.289Z",
+            "end": "2026-03-03T14:23:18.629Z",
+            "magnitude": 1,
+            "visibleFromLocation": true,
+            "visibleAtPeak": false,
+            "description": {
+              "en": "Total Lunar Eclipse — 100% obscuration.",
+              "hi": "पूर्ण चंद्र ग्रहण — 100% ग्रास।"
+            },
+            "sutak": {
+              "start": "2026-03-02T23:44:01.948Z",
+              "end": "2026-03-03T14:23:18.629Z"
+            }
+          }
+        ]
+      }
+    ],
+    "2027": [
+      {
+        "date": "2027-02-21",
+        "eclipses": [
+          {
+            "name": {
+              "en": "Penumbral Lunar Eclipse",
+              "hi": "उपच्छाया चंद्र ग्रहण"
+            },
+            "kind": "lunar",
+            "subtype": "penumbral",
+            "start": "2027-02-20T21:11:52.109Z",
+            "peak": "2027-02-20T23:12:44.142Z",
+            "end": "2027-02-21T01:13:36.174Z",
+            "magnitude": 0,
+            "visibleFromLocation": true,
+            "visibleAtPeak": true,
+            "description": {
+              "en": "Penumbral Lunar Eclipse — penumbral shadow only; no sutak.",
+              "hi": "उपच्छाया चंद्र ग्रहण — केवल उपच्छाया छाया; सूतक नहीं।"
+            }
+          }
+        ]
+      },
+      {
+        "date": "2027-07-18",
+        "eclipses": [
+          {
+            "name": {
+              "en": "Penumbral Lunar Eclipse",
+              "hi": "उपच्छाया चंद्र ग्रहण"
+            },
+            "kind": "lunar",
+            "subtype": "penumbral",
+            "start": "2027-07-18T15:50:13.585Z",
+            "peak": "2027-07-18T16:02:54.880Z",
+            "end": "2027-07-18T16:15:36.174Z",
+            "magnitude": 0,
+            "visibleFromLocation": true,
+            "visibleAtPeak": true,
+            "description": {
+              "en": "Penumbral Lunar Eclipse — penumbral shadow only; no sutak.",
+              "hi": "उपच्छाया चंद्र ग्रहण — केवल उपच्छाया छाया; सूतक नहीं।"
+            }
+          }
+        ]
+      },
+      {
+        "date": "2027-08-02",
+        "eclipses": [
+          {
+            "name": {
+              "en": "Partial Solar Eclipse",
+              "hi": "आंशिक सूर्य ग्रहण"
+            },
+            "kind": "solar",
+            "subtype": "partial",
+            "start": "2027-08-02T10:35:33.763Z",
+            "peak": "2027-08-02T11:07:37.251Z",
+            "end": "2027-08-02T11:38:16.999Z",
+            "magnitude": 0.06923317826751327,
+            "visibleFromLocation": true,
+            "visibleAtPeak": true,
+            "description": {
+              "en": "Partial Solar Eclipse — 7% obscuration.",
+              "hi": "आंशिक सूर्य ग्रहण — 7% ग्रास।"
+            },
+            "sutak": {
+              "start": "2027-08-01T22:35:33.763Z",
+              "end": "2027-08-02T11:38:16.999Z"
+            }
+          }
+        ]
+      }
+    ],
+    "2028": [
+      {
+        "date": "2028-07-06",
+        "eclipses": [
+          {
+            "name": {
+              "en": "Partial Lunar Eclipse",
+              "hi": "आंशिक चंद्र ग्रहण"
+            },
+            "kind": "lunar",
+            "subtype": "partial",
+            "start": "2028-07-06T15:43:55.421Z",
+            "peak": "2028-07-06T18:19:38.379Z",
+            "end": "2028-07-06T20:55:21.336Z",
+            "magnitude": 0.3322998217792101,
+            "visibleFromLocation": true,
+            "visibleAtPeak": true,
+            "description": {
+              "en": "Partial Lunar Eclipse — 33% obscuration.",
+              "hi": "आंशिक चंद्र ग्रहण — 33% ग्रास।"
+            },
+            "sutak": {
+              "start": "2028-07-06T06:43:55.421Z",
+              "end": "2028-07-06T20:55:21.336Z"
+            }
+          }
+        ]
+      },
+      {
+        "date": "2028-12-31",
+        "eclipses": [
+          {
+            "name": {
+              "en": "Total Lunar Eclipse",
+              "hi": "पूर्ण चंद्र ग्रहण"
+            },
+            "kind": "lunar",
+            "subtype": "total",
+            "start": "2028-12-31T14:03:27.574Z",
+            "peak": "2028-12-31T16:51:54.549Z",
+            "end": "2028-12-31T19:40:21.523Z",
+            "magnitude": 1,
+            "visibleFromLocation": true,
+            "visibleAtPeak": true,
+            "description": {
+              "en": "Total Lunar Eclipse — 100% obscuration.",
+              "hi": "पूर्ण चंद्र ग्रहण — 100% ग्रास।"
+            },
+            "sutak": {
+              "start": "2028-12-31T05:03:27.574Z",
+              "end": "2028-12-31T19:40:21.523Z"
+            }
+          }
+        ]
+      }
+    ],
+    "2029": [
+      {
+        "date": "2029-12-21",
+        "eclipses": [
+          {
+            "name": {
+              "en": "Total Lunar Eclipse",
+              "hi": "पूर्ण चंद्र ग्रहण"
+            },
+            "kind": "lunar",
+            "subtype": "total",
+            "start": "2029-12-20T19:42:34.436Z",
+            "peak": "2029-12-20T22:41:54.610Z",
+            "end": "2029-12-21T01:41:14.783Z",
+            "magnitude": 1,
+            "visibleFromLocation": true,
+            "visibleAtPeak": true,
+            "description": {
+              "en": "Total Lunar Eclipse — 100% obscuration.",
+              "hi": "पूर्ण चंद्र ग्रहण — 100% ग्रास।"
+            },
+            "sutak": {
+              "start": "2029-12-20T10:42:34.436Z",
+              "end": "2029-12-21T01:41:14.783Z"
+            }
+          }
+        ]
+      }
+    ],
+    "2030": [
+      {
+        "date": "2030-06-01",
+        "eclipses": [
+          {
+            "name": {
+              "en": "Partial Solar Eclipse",
+              "hi": "आंशिक सूर्य ग्रहण"
+            },
+            "kind": "solar",
+            "subtype": "partial",
+            "start": "2030-06-01T05:29:15.459Z",
+            "peak": "2030-06-01T06:26:07.220Z",
+            "end": "2030-06-01T07:23:32.918Z",
+            "magnitude": 0.03201876826173855,
+            "visibleFromLocation": true,
+            "visibleAtPeak": true,
+            "description": {
+              "en": "Partial Solar Eclipse — 3% obscuration.",
+              "hi": "आंशिक सूर्य ग्रहण — 3% ग्रास।"
+            },
+            "sutak": {
+              "start": "2030-05-31T17:29:15.459Z",
+              "end": "2030-06-01T07:23:32.918Z"
+            }
+          }
+        ]
+      },
+      {
+        "date": "2030-06-16",
+        "eclipses": [
+          {
+            "name": {
+              "en": "Partial Lunar Eclipse",
+              "hi": "आंशिक चंद्र ग्रहण"
+            },
+            "kind": "lunar",
+            "subtype": "partial",
+            "start": "2030-06-15T16:13:48.134Z",
+            "peak": "2030-06-15T18:33:14.732Z",
+            "end": "2030-06-15T20:52:41.329Z",
+            "magnitude": 0.4708077570686115,
+            "visibleFromLocation": true,
+            "visibleAtPeak": true,
+            "description": {
+              "en": "Partial Lunar Eclipse — 47% obscuration.",
+              "hi": "आंशिक चंद्र ग्रहण — 47% ग्रास।"
+            },
+            "sutak": {
+              "start": "2030-06-15T07:13:48.134Z",
+              "end": "2030-06-15T20:52:41.329Z"
+            }
+          }
+        ]
+      },
+      {
+        "date": "2030-12-10",
+        "eclipses": [
+          {
+            "name": {
+              "en": "Penumbral Lunar Eclipse",
+              "hi": "उपच्छाया चंद्र ग्रहण"
+            },
+            "kind": "lunar",
+            "subtype": "penumbral",
+            "start": "2030-12-09T20:07:30.214Z",
+            "peak": "2030-12-09T22:27:32.805Z",
+            "end": "2030-12-10T00:47:35.395Z",
+            "magnitude": 0,
+            "visibleFromLocation": true,
+            "visibleAtPeak": true,
+            "description": {
+              "en": "Penumbral Lunar Eclipse — penumbral shadow only; no sutak.",
+              "hi": "उपच्छाया चंद्र ग्रहण — केवल उपच्छाया छाया; सूतक नहीं।"
+            }
+          }
+        ]
+      }
+    ],
+    "2031": [
+      {
+        "date": "2031-05-21",
+        "eclipses": [
+          {
+            "name": {
+              "en": "Partial Solar Eclipse",
+              "hi": "आंशिक सूर्य ग्रहण"
+            },
+            "kind": "solar",
+            "subtype": "partial",
+            "start": "2031-05-21T06:16:35.159Z",
+            "peak": "2031-05-21T07:56:20.750Z",
+            "end": "2031-05-21T09:26:36.965Z",
+            "magnitude": 0.3939059024675881,
+            "visibleFromLocation": true,
+            "visibleAtPeak": true,
+            "description": {
+              "en": "Partial Solar Eclipse — 39% obscuration.",
+              "hi": "आंशिक सूर्य ग्रहण — 39% ग्रास।"
+            },
+            "sutak": {
+              "start": "2031-05-20T18:16:35.159Z",
+              "end": "2031-05-21T09:26:36.965Z"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,13 +1,9 @@
 import type { ChandraMasaInfo } from '../types/elements';
 import type { MasaSystem } from '../types/options';
-
-/** Mean synodic month in days */
-const SYNODIC_MONTH = 29.53059;
-/** Julian year in days */
-const TROPICAL_YEAR = 365.25;
+import { boundingNewMoons } from '../astronomy/newMoon';
 
 /**
- * Compute the current Chandra Masa (Hindu lunar month) from sidereal longitudes.
+ * Compute the current Chandra Masa (Hindu lunar month).
  *
  * The Amanta (South-Indian) month is named after the nakshatra in which
  * the Purnima (full moon) of that month typically falls.  The Amavasya
@@ -21,6 +17,13 @@ const TROPICAL_YEAR = 365.25;
  * the same solar month the first initiates an Adhika (extra) month and the
  * second the regular (Nija) month.
  *
+ * The masa identity (index + Adhika status) is derived from the **actual** new
+ * moons bounding the current lunar month — found via {@link boundingNewMoons}
+ * and the sidereal Sun rashi at each — not from mean-motion estimates. Mean
+ * motion overshoots the Sankranti boundary near aphelion (June/July), exactly
+ * when Adhika Jyeshtha/Ashadha occur, which previously produced false-negative,
+ * day-to-day-flickering `isAdhika` values within a single Adhika month.
+ *
  * Purnimanta (North-Indian) month starts at the previous full moon, so during
  * Krishna Paksha the Purnimanta name runs one month ahead of the Amanta name.
  *
@@ -29,28 +32,30 @@ const TROPICAL_YEAR = 365.25;
  * @param nameFn        Callback that returns a translated month name for an index.
  * @param system        `'purnimanta'` (default) or `'amanta'` — controls which
  *                      system the primary `index`/`name` fields represent.
+ * @param refDate       Reference instant (UTC) — used to locate the bounding new moons.
+ * @param getSiderealSun  Returns the sidereal Sun longitude (degrees) at a given instant.
  */
 export function computeChandraMasa(
   siderealSun: number,
   siderealMoon: number,
   nameFn: (index: number, isAdhika: boolean) => string,
   system: MasaSystem = 'purnimanta',
+  refDate: Date,
+  getSiderealSun: (d: Date) => number,
 ): ChandraMasaInfo {
   // Moon–Sun elongation in [0, 360)
   const elongation = ((siderealMoon - siderealSun) + 360) % 360;
 
-  // ── Previous Amavasya ────────────────────────────────
-  const daysElapsed = (elongation / 360) * SYNODIC_MONTH;
-  // Sun moves ~360°/year; subtract the degrees it has travelled since new moon
-  const sunAtPrevNewMoon = ((siderealSun - (daysElapsed / TROPICAL_YEAR) * 360) + 36000) % 360;
+  // ── Bounding Amavasyas of the current lunar month ────
+  // Use the true new-moon instants and the sidereal Sun rashi at each.
+  const { prev, next } = boundingNewMoons(refDate);
+  const sunAtPrevNewMoon = ((getSiderealSun(prev) % 360) + 360) % 360;
+  const sunAtNextNewMoon = ((getSiderealSun(next) % 360) + 360) % 360;
   const solarMonthAtPrev = Math.floor(sunAtPrevNewMoon / 30);
-
-  // ── Next Amavasya ────────────────────────────────────
-  const daysUntilNext = SYNODIC_MONTH - daysElapsed;
-  const sunAtNextNewMoon = (siderealSun + (daysUntilNext / TROPICAL_YEAR) * 360) % 360;
   const solarMonthAtNext = Math.floor(sunAtNextNewMoon / 30);
 
-  // Adhika: both Amavasyas land in the same solar month
+  // Adhika: both bounding Amavasyas land in the same solar month
+  // (no Sankranti occurs between them).
   const isAdhika = solarMonthAtPrev === solarMonthAtNext;
 
   const amantaIndex = (solarMonthAtPrev + 1) % 12;
