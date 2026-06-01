@@ -62,11 +62,17 @@ export function computeChandraMasa(
   const amantaName = nameFn(amantaIndex, isAdhika);
 
   // ── Purnimanta ───────────────────────────────────────
-  // In Krishna Paksha (elongation ≥ 180°) the Purnimanta month is
-  // already one month ahead of the Amanta month.
+  // In Krishna Paksha (elongation ≥ 180°) the Purnimanta month is normally
+  // one month ahead of the Amanta month. An Adhika (intercalary) month has no
+  // Sankranti, so its Purnimanta name does NOT advance across the Adhika
+  // Purnima: the whole Adhika lunar month (both pakshas) carries the Adhika
+  // month's own name and Adhika flag in both systems. (Matches Drik Panchang,
+  // e.g. Adhika Jyeshtha 2026: Purnimanta stays "Adhika Jyeshtha" through both
+  // its Shukla and Krishna pakshas rather than rolling forward to Ashadha.)
   const isKrishnaPaksha = elongation >= 180;
-  const purnimantaIndex = isKrishnaPaksha ? (amantaIndex + 1) % 12 : amantaIndex;
-  const purnimantaName = nameFn(purnimantaIndex, false);
+  const purnimantaIndex =
+    isKrishnaPaksha && !isAdhika ? (amantaIndex + 1) % 12 : amantaIndex;
+  const purnimantaName = nameFn(purnimantaIndex, isAdhika);
 
   // Primary index/name follows the selected system
   const index = system === 'amanta' ? amantaIndex : purnimantaIndex;

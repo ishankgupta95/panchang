@@ -70,4 +70,25 @@ describe('Adhika Masa — Adhik Jyeshtha 2026 (Ujjain, IST)', () => {
     expect(r!.chandramasa.name).toContain('Jyeshtha');
     expect(r!.chandramasa.isAdhika).toBe(true);
   });
+
+  // Purnimanta must carry the Adhika prefix through BOTH pakshas of the Adhika
+  // month, and must NOT roll forward to Ashadha in the Krishna Paksha (an Adhika
+  // month has no Sankranti, so the Purnimanta name does not advance across its
+  // Purnima). Verified against Drik Panchang for Adhika Jyeshtha 2026.
+  it.each([
+    ['2026-05-20', 'Shukla'],
+    ['2026-05-31', 'Shukla'],
+    ['2026-06-10', 'Krishna'],
+    ['2026-06-14', 'Krishna'],
+  ])('purnimanta on %s (%s) is Adhika Jyeshtha', (d) => {
+    const r = getDailyPanchang(istDay(d), UJJAIN, { timezone: TZ });
+    expect(r!.chandramasa.purnimantaName).toBe('Adhika Jyeshtha');
+    expect(r!.chandramasa.purnimantaIndex).toBe(r!.chandramasa.amantaIndex);
+  });
+
+  it('purnimanta returns to plain Jyeshtha in the Nija month (2026-06-20)', () => {
+    const r = getDailyPanchang(istDay('2026-06-20'), UJJAIN, { timezone: TZ });
+    expect(r!.chandramasa.purnimantaName).toBe('Jyeshtha');
+    expect(r!.chandramasa.isAdhika).toBe(false);
+  });
 });

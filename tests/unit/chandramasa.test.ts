@@ -70,7 +70,7 @@ describe('computeChandraMasa', () => {
     expect(result.purnimantaIndex).toBeGreaterThanOrEqual(0);
     expect(result.purnimantaIndex).toBeLessThanOrEqual(11);
     expect(MASA_NAMES).toContain(result.amantaName.replace('Adhika ', ''));
-    expect(MASA_NAMES).toContain(result.purnimantaName);
+    expect(MASA_NAMES).toContain(result.purnimantaName.replace('Adhika ', ''));
   });
 
   describe('purnimanta vs amanta system', () => {
@@ -84,15 +84,32 @@ describe('computeChandraMasa', () => {
       expect(purnimanta.name).toBe(amanta.name);
     });
 
-    it('in Krishna Paksha, purnimanta is one month ahead of amanta', () => {
-      // Moon 200° ahead of Sun → elongation 200° → Krishna Paksha
+    it('in a normal Krishna Paksha, purnimanta is one month ahead of amanta', () => {
+      // Moon 200° ahead of Sun → elongation 200° → Krishna Paksha.
+      // sunStubNormal → bounding Amavasyas a rashi apart → a normal (non-Adhika)
+      // month, where the Purnimanta name advances across the Purnima.
       const sunLon = 15;
       const moonLon = (sunLon + 200) % 360;
-      const purnimanta = computeChandraMasa(sunLon, moonLon, nameResolver, 'purnimanta', REF, sunStub(sunLon));
-      const amanta = computeChandraMasa(sunLon, moonLon, nameResolver, 'amanta', REF, sunStub(sunLon));
+      const purnimanta = computeChandraMasa(sunLon, moonLon, nameResolver, 'purnimanta', REF, sunStubNormal(sunLon));
+      const amanta = computeChandraMasa(sunLon, moonLon, nameResolver, 'amanta', REF, sunStubNormal(sunLon));
       expect(purnimanta.index).toBe((amanta.index + 1) % 12);
       expect(purnimanta.amantaIndex).toBe(amanta.index);
       expect(amanta.purnimantaIndex).toBe(purnimanta.index);
+    });
+
+    it('in an Adhika Krishna Paksha, purnimanta does NOT advance and carries the Adhika prefix', () => {
+      // Adhika months have no Sankranti, so the Purnimanta name neither advances
+      // across the Adhika Purnima nor drops the Adhika flag. (Drik Panchang:
+      // Adhika Jyeshtha 2026 stays "Adhika Jyeshtha" in both systems / pakshas
+      // rather than rolling forward to Ashadha in its Krishna Paksha.)
+      const sunLon = 15;
+      const moonLon = (sunLon + 200) % 360; // Krishna Paksha
+      const purnimanta = computeChandraMasa(sunLon, moonLon, nameResolver, 'purnimanta', REF, sunStub(sunLon));
+      const amanta = computeChandraMasa(sunLon, moonLon, nameResolver, 'amanta', REF, sunStub(sunLon));
+      expect(purnimanta.isAdhika).toBe(true);
+      expect(purnimanta.purnimantaIndex).toBe(purnimanta.amantaIndex);
+      expect(purnimanta.purnimantaName).toBe(purnimanta.amantaName);
+      expect(purnimanta.purnimantaName.startsWith('Adhika ')).toBe(true);
     });
 
     it('amanta system sets index/name to amanta values', () => {

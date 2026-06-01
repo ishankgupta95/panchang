@@ -189,7 +189,7 @@ const KALIYUGA_EPOCH_YEAR = -3101; // 3102 BCE (proleptic) / Kali Yuga begins 18
  *
  * @example
  * ```typescript
- * getKaliYugaYear(new Date('2026-01-01')); // 5127
+ * getKaliYugaYear(new Date('2026-01-01')); // 5126 (before the 18 Feb epoch anniversary)
  * ```
  */
 export function getKaliYugaYear(date: Date): number {

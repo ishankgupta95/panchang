@@ -169,13 +169,16 @@ export function getUpcomingSolarEclipse(
   const observer = makeObserver(location);
   let info = SearchLocalSolarEclipse(fromUtc, observer);
   for (let i = 0; i < 6; i++) {
-    const peakMs = info.peak.time.date.getTime();
-    const windowEndMs = fromUtc.getTime() + withinDays * 24 * 3600_000;
-    if (peakMs > windowEndMs + 6 * 3600_000) return null;
-
     const startDate = info.partial_begin.time.date;
     const peakDate = info.peak.time.date;
     const endDate = info.partial_end.time.date;
+
+    // Stop once an eclipse's partial phase begins entirely after the window —
+    // this one and every later eclipse are out of range. Bounds on the
+    // eclipse's own local partial-begin instant (mirroring the lunar path's
+    // sd_penum bound) rather than a fixed 6 h buffer.
+    const windowEndMs = fromUtc.getTime() + withinDays * 24 * 3600_000;
+    if (startDate.getTime() > windowEndMs) return null;
 
     if (endDate.getTime() >= fromUtc.getTime()) {
       const subtype = eclipseKindToSubtype(info.kind);
