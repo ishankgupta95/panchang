@@ -151,10 +151,14 @@ export interface HoraInfo {
 // ── Samvat (Hindu year eras) ──────────────────────────
 
 export interface SamvatInfo {
-  /** Vikram Samvat year (increments at Chaitra Shukla Pratipada ≈ April) */
+  /** Vikram Samvat year (increments at Chaitra Shukla Pratipada) */
   vikramSamvat: number;
   /** Shaka Samvat year (same new-year point, offset 135 years behind VS) */
   shakaSamvat: number;
+  /** 60-year Jovian cycle (Samvatsara) name for the Vikram era, e.g. "Siddharthi". */
+  vikramSamvatsara: string;
+  /** 60-year Jovian cycle (Samvatsara) name for the Shaka era, e.g. "Parabhava". */
+  shakaSamvatsara: string;
 }
 
 // ── Special Yogas (auspicious day detection) ─────────
@@ -209,10 +213,10 @@ export interface EclipseInfo {
   visibleFromLocation: boolean;
   /** Fraction of the disc obscured at peak, range [0, 1]. */
   magnitude: number;
-  /** Pre-eclipse impurity window start (sutak). */
-  sutakStart: Date;
-  /** End of sutak — coincides with eclipse end (moksha). */
-  sutakEnd: Date;
+  /** Pre-eclipse impurity window start (sutak), or null when no sutak applies (penumbral lunar eclipse). */
+  sutakStart: Date | null;
+  /** End of sutak (moksha) — umbral last contact; null for penumbral lunar eclipses. */
+  sutakEnd: Date | null;
   description: string;
 }
 

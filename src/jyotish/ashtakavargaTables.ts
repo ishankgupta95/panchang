@@ -18,20 +18,16 @@ import type { GrahaName } from '../types/jyotish';
  * JagannathaHora and PyJHora source tables. The list cells below match
  * the form used by every modern open-source Vedic-astrology calculator.
  *
- * **Sun total = 47 (vs the BPHS-verses figure of 48).** The Sun's
- * Bhinnashtaka grand total is one of the well-known textual
- * inconsistencies in BPHS Ch. 66: B.V. Raman (*Three Hundred Important
- * Combinations*) and a few other modern texts publish 48; the per-cell
- * lists they actually print sum to 47 (with Venus-Sun = 3 and
- * Lagna-Sun = 6 as below). Modern open-source calculators
- * (JagannathaHora, PyJHora) use the 47-total cell data; that is what
- * is pinned here. Callers comparing to a paper-published "Sarvashtaka =
- * 337" should expect 336 from this library; the per-rashi distribution
- * is unaffected by the off-by-one in the Sun total.
+ * **Sun total = 48 (standard).** The Sun's Bhinnashtaka counts Mars's
+ * benefic places as 1,2,4,7,8,9,10,11 (8 cells) per BPHS Ch. 66 and the
+ * Indian-ephemeris / DrikPanchang convention, giving Sun = 48 and the
+ * canonical Sarvashtaka checksum 337. (A prior revision omitted the 9th
+ * in the Mars-Sun row, yielding the non-standard 47/336; corrected here
+ * to match DrikPanchang, the project parity oracle.)
  *
  * Per-receiver totals (sum of list lengths across all 8 contributors):
- *   Sun = 47, Moon = 49, Mars = 39, Mercury = 54,
- *   Jupiter = 56, Venus = 52, Saturn = 39  →  Sarvashtaka = 336.
+ *   Sun = 48, Moon = 49, Mars = 39, Mercury = 54,
+ *   Jupiter = 56, Venus = 52, Saturn = 39  →  Sarvashtaka = 337.
  */
 /** Receiver grahas — Rahu and Ketu have no Ashtakavarga grid. */
 export type AshtakavargaReceiver = Exclude<GrahaName, 'Rahu' | 'Ketu'>;
@@ -60,11 +56,11 @@ export const BENEFIC_OFFSETS: Readonly<Record<
   AshtakavargaReceiver,
   Readonly<Record<AshtakavargaContributor, readonly number[]>>
 >> = Object.freeze({
-  // ── Surya (Sun) Bhinnashtaka — 47 bindus total ──────
+  // ── Surya (Sun) Bhinnashtaka — 48 bindus total ──────
   Sun: Object.freeze({
     Sun:     Object.freeze([1, 2, 4, 7, 8, 9, 10, 11]),
     Moon:    Object.freeze([3, 6, 10, 11]),
-    Mars:    Object.freeze([1, 2, 4, 7, 8, 10, 11]),
+    Mars:    Object.freeze([1, 2, 4, 7, 8, 9, 10, 11]),
     Mercury: Object.freeze([3, 5, 6, 9, 10, 11, 12]),
     Jupiter: Object.freeze([5, 6, 9, 11]),
     Venus:   Object.freeze([6, 7, 12]),
@@ -147,12 +143,12 @@ export const BENEFIC_OFFSETS: Readonly<Record<
  * value, regardless of where the planets are placed.
  */
 export const BHINNASHTAKA_TOTAL: Readonly<Record<AshtakavargaReceiver, number>> = Object.freeze({
-  Sun: 47, Moon: 49, Mars: 39, Mercury: 54,
+  Sun: 48, Moon: 49, Mars: 39, Mercury: 54,
   Jupiter: 56, Venus: 52, Saturn: 39,
 });
 
-/** Sarvashtaka grand total = Σ Bhinnashtaka totals = 336. */
-export const SARVASHTAKA_TOTAL = 336;
+/** Sarvashtaka grand total = Σ Bhinnashtaka totals = 337 (canonical checksum). */
+export const SARVASHTAKA_TOTAL = 337;
 
 /**
  * Two-sign rulership pairs used by Ekadhipatya Sodhana (BPHS Ch. 67).

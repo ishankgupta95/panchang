@@ -71,7 +71,7 @@ describe('BENEFIC_OFFSETS — BPHS Ch. 66 table pin', () => {
   it('Sun receiver — 8 contributor lists', () => {
     expect(BENEFIC_OFFSETS.Sun.Sun).toEqual([1, 2, 4, 7, 8, 9, 10, 11]);
     expect(BENEFIC_OFFSETS.Sun.Moon).toEqual([3, 6, 10, 11]);
-    expect(BENEFIC_OFFSETS.Sun.Mars).toEqual([1, 2, 4, 7, 8, 10, 11]);
+    expect(BENEFIC_OFFSETS.Sun.Mars).toEqual([1, 2, 4, 7, 8, 9, 10, 11]);
     expect(BENEFIC_OFFSETS.Sun.Mercury).toEqual([3, 5, 6, 9, 10, 11, 12]);
     expect(BENEFIC_OFFSETS.Sun.Jupiter).toEqual([5, 6, 9, 11]);
     expect(BENEFIC_OFFSETS.Sun.Venus).toEqual([6, 7, 12]);
@@ -181,7 +181,7 @@ describe('BENEFIC_OFFSETS — BPHS Ch. 66 table pin', () => {
     let sum = 0;
     for (const recv of ASHTAKAVARGA_RECEIVERS) sum += BHINNASHTAKA_TOTAL[recv];
     expect(sum).toBe(SARVASHTAKA_TOTAL);
-    expect(SARVASHTAKA_TOTAL).toBe(336);
+    expect(SARVASHTAKA_TOTAL).toBe(337);
   });
 });
 
@@ -255,9 +255,9 @@ describe('Bhinnashtaka — hand-validated pins (Modi)', () => {
   const av = computeAshtakavarga(chart);
 
   it('Sun Bhinnashtaka — hand-computed cell-by-cell', () => {
-    // Per-rashi tally walked manually from BPHS BENEFIC_OFFSETS.Sun and
-    // Modi's contributor positions; total = 47 (confirmed).
-    expect(av.bhinnashtaka.Sun).toEqual([4, 4, 5, 4, 5, 5, 3, 3, 3, 4, 5, 2]);
+    // Per-rashi tally walked from BPHS BENEFIC_OFFSETS.Sun (Mars contributes
+    // in 1,2,4,7,8,9,10,11) and Modi's contributor positions; total = 48.
+    expect(av.bhinnashtaka.Sun).toEqual([4, 4, 5, 5, 5, 5, 3, 3, 3, 4, 5, 2]);
   });
 
   it('Saturn Bhinnashtaka — hand-computed cell-by-cell', () => {
@@ -282,17 +282,17 @@ describe('Bhinnashtaka — hand-validated pins (Modi)', () => {
 describe('Sarvashtaka — golden-master pins', () => {
   it('Modi (Lagna=7, Sun=5, Moon=7, Mars=7, Mercury=5, Jup=10, Ven=4, Sat=4)', () => {
     const av = computeAshtakavarga(chartFor('Narendra Modi'));
-    expect(av.sarvashtaka).toEqual([30, 24, 33, 29, 27, 36, 17, 30, 31, 32, 27, 20]);
+    expect(av.sarvashtaka).toEqual([30, 24, 33, 30, 27, 36, 17, 30, 31, 32, 27, 20]);
   });
 
   it('Sachin Tendulkar (Lagna=4, Sun=0, Moon=8, Mars=9, Mercury=11, Jup=9, Ven=0, Sat=1)', () => {
     const av = computeAshtakavarga(chartFor('Sachin Tendulkar'));
-    expect(av.sarvashtaka).toEqual([17, 31, 26, 25, 31, 23, 33, 36, 26, 34, 32, 22]);
+    expect(av.sarvashtaka).toEqual([17, 31, 26, 25, 31, 24, 33, 36, 26, 34, 32, 22]);
   });
 
   it('Ratan Tata (Lagna=8, Sun=8, Moon=6, Mars=10, Mercury=8, Jup=9, Ven=8, Sat=11)', () => {
     const av = computeAshtakavarga(chartFor('Ratan Tata'));
-    expect(av.sarvashtaka).toEqual([23, 32, 21, 24, 32, 29, 40, 29, 33, 22, 24, 27]);
+    expect(av.sarvashtaka).toEqual([23, 32, 21, 24, 32, 29, 41, 29, 33, 22, 24, 27]);
   });
 });
 

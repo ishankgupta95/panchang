@@ -31,28 +31,29 @@ import {
 } from '../../src/jyotish/lagna';
 import { computeBhava } from '../../src/jyotish/bhava';
 import { computeSunrise } from '../../src/astronomy/sunrise';
+import { getSiderealSunLongitude } from '../../src/astronomy/sun';
 import type { SripatiLagnaInfo } from '../../src/types/jyotish';
 
 const DELHI = { latitude: 28.6139, longitude: 77.2090 };
 
 // ── 1. Sunrise boundary ───────────────────────────────
 
-describe('Special lagnas at sunrise — all collapse to natal asc', () => {
-  it('Hora / Ghati / Bhava at exact sunrise == lagna at sunrise (within sub-arcsec)', () => {
+describe('Special lagnas at sunrise — all collapse to the Sun at sunrise', () => {
+  it('Hora / Ghati / Bhava at exact sunrise == Sun longitude at sunrise (within sub-arcsec)', () => {
     // Pick a date and compute its sunrise.
     const seed = new Date('2025-01-14T00:00:00Z');
     const sunrise = computeSunrise(seed, DELHI);
 
-    const ascAtSunrise = computeLagna(sunrise, DELHI).siderealLongitude;
+    const sunAtSunrise = getSiderealSunLongitude(sunrise, 'lahiri');
     const hl = computeHoraLagna(sunrise, DELHI).siderealLongitude;
     const gl = computeGhatiLagna(sunrise, DELHI).siderealLongitude;
     const bl = computeBhavaLagna(sunrise, DELHI).siderealLongitude;
 
-    // At t=sunrise, hoursSince = 0, so all three should equal ascAtSunrise
+    // At t=sunrise, hoursSince = 0, so all three should equal sunAtSunrise
     // up to a few-arcsecond drift from `SearchRiseSet`'s internal precision.
-    expect(Math.abs(hl - ascAtSunrise)).toBeLessThan(0.005);
-    expect(Math.abs(gl - ascAtSunrise)).toBeLessThan(0.005);
-    expect(Math.abs(bl - ascAtSunrise)).toBeLessThan(0.005);
+    expect(Math.abs(hl - sunAtSunrise)).toBeLessThan(0.005);
+    expect(Math.abs(gl - sunAtSunrise)).toBeLessThan(0.005);
+    expect(Math.abs(bl - sunAtSunrise)).toBeLessThan(0.005);
   });
 });
 
@@ -63,9 +64,9 @@ describe('Special lagnas — 1-hour advance rates', () => {
     const sunrise = computeSunrise(new Date('2025-01-14T00:00:00Z'), DELHI);
     const oneHourLater = new Date(sunrise.getTime() + 3600_000);
 
-    const ascAtSunrise = computeLagna(sunrise, DELHI).siderealLongitude;
+    const sunAtSunrise = getSiderealSunLongitude(sunrise, 'lahiri');
     const hl1h = computeHoraLagna(oneHourLater, DELHI).siderealLongitude;
-    let delta = hl1h - ascAtSunrise;
+    let delta = hl1h - sunAtSunrise;
     delta = ((delta + 540) % 360) - 180;
     expect(Math.abs(delta - 30)).toBeLessThan(0.01);
   });
@@ -74,9 +75,9 @@ describe('Special lagnas — 1-hour advance rates', () => {
     const sunrise = computeSunrise(new Date('2025-01-14T00:00:00Z'), DELHI);
     const oneHourLater = new Date(sunrise.getTime() + 3600_000);
 
-    const ascAtSunrise = computeLagna(sunrise, DELHI).siderealLongitude;
+    const sunAtSunrise = getSiderealSunLongitude(sunrise, 'lahiri');
     const gl1h = computeGhatiLagna(oneHourLater, DELHI).siderealLongitude;
-    let delta = gl1h - ascAtSunrise;
+    let delta = gl1h - sunAtSunrise;
     delta = ((delta + 540) % 360) - 180;
     expect(Math.abs(delta - 75)).toBeLessThan(0.01);
   });
@@ -85,9 +86,9 @@ describe('Special lagnas — 1-hour advance rates', () => {
     const sunrise = computeSunrise(new Date('2025-01-14T00:00:00Z'), DELHI);
     const oneHourLater = new Date(sunrise.getTime() + 3600_000);
 
-    const ascAtSunrise = computeLagna(sunrise, DELHI).siderealLongitude;
+    const sunAtSunrise = getSiderealSunLongitude(sunrise, 'lahiri');
     const bl1h = computeBhavaLagna(oneHourLater, DELHI).siderealLongitude;
-    let delta = bl1h - ascAtSunrise;
+    let delta = bl1h - sunAtSunrise;
     delta = ((delta + 540) % 360) - 180;
     expect(Math.abs(delta - 15)).toBeLessThan(0.01);
   });
@@ -96,9 +97,9 @@ describe('Special lagnas — 1-hour advance rates', () => {
     const sunrise = computeSunrise(new Date('2025-01-14T00:00:00Z'), DELHI);
     const oneGhatika = new Date(sunrise.getTime() + 24 * 60 * 1000);
 
-    const ascAtSunrise = computeLagna(sunrise, DELHI).siderealLongitude;
+    const sunAtSunrise = getSiderealSunLongitude(sunrise, 'lahiri');
     const gl = computeGhatiLagna(oneGhatika, DELHI).siderealLongitude;
-    let delta = gl - ascAtSunrise;
+    let delta = gl - sunAtSunrise;
     delta = ((delta + 540) % 360) - 180;
     expect(Math.abs(delta - 30)).toBeLessThan(0.01);
   });
@@ -244,9 +245,9 @@ describe('Special lagnas — 2-hour cross-check', () => {
     const sunrise = computeSunrise(new Date('2025-01-14T00:00:00Z'), DELHI);
     const t = new Date(sunrise.getTime() + 2 * 3600_000);
 
-    const ascAtSunrise = computeLagna(sunrise, DELHI).siderealLongitude;
+    const sunAtSunrise = getSiderealSunLongitude(sunrise, 'lahiri');
     const hl = computeHoraLagna(t, DELHI).siderealLongitude;
-    const expected = (ascAtSunrise + 60) % 360;
+    const expected = (sunAtSunrise + 60) % 360;
     let delta = hl - expected;
     delta = ((delta + 540) % 360) - 180;
     expect(Math.abs(delta)).toBeLessThan(0.05);
@@ -256,9 +257,9 @@ describe('Special lagnas — 2-hour cross-check', () => {
     const sunrise = computeSunrise(new Date('2025-01-14T00:00:00Z'), DELHI);
     const t = new Date(sunrise.getTime() + 2 * 3600_000);
 
-    const ascAtSunrise = computeLagna(sunrise, DELHI).siderealLongitude;
+    const sunAtSunrise = getSiderealSunLongitude(sunrise, 'lahiri');
     const gl = computeGhatiLagna(t, DELHI).siderealLongitude;
-    const expected = (ascAtSunrise + 150) % 360;
+    const expected = (sunAtSunrise + 150) % 360;
     let delta = gl - expected;
     delta = ((delta + 540) % 360) - 180;
     expect(Math.abs(delta)).toBeLessThan(0.05);

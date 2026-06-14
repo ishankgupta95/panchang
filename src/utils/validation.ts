@@ -3,19 +3,21 @@ import type { GeoLocation } from '../types/location';
 import { TOTAL_NAKSHATRAS, TOTAL_TITHIS } from './constants';
 
 export function validateLocation(location: GeoLocation): void {
-  if (typeof location.latitude !== 'number' || location.latitude < -90 || location.latitude > 90) {
+  // Number.isFinite rejects NaN, ±Infinity, and non-number values (it does not
+  // coerce), so it also covers the typeof check.
+  if (!Number.isFinite(location.latitude) || location.latitude < -90 || location.latitude > 90) {
     throw new PanchangError(
-      `Latitude must be a number between -90 and 90, got ${location.latitude}`,
+      `Latitude must be a finite number between -90 and 90, got ${location.latitude}`,
       'INVALID_LATITUDE'
     );
   }
-  if (typeof location.longitude !== 'number' || location.longitude < -180 || location.longitude > 180) {
+  if (!Number.isFinite(location.longitude) || location.longitude < -180 || location.longitude > 180) {
     throw new PanchangError(
-      `Longitude must be a number between -180 and 180, got ${location.longitude}`,
+      `Longitude must be a finite number between -180 and 180, got ${location.longitude}`,
       'INVALID_LONGITUDE'
     );
   }
-  if (location.elevation !== undefined && (typeof location.elevation !== 'number' || location.elevation < -500)) {
+  if (location.elevation !== undefined && (!Number.isFinite(location.elevation) || location.elevation < -500)) {
     throw new PanchangError(
       `Elevation must be >= -500 meters, got ${location.elevation}`,
       'INVALID_ELEVATION'
@@ -27,7 +29,9 @@ export function validateDate(date: Date): void {
   if (!(date instanceof Date) || isNaN(date.getTime())) {
     throw new PanchangError(`Invalid Date: ${String(date)}`, 'INVALID_DATE');
   }
-  const year = date.getFullYear();
+  // Use UTC year so the accepted range does not depend on the host machine's
+  // timezone at the 1900/2100 boundaries.
+  const year = date.getUTCFullYear();
   if (year < 1900 || year > 2100) {
     throw new PanchangError(
       `Date must be between 1900 and 2100 for astronomical accuracy, got year ${year}`,

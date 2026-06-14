@@ -142,7 +142,7 @@ function makeEntry(
   // Sutak applies only to an observable eclipse that warrants it: all visible
   // solar eclipses, and visible umbral (partial/total) lunar eclipses.
   // Penumbral lunar eclipses carry no sutak (drik / pandit consensus).
-  if (anyPhaseVisible && subtype !== 'penumbral') {
+  if (anyPhaseVisible && subtype !== 'penumbral' && e.sutakStart && e.sutakEnd) {
     entry.sutak = { start: e.sutakStart.toISOString(), end: e.sutakEnd.toISOString() };
   }
   return entry;

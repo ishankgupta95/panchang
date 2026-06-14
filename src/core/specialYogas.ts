@@ -46,7 +46,8 @@ export function computeSpecialYogas(
   // Tithi number within paksha: 1–15
   const tithiNumber = (tithiIndex % 15) + 1;
 
-  if (AMRIT_SIDDHI_TABLE.get(varaIndex)?.has(tithiNumber)) {
+  // Amrit Siddhi Yoga — fixed weekday × Moon-nakshatra pair (not tithi).
+  if (AMRIT_SIDDHI_TABLE.get(varaIndex) === nakshatraIndex) {
     results.push({ name: nameResolver('amrit_siddhi'), type: 'amrit_siddhi' });
   }
 

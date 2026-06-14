@@ -88,8 +88,11 @@ describe('static eclipse table', () => {
           expect(eclipse.sutak, `penumbral on ${eclipse.peak}`).toBeUndefined();
         } else {
           expect(eclipse.sutak, `${eclipse.kind}/${eclipse.subtype} on ${eclipse.peak}`).toBeDefined();
-          // Sutak ends at the eclipse end (moksha) and starts before it begins.
-          expect(eclipse.sutak!.end).toBe(eclipse.end);
+          // Sutak ends at the moksha point — the umbral (partial) last contact —
+          // which is at or before the eclipse's penumbral end (for total/partial
+          // lunar eclipses it is strictly before), and starts before it begins.
+          expect(new Date(eclipse.sutak!.end).getTime())
+            .toBeLessThanOrEqual(new Date(eclipse.end).getTime());
           expect(new Date(eclipse.sutak!.start).getTime())
             .toBeLessThan(new Date(eclipse.start).getTime());
         }

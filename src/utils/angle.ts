@@ -1,9 +1,13 @@
 /** Normalize angle to [0, 360). */
 export function normalize360(degrees: number): number {
-  const r = degrees % 360;
-  // Handle -0 from JS modulo (e.g. -360 % 360 = -0)
-  if (r === 0) return 0;
-  return r < 0 ? r + 360 : r;
+  let r = degrees % 360;
+  if (r < 0) r += 360;
+  // Floating-point guard: a tiny negative input (e.g. -1e-15) yields
+  // r + 360 === 360 exactly, which would violate the [0, 360) contract and
+  // produce an out-of-range index (e.g. nakshatra 27). Collapse it to 0.
+  if (r >= 360) r -= 360;
+  // Collapse -0 (e.g. -360 % 360 === -0) to +0.
+  return r === 0 ? 0 : r;
 }
 
 export function degToRad(degrees: number): number {

@@ -1,5 +1,6 @@
 import { Body, SearchRiseSet, MakeTime, Observer } from 'astronomy-engine';
 import { PanchangError } from '../types/errors';
+import { validateLocation } from '../utils/validation';
 import type { GeoLocation } from '../types/location';
 
 /**
@@ -27,6 +28,7 @@ export function computeSunrise(
   location: GeoLocation,
   limitDays: number = 2
 ): Date {
+  validateLocation(location);
   const observer = new Observer(
     location.latitude,
     location.longitude,
@@ -69,6 +71,7 @@ export function computeSunset(
   location: GeoLocation,
   limitDays: number = 2
 ): Date {
+  validateLocation(location);
   const observer = new Observer(
     location.latitude,
     location.longitude,

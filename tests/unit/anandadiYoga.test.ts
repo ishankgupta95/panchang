@@ -52,9 +52,9 @@ describe('computeAnandadiYoga — 28 fixtures (one per yoga)', () => {
     { yoga: 20, vara: 0, nakshatra: 20, name: 'Amrita',     quality: 'auspicious' },
     { yoga: 21, vara: 1, nakshatra: 24, name: 'Musala',     quality: 'inauspicious' },
     { yoga: 22, vara: 0, nakshatra: 21, name: 'Gada',       quality: 'inauspicious' },
-    { yoga: 23, vara: 0, nakshatra: 22, name: 'Matanga',    quality: 'inauspicious' },
+    { yoga: 23, vara: 0, nakshatra: 22, name: 'Matanga',    quality: 'auspicious' },
     { yoga: 24, vara: 0, nakshatra: 23, name: 'Raksha',     quality: 'inauspicious' },
-    { yoga: 25, vara: 0, nakshatra: 24, name: 'Charma',     quality: 'inauspicious' },
+    { yoga: 25, vara: 0, nakshatra: 24, name: 'Charma',     quality: 'auspicious' },
     { yoga: 26, vara: 0, nakshatra: 25, name: 'Sthira',     quality: 'auspicious' },
     { yoga: 27, vara: 0, nakshatra: 26, name: 'Vardhamana', quality: 'auspicious' },
   ];
@@ -121,7 +121,7 @@ describe('computeAnandadiYoga — invariants', () => {
     }
   });
 
-  it('quality counts: 14 auspicious + 14 inauspicious across the 28-name cycle', () => {
+  it('quality counts: 16 auspicious + 12 inauspicious across the 28-name cycle', () => {
     // Sample the full cycle by using Sunday's first 21 entries plus the rows
     // that cover the remaining yogas.
     const qualityByYoga: Record<number, string> = {};
@@ -136,8 +136,9 @@ describe('computeAnandadiYoga — invariants', () => {
     for (const q of Object.values(qualityByYoga)) {
       counts[q as keyof typeof counts]++;
     }
-    expect(counts.auspicious).toBe(14);
-    expect(counts.inauspicious).toBe(14);
+    // Matanga (23) and Charma (25) are auspicious per DrikPanchang → 16/12.
+    expect(counts.auspicious).toBe(16);
+    expect(counts.inauspicious).toBe(12);
     expect(counts.neutral).toBe(0);
   });
 });

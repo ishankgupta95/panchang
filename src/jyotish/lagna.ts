@@ -1,6 +1,7 @@
 import { SiderealTime } from 'astronomy-engine';
 import { computeAyanamsa, dateToJulianDay } from '../astronomy/ayanamsa';
 import { computeSunrise } from '../astronomy/sunrise';
+import { getSiderealSunLongitude } from '../astronomy/sun';
 import { meanObliquity } from './planets';
 import { resolveNakshatraName, resolveMasaName } from '../i18n/resolver';
 import { normalize360, degToRad } from '../utils/angle';
@@ -192,9 +193,13 @@ export function computeHoraLagna(
   validateDate(birthDate);
   validateLocation(location);
   const sunrise = findSunriseBefore(birthDate, location);
-  const ascAtSunrise = computeLagna(sunrise, location, ayanamsaType, lang).siderealLongitude;
+  // BPHS Ch. 4: special lagnas advance from the SUN's sidereal longitude at
+  // sunrise (not the ascendant). At sunrise the Sun sits on the horizon but its
+  // ecliptic longitude differs from the rising ecliptic point by the
+  // ascensional/obliquity offset (latitude- and season-dependent).
+  const sunSidAtSunrise = getSiderealSunLongitude(sunrise, ayanamsaType);
   const hoursSinceSunrise = (birthDate.getTime() - sunrise.getTime()) / 3600_000;
-  const horaLon = ascAtSunrise + hoursSinceSunrise * 30;
+  const horaLon = sunSidAtSunrise + hoursSinceSunrise * 30;
   return buildLagnaInfo(horaLon, lang);
 }
 
@@ -221,9 +226,10 @@ export function computeGhatiLagna(
   validateDate(birthDate);
   validateLocation(location);
   const sunrise = findSunriseBefore(birthDate, location);
-  const ascAtSunrise = computeLagna(sunrise, location, ayanamsaType, lang).siderealLongitude;
+  // BPHS Ch. 4: base point is the Sun's sidereal longitude at sunrise.
+  const sunSidAtSunrise = getSiderealSunLongitude(sunrise, ayanamsaType);
   const ghatikasSinceSunrise = (birthDate.getTime() - sunrise.getTime()) / (24 * 60 * 1000);
-  const ghatiLon = ascAtSunrise + ghatikasSinceSunrise * 30;
+  const ghatiLon = sunSidAtSunrise + ghatikasSinceSunrise * 30;
   return buildLagnaInfo(ghatiLon, lang);
 }
 
@@ -248,9 +254,10 @@ export function computeBhavaLagna(
   validateDate(birthDate);
   validateLocation(location);
   const sunrise = findSunriseBefore(birthDate, location);
-  const ascAtSunrise = computeLagna(sunrise, location, ayanamsaType, lang).siderealLongitude;
+  // BPHS Ch. 4: base point is the Sun's sidereal longitude at sunrise.
+  const sunSidAtSunrise = getSiderealSunLongitude(sunrise, ayanamsaType);
   const hoursSinceSunrise = (birthDate.getTime() - sunrise.getTime()) / 3600_000;
-  const bhavaLon = ascAtSunrise + hoursSinceSunrise * 15;
+  const bhavaLon = sunSidAtSunrise + hoursSinceSunrise * 15;
   return buildLagnaInfo(bhavaLon, lang);
 }
 

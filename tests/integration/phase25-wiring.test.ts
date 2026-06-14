@@ -60,7 +60,10 @@ describe('Phase 25 — eclipse wiring in getDailyPanchang', () => {
     expect(r.eclipse).not.toBeNull();
     expect(r.eclipse!.kind).toBe('lunar');
     expect(r.eclipse!.subtype).toMatch(/^(partial|total|penumbral)$/);
-    expect(r.eclipse!.sutakEnd.getTime()).toBe(r.eclipse!.end.getTime());
+    // sutakEnd is the umbral (partial) last contact, which precedes the
+    // penumbral eclipse end for a total/partial lunar eclipse.
+    expect(r.eclipse!.sutakEnd).not.toBeNull();
+    expect(r.eclipse!.sutakEnd!.getTime()).toBeLessThan(r.eclipse!.end.getTime());
   });
 
   it('emits the eclipse as a top-of-list festival entry', () => {

@@ -188,14 +188,31 @@ describe('sequence invariants (held for all valid Moon longitudes)', () => {
         expect(totalYears).toBeLessThanOrEqual(120 + 1e-6);
       });
 
-      it('each mahadasha has 9 antardashas in cyclic order starting from the mahadasha lord', () => {
-        for (const md of r.mahaDashas) {
+      it('full (non-first) mahadashas have 9 antardashas in cyclic order from the lord', () => {
+        for (let m = 1; m < r.mahaDashas.length; m++) {
+          const md = r.mahaDashas[m]!;
           expect(md.antarDashas).toHaveLength(9);
           const mdIdx = DASHA_ORDER.indexOf(md.lord);
           for (let j = 0; j < 9; j++) {
             expect(md.antarDashas[j]!.lord).toBe(DASHA_ORDER[(mdIdx + j) % 9]);
           }
         }
+      });
+
+      it('first (partial) mahadasha: 1..9 antardashas forming a contiguous tail of the cyclic order', () => {
+        // The partial first mahadasha drops the antardashas that fully elapsed
+        // before birth, so it shows the final k of the 9 (ending on the (lord+8)
+        // antardasha) and begins mid-sequence.
+        const md = r.mahaDashas[0]!;
+        const mdIdx = DASHA_ORDER.indexOf(md.lord);
+        expect(md.antarDashas.length).toBeGreaterThanOrEqual(1);
+        expect(md.antarDashas.length).toBeLessThanOrEqual(9);
+        const firstIdx = DASHA_ORDER.indexOf(md.antarDashas[0]!.lord);
+        for (let j = 0; j < md.antarDashas.length; j++) {
+          expect(md.antarDashas[j]!.lord).toBe(DASHA_ORDER[(firstIdx + j) % 9]);
+        }
+        const lastIdx = DASHA_ORDER.indexOf(md.antarDashas[md.antarDashas.length - 1]!.lord);
+        expect(lastIdx).toBe((mdIdx + 8) % 9);
       });
 
       it('antardasha durations sum to parent mahadasha duration (± few ms)', () => {
@@ -209,8 +226,13 @@ describe('sequence invariants (held for all valid Moon longitudes)', () => {
         }
       });
 
-      it('antardasha proportions follow lordYears/120 × parentDuration', () => {
-        for (const md of r.mahaDashas) {
+      it('antardasha proportions follow lordYears/120 × parentDuration (full mahadashas)', () => {
+        // Only full mahadashas hold the simple proportion. The first (partial)
+        // mahadasha runs full-length antardashas inside a shorter window (first
+        // one truncated), so its per-antardasha durations are intentionally not
+        // proportional to the displayed mahadasha span.
+        for (let m = 1; m < r.mahaDashas.length; m++) {
+          const md = r.mahaDashas[m]!;
           const mdMs = md.endDate.getTime() - md.startDate.getTime();
           for (const ad of md.antarDashas) {
             const expectedMs = (DASHA_YEARS[ad.lord] / 120) * mdMs;

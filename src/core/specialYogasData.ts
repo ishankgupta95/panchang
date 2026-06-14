@@ -8,21 +8,26 @@
  */
 
 /**
- * Amrit Siddhi Yoga — auspicious Vara × Tithi combinations.
+ * Amrit Siddhi Yoga — auspicious Vara × Nakshatra combinations.
  *
- * Lookup: vara index → set of tithi numbers within paksha (1-based, 1–15).
- * Applies to both Shukla and Krishna pakshas.
+ * Lookup: vara index (0 = Sunday … 6 = Saturday) → the single qualifying
+ * Moon-nakshatra index (0 = Ashwini … 26 = Revati). The yoga is defined by
+ * seven fixed weekday-nakshatra pairs (Kalamrita / Muhurta Parijata; matches
+ * DrikPanchang's Amrit Siddhi emissions):
+ *   Sun-Hasta, Mon-Mrigashira, Tue-Ashwini, Wed-Anuradha,
+ *   Thu-Pushya, Fri-Revati, Sat-Rohini.
  *
- * Source: traditional Muhurta Chintamani / Drik Panchang tables.
+ * NOTE: previously (incorrectly) modelled as a Vara × Tithi table, which both
+ * false-fired on tithi coincidences and missed the real nakshatra-based days.
  */
-export const AMRIT_SIDDHI_TABLE: ReadonlyMap<number, ReadonlySet<number>> = new Map([
-  [0, new Set([1, 4, 6, 9, 14])],      // Sunday
-  [1, new Set([2, 7, 12])],             // Monday
-  [2, new Set([3, 8, 13])],             // Tuesday
-  [3, new Set([5, 10, 15])],            // Wednesday
-  [4, new Set([6, 11])],                // Thursday
-  [5, new Set([2, 7, 12])],             // Friday
-  [6, new Set([3, 8, 13])],             // Saturday
+export const AMRIT_SIDDHI_TABLE: ReadonlyMap<number, number> = new Map([
+  [0, 12],  // Sunday    → Hasta
+  [1, 4],   // Monday    → Mrigashira
+  [2, 0],   // Tuesday   → Ashwini
+  [3, 16],  // Wednesday → Anuradha
+  [4, 7],   // Thursday  → Pushya
+  [5, 26],  // Friday    → Revati
+  [6, 3],   // Saturday  → Rohini
 ]);
 
 /**

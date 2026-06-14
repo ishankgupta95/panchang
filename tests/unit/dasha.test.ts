@@ -92,9 +92,13 @@ describe('computeVimshottariDasha', () => {
       }
     });
 
-    it('each mahadasha has 9 antardashas', () => {
-      for (const md of result.mahaDashas) {
-        expect(md.antarDashas).toHaveLength(9);
+    it('each full mahadasha has 9 antardashas; the first (partial) has 1..9', () => {
+      // The first mahadasha is a partial balance: antardashas run full-length
+      // from the pre-birth virtual start and only those after birth are shown.
+      expect(result.mahaDashas[0]!.antarDashas.length).toBeGreaterThanOrEqual(1);
+      expect(result.mahaDashas[0]!.antarDashas.length).toBeLessThanOrEqual(9);
+      for (let i = 1; i < result.mahaDashas.length; i++) {
+        expect(result.mahaDashas[i]!.antarDashas).toHaveLength(9);
       }
     });
 

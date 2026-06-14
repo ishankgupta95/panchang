@@ -1,4 +1,5 @@
 import { Body, SearchRiseSet, MakeTime, Observer } from 'astronomy-engine';
+import { validateLocation } from '../utils/validation';
 import type { GeoLocation } from '../types/location';
 
 /**
@@ -27,6 +28,7 @@ export function getMoonrise(
   location: GeoLocation,
   limitDays: number = 2,
 ): Date | null {
+  validateLocation(location);
   const observer = new Observer(
     location.latitude,
     location.longitude,
@@ -60,6 +62,7 @@ export function getMoonset(
   location: GeoLocation,
   limitDays: number = 2,
 ): Date | null {
+  validateLocation(location);
   const observer = new Observer(
     location.latitude,
     location.longitude,

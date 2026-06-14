@@ -21,17 +21,37 @@ describe('getUpcomingLunarEclipse', () => {
     expect(peakDay.getUTCDate()).toBeLessThanOrEqual(15);
   });
 
-  it('sutakStart is 9 hours (3 prahara) before the penumbral start for lunar', () => {
+  it('lunar sutak is anchored to the umbral (partial) phase, 9h lead, symmetric about peak', () => {
+    // 2025-03-14 is a TOTAL lunar eclipse. Sutak runs from 9h before umbral
+    // first contact (peak − sd_partial) to umbral last contact (peak + sd_partial),
+    // NOT the faint penumbral contacts. So (peak − sutakStart − 9h) === (sutakEnd − peak).
     const info = getUpcomingLunarEclipse(new Date('2025-03-01T00:00:00Z'), DELHI, 30);
     expect(info).not.toBeNull();
-    const gapMs = info!.start.getTime() - info!.sutakStart.getTime();
-    expect(gapMs).toBe(9 * 3600_000);
+    expect(info!.sutakStart).not.toBeNull();
+    expect(info!.sutakEnd).not.toBeNull();
+    const peak = info!.peak.getTime();
+    const umbralLead = peak - info!.sutakStart!.getTime() - 9 * 3600_000;
+    const umbralTrail = info!.sutakEnd!.getTime() - peak;
+    expect(umbralLead).toBeGreaterThan(0);
+    expect(Math.abs(umbralLead - umbralTrail)).toBeLessThan(1000);
   });
 
-  it('sutakEnd equals eclipse end', () => {
+  it('lunar sutakEnd (umbral last contact) precedes the penumbral eclipse end', () => {
     const info = getUpcomingLunarEclipse(new Date('2025-03-01T00:00:00Z'), DELHI, 30);
     expect(info).not.toBeNull();
-    expect(info!.sutakEnd.getTime()).toBe(info!.end.getTime());
+    expect(info!.sutakEnd).not.toBeNull();
+    expect(info!.sutakEnd!.getTime()).toBeLessThan(info!.end.getTime());
+    // Umbral-to-penumbral gap is on the order of an hour.
+    expect(info!.end.getTime() - info!.sutakEnd!.getTime()).toBeGreaterThan(30 * 60_000);
+  });
+
+  it('penumbral lunar eclipse carries no sutak (null window)', () => {
+    // 2027-02-20 is a penumbral lunar eclipse — no umbral phase, no sutak.
+    const info = getUpcomingLunarEclipse(new Date('2027-02-01T00:00:00Z'), DELHI, 40);
+    expect(info).not.toBeNull();
+    expect(info!.subtype).toBe('penumbral');
+    expect(info!.sutakStart).toBeNull();
+    expect(info!.sutakEnd).toBeNull();
   });
 
   it('returns null when no eclipse falls within the window', () => {

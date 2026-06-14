@@ -14,35 +14,33 @@ const callLegacy = (vara: number, tithi: number, nak: number) =>
 
 describe('computeSpecialYogas', () => {
   describe('Amrit Siddhi Yoga', () => {
-    it('detects Sunday + Shukla Pratipada (tithi 0, number 1)', () => {
-      const yogas = callLegacy(0, 0, 10);
-      expect(yogas.some(y => y.type === 'amrit_siddhi')).toBe(true);
+    // Fixed weekday × Moon-nakshatra pairs (BPHS / DrikPanchang): Sun-Hasta(12),
+    // Mon-Mrigashira(4), Tue-Ashwini(0), Wed-Anuradha(16), Thu-Pushya(7),
+    // Fri-Revati(26), Sat-Rohini(3). Independent of tithi.
+    it('detects Sunday + Hasta (nakshatra 12)', () => {
+      expect(callLegacy(0, 5, 12).some(y => y.type === 'amrit_siddhi')).toBe(true);
     });
 
-    it('detects Sunday + Shukla Chaturthi (tithi 3, number 4)', () => {
-      const yogas = callLegacy(0, 3, 10);
-      expect(yogas.some(y => y.type === 'amrit_siddhi')).toBe(true);
+    it('detects Monday + Mrigashira (nakshatra 4)', () => {
+      expect(callLegacy(1, 5, 4).some(y => y.type === 'amrit_siddhi')).toBe(true);
     });
 
-    it('detects Wednesday + Purnima (tithi 14, number 15)', () => {
-      const yogas = callLegacy(3, 14, 10);
-      expect(yogas.some(y => y.type === 'amrit_siddhi')).toBe(true);
+    it('detects Thursday + Pushya (nakshatra 7)', () => {
+      expect(callLegacy(4, 5, 7).some(y => y.type === 'amrit_siddhi')).toBe(true);
     });
 
-    it('detects Wednesday + Amavasya (tithi 29, number 15)', () => {
-      const yogas = callLegacy(3, 29, 10);
-      expect(yogas.some(y => y.type === 'amrit_siddhi')).toBe(true);
+    it('detects Saturday + Rohini (nakshatra 3)', () => {
+      expect(callLegacy(6, 5, 3).some(y => y.type === 'amrit_siddhi')).toBe(true);
     });
 
-    it('applies to both pakshas — Monday + Krishna Dwitiya (tithi 16, number 2)', () => {
-      const yogas = callLegacy(1, 16, 10);
-      expect(yogas.some(y => y.type === 'amrit_siddhi')).toBe(true);
+    it('is independent of tithi (Monday + Mrigashira fires in any tithi)', () => {
+      expect(callLegacy(1, 16, 4).some(y => y.type === 'amrit_siddhi')).toBe(true);
+      expect(callLegacy(1, 2, 4).some(y => y.type === 'amrit_siddhi')).toBe(true);
     });
 
-    it('does not detect for non-matching combination', () => {
-      // Sunday + Dwitiya (tithi 1, number 2) — not in Sunday's set
-      const yogas = callLegacy(0, 1, 10);
-      expect(yogas.some(y => y.type === 'amrit_siddhi')).toBe(false);
+    it('does not detect for a non-matching weekday-nakshatra pair', () => {
+      // Sunday's pair is Hasta(12); Rohini(3) is Saturday's pair, not Sunday's
+      expect(callLegacy(0, 5, 3).some(y => y.type === 'amrit_siddhi')).toBe(false);
     });
   });
 
@@ -89,14 +87,13 @@ describe('computeSpecialYogas', () => {
   });
 
   it('can return multiple yogas simultaneously', () => {
-    // Sunday + Pushya(7): Ravi Pushya + Sarvartha Siddhi (Sunday has Pushya)
-    // + Amrit Siddhi if tithi matches (use tithi 0 = Pratipada, number 1 for Sunday)
-    const yogas = callLegacy(0, 0, 7);
+    // Sunday + Hasta(12): Amrit Siddhi (Sun-Hasta pair) + Sarvartha Siddhi
+    // (Sunday's SSY set includes Hasta).
+    const yogas = callLegacy(0, 5, 12);
     expect(yogas.length).toBeGreaterThanOrEqual(2);
     const types = yogas.map(y => y.type);
-    expect(types).toContain('ravi_pushya');
-    expect(types).toContain('sarvartha_siddhi');
     expect(types).toContain('amrit_siddhi');
+    expect(types).toContain('sarvartha_siddhi');
   });
 
   it('returns empty array when no yoga matches', () => {
@@ -110,7 +107,8 @@ describe('computeSpecialYogas', () => {
 
   it('uses name resolver for translated names', () => {
     const customResolver = (type: string) => `translated_${type}`;
-    const yogas = computeSpecialYogas(0, 0, 7, 7, customResolver);
+    // Sunday + Hasta(12) → Amrit Siddhi is the first yoga pushed.
+    const yogas = computeSpecialYogas(0, 0, 12, 12, customResolver);
     expect(yogas[0]!.name).toBe('translated_amrit_siddhi');
   });
 });

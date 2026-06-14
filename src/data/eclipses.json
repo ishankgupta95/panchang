@@ -11,7 +11,7 @@
     ],
     "startYear": 2024,
     "endYear": 2031,
-    "generatedAt": "2026-05-30T14:11:40.371Z",
+    "generatedAt": "2026-06-14T13:23:29.390Z",
     "note": "Eclipses pre-computed for Varanasi (IST), visible from there during any phase (eclipsed body above the horizon between first and last contact — so an eclipse in progress at moon/sunrise or moon/sunset is included). visibleAtPeak flags whether greatest eclipse itself is observable. Within India visibility is essentially uniform; elsewhere it differs, so build a location-specific table at runtime with buildEclipsesTable and cache it. Solar eclipses carry the subtype seen from Varanasi (a globally-total eclipse may show as partial). Times are ISO UTC. Sutak: 4 prahara (12h) before first contact for solar, 3 prahara (9h) for umbral (partial/total) lunar, ending at moksha; penumbral lunar eclipses carry no sutak and are not religiously observed (drik / pandit consensus). Each entry carries both en and hi text."
   },
   "years": {
@@ -38,8 +38,8 @@
               "hi": "पूर्ण चंद्र ग्रहण — 100% ग्रास।"
             },
             "sutak": {
-              "start": "2025-09-07T06:28:02.515Z",
-              "end": "2025-09-07T20:55:20.486Z"
+              "start": "2025-09-07T07:26:40.110Z",
+              "end": "2025-09-07T19:56:42.891Z"
             }
           }
         ]
@@ -67,8 +67,8 @@
               "hi": "पूर्ण चंद्र ग्रहण — 100% ग्रास।"
             },
             "sutak": {
-              "start": "2026-03-02T23:44:01.948Z",
-              "end": "2026-03-03T14:23:18.629Z"
+              "start": "2026-03-03T00:49:45.126Z",
+              "end": "2026-03-03T13:17:35.451Z"
             }
           }
         ]
@@ -171,8 +171,8 @@
               "hi": "आंशिक चंद्र ग्रहण — 33% ग्रास।"
             },
             "sutak": {
-              "start": "2028-07-06T06:43:55.421Z",
-              "end": "2028-07-06T20:55:21.336Z"
+              "start": "2028-07-06T08:08:19.584Z",
+              "end": "2028-07-06T19:30:57.173Z"
             }
           }
         ]
@@ -198,8 +198,8 @@
               "hi": "पूर्ण चंद्र ग्रहण — 100% ग्रास।"
             },
             "sutak": {
-              "start": "2028-12-31T05:03:27.574Z",
-              "end": "2028-12-31T19:40:21.523Z"
+              "start": "2028-12-31T06:07:09.717Z",
+              "end": "2028-12-31T18:36:39.380Z"
             }
           }
         ]
@@ -227,8 +227,8 @@
               "hi": "पूर्ण चंद्र ग्रहण — 100% ग्रास।"
             },
             "sutak": {
-              "start": "2029-12-20T10:42:34.436Z",
-              "end": "2029-12-21T01:41:14.783Z"
+              "start": "2029-12-20T11:54:54.738Z",
+              "end": "2029-12-21T00:28:54.481Z"
             }
           }
         ]
@@ -283,8 +283,8 @@
               "hi": "आंशिक चंद्र ग्रहण — 47% ग्रास।"
             },
             "sutak": {
-              "start": "2030-06-15T07:13:48.134Z",
-              "end": "2030-06-15T20:52:41.329Z"
+              "start": "2030-06-15T08:20:39.848Z",
+              "end": "2030-06-15T19:45:49.615Z"
             }
           }
         ]

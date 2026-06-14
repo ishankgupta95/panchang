@@ -722,7 +722,10 @@ export function getDailyPanchang(
         const idx = getTithiIndexFromLons(moon, sun);
         return computeTithiFromLongitudes(moon, sun, resolveTithiName(idx, lang), resolvePakshaName(idx, lang));
       },
-      30, 36, maxIter, 2,
+      // maxPerDay = 3: a short tithi fully contained in the sunrise→nextSunrise
+      // window means 3 tithis legitimately touch the Hindu day (was 2, which
+      // silently dropped the 3rd). Matches MAX_DAILY_TITHIS.
+      30, 36, maxIter, 3,
     ) as DailyTithiInfo[];
     nakshatras = findDailyElements(
       sunriseUtc, nextSunriseUtc, nakshatraAtSunrise,
@@ -731,7 +734,7 @@ export function getDailyPanchang(
         const moon = getMoon(d);
         return computeNakshatraFromLongitude(moon, resolveNakshatraName(Math.floor(moon / NAKSHATRA_SPAN), lang));
       },
-      27, 36, maxIter, 2,
+      27, 36, maxIter, 3,
     ) as DailyNakshatraInfo[];
     yogas = findDailyElements(
       sunriseUtc, nextSunriseUtc, yogaAtSunrise,
@@ -740,7 +743,7 @@ export function getDailyPanchang(
         const moon = getMoon(d), sun = getSun(d);
         return computeYogaFromLongitudes(moon, sun, resolveYogaName(getYogaIndex(moon, sun), lang));
       },
-      27, 36, maxIter, 2,
+      27, 36, maxIter, 3,
     ) as DailyYogaInfo[];
     karanas = findDailyElements(
       sunriseUtc, nextSunriseUtc, karanaAtSunrise,
@@ -749,7 +752,7 @@ export function getDailyPanchang(
         const moon = getMoon(d), sun = getSun(d);
         return computeKaranaFromLongitudes(moon, sun, resolveKaranaName(getKaranaIndex(moon, sun), lang));
       },
-      60, 18, maxIter, 4,
+      60, 18, maxIter, 5,
     ) as DailyKaranaInfo[];
   } else {
     tithis = [{ ...tithiAtSunrise, startTime: null, isActiveAtSunrise: true }];
@@ -902,8 +905,8 @@ export function getDailyPanchang(
           end: toLocal(eclipseUtc.end),
           visibleFromLocation: eclipseUtc.visibleFromLocation,
           magnitude: eclipseUtc.magnitude,
-          sutakStart: toLocal(eclipseUtc.sutakStart),
-          sutakEnd: toLocal(eclipseUtc.sutakEnd),
+          sutakStart: toLocalOrNull(eclipseUtc.sutakStart),
+          sutakEnd: toLocalOrNull(eclipseUtc.sutakEnd),
           description: eclipseUtc.description,
         }
       : null,

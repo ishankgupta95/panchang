@@ -26,10 +26,10 @@ export interface EclipseInfo {
   visibleFromLocation: boolean;
   /** Fraction of the disc obscured at peak, range [0, 1]. */
   magnitude: number;
-  /** Pre-eclipse impurity window start (sutak). 12h (4 prahara) before `start` for solar, 9h (3 prahara) for lunar — classical Smarta convention. */
-  sutakStart: Date;
-  /** End of sutak — coincides with eclipse end (moksha / purification point). */
-  sutakEnd: Date;
+  /** Pre-eclipse impurity window start (sutak), or null when no sutak applies (penumbral lunar eclipse). Solar: 12h (4 prahara) before partial first contact; lunar: 9h (3 prahara) before the UMBRAL (partial) first contact. */
+  sutakStart: Date | null;
+  /** End of sutak (moksha / purification point) — partial last contact (umbral last contact for lunar); null for penumbral lunar eclipses. */
+  sutakEnd: Date | null;
   description: string;
 }
 
@@ -125,8 +125,16 @@ export function getUpcomingLunarEclipse(
 
     if (endDate.getTime() >= fromUtc.getTime()) {
       const subtype = eclipseKindToSubtype(info.kind);
-      const sutakStart = new Date(startDate.getTime() - LUNAR_SUTAK_HOURS * 3600_000);
-      const sutakEnd = endDate;
+      // Sutak is anchored to the UMBRAL (partial) phase, not the faint penumbral
+      // phase: DrikPanchang / pandit convention. Penumbral eclipses have no
+      // umbral phase (sd_partial === 0) and carry no sutak.
+      const hasUmbra = info.sd_partial > 0;
+      const sutakStart = hasUmbra
+        ? new Date(peakDate.getTime() - info.sd_partial * 60_000 - LUNAR_SUTAK_HOURS * 3600_000)
+        : null;
+      const sutakEnd = hasUmbra
+        ? new Date(peakDate.getTime() + info.sd_partial * 60_000)
+        : null;
       const visibleFromLocation = location
         ? isBodyAboveHorizon(peakDate, location, Body.Moon)
         : false;

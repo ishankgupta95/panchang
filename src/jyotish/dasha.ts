@@ -88,14 +88,27 @@ export function computeVimshottariDasha(
     const lordIdx = (startLordIdx + i) % 9;
     const lord = DASHA_ORDER[lordIdx]!;
     const years = DASHA_YEARS[lord];
+    const fullDurationMs = years * MS_PER_YEAR;
 
-    // First dasha: starts at birth, may be partial
-    const durationMs = i === 0 ? balanceMs : years * MS_PER_YEAR;
     const startDate = new Date(cursor.getTime());
-    const endDate = new Date(cursor.getTime() + durationMs);
+    let endDate: Date;
+    let antarDashas: AntarDasha[];
 
-    // Antardasha sub-periods (proportional share of the mahadasha)
-    const antarDashas: AntarDasha[] = buildAntarDashas(lord, startDate, durationMs);
+    if (i === 0) {
+      // Partial first mahadasha (balance of the birth-nakshatra lord). It began
+      // `elapsed` before birth; its antardashas run at their FULL durations from
+      // that virtual start, and we display only the portion from birth onward.
+      // So the antardasha current at birth appears truncated and the remaining
+      // ones at full length — the classical balance method. (Scaling every
+      // antardasha proportionally into the balance, as before, reported the
+      // wrong bhukti lord/dates for anyone not born at the nakshatra start.)
+      endDate = new Date(cursor.getTime() + balanceMs);
+      const virtualStart = new Date(birthDate.getTime() - (fullDurationMs - balanceMs));
+      antarDashas = buildAntarDashas(lord, virtualStart, fullDurationMs, startDate.getTime());
+    } else {
+      endDate = new Date(cursor.getTime() + fullDurationMs);
+      antarDashas = buildAntarDashas(lord, startDate, fullDurationMs, startDate.getTime());
+    }
 
     mahaDashas.push({ lord, startDate, endDate, years, antarDashas });
     cursor = endDate;
@@ -179,25 +192,42 @@ export function computeVimshottariPratyantar(antardasha: AntarDasha): Pratyantar
   return out;
 }
 
+/**
+ * Build the antardashas of a mahadasha.
+ *
+ * Antardashas always run at their full proportional durations
+ * `(antarYears / 120) × mahaFullDurationMs` from the mahadasha's (virtual)
+ * start. `clipStartMs` is the first instant to display: antardashas ending at
+ * or before it are dropped, and the one straddling it is truncated to begin at
+ * it. For a complete mahadasha pass `clipStartMs = mahaVirtualStart`; for the
+ * partial first mahadasha pass the birth instant so the elapsed (pre-birth)
+ * antardashas fall away and the running one is shown truncated.
+ */
 function buildAntarDashas(
   mahaLord: DashaLord,
-  mahaStart: Date,
-  mahaDurationMs: number,
+  mahaVirtualStart: Date,
+  mahaFullDurationMs: number,
+  clipStartMs: number,
 ): AntarDasha[] {
   const mahaIdx = DASHA_ORDER.indexOf(mahaLord);
   const antarDashas: AntarDasha[] = [];
-  let cursor = new Date(mahaStart.getTime());
+  let cursor = mahaVirtualStart.getTime();
 
   for (let i = 0; i < 9; i++) {
-    const antarLordIdx = (mahaIdx + i) % 9;
-    const antarLord = DASHA_ORDER[antarLordIdx]!;
-    const antarYears = DASHA_YEARS[antarLord];
-    // Antardasha proportion: (antarLord years / 120) * mahadasha duration
-    const antarMs = (antarYears / 120) * mahaDurationMs;
-    const startDate = new Date(cursor.getTime());
-    const endDate = new Date(cursor.getTime() + antarMs);
-    antarDashas.push({ lord: antarLord, startDate, endDate });
-    cursor = endDate;
+    const antarLord = DASHA_ORDER[(mahaIdx + i) % 9]!;
+    const antarMs = (DASHA_YEARS[antarLord] / 120) * mahaFullDurationMs;
+    const adStart = cursor;
+    const adEnd = cursor + antarMs;
+    cursor = adEnd;
+    // Skip antardashas fully elapsed before the display window (pre-birth
+    // portion of a partial first mahadasha); truncate the straddling one.
+    if (adEnd <= clipStartMs) continue;
+    const displayStart = adStart < clipStartMs ? clipStartMs : adStart;
+    antarDashas.push({
+      lord: antarLord,
+      startDate: new Date(displayStart),
+      endDate: new Date(adEnd),
+    });
   }
 
   return antarDashas;

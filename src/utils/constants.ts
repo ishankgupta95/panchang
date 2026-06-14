@@ -142,11 +142,12 @@ export const ANANDADI_TABLE: readonly (readonly number[])[] = buildAnandadiTable
 
 /**
  * Auspicious / inauspicious classification per Anandadi yoga, indexed
- * 0..27 in the canonical name order above. Source: Muhurta-chintamani
- * Ch. 4, summarised in the standard Pandit references — exactly 14 are
- * auspicious (Ananda, Prajapati, Saumya, Dhwaja, Shrivatsa, Chhatra,
- * Maitra, Manasa, Padma, Siddhi, Shubha, Amrita, Sthira, Vardhamana)
- * and the remaining 14 are inauspicious.
+ * 0..27 in the canonical name order above. Aligned to DrikPanchang (the
+ * project's parity oracle): 16 are auspicious (Ananda, Prajapati, Saumya,
+ * Dhwaja, Shrivatsa, Chhatra, Maitra, Manasa, Padma, Siddhi, Shubha,
+ * Amrita, Matanga, Charma, Sthira, Vardhamana) and the remaining 12 are
+ * inauspicious. Matanga (23) and Charma (25) are marked auspicious by
+ * DrikPanchang day-panchang (verified 2026-06-26 Matanga, 2026-06-16 Chara).
  */
 export const ANANDADI_QUALITY: readonly ('auspicious' | 'inauspicious' | 'neutral')[] = [
   'auspicious',   //  0 Ananda
@@ -172,9 +173,9 @@ export const ANANDADI_QUALITY: readonly ('auspicious' | 'inauspicious' | 'neutra
   'auspicious',   // 20 Amrita
   'inauspicious', // 21 Musala
   'inauspicious', // 22 Gada
-  'inauspicious', // 23 Matanga
+  'auspicious',   // 23 Matanga  (auspicious per DrikPanchang)
   'inauspicious', // 24 Raksha
-  'inauspicious', // 25 Charma
+  'auspicious',   // 25 Charma   (auspicious per DrikPanchang)
   'auspicious',   // 26 Sthira
   'auspicious',   // 27 Vardhamana
 ];
