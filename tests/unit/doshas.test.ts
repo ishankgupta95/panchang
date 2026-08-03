@@ -14,6 +14,7 @@
 import { describe, it, expect } from 'vitest';
 import { computeMangalDosha, computePitruDosha } from '../../src/jyotish/doshas';
 import type { BirthChart, PlanetPlacement, GrahaName } from '../../src/types/jyotish';
+import { indexPlanets } from '../../src/jyotish/charts';
 
 interface ChartOpts {
   lagnaRashi: number;
@@ -60,6 +61,11 @@ function makeChart(opts: ChartOpts): BirthChart {
       isRetrograde: false,
     };
   };
+  const planets: PlanetPlacement[] = [
+    stub('Sun'), stub('Moon'), stub('Mars'), stub('Mercury'),
+    stub('Jupiter'), stub('Venus'), stub('Saturn'),
+    stub('Rahu'), stub('Ketu'),
+  ];
   return {
     divisional: 'D1',
     lagna: {
@@ -83,11 +89,8 @@ function makeChart(opts: ChartOpts): BirthChart {
         };
       }),
     },
-    planets: [
-      stub('Sun'), stub('Moon'), stub('Mars'), stub('Mercury'),
-      stub('Jupiter'), stub('Venus'), stub('Saturn'),
-      stub('Rahu'), stub('Ketu'),
-    ],
+    planets,
+    byPlanet: indexPlanets(planets),
   };
 }
 

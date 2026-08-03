@@ -1,0 +1,19 @@
+{
+  // Type-checks the test suite against the library's own types.
+  //
+  // The main `tsconfig.json` excludes `tests/` (it drives the build, and the
+  // build must not emit test files). That left the suite unchecked: hand-built
+  // `BirthChart` fixtures silently drifted from the interface, and adding a
+  // required field to it surfaced only as ~65 runtime failures rather than a
+  // compile error pointing at each fixture.
+  //
+  // `npm run typecheck` runs both configs.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false
+  },
+  "include": ["src", "tests"]
+}

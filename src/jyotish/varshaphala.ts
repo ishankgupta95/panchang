@@ -338,7 +338,7 @@ function pickYearLord(
   const lagnaRashi = varshaChart.lagna.rashi.index;
   const lagnaLord = VISIBLE_GRAHAS_BY_INDEX[RASHI_LORD[lagnaRashi]!]!;
 
-  const sunPlacement = varshaChart.planets.find((p) => p.planet === 'Sun')!;
+  const sunPlacement = varshaChart.byPlanet.Sun;
   const sunRashiLord = VISIBLE_GRAHAS_BY_INDEX[RASHI_LORD[sunPlacement.rashi.index]!]!;
 
   const triraashi = triraashiPati(lagnaRashi, isDay);
@@ -385,12 +385,12 @@ function resolveOperand(
     case 'Jupiter':
     case 'Venus':
     case 'Saturn':
-      return varshaChart.planets.find((p) => p.planet === op)!.longitude;
+      return varshaChart.byPlanet[op].longitude;
     case 'Asc':
       return varshaChart.lagna.siderealLongitude;
     case 'AscLord': {
       const lord = VISIBLE_GRAHAS_BY_INDEX[RASHI_LORD[varshaChart.lagna.rashi.index]!]!;
-      return varshaChart.planets.find((p) => p.planet === lord)!.longitude;
+      return varshaChart.byPlanet[lord].longitude;
     }
     case 'House11Cusp': {
       const lagnaRashi = varshaChart.lagna.rashi.index;

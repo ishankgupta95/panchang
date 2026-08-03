@@ -4,7 +4,7 @@ import { getSiderealSunLongitude } from '../astronomy/sun';
 import { getSiderealMoonLongitude } from '../astronomy/moon';
 import { computeNakshatraFromLongitude } from '../core/nakshatra';
 import { normalize360 } from '../utils/angle';
-import { NAKSHATRA_SPAN } from '../utils/constants';
+import { nakshatraOf } from '../utils/constants';
 import type { AyanamsaType } from '../types/options';
 import type { GrahaPosition, GrahaName, PlanetaryPositions } from '../types/jyotish';
 
@@ -128,7 +128,7 @@ function buildGrahaPosition(
 ): GrahaPosition {
   const rashiIndex = Math.floor(siderealLon / 30);
   const degreeInRashi = siderealLon - rashiIndex * 30;
-  const nakIdx = Math.floor(siderealLon / NAKSHATRA_SPAN);
+  const nakIdx = nakshatraOf(siderealLon);
   return {
     planet,
     siderealLongitude: siderealLon,

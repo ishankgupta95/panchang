@@ -25,7 +25,7 @@ import { describe, it, expect } from 'vitest';
 import {
   computeBhavaBala, computeShadbala, _BHAVA_DIK_VALUES_FOR_TEST,
 } from '../../src/jyotish/shadbala';
-import { computeRashiChart } from '../../src/jyotish/charts';
+import { computeRashiChart, indexPlanets } from '../../src/jyotish/charts';
 import type {
   BhavaChart, BirthChart, GrahaName, HouseInfo,
   LagnaInfo, PlanetPlacement,
@@ -126,7 +126,7 @@ function synthChart(spec: SynthSpec): BirthChart {
       isRetrograde: g === 'Rahu' || g === 'Ketu',
     };
   });
-  return { divisional: 'D1', lagna, bhava, planets };
+  return { divisional: 'D1', lagna, bhava, planets, byPlanet: indexPlanets(planets) };
 }
 
 // ── Structural invariants ─────────────────────────────

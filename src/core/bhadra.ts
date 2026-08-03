@@ -1,4 +1,5 @@
 import { getKaranaIndexAtTime } from './karana';
+import type { BhadraInfo } from '../types/elements';
 
 /**
  * Bhadra Kala (also called Vishti Karana in scripture) is an inauspicious
@@ -24,16 +25,12 @@ import { getKaranaIndexAtTime } from './karana';
  *   - Karana 49: Krishna Dashami,  2nd half
  *   - Karana 56: Krishna Chaturdashi, 1st half
  */
-export interface BhadraInfo {
-  /** UTC start of the Vishti karana window (may precede sunrise). */
-  start: Date;
-  /** UTC end of the Vishti karana window (may exceed nextSunrise). */
-  end: Date;
-  /** Classical "abode" of Bhadra: determines which portion is inauspicious. */
-  location: 'earth' | 'heaven' | 'paatal';
-  /** True when Bhadra is currently active at local sunrise. */
-  isActive: boolean;
-}
+// `BhadraInfo` is declared once, in `types/elements.ts`, and re-exported here
+// for callers of this module. It previously had a second, independent
+// declaration in this file; the two were identical when written but nothing
+// kept them so, and adding `locationName` to the canonical one left this copy
+// silently behind.
+export type { BhadraInfo };
 
 export function isVishtiKarana(karanaIndex: number): boolean {
   if (karanaIndex <= 0 || karanaIndex >= 57) return false;
@@ -74,6 +71,7 @@ export function computeBhadraKaal(
   nextSunriseUtc: Date,
   getMoon: (d: Date) => number,
   getSun: (d: Date) => number,
+  locationNameFn: (key: 'earth' | 'heaven' | 'paatal') => string = (k) => k,
 ): BhadraInfo | null {
   const karanaAt = (d: Date): number => getKaranaIndexAtTime(d, getMoon, getSun);
   const dayLengthMs = nextSunriseUtc.getTime() - sunriseUtc.getTime();
@@ -140,10 +138,12 @@ export function computeBhadraKaal(
     }
   }
 
+  const location = bhadraLocation(vishtiKaranaIndex);
   return {
     start: startTime,
     end: endTime,
-    location: bhadraLocation(vishtiKaranaIndex),
+    location,
+    locationName: locationNameFn(location),
     isActive: isVishtiKarana(sunriseKarana),
   };
 }

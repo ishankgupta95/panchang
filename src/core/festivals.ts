@@ -475,6 +475,52 @@ export function computeFestivals(
     return ctx.priorDayTithiByRule?.[rule];
   };
 
+  /**
+   * Classical **vyapini** test: does `targetTithi` prevail over `dateRule`'s
+   * kala today, without having already been claimed by yesterday?
+   *
+   * Sampling only the kala's midpoint misses days where the tithi covered most
+   * of the kala but ended minutes before that midpoint — e.g. Janmashtami 2026
+   * at Pune, where Ashtami ran 02:26 IST Sep 4 → 00:14 IST Sep 5: active at
+   * nishita *start*, gone ~20 min before nishita midpoint. So a match at either
+   * end of the kala counts, and the two dedupe rules below stop the same tithi
+   * being emitted on consecutive days.
+   *
+   * This logic was previously written out three times — once in the registry
+   * loop and again for Masik Shivaratri and Vinayaka Chaturthi — with all four
+   * conditions repeated verbatim each time. It is the part of the festival
+   * engine most likely to need correction against Drik, so it lives in one
+   * place.
+   */
+  const prevailsInKala = (targetTithi: number, dateRule: FestivalDateRule): boolean => {
+    const endTithi = tithiForRule(dateRule);
+    const startTithi = tithiForRuleStart(dateRule);
+    const priorEndTithi = priorDayTithiForRule(dateRule);
+
+    const matchedByEnd = endTithi === targetTithi;
+    const matchedByStart =
+      dateRule !== 'sunrise' &&
+      startTithi !== undefined &&
+      startTithi === targetTithi &&
+      endTithi !== targetTithi;
+    if (!matchedByEnd && !matchedByStart) return false;
+
+    // The tithi only just nudged into today's kala-end, but yesterday's
+    // kala-end already held it → yesterday emitted; suppress today.
+    if (
+      dateRule !== 'sunrise' &&
+      startTithi !== undefined &&
+      startTithi !== targetTithi &&
+      priorEndTithi === targetTithi
+    ) return false;
+
+    // Start-only match: the tithi spanned yesterday's kala fully (yesterday
+    // matched by end) and is leaving today's — yesterday wins.
+    if (matchedByStart && priorEndTithi === targetTithi) return false;
+
+    return true;
+  };
+
   // ── Fixed registry festivals ──────────────────────────────
   for (const rule of FESTIVAL_REGISTRY) {
     const adhikaBehaviour: AdhikaBehaviour = rule.adhikaBehaviour ?? 'skip';
@@ -515,35 +561,7 @@ export function computeFestivals(
         // since the normal year has no Adhika and the festival observes as usual).
         (adhikaBehaviour !== 'shift-to-nija' || !ctx.isAdhika);
       if (masaMatches) {
-        const dateRule = rule.dateRule ?? 'sunrise';
-        const endTithi = tithiForRule(dateRule);
-        const startTithi = tithiForRuleStart(dateRule);
-        const priorEndTithi = priorDayTithiForRule(dateRule);
-        // Classical vyapini rule: the tithi prevails during the kala. Sampling
-        // only the midpoint misses days where the tithi covered most of the
-        // kala but ended minutes before midpoint (e.g. Janmashtami 2026 Pune,
-        // where Ashtami ran 02:26 IST Sep 4 → 00:14 IST Sep 5, was active at
-        // nishita start but ended ~20 min before nishita midpoint).
-        const matchedByEnd = endTithi === rule.tithi;
-        const matchedByStart =
-          dateRule !== 'sunrise' &&
-          startTithi !== undefined &&
-          startTithi === rule.tithi &&
-          endTithi !== rule.tithi;
-        if (matchedByEnd || matchedByStart) {
-          // Tithi just nudged into today's kala-end but yesterday's kala-end
-          // also held it → yesterday already emitted, suppress today.
-          if (
-            dateRule !== 'sunrise' &&
-            startTithi !== undefined &&
-            startTithi !== rule.tithi &&
-            priorEndTithi === rule.tithi
-          ) continue;
-          // Start-only match: tithi spanned yesterday's kala fully (yesterday
-          // matched by end) and is leaving today's kala — yesterday wins.
-          if (matchedByStart && priorEndTithi === rule.tithi) continue;
-          match = true;
-        }
+        match = prevailsInKala(rule.tithi, rule.dateRule ?? 'sunrise');
       }
     }
 
@@ -559,7 +577,11 @@ export function computeFestivals(
       }
     }
 
-    const festival: FestivalInfo = { name: nameResolver(rule.key), type: rule.type };
+    const festival: FestivalInfo = {
+      key: rule.key,
+      name: nameResolver(rule.key),
+      type: rule.type,
+    };
 
     // Purnimanta-naming awareness: add description with the Purnimanta masa name
     // for Krishna-paksha festivals that were traditionally named under the
@@ -594,6 +616,7 @@ export function computeFestivals(
 
     // Vaishnava always fasts on the Ekadashi-at-sunrise day.
     results.push({
+      key: 'vaishnava_ekadashi',
       name: nameResolver('vaishnava_ekadashi'),
       type: 'vaishnava_ekadashi',
       description: namedDescription,
@@ -602,6 +625,7 @@ export function computeFestivals(
     if (ctx.ekadashiDashamiViddha) {
       // Smarta deferred to tomorrow (Dwadashi).
       const deferral: FestivalInfo = {
+        key: 'smarta_ekadashi',
         name: nameResolver('smarta_ekadashi'),
         type: 'smarta_ekadashi',
         description: nameResolver('desc_ekadashi_deferred_to_dwadashi')
@@ -610,6 +634,7 @@ export function computeFestivals(
       results.push(deferral);
       // Generic `ekadashi` with note for ergonomics.
       results.push({
+        key: 'ekadashi',
         name: nameResolver('ekadashi'),
         type: 'ekadashi',
         description: nameResolver('desc_ekadashi_viddha_smarta_next'),
@@ -617,11 +642,13 @@ export function computeFestivals(
     } else {
       // Non-viddha: Smarta and Vaishnava coincide.
       results.push({
+        key: 'smarta_ekadashi',
         name: nameResolver('smarta_ekadashi'),
         type: 'smarta_ekadashi',
         description: namedDescription,
       });
       results.push({
+        key: 'ekadashi',
         name: nameResolver('ekadashi'),
         type: 'ekadashi',
         description: namedDescription,
@@ -630,6 +657,7 @@ export function computeFestivals(
   } else if (ctx.smartaDwadashiToday) {
     // Smarta fast landed on Dwadashi today after yesterday's viddha Ekadashi.
     results.push({
+      key: 'smarta_ekadashi',
       name: nameResolver('smarta_ekadashi'),
       type: 'smarta_ekadashi',
       description: nameResolver('desc_ekadashi_viddha_smarta_today'),
@@ -638,48 +666,24 @@ export function computeFestivals(
 
   // ── Sankashti Chaturthi — Krishna Chaturthi (18) at moonrise ──
   if (tithiForRule('chandrodaya') === 18) {
-    results.push({ name: nameResolver('sankashti_chaturthi'), type: 'major' });
+    results.push({ key: 'sankashti_chaturthi', name: nameResolver('sankashti_chaturthi'), type: 'major' });
   }
 
   // ── Masik Shivaratri (monthly) — Krishna Chaturdashi (28) at nishita ──
   // Suppressed in Nija Magha (where Maha Shivaratri already fires).
   {
-    const endTithi = tithiForRule('nishita');
-    const startTithi = ctx.tithiByRuleStart?.nishita;
-    const priorEndTithi = ctx.priorDayTithiByRule?.nishita;
-    const matchedByEnd = endTithi === 28;
-    const matchedByStart = startTithi !== undefined && startTithi === 28 && endTithi !== 28;
-    if (matchedByEnd || matchedByStart) {
-      const isMahaShivaratriMonth = !ctx.isAdhika && ctx.chandraMasaIndex === 10;
-      const dedupeA =
-        startTithi !== undefined &&
-        startTithi !== 28 &&
-        priorEndTithi === 28;
-      const dedupeB = matchedByStart && priorEndTithi === 28;
-      if (!isMahaShivaratriMonth && !dedupeA && !dedupeB) {
-        results.push({ name: nameResolver('masik_shivaratri'), type: 'minor' });
-      }
+    const isMahaShivaratriMonth = !ctx.isAdhika && ctx.chandraMasaIndex === 10;
+    if (!isMahaShivaratriMonth && prevailsInKala(28, 'nishita')) {
+      results.push({ key: 'masik_shivaratri', name: nameResolver('masik_shivaratri'), type: 'minor' });
     }
   }
 
   // ── Vinayaka Chaturthi (monthly) — Shukla Chaturthi (3) at madhyahna ──
   // Suppressed in Nija Bhadrapada (where Ganesh Chaturthi already fires).
   {
-    const endTithi = tithiForRule('madhyahna');
-    const startTithi = ctx.tithiByRuleStart?.madhyahna;
-    const priorEndTithi = ctx.priorDayTithiByRule?.madhyahna;
-    const matchedByEnd = endTithi === 3;
-    const matchedByStart = startTithi !== undefined && startTithi === 3 && endTithi !== 3;
-    if (matchedByEnd || matchedByStart) {
-      const isGaneshChaturthiMonth = !ctx.isAdhika && ctx.chandraMasaIndex === 5;
-      const dedupeA =
-        startTithi !== undefined &&
-        startTithi !== 3 &&
-        priorEndTithi === 3;
-      const dedupeB = matchedByStart && priorEndTithi === 3;
-      if (!isGaneshChaturthiMonth && !dedupeA && !dedupeB) {
-        results.push({ name: nameResolver('vinayaka_chaturthi'), type: 'minor' });
-      }
+    const isGaneshChaturthiMonth = !ctx.isAdhika && ctx.chandraMasaIndex === 5;
+    if (!isGaneshChaturthiMonth && prevailsInKala(3, 'madhyahna')) {
+      results.push({ key: 'vinayaka_chaturthi', name: nameResolver('vinayaka_chaturthi'), type: 'minor' });
     }
   }
 
@@ -688,9 +692,9 @@ export function computeFestivals(
   // apps surface these as "festival-like" auspicious days without extra plumbing.
   if (ctx.nakshatraIndex === 7) {
     if (ctx.varaIndex === 0) {
-      results.push({ name: nameResolver('ravi_pushya'), type: 'minor' });
+      results.push({ key: 'ravi_pushya', name: nameResolver('ravi_pushya'), type: 'minor' });
     } else if (ctx.varaIndex === 4) {
-      results.push({ name: nameResolver('guru_pushya'), type: 'minor' });
+      results.push({ key: 'guru_pushya', name: nameResolver('guru_pushya'), type: 'minor' });
     }
   }
 
@@ -705,7 +709,7 @@ export function computeFestivals(
     ctx.nakshatraIndex === 2 ||
     (ctx.nakshatraIndicesInDay !== undefined && ctx.nakshatraIndicesInDay.has(2));
   if (krittikaPrevails) {
-    results.push({ name: nameResolver('masik_karthigai'), type: 'minor' });
+    results.push({ key: 'masik_karthigai', name: nameResolver('masik_karthigai'), type: 'minor' });
   }
 
   // ── Pradosha Vrata — Shukla/Krishna Trayodashi at pradosha-kala ──
@@ -713,6 +717,7 @@ export function computeFestivals(
   if (pradoshaTithi === 12 || pradoshaTithi === 27) {
     const variantKey = PRADOSHA_NAMES[ctx.varaIndex] ?? 'pradosha';
     results.push({
+      key: 'pradosha',
       name: nameResolver('pradosha'),
       type: 'pradosha',
       description: nameResolver(variantKey),
@@ -726,6 +731,7 @@ export function computeFestivals(
       ? rashiNameResolver(ctx.sankrantiRashi)
       : `Rashi ${ctx.sankrantiRashi}`;
     results.push({
+      key: 'sankranti',
       name: nameResolver('sankranti'),
       type: 'sankranti',
       description: rashiName,
@@ -739,6 +745,7 @@ export function computeFestivals(
       for (const r of regionalRules) {
         if (region !== 'all' && !r.regions.includes('all') && !r.regions.includes(region)) continue;
         results.push({
+          key: r.key,
           name: nameResolver(r.key),
           type: 'sankranti',
           description: rashiName,
@@ -753,21 +760,21 @@ export function computeFestivals(
   // Himachal; not emitted in instant mode (context field is omitted there).
   if (ctx.nextDaySankrantiRashi === 9) {
     if (region === 'all' || LOHRI_REGIONS.includes(region)) {
-      results.push({ name: nameResolver('lohri'), type: 'major' });
+      results.push({ key: 'lohri', name: nameResolver('lohri'), type: 'major' });
     }
   }
 
   // ── Raja Parba day 1 (Pahili Raja) — day before Karka Sankranti ──
   if (ctx.nextDaySankrantiRashi === 3) {
     if (region === 'all' || RAJA_REGIONS.includes(region)) {
-      results.push({ name: nameResolver('raja_pahili'), type: 'major' });
+      results.push({ key: 'raja_pahili', name: nameResolver('raja_pahili'), type: 'major' });
     }
   }
 
   // ── Raja Parba day 3 (Basi Raja) — day after Karka Sankranti ──
   if (ctx.prevDaySankrantiRashi === 3) {
     if (region === 'all' || RAJA_REGIONS.includes(region)) {
-      results.push({ name: nameResolver('raja_basi'), type: 'major' });
+      results.push({ key: 'raja_basi', name: nameResolver('raja_basi'), type: 'major' });
     }
   }
 

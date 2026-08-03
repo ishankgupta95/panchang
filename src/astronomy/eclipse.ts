@@ -9,7 +9,12 @@ import {
   Horizon,
   EclipseKind,
 } from 'astronomy-engine';
+import { getTropicalMoonLongitude } from './moon';
+import { getTropicalSunLongitude } from './sun';
+import { normalize360 } from '../utils/angle';
+import { getTranslations } from '../i18n/resolver';
 import type { GeoLocation } from '../types/location';
+import type { Language } from '../types/options';
 
 export type EclipseSubtype = 'partial' | 'total' | 'annular' | 'penumbral';
 
@@ -104,11 +109,13 @@ export function isEclipseVisibleAnyPhase(
  * @param fromUtc     UTC instant to search forward from.
  * @param location    Observer location (required for `visibleFromLocation`).
  * @param withinDays  Max number of days ahead to look.
+ * @param lang        Language for `description`. Defaults to `'en'`.
  */
 export function getUpcomingLunarEclipse(
   fromUtc: Date,
   location: GeoLocation,
   withinDays: number,
+  lang: Language = 'en',
 ): EclipseInfo | null {
   let info = SearchLunarEclipse(fromUtc);
   // Sanity-bounded loop to catch the first eclipse whose PENUMBRAL start is
@@ -149,7 +156,7 @@ export function getUpcomingLunarEclipse(
         magnitude: info.obscuration,
         sutakStart,
         sutakEnd,
-        description: describeLunarEclipse(subtype, info.obscuration, visibleFromLocation),
+        description: describeEclipse('lunar', subtype, info.obscuration, visibleFromLocation, lang),
       };
     }
     info = NextLunarEclipse(info.peak);
@@ -168,11 +175,13 @@ export function getUpcomingLunarEclipse(
  * @param fromUtc     UTC instant to search forward from.
  * @param location    Observer location.
  * @param withinDays  Max number of days ahead to look.
+ * @param lang        Language for `description`. Defaults to `'en'`.
  */
 export function getUpcomingSolarEclipse(
   fromUtc: Date,
   location: GeoLocation,
   withinDays: number,
+  lang: Language = 'en',
 ): EclipseInfo | null {
   const observer = makeObserver(location);
   let info = SearchLocalSolarEclipse(fromUtc, observer);
@@ -204,7 +213,7 @@ export function getUpcomingSolarEclipse(
         magnitude: info.obscuration,
         sutakStart,
         sutakEnd,
-        description: describeSolarEclipse(subtype, info.obscuration, visibleFromLocation),
+        description: describeEclipse('solar', subtype, info.obscuration, visibleFromLocation, lang),
       };
     }
     info = NextLocalSolarEclipse(info.peak.time, observer);
@@ -213,40 +222,100 @@ export function getUpcomingSolarEclipse(
 }
 
 /**
+ * Moon–Sun elongation in [0, 360) at a UTC instant. Ayanamsa cancels in the
+ * difference, so tropical longitudes are used directly and no ayanamsa system
+ * needs to be threaded in.
+ */
+function elongationAt(date: Date): number {
+  return normalize360(getTropicalMoonLongitude(date) - getTropicalSunLongitude(date));
+}
+
+/**
+ * Syzygy guard for {@link getEclipseDuringDay}.
+ *
+ * A solar eclipse can only occur at conjunction (elongation 0°) and a lunar
+ * eclipse only at opposition (180°) — this is definitional, not an
+ * approximation. Elongation advances monotonically at ~12.19°/day, so a
+ * syzygy falls inside `[fromUtc, toUtc]` exactly when the elongation, measured
+ * relative to `targetDeg`, wraps past zero across the interval.
+ *
+ * Callers pad the interval (see `SYZYGY_GUARD_MARGIN_MS`) because an eclipse's
+ * *peak* is local maximum obscuration, which parallax can offset from exact
+ * geocentric syzygy by up to ~an hour, and because `getEclipseDuringDay` also
+ * admits an eclipse whose peak sits slightly before sunrise.
+ *
+ * Costs 4 ephemeris evaluations; skips a search costing several hundred.
+ */
+function syzygyBetween(fromUtc: Date, toUtc: Date, targetDeg: number): boolean {
+  const relFrom = normalize360(elongationAt(fromUtc) - targetDeg);
+  const relTo = normalize360(elongationAt(toUtc) - targetDeg);
+  // Exactly at (or a hair past) the target at the start of the window.
+  if (relFrom === 0) return true;
+  // Elongation increases; a wrap past 360→0 means the target was crossed.
+  return relTo < relFrom;
+}
+
+/**
+ * Padding applied on each side of the Hindu day before the syzygy test, in ms.
+ * 12 h ≈ 6.1° of elongation — far wider than the ~1 h peak-vs-syzygy offset it
+ * needs to absorb, so the guard never hides a real eclipse.
+ */
+const SYZYGY_GUARD_MARGIN_MS = 12 * 3600_000;
+
+/**
  * If an eclipse overlaps the Hindu day `[sunriseUtc, nextSunriseUtc)`, return it;
  * otherwise `null`. Used by `getDailyPanchang` to surface eclipses as a top-level
  * field. Both solar (local) and lunar are checked; solar is preferred when both
  * hit the same Hindu day (impossible in practice — they never pair within hours).
+ *
+ * Each branch is guarded by a cheap syzygy test, so on the ~98% of days that
+ * hold neither a new nor a full moon this returns `null` after 4 ephemeris
+ * evaluations instead of running a full eclipse search.
  */
 export function getEclipseDuringDay(
   sunriseUtc: Date,
   nextSunriseUtc: Date,
   location: GeoLocation,
+  lang: Language = 'en',
 ): EclipseInfo | null {
   const windowMs = nextSunriseUtc.getTime() - sunriseUtc.getTime();
   const windowDays = Math.ceil(windowMs / (24 * 3600_000)) + 1;
 
-  const solar = getUpcomingSolarEclipse(sunriseUtc, location, windowDays);
-  if (solar && solar.peak.getTime() < nextSunriseUtc.getTime()) return solar;
+  const guardFrom = new Date(sunriseUtc.getTime() - SYZYGY_GUARD_MARGIN_MS);
+  const guardTo = new Date(nextSunriseUtc.getTime() + SYZYGY_GUARD_MARGIN_MS);
 
-  const lunar = getUpcomingLunarEclipse(sunriseUtc, location, windowDays);
-  if (lunar && lunar.peak.getTime() < nextSunriseUtc.getTime()) return lunar;
+  if (syzygyBetween(guardFrom, guardTo, 0)) {
+    const solar = getUpcomingSolarEclipse(sunriseUtc, location, windowDays, lang);
+    if (solar && solar.peak.getTime() < nextSunriseUtc.getTime()) return solar;
+  }
+
+  if (syzygyBetween(guardFrom, guardTo, 180)) {
+    const lunar = getUpcomingLunarEclipse(sunriseUtc, location, windowDays, lang);
+    if (lunar && lunar.peak.getTime() < nextSunriseUtc.getTime()) return lunar;
+  }
 
   return null;
 }
 
-function describeSolarEclipse(subtype: EclipseSubtype, mag: number, visible: boolean): string {
-  const pct = Math.round(mag * 100);
-  const vis = visible ? 'visible from location' : 'not visible from location';
-  return `${capitalize(subtype)} solar eclipse — ${pct}% obscuration, ${vis}.`;
-}
-
-function describeLunarEclipse(subtype: EclipseSubtype, mag: number, visible: boolean): string {
-  const pct = Math.round(mag * 100);
-  const vis = visible ? 'visible from location' : 'not visible from location';
-  return `${capitalize(subtype)} lunar eclipse — ${pct}% obscuration, ${vis}.`;
-}
-
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
+/**
+ * Render an eclipse description in `lang`.
+ *
+ * Previously built with an English template literal here, which meant a
+ * `language: 'hi'` daily panchang carried a Hindi festival `name` alongside an
+ * English `description`. Every input is already structured on `EclipseInfo`, so
+ * the sentence is pure presentation and belongs in the i18n layer.
+ */
+function describeEclipse(
+  kind: 'solar' | 'lunar',
+  subtype: EclipseSubtype,
+  mag: number,
+  visible: boolean,
+  lang: Language,
+): string {
+  const e = getTranslations(lang).eclipse;
+  return e.template
+    .replace('{subtype}', e.subtype[subtype])
+    .replace('{kind}', e.kind[kind])
+    .replace('{percent}', String(Math.round(mag * 100)))
+    .replace('{visibility}', visible ? e.visibility.visible : e.visibility.notVisible);
 }

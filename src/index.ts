@@ -112,7 +112,7 @@ export type { MoonPhaseName, MoonPhaseEvent } from './astronomy/moonPhase';
 // Muhurta scoring engine + stock rules
 export { scoreMuhurta, findAuspiciousDates } from './muhurta/engine';
 export type {
-  MuhurtaRule, MuhurtaScore, MuhurtaDay, MuhurtaScoreOptions,
+  MuhurtaRule, MuhurtaScore, MuhurtaDay, MuhurtaScoreOptions, MuhurtaFactor,
 } from './muhurta/engine';
 export {
   vivahRule, grihaPraveshRule, namakaranaRule, vidyarambhRule,
@@ -161,7 +161,7 @@ export type {
   GeoLocation,
   PanchangOptions, InstantPanchangOptions, BirthChartOptions,
   AyanamsaType, Language, Precision, MasaSystem, FestivalRegion, LegacyFestivalRegion,
-  HouseSystem,
+  HouseSystem, PanchangSection,
   DailyPanchangResult, InstantPanchangResult,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, MasaInfo,
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,

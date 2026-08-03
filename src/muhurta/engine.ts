@@ -49,6 +49,25 @@ export interface MuhurtaRule {
   excludePanchaka?: boolean;
 }
 
+/**
+ * One scoring input, in machine-readable form.
+ *
+ * `MuhurtaScore.reasons` renders these as English sentences, which makes it
+ * unsuitable for a localized UI or for programmatic filtering. `factors`
+ * carries the same information without the prose: a stable `code`, the axis it
+ * came from, the index that triggered it, and its effect on the score.
+ */
+export interface MuhurtaFactor {
+  /** Stable identifier, e.g. `'auspicious_tithi'`, `'bhadra'`, `'jwalamukhi'`. */
+  code: string;
+  /** Which panchang axis produced it. `'exclusion'` means the day was zeroed. */
+  axis: 'tithi' | 'nakshatra' | 'vara' | 'yoga' | 'specialYoga' | 'exclusion';
+  /** The element index that triggered it, when the axis has one. */
+  index?: number;
+  /** Points contributed. Negative lowers the score; 0 for a hard exclusion. */
+  delta: number;
+}
+
 /** Per-day score result. */
 export interface MuhurtaScore {
   /** Calendar date evaluated. */
@@ -57,8 +76,16 @@ export interface MuhurtaScore {
   score: number;
   /** True when the day clears all hard exclusions and lands in a positive band. */
   passes: boolean;
-  /** Brief notes on which factors raised or lowered the score. */
+  /**
+   * Brief English notes on which factors raised or lowered the score.
+   *
+   * Diagnostic output — these are **not** localized and are not a stable
+   * format. Use {@link MuhurtaScore.factors} for anything a user will see or
+   * that code will branch on.
+   */
   reasons: string[];
+  /** The same factors, structured. Safe to localize and to filter on. */
+  factors: MuhurtaFactor[];
 }
 
 /** Per-day result returned by `findAuspiciousDates`. */
@@ -106,13 +133,21 @@ export function scoreMuhurta(
 ): MuhurtaScore {
   validateDate(date);
   validateLocation(location);
-  const panchang = getDailyPanchang(date, location, options);
+  // Scoring reads only elements, vara, chandramasa, gandaMula, panchaka,
+  // specialYogas, plus Bhadra ('lunarWindows') and the eclipse overlap. It
+  // never returns the panchang, so festivals and moon times can be skipped.
+  const panchang = getDailyPanchang(date, location, {
+    ...options,
+    sections: ['eclipse', 'lunarWindows'],
+    computeEndTimes: false,
+  });
   if (panchang === null) {
     return {
       date,
       score: 0,
       passes: false,
       reasons: ['polar location with no sunrise — Hindu day undefined'],
+      factors: [{ code: 'no_sunrise', axis: 'exclusion', delta: 0 }],
     };
   }
   return scoreFromPanchang(panchang, rule);
@@ -162,6 +197,9 @@ export function findAuspiciousDates(
   const dayMs = 24 * 3600_000;
   for (let t = start.getTime(); t <= end.getTime(); t += dayMs) {
     const d = new Date(t);
+    // Deliberately NOT section-trimmed, unlike `scoreMuhurta`: every returned
+    // day carries its `panchang` for callers to drill into, and that field is
+    // documented as the full result. Trimming would quietly hollow it out.
     const panchang = getDailyPanchang(d, location, options);
     if (panchang === null) continue;
     const result = scoreFromPanchang(panchang, rule);
@@ -178,6 +216,7 @@ export function findAuspiciousDates(
 
 function scoreFromPanchang(p: DailyPanchangResult, rule: MuhurtaRule): MuhurtaScore {
   const reasons: string[] = [];
+  const factors: MuhurtaFactor[] = [];
   let score = 50; // neutral baseline
   let passes = true;
 
@@ -188,30 +227,30 @@ function scoreFromPanchang(p: DailyPanchangResult, rule: MuhurtaRule): MuhurtaSc
 
   // Hard exclusions (zero score immediately if matched).
   if (rule.excludeBhadra && p.bhadra !== null) {
-    return zero(p.date, 'Bhadra Kala active on this day');
+    return zero(p.date, 'Bhadra Kala active on this day', 'bhadra');
   }
   if (rule.excludeEkadashi) {
     const isEkadashi = tithiAtSunrise === 10 || tithiAtSunrise === 25;
     if (isEkadashi) {
-      return zero(p.date, 'Ekadashi tithi at sunrise');
+      return zero(p.date, 'Ekadashi tithi at sunrise', 'ekadashi');
     }
   }
   if (rule.excludeEclipse && p.eclipse !== null) {
-    return zero(p.date, `Eclipse overlap (${p.eclipse.subtype})`);
+    return zero(p.date, `Eclipse overlap (${p.eclipse.subtype})`, 'eclipse');
   }
   if (rule.excludeAdhikaMasa && p.chandramasa.isAdhika) {
-    return zero(p.date, 'Adhika (intercalary) lunar month');
+    return zero(p.date, 'Adhika (intercalary) lunar month', 'adhika_masa');
   }
   if (rule.excludeGandaMula && p.gandaMula.active) {
-    return zero(p.date, `Ganda Mula nakshatra (${p.gandaMula.severity})`);
+    return zero(p.date, `Ganda Mula nakshatra (${p.gandaMula.severity})`, 'ganda_mula');
   }
   if (rule.excludePanchaka && p.panchaka) {
-    return zero(p.date, 'Panchaka active');
+    return zero(p.date, 'Panchaka active', 'panchaka');
   }
   if (rule.requirePaksha) {
     const paksha = tithiAtSunrise < 15 ? 'shukla' : 'krishna';
     if (paksha !== rule.requirePaksha) {
-      return zero(p.date, `paksha is ${paksha}, rule requires ${rule.requirePaksha}`);
+      return zero(p.date, `paksha is ${paksha}, rule requires ${rule.requirePaksha}`, 'paksha');
     }
   }
 
@@ -219,33 +258,41 @@ function scoreFromPanchang(p: DailyPanchangResult, rule: MuhurtaRule): MuhurtaSc
   if (rule.auspiciousTithis?.includes(tithiAtSunrise)) {
     score += 10;
     reasons.push(`auspicious tithi (${tithiAtSunrise})`);
+    factors.push({ code: 'auspicious_tithi', axis: 'tithi', index: tithiAtSunrise, delta: 10 });
   } else if (rule.inauspiciousTithis?.includes(tithiAtSunrise)) {
     score -= 15;
     reasons.push(`inauspicious tithi (${tithiAtSunrise})`);
+    factors.push({ code: 'inauspicious_tithi', axis: 'tithi', index: tithiAtSunrise, delta: -15 });
   }
 
   if (rule.auspiciousNakshatras?.includes(nakAtSunrise)) {
     score += 10;
     reasons.push(`auspicious nakshatra (${nakAtSunrise})`);
+    factors.push({ code: 'auspicious_nakshatra', axis: 'nakshatra', index: nakAtSunrise, delta: 10 });
   } else if (rule.inauspiciousNakshatras?.includes(nakAtSunrise)) {
     score -= 15;
     reasons.push(`inauspicious nakshatra (${nakAtSunrise})`);
+    factors.push({ code: 'inauspicious_nakshatra', axis: 'nakshatra', index: nakAtSunrise, delta: -15 });
   }
 
   if (rule.auspiciousVaras?.includes(varaIdx)) {
     score += 10;
     reasons.push(`auspicious vara (${varaIdx})`);
+    factors.push({ code: 'auspicious_vara', axis: 'vara', index: varaIdx, delta: 10 });
   } else if (rule.inauspiciousVaras?.includes(varaIdx)) {
     score -= 15;
     reasons.push(`inauspicious vara (${varaIdx})`);
+    factors.push({ code: 'inauspicious_vara', axis: 'vara', index: varaIdx, delta: -15 });
   }
 
   if (rule.auspiciousYogas?.includes(yogaAtSunrise)) {
     score += 10;
     reasons.push(`auspicious yoga (${yogaAtSunrise})`);
+    factors.push({ code: 'auspicious_yoga', axis: 'yoga', index: yogaAtSunrise, delta: 10 });
   } else if (rule.inauspiciousYogas?.includes(yogaAtSunrise)) {
     score -= 15;
     reasons.push(`inauspicious yoga (${yogaAtSunrise})`);
+    factors.push({ code: 'inauspicious_yoga', axis: 'yoga', index: yogaAtSunrise, delta: -15 });
   }
 
   // Special yoga bonuses — Amrit Siddhi / Sarvartha Siddhi / Ravi Pushya /
@@ -255,10 +302,12 @@ function scoreFromPanchang(p: DailyPanchangResult, rule: MuhurtaRule): MuhurtaSc
       || sy.type === 'ravi_pushya' || sy.type === 'guru_pushya') {
       score += 5;
       reasons.push(`${sy.type} bonus`);
+      factors.push({ code: sy.type, axis: 'specialYoga', delta: 5 });
     }
     if (sy.type === 'jwalamukhi') {
       score -= 10;
       reasons.push('Jwalamukhi yoga penalty');
+      factors.push({ code: 'jwalamukhi', axis: 'specialYoga', delta: -10 });
     }
   }
 
@@ -271,9 +320,16 @@ function scoreFromPanchang(p: DailyPanchangResult, rule: MuhurtaRule): MuhurtaSc
     score,
     passes,
     reasons,
+    factors,
   };
 }
 
-function zero(date: Date, reason: string): MuhurtaScore {
-  return { date, score: 0, passes: false, reasons: [reason] };
+function zero(date: Date, reason: string, code: string): MuhurtaScore {
+  return {
+    date,
+    score: 0,
+    passes: false,
+    reasons: [reason],
+    factors: [{ code, axis: 'exclusion', delta: 0 }],
+  };
 }

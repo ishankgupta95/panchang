@@ -4,6 +4,25 @@ export const NAKSHATRA_SPAN = 360 / 27; // 13.3333...
 export const NAKSHATRA_PADA_SPAN = NAKSHATRA_SPAN / 4; // 3.3333...
 export const YOGA_SPAN = 360 / 27; // 13.3333...
 export const KARANA_SPAN = 6;
+export const RASHI_SPAN = 30;
+
+/**
+ * Nakshatra index (0 = Ashwini … 26 = Revati) for a sidereal longitude.
+ *
+ * `Math.floor(lon / NAKSHATRA_SPAN)` appeared ~24 times across the codebase and
+ * `Math.floor(lon / 30)` ~35 times; naming them keeps the intent legible at the
+ * call site and gives the conversion a single home.
+ *
+ * Expects `lon` already normalized to [0, 360).
+ */
+export function nakshatraOf(siderealLongitude: number): number {
+  return Math.floor(siderealLongitude / NAKSHATRA_SPAN);
+}
+
+/** Rashi index (0 = Mesha … 11 = Meena) for a sidereal longitude in [0, 360). */
+export function rashiOf(siderealLongitude: number): number {
+  return Math.floor(siderealLongitude / RASHI_SPAN);
+}
 
 // ── Inauspicious period slot assignments (0-indexed from sunrise) ──
 // Index = day of week (0=Sunday, 6=Saturday)

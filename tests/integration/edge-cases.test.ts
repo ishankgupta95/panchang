@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { getDailyPanchang, getInstantPanchang } from '../../src/core/panchang';
 import { computeSunrise } from '../../src/astronomy/sunrise';
+import { getSiderealMoonLongitude } from '../../src/astronomy/moon';
+import { getSiderealSunLongitude } from '../../src/astronomy/sun';
 import { PanchangError } from '../../src/types/errors';
 
 // Use noon UTC so getDate() is unambiguous in any system timezone
@@ -65,5 +67,59 @@ describe('edge cases', () => {
     expect(result.nakshatras).toHaveLength(1);
     expect(result.yogas).toHaveLength(1);
     expect(result.karanas).toHaveLength(1);
+  });
+});
+
+/**
+ * Sub-tolerance element slivers at the day boundary.
+ *
+ * On the Hindu day beginning 2026-02-27 at NYC, the Saubhagya→Shobhana yoga
+ * transition falls at 11:31:14.706 UTC — **6.1 seconds before** that day's
+ * `nextSunrise` (11:31:20.808 UTC), verified below by bisecting exact
+ * longitudes. The day therefore genuinely contains three yogas, the last
+ * lasting about six seconds, and both precision settings report all three.
+ *
+ * Worth pinning because a sliver this short sits well inside the ±30 s bracket
+ * that `STANDARD_PRECISION` resolves transitions to. Whether it survives
+ * depends on which side of `nextSunrise` the search's upper bound lands on, so
+ * it is a sensitive canary for changes to the search or to the longitude memo.
+ */
+describe('element slivers at the day boundary', () => {
+  const NYC_SLIVER_DAY = noonUtc(2026, 2, 27);
+
+  for (const precision of ['standard', 'high'] as const) {
+    it(`${precision} precision resolves the ~6s third yoga`, () => {
+      const r = getDailyPanchang(NYC_SLIVER_DAY, NYC, { timezone: -300, precision });
+      expect(r).not.toBeNull();
+      expect(r!.yogas).toHaveLength(3);
+
+      const sliver = r!.yogas[2]!;
+      expect(sliver.name).toBe('Shobhana');
+      expect(sliver.endTime!.getTime()).toBe(r!.nextSunrise.getTime());
+      const spanMs = sliver.endTime!.getTime() - sliver.startTime!.getTime();
+      expect(spanMs).toBeGreaterThan(0);
+      expect(spanMs).toBeLessThan(60_000);
+    });
+  }
+
+  it('the true transition really does precede nextSunrise', () => {
+    // Independent of the library's search: bisect exact longitudes.
+    const SPAN = 360 / 27;
+    const yogaIdxAt = (t: number): number => {
+      const d = new Date(t);
+      const sum = getSiderealMoonLongitude(d, 'lahiri') + getSiderealSunLongitude(d, 'lahiri');
+      return Math.floor((((sum % 360) + 360) % 360) / SPAN);
+    };
+    let lo = Date.UTC(2026, 1, 28, 11, 0, 0);
+    let hi = Date.UTC(2026, 1, 28, 12, 0, 0);
+    const startIdx = yogaIdxAt(lo);
+    while (hi - lo > 1) {
+      const mid = Math.floor((lo + hi) / 2);
+      if (yogaIdxAt(mid) === startIdx) lo = mid; else hi = mid;
+    }
+    const r = getDailyPanchang(NYC_SLIVER_DAY, NYC, { timezone: -300 })!;
+    const nextSunriseUtc = r.nextSunrise.getTime() + 300 * 60_000;
+    expect(hi).toBeLessThan(nextSunriseUtc);
+    expect(nextSunriseUtc - hi).toBeLessThan(30_000);
   });
 });

@@ -229,6 +229,19 @@ export interface BirthChart {
   lagna: LagnaInfo;
   bhava: BhavaChart;
   planets: PlanetPlacement[];
+  /**
+   * The same nine placements keyed by graha, for direct lookup.
+   *
+   * `planets` stays the canonical ordered list — iterate that. Reach for this
+   * when you want one specific graha: `chart.byPlanet.Mars` replaces
+   * `chart.planets.find(p => p.planet === 'Mars')!`, which appeared ~20 times
+   * across the dosha / yoga / bala code and required a non-null assertion at
+   * every site even though the entry is always present.
+   *
+   * Both views reference the same objects, so a mutation through one is
+   * visible through the other.
+   */
+  byPlanet: Readonly<Record<GrahaName, PlanetPlacement>>;
 }
 
 /**

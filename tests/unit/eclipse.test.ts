@@ -4,6 +4,7 @@ import {
   getUpcomingSolarEclipse,
   getEclipseDuringDay,
 } from '../../src/astronomy/eclipse';
+import { computeSunrise as getSunrise, computeSunset as getSunset } from '../../src/astronomy/sunrise';
 
 const DELHI = { latitude: 28.6139, longitude: 77.209 };
 const SYDNEY = { latitude: -33.8688, longitude: 151.2093 };
@@ -133,4 +134,52 @@ describe('getEclipseDuringDay', () => {
     const info = getEclipseDuringDay(sunrise, nextSunrise, DELHI);
     expect(info).toBeNull();
   });
+});
+
+/**
+ * The syzygy guard inside `getEclipseDuringDay` skips the (expensive) eclipse
+ * search on days that can hold neither a new nor a full moon. That is a pure
+ * optimization: it must never change an answer. This pins the equivalence
+ * against the unguarded formulation, which is reconstructed here from the same
+ * two searches the guarded version delegates to.
+ *
+ * Guard the full range in the perf suite; here we cover a year across
+ * latitudes — enough to catch a guard that is too narrow (it would drop a real
+ * eclipse) without making the unit suite slow.
+ */
+describe('getEclipseDuringDay — syzygy guard is answer-preserving', () => {
+  function unguarded(sunriseUtc: Date, nextSunriseUtc: Date, location: typeof DELHI) {
+    const windowMs = nextSunriseUtc.getTime() - sunriseUtc.getTime();
+    const windowDays = Math.ceil(windowMs / (24 * 3600_000)) + 1;
+    const solar = getUpcomingSolarEclipse(sunriseUtc, location, windowDays);
+    if (solar && solar.peak.getTime() < nextSunriseUtc.getTime()) return solar;
+    const lunar = getUpcomingLunarEclipse(sunriseUtc, location, windowDays);
+    if (lunar && lunar.peak.getTime() < nextSunriseUtc.getTime()) return lunar;
+    return null;
+  }
+  const identity = (e: ReturnType<typeof unguarded>) =>
+    e === null ? 'null' : `${e.kind}/${e.subtype}/${e.peak.toISOString()}/${e.magnitude}`;
+
+  for (const [name, loc] of [
+    ['Delhi', DELHI],
+    ['Sydney', SYDNEY],
+  ] as const) {
+    it(`matches the unguarded result on every day of 2025 (${name})`, () => {
+      let eclipseDays = 0;
+      for (let d = 0; d < 365; d++) {
+        const anchor = new Date(Date.UTC(2025, 0, 1) + d * 86_400_000);
+        const sunrise = getSunrise(anchor, loc);
+        const nextSunrise = getSunrise(getSunset(sunrise, loc), loc);
+        const expected = unguarded(sunrise, nextSunrise, loc);
+        if (expected !== null) eclipseDays++;
+        expect(
+          identity(getEclipseDuringDay(sunrise, nextSunrise, loc)),
+          `guard diverged on ${anchor.toISOString().slice(0, 10)}`,
+        ).toBe(identity(expected));
+      }
+      // Sanity: the year genuinely contains eclipse days, so a guard that
+      // returned `null` unconditionally could not pass the loop above.
+      expect(eclipseDays).toBeGreaterThan(0);
+    });
+  }
 });

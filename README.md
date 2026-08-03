@@ -5,7 +5,7 @@
 Pure TypeScript Hindu Panchang (almanac), Jyotish, and Birth Chart calculations.
 Zero native dependencies. Works offline in React Native (Hermes), Node.js, and browsers.
 
-**Fast** (~0.1 ms names-only, ~0.5 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,164 tests across 100 files**
+**Fast** (~0.2 ms trimmed, ~1.5 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,233 tests across 104 files**
 
 ---
 
@@ -232,10 +232,14 @@ observances (Masik Shivaratri, Pushya days, Shravan Somvar…).
 
 ```typescript
 r.festivals.forEach(f => {
+  // key:  stable, language-independent id — 'diwali', 'makar_sankranti', …
   // type: major | minor | ekadashi | smarta_ekadashi | vaishnava_ekadashi
   //     | pradosha | sankranti | eclipse
-  console.log(f.name, f.type, f.deferralDate);
+  console.log(f.key, f.name, f.type, f.deferralDate);
 });
+
+// `name` is localized, so match on `key` — never on `name`.
+const hasDiwali = r.festivals.some(f => f.key === 'diwali');
 ```
 
 ### Regional scoping
@@ -553,6 +557,12 @@ const lagna = computeLagna(birth, loc, 'lahiri', 'en');
 // Bhava — 'whole-sign' (default) | 'equal' | 'placidus-kp'.
 // Placidus-KP throws PanchangError('CIRCUMPOLAR') beyond ±66.5°.
 const houses = computeBhava(birth, loc, { houseSystem: 'whole-sign' });
+
+// `chart.planets` is the ordered list; `chart.byPlanet` is the same nine
+// placements keyed by graha, for direct lookup without a linear scan.
+const chart = computeRashiChart(birth, loc);
+chart.byPlanet.Mars.house;        // instead of chart.planets.find(...)!
+chart.planets.map(p => p.rashi);  // iterate the list as before
 
 // D1 — full Rashi chart with 9-graha house placement.
 const d1 = computeRashiChart(birth, loc, { houseSystem: 'whole-sign' });
@@ -885,8 +895,9 @@ const r = getDailyPanchang(date, loc, {
   language: 'en',                         // en | hi
   masaSystem: 'purnimanta',               // purnimanta | amanta
   region: 'all',                          // 21 state slugs + 'nepal' + 'all'
-  computeEndTimes: true,                  // false → ~5x speedup, names only
-  precision: 'standard',                  // standard (15 iter) | high (25 iter)
+  computeEndTimes: true,                  // false → skip transition searches
+  precision: 'standard',                  // standard (±30 s) | high (±1 s)
+  sections: undefined,                    // undefined = all; see Performance
   janmaRashi: undefined,                  // pass to add r.chandraBalam
   janmaNakshatra: undefined,              // pass to add r.tarabala
 });
@@ -898,6 +909,21 @@ versions lack — pass a number on those targets. DST resolves automatically for
 IANA zones.
 
 ---
+
+### Localized vs machine-readable fields
+
+Every user-facing string follows `language`. Where a value is also meaningful to
+code, the two are separate fields — the stable key never changes with language:
+
+| Machine-readable | Localized display |
+|---|---|
+| `festival.key` (`'diwali'`) | `festival.name` (`"दिवाली"`) |
+| `bhadra.location` (`'paatal'`) | `bhadra.locationName` (`"पाताल"`) |
+| `eclipse.kind` / `eclipse.subtype` | `eclipse.description` |
+| `muhurtaScore.factors[].code` | `muhurtaScore.reasons` (English only) |
+
+`MuhurtaScore.reasons` is diagnostic English and not a stable format; use
+`factors` for anything shown to a user or branched on in code.
 
 ## Types & Exports
 
@@ -1103,14 +1129,16 @@ Two-pass rendering pattern for smooth UI:
 import { getDailyPanchang } from 'panchang-ts';
 import { InteractionManager } from 'react-native';
 
-// Pass 1 — instant, names only (~0.1 ms Node, <100 ms Hermes)
+// Pass 1 — cheapest useful result: elements, slots, muhurtas (~0.2 ms Node).
+// Dropping the optional sections matters more here than `computeEndTimes`.
 const fast = getDailyPanchang(date, location, {
   timezone: 330,
+  sections: [],
   computeEndTimes: false,
 });
 setState(fast);
 
-// Pass 2 — background, full with end-times (~0.5 ms Node, <500 ms Hermes)
+// Pass 2 — background, everything (~1.5 ms Node)
 InteractionManager.runAfterInteractions(() => {
   setState(getDailyPanchang(date, location, { timezone: 330 }));
 });
@@ -1120,7 +1148,7 @@ InteractionManager.runAfterInteractions(() => {
 
 ## Accuracy
 
-8,164 tests across 100 files, including fixtures cross-verified against reference
+8,233 tests across 104 files, including fixtures cross-verified against reference
 panchang calculations spanning 2025–2026 across 10 Indian cities plus New York,
 London, Sydney, Dubai, Singapore (diaspora fixtures cover DST on
 `America/New_York`).
@@ -1166,13 +1194,74 @@ Jayanti — matches the canonical date across 2025 and 2026 fixtures.
 
 ## Performance
 
-| Mode | Node.js | Hermes (budget Android) |
-|---|---|---|
-| Names-only (`computeEndTimes: false`) | ~0.1 ms | <100 ms |
-| Full with end-times | ~0.5 ms | <500 ms |
+Measured with `npm run bench` on an Apple M-series laptop under Node 24, Pune
+2025-07-04. Treat them as relative guidance, not a spec — they move with
+hardware and date.
+
+| `getDailyPanchang` call | Node.js |
+|---|---|
+| Default (all sections + end-times) | ~1.5 ms |
+| `computeEndTimes: false` | ~0.95 ms |
+| `sections: []` | ~0.73 ms |
+| `sections: []` + `computeEndTimes: false` | ~0.21 ms |
+| `precision: 'high'` | ~2.1 ms |
+| `getInstantPanchang` | ~0.34 ms |
+
+Cost is dominated by ephemeris evaluations, so the levers that matter are the
+ones that avoid them:
+
+- **`sections`** — skip the optional ephemeris-backed blocks you don't need.
+  `'festivals'` is by far the most expensive (it needs the previous day's
+  sunrise/sunset and the next day's solar transit). See
+  [Narrowing the work](#narrowing-the-work).
+- **`computeEndTimes: false`** — skip the transition searches when you only
+  need the names in force at sunrise.
+
+Range helpers apply the same narrowing internally:
+`getEkadashiDatesForYear` reads only the tithi at sunrise and so runs with
+every optional section off (~90 ms for a full year);
+`getFestivalsInRange` keeps only `'festivals'` and `'eclipse'` (~430 ms/year).
 
 Birth-chart helpers are independent — calling them does not add work to
-`getDailyPanchang`.
+`getDailyPanchang`. Within them, `computeShadbala` and `computeBhavaBala`
+build the natal positions once and derive all seven charts from them (~0.2 ms
+each).
+
+### Narrowing the work
+
+```typescript
+// Everything (default).
+getDailyPanchang(date, loc, { timezone: 330 });
+
+// Festivals only — no moon times, no Bhadra/Varjyam windows.
+getDailyPanchang(date, loc, {
+  timezone: 330,
+  sections: ['festivals', 'eclipse'],
+});
+
+// Cheapest useful call: elements, slots, muhurtas and inauspicious periods
+// only. Those are arithmetic on the sunrise triplet and are always computed.
+getDailyPanchang(date, loc, {
+  timezone: 330,
+  sections: [],
+  computeEndTimes: false,
+});
+```
+
+Omitting a section leaves its fields at their documented empty value (`null`
+or `[]`) — never a half-filled one.
+
+### A note on Hermes / React Native
+
+Earlier versions of this table also quoted Hermes figures. Those were budget
+targets from the project plan, never measurements: `npm run test:hermes` runs
+`hermes-parser` over the built bundle to prove the syntax is Hermes-compatible,
+which is a *parse* check and does not execute anything. Hermes numbers will be
+published here once they are actually measured on device.
+
+What does carry over is the shape of the cost: it is dominated by ephemeris
+math, so the `sections` and `computeEndTimes` levers above have the same
+proportional effect on any runtime.
 
 ---
 

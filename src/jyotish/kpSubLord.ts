@@ -1,4 +1,4 @@
-import { NAKSHATRA_SPAN } from '../utils/constants';
+import { NAKSHATRA_SPAN, nakshatraOf } from '../utils/constants';
 import { normalize360 } from '../utils/angle';
 import { computeBhava } from './bhava';
 import {
@@ -148,7 +148,7 @@ function subLordAtOffset(degInNak: number, starLord: DashaLord): DashaLord {
 export function computeKpSubLord(siderealLongitude: number): KpSubLordInfo {
   const lon = normalize360(siderealLongitude);
   const rashi = Math.floor(lon / 30);
-  const nakIdx = Math.floor(lon / NAKSHATRA_SPAN);
+  const nakIdx = nakshatraOf(lon);
   const degInNak = lon - nakIdx * NAKSHATRA_SPAN;
 
   const starLord = NAKSHATRA_LORD[nakIdx]!;
@@ -256,7 +256,7 @@ export function computeKpSignificators(chart: BirthChart): KpSignificators {
   const planetStarLord: Partial<Record<GrahaName, DashaLord>> = {};
   for (const p of chart.planets) {
     planetHouse[p.planet] = p.house;
-    const nakIdx = Math.floor(p.longitude / NAKSHATRA_SPAN);
+    const nakIdx = nakshatraOf(p.longitude);
     planetStarLord[p.planet] = NAKSHATRA_LORD[nakIdx]!;
   }
 

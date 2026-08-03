@@ -82,7 +82,7 @@
     "test:hermes": "bash scripts/hermes-check.sh",
     "bench": "vitest bench",
     "lint": "eslint src",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
     "prepublishOnly": "npm run build",
     "festivals:gen": "npm run build && node --experimental-strip-types scripts/generate-festivals-json.ts",
     "eclipses:gen": "npm run build && node --experimental-strip-types scripts/generate-eclipses-json.ts",

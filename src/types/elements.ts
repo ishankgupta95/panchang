@@ -181,6 +181,17 @@ export interface SpecialYogaInfo {
 // ── Festivals ────────────────────────────────────────
 
 export interface FestivalInfo {
+  /**
+   * Stable, language-independent identifier — e.g. `'diwali'`,
+   * `'makar_sankranti'`, `'sankashti_chaturthi'`.
+   *
+   * `name` is already localized, so it is not safe to match on: the same
+   * festival is `"Diwali"` under `language: 'en'` and `"दिवाली"` under `'hi'`.
+   * Use `key` to filter, attach icons, or deep-link, and `name` only to
+   * display. Keys are treated as part of the public contract and will not be
+   * renamed without a major version.
+   */
+  key: string;
   name: string;
   type:
     | 'major'
@@ -225,7 +236,13 @@ export interface EclipseInfo {
 export interface BhadraInfo {
   start: Date;
   end: Date;
+  /**
+   * Bhadra's residence — a stable machine-readable key, not display text.
+   * Use {@link BhadraInfo.locationName} to show it to a user.
+   */
   location: 'earth' | 'heaven' | 'paatal';
+  /** Localized display name for {@link BhadraInfo.location}. */
+  locationName: string;
   isActive: boolean;
 }
 

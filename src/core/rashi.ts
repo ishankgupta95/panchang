@@ -1,4 +1,4 @@
-import { NAKSHATRA_SPAN } from '../utils/constants';
+import { nakshatraOf } from '../utils/constants';
 import type { RashiInfo } from '../types/elements';
 
 /**
@@ -32,6 +32,6 @@ export function computeSuryaNakshatra(
   siderealSun: number,
   nameFn: (index: number) => string,
 ): RashiInfo {
-  const index = Math.floor(siderealSun / NAKSHATRA_SPAN);
+  const index = nakshatraOf(siderealSun);
   return { index, name: nameFn(index) };
 }

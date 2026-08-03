@@ -19,7 +19,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { computeArudhas } from '../../src/jyotish/arudha';
-import { computeRashiChart } from '../../src/jyotish/charts';
+import { computeRashiChart, indexPlanets } from '../../src/jyotish/charts';
 import type {
   BhavaChart, BirthChart, GrahaName, HouseInfo, LagnaInfo, PlanetPlacement,
 } from '../../src/types/jyotish';
@@ -76,7 +76,7 @@ function synthChart(spec: SynthSpec): BirthChart {
       isRetrograde: g === 'Rahu' || g === 'Ketu',
     };
   });
-  return { divisional: 'D1', lagna, bhava, planets };
+  return { divisional: 'D1', lagna, bhava, planets, byPlanet: indexPlanets(planets) };
 }
 
 // ── 1. Synthetic unit cases — standard rule ───────────

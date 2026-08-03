@@ -41,10 +41,10 @@ const MARS_EXALTED_RASHI = 9; // Capricorn
  * ```
  */
 export function computeMangalDosha(chart: BirthChart): MangalDoshaInfo {
-  const mars = chart.planets.find((p) => p.planet === 'Mars')!;
-  const moon = chart.planets.find((p) => p.planet === 'Moon')!;
-  const venus = chart.planets.find((p) => p.planet === 'Venus')!;
-  const jupiter = chart.planets.find((p) => p.planet === 'Jupiter')!;
+  const mars = chart.byPlanet.Mars;
+  const moon = chart.byPlanet.Moon;
+  const venus = chart.byPlanet.Venus;
+  const jupiter = chart.byPlanet.Jupiter;
 
   const marsRashi = mars.rashi.index;
   const houseFrom = (refRashi: number): number =>
@@ -171,8 +171,8 @@ const KAAL_SARP_BY_RAHU_HOUSE: readonly KaalSarpSubtype[] = [
  * ```
  */
 export function computeKaalSarp(chart: BirthChart): KaalSarpDoshaInfo {
-  const rahu = chart.planets.find((p) => p.planet === 'Rahu')!;
-  const ketu = chart.planets.find((p) => p.planet === 'Ketu')!;
+  const rahu = chart.byPlanet.Rahu;
+  const ketu = chart.byPlanet.Ketu;
   const visiblePlanets = chart.planets.filter(
     (p) => p.planet !== 'Rahu' && p.planet !== 'Ketu',
   );
@@ -251,13 +251,13 @@ const GRAHA_NAME_BY_INDEX: readonly GrahaName[] = [
  * ```
  */
 export function computePitruDosha(chart: BirthChart): PitruDoshaInfo {
-  const sun = chart.planets.find((p) => p.planet === 'Sun')!;
-  const rahu = chart.planets.find((p) => p.planet === 'Rahu')!;
-  const saturn = chart.planets.find((p) => p.planet === 'Saturn')!;
+  const sun = chart.byPlanet.Sun;
+  const rahu = chart.byPlanet.Rahu;
+  const saturn = chart.byPlanet.Saturn;
 
   const ninthRashi = chart.bhava.houses[8]!.rashi.index;
   const ninthLordName = GRAHA_NAME_BY_INDEX[RASHI_LORD[ninthRashi]!]!;
-  const ninthLord = chart.planets.find((p) => p.planet === ninthLordName)!;
+  const ninthLord = chart.byPlanet[ninthLordName];
 
   const reasons: string[] = [];
 

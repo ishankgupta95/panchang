@@ -131,7 +131,57 @@ export interface InstantPanchangOptions {
   region?: FestivalRegion | LegacyFestivalRegion;
 }
 
+/**
+ * An optional, individually-skippable block of `getDailyPanchang` work.
+ *
+ * Only the blocks backed by *ephemeris searches* are listed here — those are
+ * the ones with measurable cost. Everything else a daily panchang returns
+ * (the five elements, slot systems, muhurtas, inauspicious periods, masa /
+ * samvat / rashi) is arithmetic over the sunrise-sunset-nextSunrise triplet
+ * and is always computed, because skipping it would save nothing.
+ *
+ * - `'festivals'`    — festival detection. The most expensive block: it needs
+ *                      the prior day's sunrise/sunset, the following day's
+ *                      transit, per-kala tithi anchors, and the prior day's
+ *                      Chandra Masa.
+ * - `'eclipse'`      — eclipse overlapping the Hindu day.
+ * - `'moonTimes'`    — `moonrise` / `moonset`.
+ * - `'lunarWindows'` — Bhadra, Varjyam and Panchaka-Rahita windows, each of
+ *                      which binary-searches lunar longitude across the day.
+ *
+ * Omitting a section leaves its result fields at their documented empty value
+ * (`null`, or `[]`), never a partially-filled one — so this is purely a
+ * cost/detail trade, not a change in the result's shape.
+ */
+export type PanchangSection = 'festivals' | 'eclipse' | 'moonTimes' | 'lunarWindows';
+
 export interface PanchangOptions extends InstantPanchangOptions {
   /** UTC offset in minutes (e.g. 330 for IST) or a tz string. Required. */
   timezone: number | string;
+  /**
+   * Which optional, ephemeris-backed sections to compute. Defaults to all of
+   * them, so omitting this is exactly the pre-existing behaviour.
+   *
+   * Pass a narrower list when a caller only needs part of the result — a
+   * date-scanner reading nothing but the tithi at sunrise, say, or a calendar
+   * builder that wants festivals but no moon times.
+   *
+   * ```typescript
+   * // Tithi-only scan: skips every ephemeris search the day doesn't need.
+   * getDailyPanchang(d, loc, { timezone: 330, sections: [], computeEndTimes: false });
+   * ```
+   *
+   * See {@link PanchangSection} for what each value covers and why the rest of
+   * the result is always computed.
+   *
+   * **Precision caveat.** Element *identity* (which tithi / nakshatra / yoga /
+   * karana, in what order) is unaffected by narrowing. Element *transition
+   * times* can differ from a full run by up to 60 seconds: longitudes are
+   * memoized in 60-second buckets, and a narrowed run populates fewer of them,
+   * so the transition search may converge to a slightly different point within
+   * the same bucket. Omitting this option entirely is the pre-existing code
+   * path and is unaffected. If a narrowed run must agree with a full one to the
+   * second, don't narrow.
+   */
+  sections?: readonly PanchangSection[];
 }

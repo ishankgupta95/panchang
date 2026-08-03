@@ -1,4 +1,5 @@
 import type { GowriInfo, GowriSlot, ChoghadiyaQuality } from '../types/elements';
+import { buildEqualSlots } from '../utils/slots';
 
 /**
  * Quality for each of the 8 Gowri Panchangam slot names (index 0–7):
@@ -33,21 +34,11 @@ function buildSlots(
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
 ): GowriSlot[] {
-  const slotMs = durationMs / 8;
-  const slots: GowriSlot[] = [];
-  for (let i = 0; i < 8; i++) {
+  return buildEqualSlots(reference, durationMs, 8, (i, start, end) => {
     const idx = (startIndex + i) % 8;
     const quality = GOWRI_QUALITY[idx]!;
-    slots.push({
-      start: new Date(reference.getTime() + i * slotMs),
-      end: new Date(reference.getTime() + (i + 1) * slotMs),
-      index: idx,
-      name: nameFn(idx),
-      quality,
-      qualityName: qualityNameFn(quality),
-    });
-  }
-  return slots;
+    return { start, end, index: idx, name: nameFn(idx), quality, qualityName: qualityNameFn(quality) };
+  });
 }
 
 /**

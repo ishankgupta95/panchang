@@ -6,6 +6,7 @@ import { validateLocation, validateDate } from '../utils/validation';
 import type { GeoLocation } from '../types/location';
 import type { AyanamsaType, MasaSystem, FestivalRegion, LegacyFestivalRegion } from '../types/options';
 import type { EclipseInfo, FestivalInfo } from '../types/elements';
+import { resolveMasaName } from '../i18n/resolver';
 
 export interface YearlyListingOptions {
   /** UTC offset in minutes (e.g. 330 for IST). Required. */
@@ -66,7 +67,13 @@ export function getEkadashiDatesForYear(
   const end = new Date(Date.UTC(year, 11, 31));
   for (let t = start.getTime(); t <= end.getTime(); t += dayMs) {
     const d = new Date(t);
-    const p = getDailyPanchang(d, location, options);
+    // Only the tithi at sunrise is read, so skip every optional section and
+    // the end-time searches — this is a 365-iteration loop.
+    const p = getDailyPanchang(d, location, {
+      ...options,
+      sections: [],
+      computeEndTimes: false,
+    });
     if (p === null) continue;
     const t0 = p.tithis[0]!.index;
     if (t0 === 10 || t0 === 25) {
@@ -99,8 +106,10 @@ export function getSankrantisForYear(
   const dayMs = 24 * 3600_000;
   const start = new Date(Date.UTC(year, 0, 1));
   const end = new Date(Date.UTC(year, 11, 31));
+  // Rashi names come from the i18n tables rather than a local copy: this file
+  // used to declare its own `en`/`hi` arrays, which both duplicated
+  // `masaNames` and hard-coded the set of supported languages.
   const lang = options.language ?? 'en';
-  const rashiNames = lang === 'hi' ? RASHI_NAMES_HI : RASHI_NAMES_EN;
 
   let prevRashi: number | null = null;
   for (let t = start.getTime(); t <= end.getTime(); t += dayMs) {
@@ -109,24 +118,12 @@ export function getSankrantisForYear(
     if (p === null) continue;
     const rashi = Math.floor(p.siderealSun / 30) % 12;
     if (prevRashi !== null && rashi !== prevRashi) {
-      out.push({ date: d, rashi, rashiName: rashiNames[rashi]! });
+      out.push({ date: d, rashi, rashiName: resolveMasaName(rashi, lang) });
     }
     prevRashi = rashi;
   }
   return out;
 }
-
-/** Solar rashi names — `en` and `hi` mirror the panchang-ts masa name lists. */
-const RASHI_NAMES_EN: readonly string[] = [
-  'Mesha', 'Vrishabha', 'Mithuna', 'Karka',
-  'Simha', 'Kanya', 'Tula', 'Vrischika',
-  'Dhanus', 'Makara', 'Kumbha', 'Meena',
-];
-const RASHI_NAMES_HI: readonly string[] = [
-  'मेष', 'वृषभ', 'मिथुन', 'कर्क',
-  'सिंह', 'कन्या', 'तुला', 'वृश्चिक',
-  'धनु', 'मकर', 'कुम्भ', 'मीन',
-];
 
 /**
  * Collect every festival emission in a date range. Useful for building a
@@ -164,7 +161,13 @@ export function getFestivalsInRange(
   const dayMs = 24 * 3600_000;
   for (let t = start.getTime(); t <= end.getTime(); t += dayMs) {
     const d = new Date(t);
-    const p = getDailyPanchang(d, location, options);
+    // Only `festivals` is read. Eclipses are surfaced as festival entries, so
+    // that section stays on; moon times and lunar windows are not needed.
+    const p = getDailyPanchang(d, location, {
+      ...options,
+      sections: ['festivals', 'eclipse'],
+      computeEndTimes: false,
+    });
     if (p === null) continue;
     for (const f of p.festivals) {
       out.push({ date: p.date, festival: f });

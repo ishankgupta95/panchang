@@ -1,9 +1,9 @@
-import { computeRashiChart } from './charts';
-import { computeDivisionalChart } from './divisionals';
+import { rashiChartFromBasis } from './charts';
+import { divisionalChartFromBasis } from './divisionals';
+import { computeNatalBasis, type NatalBasis } from './natalBasis';
 import { computeDignity } from './dignity';
 import { RASHI_LORD } from './matchingTables';
 import { computeSunrise, computeSunset } from '../astronomy/sunrise';
-import { validateLocation, validateDate } from '../utils/validation';
 import { normalize360 } from '../utils/angle';
 import type { GeoLocation } from '../types/location';
 import type { BirthChartOptions } from '../types/options';
@@ -85,11 +85,8 @@ export function computeShadbala(
   location: GeoLocation,
   options: BirthChartOptions = {},
 ): ShadbalaResult {
-  validateDate(birthDate);
-  validateLocation(location);
-
-  const chart = computeRashiChart(birthDate, location, options);
-  return shadbalaForChart(chart, birthDate, location);
+  const basis = computeNatalBasis(birthDate, location, options);
+  return shadbalaForChart(rashiChartFromBasis(basis, options), basis);
 }
 
 /**
@@ -98,11 +95,8 @@ export function computeShadbala(
  * inputs) and `computeBhavaBala` (which needs the chart for its own
  * algorithm and shares it to avoid the duplicate planetary-position work).
  */
-function shadbalaForChart(
-  chart: BirthChart,
-  birthDate: Date,
-  location: GeoLocation,
-): ShadbalaResult {
+function shadbalaForChart(chart: BirthChart, basis: NatalBasis): ShadbalaResult {
+  const { birthDate, location } = basis;
   // Sunrise / sunset for Nathonatha Bala. Compute at local midnight context.
   // Use a 12h-back anchor so `computeSunrise` returns the *current* sunrise
   // for the birth instant rather than the next one.
@@ -113,8 +107,8 @@ function shadbalaForChart(
   const sunsetUtc = computeSunset(sunriseUtc, location);
   const nextSunriseUtc = computeSunrise(sunsetUtc, location);
 
-  const sunPlanet = chart.planets.find((p) => p.planet === 'Sun')!;
-  const moonPlanet = chart.planets.find((p) => p.planet === 'Moon')!;
+  const sunPlanet = chart.byPlanet.Sun;
+  const moonPlanet = chart.byPlanet.Moon;
 
   // Compute the 6 divisional charts needed by Saptavargaja (D2, D3, D7,
   // D9, D12, D30 — D1 is `chart`). Done once for the entire Shadbala
@@ -122,14 +116,14 @@ function shadbalaForChart(
   const VARGAS: readonly Divisional[] = ['D2', 'D3', 'D7', 'D9', 'D12', 'D30'];
   const divisionalCharts: Record<Divisional, DivisionalChart> = {} as Record<Divisional, DivisionalChart>;
   for (const v of VARGAS) {
-    divisionalCharts[v] = computeDivisionalChart(birthDate, location, v);
+    divisionalCharts[v] = divisionalChartFromBasis(basis, v);
   }
 
   const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
   const partials: Record<GrahaName, PlanetShadbala> = {} as Record<GrahaName, PlanetShadbala>;
 
   for (const g of grahas) {
-    const placement = chart.planets.find((p) => p.planet === g)!;
+    const placement = chart.byPlanet[g];
     const sthana = sthanaBala(g, placement, chart, divisionalCharts);
     const dig = digBala(g, placement.longitude, chart.lagna.siderealLongitude);
     const kala = kalaBala(g, birthDate, sunriseUtc, sunsetUtc, nextSunriseUtc,
@@ -240,7 +234,7 @@ function saptavargajaBala(
   divisionalCharts: Record<Divisional, DivisionalChart>,
 ): number {
   // D1 (Rashi) contribution.
-  const d1Rashi = chart.planets.find((p) => p.planet === graha)!.rashi.index;
+  const d1Rashi = chart.byPlanet[graha].rashi.index;
   let total = SAPT_VIRUPAS[computeDignity(graha, d1Rashi)]!;
   // D2..D30 contributions.
   for (const v of SAPT_VARGAS) {
@@ -258,7 +252,8 @@ function ojhaYugmaBala(
   chart: BirthChart,
   divisionalCharts: Record<Divisional, DivisionalChart>,
 ): number {
-  const d1Rashi = chart.planets.find((p) => p.planet === graha)!.rashi.index;
+  const d1Rashi = chart.byPlanet[graha].rashi.index;
+  // Divisional charts carry only the ordered list, not a keyed view.
   const d9Rashi = divisionalCharts.D9.planets.find((p) => p.planet === graha)!.rashi.index;
   // Rashi index 0 (Aries = 1st sign) → "1st" is conventionally ODD.
   // Odd-indexed rashis are the "even-numbered" signs (2nd, 4th, ...).
@@ -488,7 +483,7 @@ const SPECIAL: Record<GrahaName, ReadonlySet<number>> = {
  * negative by convention; net hostile aspects don't subtract from the total).
  */
 function drikBala(graha: GrahaName, chart: BirthChart): number {
-  const target = chart.planets.find((p) => p.planet === graha)!;
+  const target = chart.byPlanet[graha];
   let net = 0;
   for (const aspector of chart.planets) {
     if (aspector.planet === graha) continue;
@@ -607,11 +602,9 @@ export function computeBhavaBala(
   location: GeoLocation,
   options: BirthChartOptions = {},
 ): BhavaBalaResult {
-  validateDate(birthDate);
-  validateLocation(location);
-
-  const chart = computeRashiChart(birthDate, location, options);
-  const shadbala = shadbalaForChart(chart, birthDate, location);
+  const basis = computeNatalBasis(birthDate, location, options);
+  const chart = rashiChartFromBasis(basis, options);
+  const shadbala = shadbalaForChart(chart, basis);
 
   const houses: BhavaBalaPerHouse[] = [];
   for (let i = 0; i < 12; i++) {

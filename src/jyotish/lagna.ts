@@ -5,7 +5,7 @@ import { getSiderealSunLongitude } from '../astronomy/sun';
 import { meanObliquity } from './planets';
 import { resolveNakshatraName, resolveMasaName } from '../i18n/resolver';
 import { normalize360, degToRad } from '../utils/angle';
-import { NAKSHATRA_SPAN, NAKSHATRA_PADA_SPAN } from '../utils/constants';
+import { NAKSHATRA_SPAN, NAKSHATRA_PADA_SPAN, nakshatraOf } from '../utils/constants';
 import { validateLocation, validateDate } from '../utils/validation';
 import type { AyanamsaType, Language } from '../types/options';
 import type { GeoLocation } from '../types/location';
@@ -82,7 +82,7 @@ export function computeLagna(
 
   const rashiIndex = Math.floor(siderealLongitude / 30);
   const degreeInRashi = siderealLongitude - rashiIndex * 30;
-  const nakIdx = Math.floor(siderealLongitude / NAKSHATRA_SPAN);
+  const nakIdx = nakshatraOf(siderealLongitude);
   const degreesInNakshatra = siderealLongitude - nakIdx * NAKSHATRA_SPAN;
   const pada = Math.min(4, Math.floor(degreesInNakshatra / NAKSHATRA_PADA_SPAN) + 1);
 
@@ -141,7 +141,7 @@ function buildLagnaInfo(siderealLongitude: number, lang: Language): LagnaInfo {
   const sid = normalize360(siderealLongitude);
   const rashiIndex = Math.floor(sid / 30);
   const degreeInRashi = sid - rashiIndex * 30;
-  const nakIdx = Math.floor(sid / NAKSHATRA_SPAN);
+  const nakIdx = nakshatraOf(sid);
   const degreesInNakshatra = sid - nakIdx * NAKSHATRA_SPAN;
   const pada = Math.min(4, Math.floor(degreesInNakshatra / NAKSHATRA_PADA_SPAN) + 1);
   return {

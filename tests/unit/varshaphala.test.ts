@@ -46,6 +46,7 @@ import { getSiderealSunLongitude } from '../../src/astronomy/sun';
 import { computeLagna } from '../../src/jyotish/lagna';
 import type { BirthChart, GrahaName, PlanetPlacement } from '../../src/types/jyotish';
 import fixtures from '../fixtures/astrosage-charts.json';
+import { indexPlanets } from '../../src/jyotish/charts';
 
 // ── Fixture helpers ───────────────────────────────────
 
@@ -376,6 +377,7 @@ function synthVarshaChart(spec: {
       }),
     },
     planets,
+    byPlanet: indexPlanets(planets),
   };
 }
 

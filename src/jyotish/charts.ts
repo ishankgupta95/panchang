@@ -1,14 +1,11 @@
-import { computeLagna } from './lagna';
-import { computeBhava } from './bhava';
-import { computePlanetaryPositions } from './planets';
-import { resolveMasaName, resolveNakshatraName } from '../i18n/resolver';
+import { bhavaFromBasis } from './bhava';
+import { computeNatalBasis, grahaList, type NatalBasis } from './natalBasis';
+import { resolveMasaName } from '../i18n/resolver';
 import { normalize360 } from '../utils/angle';
-import { validateLocation, validateDate } from '../utils/validation';
-import type { AyanamsaType, Language, BirthChartOptions } from '../types/options';
+import type { BirthChartOptions } from '../types/options';
 import type { GeoLocation } from '../types/location';
 import type {
-  BirthChart, DivisionalChart, PlanetPlacement,
-  GrahaPosition, GrahaName,
+  BirthChart, DivisionalChart, GrahaName, PlanetPlacement,
 } from '../types/jyotish';
 
 /**
@@ -38,36 +35,22 @@ export function computeRashiChart(
   location: GeoLocation,
   options: BirthChartOptions = {},
 ): BirthChart {
-  validateDate(birthDate);
-  validateLocation(location);
+  return rashiChartFromBasis(computeNatalBasis(birthDate, location, options), options);
+}
 
-  const ayanamsaType: AyanamsaType = options.ayanamsa ?? 'lahiri';
-  const lang: Language = options.language ?? 'en';
-
-  const lagna = computeLagna(birthDate, location, ayanamsaType, lang);
-  const bhava = computeBhava(birthDate, location, options);
-  const positions = computePlanetaryPositions(
-    birthDate,
-    ayanamsaType,
-    (idx) => resolveNakshatraName(idx, lang),
-    (idx) => resolveMasaName(idx, lang),
-    options.nodeType ?? 'mean',
-  );
-
+/**
+ * D1 chart derived from an already-resolved {@link NatalBasis}.
+ *
+ * @internal Shares the basis with the divisional charts built alongside it.
+ */
+export function rashiChartFromBasis(
+  basis: NatalBasis,
+  options: BirthChartOptions = {},
+): BirthChart {
+  const bhava = bhavaFromBasis(basis, options.houseSystem ?? 'whole-sign');
   const cusps = bhava.houses.map((h) => h.cuspLongitude);
-  const grahaList: { key: GrahaName; pos: GrahaPosition }[] = [
-    { key: 'Sun', pos: positions.sun },
-    { key: 'Moon', pos: positions.moon },
-    { key: 'Mars', pos: positions.mars },
-    { key: 'Mercury', pos: positions.mercury },
-    { key: 'Jupiter', pos: positions.jupiter },
-    { key: 'Venus', pos: positions.venus },
-    { key: 'Saturn', pos: positions.saturn },
-    { key: 'Rahu', pos: positions.rahu },
-    { key: 'Ketu', pos: positions.ketu },
-  ];
 
-  const planets: PlanetPlacement[] = grahaList.map(({ key, pos }) => ({
+  const planets: PlanetPlacement[] = grahaList(basis).map(({ key, pos }) => ({
     planet: key,
     longitude: pos.siderealLongitude,
     rashi: pos.rashi,
@@ -76,7 +59,30 @@ export function computeRashiChart(
     isRetrograde: pos.isRetrograde,
   }));
 
-  return { divisional: 'D1', lagna, bhava, planets };
+  return {
+    divisional: 'D1',
+    lagna: basis.lagna,
+    bhava,
+    planets,
+    byPlanet: indexPlanets(planets),
+  };
+}
+
+/**
+ * Build the keyed `byPlanet` view over an ordered placement list.
+ *
+ * Exported so test fixtures that assemble a `BirthChart` by hand derive the
+ * keyed view from their own list rather than restating it — the two must not
+ * be able to disagree.
+ *
+ * @internal
+ */
+export function indexPlanets(
+  planets: readonly PlanetPlacement[],
+): Record<GrahaName, PlanetPlacement> {
+  const byPlanet = {} as Record<GrahaName, PlanetPlacement>;
+  for (const p of planets) byPlanet[p.planet] = p;
+  return byPlanet;
 }
 
 /**
@@ -109,37 +115,21 @@ export function computeNavamsa(
   location: GeoLocation,
   options: BirthChartOptions = {},
 ): DivisionalChart {
-  validateDate(birthDate);
-  validateLocation(location);
+  return navamsaFromBasis(computeNatalBasis(birthDate, location, options));
+}
 
-  const ayanamsaType: AyanamsaType = options.ayanamsa ?? 'lahiri';
-  const lang: Language = options.language ?? 'en';
-
-  const lagna = computeLagna(birthDate, location, ayanamsaType, lang);
-  const positions = computePlanetaryPositions(
-    birthDate,
-    ayanamsaType,
-    (idx) => resolveNakshatraName(idx, lang),
-    (idx) => resolveMasaName(idx, lang),
-    options.nodeType ?? 'mean',
-  );
-
-  const navLagnaLon = navamsaLongitude(lagna.siderealLongitude);
+/**
+ * Navamsa derived from an already-resolved {@link NatalBasis}.
+ *
+ * @internal Used by `computeShadbala`, which needs D9 alongside five other
+ * vargas and the D1 chart — all from the same instant.
+ */
+export function navamsaFromBasis(basis: NatalBasis): DivisionalChart {
+  const { lang } = basis;
+  const navLagnaLon = navamsaLongitude(basis.lagna.siderealLongitude);
   const navLagnaRashi = Math.floor(navLagnaLon / 30);
 
-  const grahaList: { key: GrahaName; pos: GrahaPosition }[] = [
-    { key: 'Sun', pos: positions.sun },
-    { key: 'Moon', pos: positions.moon },
-    { key: 'Mars', pos: positions.mars },
-    { key: 'Mercury', pos: positions.mercury },
-    { key: 'Jupiter', pos: positions.jupiter },
-    { key: 'Venus', pos: positions.venus },
-    { key: 'Saturn', pos: positions.saturn },
-    { key: 'Rahu', pos: positions.rahu },
-    { key: 'Ketu', pos: positions.ketu },
-  ];
-
-  const planets: PlanetPlacement[] = grahaList.map(({ key, pos }) => {
+  const planets: PlanetPlacement[] = grahaList(basis).map(({ key, pos }) => {
     const d9Lon = navamsaLongitude(pos.siderealLongitude);
     const d9Rashi = Math.floor(d9Lon / 30);
     return {

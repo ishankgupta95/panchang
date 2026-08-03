@@ -1,7 +1,61 @@
 import { PanchangError } from '../types/errors';
 
 /**
+ * How precisely element transition times are resolved.
+ *
+ * The binary search stops on whichever comes first: the bracket narrowing below
+ * `toleranceMs`, or `maxIterations` probes. For these to be consistent,
+ * `maxIterations` must be large enough to *reach* the tolerance across the
+ * widest search window (36 h): ⌈log2(36 h / tolerance)⌉ probes.
+ *
+ * This pairing used to be wrong. `precision: 'high'` raised `maxIterations`
+ * from 15 to 25 but left the tolerance at 30 s — and 36 h narrows to 30 s in 13
+ * probes, so the tolerance always bound first and the option changed nothing.
+ * It was verified byte-identical to `'standard'` across 60 consecutive days.
+ * Precision now moves the tolerance, which is the knob that actually binds.
+ */
+export interface SearchPrecision {
+  /** Stop once the bracket is this narrow. */
+  toleranceMs: number;
+  /** Hard probe cap; must be able to reach `toleranceMs` over a 36 h window. */
+  maxIterations: number;
+}
+
+/** ±30 s — one probe past the printed-minute resolution almanacs publish at. */
+export const STANDARD_PRECISION: SearchPrecision = {
+  toleranceMs: 30_000,
+  maxIterations: 15,
+};
+
+/**
+ * ±1 s. 36 h → 1 s needs ⌈log2(129_600_000 / 1000)⌉ = 17 probes, so 20 leaves
+ * headroom for the window extensions in `findTransitionTime`.
+ */
+export const HIGH_PRECISION: SearchPrecision = {
+  toleranceMs: 1_000,
+  maxIterations: 20,
+};
+
+/**
  * Binary search to find the UTC moment when a discrete element index transitions.
+ *
+ * Returns the **upper** bracket — the earliest probe known to be past the
+ * transition — so the result is biased late by up to `toleranceMs` and is never
+ * early. At the default ±30 s that bias is the dominant error in a published
+ * end time; `precision: 'high'` cuts it to ±1 s.
+ *
+ * The convention is deliberate and load-bearing: `findDailyElements` clamps
+ * against `nextSunrise` and advances its cursor past this value, and a
+ * never-early result guarantees the cursor cannot land back inside the element
+ * it just closed. Returning the midpoint would halve the error but needs that
+ * walk re-checked, and would shift every published end time by ~15 s.
+ *
+ * One consequence to be aware of: an element occupying less than `toleranceMs`
+ * at the very end of a Hindu day sits entirely inside the bracket, so whether
+ * it survives depends on which side of `nextSunrise` the returned bound lands
+ * on. `tests/integration/edge-cases.test.ts` pins a real case — a ~6 s yoga at
+ * NYC on 2026-02-27 — as a canary for changes to this search or to the
+ * longitude memo it reads through.
  */
 export function findTransitionTime(
   startUtc: Date,
@@ -101,7 +155,9 @@ export function findStartTime(
  * @param computeElementAtTime Callback: computes full element at a UTC instant
  * @param totalElements       Cycle size (30 for Tithi, 27 for Nakshatra/Yoga, 60 for Karana)
  * @param searchWindowHours   Forward search window per element
- * @param maxIterations       Binary search iterations
+ * @param precision           Tolerance / iteration budget for every search
+ *                            performed here, including the backward search for
+ *                            the first element's start time.
  * @param maxPerDay           Safety cap on number of elements per day
  */
 export function findDailyElements<T extends { index: number; endTime: Date | null }>(
@@ -112,7 +168,7 @@ export function findDailyElements<T extends { index: number; endTime: Date | nul
   computeElementAtTime: (date: Date) => T,
   totalElements: number,
   searchWindowHours: number,
-  maxIterations: number,
+  precision: SearchPrecision,
   maxPerDay: number,
 ): Array<T & { startTime: Date | null; isActiveAtSunrise: boolean }> {
   const results: Array<T & { startTime: Date | null; isActiveAtSunrise: boolean }> = [];
@@ -122,7 +178,10 @@ export function findDailyElements<T extends { index: number; endTime: Date | nul
     const element = results.length === 0 ? elementAtSunrise : computeElementAtTime(cursor);
 
     const startTime: Date = results.length === 0
-      ? findStartTime(sunriseUtc, element.index, totalElements, getIndexAtTime)
+      ? findStartTime(
+          sunriseUtc, element.index, totalElements, getIndexAtTime,
+          36, precision.maxIterations, precision.toleranceMs,
+        )
       : cursor;
     const isActiveAtSunrise = results.length === 0;
 
@@ -139,7 +198,10 @@ export function findDailyElements<T extends { index: number; endTime: Date | nul
     }
 
     const searchEnd = new Date(cursor.getTime() + searchWindowHours * 3600_000);
-    const rawEnd = findTransitionTime(cursor, searchEnd, element.index, getIndexAtTime, maxIterations);
+    const rawEnd = findTransitionTime(
+      cursor, searchEnd, element.index, getIndexAtTime,
+      precision.maxIterations, precision.toleranceMs,
+    );
     const endTime = rawEnd.getTime() > nextSunriseUtc.getTime()
       ? new Date(nextSunriseUtc.getTime())
       : rawEnd;
