@@ -1,0 +1,17 @@
+# Source and config (not needed in published package)
+src/
+tests/
+scripts/
+.github/
+.changeset/
+.eslintrc.cjs
+tsconfig*.json
+tsup.config.ts
+vitest.config.ts
+
+# Dev artifacts
+coverage/
+*.tgz
+.DS_Store
+.vscode/
+.idea/
