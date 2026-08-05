@@ -1,9 +1,11 @@
-import { getSiderealMoonLongitude } from './moon';
-import { getSiderealSunLongitude } from './sun';
+import { getSiderealMoonLongitude, getTropicalMoonLongitude } from './moon';
+import { getSiderealSunLongitude, getTropicalSunLongitude } from './sun';
+import { computeAyanamsa } from './ayanamsa';
+import { normalize360 } from '../utils/angle';
 import type { AyanamsaType } from '../types/options';
 
 /**
- * Per-call memo for sidereal Sun / Moon longitudes.
+ * Per-call memo for sidereal Sun / Moon longitudes, in one of two modes.
  *
  * ## Why this memoizes on the exact instant
  *
@@ -35,54 +37,210 @@ import type { AyanamsaType } from '../types/options';
  * mean drift against DrikPanchang improved from 32.29 s to
  * 31.10 s (11 of 52 measurements better, 7 worse, 34 unchanged) and worst-case
  * drift from 146.5 s to 130.6 s; narrowing `options.sections` became exactly
- * output-neutral. The cost is ~14% on a default `getDailyPanchang`, because
- * bisection probes no longer collide in the final iterations.
+ * output-neutral.
  *
- * Bucketing was never buying much: a binary search over a 36 h window only
- * produces probes within 60 s of each other in its last couple of iterations.
- * The memo's real value is repeated reads of the *same* anchors — sunrise,
- * sunset and the kala boundaries are each read by the tithi, nakshatra, yoga
- * and karana blocks independently — and those are exact-instant repeats.
+ * ## Why there is a second, interpolating mode
+ *
+ * Exact memoization only helps when callers repeat an instant, and the element
+ * end-time searches almost never do: a default `getDailyPanchang` issued 81
+ * `GeoMoon` and 52 `SunPosition` evaluations, of which all but four existed to
+ * serve `findTransitionTime`. The secant solve is already frugal in *probes*
+ * (~5 against bisection's 13) — what it is not frugal in is ephemeris cost per
+ * probe, because each one re-runs the full ELP/VSOP87 series.
+ *
+ * `'interpolated'` mode replaces per-instant evaluation with a Chebyshev
+ * interpolant over a fixed UTC block: sample the tropical longitude at
+ * {@link MOON_NODES}/{@link SUN_NODES} nodes once, then answer every probe in
+ * that block from the polynomial. The block containing an instant is
+ * `floor(t / BLOCK)`, a pure function of the instant, so the order-independence
+ * established above is preserved — unlike the 60-second bins, an interpolant is
+ * not seeded by whichever caller happened to arrive first.
+ *
+ * Node counts were chosen so interpolation error sits at astronomy-engine's own
+ * resolution floor. Max error over five epochs, expressed as the time error it
+ * implies at each body's mean rate:
+ *
+ *   Moon, 4-day block, 10 nodes → 1.3 ms      Sun, 8-day block, 8 nodes → 0.9 ms
+ *
+ * Both are at the floor: adding nodes does not reduce them, because what is
+ * left is astronomy-engine's own rounding rather than the fit. For scale, the
+ * secant solve's own accuracy is mean 11 ms / worst 24 ms, and mean drift
+ * against DrikPanchang is 17.4 s.
+ *
+ * Measured end-to-end over 2,190 day-panchangs (six locations × all of 2025):
+ * zero differences in any name, index, boolean or festival; date fields moved
+ * by mean 16.4 ms and at most 26 ms — the latter being the 25 ms forward-walk
+ * step in `secantBoundary` landing one step differently, not fit error.
+ *
+ * ## Why the mode is chosen by the caller rather than adaptively
+ *
+ * Building a block costs 10 Moon + 8 Sun evaluations up front, which is a net
+ * *loss* on callers that read only a handful of longitudes: with
+ * `computeEndTimes: false` and no optional sections, a day needs 1 `GeoMoon`
+ * and 3 `SunPosition` in total. Switching mode part-way through a call on a
+ * usage heuristic would reintroduce exactly the order-dependence documented
+ * above, so instead the caller states which regime it is in, once, at
+ * construction. `'exact'` is the default and is byte-identical to the behaviour
+ * this class has always had.
  */
+export type LongitudeCacheMode = 'exact' | 'interpolated';
+
+const DAY_MS = 86_400_000;
+
+/** Block span and node count for the Moon in `'interpolated'` mode. */
+const MOON_BLOCK_MS = 4 * DAY_MS;
+const MOON_NODES = 10;
+/** Block span and node count for the Sun in `'interpolated'` mode. */
+const SUN_BLOCK_MS = 8 * DAY_MS;
+const SUN_NODES = 8;
+
+/**
+ * Chebyshev interpolant of a longitude over `[t0, t1]`, evaluated by the
+ * barycentric formula.
+ *
+ * Nodes are sampled in tropical longitude and unwrapped against their
+ * predecessor, so the fitted series stays continuous across the 360° seam; the
+ * ayanamsa is applied afterwards, per read, since it is a cheap polynomial.
+ */
+class ChebyshevLongitude {
+  private readonly nodeX: Float64Array;
+  private readonly nodeY: Float64Array;
+  private readonly weight: Float64Array;
+  private readonly midMs: number;
+  private readonly halfMs: number;
+
+  constructor(tropicalAt: (ms: number) => number, t0Ms: number, t1Ms: number, nodes: number) {
+    this.midMs = (t0Ms + t1Ms) / 2;
+    this.halfMs = (t1Ms - t0Ms) / 2;
+    this.nodeX = new Float64Array(nodes);
+    this.nodeY = new Float64Array(nodes);
+    this.weight = new Float64Array(nodes);
+
+    let previous = 0;
+    for (let k = 0; k < nodes; k++) {
+      const x = Math.cos((Math.PI * k) / (nodes - 1));
+      this.nodeX[k] = x;
+
+      let y = tropicalAt(this.midMs + this.halfMs * x);
+      if (k > 0) {
+        while (y - previous > 180) y -= 360;
+        while (y - previous < -180) y += 360;
+      }
+      this.nodeY[k] = y;
+      previous = y;
+
+      // Barycentric weights for Chebyshev points of the second kind.
+      this.weight[k] = (k === 0 || k === nodes - 1 ? 0.5 : 1) * (k % 2 ? -1 : 1);
+    }
+  }
+
+  at(ms: number): number {
+    const x = (ms - this.midMs) / this.halfMs;
+    const nodeX = this.nodeX;
+    const nodeY = this.nodeY;
+    const weight = this.weight;
+
+    let numerator = 0;
+    let denominator = 0;
+    for (let k = 0; k < nodeX.length; k++) {
+      const y = nodeY[k] as number;
+      const dx = x - (nodeX[k] as number);
+      // Landing exactly on a node divides by zero; the node value is the answer.
+      if (dx === 0) return y;
+      const q = (weight[k] as number) / dx;
+      numerator += q * y;
+      denominator += q;
+    }
+    return numerator / denominator;
+  }
+}
+
 export class LongitudeCache {
+  private readonly ayanamsaType: AyanamsaType;
+  private readonly mode: LongitudeCacheMode;
+
+  /** `'exact'` mode: longitude per exact instant. */
   private moonCache = new Map<number, number>();
   private sunCache = new Map<number, number>();
-  private readonly ayanamsaType: AyanamsaType;
+  /** `'interpolated'` mode: one interpolant per block index. */
+  private moonBlocks = new Map<number, ChebyshevLongitude>();
+  private sunBlocks = new Map<number, ChebyshevLongitude>();
 
   public hits = 0;
   public misses = 0;
 
-  constructor(ayanamsaType: AyanamsaType) {
+  constructor(ayanamsaType: AyanamsaType, mode: LongitudeCacheMode = 'exact') {
     this.ayanamsaType = ayanamsaType;
+    this.mode = mode;
   }
 
   getMoon(date: Date): number {
-    const key = date.getTime();
-    const cached = this.moonCache.get(key);
-    if (cached !== undefined) {
-      this.hits++;
-      return cached;
+    if (this.mode === 'exact') {
+      const key = date.getTime();
+      const cached = this.moonCache.get(key);
+      if (cached !== undefined) {
+        this.hits++;
+        return cached;
+      }
+      this.misses++;
+      const lon = getSiderealMoonLongitude(date, this.ayanamsaType);
+      this.moonCache.set(key, lon);
+      return lon;
     }
-    this.misses++;
-    const lon = getSiderealMoonLongitude(date, this.ayanamsaType);
-    this.moonCache.set(key, lon);
-    return lon;
+
+    const ms = date.getTime();
+    const block = Math.floor(ms / MOON_BLOCK_MS);
+    let interpolant = this.moonBlocks.get(block);
+    if (interpolant === undefined) {
+      this.misses++;
+      interpolant = new ChebyshevLongitude(
+        (t) => getTropicalMoonLongitude(new Date(t)),
+        block * MOON_BLOCK_MS,
+        (block + 1) * MOON_BLOCK_MS,
+        MOON_NODES,
+      );
+      this.moonBlocks.set(block, interpolant);
+    } else {
+      this.hits++;
+    }
+    return normalize360(interpolant.at(ms) - computeAyanamsa(date, this.ayanamsaType));
   }
 
   getSun(date: Date): number {
-    const key = date.getTime();
-    const cached = this.sunCache.get(key);
-    if (cached !== undefined) {
-      this.hits++;
-      return cached;
+    if (this.mode === 'exact') {
+      const key = date.getTime();
+      const cached = this.sunCache.get(key);
+      if (cached !== undefined) {
+        this.hits++;
+        return cached;
+      }
+      this.misses++;
+      const lon = getSiderealSunLongitude(date, this.ayanamsaType);
+      this.sunCache.set(key, lon);
+      return lon;
     }
-    this.misses++;
-    const lon = getSiderealSunLongitude(date, this.ayanamsaType);
-    this.sunCache.set(key, lon);
-    return lon;
+
+    const ms = date.getTime();
+    const block = Math.floor(ms / SUN_BLOCK_MS);
+    let interpolant = this.sunBlocks.get(block);
+    if (interpolant === undefined) {
+      this.misses++;
+      interpolant = new ChebyshevLongitude(
+        (t) => getTropicalSunLongitude(new Date(t)),
+        block * SUN_BLOCK_MS,
+        (block + 1) * SUN_BLOCK_MS,
+        SUN_NODES,
+      );
+      this.sunBlocks.set(block, interpolant);
+    } else {
+      this.hits++;
+    }
+    return normalize360(interpolant.at(ms) - computeAyanamsa(date, this.ayanamsaType));
   }
 
   get size(): number {
-    return this.moonCache.size + this.sunCache.size;
+    return (
+      this.moonCache.size + this.sunCache.size + this.moonBlocks.size + this.sunBlocks.size
+    );
   }
 }

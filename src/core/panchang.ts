@@ -179,7 +179,9 @@ export function getInstantPanchang(
   const t = getTranslations(lang);
   const doEndTimes = options?.computeEndTimes !== false;
 
-  const cache = new LongitudeCache(ayanamsaType);
+  // Interpolate only when the end-time searches will actually run: building a
+  // block costs more than the handful of reads a names-only call makes.
+  const cache = new LongitudeCache(ayanamsaType, doEndTimes ? 'interpolated' : 'exact');
   const getMoon = (d: Date) => cache.getMoon(d);
   const getSun = (d: Date) => cache.getSun(d);
 
@@ -406,7 +408,9 @@ export function getDailyPanchang(
   const needBhadra = wantLunarWindows || wantFestivals;
 
   // ── 2. Create per-call longitude cache ──────────────
-  const cache = new LongitudeCache(ayanamsaType);
+  // Interpolate only when the end-time searches will actually run: building a
+  // block costs more than the handful of reads a names-only call makes.
+  const cache = new LongitudeCache(ayanamsaType, doEndTimes ? 'interpolated' : 'exact');
   const getMoon = (d: Date) => cache.getMoon(d);
   const getSun = (d: Date) => cache.getSun(d);
   // Shared across today's and the prior day's Chandra Masa resolution — both

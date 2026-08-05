@@ -33,7 +33,10 @@ describe('Madhyahna / Sandhya wiring — daily panchang', () => {
   it('madhyahna is centered on the sunrise→sunset midpoint', () => {
     const noonMs = (r.sunrise.getTime() + r.sunset.getTime()) / 2;
     const centerMs = (r.madhyahna.start.getTime() + r.madhyahna.end.getTime()) / 2;
-    expect(centerMs).toBe(noonMs);
+    // Sub-millisecond, not exact: when sunrise + sunset is odd the true midpoint
+    // lands on a half-millisecond, which an integer-ms Date cannot represent.
+    // Asserting equality only held while that sum happened to be even.
+    expect(Math.abs(centerMs - noonMs)).toBeLessThanOrEqual(1);
   });
 
   it('pratah sandhya ends at sunrise and is 3 night-ghatikas wide', () => {

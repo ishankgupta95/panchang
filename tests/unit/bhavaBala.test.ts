@@ -417,39 +417,55 @@ const FIXTURE_PINS: ReadonlyArray<{ name: string; totals: readonly number[] }> =
   // (which would have signalled a crossed sign boundary), and max
   // |Δshadbala| is 0.0071 V — i.e. per-house Δ is exactly
   // Δshadbala[cuspLord], the same relationship as the previous re-pin.
+  //
+  // Re-pinned again when solar rise/set events became canonically cached
+  // (see `EVENT_CACHE` in src/astronomy/sunrise.ts). Predicted before
+  // measuring, per the anti-circular workflow. `SearchRiseSet` locates an
+  // event to within its own refinement tolerance, so the same sunrise came
+  // back up to ~109 ms apart depending on which caller's search start found
+  // it; anchoring every event to its UTC day fixes one value per event, and
+  // `computeShadbala` reads sunrise/sunset for the Kaala Bala day fraction.
+  // The prediction was therefore: no discrete quantity may move (a 108 ms
+  // shift cannot cross a sign or Dig-Bala boundary), and the continuous
+  // Kaala Bala terms must move by ~108 ms / 43.2e6 ms of a day — i.e. into
+  // the 4th decimal at most. Confirmed exactly: an isolation build carrying
+  // the interpolating longitude cache but the *old* sunrise reproduced all
+  // five fixtures byte-identically, so the entire movement is attributable
+  // to the rise/set change, and max |Δtotal| is 0.0009 V on totals of
+  // 54-819 (worst relative movement 1.1e-5).
   {
     name: 'Narendra Modi',
     totals: [
-      378.4448, 367.5252, 330.1265, 344.4165, 332.5252, 294.1548,
-      283.0118, 492.0917, 310.6235, 434.1575, 462.8017, 348.0118,
+      378.4447, 367.5253, 330.1264, 344.4164, 332.5253, 294.1547,
+      283.0119, 492.0917, 310.6234, 434.1576, 462.8017, 348.0119,
     ],
   },
   {
     name: 'Sachin Tendulkar',
     totals: [
-      563.7607, 424.5007, 247.2775, 350.0402, 310.2725, 330.3341,
-      318.1841, 299.5525, 357.9002, 293.7075, 379.5007, 386.8776,
+      563.7609, 424.5007, 247.2777, 350.0401, 310.2727, 330.3340,
+      318.1840, 299.5527, 357.9001, 293.7077, 379.5007, 386.8775,
     ],
   },
   {
     name: 'Ratan Tata',
     totals: [
-      482.1611, 207.3089, 135.8789, 405.0211, 258.9077, 399.8394,
-      433.4589, 204.3893, 540.9573, 388.4589, 481.2694, 243.9077,
+      482.1611, 207.3089, 135.8789, 405.0211, 258.9078, 399.8394,
+      433.4589, 204.3894, 540.9573, 388.4589, 481.2694, 243.9078,
     ],
   },
   {
     name: 'Dhirubhai Ambani',
     totals: [
-      463.3512, 283.2021, 226.7721, 426.9212, 232.9385, 630.7368,
-      318.3524, 163.1986, 537.0813, 367.6424, 495.7368, 346.5085,
+      463.3511, 283.2022, 226.7722, 426.9211, 232.9386, 630.7366,
+      318.3524, 163.1988, 537.0812, 367.6424, 495.7366, 346.5086,
     ],
   },
   {
     name: 'Mukesh Ambani',
     totals: [
-      70.6601, 819.6299, 54.2434, 94.2434, 718.1999, 82.8001,
-      619.5144, 417.8971, 80.9967, 777.8858, 377.8971, 731.6544,
+      70.6609, 819.6291, 54.2443, 94.2443, 718.1991, 82.8009,
+      619.5136, 417.8971, 80.9976, 777.8849, 377.8971, 731.6536,
     ],
   },
 ];
