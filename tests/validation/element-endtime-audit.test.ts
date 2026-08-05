@@ -4,36 +4,74 @@
  *
  * `seconds-audit.test.ts` already audits sunrise/sunset, but those come
  * straight out of astronomy-engine at sub-second accuracy — they were never
- * the risky values. The end times are: each one is the output of a binary
- * search whose tolerance bounds it, and until now nothing asserted them, even
- * though `drikpanchang-verified.json` has carried the Drik values all along.
+ * the risky values. The end times are: each one is the output of a numeric
+ * search, and until now nothing asserted them, even though
+ * `drikpanchang-verified.json` has carried the Drik values all along.
  *
- * ## What this found
+ * ## What this found — and what fixing it achieved
  *
- * The drift is *systematic per element type*, not random, and it barely moves
- * when `precision: 'high'` tightens the search from ±30 s to ±1 s (worst case
- * 131 s → 133 s). So the residual is a model difference from Drik, not a
- * search artifact:
+ * The original audit found drift that split cleanly by *ayanamsa exposure*:
+ * tithi and karana (Moon − Sun, ayanamsa cancels) ran late by ~35 s, while
+ * nakshatra (ayanamsa once) ran 52 s early and yoga (ayanamsa twice) ran 106 s
+ * early. That is the exact signature of a wrong ayanamsa constant, and it was:
+ * the library's Lahiri sat 38″ behind DrikPanchang's. See `LAHIRI_J2000_DEG`
+ * in `src/astronomy/ayanamsa.ts` for how the correct value was measured.
  *
- *   tithi      +6 … +57 s   (Moon − Sun; ayanamsa cancels)   mean |Δ| 37 s
- *   karana     +14 … +59 s  (Moon − Sun; ayanamsa cancels)   mean |Δ| 42 s
- *   nakshatra  −38 … −63 s  (Moon; ayanamsa applied once)    mean |Δ| 55 s
- *   yoga       −69 … −131 s (Moon + Sun; ayanamsa twice)     mean |Δ| 106 s
+ * Correcting it removed the sign split and most of the magnitude. A later
+ * change — solving transitions by secant rather than bisecting to a tolerance —
+ * removed the search's residual late bias (~6.7 s) on top of that:
  *
- * The split tracks ayanamsa exposure exactly. The ayanamsa-free elements agree
- * to within the search tolerance; the ayanamsa-dependent ones run early, and
- * yoga — which carries the offset twice — runs roughly twice as early as
- * nakshatra. That is the signature of this library's Lahiri ayanamsa sitting
- * ~0.0076° (≈27 arcsec) ahead of Drik's: 0.0076° / 13.18°·day⁻¹ ≈ 50 s for
- * nakshatra, and 2 × 0.0076° / 14.17°·day⁻¹ ≈ 93 s for yoga, against ~50 s and
- * ~110 s observed.
+ *                                    original      + ayanamsa     + secant
+ *   tithi      (ayanamsa cancels)   +6 … +57 s     +6 … +57 s    +2 … +46 s
+ *   karana     (ayanamsa cancels)  +14 … +59 s    +14 … +59 s    +7 … +51 s
+ *   nakshatra  (ayanamsa once)     −38 … −63 s     +4 … +26 s    −6 … +24 s
+ *   yoga       (ayanamsa twice)    −69 … −131 s   +12 … +74 s    +6 … +60 s
  *
- * That is left **unchanged** here deliberately. Retuning the ayanamsa constant
- * would move every sidereal output in the library and re-pin a large number of
- * fixtures; it is a decision to take on its own evidence, not a side effect of
- * adding an audit. This test's job is to make the drift visible and stop it
- * growing. The bounds below sit just above the observed worst case per element,
- * so a regression that widens the gap — or flips a sign — fails loudly.
+ * The ayanamsa correction left tithi and karana untouched, exactly as
+ * predicted — it cannot affect a difference of two longitudes that both carry
+ * it. The secant change moved all four, because the late bias it removed was
+ * common to every search.
+ *
+ * There is no `precision` column: the secant solve converges to the root, which
+ * is why the option that used to select a tighter tolerance no longer exists.
+ *
+ * ## What remains, and why it is not chased further
+ *
+ * All four now drift *late* by a similar amount. Three independent checks say
+ * the remaining ~20 s is **not** something this library can fix:
+ *
+ *  1. **The search is not responsible.** Comparing each reported end time
+ *     against an exact bisection of the same index function puts the search's
+ *     own contribution at **≤24 ms** (mean 11 ms over 3,669 searches). The
+ *     reported value *is* the true transition to within a rounding step.
+ *  2. **The ephemeris is not responsible.** Drik publishes sidereal planetary
+ *     positions to the arcsecond. Solving for the instant at which this
+ *     library reproduces Drik's Surya and Chandra for 2025-01-14 gives two
+ *     answers **7 seconds apart** — i.e. Sun and Moon agree with Drik's Swiss
+ *     Ephemeris to well under an arcsecond at a common instant. A 1″ error
+ *     would move a tithi boundary by ~2 s, so the ephemeris cannot produce
+ *     tens of seconds of drift.
+ *  3. **The residual is not self-consistent.** Solving for the library's
+ *     errors in Moon, Sun and ayanamsa, the (m − s) implied by nakshatra+yoga
+ *     disagrees with what tithi+karana measure directly by ~16″, and the
+ *     per-fixture drift scatters from −6 s to +60 s with no pattern. No single
+ *     constant fits, so there is no further offset waiting to be found.
+ *
+ * What is left is dominated by the reference itself: Drik publishes to the
+ * minute, so every measurement here carries ±30 s of quantization, and five
+ * fixtures cannot average that down. Tightening this needs reference end times
+ * at seconds resolution, not a change to the library.
+ *
+ * ## Reading the reference values
+ *
+ * Drik prints `HH:MM`, and this audit compares against the *midpoint* of that
+ * minute (+30 s), i.e. it assumes Drik truncates. That assumption is now
+ * checked rather than assumed: comparing against the exact minute instead
+ * (i.e. assuming Drik rounds) more than doubles the overall mean drift, from
+ * 21.4 s to 50.8 s. Truncation is the convention.
+ *
+ * The bounds below are regression detectors, not independent accuracy checks;
+ * see {@link TOLERANCE_SEC} for how their headroom is chosen.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -77,18 +115,22 @@ function actualSecondsFromMidnight(d: Date, dateStr: string): number {
 }
 
 /**
- * Per-element bounds, set just above the measured worst case with ~20% of
- * headroom. Intentionally *not* uniform — a single loose bound would hide the
- * fact that the ayanamsa-free elements track Drik much more closely.
+ * Per-element bounds. Intentionally *not* uniform.
  *
- * Measured maxima at the time of writing: tithi 44.6 s, karana 90.5 s,
- * nakshatra 82.4 s, yoga 146.5 s.
+ * Measured maxima: tithi 46 s, karana 51 s, nakshatra 24 s, yoga 60 s. The
+ * headroom above those is roughly one Drik quantum (±30 s), because that — not
+ * the search, which now contributes ≤24 ms — is what dominates the spread. A
+ * sixth fixture drawing badly could legitimately land ~30 s worse than any of
+ * the five here, and the bounds have to survive that without being so loose
+ * they stop detecting a real shift.
+ *
+ * For scale: these were 60 / 110 / 100 / 170 s before the ayanamsa correction.
  */
 const TOLERANCE_SEC: Record<string, number> = {
-  tithi: 60,
-  karana: 110,
-  nakshatra: 100,
-  yoga: 170,
+  tithi: 76,
+  karana: 81,
+  nakshatra: 54,
+  yoga: 90,
 };
 
 const withEndTimes = (fixtures as Fixture[]).filter((f) => f.expected.tithiEndHHMM);
@@ -121,10 +163,18 @@ describe('Element end-time drift vs DrikPanchang', () => {
     }
   }
 
-  it('ayanamsa-free elements track Drik roughly twice as closely', () => {
-    // The load-bearing assertion: it pins the *shape* of the disagreement, so
-    // that if someone retunes the ayanamsa the relationship changes and this
-    // test reports it rather than the per-element bounds silently absorbing it.
+  it('drift no longer grows with ayanamsa exposure', () => {
+    // The invariant that guards the ayanamsa constant.
+    //
+    // Before the correction this ratio was ~2.3: drift scaled with how many
+    // times the ayanamsa entered an element's formula (tithi/karana zero,
+    // nakshatra once, yoga twice), which is precisely what a mistuned constant
+    // produces. With the constant right, exposure no longer amplifies drift and
+    // the ratio sits near 0.6.
+    //
+    // It is a sensitive detector because the leverage is large: an error of δ
+    // arcsec adds ~1.8·δ seconds to nakshatra drift and ~3.4·δ to yoga. A 10″
+    // regression — 0.003° — would push this back above 1.0 and fail here.
     //
     // Compared on means rather than maxima. A single fixture's worst case is
     // dominated by where its transition happens to fall inside the ±30 s search
@@ -162,9 +212,9 @@ describe('Element end-time drift vs DrikPanchang', () => {
     ).toBeLessThan(60);
     expect(
       meanAyanamsa / meanElongation,
-      `ayanamsa-based mean ${meanAyanamsa.toFixed(1)}s vs elongation-based ` +
-        `${meanElongation.toFixed(1)}s — if this ratio has collapsed toward 1, ` +
-        `the ayanamsa was retuned and this audit's header needs updating`,
-    ).toBeGreaterThan(1.5);
+      `ayanamsa-exposed mean ${meanAyanamsa.toFixed(1)}s vs ayanamsa-free ` +
+        `${meanElongation.toFixed(1)}s — a ratio above 1 means the ayanamsa ` +
+        `constant has drifted from DrikPanchang's again`,
+    ).toBeLessThan(1.0);
   });
 });

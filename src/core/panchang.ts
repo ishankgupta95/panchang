@@ -4,11 +4,14 @@ import { LongitudeCache } from '../astronomy/cache';
 import { NewMoonCache } from '../astronomy/newMoon';
 import { computeAyanamsa } from '../astronomy/ayanamsa';
 import { computeSunrise, computeSunset } from '../astronomy/sunrise';
+import type { ElementAngle } from '../utils/search';
 import {
   findTransitionTime, findDailyElements,
-  STANDARD_PRECISION, HIGH_PRECISION,
+  STANDARD_PRECISION,
 } from '../utils/search';
-import { nakshatraOf } from '../utils/constants';
+import {
+  nakshatraOf, TITHI_SPAN, KARANA_SPAN, NAKSHATRA_SPAN, YOGA_SPAN,
+} from '../utils/constants';
 import { resolveUtcOffset, getLocalMidnightUtc, utcToLocalDisplay } from '../utils/timezone';
 import {
   computeTithiFromLongitudes,
@@ -79,6 +82,32 @@ import type {
 } from '../types/elements';
 
 /**
+ * The continuous angle behind each element index, for {@link findTransitionTime}
+ * and {@link findDailyElements}.
+ *
+ * These must stay in lockstep with the matching `get*IndexAtTime` functions —
+ * each index is `floor(normalize360(angle) / span)`, so the angle here is
+ * exactly what that function normalizes and floors. They are built per call so
+ * they read through the same memoized `getMoon` / `getSun` the index functions
+ * use, which keeps the secant solve free of extra ephemeris work.
+ */
+const TITHI_ANGLE = (
+  getMoon: (d: Date) => number, getSun: (d: Date) => number,
+): ElementAngle => ({ angleAt: (d) => getMoon(d) - getSun(d), spanDeg: TITHI_SPAN });
+
+const KARANA_ANGLE = (
+  getMoon: (d: Date) => number, getSun: (d: Date) => number,
+): ElementAngle => ({ angleAt: (d) => getMoon(d) - getSun(d), spanDeg: KARANA_SPAN });
+
+const NAKSHATRA_ANGLE = (
+  getMoon: (d: Date) => number,
+): ElementAngle => ({ angleAt: (d) => getMoon(d), spanDeg: NAKSHATRA_SPAN });
+
+const YOGA_ANGLE = (
+  getMoon: (d: Date) => number, getSun: (d: Date) => number,
+): ElementAngle => ({ angleAt: (d) => getSun(d) + getMoon(d), spanDeg: YOGA_SPAN });
+
+/**
  * Returns the Panchang elements active at a single UTC moment.
  *
  * Use this for birth-chart calculations, muhurta selection, or any case
@@ -111,7 +140,7 @@ import type {
  * @param date     UTC instant to evaluate.
  * @param location Observer coordinates `{ latitude, longitude, elevation? }`.
  * @param options  Optional settings: `ayanamsa`, `language`, `computeEndTimes`,
- *                 `precision`. No `timezone` required — the result is UTC-based.
+ *                 No `timezone` required — the result is UTC-based.
  * @returns        `InstantPanchangResult` with one value per element
  *                 (tithi, nakshatra, yoga, karana, vara) plus sidereal longitudes,
  *                 or `null` for polar locations on dates with no sunrise. Invalid
@@ -149,7 +178,6 @@ export function getInstantPanchang(
   const lang = options?.language ?? 'en';
   const t = getTranslations(lang);
   const doEndTimes = options?.computeEndTimes !== false;
-  const precision = options?.precision === 'high' ? HIGH_PRECISION : STANDARD_PRECISION;
 
   const cache = new LongitudeCache(ayanamsaType);
   const getMoon = (d: Date) => cache.getMoon(d);
@@ -223,22 +251,22 @@ export function getInstantPanchang(
     tithi.endTime = findTransitionTime(
       date, new Date(date.getTime() + 36 * 3600_000),
       tithi.index, (d) => getTithiIndexAtTime(d, getMoon, getSun),
-      precision.maxIterations, precision.toleranceMs,
+      STANDARD_PRECISION.maxIterations, STANDARD_PRECISION.toleranceMs, TITHI_ANGLE(getMoon, getSun),
     );
     nakshatra.endTime = findTransitionTime(
       date, new Date(date.getTime() + 36 * 3600_000),
       nakshatra.index, (d) => getNakshatraIndexAtTime(d, getMoon),
-      precision.maxIterations, precision.toleranceMs,
+      STANDARD_PRECISION.maxIterations, STANDARD_PRECISION.toleranceMs, NAKSHATRA_ANGLE(getMoon),
     );
     yoga.endTime = findTransitionTime(
       date, new Date(date.getTime() + 36 * 3600_000),
       yoga.index, (d) => getYogaIndexAtTime(d, getMoon, getSun),
-      precision.maxIterations, precision.toleranceMs,
+      STANDARD_PRECISION.maxIterations, STANDARD_PRECISION.toleranceMs, YOGA_ANGLE(getMoon, getSun),
     );
     karana.endTime = findTransitionTime(
       date, new Date(date.getTime() + 18 * 3600_000),
       karana.index, (d) => getKaranaIndexAtTime(d, getMoon, getSun),
-      precision.maxIterations, precision.toleranceMs,
+      STANDARD_PRECISION.maxIterations, STANDARD_PRECISION.toleranceMs, KARANA_ANGLE(getMoon, getSun),
     );
   }
 
@@ -324,7 +352,7 @@ export function getInstantPanchang(
  * @param location Observer coordinates `{ latitude, longitude, elevation? }`.
  * @param options  Settings — `timezone` is required (UTC offset in minutes,
  *                 e.g. 330 for IST). Also accepts `ayanamsa`, `language`,
- *                 `computeEndTimes`, `precision`.
+ *                 `computeEndTimes`.
  * @returns        `DailyPanchangResult` on a normal day, or `null` for polar
  *                 locations on dates with no sunrise / sunset (the Hindu day
  *                 is undefined when sunrise doesn't occur). Invalid inputs
@@ -364,7 +392,6 @@ export function getDailyPanchang(
   const lang = options.language ?? 'en';
   const t = getTranslations(lang);
   const doEndTimes = options.computeEndTimes !== false;
-  const precision = options.precision === 'high' ? HIGH_PRECISION : STANDARD_PRECISION;
 
   // Optional ephemeris-backed sections; all enabled unless narrowed.
   const sections = options.sections;
@@ -579,7 +606,7 @@ export function getDailyPanchang(
       // maxPerDay = 3: a short tithi fully contained in the sunrise→nextSunrise
       // window means 3 tithis legitimately touch the Hindu day (was 2, which
       // silently dropped the 3rd). Matches MAX_DAILY_TITHIS.
-      30, 36, precision, 3,
+      30, 36, STANDARD_PRECISION, 3, TITHI_ANGLE(getMoon, getSun),
     ) as DailyTithiInfo[];
     nakshatras = findDailyElements(
       sunriseUtc, nextSunriseUtc, nakshatraAtSunrise,
@@ -588,7 +615,7 @@ export function getDailyPanchang(
         const moon = getMoon(d);
         return computeNakshatraFromLongitude(moon, resolveNakshatraName(nakshatraOf(moon), lang));
       },
-      27, 36, precision, 3,
+      27, 36, STANDARD_PRECISION, 3, NAKSHATRA_ANGLE(getMoon),
     ) as DailyNakshatraInfo[];
     yogas = findDailyElements(
       sunriseUtc, nextSunriseUtc, yogaAtSunrise,
@@ -597,7 +624,7 @@ export function getDailyPanchang(
         const moon = getMoon(d), sun = getSun(d);
         return computeYogaFromLongitudes(moon, sun, resolveYogaName(getYogaIndex(moon, sun), lang));
       },
-      27, 36, precision, 3,
+      27, 36, STANDARD_PRECISION, 3, YOGA_ANGLE(getMoon, getSun),
     ) as DailyYogaInfo[];
     karanas = findDailyElements(
       sunriseUtc, nextSunriseUtc, karanaAtSunrise,
@@ -606,7 +633,7 @@ export function getDailyPanchang(
         const moon = getMoon(d), sun = getSun(d);
         return computeKaranaFromLongitudes(moon, sun, resolveKaranaName(getKaranaIndex(moon, sun), lang));
       },
-      60, 18, precision, 5,
+      60, 18, STANDARD_PRECISION, 5, KARANA_ANGLE(getMoon, getSun),
     ) as DailyKaranaInfo[];
   } else {
     tithis = [{ ...tithiAtSunrise, startTime: null, isActiveAtSunrise: true }];

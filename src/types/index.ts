@@ -1,7 +1,7 @@
 export type { GeoLocation } from './location';
 export type {
   PanchangOptions, InstantPanchangOptions, BirthChartOptions,
-  AyanamsaType, Language, Precision, MasaSystem, FestivalRegion, LegacyFestivalRegion,
+  AyanamsaType, Language, MasaSystem, FestivalRegion, LegacyFestivalRegion,
   HouseSystem, PanchangSection,
 } from './options';
 export type {

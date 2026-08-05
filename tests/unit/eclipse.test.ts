@@ -164,6 +164,14 @@ describe('getEclipseDuringDay — syzygy guard is answer-preserving', () => {
     ['Delhi', DELHI],
     ['Sydney', SYDNEY],
   ] as const) {
+    // Explicit timeout: this is the most expensive test in the suite by an
+    // order of magnitude. It deliberately runs the *unguarded* eclipse search
+    // — the thing the syzygy guard exists to avoid — on all 365 days, at
+    // ~4.5 ms a call, so ~2.8 s of real work for Delhi. That is well inside
+    // Vitest's 5 s default in isolation, but a full-suite run puts several
+    // files on parallel workers and it has been observed stretching to 6.6 s
+    // and timing out. Sampling fewer days would trade away the exhaustiveness
+    // that makes this test worth having, so the budget is raised instead.
     it(`matches the unguarded result on every day of 2025 (${name})`, () => {
       let eclipseDays = 0;
       for (let d = 0; d < 365; d++) {
@@ -180,6 +188,6 @@ describe('getEclipseDuringDay — syzygy guard is answer-preserving', () => {
       // Sanity: the year genuinely contains eclipse days, so a guard that
       // returned `null` unconditionally could not pass the loop above.
       expect(eclipseDays).toBeGreaterThan(0);
-    });
+    }, 30_000);
   }
 });

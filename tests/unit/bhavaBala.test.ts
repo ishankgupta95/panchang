@@ -404,39 +404,52 @@ const FIXTURE_PINS: ReadonlyArray<{ name: string; totals: readonly number[] }> =
   // range (Jupiter +206.25 V from heavy saptavargaja+ojha, Saturn
   // +120 V, Sun +183.75 V) so several previously-negative bhavaBala
   // totals (-53, -65, -40, -16) now turn positive after the increase.
+  //
+  // Re-pinned again when the Lahiri ayanamsa was corrected to match
+  // DrikPanchang (+0.010590°, see `LAHIRI_J2000_DEG`). Predicted before
+  // measuring, per the anti-circular workflow: a *rigid* shift of every
+  // sidereal longitude leaves all sign-based and relative-angular
+  // quantities untouched, so dik, drik and sthana must not move at all,
+  // and only the continuous shadbala sub-components of the cusp lord can
+  // respond. Confirmed exactly — across all 60 houses, Δdik = Δdrik =
+  // Δsthana = 0.0000, the whole change lands in bhavadhipati, max
+  // |Δtotal| is 0.0071 V (on totals of 50-800), no Dig-Bala value flipped
+  // (which would have signalled a crossed sign boundary), and max
+  // |Δshadbala| is 0.0071 V — i.e. per-house Δ is exactly
+  // Δshadbala[cuspLord], the same relationship as the previous re-pin.
   {
     name: 'Narendra Modi',
     totals: [
       378.4448, 367.5252, 330.1265, 344.4165, 332.5252, 294.1548,
-      283.0118, 492.0988, 310.6306, 434.1504, 462.8088, 348.0118,
+      283.0118, 492.0917, 310.6235, 434.1575, 462.8017, 348.0118,
     ],
   },
   {
     name: 'Sachin Tendulkar',
     totals: [
-      563.7607, 424.5077, 247.2705, 350.0473, 310.2725, 330.3341,
-      318.1841, 299.5525, 357.9073, 293.7005, 379.5077, 386.8776,
+      563.7607, 424.5007, 247.2775, 350.0402, 310.2725, 330.3341,
+      318.1841, 299.5525, 357.9002, 293.7075, 379.5007, 386.8776,
     ],
   },
   {
     name: 'Ratan Tata',
     totals: [
-      482.1611, 207.3089, 135.8789, 405.0211, 258.9007, 399.8465,
-      433.4519, 204.3893, 540.9573, 388.4519, 481.2765, 243.9007,
+      482.1611, 207.3089, 135.8789, 405.0211, 258.9077, 399.8394,
+      433.4589, 204.3893, 540.9573, 388.4589, 481.2694, 243.9077,
     ],
   },
   {
     name: 'Dhirubhai Ambani',
     totals: [
-      463.3512, 283.2021, 226.7721, 426.9212, 232.9455, 630.7439,
-      318.3524, 163.2057, 537.0813, 367.6424, 495.7439, 346.5155,
+      463.3512, 283.2021, 226.7721, 426.9212, 232.9385, 630.7368,
+      318.3524, 163.1986, 537.0813, 367.6424, 495.7368, 346.5085,
     ],
   },
   {
     name: 'Mukesh Ambani',
     totals: [
       70.6601, 819.6299, 54.2434, 94.2434, 718.1999, 82.8001,
-      619.5074, 417.8971, 81.0038, 777.8928, 377.8971, 731.6474,
+      619.5144, 417.8971, 80.9967, 777.8858, 377.8971, 731.6544,
     ],
   },
 ];

@@ -5,7 +5,6 @@ export type AyanamsaType =
   | 'true-chitra'
   | 'thirukanitham';
 export type Language = 'en' | 'hi';
-export type Precision = 'standard' | 'high';
 export type MasaSystem = 'purnimanta' | 'amanta';
 
 /**
@@ -108,7 +107,6 @@ export interface InstantPanchangOptions {
   ayanamsa?: AyanamsaType;
   language?: Language;
   computeEndTimes?: boolean;
-  precision?: Precision;
   /** Lunar month naming system. Default: `'purnimanta'` (North Indian). */
   masaSystem?: MasaSystem;
   /**
@@ -174,14 +172,17 @@ export interface PanchangOptions extends InstantPanchangOptions {
    * See {@link PanchangSection} for what each value covers and why the rest of
    * the result is always computed.
    *
-   * **Precision caveat.** Element *identity* (which tithi / nakshatra / yoga /
-   * karana, in what order) is unaffected by narrowing. Element *transition
-   * times* can differ from a full run by up to 60 seconds: longitudes are
-   * memoized in 60-second buckets, and a narrowed run populates fewer of them,
-   * so the transition search may converge to a slightly different point within
-   * the same bucket. Omitting this option entirely is the pre-existing code
-   * path and is unaffected. If a narrowed run must agree with a full one to the
-   * second, don't narrow.
+   * **Narrowing is exactly output-neutral.** Every field a narrowed run does
+   * compute is identical — to the millisecond — to what a full run would have
+   * produced; narrowing only decides what is *skipped*, never what a computed
+   * value is. This holds because `LongitudeCache` memoizes on the exact
+   * instant, so its contents can never depend on which blocks ran first.
+   *
+   * (This was not always so. While the memo keyed on a 60-second bucket but
+   * stored the value computed at the first instant to fall in it, transition
+   * times could shift by up to 63 s depending on which sections were requested,
+   * and the element *count* could differ on a day whose last element was
+   * shorter than the search tolerance. Both are fixed.)
    */
   sections?: readonly PanchangSection[];
 }

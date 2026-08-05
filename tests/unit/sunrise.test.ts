@@ -93,3 +93,47 @@ describe('computeSunset', () => {
     expect((caught as PanchangError).code).toBe('NO_SUNSET');
   });
 });
+
+/**
+ * What definition of "sunrise" this library implements.
+ *
+ * DrikPanchang documents its own rule as "upper edge of sun along with
+ * refraction", with elevation excluded by default — which is the standard
+ * almanac definition: the instant the Sun's **geometric** centre altitude
+ * reaches −0.8333° (−50′ = 34′ mean refraction + 16′ solar semi-diameter),
+ * putting the refracted upper limb on the horizon. This library passes
+ * `elevation ?? 0` and lets `SearchRiseSet` apply the same convention.
+ *
+ * This test pins that, because it is the thing that would silently change if
+ * anyone swapped the rise/set call or started feeding elevation through: the
+ * definition is worth far more than any single pinned timestamp, and a wrong
+ * threshold shifts *every* Hindu-day boundary in the library, and with it every
+ * "at sunrise" element and every proportional muhurta slot.
+ *
+ * Measured against Drik: day length (`Dinamana`, which Drik publishes to the
+ * second and which is convention-free, being a difference of two times) agrees
+ * to within 11 s at Delhi. The absolute instants cannot be compared more
+ * tightly than that, because Drik displays rise/set only to the minute and its
+ * rounding convention is not documented — a ±30 s ambiguity that is larger than
+ * the disagreement being measured.
+ */
+describe('sunrise definition', () => {
+  it('fires when the geometric solar centre reaches −0.8333°', async () => {
+    const ae = await import('astronomy-engine');
+    const DELHI = { latitude: 28.6139, longitude: 77.209 };
+    const observer = new ae.Observer(DELHI.latitude, DELHI.longitude, 0);
+
+    // Two dates far apart in declination: a threshold error shows up as a much
+    // larger time error in winter, when the Sun crosses the horizon obliquely.
+    for (const day of ['2025-01-14', '2025-08-15']) {
+      const sunrise = computeSunrise(new Date(`${day}T00:00:00Z`), DELHI);
+      const time = ae.MakeTime(sunrise);
+      const eq = ae.Equator(ae.Body.Sun, time, observer, true, true);
+      const geometricAltitude = ae.Horizon(time, observer, eq.ra, eq.dec, null).altitude;
+      expect(
+        geometricAltitude,
+        `${day}: geometric solar altitude at sunrise was ${geometricAltitude.toFixed(4)}°`,
+      ).toBeCloseTo(-0.8333, 2);
+    }
+  });
+});

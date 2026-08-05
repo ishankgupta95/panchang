@@ -442,24 +442,6 @@ describe('getDailyPanchang — ayanamsa options', () => {
   });
 });
 
-// ── Precision options ───────────────────────────────────────────────────────
-
-describe('getDailyPanchang — precision options', () => {
-  it('standard precision produces valid results', () => {
-    const r = getDailyPanchang(noonUtc('2025-01-14'), PUNE, {
-      timezone: 330, precision: 'standard',
-    });
-    expect(r.tithis.length).toBeGreaterThanOrEqual(1);
-  });
-
-  it('high precision produces valid results', () => {
-    const r = getDailyPanchang(noonUtc('2025-01-14'), PUNE, {
-      timezone: 330, precision: 'high',
-    });
-    expect(r.tithis.length).toBeGreaterThanOrEqual(1);
-  });
-});
-
 // ── computeEndTimes: false ──────────────────────────────────────────────────
 
 describe('getDailyPanchang — computeEndTimes: false', () => {

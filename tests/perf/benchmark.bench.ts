@@ -72,18 +72,6 @@ describe('getDailyPanchang — full mode (computeEndTimes: true)', () => {
   });
 });
 
-// ── High precision mode ───────────────────────────────────────────────────────
-
-describe('getDailyPanchang — high precision', () => {
-  bench('Pune full precision', () => {
-    getDailyPanchang(DATE_WINTER, PUNE, {
-      timezone: 330,
-      computeEndTimes: true,
-      precision: 'high',
-    });
-  });
-});
-
 // ── Instant mode ──────────────────────────────────────────────────────────────
 
 describe('getInstantPanchang', () => {

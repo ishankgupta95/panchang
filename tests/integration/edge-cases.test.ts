@@ -73,34 +73,54 @@ describe('edge cases', () => {
 /**
  * Sub-tolerance element slivers at the day boundary.
  *
- * On the Hindu day beginning 2026-02-27 at NYC, the Saubhagya→Shobhana yoga
- * transition falls at 11:31:14.706 UTC — **6.1 seconds before** that day's
- * `nextSunrise` (11:31:20.808 UTC), verified below by bisecting exact
+ * On the Hindu day beginning 2027-10-05 at London, the Saubhagya→Shobhana yoga
+ * transition falls at 06:08:46.935 UTC — **5.85 seconds before** that day's
+ * `nextSunrise` (06:08:52.784 UTC), verified below by bisecting exact
  * longitudes. The day therefore genuinely contains three yogas, the last
- * lasting about six seconds, and both precision settings report all three.
+ * lasting under six seconds.
  *
- * Worth pinning because a sliver this short sits well inside the ±30 s bracket
- * that `STANDARD_PRECISION` resolves transitions to. Whether it survives
- * depends on which side of `nextSunrise` the search's upper bound lands on, so
- * it is a sensitive canary for changes to the search or to the longitude memo.
+ * A sliver this short used to be a coin flip. `findTransitionTime` bisected
+ * until the bracket fell under a tolerance and returned the upper bound, so the
+ * answer landed uniformly in [true, true + 15.8 s] — and whether a 5.85 s
+ * element survived depended on where in that band it fell. It did not survive.
+ *
+ * The search now solves for the boundary by secant iteration on the continuous
+ * angle and converges to the root, landing within 25 ms. That is what this
+ * pins: sub-tolerance elements at a day boundary are decided by astronomy
+ * rather than by search tolerance.
+ *
+ * (The example itself has been re-derived twice — an earlier NYC 2026-02-27
+ * case stopped being a sliver when the Lahiri ayanamsa was corrected to match
+ * DrikPanchang, since yoga carries the ayanamsa twice and that transition moved
+ * ~122 s. The scenario is astronomical, not structural: when the sidereal frame
+ * moves, the example has to move with it.)
  */
 describe('element slivers at the day boundary', () => {
-  const NYC_SLIVER_DAY = noonUtc(2026, 2, 27);
+  const LONDON = { latitude: 51.5074, longitude: -0.1278 };
+  const SLIVER_DAY = noonUtc(2027, 10, 5);
+  const TRUE_TRANSITION_UTC = Date.UTC(2027, 9, 6, 6, 8, 46, 935);
 
-  for (const precision of ['standard', 'high'] as const) {
-    it(`${precision} precision resolves the ~6s third yoga`, () => {
-      const r = getDailyPanchang(NYC_SLIVER_DAY, NYC, { timezone: -300, precision });
-      expect(r).not.toBeNull();
-      expect(r!.yogas).toHaveLength(3);
+  it('resolves the ~6s third yoga', () => {
+    const r = getDailyPanchang(SLIVER_DAY, LONDON, { timezone: 0 });
+    expect(r).not.toBeNull();
+    expect(r!.yogas).toHaveLength(3);
 
-      const sliver = r!.yogas[2]!;
-      expect(sliver.name).toBe('Shobhana');
-      expect(sliver.endTime!.getTime()).toBe(r!.nextSunrise.getTime());
-      const spanMs = sliver.endTime!.getTime() - sliver.startTime!.getTime();
-      expect(spanMs).toBeGreaterThan(0);
-      expect(spanMs).toBeLessThan(60_000);
-    });
-  }
+    const sliver = r!.yogas[2]!;
+    expect(sliver.name).toBe('Shobhana');
+    expect(sliver.endTime!.getTime()).toBe(r!.nextSunrise.getTime());
+    const spanMs = sliver.endTime!.getTime() - sliver.startTime!.getTime();
+    expect(spanMs).toBeGreaterThan(0);
+    expect(spanMs).toBeLessThan(60_000);
+  });
+
+  it('lands within 25ms of the true transition', () => {
+    // The secant solve converges to the root. The residual is the bounded
+    // forward walk that restores the never-early guarantee — one 25 ms step.
+    const r = getDailyPanchang(SLIVER_DAY, LONDON, { timezone: 0 })!;
+    const error = r.yogas[1]!.endTime!.getTime() - TRUE_TRANSITION_UTC;
+    expect(error, `error ${error}ms`).toBeGreaterThanOrEqual(0);
+    expect(error, `error ${error}ms`).toBeLessThanOrEqual(25);
+  });
 
   it('the true transition really does precede nextSunrise', () => {
     // Independent of the library's search: bisect exact longitudes.
@@ -110,16 +130,16 @@ describe('element slivers at the day boundary', () => {
       const sum = getSiderealMoonLongitude(d, 'lahiri') + getSiderealSunLongitude(d, 'lahiri');
       return Math.floor((((sum % 360) + 360) % 360) / SPAN);
     };
-    let lo = Date.UTC(2026, 1, 28, 11, 0, 0);
-    let hi = Date.UTC(2026, 1, 28, 12, 0, 0);
+    let lo = Date.UTC(2027, 9, 6, 5, 30, 0);
+    let hi = Date.UTC(2027, 9, 6, 6, 30, 0);
     const startIdx = yogaIdxAt(lo);
     while (hi - lo > 1) {
       const mid = Math.floor((lo + hi) / 2);
       if (yogaIdxAt(mid) === startIdx) lo = mid; else hi = mid;
     }
-    const r = getDailyPanchang(NYC_SLIVER_DAY, NYC, { timezone: -300 })!;
-    const nextSunriseUtc = r.nextSunrise.getTime() + 300 * 60_000;
-    expect(hi).toBeLessThan(nextSunriseUtc);
-    expect(nextSunriseUtc - hi).toBeLessThan(30_000);
+    expect(hi).toBe(TRUE_TRANSITION_UTC);
+    const r = getDailyPanchang(SLIVER_DAY, LONDON, { timezone: 0 })!;
+    expect(hi).toBeLessThan(r.nextSunrise.getTime());
+    expect(r.nextSunrise.getTime() - hi).toBeLessThan(30_000);
   });
 });

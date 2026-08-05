@@ -160,7 +160,7 @@ export type {
 export type {
   GeoLocation,
   PanchangOptions, InstantPanchangOptions, BirthChartOptions,
-  AyanamsaType, Language, Precision, MasaSystem, FestivalRegion, LegacyFestivalRegion,
+  AyanamsaType, Language, MasaSystem, FestivalRegion, LegacyFestivalRegion,
   HouseSystem, PanchangSection,
   DailyPanchangResult, InstantPanchangResult,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, MasaInfo,

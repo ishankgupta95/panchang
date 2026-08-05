@@ -5,7 +5,7 @@
 Pure TypeScript Hindu Panchang (almanac), Jyotish, and Birth Chart calculations.
 Zero native dependencies. Works offline in React Native (Hermes), Node.js, and browsers.
 
-**Fast** (~0.2 ms trimmed, ~1.5 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,233 tests across 104 files**
+**Fast** (~0.2 ms trimmed, ~1.15 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,235 tests across 104 files**
 
 ---
 
@@ -896,7 +896,6 @@ const r = getDailyPanchang(date, loc, {
   masaSystem: 'purnimanta',               // purnimanta | amanta
   region: 'all',                          // 21 state slugs + 'nepal' + 'all'
   computeEndTimes: true,                  // false → skip transition searches
-  precision: 'standard',                  // standard (±30 s) | high (±1 s)
   sections: undefined,                    // undefined = all; see Performance
   janmaRashi: undefined,                  // pass to add r.chandraBalam
   janmaNakshatra: undefined,              // pass to add r.tarabala
@@ -1200,12 +1199,11 @@ hardware and date.
 
 | `getDailyPanchang` call | Node.js |
 |---|---|
-| Default (all sections + end-times) | ~1.5 ms |
-| `computeEndTimes: false` | ~0.95 ms |
-| `sections: []` | ~0.73 ms |
-| `sections: []` + `computeEndTimes: false` | ~0.21 ms |
-| `precision: 'high'` | ~2.1 ms |
-| `getInstantPanchang` | ~0.34 ms |
+| Default (all sections + end-times) | ~1.15 ms |
+| `computeEndTimes: false` | ~0.85 ms |
+| `sections: []` | ~0.48 ms |
+| `sections: []` + `computeEndTimes: false` | ~0.23 ms |
+| `getInstantPanchang` | ~0.36 ms |
 
 Cost is dominated by ephemeris evaluations, so the levers that matter are the
 ones that avoid them:
@@ -1219,8 +1217,11 @@ ones that avoid them:
 
 Range helpers apply the same narrowing internally:
 `getEkadashiDatesForYear` reads only the tithi at sunrise and so runs with
-every optional section off (~90 ms for a full year);
-`getFestivalsInRange` keeps only `'festivals'` and `'eclipse'` (~430 ms/year).
+every optional section off (~40 ms for a full year);
+`getFestivalsInRange` keeps only `'festivals'` and `'eclipse'` (~430 ms/year);
+`getSankrantisForYear` needs only the Sun, so it scans one solar longitude per
+day and bisects the 12 transits rather than building a panchang each day
+(~3 ms/year).
 
 Birth-chart helpers are independent — calling them does not add work to
 `getDailyPanchang`. Within them, `computeShadbala` and `computeBhavaBala`
@@ -1250,6 +1251,13 @@ getDailyPanchang(date, loc, {
 
 Omitting a section leaves its fields at their documented empty value (`null`
 or `[]`) — never a half-filled one.
+
+Narrowing is **exactly output-neutral**: every field a narrowed call does
+compute is identical, to the millisecond, to what the full call would have
+returned. `sections` only decides what is skipped, never what a computed value
+is. (This is guaranteed by `LongitudeCache` memoizing on the exact instant. It
+was not true while that memo binned longitudes into 60-second buckets, when
+narrowing could shift transition times by up to 63 s.)
 
 ### A note on Hermes / React Native
 

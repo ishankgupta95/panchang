@@ -34,8 +34,17 @@ const SEED_HALF_WINDOW_DAYS = 2.5;
  *
  * Uses astronomy-engine's `SearchMoonPhase(0, …)` — the moment Moon–Sun
  * elongation reaches 0° — which is accurate to seconds. The Moon's current
- * phase angle seeds a narrow search window; the wide scan remains as a
- * fallback, so the seed is a pure speed-up and cannot change the answer.
+ * phase angle seeds a narrow search window, with the wide scan retained as a
+ * fallback.
+ *
+ * The seed never changes *which* lunation is returned: measured against the
+ * wide scan at 8 h steps across 1900–2100 (219,147 samples), the
+ * `prev ≤ ref < next` bracket was identical every time. It can move the
+ * returned instants by up to ~175 ms on ~6% of inputs, because
+ * `SearchMoonPhase` converges to a marginally different root when handed a
+ * different bracket. That is far below any resolution this library publishes,
+ * but it is not literally zero — don't rely on bit-identical instants across
+ * the two paths.
  *
  * @param ref Reference instant (UTC). Both returned instants are UTC.
  */

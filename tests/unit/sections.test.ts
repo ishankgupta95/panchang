@@ -71,80 +71,48 @@ describe('options.sections', () => {
   });
 
   /**
-   * Element **identity** — which elements, in which order — is exactly
-   * preserved when narrowing. Transition **times** are preserved to within one
-   * `LongitudeCache` bucket.
+   * Narrowing is **exactly** output-neutral for the elements: same identity,
+   * same transition times to the millisecond, same progress fields.
    *
-   * The bucket caveat is real and worth stating plainly. The cache memoizes
-   * longitudes on 60-second bins, and the transition binary search reads
-   * through it. A narrowed run populates fewer bins (no festival kala anchors),
-   * so a search can converge to a slightly different point inside the same bin
-   * — observed at up to ~47 s on 2026-08-26 at Pune.
+   * This is a guarantee rather than a tolerance because `LongitudeCache`
+   * memoizes on the exact instant. It did not always: while the memo keyed on a
+   * 60-second bucket but stored the value computed at the first instant to land
+   * in that bucket, a narrowed run populated the buckets from different
+   * instants and transition times moved by up to 63 s — and on 2025-01-06 at
+   * NYC the two paths even disagreed on how many nakshatras the day held.
    *
-   * The alternative is to make the search read exact longitudes, which would
-   * make narrowing perfectly deterministic but would shift every published
-   * transition time relative to the released behaviour. Keeping the bins means
-   * the default (un-narrowed) call is bit-identical to what shipped, and the
-   * divergence is confined to the opt-in path. Callers who need a narrowed run
-   * to agree with a full one to the second should not narrow.
+   * A tolerance-based version of this test hid that: it bounded drift at one
+   * 60 s bucket and passed only because its day list never hit a larger case.
+   * Exact equality has no such failure mode, so the matrix below is swept wide
+   * on purpose.
    */
-  it('keeps element identity identical and times within one cache bucket', () => {
-    const BUCKET_MS = 60_000;
-    const identity = (els: readonly { index: number; name: string }[]) =>
-      els.map((e) => `${e.index}|${e.name}`);
-    const drift = (
-      a: readonly { startTime: Date | null; endTime: Date | null }[],
-      b: readonly { startTime: Date | null; endTime: Date | null }[],
-    ) => {
-      let worst = 0;
-      for (let i = 0; i < b.length; i++) {
-        for (const k of ['startTime', 'endTime'] as const) {
-          const x = a[i]![k], y = b[i]![k];
-          if (x && y) worst = Math.max(worst, Math.abs(x.getTime() - y.getTime()));
-        }
-      }
-      return worst;
-    };
+  it('is exactly output-neutral for element arrays', () => {
+    const LOCATIONS = [
+      { name: 'Pune', loc: PUNE, tz: 330 },
+      { name: 'NYC', loc: { latitude: 40.7128, longitude: -74.006 }, tz: -300 },
+      { name: 'London', loc: { latitude: 51.5074, longitude: -0.1278 }, tz: 0 },
+      { name: 'Sydney', loc: { latitude: -33.8688, longitude: 151.2093 }, tz: 600 },
+    ];
+    // 2025-01-06 NYC is the day the bucketed memo disagreed on element count.
+    const SWEEP = [
+      '2025-01-06', '2025-01-24', '2025-02-15', '2025-07-04', '2025-09-07',
+      '2025-10-04', '2025-12-20', '2026-01-14', '2026-03-03', '2026-08-26',
+    ];
 
-    for (const day of DAYS) {
-      const full = panchangFor(day);
-      const bare = panchangFor(day, []);
-      for (const [name, a, b] of [
-        ['tithis', bare.tithis, full.tithis],
-        ['nakshatras', bare.nakshatras, full.nakshatras],
-        ['yogas', bare.yogas, full.yogas],
-        ['karanas', bare.karanas, full.karanas],
-      ] as const) {
-        expect(identity(a), `${name} identity ${day}`).toEqual(identity(b));
-        expect(drift(a, b), `${name} timing drift on ${day}`).toBeLessThan(BUCKET_MS);
-      }
-    }
-  });
-
-  it('keeps sub-degree progress fields within one cache bucket when narrowed', () => {
-    // The Moon moves ~0.0092°/min, so a 60 s bucket bounds the divergence at
-    // ~0.01° of nakshatra travel (~0.07% of a nakshatra). Anything larger would
-    // mean narrowing had changed the computation, not just the bucket contents.
-    const MAX_DEG = 0.01;
-    const MAX_PCT = 0.08;
-    for (const day of DAYS) {
-      const full = panchangFor(day);
-      const bare = panchangFor(day, []);
-      for (let i = 0; i < full.nakshatras.length; i++) {
-        expect(
-          Math.abs(bare.nakshatras[i]!.degreesInNakshatra - full.nakshatras[i]!.degreesInNakshatra),
-          `nakshatra[${i}] degrees on ${day}`,
-        ).toBeLessThanOrEqual(MAX_DEG);
-      }
-      for (const [name, a, b] of [
-        ['tithi', bare.tithis, full.tithis],
-        ['yoga', bare.yogas, full.yogas],
-      ] as const) {
-        for (let i = 0; i < b.length; i++) {
+    for (const { name, loc, tz } of LOCATIONS) {
+      for (const day of SWEEP) {
+        const opts = { timezone: tz };
+        const full = getDailyPanchang(new Date(`${day}T06:30:00Z`), loc, opts);
+        const bare = getDailyPanchang(new Date(`${day}T06:30:00Z`), loc, {
+          ...opts,
+          sections: [],
+        });
+        if (full === null || bare === null) continue;
+        for (const field of ['tithis', 'nakshatras', 'yogas', 'karanas'] as const) {
           expect(
-            Math.abs(a[i]!.completionPercentage - b[i]!.completionPercentage),
-            `${name}[${i}] completion on ${day}`,
-          ).toBeLessThanOrEqual(MAX_PCT);
+            JSON.stringify(bare[field]),
+            `${field} on ${day} at ${name} must be identical when narrowed`,
+          ).toBe(JSON.stringify(full[field]));
         }
       }
     }
@@ -201,7 +169,15 @@ describe('options.sections', () => {
       for (let i = 0; i < 20; i++) getDailyPanchang(day, PUNE, opts);
       return performance.now() - t0;
     };
-    const ratio = time([]) / time();
+    // Interleaved, minimum-of-N — see `ratioOf` in tests/perf/perf.test.ts for
+    // why. Vitest runs files in parallel workers, so timing one side to
+    // completion and then the other lets a scheduling stall land entirely on
+    // one of them; contention only ever inflates a measurement, so the smallest
+    // observed ratio is the closest to the uncontended truth. The naive version
+    // of this failed intermittently under a full-suite run while measuring
+    // ~0.29 in isolation, against a 0.75 bound.
+    let ratio = Infinity;
+    for (let i = 0; i < 5; i++) ratio = Math.min(ratio, time([]) / time());
     expect(ratio, `sections:[] took ${(ratio * 100).toFixed(0)}% of a full run`)
       .toBeLessThan(0.75);
   });
