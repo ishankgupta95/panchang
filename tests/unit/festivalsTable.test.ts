@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  FESTIVALS_META,
-  FESTIVALS_YEAR_RANGE,
+  getFestivalsYearRange,
   getFestivalsForYear,
   getFestivalsForDate,
 } from '../../src/calendar/festivalsTable';
@@ -11,34 +10,46 @@ import { getFestivalsInRange } from '../../src/calendar/yearly';
 const VARANASI = { latitude: 25.3176, longitude: 82.9739 };
 const IST = { timezone: 330 as const };
 
-// Earliest bundled year is always present regardless of when the table was
-// last regenerated (the generator uses a rolling 2-past / 5-future window).
-const SAMPLE_YEAR = FESTIVALS_YEAR_RANGE.start;
+// The library ships no table, so the suite builds the one it reads. A single
+// fixed year keeps this fast and makes the assertions stable — nothing here
+// depends on when the tests happen to run.
+const SAMPLE_YEAR = 2026;
 
-describe('static festivals table', () => {
+const varanasiTable = buildFestivalsTable({
+  location: VARANASI,
+  timezoneOffsetMinutes: 330,
+  startYear: SAMPLE_YEAR,
+  endYear: SAMPLE_YEAR,
+  languages: ['en', 'hi'],
+  referenceLocation: 'Varanasi',
+  note: 'test fixture',
+});
+
+describe('festivals table reader', () => {
   describe('metadata', () => {
-    it('declares Varanasi / IST / Purnimanta / Lahiri / all-regions / en+hi', () => {
-      expect(FESTIVALS_META.referenceLocation).toBe('Varanasi');
-      expect(FESTIVALS_META.timezoneOffsetMinutes).toBe(330);
-      expect(FESTIVALS_META.masaSystem).toBe('purnimanta');
-      expect(FESTIVALS_META.ayanamsa).toBe('lahiri');
-      expect(FESTIVALS_META.region).toBe('all');
-      expect([...FESTIVALS_META.languages]).toEqual(['en', 'hi']);
+    it('stamps what the table was built from', () => {
+      expect(varanasiTable._meta.referenceLocation).toBe('Varanasi');
+      expect(varanasiTable._meta.timezoneOffsetMinutes).toBe(330);
+      expect(varanasiTable._meta.masaSystem).toBe('purnimanta');
+      expect(varanasiTable._meta.ayanamsa).toBe('lahiri');
+      expect(varanasiTable._meta.region).toBe('all');
+      expect([...varanasiTable._meta.languages]).toEqual(['en', 'hi']);
     });
 
-    it('spans a rolling 2-past / 5-future window (8 years inclusive)', () => {
-      expect(FESTIVALS_YEAR_RANGE.end - FESTIVALS_YEAR_RANGE.start).toBe(7);
+    it('reports its own year range', () => {
+      expect(getFestivalsYearRange(varanasiTable))
+        .toEqual({ start: SAMPLE_YEAR, end: SAMPLE_YEAR });
     });
   });
 
   describe('getFestivalsForYear', () => {
-    it('returns null outside the bundled range', () => {
-      expect(getFestivalsForYear(FESTIVALS_YEAR_RANGE.start - 1)).toBeNull();
-      expect(getFestivalsForYear(FESTIVALS_YEAR_RANGE.end + 1)).toBeNull();
+    it('returns null outside the table range', () => {
+      expect(getFestivalsForYear(varanasiTable, SAMPLE_YEAR - 1)).toBeNull();
+      expect(getFestivalsForYear(varanasiTable, SAMPLE_YEAR + 1)).toBeNull();
     });
 
     it('returns a sorted, non-empty array for in-range years', () => {
-      const days = getFestivalsForYear(SAMPLE_YEAR);
+      const days = getFestivalsForYear(varanasiTable, SAMPLE_YEAR);
       expect(days).not.toBeNull();
       expect(days!.length).toBeGreaterThan(100);
       const dates = days!.map(d => d.date);
@@ -46,7 +57,7 @@ describe('static festivals table', () => {
     });
 
     it('contains Diwali with the Purnimanta-paksha description (en default)', () => {
-      const days = getFestivalsForYear(SAMPLE_YEAR)!;
+      const days = getFestivalsForYear(varanasiTable, SAMPLE_YEAR)!;
       const diwaliDay = days.find(d => d.festivals.some(f => f.name === 'Diwali'));
       expect(diwaliDay).toBeDefined();
       const diwali = diwaliDay!.festivals.find(f => f.name === 'Diwali')!;
@@ -55,7 +66,7 @@ describe('static festivals table', () => {
     });
 
     it('flattens to hi when requested', () => {
-      const days = getFestivalsForYear(SAMPLE_YEAR, 'hi')!;
+      const days = getFestivalsForYear(varanasiTable, SAMPLE_YEAR, 'hi')!;
       const diwaliDay = days.find(d => d.festivals.some(f => f.name === 'दिवाली'));
       expect(diwaliDay).toBeDefined();
       expect(diwaliDay!.festivals.some(f => f.name === 'दिवाली')).toBe(true);
@@ -63,37 +74,37 @@ describe('static festivals table', () => {
   });
 
   describe('getFestivalsForDate', () => {
-    // Resolve Diwali's actual date in the sample year so the assertion is
-    // stable across regenerations of the rolling window.
-    const diwaliDate = getFestivalsForYear(SAMPLE_YEAR)!
+    // Resolve Diwali's actual date from the table so the assertion does not
+    // hard-code a calendar date.
+    const diwaliDate = getFestivalsForYear(varanasiTable, SAMPLE_YEAR)!
       .find(d => d.festivals.some(f => f.name === 'Diwali'))!.date;
 
     it('accepts ISO YYYY-MM-DD strings', () => {
-      const fests = getFestivalsForDate(diwaliDate);
+      const fests = getFestivalsForDate(varanasiTable, diwaliDate);
       expect(fests.some(f => f.name === 'Diwali')).toBe(true);
     });
 
     it('returns hi names when lang=hi', () => {
-      const fests = getFestivalsForDate(diwaliDate, 'hi');
+      const fests = getFestivalsForDate(varanasiTable, diwaliDate, 'hi');
       expect(fests.some(f => f.name === 'दिवाली')).toBe(true);
     });
 
     it('accepts Date objects and converts via the table timezone (IST)', () => {
       // Noon IST on Diwali — unambiguous calendar date in IST.
       const noonIst = new Date(`${diwaliDate}T06:30:00Z`);
-      const fests = getFestivalsForDate(noonIst);
+      const fests = getFestivalsForDate(varanasiTable, noonIst);
       expect(fests.some(f => f.name === 'Diwali')).toBe(true);
     });
 
     it('returns [] for out-of-range dates', () => {
-      expect(getFestivalsForDate(`${FESTIVALS_YEAR_RANGE.start - 5}-01-01`)).toEqual([]);
-      expect(getFestivalsForDate(`${FESTIVALS_YEAR_RANGE.end + 5}-12-31`)).toEqual([]);
+      expect(getFestivalsForDate(varanasiTable, `${SAMPLE_YEAR - 5}-01-01`)).toEqual([]);
+      expect(getFestivalsForDate(varanasiTable, `${SAMPLE_YEAR + 5}-12-31`)).toEqual([]);
     });
   });
 
   describe('parity with live getFestivalsInRange for Varanasi', () => {
-    // Recompute the sample year live and diff against the bundled table.
-    // If this drifts, regenerate via `npm run festivals:gen`.
+    // A table is only worth reading if it says what the engine says. This is
+    // the assertion that keeps `buildFestivalsTable` honest.
     it('matches live computation (non-eclipse emissions)', () => {
       const live = getFestivalsInRange(
         new Date(Date.UTC(SAMPLE_YEAR, 0, 1)),
@@ -110,7 +121,7 @@ describe('static festivals table', () => {
       }
 
       const tableMap = new Map<string, Set<string>>(
-        getFestivalsForYear(SAMPLE_YEAR)!.map(
+        getFestivalsForYear(varanasiTable, SAMPLE_YEAR)!.map(
           day => [day.date, new Set(day.festivals.map(f => f.name))],
         ),
       );
@@ -124,7 +135,7 @@ describe('static festivals table', () => {
   });
 });
 
-describe('buildFestivalsTable (location-specific, runtime)', () => {
+describe('buildFestivalsTable (another location)', () => {
   const NYC = { latitude: 40.7128, longitude: -74.006 };
   const NYC_OFFSET = -300; // US Eastern (EST), UTC-5
 
@@ -147,8 +158,8 @@ describe('buildFestivalsTable (location-specific, runtime)', () => {
     expect([...built._meta.languages]).toEqual(['en']);
   });
 
-  it('produces a year readable by getFestivalsForYear via the source arg', () => {
-    const days = getFestivalsForYear(SAMPLE_YEAR, 'en', built);
+  it('produces a year readable by getFestivalsForYear', () => {
+    const days = getFestivalsForYear(built, SAMPLE_YEAR, 'en');
     expect(days).not.toBeNull();
     expect(days!.length).toBeGreaterThan(50);
     expect(days!.some(d => d.festivals.some(f => f.name === 'Diwali'))).toBe(true);
@@ -166,20 +177,20 @@ describe('buildFestivalsTable (location-specific, runtime)', () => {
       if (d.festival.type === 'eclipse') continue;
       liveDates.add(toKey(d.date, NYC_OFFSET));
     }
-    const tableDates = new Set(getFestivalsForYear(SAMPLE_YEAR, 'en', built)!.map(d => d.date));
+    const tableDates = new Set(getFestivalsForYear(built, SAMPLE_YEAR, 'en')!.map(d => d.date));
     expect([...tableDates].sort()).toEqual([...liveDates].sort());
   });
 
   it('getFestivalsForDate respects the source table timezone', () => {
-    const diwali = getFestivalsForYear(SAMPLE_YEAR, 'en', built)!
+    const diwali = getFestivalsForYear(built, SAMPLE_YEAR, 'en')!
       .find(d => d.festivals.some(f => f.name === 'Diwali'))!;
-    const fests = getFestivalsForDate(diwali.date, 'en', built);
+    const fests = getFestivalsForDate(built, diwali.date, 'en');
     expect(fests.some(f => f.name === 'Diwali')).toBe(true);
   });
 
   it('falls back gracefully when a missing locale is requested', () => {
     // built only has 'en'; asking for 'hi' should yield the en string.
-    const days = getFestivalsForYear(SAMPLE_YEAR, 'hi', built)!;
+    const days = getFestivalsForYear(built, SAMPLE_YEAR, 'hi')!;
     const diwaliDay = days.find(d => d.festivals.some(f => f.name === 'Diwali'));
     expect(diwaliDay).toBeDefined();
   });

@@ -1,25 +1,25 @@
-// Static Moon-phases table — pre-computed for IST (India). Ships as a separate
-// entry point (`panchang-ts/moon-phases`) so consumers that only need phase
-// dates don't pay the engine cost; this module imports the bundled JSON but
-// NOT the engine.
+// Engine-free reader for a Moon-phases table.
+//
+// Ships as a separate entry point (`panchang-ts/moon-phases`) that imports NO
+// astronomy code, so an app can read a table without pulling the engine into
+// its client bundle.
+//
+// **No table is bundled.** Phases are astronomical instants — the same
+// worldwide — but assigning each to a *calendar date* needs a timezone, and any
+// table shipped here would go stale. Build your own with
+// `buildMoonPhasesTable` (from the main `panchang-ts` entry, which does use the
+// engine), cache the JSON at your build time, and pass it to the accessors
+// below.
 //
 // Each entry carries text in one or more locales; choose via the optional
 // `lang` argument on the accessors (defaults to `'en'`).
-//
-// Phases are astronomical instants — the same worldwide — so the only thing
-// that is "India" about the bundled table is the timezone used to assign each
-// instant to a calendar date. For another timezone, build one with
-// `buildMoonPhasesTable` (from the main `panchang-ts` entry) and pass it as the
-// `source` argument below.
 
-import moonPhasesData from '../data/moonPhases.json' with { type: 'json' };
 import type {
   MoonPhasesFile,
   MoonPhasesTableLanguage,
   MoonPhaseTableDay,
   MoonPhaseTableEntry,
   MoonPhaseTableEntryRaw,
-  MoonPhaseTableMeta,
 } from './moonPhasesTableTypes';
 
 export type {
@@ -33,16 +33,17 @@ export type {
   MoonPhasesFile,
 } from './moonPhasesTableTypes';
 
-const bundled = moonPhasesData as unknown as MoonPhasesFile;
-
-/** Metadata describing what the bundled table was generated from. */
-export const MOON_PHASES_META: MoonPhaseTableMeta = bundled._meta;
-
-/** Inclusive year range covered by the bundled table. */
-export const MOON_PHASES_YEAR_RANGE = {
-  start: bundled._meta.startYear,
-  end: bundled._meta.endYear,
-} as const;
+/**
+ * Inclusive Gregorian year range a table covers.
+ *
+ * Read straight off `_meta`; provided so callers can range-check without
+ * reaching into the file shape.
+ */
+export function getMoonPhasesYearRange(
+  source: MoonPhasesFile,
+): { start: number; end: number } {
+  return { start: source._meta.startYear, end: source._meta.endYear };
+}
 
 function flatten(
   raw: MoonPhaseTableEntryRaw,
@@ -61,16 +62,15 @@ function flatten(
  *
  * Returns `null` if `year` is outside the table's range.
  *
- * @param year Gregorian year.
- * @param lang `'en'` (default) or `'hi'`.
- * @param source Table to read from. Defaults to the bundled IST table; pass a
- *               {@link buildMoonPhasesTable} result to read a table you built
- *               for another timezone.
+ * @param source Table to read from — a {@link buildMoonPhasesTable} result you
+ *               built and cached. Required: nothing is bundled.
+ * @param year   Gregorian year.
+ * @param lang   `'en'` (default) or `'hi'`.
  */
 export function getMoonPhasesForYear(
+  source: MoonPhasesFile,
   year: number,
   lang: MoonPhasesTableLanguage = 'en',
-  source: MoonPhasesFile = bundled,
 ): MoonPhaseTableDay[] | null {
   const days = source.years[String(year)];
   if (!days) return null;
@@ -86,16 +86,16 @@ export function getMoonPhasesForYear(
  * Returns an empty array if the date has no phase event or is outside the
  * table's range. The date is matched against the phase instant's local date.
  *
- * @param date Either an ISO `YYYY-MM-DD` string (interpreted in the table's
- *             reference timezone) or a `Date` (its local calendar date in the
- *             table's reference timezone is used).
- * @param lang `'en'` (default) or `'hi'`.
- * @param source Table to read from. Defaults to the bundled IST table.
+ * @param source Table to read from. Required: nothing is bundled.
+ * @param date   Either an ISO `YYYY-MM-DD` string (interpreted in the table's
+ *               reference timezone) or a `Date` (its local calendar date in the
+ *               table's reference timezone is used).
+ * @param lang   `'en'` (default) or `'hi'`.
  */
 export function getMoonPhasesForDate(
+  source: MoonPhasesFile,
   date: string | Date,
   lang: MoonPhasesTableLanguage = 'en',
-  source: MoonPhasesFile = bundled,
 ): MoonPhaseTableEntry[] {
   const key = typeof date === 'string'
     ? date

@@ -303,8 +303,8 @@ const hasDiwali = r.festivals.some(f => f.key === 'diwali');
 ```
 
 `key` is on engine results (`getDailyPanchang`, `getInstantPanchang`,
-`getFestivalsInRange`). Entries read out of the bundled `panchang-ts/festivals`
-table carry `name` / `type` / `description` only.
+`getFestivalsInRange`). Entries read back out of a `buildFestivalsTable` table
+carry `name` / `type` / `description` only.
 
 ### Regional scoping
 
@@ -330,79 +330,60 @@ getDailyPanchang(jan13, amritsar, { timezone: 330, region: 'punjab' })!
 legacy slugs `'tamil'`, `'bengal'`, `'north-india'` are still accepted and
 mapped internally.
 
-### Pre-computed table (bundled, India / IST)
+### Pre-computed table — build your own and cache it
 
-If you want festival *dates* without running the engine, import the static
-table at `panchang-ts/festivals`. It bundles a rolling **2-years-past /
-5-years-future** window pre-computed against Varanasi (IST). Within India
-these dates are essentially universal.
+If you want festival *dates* without running the engine in your app, compute a
+table once with `buildFestivalsTable`, cache the JSON, and read it back through
+the engine-free `panchang-ts/festivals` entry point.
+
+**The library ships no pre-computed table.** Festival dates are
+observer-dependent — canonical times (nishita / pradosha / chandrodaya …) shift
+with the timezone offset, so a table built for one place can be ±1 day wrong
+elsewhere — and any table baked into the package would also go stale. Building
+your own means it is correct for *your* users and covers whatever years you
+want.
 
 ```typescript
+import { buildFestivalsTable } from 'panchang-ts';            // uses the engine
 import {
   getFestivalsForYear,
   getFestivalsForDate,
-  FESTIVALS_META,
-  FESTIVALS_YEAR_RANGE,
-} from 'panchang-ts/festivals';
+  getFestivalsYearRange,
+} from 'panchang-ts/festivals';                                // engine-free
 
-const yr = FESTIVALS_YEAR_RANGE.start;          // e.g. { start: 2024, end: 2031 }
-getFestivalsForYear(yr)!.length;                // ~150 festival days
-const diwali = getFestivalsForYear(yr)!
-  .find(d => d.festivals.some(f => f.name === 'Diwali'))!.date;
-getFestivalsForDate(diwali);                    // [Narak Chaturdashi, Diwali]
-getFestivalsForDate(diwali, 'hi');              // [नरक चतुर्दशी, दिवाली]
-FESTIVALS_META.referenceLocation;               // "Varanasi"
-FESTIVALS_META.languages;                       // ["en", "hi"]
-```
-
-This entry point is engine-free — it ships only the JSON + accessors, so
-importing it won't pull the calculation engine into your bundle. Both `en`
-and `hi` are bundled (names *and* descriptions); pass the locale as the
-second argument. Eclipses are excluded here (visibility is location-dependent)
-— they ship as their own bundled table at `panchang-ts/eclipses` (see
-[Eclipses](#eclipses)).
-
-### Festivals outside India — build a location table and cache it
-
-The bundled table is **IST-only**. Elsewhere (Europe, North America, rest
-of world) festival dates can shift by ±1 day, because canonical times
-(nishita / pradosha / chandrodaya …) are observer-dependent — and the shift
-tracks the timezone offset, not the "region", so a single per-continent
-table would mis-date boundary-day festivals.
-
-For an offline app serving users worldwide, the right pattern is
-**compute-once-then-cache for the user's actual location**. Build a
-location-specific table with `buildFestivalsTable` (from the main entry —
-it uses the engine), persist the returned JSON, then read it back through
-the same accessors via their `source` argument:
-
-```typescript
-import { buildFestivalsTable } from 'panchang-ts';
-import { getFestivalsForYear, getFestivalsForDate } from 'panchang-ts/festivals';
-
-// On first use at the user's location (a few seconds on-device — run it in
-// the background / chunk by year), then cache `table` to disk/MMKV.
+// Build once — at your build time, or on first launch in the background.
 const table = buildFestivalsTable({
-  location: { latitude: 40.7128, longitude: -74.006 },
-  timezoneOffsetMinutes: -300,   // US Eastern (EST); 0 = UK, 330 = IST
+  location: { latitude: 25.3176, longitude: 82.9739 },   // Varanasi
+  timezoneOffsetMinutes: 330,    // IST; -300 = US Eastern, 0 = UK
   startYear: 2024,
   endYear: 2031,
-  languages: ['en'],             // omit hi to halve the size
+  languages: ['en', 'hi'],       // drop 'hi' to halve the size
+  referenceLocation: 'Varanasi',
 });
+// …persist `table` as JSON (disk / MMKV / your bundler's asset pipeline).
 
-// Later reads are instant lookups against the cached table:
-getFestivalsForYear(2026, 'en', table);
-getFestivalsForDate('2026-11-08', 'en', table);  // key is in the table's tz
+// Later reads are instant lookups — no engine, no ephemeris.
+getFestivalsYearRange(table);                    // { start: 2024, end: 2031 }
+getFestivalsForYear(table, 2026)!.length;        // ~150 festival days
+const diwali = getFestivalsForYear(table, 2026)!
+  .find(d => d.festivals.some(f => f.name === 'Diwali'))!.date;
+getFestivalsForDate(table, diwali);              // [Narak Chaturdashi, Diwali]
+getFestivalsForDate(table, diwali, 'hi');        // [नरक चतुर्दशी, दिवाली]
 ```
 
-`buildFestivalsTable` returns the same `FestivalsFile` shape as the bundled
-data, so a cached table and the bundled India table are interchangeable as
-the `source` argument. India-majority apps can lean on the bundled table for
-zero first-load latency and only compute-and-cache for non-IST users.
+`panchang-ts/festivals` imports no astronomy code, so a client bundle that only
+*reads* a table never pulls in the engine. Keep `buildFestivalsTable` on the
+build/server side (or behind a one-time on-device warm-up) and ship only the
+JSON.
 
-**Other notes:** Karva Chauth / Dhanteras / Diwali emit with Purnimanta
-paksha naming. To regenerate the bundled India table after a registry
-change, run `npm run festivals:gen` (rolling window, no constants to edit).
+Eclipses are excluded here — visibility is location-dependent, so they get their
+own table at `panchang-ts/eclipses` (see [Eclipses](#eclipses)).
+
+`npm run festivals:gen` is a worked example of the whole pattern; it writes a
+rolling 2-past / 5-future window to `./festivals.json` (or a path you pass).
+
+**Other notes:** Karva Chauth / Dhanteras / Diwali emit with Purnimanta paksha
+naming.
 
 ## Eclipses
 
@@ -422,65 +403,60 @@ import { getUpcomingSolarEclipse, getUpcomingLunarEclipse } from 'panchang-ts';
 const next = getUpcomingSolarEclipse(new Date(), loc, 365 /* days */);
 ```
 
-### Pre-computed table (bundled, India / IST)
+### Pre-computed table — build your own and cache it
 
-Like the festivals table, eclipse data ships as a static, engine-free entry
-at `panchang-ts/eclipses` — a rolling **2-years-past / 5-years-future** window
-pre-computed against Varanasi (IST). It lists every eclipse **visible from
-there during any phase** (so an eclipse already in progress at moon/sunrise or
-moon/sunset is included); the `visibleAtPeak` flag tells you whether greatest
-eclipse itself is observable. Within India visibility is essentially uniform.
+Same pattern as festivals: build a table with `buildEclipsesTable`, cache it,
+read it back through the engine-free `panchang-ts/eclipses` entry point.
+
+**No table is bundled.** Which eclipses are visible — and therefore which carry
+`sutak` — is location-dependent, so a table is only meaningful for the place it
+was built for.
 
 ```typescript
+import { buildEclipsesTable } from 'panchang-ts';            // uses the engine
 import {
   getEclipsesForYear,
   getEclipsesForDate,
-  ECLIPSES_META,
-  ECLIPSES_YEAR_RANGE,
-} from 'panchang-ts/eclipses';
+  getEclipsesYearRange,
+} from 'panchang-ts/eclipses';                                // engine-free
 
-const e = getEclipsesForYear(2025)![0].eclipses[0];
+const table = buildEclipsesTable({
+  location: { latitude: 25.3176, longitude: 82.9739 },   // Varanasi
+  timezoneOffsetMinutes: 330,
+  startYear: 2024,
+  endYear: 2031,
+  languages: ['en', 'hi'],
+  // visibleOnly: false → also include eclipses below the horizon (no sutak)
+});
+// …persist `table` as JSON, then:
+
+getEclipsesYearRange(table);            // { start: 2024, end: 2031 }
+const e = getEclipsesForYear(table, 2025)![0].eclipses[0];
 e.kind;                 // 'lunar'
 e.subtype;              // 'total'
 e.start; e.peak; e.end; // ISO UTC strings
 e.magnitude;            // 0..1 obscuration at peak
-e.visibleFromLocation;  // visible during any phase? (always true in bundled table)
+e.visibleFromLocation;  // visible during any phase?
 e.visibleAtPeak;        // is greatest eclipse itself above the horizon?
 e.sutak;                // { start, end } — see note below
-getEclipsesForDate('2025-09-07', 'hi');  // [पूर्ण चंद्र ग्रहण]
-ECLIPSES_META.referenceLocation;         // "Varanasi"
+getEclipsesForDate(table, '2025-09-07', 'hi');  // [पूर्ण चंद्र ग्रहण]
 ```
 
-Each entry carries `en` + `hi` text. Solar eclipses report the subtype seen
-**locally** (a globally-total eclipse may read `partial` from Varanasi). The
-`sutak` window is present only where it applies — all visible solar eclipses
-and visible **umbral** (partial/total) lunar eclipses; **penumbral** lunar
-eclipses carry no `sutak` and are not religiously observed (drik / pandit
-consensus). For full astronomical detail (e.g. eclipses *not* visible in
-India), use `getUpcomingEclipses` / `getEclipsesInRange` from the main entry.
+By default a table lists every eclipse **visible from the location during any
+phase** (so one already in progress at moon/sunrise or moon/sunset is included);
+`visibleAtPeak` tells you whether greatest eclipse itself is observable.
 
-**Outside India:** which eclipses are visible — and thus carry `sutak` —
-differs by location. Build and cache a location-specific table with
-`buildEclipsesTable` (main entry, uses the engine), then read it back via the
-same accessors' `source` argument — the same compute-once-then-cache pattern
-as festivals:
+Solar eclipses report the subtype seen **locally** (a globally-total eclipse may
+read `partial` from a given place). The `sutak` window is present only where it
+applies — all visible solar eclipses and visible **umbral** (partial/total)
+lunar eclipses; **penumbral** lunar eclipses carry no `sutak` and are not
+religiously observed (drik / pandit consensus).
 
-```typescript
-import { buildEclipsesTable } from 'panchang-ts';
-import { getEclipsesForYear } from 'panchang-ts/eclipses';
+For one-off astronomical detail without building a table, use
+`getUpcomingEclipses` / `getEclipsesInRange` from the main entry.
 
-const table = buildEclipsesTable({
-  location: { latitude: 51.5074, longitude: -0.1278 },
-  timezoneOffsetMinutes: 0,        // UK / GMT
-  startYear: 2024,
-  endYear: 2031,
-  // visibleOnly: false → also include eclipses below the horizon (no sutak)
-});
-getEclipsesForYear(2025, 'en', table);
-```
-
-To regenerate the bundled India table, run `npm run eclipses:gen` (rolling
-window, no constants to edit).
+`npm run eclipses:gen` is a worked example; it writes a rolling 2-past /
+5-future window to `./eclipses.json` (or a path you pass).
 
 ## Moon Phases
 
@@ -495,43 +471,39 @@ const phases = getMoonPhasesInRange(new Date('2026-01-01'), new Date('2026-12-31
 phases.forEach(p => console.log(p.phase, p.time.toISOString()));  // ~49 / year
 ```
 
-### Pre-computed table (bundled, India / IST)
+### Pre-computed table — build your own and cache it
 
-Same engine-free pattern as festivals and eclipses, at `panchang-ts/moon-phases`
-— a rolling **2-years-past / 5-years-future** window. Phases are global
-instants; the bundled table maps each onto its **IST** calendar date (so a new
-moon at 19:52 UTC on Jan 18 is listed under Jan 19 in India).
+Same pattern again, at `panchang-ts/moon-phases`. Phases are **global instants**,
+so `buildMoonPhasesTable` takes only a `timezoneOffsetMinutes` (no coordinates)
+— the timezone just decides which calendar date each instant lands on (a new
+moon at 19:52 UTC on Jan 18 is listed under Jan 19 in IST).
 
 ```typescript
+import { buildMoonPhasesTable } from 'panchang-ts';          // uses the engine
 import {
   getMoonPhasesForYear,
   getMoonPhasesForDate,
-  MOON_PHASES_META,
-  MOON_PHASES_YEAR_RANGE,
-} from 'panchang-ts/moon-phases';
+  getMoonPhasesYearRange,
+} from 'panchang-ts/moon-phases';                             // engine-free
 
-getMoonPhasesForYear(2026)!.length;            // ~49 phase days
-getMoonPhasesForDate('2026-01-03');            // [{ phase: 'full', name: 'Full Moon', ... }]
-getMoonPhasesForDate('2026-01-03', 'hi');      // [{ phase: 'full', name: 'पूर्णिमा', ... }]
+const table = buildMoonPhasesTable({
+  timezoneOffsetMinutes: 330,    // IST; -300 = US Eastern
+  startYear: 2024,
+  endYear: 2031,
+  languages: ['en', 'hi'],
+});
+// …persist `table` as JSON, then:
+
+getMoonPhasesYearRange(table);                        // { start: 2024, end: 2031 }
+getMoonPhasesForYear(table, 2026)!.length;            // ~49 phase days
+getMoonPhasesForDate(table, '2026-01-03');            // [{ phase: 'full', name: 'Full Moon', … }]
+getMoonPhasesForDate(table, '2026-01-03', 'hi');      // [{ phase: 'full', name: 'पूर्णिमा', … }]
 ```
 
 Each entry carries `phase`, the phase `time` (ISO UTC), and `en` + `hi` text.
-For another timezone, build and cache a table with `buildMoonPhasesTable` (main
-entry) and pass it as the accessors' `source` argument — it takes only a
-`timezoneOffsetMinutes` (no coordinates, since phases are location-independent):
 
-```typescript
-import { buildMoonPhasesTable } from 'panchang-ts';
-import { getMoonPhasesForYear } from 'panchang-ts/moon-phases';
-
-const table = buildMoonPhasesTable({
-  timezoneOffsetMinutes: -300,   // US Eastern
-  startYear: 2024, endYear: 2031,
-});
-getMoonPhasesForYear(2026, 'en', table);
-```
-
-Regenerate the bundled India table with `npm run moon-phases:gen`.
+`npm run moon-phases:gen` is a worked example; it writes a rolling 2-past /
+5-future window to `./moonPhases.json` (or a path you pass).
 
 ## Planetary Positions
 
@@ -1184,8 +1156,9 @@ getKaliYugaYear, getHinduNewYear, computeSamvat
 getEkadashiDatesForYear, getSankrantisForYear, getFestivalsInRange
 getUpcomingEclipses, getEclipsesInRange
 
-// Static data tables (engine-using runtime builders; bundled JSON at
-// panchang-ts/festivals, panchang-ts/eclipses, panchang-ts/moon-phases)
+// Static data tables — build one, cache the JSON, then read it back through
+// the engine-free panchang-ts/festivals · /eclipses · /moon-phases entries.
+// No table ships with the package.
 buildFestivalsTable, buildEclipsesTable, buildMoonPhasesTable
 
 // Errors

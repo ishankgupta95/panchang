@@ -1,17 +1,18 @@
 /**
  * Moon-phases JSON Generator
  *
- * Thin CLI wrapper around `buildMoonPhasesTable` that produces the bundled
- * India (IST) table at `src/data/moonPhases.json`. The window is dynamic —
- * 2 years past through 5 years future relative to the run date — matching the
- * festivals / eclipses generators, so all three tables cover the same span.
+ * Thin CLI wrapper around `buildMoonPhasesTable`, kept as a worked example of
+ * the compute-and-cache pattern. The library ships **no** pre-computed table:
+ * generate your own, commit it to *your* project, and read it back with
+ * `panchang-ts/moon-phases`.
  *
- * Lunar phases are astronomical instants (the same worldwide); the table is
- * stamped IST only so each instant maps to an Indian calendar date. For another
- * timezone, build a table at runtime with `buildMoonPhasesTable`.
+ * The window is dynamic — 2 years past through 5 years future relative to the
+ * run date. Lunar phases are astronomical instants (the same worldwide); the
+ * timezone below only decides which calendar date each instant lands on.
  *
  * Usage:
- *   npm run moon-phases:gen   # builds the lib, then runs this
+ *   npm run moon-phases:gen                 # -> ./moonPhases.json
+ *   npm run moon-phases:gen -- path/out.json
  */
 
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -57,7 +58,9 @@ function main(): void {
 
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
-  const outPath = resolve(__dirname, '..', 'src', 'data', 'moonPhases.json');
+  // Output path: first CLI arg, else `<name>` in the current directory.
+  // Nothing is written into the package — consumers own their table.
+  const outPath = resolve(process.argv[2] ?? 'moonPhases.json');
   mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(outPath, JSON.stringify(file, null, 2) + '\n', 'utf8');
 
