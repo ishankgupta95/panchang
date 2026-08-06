@@ -5,7 +5,7 @@
 Pure TypeScript Hindu Panchang (almanac), Jyotish, and Birth Chart calculations.
 Zero native dependencies. Works offline in React Native (Hermes), Node.js, and browsers.
 
-**Fast** (~0.2 ms trimmed, ~1.15 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,235 tests across 104 files**
+**Fast** (~0.2 ms trimmed, ~1.1 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,235 tests across 104 files**
 
 ---
 
@@ -63,6 +63,66 @@ set on a given calendar day, which is normal.
 at the given instant — it skips canonical-time refinements (madhyahna /
 pradosha / nishita / chandrodaya), transit-based Sankranti, and Smarta/Vaishnava
 Ekadashi split. For reliable festival dating, use `getDailyPanchang`.
+
+---
+
+## Upgrading from 4.x
+
+Two changes move numbers that 4.x produced, and one option is gone.
+
+### Lahiri ayanamsa corrected by +38″
+
+The library's Lahiri constant sat 38 arcseconds behind DrikPanchang's — it used
+`23.853211°` at J2000 (the widely-repeated 23° 51′ 11.6″ figure) where Drik
+computes `23.863801°`. The replacement was solved from Drik's own published
+values across 1950–2050, which agree on it to within 0.01″ — a century-wide
+baseline, so the precession polynomial is pinned too, not just the epoch
+constant. Every sidereal output moves with it:
+
+| Output | Effect |
+|---|---|
+| Nakshatra end-times | ~69 s later than 4.x (carries the ayanamsa once) |
+| Yoga end-times | ~129 s later than 4.x (carries it twice) |
+| Planetary longitudes, rashi, pada, lagna, divisionals, dashas | shifted +0.0106° |
+| Tithi / karana end-times | unchanged — Moon − Sun cancels the ayanamsa |
+| Raman / KP / True Chitra / Thirukanitham | moved by the same +38″; their offsets from Lahiri are preserved |
+
+Worst-case end-time drift vs Drik dropped from 131 s to 60 s, and the sign split
+by ayanamsa exposure — nakshatra and yoga early, tithi and karana late — is gone.
+If you have snapshot tests or cached charts from 4.x, expect them to need
+re-pinning.
+
+### `precision` removed
+
+`precision: 'standard' | 'high'` and the `Precision` type no longer exist.
+Element transitions are now solved by secant iteration, which converges to the
+root rather than stopping at a fixed tolerance, so there is nothing left for the
+option to select — and the tighter setting no longer buys anything. Removing it
+from your options object is the whole migration; leaving it in is a type error,
+not a silent no-op.
+
+### Sunrise is single-valued per location-day
+
+Solar rise/set is computed from a canonical anchor and cached per location-day,
+so it no longer depends on which instant the caller happened to start searching
+from. Values shift by ≤108 ms vs 4.x, and two calls for the same day now agree
+exactly instead of differing by up to 109 ms. Windows derived proportionally
+from the day length — Varjyam, Bhadra, the slot systems — move by a little more
+than that. This removes an inconsistency rather than introducing an
+approximation: 4.x returned a different sunrise depending on which caller asked.
+
+### Additive, but worth knowing
+
+- `festivals[].key` — stable, language-independent festival id. Match on this,
+  never on `name`.
+- `bhadra.locationName` — localized display name; `bhadra.location` stays the
+  machine-readable key.
+- `MuhurtaScore.factors` — structured scoring inputs alongside English `reasons`.
+- `BirthChart.byPlanet` — the nine placements keyed by graha.
+- `eclipse.description` is now localized. Under `language: 'hi'` it was
+  previously emitted in English, including inside `festivals[].description`.
+- `sections` on `getDailyPanchang` — opt into a narrower, cheaper call. See
+  [Performance](#performance).
 
 ---
 
@@ -241,6 +301,10 @@ r.festivals.forEach(f => {
 // `name` is localized, so match on `key` — never on `name`.
 const hasDiwali = r.festivals.some(f => f.key === 'diwali');
 ```
+
+`key` is on engine results (`getDailyPanchang`, `getInstantPanchang`,
+`getFestivalsInRange`). Entries read out of the bundled `panchang-ts/festivals`
+table carry `name` / `type` / `description` only.
 
 ### Regional scoping
 
@@ -815,7 +879,12 @@ to `computePrashnaChart` for traditional Vedic Prashna.
 import { scoreMuhurta, findAuspiciousDates, vivahRule } from 'panchang-ts';
 
 const r = scoreMuhurta(new Date('2026-05-12'), DELHI, vivahRule, { timezone: 330 });
-// → { date, score: 0..100, passes: boolean, reasons: string[] }
+// → { date, score: 0..100, passes: boolean,
+//     reasons: string[],           // diagnostic English
+//     factors: MuhurtaFactor[] }   // { code, axis, index?, delta } — stable
+
+r.factors.filter(f => f.delta < 0);              // what cost the day points
+r.factors.some(f => f.axis === 'exclusion');     // hard-excluded?
 
 const dates = findAuspiciousDates(
   vivahRule,
@@ -844,6 +913,14 @@ Scoring: starts at 50; +10 per matching auspicious axis (tithi / nakshatra /
 vara / yoga), -15 per inauspicious axis, hard exclusions zero the score.
 Special yogas (Amrit Siddhi, Sarvartha Siddhi, Ravi/Guru Pushya) add +5;
 Jwalamukhi subtracts -10. Clamped 0..100; `passes: true` when score ≥ 50.
+
+Every scoring input appears in both `reasons` (English prose, diagnostic, not a
+stable format) and `factors` (structured, with a stable `code`). Localize and
+filter on `factors`.
+
+`scoreMuhurta` computes only the sections it actually scores against, so it is
+cheaper than a full `getDailyPanchang`. `findAuspiciousDates` does not narrow —
+each returned day carries its complete `panchang` for callers to drill into.
 
 ## Calendar Conversion
 
@@ -952,7 +1029,8 @@ interface VaraInfo {
 }
 
 interface FestivalInfo {
-  name: string;
+  key: string;          // stable, language-independent id — match on this
+  name: string;         // localized — display only
   type: 'major' | 'minor' | 'ekadashi' | 'smarta_ekadashi' | 'vaishnava_ekadashi'
       | 'pradosha' | 'sankranti' | 'eclipse';
   description?: string;
@@ -992,6 +1070,7 @@ interface EclipseInfo {
 interface BhadraInfo {
   start: Date; end: Date;
   location: 'earth' | 'heaven' | 'paatal';   // 'earth' = malefic for all work
+  locationName: string;                      // localized display name
   isActive: boolean;
 }
 ```
@@ -1128,8 +1207,9 @@ Two-pass rendering pattern for smooth UI:
 import { getDailyPanchang } from 'panchang-ts';
 import { InteractionManager } from 'react-native';
 
-// Pass 1 — cheapest useful result: elements, slots, muhurtas (~0.2 ms Node).
-// Dropping the optional sections matters more here than `computeEndTimes`.
+// Pass 1 — cheapest useful result: elements, slots, muhurtas (~0.18 ms Node).
+// `sections` is the lever; `computeEndTimes: false` only helps once it is
+// narrowed, and slightly hurts on a full-section call.
 const fast = getDailyPanchang(date, location, {
   timezone: 330,
   sections: [],
@@ -1137,7 +1217,7 @@ const fast = getDailyPanchang(date, location, {
 });
 setState(fast);
 
-// Pass 2 — background, everything (~1.5 ms Node)
+// Pass 2 — background, everything (~1.1 ms Node)
 InteractionManager.runAfterInteractions(() => {
   setState(getDailyPanchang(date, location, { timezone: 330 }));
 });
@@ -1147,7 +1227,7 @@ InteractionManager.runAfterInteractions(() => {
 
 ## Accuracy
 
-8,233 tests across 104 files, including fixtures cross-verified against reference
+8,235 tests across 104 files, including fixtures cross-verified against reference
 panchang calculations spanning 2025–2026 across 10 Indian cities plus New York,
 London, Sydney, Dubai, Singapore (diaspora fixtures cover DST on
 `America/New_York`).
@@ -1157,8 +1237,8 @@ London, Sydney, Dubai, Singapore (diaspora fixtures cover DST on
 | Sunrise / Sunset | ≤29 s observed vs reference minute-midpoint (±45 s tolerance) |
 | Moonrise / Moonset | Meeus apparent-upper-limb (refraction + parallax); ~3–5 min vs simpler-horizon authorities is expected |
 | Tithi / Nakshatra / Yoga / Karana names | Exact match vs reference |
-| Tithi / Nakshatra / Yoga / Karana end-times | ±3 min tolerance, max 2.01 min observed |
-| Ayanamsa | ±0.005° vs Swiss Ephemeris |
+| Tithi / Nakshatra / Yoga / Karana end-times | ≤60 s vs Drik across all 20 audited comparisons (tithi 46 s, karana 51 s, nakshatra 24 s, yoga 60 s) |
+| Ayanamsa (Lahiri) | Reproduces DrikPanchang's published value to ~0.01″ across 1950–2050 |
 | Planetary positions (Sun–Saturn) | ±0.02° sidereal |
 | Planetary positions (Rahu/Ketu, mean node) | ≤0.5° typical; ±2° tolerance |
 | Planetary positions (Rahu/Ketu, true node) | ≤0.6° typical (Meeus periodic correction) |
@@ -1166,6 +1246,18 @@ London, Sydney, Dubai, Singapore (diaspora fixtures cover DST on
 | D1 / D9 house placement | Exact match vs reference for 9-graha placement |
 | Ashtakoot total | ±1 point per pair across 30+ matched pairs |
 | Sade Sati arc start/end | ±1–2 days vs authoritative ephemerides |
+
+**End-time drift.** Drik publishes end times to the minute, so each comparison
+above carries ±30 s of quantization — that, not the search, dominates what is
+left. Two independent checks bound the library's own contribution: the reported
+value matches an exact bisection of the same index function to ≤24 ms, and Sun
+and Moon agree with Drik's sidereal positions to well under an arcsecond
+(`tests/validation/element-endtime-audit.test.ts` carries the working).
+
+**Ayanamsa.** Only Lahiri is verified against an external reference — Drik
+publishes no value for the other four. Raman, KP, True Chitrapaksha and
+Thirukanitham are held at their historical offsets from Lahiri, so correcting
+Lahiri carried them along rather than silently changing how each relates to it.
 
 **Detection notes.** **Aadal / Vidaal** follow the classical Moon-from-Sun
 nakshatra-distance rule (AstroShastra, HoraSarvam, Ernst Wilhelm), NOT the
@@ -1193,42 +1285,71 @@ Jayanti — matches the canonical date across 2025 and 2026 fixtures.
 
 ## Performance
 
-Measured with `npm run bench` on an Apple M-series laptop under Node 24, Pune
-2025-07-04. Treat them as relative guidance, not a spec — they move with
-hardware and date.
+Measured at Pune on an Apple M-series laptop under Node 24. Treat them as
+relative guidance, not a spec — they move with hardware, latitude and date.
 
-| `getDailyPanchang` call | Node.js |
-|---|---|
-| Default (all sections + end-times) | ~1.15 ms |
-| `computeEndTimes: false` | ~0.85 ms |
-| `sections: []` | ~0.48 ms |
-| `sections: []` + `computeEndTimes: false` | ~0.23 ms |
-| `getInstantPanchang` | ~0.36 ms |
+Two columns, because they differ and both are real. **Distinct days** is the
+calendar-scan cost: every call misses the solar rise/set cache. **Same day
+repeated** is what a UI that re-renders one date sees, and what `npm run bench`
+reports.
 
-Cost is dominated by ephemeris evaluations, so the levers that matter are the
-ones that avoid them:
+| `getDailyPanchang` call | Distinct days | Same day repeated |
+|---|---|---|
+| Default (all sections + end-times) | ~1.10 ms | ~0.53 ms |
+| `computeEndTimes: false` | ~1.11 ms | ~0.62 ms |
+| Without `'festivals'` | ~0.80 ms | — |
+| `sections: ['festivals', 'eclipse']` | ~0.66 ms | — |
+| `sections: []` | ~0.31 ms | — |
+| `sections: []` + `computeEndTimes: false` | ~0.18 ms | ~0.14 ms |
+| `getInstantPanchang` | ~0.25 ms | ~0.21 ms |
+
+Cost is dominated by ephemeris evaluations, so the lever that matters is the one
+that avoids them:
 
 - **`sections`** — skip the optional ephemeris-backed blocks you don't need.
-  `'festivals'` is by far the most expensive (it needs the previous day's
-  sunrise/sunset and the next day's solar transit). See
+  `'festivals'` is the expensive one: dropping it takes a default call from
+  ~1.10 ms to ~0.80 ms, and dropping everything takes it to ~0.31 ms. See
   [Narrowing the work](#narrowing-the-work).
-- **`computeEndTimes: false`** — skip the transition searches when you only
-  need the names in force at sunrise.
+- **`computeEndTimes: false`** — **not** a speed lever on its own any more.
+  It skips the transition searches, but it also switches the longitude cache
+  from Chebyshev interpolation to exact per-instant evaluation, and on a
+  full-section call the blocks it stops building were already paying for
+  themselves. It is a win only once the sections are narrowed (~0.31 → ~0.18 ms
+  on `sections: []`). Use it to drop `endTime` fields you don't want, not to go
+  faster.
+
+Repeated calls for the same location-day are cheaper because solar rise/set
+events are cached process-wide, keyed on `(direction, lat, lon, elevation, UTC
+day)` and bounded at 20,000 entries. The cache makes sunrise single-valued as
+well as fast — see [Upgrading from 4.x](#sunrise-is-single-valued-per-location-day).
 
 Range helpers apply the same narrowing internally:
 `getEkadashiDatesForYear` reads only the tithi at sunrise and so runs with
-every optional section off (~40 ms for a full year);
-`getFestivalsInRange` keeps only `'festivals'` and `'eclipse'` (~430 ms/year);
+every optional section off (~34 ms for a full year);
+`getFestivalsInRange` keeps only `'festivals'` and `'eclipse'` (~250 ms/year);
 `getSankrantisForYear` needs only the Sun, so it scans one solar longitude per
 day and bisects the 12 transits rather than building a panchang each day
 (~3 ms/year).
 
 Birth-chart helpers are independent — calling them does not add work to
 `getDailyPanchang`. Within them, `computeShadbala` and `computeBhavaBala`
-build the natal positions once and derive all seven charts from them (~0.2 ms
+build the natal positions once and derive all seven charts from them (~0.18 ms
 each).
 
 ### Narrowing the work
+
+`PanchangSection` lists the four optional blocks. Everything else a daily
+panchang returns — the five elements, slot systems, muhurtas, inauspicious
+periods, masa / samvat / rashi — is arithmetic over the sunrise / sunset /
+next-sunrise triplet and is always computed, because skipping it would save
+nothing.
+
+| Section | Covers | Fields when omitted |
+|---|---|---|
+| `'festivals'` | Festival detection — needs the prior day's sunrise/sunset, the next day's transit, per-kala tithi anchors, and the prior day's Chandra Masa | `festivals: []` — but an eclipse entry is still prepended when `'eclipse'` is on |
+| `'eclipse'` | Eclipse overlapping the Hindu day | `eclipse: null` |
+| `'moonTimes'` | `moonrise` / `moonset` | `null` |
+| `'lunarWindows'` | Bhadra, Varjyam, Panchaka-Rahita — each binary-searches lunar longitude across the day | `null` / `[]` |
 
 ```typescript
 // Everything (default).
