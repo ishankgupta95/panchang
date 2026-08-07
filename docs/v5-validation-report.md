@@ -2034,7 +2034,9 @@ to check it against.
 | `getSankrantisForYear`, ms/yr | 153.7 → **3.29** | −97.9% (46.7×) |
 | `computeShadbala` / `computeBhavaBala` | 0.719 / 0.731 → **0.333 / 0.340** | −54% |
 | `computeSunrise`, cold | 0.0382 → **0.0389** | **+1.8%** — the notes claimed −25.2% |
+| `getSunset`, cold | 0.0353 → **0.0384** | **+8.8%** — the notes did not carry this row |
 | `getMoonrise`, cold | 0.0784 → **0.0827** | **+5.5%** — the notes claimed −39.0% |
+| `getMoonset`, cold | 0.0775 → **0.0826** | **+6.6%** — the notes did not carry this row |
 | `computeRashiChart` / `computeNavamsa` | 0.0975 / 0.0944 → **0.318 / 0.314** | **+226% / +233%** |
 
 | vs the **pre-Phase-36 tree** — what the exit criteria were written against | | |
@@ -2047,15 +2049,26 @@ to check it against.
 | `computeShadbala` | 0.1120 → **0.3330** | **+197%** |
 | `computeRashiChart` | 0.0968 → **0.3183** | **+229%** |
 
-The two inverted rows were confirmed twice — a standalone median-of-7 run
+The inverted rows were confirmed twice — a standalone median-of-7 run
 (moonrise 0.0769 / 0.0767 / 0.0821, sunrise 0.0380 / 0.0610 / 0.0389 across
-published / HEAD / 5.0.0) and the full repeat sweep above. The −25% and −39%
+published / HEAD / 5.0.0) and the full repeat sweep above — and a third time by
+an independent re-run two hours later (sunrise 0.0387 / 0.0615 / 0.0396,
+moonrise 0.0801 / 0.0800 / 0.0840, sunset 0.0358 / 0.0379 / 0.0396, moonset
+0.0793 / 0.0792 / 0.0839). The −25% and −39%
 the notes claimed are real
 improvements **over the HEAD tree**, where 36.1's canonical rise/set cache had
 made a standalone cold primitive 60% more expensive; against what users have,
-a single cold rise/set call is unchanged to within a few percent. The win that
+a single cold rise/set call is unchanged to ~9% worse. The win that
 cache buys is on the *repeated* day, and a cold primitive benchmark is precisely
 the shape that cannot see it.
+
+**It is all four primitives, not two.** The first correction pass fixed the
+direction of `computeSunrise` and `getMoonrise` because those were the two rows
+the old notes named, and did not check the other two — which are inverted as
+well, and `getSunset` by more than either of the rows that were corrected. A
+selective "we got slower" list is the same defect one level down: the reader
+who checks the primitive that is *not* in the table is the one who finds the
+number nobody stated.
 
 Rows excluded rather than quietly compared: every `sections: []` configuration
 (the option does not exist in 4.3.1), and `computeBhava` (it computes the full

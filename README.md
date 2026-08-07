@@ -5,7 +5,7 @@
 Pure TypeScript Hindu Panchang (almanac), Jyotish, and Birth Chart calculations.
 Zero native dependencies. Works offline in React Native (Hermes), Node.js, and browsers.
 
-**Fast** (~0.2 ms trimmed, ~1.1 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,235 tests across 104 files**
+**Fast** (~0.25 ms trimmed, ~0.41 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,368 tests across 121 files**
 
 ---
 
@@ -283,7 +283,9 @@ timezone, so there is no zone to render a wall clock in.
 
 **Cost:** rendering the strings adds ~0.04 ms per daily panchang — invisible on
 a cold call (0.7885 → 0.7924 ms) and ~20% of a fully cached warm one
-(0.176 → 0.215 ms), which is still 66% below 4.x's 0.629 ms.
+(0.176 → 0.215 ms). Both pairs are the tree measured against itself when the
+change landed, mid-Phase-36; the release finally warms to **0.17 ms**, against
+published 4.3.1's **6.20 ms**.
 
 ### `result.timezone` is now an object
 
@@ -1524,7 +1526,8 @@ Two-pass rendering pattern for smooth UI:
 import { getDailyPanchang } from 'panchang-ts';
 import { InteractionManager } from 'react-native';
 
-// Pass 1 — cheapest useful result: elements, slots, muhurtas (~0.18 ms Node).
+// Pass 1 — cheapest useful result: elements, slots, muhurtas
+// (~0.25 ms Node on a new date, ~0.14 ms on one already seen).
 // `sections` is the lever; `computeEndTimes: false` only helps once it is
 // narrowed, and slightly hurts on a full-section call.
 const fast = getDailyPanchang(date, location, {
@@ -1534,7 +1537,7 @@ const fast = getDailyPanchang(date, location, {
 });
 setState(fast);
 
-// Pass 2 — background, everything (~1.1 ms Node)
+// Pass 2 — background, everything (~0.41 ms Node)
 InteractionManager.runAfterInteractions(() => {
   setState(getDailyPanchang(date, location, { timezone: 330 }));
 });
@@ -1544,7 +1547,7 @@ InteractionManager.runAfterInteractions(() => {
 
 ## Accuracy
 
-8,235 tests across 104 files, including fixtures cross-verified against reference
+8,368 tests across 121 files, including fixtures cross-verified against reference
 panchang calculations spanning 2025–2026 across 10 Indian cities plus New York,
 London, Sydney, Dubai, Singapore (diaspora fixtures cover DST on
 `America/New_York`).
@@ -1653,9 +1656,10 @@ Repeated calls for the same location-day are cheaper because solar rise/set
 events are cached process-wide, keyed on `(direction, lat, lon, elevation, UTC
 day)` and bounded at 20,000 entries. The cache makes sunrise single-valued as
 well as fast — see [Upgrading from 4.x](#sunrise-is-single-valued-per-location-day).
-It does not make a *single* cold `getSunrise` or `getMoonrise` cheaper — those
-are within a few percent of 4.3.1 — what it removes is the second and every
-later call for the same day.
+It does not make a *single* cold rise/set call cheaper — against 4.3.1
+`getSunrise` is +1.8%, `getSunset` +8.8%, `getMoonrise` +5.5% and `getMoonset`
++6.6%, i.e. unchanged to slightly worse — what it removes is the second and
+every later call for the same day.
 
 Range helpers apply the same narrowing internally:
 `computeEkadashiDatesForYear` reads only the tithi at sunrise and so runs with

@@ -172,7 +172,9 @@ says the harness measured the library rather than the machine.
 | `getSankrantisForYear`, ms/yr | 153.7 | **3.29** | −97.9% (46.7×) |
 | `computeShadbala` / `computeBhavaBala` | 0.719 / 0.731 | **0.333 / 0.340** | −54% |
 | `computeSunrise`, cold | 0.0382 | **0.0389** | +1.8% |
+| `getSunset`, cold | 0.0353 | **0.0384** | +8.8% |
 | `getMoonrise`, cold | 0.0784 | **0.0827** | +5.5% |
+| `getMoonset`, cold | 0.0775 | **0.0826** | +6.6% |
 | **`computeRashiChart` / `computeNavamsa`** | 0.0975 / 0.0944 | **0.318 / 0.314** | **+226% / +233%** |
 
 **Charts are 3.3× slower, and that is a trade, not a regression.** It is
@@ -183,13 +185,14 @@ carrying a 6.5-arcsecond Mercury. `computeShadbala` and `computeBhavaBala` still
 come out ahead because they build the natal positions once and derive all seven
 charts from them.
 
-**A single cold `getSunrise` / `getMoonrise` is unchanged to within a few
-percent**, and that is the honest statement — earlier drafts of these notes
-claimed −25% and −39%. The canonical per-location-day rise/set cache does not
-make one cold call cheaper; what it buys is that the second call for the same
-day is free, and that an event has one timestamp no matter who asks. The gain
-shows up in `getDailyPanchang` and in the range helpers, which is where those
-calls actually happen.
+**A single cold rise/set primitive is between unchanged and ~9% slower**, and
+that is the honest statement — earlier drafts of these notes claimed −25% and
+−39% for the two rise calls, and did not mention the two set calls at all. All
+four are in the table above. The canonical per-location-day rise/set cache does
+not make one cold call cheaper; what it buys is that the second call for the
+same day is free, and that an event has one timestamp no matter who asks. The
+gain shows up in `getDailyPanchang` and in the range helpers, which is where
+those calls actually happen.
 
 *Measured a second way, for anyone comparing against the development history
 rather than against npm: the tree this work started from — version-labelled
@@ -334,8 +337,8 @@ Against what users have: −93.2%.
   Replaced by nested enumeration.
 
 **8,368 tests** across 121 files, green over five consecutive runs. Bundle
-584.1 KB CJS against 4.3.1's 395.5 KB (gzip 145.9 against 95.9 KB) — but the
-**installed footprint falls 4.86 MB → 1.66 MB**, because the coefficient tables
+584.0 KB CJS against 4.3.1's 395.5 KB (gzip 146.1 against 96.0 KB) — but the
+**installed footprint falls 4.87 MB → 1.74 MB**, because the coefficient tables
 this package now carries are a fraction of the dependency they replace.
 **Zero invariant-test changes** across the release, over three separate 241 MB
 before/after comparisons; three numeric fixture families re-pinned, each with

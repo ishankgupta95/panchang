@@ -2011,14 +2011,23 @@ expansive ones.
 
 | Subpath | Accessors | Builder | Generator | Bundled JSON |
 |---------|-----------|---------|-----------|--------------|
-| `panchang-ts/festivals` | `getFestivalsForYear` / `…ForDate` | `buildFestivalsTable` | `festivals:gen` | `src/data/festivals.json` (v4.2.0) |
-| `panchang-ts/eclipses` | `getEclipsesForYear` / `…ForDate` | `buildEclipsesTable` | `eclipses:gen` | `src/data/eclipses.json` |
-| `panchang-ts/moon-phases` | `getMoonPhasesForYear` / `…ForDate` | `buildMoonPhasesTable` | `moon-phases:gen` | `src/data/moonPhases.json` |
+| `panchang-ts/festivals` | `readFestivalsForYear` / `…ForDate` | `buildFestivalsTable` | `festivals:gen` | **none — removed in v5** |
+| `panchang-ts/eclipses` | `readEclipsesForYear` / `…ForDate` | `buildEclipsesTable` | `eclipses:gen` | **none — removed in v5** |
+| `panchang-ts/moon-phases` | `readMoonPhasesForYear` / `…ForDate` | `buildMoonPhasesTable` | `moon-phases:gen` | **none — removed in v5** |
+| `panchang-ts/muhurta` | `readMuhurtaForYear` / `…ForDate` | `buildMuhurtaTable` | `muhurta:gen` | **none — new in v5** |
 
-All three: rolling **2-past / 5-future** window, en + hi, `_meta` + `years`
-shape, `source` arg on accessors so a runtime-built table is a drop-in for the
-bundled one. Each is bundled into its own tsup entry, so importing one never
-drags in the engine or the other tables' data.
+**Updated for v5.** This table read `getFestivalsForYear` etc. and named
+`src/data/festivals.json` / `eclipses.json` / `moonPhases.json` as bundled data.
+Both halves are out of date: v5 renamed every table accessor to `read*` (the
+`get*` names survive as deprecated aliases), and it **removed the bundled JSON
+entirely** — there is no `src/data/` and no `.json` under `src/` at all.
+Consumers build and cache their own; the `*:gen` scripts are worked examples
+that write to a path you give them, not to the package.
+
+All four: en + hi, `_meta` + `years` shape, dictionary-encoded with a stable
+`key`, `source` arg on the accessors taking whatever the builder produced. Each
+is its own tsup entry, so importing one never drags in the engine or the other
+tables' data.
 
 ### Eclipses (`getEclipsesInRange`, `isEclipseVisibleAnyPhase`)
 
@@ -2598,7 +2607,7 @@ Full evidence in [docs/v5-validation-report.md](docs/v5-validation-report.md)
 | Tier 0 fixtures committed before any new ephemeris code | ✅ Horizons positions + ΔT (36.0), NASA eclipse canon + city catalogs (36.5) |
 | baseline error curve of the *current* code recorded | ✅ seven bodies, `tier0-horizons.test.ts` |
 | every own module ≤ baseline over 1900–2100 | ✅ 2.8× (Moon) to 16× (Venus) inside |
-| invariant/tolerance split, tiers marked, enforced by a test | ✅ seven Tier 0 files, `tier-policy.test.ts` |
+| invariant/tolerance split, tiers marked, enforced by a test | ✅ eight Tier 0 files, `tier-policy.test.ts` |
 | **zero invariant-test changes** | ✅ 0 across 241 MB of before/after output |
 | every numeric re-pin predicted before observed | ✅ two re-pins, both with predicted-vs-observed recorded |
 | frozen reference + ≥100k-instant differential | ✅ four reference modules, five differential tests |
