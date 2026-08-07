@@ -32,48 +32,48 @@ function runFixtureSuite(fixtures: Fixture[]) {
         dateAtNoonUtc(date),
         location,
         { timezone },
-      );
+      )!;
 
       it('sunrise is a valid Date', () => {
-        expect(result.sunrise).toBeInstanceOf(Date);
-        expect(isNaN(result.sunrise.getTime())).toBe(false);
+        expect(result.sun.rise).toBeInstanceOf(Date);
+        expect(isNaN(result.sun.rise.getTime())).toBe(false);
       });
 
       it(`tithis.length >= ${expected.tithiCountAtLeast}`, () => {
-        expect(result.tithis.length).toBeGreaterThanOrEqual(expected.tithiCountAtLeast);
+        expect(result.angas.tithis.length).toBeGreaterThanOrEqual(expected.tithiCountAtLeast);
       });
 
       it(`nakshatras.length >= ${expected.nakshatraCountAtLeast}`, () => {
-        expect(result.nakshatras.length).toBeGreaterThanOrEqual(expected.nakshatraCountAtLeast);
+        expect(result.angas.nakshatras.length).toBeGreaterThanOrEqual(expected.nakshatraCountAtLeast);
       });
 
       it(`vara.englishName === "${expected.varaEnglish}"`, () => {
-        expect(result.vara.englishName).toBe(expected.varaEnglish);
+        expect(result.angas.vara.englishName).toBe(expected.varaEnglish);
       });
 
       it('rahuKalam.start < rahuKalam.end', () => {
-        expect(result.rahuKalam.start.getTime()).toBeLessThan(result.rahuKalam.end.getTime());
+        expect(result.inauspicious.rahuKalam.start.getTime()).toBeLessThan(result.inauspicious.rahuKalam.end.getTime());
       });
 
       // Drik convention: Abhijit is dropped on Wednesday (Buddha-vara).
       // Non-Wednesday days carry the full noon window.
       it('abhijitMuhurta is null on Wednesday, ordered otherwise', () => {
         if (expected.varaEnglish === 'Wednesday') {
-          expect(result.abhijitMuhurta).toBeNull();
+          expect(result.muhurtas.abhijit).toBeNull();
         } else {
-          expect(result.abhijitMuhurta).not.toBeNull();
-          expect(result.abhijitMuhurta!.start.getTime()).toBeLessThan(result.abhijitMuhurta!.end.getTime());
+          expect(result.muhurtas.abhijit).not.toBeNull();
+          expect(result.muhurtas.abhijit!.start.getTime()).toBeLessThan(result.muhurtas.abhijit!.end.getTime());
         }
       });
 
       it('dayDurationMinutes is in (0, 1440)', () => {
-        expect(result.dayDurationMinutes).toBeGreaterThan(0);
-        expect(result.dayDurationMinutes).toBeLessThan(24 * 60);
+        expect(result.sun.dayDurationMinutes).toBeGreaterThan(0);
+        expect(result.sun.dayDurationMinutes).toBeLessThan(24 * 60);
       });
 
       it('gowriPanchangam has 8 day + 8 night slots', () => {
-        expect(result.gowriPanchangam.day).toHaveLength(8);
-        expect(result.gowriPanchangam.night).toHaveLength(8);
+        expect(result.periods.gowri.day).toHaveLength(8);
+        expect(result.periods.gowri.night).toHaveLength(8);
       });
 
 
@@ -94,7 +94,7 @@ describe('getDailyPanchang — regional Sankranti (Phase 24-1)', () => {
   const makarDay = dateAtNoonUtc('2025-01-14'); // Makar Sankranti day
 
   it('region="all" emits pongal + makar_sankranti + bihu alongside canonical sankranti', () => {
-    const r = getDailyPanchang(makarDay, CHENNAI, { timezone: 330 });
+    const r = getDailyPanchang(makarDay, CHENNAI, { timezone: 330 })!;
     const names = r.festivals.map(f => f.name);
     expect(names).toContain('Sankranti');
     expect(names).toContain('Pongal');
@@ -104,7 +104,7 @@ describe('getDailyPanchang — regional Sankranti (Phase 24-1)', () => {
   });
 
   it('region="tamil-nadu" scopes regional variants to Tamil Nadu + pan-Indian', () => {
-    const r = getDailyPanchang(makarDay, CHENNAI, { timezone: 330, region: 'tamil-nadu' });
+    const r = getDailyPanchang(makarDay, CHENNAI, { timezone: 330, region: 'tamil-nadu' })!;
     const names = r.festivals.map(f => f.name);
     expect(names).toContain('Pongal');
     // Makar Sankranti is pan-Indian post v2.1 — emits under every region.
@@ -116,7 +116,7 @@ describe('getDailyPanchang — regional Sankranti (Phase 24-1)', () => {
   it('legacy region="tamil" is accepted via alias resolver and behaves like tamil-nadu', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     __resetRegionAliasWarnings();
-    const r = getDailyPanchang(makarDay, CHENNAI, { timezone: 330, region: 'tamil' });
+    const r = getDailyPanchang(makarDay, CHENNAI, { timezone: 330, region: 'tamil' })!;
     const names = r.festivals.map(f => f.name);
     expect(names).toContain('Pongal');
     expect(names).not.toContain('Magh Bihu');
@@ -131,22 +131,22 @@ describe('getDailyPanchang — v2.1 Lohri (day before Makara Sankranti)', () => 
   const makarDayLocal = dateAtNoonUtc('2025-01-14');
 
   it('emits Lohri on 2025-01-13 under region="punjab"', () => {
-    const r = getDailyPanchang(lohriDay, AMRITSAR, { timezone: 330, region: 'punjab' });
+    const r = getDailyPanchang(lohriDay, AMRITSAR, { timezone: 330, region: 'punjab' })!;
     expect(r.festivals.some(f => f.name === 'Lohri')).toBe(true);
   });
 
   it('emits Lohri under region="all" (default)', () => {
-    const r = getDailyPanchang(lohriDay, AMRITSAR, { timezone: 330 });
+    const r = getDailyPanchang(lohriDay, AMRITSAR, { timezone: 330 })!;
     expect(r.festivals.some(f => f.name === 'Lohri')).toBe(true);
   });
 
   it('does NOT emit Lohri under region="tamil-nadu"', () => {
-    const r = getDailyPanchang(lohriDay, AMRITSAR, { timezone: 330, region: 'tamil-nadu' });
+    const r = getDailyPanchang(lohriDay, AMRITSAR, { timezone: 330, region: 'tamil-nadu' })!;
     expect(r.festivals.some(f => f.name === 'Lohri')).toBe(false);
   });
 
   it('does NOT emit Lohri on the actual Makara Sankranti day', () => {
-    const r = getDailyPanchang(makarDayLocal, AMRITSAR, { timezone: 330, region: 'punjab' });
+    const r = getDailyPanchang(makarDayLocal, AMRITSAR, { timezone: 330, region: 'punjab' })!;
     expect(r.festivals.some(f => f.name === 'Lohri')).toBe(false);
   });
 });

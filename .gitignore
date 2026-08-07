@@ -30,3 +30,20 @@ __snapshots__/
 
 # Claude Code memory (local AI context, not project source)
 memory/
+
+# v5 measurement harnesses — generated, and the dumps are ~230 MB each
+notes/*.mjs
+!notes/diff.mjs
+!notes/driver.mjs
+!notes/pi-split.mjs
+!notes/*-fetch.mjs
+notes/dump-*.json
+notes/bench-*.json
+
+# npm pack output
+*.tgz
+
+# the builds vcompare/ measures against: the published npm artifact, and a
+# build of git HEAD (the pre-Phase-36 tree — see notes/vcompare/README.md)
+notes/vcompare/v4/
+notes/vcompare/head/

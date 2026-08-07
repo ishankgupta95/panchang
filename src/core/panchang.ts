@@ -12,7 +12,9 @@ import {
 import {
   nakshatraOf, TITHI_SPAN, KARANA_SPAN, NAKSHATRA_SPAN, YOGA_SPAN,
 } from '../utils/constants';
-import { resolveUtcOffset, getLocalMidnightUtc, utcToLocalDisplay } from '../utils/timezone';
+import {
+  resolveUtcOffset, getLocalMidnightUtc, utcToLocalDisplay, formatInZone,
+} from '../utils/timezone';
 import {
   computeTithiFromLongitudes,
   getTithiIndexAtTime,
@@ -75,13 +77,45 @@ import {
 } from '../i18n/resolver';
 import type { GeoLocation } from '../types/location';
 import type { InstantPanchangOptions, PanchangOptions, PanchangSection } from '../types/options';
-import type { InstantPanchangResult, DailyPanchangResult } from '../types/panchang';
+import type {
+  InstantPanchangResult, DailyPanchangResult, ResolvedTimezone,
+} from '../types/panchang';
 import type {
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo, TimePeriod,
-  ChoghadiyaQuality, FestivalInfo,
+  ChoghadiyaQuality, FestivalInfo, UtcWindow, Unlocalized,
 } from '../types/elements';
 
 /**
+ * ## INTERPOLATE_ALWAYS — why the panchang entry points never pick a cache mode
+ *
+ * `LongitudeCache` supports exact per-instant memoization and Chebyshev
+ * interpolation, and this file used to choose between them with
+ * `doEndTimes ? 'interpolated' : 'exact'`. That was right for a narrowed call
+ * and wrong for a full one: with every section on, the festival block alone
+ * makes enough longitude reads to pay for building the blocks, so asking for
+ * *less* output cost *more* — `computeEndTimes: false` measured 1.19 ms against
+ * a full call's 0.93 ms cold, and 0.75 ms against 0.63 ms warm.
+ *
+ * The apparent fix — interpolate when `doEndTimes || wantFestivals` — is worse
+ * than the bug. The two modes do not agree to the last bit (the interpolant
+ * carries ≤2.0e-7° of fit error), so making the mode a function of
+ * `options.sections` would make the *published numbers* a function of
+ * `options.sections`, breaking the property `tests/unit/sections.test.ts`
+ * exists to guard: narrowing skips work, it never changes output. It would hold
+ * for `computeEndTimes: true` and silently fail for `computeEndTimes: false`.
+ *
+ * So the mode is not chosen at all: both entry points always interpolate. The
+ * output then depends on neither `sections` nor `computeEndTimes`, which is a
+ * stronger guarantee than the one that was at risk — and it retires a
+ * pre-existing discrepancy where the same day published a different
+ * `siderealMoonAtSunrise` with and without end-times.
+ *
+ * The cost is bounded and one-sided: a process that computes a single day and
+ * exits pays ~0.115 ms to build blocks it never reuses, against ~0.017 ms of
+ * direct reads. Beyond a handful of days, sharing wins (`cache.ts`).
+ *
+ * ---
+ *
  * The continuous angle behind each element index, for {@link findTransitionTime}
  * and {@link findDailyElements}.
  *
@@ -158,8 +192,8 @@ const YOGA_ANGLE = (
  * if (p === null) {
  *   // polar location — Hindu day undefined
  * } else {
- *   console.log(p.tithi.name);     // "कृष्ण चतुर्दशी"
- *   console.log(p.tithi.endTime);  // Date (UTC) when this Tithi ends
+ *   console.log(p.angas.tithi.name);     // "कृष्ण चतुर्दशी"
+ *   console.log(p.angas.tithi.endTime);  // Date — true instant this Tithi ends
  * }
  * ```
  *
@@ -179,9 +213,8 @@ export function getInstantPanchang(
   const t = getTranslations(lang);
   const doEndTimes = options?.computeEndTimes !== false;
 
-  // Interpolate only when the end-time searches will actually run: building a
-  // block costs more than the handful of reads a names-only call makes.
-  const cache = new LongitudeCache(ayanamsaType, doEndTimes ? 'interpolated' : 'exact');
+  // Always interpolated — see INTERPOLATE_ALWAYS.
+  const cache = new LongitudeCache(ayanamsaType, 'interpolated');
   const getMoon = (d: Date) => cache.getMoon(d);
   const getSun = (d: Date) => cache.getSun(d);
 
@@ -296,12 +329,15 @@ export function getInstantPanchang(
     (idx) => resolveMasaName(idx, lang),
   );
 
+  // Always present, `null` when the matching option was not passed — the result
+  // shape never depends on the options. See the optional-vs-null rule on
+  // `DailyPanchangResult`.
   const chandraBalam = options?.janmaRashi !== undefined
     ? computeChandraBalam(options.janmaRashi, chandraRashi.index, lang)
-    : undefined;
+    : null;
   const tarabala = options?.janmaNakshatra !== undefined
     ? computeTarabala(options.janmaNakshatra, nakshatraOf(siderealMoon), lang)
-    : undefined;
+    : null;
   const gandaMula = computeGandaMula(nakshatraOf(siderealMoon), lang);
   const anandadiYoga = computeAnandadiYoga(
     vara.index,
@@ -312,25 +348,17 @@ export function getInstantPanchang(
   return {
     timestamp: date,
     location,
-    tithi,
-    nakshatra,
-    yoga,
-    karana,
-    vara,
     ayanamsa: ayanamsaValue,
-    siderealSun,
-    siderealMoon,
-    chandramasa,
-    samvat,
-    chandraRashi,
-    suryaNakshatra,
-    panchaka: computePanchaka(siderealMoon),
+    sun: { siderealLongitude: siderealSun, nakshatra: suryaNakshatra },
+    moon: { siderealLongitude: siderealMoon, rashi: chandraRashi },
+    angas: { tithi, nakshatra, yoga, karana, vara },
+    calendar: { chandramasa, samvat },
+    inauspicious: { panchaka: computePanchaka(siderealMoon), gandaMula },
     specialYogas,
-    festivals,
-    gandaMula,
     anandadiYoga,
-    ...(chandraBalam !== undefined ? { chandraBalam } : {}),
-    ...(tarabala !== undefined ? { tarabala } : {}),
+    festivals,
+    chandraBalam,
+    tarabala,
   };
 }
 
@@ -342,11 +370,12 @@ export function getInstantPanchang(
  * returned when a transition occurs during the day — e.g. if Tithi changes
  * at 14:30 the result has two `DailyTithiInfo` entries.
  *
- * All `Date` objects in the result are **offset-adjusted** to the requested
- * timezone. Read their components via `getUTC*` methods:
+ * Every `Date` in the result is a **true instant** — `.getTime()` is the correct
+ * epoch millisecond. For display, read the matching `*Local` string, which is
+ * offset-carrying ISO 8601 in the requested timezone:
  * ```
- * result.sunrise.getUTCHours()   // local sunrise hour
- * result.sunrise.getHours()      // ← wrong, uses system timezone
+ * result.sun.rise.getTime()   // correct epoch ms
+ * result.sun.riseLocal        // "2025-01-14T07:09:44.172+05:30"
  * ```
  *
  * @param date     Any `Date` within the local calendar day you want.
@@ -372,9 +401,9 @@ export function getInstantPanchang(
  * if (result === null) {
  *   // Polar location with midnight sun / polar night.
  * } else {
- *   result.tithis[0].name;           // "Krishna Chaturdashi"
- *   result.vara.name;                // "Mangalawara"
- *   result.rahuKalam.start;          // Date — read via getUTCHours()
+ *   result.angas.tithis[0].name;        // "Krishna Chaturdashi"
+ *   result.angas.vara.name;             // "Mangalawara"
+ *   result.inauspicious.rahuKalam.start; // Date — true instant
  * }
  *
  * // Fast mode (names only, ~5× faster):
@@ -390,6 +419,11 @@ export function getDailyPanchang(
   validateDate(date);
   validateLocation(location);
   const offsetMinutes = resolveUtcOffset(options.timezone, date);
+  // Echo the zone back when the caller named one — a bare offset cannot say
+  // which zone produced it, and every wall-clock reading depends on that.
+  const resolvedTimezone: ResolvedTimezone = typeof options.timezone === 'string'
+    ? { offsetMinutes, zone: options.timezone }
+    : { offsetMinutes };
   const ayanamsaType = options.ayanamsa ?? 'lahiri';
   const lang = options.language ?? 'en';
   const t = getTranslations(lang);
@@ -408,9 +442,8 @@ export function getDailyPanchang(
   const needBhadra = wantLunarWindows || wantFestivals;
 
   // ── 2. Create per-call longitude cache ──────────────
-  // Interpolate only when the end-time searches will actually run: building a
-  // block costs more than the handful of reads a names-only call makes.
-  const cache = new LongitudeCache(ayanamsaType, doEndTimes ? 'interpolated' : 'exact');
+  // Always interpolated — see INTERPOLATE_ALWAYS.
+  const cache = new LongitudeCache(ayanamsaType, 'interpolated');
   const getMoon = (d: Date) => cache.getMoon(d);
   const getSun = (d: Date) => cache.getSun(d);
   // Shared across today's and the prior day's Chandra Masa resolution — both
@@ -578,7 +611,10 @@ export function getDailyPanchang(
   // (wired in step 9) and a festival entry so downstream consumers iterating
   // `festivals` see it.
   const eclipseUtc = wantEclipse
-    ? getEclipseDuringDay(sunriseUtc, nextSunriseUtc, location, lang)
+    ? getEclipseDuringDay(sunriseUtc, nextSunriseUtc, location, lang, {
+        tropicalMoon: (d) => cache.getTropicalMoon(d),
+        tropicalSun: (d) => cache.getTropicalSun(d),
+      })
     : null;
   if (eclipseUtc) {
     const eclipseKey = eclipseUtc.kind === 'solar' ? 'surya_grahan' : 'chandra_grahan';
@@ -640,10 +676,11 @@ export function getDailyPanchang(
       60, 18, STANDARD_PRECISION, 5, KARANA_ANGLE(getMoon, getSun),
     ) as DailyKaranaInfo[];
   } else {
-    tithis = [{ ...tithiAtSunrise, startTime: null, isActiveAtSunrise: true }];
-    nakshatras = [{ ...nakshatraAtSunrise, startTime: null, isActiveAtSunrise: true }];
-    yogas = [{ ...yogaAtSunrise, startTime: null, isActiveAtSunrise: true }];
-    karanas = [{ ...karanaAtSunrise, startTime: null, isActiveAtSunrise: true }];
+    const bare = { startTime: null, startTimeLocal: null, endTimeLocal: null, isActiveAtSunrise: true };
+    tithis = [{ ...tithiAtSunrise, ...bare }];
+    nakshatras = [{ ...nakshatraAtSunrise, ...bare }];
+    yogas = [{ ...yogaAtSunrise, ...bare }];
+    karanas = [{ ...karanaAtSunrise, ...bare }];
   }
 
   // ── 7. Compute time-slot periods ─────────────────────
@@ -662,141 +699,167 @@ export function getDailyPanchang(
   const pratahSandhyaUtc = computePratahSandhya(sunriseUtc, sunsetUtc, nextSunriseUtc);
   const sayahnaSandhyaUtc = computeSayahnaSandhya(sunsetUtc, nextSunriseUtc);
 
-  // ── 8. Convert all UTC dates to local display ────────
-  const toLocal = (d: Date) => utcToLocalDisplay(d, offsetMinutes);
-  const toLocalOrNull = (d: Date | null) => d ? toLocal(d) : null;
-  const convertTimePeriod = (tp: TimePeriod): TimePeriod => ({
-    start: toLocal(tp.start),
-    end: toLocal(tp.end),
+  // ── 8. Render local wall-clock strings; instants stay instants ────────
+  //
+  // This block used to *shift* every published `Date` by `offsetMinutes`, so
+  // `result.sunrise.getTime()` was not when sunrise happened. That made
+  // `JSON.stringify`, `Intl` with a `timeZone`, date-fns, Temporal and any
+  // comparison against a real timestamp silently wrong by the offset, and the
+  // README had to tell consumers to read the values back with `getUTC*`.
+  //
+  // v5 publishes the true instant and renders the wall clock alongside it as an
+  // offset-carrying ISO 8601 string. The instant is the fact; the string is one
+  // presentation of it, and `formatInZone` is exported so callers can make
+  // others.
+  const local = (d: Date) => formatInZone(d, offsetMinutes);
+  const localOrNull = (d: Date | null) => (d ? local(d) : null);
+  const withLocal = (tp: UtcWindow): TimePeriod => ({
+    start: tp.start,
+    end: tp.end,
+    startLocal: local(tp.start),
+    endLocal: local(tp.end),
   });
   /**
    * Localize a slot array (Choghadiya / Hora / Do-Ghati / Gowri shapes) by
-   * converting `start`/`end` to local display while preserving every other
-   * field on the slot. The destructure-then-spread shape is what makes this
-   * type-safe across slot variants — `convertTimePeriod` returns only
-   * `{start,end}` and would otherwise drop name/quality/etc.
+   * adding `startLocal`/`endLocal` while preserving every other field. The
+   * spread is what makes this type-safe across slot variants — `withLocal`
+   * returns only the window fields and would otherwise drop name/quality/etc.
    */
-  const localizeSlots = <T extends TimePeriod>(slots: readonly T[]): T[] =>
-    slots.map(s => ({ ...s, ...convertTimePeriod(s) }));
+  const localizeSlots = <T extends TimePeriod>(
+    slots: readonly Unlocalized<T>[],
+  ): T[] => slots.map(s => ({ ...s, ...withLocal(s) }) as T);
 
   const dayDurationMs = sunsetUtc.getTime() - sunriseUtc.getTime();
   const nightDurationMs = nextSunriseUtc.getTime() - sunsetUtc.getTime();
 
-  for (const t of tithis) {
-    t.endTime = toLocalOrNull(t.endTime);
-    (t as DailyTithiInfo).startTime = toLocalOrNull((t as DailyTithiInfo).startTime);
-  }
-  for (const n of nakshatras) {
-    n.endTime = toLocalOrNull(n.endTime);
-    (n as DailyNakshatraInfo).startTime = toLocalOrNull((n as DailyNakshatraInfo).startTime);
-  }
-  for (const y of yogas) {
-    y.endTime = toLocalOrNull(y.endTime);
-    (y as DailyYogaInfo).startTime = toLocalOrNull((y as DailyYogaInfo).startTime);
-  }
-  for (const k of karanas) {
-    k.endTime = toLocalOrNull(k.endTime);
-    (k as DailyKaranaInfo).startTime = toLocalOrNull((k as DailyKaranaInfo).startTime);
+  for (const t of tithis) t.startTimeLocal = localOrNull(t.startTime);
+  for (const n of nakshatras) n.startTimeLocal = localOrNull(n.startTime);
+  for (const y of yogas) y.startTimeLocal = localOrNull(y.startTime);
+  for (const k of karanas) k.startTimeLocal = localOrNull(k.startTime);
+  for (const e of [...tithis, ...nakshatras, ...yogas, ...karanas]) {
+    e.endTimeLocal = localOrNull(e.endTime);
   }
 
+  // Always present, `null` when the matching option was not passed — see the
+  // optional-vs-null rule on `DailyPanchangResult`.
   const chandraBalam = options.janmaRashi !== undefined
     ? computeChandraBalam(options.janmaRashi, chandraRashi.index, lang)
-    : undefined;
+    : null;
   const tarabala = options.janmaNakshatra !== undefined
     ? computeTarabala(
         options.janmaNakshatra,
         nakshatraOf(siderealMoonAtSunrise),
         lang,
       )
-    : undefined;
+    : null;
+
+  const dayMinutes = Math.round(dayDurationMs / 60_000);
+  const nightMinutes = Math.round(nightDurationMs / 60_000);
 
   // ── 9. Assemble result ───────────────────────────────
   return {
     date,
     location,
-    timezone: offsetMinutes,
-    sunrise: toLocal(sunriseUtc),
-    sunset: toLocal(sunsetUtc),
-    nextSunrise: toLocal(nextSunriseUtc),
-    dayDurationMinutes: Math.round(dayDurationMs / 60_000),
-    nightDurationMinutes: Math.round(nightDurationMs / 60_000),
-    tithis,
-    nakshatras,
-    yogas,
-    karanas,
-    vara,
-    rahuKalam: convertTimePeriod(rahuKalam),
-    gulikaKalam: convertTimePeriod(gulikaKalam),
-    yamaganda: convertTimePeriod(yamaganda),
-    abhijitMuhurta: abhijitMuhurta === null ? null : convertTimePeriod(abhijitMuhurta),
+    timezone: resolvedTimezone,
     ayanamsa: ayanamsaValue,
-    siderealSunAtSunrise,
-    siderealMoonAtSunrise,
-    masa,
-    chandramasa,
-    samvat,
-    chandraRashi,
-    suryaNakshatra,
-    brahmaMuhurta: convertTimePeriod(brahmaMuhurta),
-    choghadiya: {
-      day:   localizeSlots(choghadiya.day),
-      night: localizeSlots(choghadiya.night),
+    sun: {
+      rise: sunriseUtc,
+      set: sunsetUtc,
+      nextRise: nextSunriseUtc,
+      riseLocal: local(sunriseUtc),
+      setLocal: local(sunsetUtc),
+      nextRiseLocal: local(nextSunriseUtc),
+      dayDurationMinutes: dayMinutes,
+      nightDurationMinutes: nightMinutes,
+      dinamanaMinutes: dayMinutes,
+      ratrimanaMinutes: nightMinutes,
+      siderealLongitude: siderealSunAtSunrise,
+      nakshatra: suryaNakshatra,
     },
-    hora: {
-      day:   localizeSlots(hora.day),
-      night: localizeSlots(hora.night),
+    moon: {
+      rise: moonriseUtc,
+      set:  moonsetUtc,
+      riseLocal: localOrNull(moonriseUtc),
+      setLocal:  localOrNull(moonsetUtc),
+      siderealLongitude: siderealMoonAtSunrise,
+      rashi: chandraRashi,
     },
-    moonrise: moonriseUtc ? toLocal(moonriseUtc) : null,
-    moonset:  moonsetUtc  ? toLocal(moonsetUtc)  : null,
-    panchaka,
-    panchakaRahita: panchakaRahitaUtc.map(convertTimePeriod),
-    doGhatiMuhurta: {
-      day:   localizeSlots(doGhatiMuhurta.day),
-      night: localizeSlots(doGhatiMuhurta.night),
+    angas: { tithis, nakshatras, yogas, karanas, vara },
+    calendar: { masa, chandramasa, samvat },
+    muhurtas: {
+      abhijit: abhijitMuhurta === null ? null : withLocal(abhijitMuhurta),
+      brahma: withLocal(brahmaMuhurta),
+      vijaya: withLocal(vijayaMuhurtaUtc),
+      godhuli: withLocal(godhuliMuhurtaUtc),
+      nishita: withLocal(nishitaMuhurtaUtc),
+      amritKala: amritKalaUtc ? withLocal(amritKalaUtc) : null,
+      madhyahna: withLocal(madhyahnaWindowUtc),
+      pratahSandhya: withLocal(pratahSandhyaUtc),
+      sayahnaSandhya: withLocal(sayahnaSandhyaUtc),
+      doGhati: {
+        day:   localizeSlots(doGhatiMuhurta.day),
+        night: localizeSlots(doGhatiMuhurta.night),
+      },
+    },
+    inauspicious: {
+      rahuKalam: withLocal(rahuKalam),
+      gulikaKalam: withLocal(gulikaKalam),
+      yamaganda: withLocal(yamaganda),
+      durMuhurta: [withLocal(durMuhurtaUtc[0]), withLocal(durMuhurtaUtc[1])],
+      varjyam: varjyamUtc ? withLocal(varjyamUtc) : null,
+      bhadra: bhadraUtc
+        ? {
+            start: bhadraUtc.start,
+            end: bhadraUtc.end,
+            startLocal: local(bhadraUtc.start),
+            endLocal: local(bhadraUtc.end),
+            location: bhadraUtc.location,
+            locationName: bhadraUtc.locationName,
+            isActive: bhadraUtc.isActive,
+          }
+        : null,
+      gandaMula,
+      panchaka,
+      panchakaRahita: panchakaRahitaUtc.map(withLocal),
+    },
+    periods: {
+      choghadiya: {
+        day:   localizeSlots(choghadiya.day),
+        night: localizeSlots(choghadiya.night),
+      },
+      hora: {
+        day:   localizeSlots(hora.day),
+        night: localizeSlots(hora.night),
+      },
+      gowri: {
+        day:   localizeSlots(gowriPanchangam.day),
+        night: localizeSlots(gowriPanchangam.night),
+      },
     },
     specialYogas,
-    durMuhurta: [convertTimePeriod(durMuhurtaUtc[0]), convertTimePeriod(durMuhurtaUtc[1])],
-    festivals,
-    gowriPanchangam: {
-      day:   localizeSlots(gowriPanchangam.day),
-      night: localizeSlots(gowriPanchangam.night),
-    },
-    bhadra: bhadraUtc
-      ? {
-          start: toLocal(bhadraUtc.start),
-          end: toLocal(bhadraUtc.end),
-          location: bhadraUtc.location,
-          locationName: bhadraUtc.locationName,
-          isActive: bhadraUtc.isActive,
-        }
-      : null,
-    varjyam: varjyamUtc ? convertTimePeriod(varjyamUtc) : null,
-    gandaMula,
     anandadiYoga,
-    vijayaMuhurta: convertTimePeriod(vijayaMuhurtaUtc),
-    godhuliMuhurta: convertTimePeriod(godhuliMuhurtaUtc),
-    nishitaMuhurta: convertTimePeriod(nishitaMuhurtaUtc),
-    amritKala: amritKalaUtc ? convertTimePeriod(amritKalaUtc) : null,
-    madhyahna: convertTimePeriod(madhyahnaWindowUtc),
-    pratahSandhya: convertTimePeriod(pratahSandhyaUtc),
-    sayahnaSandhya: convertTimePeriod(sayahnaSandhyaUtc),
-    dinamanaMinutes: Math.round(dayDurationMs / 60_000),
-    ratrimanaMinutes: Math.round(nightDurationMs / 60_000),
+    festivals,
     eclipse: eclipseUtc
       ? {
           kind: eclipseUtc.kind,
           subtype: eclipseUtc.subtype,
-          start: toLocal(eclipseUtc.start),
-          peak: toLocal(eclipseUtc.peak),
-          end: toLocal(eclipseUtc.end),
+          start: eclipseUtc.start,
+          peak: eclipseUtc.peak,
+          end: eclipseUtc.end,
+          startLocal: local(eclipseUtc.start),
+          peakLocal: local(eclipseUtc.peak),
+          endLocal: local(eclipseUtc.end),
           visibleFromLocation: eclipseUtc.visibleFromLocation,
+          obscuration: eclipseUtc.obscuration,
           magnitude: eclipseUtc.magnitude,
-          sutakStart: toLocalOrNull(eclipseUtc.sutakStart),
-          sutakEnd: toLocalOrNull(eclipseUtc.sutakEnd),
+          sutakStart: eclipseUtc.sutakStart,
+          sutakEnd: eclipseUtc.sutakEnd,
+          sutakStartLocal: localOrNull(eclipseUtc.sutakStart),
+          sutakEndLocal: localOrNull(eclipseUtc.sutakEnd),
           description: eclipseUtc.description,
         }
       : null,
-    ...(chandraBalam !== undefined ? { chandraBalam } : {}),
-    ...(tarabala !== undefined ? { tarabala } : {}),
+    chandraBalam,
+    tarabala,
   };
 }

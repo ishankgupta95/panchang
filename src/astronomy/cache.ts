@@ -155,6 +155,54 @@ class ChebyshevLongitude {
   }
 }
 
+/**
+ * Interpolation blocks live at module scope, not on the cache instance.
+ *
+ * `LongitudeCache` is constructed once per `getDailyPanchang`, so an instance-
+ * level block map dies with the call: a calendar scan rebuilt the 4-day Moon and
+ * 8-day Sun blocks *every day*, paying 10 Moon + 8 Sun evaluations to serve one
+ * day and then discarding them. Measured over a 365-day scan that was 21.5
+ * `GeoMoon` and 29.1 `SunPosition` per day, against 6.5 and 5.1 when the blocks
+ * are shared.
+ *
+ * Sharing is sound for the same reason the per-instant memo is: a block is
+ * `ChebyshevLongitude` fitted over `[blockIndex·SPAN, (blockIndex+1)·SPAN]`, so
+ * it is a pure function of its block index and nothing else. In particular the
+ * nodes hold **tropical** longitudes — the ayanamsa is applied per read — so a
+ * block is also independent of the ayanamsa system and is shared across them.
+ * Sharing changes only *which call builds* a block, never its contents, so the
+ * order-independence documented above is preserved exactly.
+ *
+ * Bounded with the same clear-on-overflow policy `EVENT_CACHE` uses in
+ * `sunrise.ts`: a long-running process must not grow these without limit. At
+ * the cap the resident set is ~11 years of Moon blocks and ~22 years of Sun
+ * blocks (~0.9 MB), which covers any calendar view; the multi-century
+ * `build*Table` scans stream forward, so the handful of clears they trigger cost
+ * one block rebuild each.
+ */
+const MAX_BLOCKS = 1024;
+const MOON_BLOCK_STORE = new Map<number, ChebyshevLongitude>();
+const SUN_BLOCK_STORE = new Map<number, ChebyshevLongitude>();
+
+function blockFor(
+  store: Map<number, ChebyshevLongitude>,
+  index: number,
+  spanMs: number,
+  nodes: number,
+  tropicalAt: (ms: number) => number,
+): { interpolant: ChebyshevLongitude; built: boolean } {
+  const existing = store.get(index);
+  if (existing !== undefined) return { interpolant: existing, built: false };
+
+  const interpolant = new ChebyshevLongitude(
+    tropicalAt, index * spanMs, (index + 1) * spanMs, nodes,
+  );
+  if (store.size >= MAX_BLOCKS) store.clear();
+  store.set(index, interpolant);
+  return { interpolant, built: true };
+}
+
+
 export class LongitudeCache {
   private readonly ayanamsaType: AyanamsaType;
   private readonly mode: LongitudeCacheMode;
@@ -162,9 +210,15 @@ export class LongitudeCache {
   /** `'exact'` mode: longitude per exact instant. */
   private moonCache = new Map<number, number>();
   private sunCache = new Map<number, number>();
-  /** `'interpolated'` mode: one interpolant per block index. */
-  private moonBlocks = new Map<number, ChebyshevLongitude>();
-  private sunBlocks = new Map<number, ChebyshevLongitude>();
+  /**
+   * `'exact'` mode, tropical reads. Kept separate from the sidereal maps rather
+   * than derived by re-adding the ayanamsa: `sidereal` is
+   * `normalize360(tropical − ayanamsa)`, and normalizing twice around the 360°
+   * seam is not the identity in floating point. A distinct memo keeps the
+   * tropical accessors bit-exact against {@link getTropicalMoonLongitude}.
+   */
+  private moonTropicalCache = new Map<number, number>();
+  private sunTropicalCache = new Map<number, number>();
 
   public hits = 0;
   public misses = 0;
@@ -189,20 +243,11 @@ export class LongitudeCache {
     }
 
     const ms = date.getTime();
-    const block = Math.floor(ms / MOON_BLOCK_MS);
-    let interpolant = this.moonBlocks.get(block);
-    if (interpolant === undefined) {
-      this.misses++;
-      interpolant = new ChebyshevLongitude(
-        (t) => getTropicalMoonLongitude(new Date(t)),
-        block * MOON_BLOCK_MS,
-        (block + 1) * MOON_BLOCK_MS,
-        MOON_NODES,
-      );
-      this.moonBlocks.set(block, interpolant);
-    } else {
-      this.hits++;
-    }
+    const { interpolant, built } = blockFor(
+      MOON_BLOCK_STORE, Math.floor(ms / MOON_BLOCK_MS), MOON_BLOCK_MS, MOON_NODES,
+      (t) => getTropicalMoonLongitude(new Date(t)),
+    );
+    if (built) this.misses++; else this.hits++;
     return normalize360(interpolant.at(ms) - computeAyanamsa(date, this.ayanamsaType));
   }
 
@@ -221,26 +266,77 @@ export class LongitudeCache {
     }
 
     const ms = date.getTime();
-    const block = Math.floor(ms / SUN_BLOCK_MS);
-    let interpolant = this.sunBlocks.get(block);
-    if (interpolant === undefined) {
-      this.misses++;
-      interpolant = new ChebyshevLongitude(
-        (t) => getTropicalSunLongitude(new Date(t)),
-        block * SUN_BLOCK_MS,
-        (block + 1) * SUN_BLOCK_MS,
-        SUN_NODES,
-      );
-      this.sunBlocks.set(block, interpolant);
-    } else {
-      this.hits++;
-    }
+    const { interpolant, built } = blockFor(
+      SUN_BLOCK_STORE, Math.floor(ms / SUN_BLOCK_MS), SUN_BLOCK_MS, SUN_NODES,
+      (t) => getTropicalSunLongitude(new Date(t)),
+    );
+    if (built) this.misses++; else this.hits++;
     return normalize360(interpolant.at(ms) - computeAyanamsa(date, this.ayanamsaType));
+  }
+
+  /**
+   * Tropical longitude of the Moon, through the same cache the sidereal reads
+   * use.
+   *
+   * Exists for consumers whose quantity is a Moon−Sun *difference*, where the
+   * ayanamsa cancels — the eclipse syzygy guard being the one in-tree caller.
+   * Going through the cache is what matters: the guard costs four evaluations
+   * to skip a search costing hundreds, but before this those four were full
+   * ELP/VSOP87 runs, so `sections: ['eclipse']` paid the same per-day ephemeris
+   * bill as a full panchang.
+   */
+  getTropicalMoon(date: Date): number {
+    if (this.mode === 'exact') {
+      const key = date.getTime();
+      const cached = this.moonTropicalCache.get(key);
+      if (cached !== undefined) {
+        this.hits++;
+        return cached;
+      }
+      this.misses++;
+      const lon = getTropicalMoonLongitude(date);
+      this.moonTropicalCache.set(key, lon);
+      return lon;
+    }
+
+    const ms = date.getTime();
+    const { interpolant, built } = blockFor(
+      MOON_BLOCK_STORE, Math.floor(ms / MOON_BLOCK_MS), MOON_BLOCK_MS, MOON_NODES,
+      (t) => getTropicalMoonLongitude(new Date(t)),
+    );
+    if (built) this.misses++; else this.hits++;
+    return normalize360(interpolant.at(ms));
+  }
+
+  /** Tropical longitude of the Sun. See {@link getTropicalMoon}. */
+  getTropicalSun(date: Date): number {
+    if (this.mode === 'exact') {
+      const key = date.getTime();
+      const cached = this.sunTropicalCache.get(key);
+      if (cached !== undefined) {
+        this.hits++;
+        return cached;
+      }
+      this.misses++;
+      const lon = getTropicalSunLongitude(date);
+      this.sunTropicalCache.set(key, lon);
+      return lon;
+    }
+
+    const ms = date.getTime();
+    const { interpolant, built } = blockFor(
+      SUN_BLOCK_STORE, Math.floor(ms / SUN_BLOCK_MS), SUN_BLOCK_MS, SUN_NODES,
+      (t) => getTropicalSunLongitude(new Date(t)),
+    );
+    if (built) this.misses++; else this.hits++;
+    return normalize360(interpolant.at(ms));
   }
 
   get size(): number {
     return (
-      this.moonCache.size + this.sunCache.size + this.moonBlocks.size + this.sunBlocks.size
+      this.moonCache.size + this.sunCache.size +
+      this.moonTropicalCache.size + this.sunTropicalCache.size +
+      MOON_BLOCK_STORE.size + SUN_BLOCK_STORE.size
     );
   }
 }

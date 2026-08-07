@@ -108,7 +108,7 @@ describe('computeVijayaMuhurta', () => {
   it('falls after Abhijit and before sunset', () => {
     const abhijit = computeAbhijitMuhurta(sunrise, sunset);
     const vijaya = computeVijayaMuhurta(sunrise, sunset);
-    expect(vijaya.start.getTime()).toBeGreaterThan(abhijit.end.getTime());
+    expect(vijaya.start.getTime()).toBeGreaterThan(abhijit!.end.getTime());
     expect(vijaya.end.getTime()).toBeLessThan(sunset.getTime());
   });
 
@@ -345,7 +345,6 @@ describe('computeSayahnaSandhya', () => {
 
   it('scales with night length and ends ~3 ghatikas after sunset', () => {
     // Same fixture day as above; night ≈ 808 min → width ≈ 81 min.
-    const sr = new Date('2026-01-15T01:45:00Z');
     const ss = new Date('2026-01-15T12:16:00Z');
     const nsr = new Date('2026-01-16T01:44:00Z');
     const s = computeSayahnaSandhya(ss, nsr);

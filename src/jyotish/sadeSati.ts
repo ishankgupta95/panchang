@@ -1,4 +1,4 @@
-import { Body, GeoVector, Ecliptic, MakeTime } from 'astronomy-engine';
+import { getTropicalPlanetLongitude } from '../astronomy/planet';
 import { computeAyanamsa } from '../astronomy/ayanamsa';
 import { normalize360 } from '../utils/angle';
 import { validateDate } from '../utils/validation';
@@ -27,9 +27,16 @@ const MAX_BACKWARD_SCAN_DAYS = 12 * 365;
  *
  * Single-body fast path — avoids `computePlanetaryPositions` overhead since
  * Sade Sati boundary search invokes this hundreds of times.
+ *
+ * This previously asked for the *geometric* position (`GeoVector(…, false)`)
+ * while `computePlanetaryPositions` published the apparent one, so the Saturn
+ * longitude a Sade Sati boundary was solved from differed from the Saturn
+ * longitude the chart reported. The gap is Saturn's aberration, ~20″, worth
+ * ~3.5 hours of transit time on a boundary that lasts seven and a half years —
+ * invisible in the result, but the two are now the same number.
  */
 function saturnSiderealLongitude(date: Date, ayanamsa: AyanamsaType): number {
-  const tropical = Ecliptic(GeoVector(Body.Saturn, MakeTime(date), false)).elon;
+  const tropical = getTropicalPlanetLongitude('saturn', date);
   return normalize360(tropical - computeAyanamsa(date, ayanamsa));
 }
 

@@ -39,8 +39,7 @@ describe('getKaranaIndex', () => {
     const seen = new Set<number>();
     for (let i = 0; i < 60; i++) {
       const elongation = i * KARANA_SPAN + 1;
-      const idx = getKaranaIndex(elongation, 0);
-      seen.add(idx);
+      seen.add(getKaranaIndex(elongation, 0));
     }
     expect(seen.size).toBe(60);
   });
@@ -80,7 +79,6 @@ describe('computeKaranaFromLongitudes', () => {
 
   it('completionPercentage is in [0, 100]', () => {
     for (let elongation = 0; elongation < 360; elongation += 10) {
-      const idx = getKaranaIndex(elongation, 0);
       const result = computeKaranaFromLongitudes(elongation, 0, 'test');
       expect(result.completionPercentage).toBeGreaterThanOrEqual(0);
       expect(result.completionPercentage).toBeLessThanOrEqual(100);

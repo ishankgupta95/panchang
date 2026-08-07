@@ -1,4 +1,6 @@
 /**
+ * @tier 1  DrikPanchang.com — a drift audit, so the bound is Drik's quantization plus our error
+ *
  * Drift audit for **element end times** (tithi / nakshatra / yoga / karana)
  * against DrikPanchang.
  *
@@ -108,23 +110,35 @@ function drikSecondsFromMidnight(hhmm: string): number {
   return (nextDay ? 86_400 : 0) + h * 3600 + m * 60 + 30;
 }
 
-/** Seconds from local midnight of `dateStr` for an offset-adjusted Date. */
-function actualSecondsFromMidnight(d: Date, dateStr: string): number {
-  const [y, m, day] = dateStr.split('-').map(Number) as [number, number, number];
-  return (d.getTime() - Date.UTC(y, m - 1, day, 0, 0, 0, 0)) / 1000;
+/**
+ * Seconds from local midnight of `dateStr`, read from an offset-carrying ISO
+ * string. v5: published `Date`s are true instants, so a UTC-midnight
+ * subtraction no longer yields a local wall clock.
+ */
+function actualSecondsFromMidnight(local: string, dateStr: string): number {
+  const dayDelta = Math.round(
+    (Date.parse(`${local.slice(0, 10)}T00:00:00Z`) - Date.parse(`${dateStr}T00:00:00Z`))
+    / 86_400_000,
+  );
+  const [h, m, sec] = local.slice(11, 19).split(':').map(Number) as [number, number, number];
+  return dayDelta * 86_400 + h * 3600 + m * 60 + sec;
 }
 
 /**
  * Per-element bounds. Intentionally *not* uniform.
  *
- * Measured maxima: tithi 46 s, karana 51 s, nakshatra 24 s, yoga 60 s. The
+ * Measured maxima: tithi 42 s, karana 49 s, nakshatra 22 s, yoga 58 s. The
  * headroom above those is roughly one Drik quantum (±30 s), because that — not
  * the search, which now contributes ≤24 ms — is what dominates the spread. A
  * sixth fixture drawing badly could legitimately land ~30 s worse than any of
  * the five here, and the bounds have to survive that without being so loose
  * they stop detecting a real shift.
  *
- * For scale: these were 60 / 110 / 100 / 170 s before the ayanamsa correction.
+ * For scale: these were 60 / 110 / 100 / 170 s before the ayanamsa correction,
+ * and 46 / 51 / 24 / 60 s before Phase 36 replaced the ephemeris. The whole
+ * port therefore moved Drik parity by 2–4 s, in the direction of Drik — which
+ * on five fixtures is not evidence of improvement, only evidence that the
+ * exit criterion ("no worse than the current ≤60 s") is met.
  */
 const TOLERANCE_SEC: Record<string, number> = {
   tithi: 76,
@@ -146,11 +160,11 @@ describe('Element end-time drift vs DrikPanchang', () => {
     const r = getDailyPanchang(noonUtc(f.date), f.location, { timezone: f.timezone });
     if (r === null) throw new Error(`no panchang for ${f.date}`);
 
-    const cases: [string, Date | null, string | undefined][] = [
-      ['tithi', r.tithis[0]!.endTime, f.expected.tithiEndHHMM],
-      ['nakshatra', r.nakshatras[0]!.endTime, f.expected.nakshatraEndHHMM],
-      ['yoga', r.yogas[0]!.endTime, f.expected.yogaEndHHMM],
-      ['karana', r.karanas[0]!.endTime, f.expected.karanaEndHHMM],
+    const cases: [string, string | null, string | undefined][] = [
+      ['tithi', r.angas.tithis[0]!.endTimeLocal, f.expected.tithiEndHHMM],
+      ['nakshatra', r.angas.nakshatras[0]!.endTimeLocal, f.expected.nakshatraEndHHMM],
+      ['yoga', r.angas.yogas[0]!.endTimeLocal, f.expected.yogaEndHHMM],
+      ['karana', r.angas.karanas[0]!.endTimeLocal, f.expected.karanaEndHHMM],
     ];
 
     for (const [element, actual, expected] of cases) {
@@ -185,7 +199,7 @@ describe('Element end-time drift vs DrikPanchang', () => {
     for (const f of withEndTimes) {
       const r = getDailyPanchang(noonUtc(f.date), f.location, { timezone: f.timezone });
       if (r === null) continue;
-      const push = (bucket: number[], actual: Date | null, expected?: string) => {
+      const push = (bucket: number[], actual: string | null, expected?: string) => {
         if (actual && expected) {
           bucket.push(Math.abs(
             actualSecondsFromMidnight(actual, f.date) - drikSecondsFromMidnight(expected),
@@ -193,11 +207,11 @@ describe('Element end-time drift vs DrikPanchang', () => {
         }
       };
       // Ayanamsa cancels in Moon − Sun.
-      push(drifts.elongation, r.tithis[0]!.endTime, f.expected.tithiEndHHMM);
-      push(drifts.elongation, r.karanas[0]!.endTime, f.expected.karanaEndHHMM);
+      push(drifts.elongation, r.angas.tithis[0]!.endTimeLocal, f.expected.tithiEndHHMM);
+      push(drifts.elongation, r.angas.karanas[0]!.endTimeLocal, f.expected.karanaEndHHMM);
       // Ayanamsa applies once (nakshatra) and twice (yoga).
-      push(drifts.ayanamsa, r.nakshatras[0]!.endTime, f.expected.nakshatraEndHHMM);
-      push(drifts.ayanamsa, r.yogas[0]!.endTime, f.expected.yogaEndHHMM);
+      push(drifts.ayanamsa, r.angas.nakshatras[0]!.endTimeLocal, f.expected.nakshatraEndHHMM);
+      push(drifts.ayanamsa, r.angas.yogas[0]!.endTimeLocal, f.expected.yogaEndHHMM);
     }
 
     const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;

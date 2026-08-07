@@ -1,4 +1,6 @@
 /**
+ * @tier 2  math-invariant + our own pins; Vimshottari is deterministic given the Moon
+ *
  * Phase 18-4 — Vimshottari Dasha validation.
  *
  * Rationale for math-invariant validation over external scraping:

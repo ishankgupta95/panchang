@@ -314,19 +314,19 @@ describe('Phase 34d — Drik panchang parity sweep (12 reference charts)', () =>
         });
 
         it('sunrise / sunset / nextSunrise are Date objects with sunset > sunrise', () => {
-          expect(r!.sunrise).toBeInstanceOf(Date);
-          expect(r!.sunset).toBeInstanceOf(Date);
-          expect(r!.nextSunrise).toBeInstanceOf(Date);
-          expect(r!.sunset.getTime()).toBeGreaterThan(r!.sunrise.getTime());
-          expect(r!.nextSunrise.getTime()).toBeGreaterThan(r!.sunset.getTime());
+          expect(r!.sun.rise).toBeInstanceOf(Date);
+          expect(r!.sun.set).toBeInstanceOf(Date);
+          expect(r!.sun.nextRise).toBeInstanceOf(Date);
+          expect(r!.sun.set.getTime()).toBeGreaterThan(r!.sun.rise.getTime());
+          expect(r!.sun.nextRise.getTime()).toBeGreaterThan(r!.sun.set.getTime());
         });
 
         it('tithis / nakshatras / yogas / karanas / vara are present and non-empty', () => {
-          expect(r!.tithis.length).toBeGreaterThan(0);
-          expect(r!.nakshatras.length).toBeGreaterThan(0);
-          expect(r!.yogas.length).toBeGreaterThan(0);
-          expect(r!.karanas.length).toBeGreaterThan(0);
-          expect(r!.vara.englishName.length).toBeGreaterThan(0);
+          expect(r!.angas.tithis.length).toBeGreaterThan(0);
+          expect(r!.angas.nakshatras.length).toBeGreaterThan(0);
+          expect(r!.angas.yogas.length).toBeGreaterThan(0);
+          expect(r!.angas.karanas.length).toBeGreaterThan(0);
+          expect(r!.angas.vara.englishName.length).toBeGreaterThan(0);
         });
       });
     });

@@ -1,4 +1,4 @@
-import { SiderealTime } from 'astronomy-engine';
+import { greenwichApparentSiderealDegrees } from '../astronomy/topocentric';
 import { computeAyanamsa, dateToJulianDay } from '../astronomy/ayanamsa';
 import { meanObliquity } from './planets';
 import { computeNatalBasis, type NatalBasis } from './natalBasis';
@@ -74,8 +74,7 @@ export function bhavaFromBasis(basis: NatalBasis, system: HouseSystem): BhavaCha
   const ascSidereal = lagna.siderealLongitude;
 
   // Common: tropical MC (used for 'placidus-kp', informational for the others).
-  const gastHours = SiderealTime(birthDate);
-  const lstDeg = normalize360(gastHours * 15 + location.longitude);
+  const lstDeg = normalize360(greenwichApparentSiderealDegrees(birthDate) + location.longitude);
   const T = (dateToJulianDay(birthDate) - 2451545.0) / 36525.0;
   const εRad = degToRad(meanObliquity(T));
   const mcTropical = computeMcTropical(lstDeg, εRad);

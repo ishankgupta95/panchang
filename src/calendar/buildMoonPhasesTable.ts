@@ -6,16 +6,17 @@
 // *instants* — identical worldwide — so this builder takes no location, only a
 // timezone offset to map each instant onto a local calendar date. Use it to
 // produce a table for any timezone, cache the JSON, and read it back through
-// `getMoonPhasesForYear` / `getMoonPhasesForDate` via their `source` argument.
+// `readMoonPhasesForYear` / `readMoonPhasesForDate` via their `source` argument.
 
-import { getMoonPhasesInRange } from '../astronomy/moonPhase';
+import { computeMoonPhasesInRange } from '../astronomy/moonPhase';
 import type {
+  MoonPhaseDictEntry,
   MoonPhasesFile,
   MoonPhasesTableLanguage,
-  MoonPhaseTableEntryRaw,
   MoonPhaseTableName,
   LocalizedString,
-  RawMoonPhaseTableDay,
+  PackedMoonPhaseEvent,
+  PackedMoonPhaseTableDay,
 } from './moonPhasesTableTypes';
 
 export interface BuildMoonPhasesTableOptions {
@@ -84,19 +85,27 @@ function toDateKey(d: Date, offsetMinutes: number): string {
   return `${y}-${m}-${day}`;
 }
 
-function makeEntry(
+function makeDictEntry(
   phase: MoonPhaseTableName,
-  time: Date,
   languages: readonly MoonPhasesTableLanguage[],
-): MoonPhaseTableEntryRaw {
+): MoonPhaseDictEntry {
   const name: LocalizedString = {};
   const description: LocalizedString = {};
   for (const lang of languages) {
     name[lang] = PHASE_NAME[lang][phase];
     description[lang] = PHASE_DESC[lang][phase];
   }
-  return { name, phase, time: time.toISOString(), description };
+  return { phase, name, description };
 }
+
+/**
+ * The dictionary is exactly the four phases, built up front and in a fixed
+ * order. Unlike festivals there is nothing to discover at runtime — name and
+ * description are pure functions of `phase` — so interning would be ceremony
+ * around a constant.
+ */
+const PHASE_ORDER: readonly MoonPhaseTableName[] =
+  ['new', 'first_quarter', 'full', 'last_quarter'];
 
 /**
  * Compute a Moon-phases table for the given timezone and year range.
@@ -107,7 +116,7 @@ function makeEntry(
  * its local date belongs to. Every in-range year appears as a key.
  *
  * @returns A {@link MoonPhasesFile} ready to serialize, cache, and feed back
- *          into the `getMoonPhasesForYear` / `getMoonPhasesForDate` accessors
+ *          into the `readMoonPhasesForYear` / `readMoonPhasesForDate` accessors
  *          via their `source` argument.
  */
 export function buildMoonPhasesTable(
@@ -140,11 +149,13 @@ export function buildMoonPhasesTable(
   const windowStart = new Date(Date.UTC(startYear, 0, 1) - 2 * dayMs);
   const windowEnd = new Date(Date.UTC(endYear, 11, 31, 23, 59, 59, 999) + 2 * dayMs);
 
-  const events = getMoonPhasesInRange(windowStart, windowEnd);
+  const events = computeMoonPhasesInRange(windowStart, windowEnd);
+  const dict = PHASE_ORDER.map(phase => makeDictEntry(phase, languages));
+  const dictIndex = new Map(PHASE_ORDER.map((phase, i) => [phase, i]));
 
   // Pre-seed every in-range year so no-phase years (none, in practice) still
   // appear, keeping the shape consistent with the other bundled tables.
-  const byYear = new Map<string, Map<string, MoonPhaseTableEntryRaw[]>>();
+  const byYear = new Map<string, Map<string, PackedMoonPhaseEvent[]>>();
   for (let year = startYear; year <= endYear; year++) {
     byYear.set(String(year), new Map());
   }
@@ -158,10 +169,10 @@ export function buildMoonPhasesTable(
       bucket = [];
       dateBuckets.set(key, bucket);
     }
-    bucket.push(makeEntry(ev.phase, ev.time, languages));
+    bucket.push({ i: dictIndex.get(ev.phase)!, t: ev.time.getTime() });
   }
 
-  const years: Record<string, RawMoonPhaseTableDay[]> = {};
+  const years: Record<string, PackedMoonPhaseTableDay[]> = {};
   for (const [yearKey, dateBuckets] of byYear) {
     years[yearKey] = [...dateBuckets.keys()]
       .sort()
@@ -170,6 +181,7 @@ export function buildMoonPhasesTable(
 
   return {
     _meta: {
+      format: 2,
       referenceLocation,
       timezoneOffsetMinutes,
       languages: [...languages],
@@ -178,6 +190,7 @@ export function buildMoonPhasesTable(
       generatedAt,
       note,
     },
+    _dict: dict,
     years,
   };
 }

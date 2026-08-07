@@ -41,7 +41,7 @@ export type {
  * Read straight off `_meta`; provided so callers can range-check without
  * reaching into the file shape.
  */
-export function getEclipsesYearRange(
+export function readEclipsesYearRange(
   source: EclipsesFile,
 ): { start: number; end: number } {
   return { start: source._meta.startYear, end: source._meta.endYear };
@@ -62,6 +62,7 @@ function flatten(
     start: raw.start,
     peak: raw.peak,
     end: raw.end,
+    obscuration: raw.obscuration,
     magnitude: raw.magnitude,
     visibleFromLocation: raw.visibleFromLocation,
     visibleAtPeak: raw.visibleAtPeak,
@@ -84,7 +85,7 @@ function flatten(
  * @param year   Gregorian year.
  * @param lang   `'en'` (default) or `'hi'`.
  */
-export function getEclipsesForYear(
+export function readEclipsesForYear(
   source: EclipsesFile,
   year: number,
   lang: EclipsesTableLanguage = 'en',
@@ -109,7 +110,7 @@ export function getEclipsesForYear(
  *               table's reference timezone is used).
  * @param lang   `'en'` (default) or `'hi'`.
  */
-export function getEclipsesForDate(
+export function readEclipsesForDate(
   source: EclipsesFile,
   date: string | Date,
   lang: EclipsesTableLanguage = 'en',
@@ -131,3 +132,16 @@ function toDateKey(d: Date, offsetMinutes: number): string {
   const day = String(shifted.getUTCDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 }
+
+/**
+ * @deprecated Renamed to {@link readEclipsesForYear} in v5, so that reading a
+ * *table* and running the *engine* stop sharing a `get*` prefix. Kept through
+ * v5; see the README "Upgrading from 4.x" section.
+ */
+export const getEclipsesForYear = readEclipsesForYear;
+
+/** @deprecated Renamed to {@link readEclipsesForDate} in v5. */
+export const getEclipsesForDate = readEclipsesForDate;
+
+/** @deprecated Renamed to {@link readEclipsesYearRange} in v5. */
+export const getEclipsesYearRange = readEclipsesYearRange;

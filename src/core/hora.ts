@@ -1,5 +1,5 @@
 import { buildEqualSlots, VARA_CHALDEAN_START } from '../utils/slots';
-import type { HoraInfo, HoraSlot } from '../types/elements';
+import type { HoraSlot, Unlocalized, UnlocalizedInfo } from '../types/elements';
 
 /**
  * First daytime Hora planet index (Chaldean order) by weekday (Sun=0 … Sat=6).
@@ -20,7 +20,7 @@ function buildHoras(
   firstPlanetIndex: number,
   nameFn: (planetIndex: number) => string,
   count: number,
-): HoraSlot[] {
+): Unlocalized<HoraSlot>[] {
   return buildEqualSlots(reference, durationMs, count, (i, start, end) => {
     const planetIndex = (firstPlanetIndex + i) % 7;
     return { start, end, planetIndex, planet: nameFn(planetIndex) };
@@ -50,7 +50,7 @@ export function computeHora(
   nextSunrise: Date,
   varaIndex: number,
   nameFn: (planetIndex: number) => string,
-): HoraInfo {
+): UnlocalizedInfo<HoraSlot> {
   const dayMs   = sunset.getTime()      - sunrise.getTime();
   const nightMs = nextSunrise.getTime() - sunset.getTime();
   const firstDay   = DAY_FIRST_HORA[varaIndex]!;

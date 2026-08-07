@@ -11,7 +11,7 @@ import { resolveChandraMasaName, resolveMasaName } from '../i18n/resolver';
 import type { NewMoonBounds } from '../astronomy/newMoon';
 import type { GeoLocation } from '../types/location';
 import type { FestivalRegion, Language, LegacyFestivalRegion, MasaSystem } from '../types/options';
-import type { ChandraMasaInfo, FestivalInfo, TimePeriod } from '../types/elements';
+import type { ChandraMasaInfo, FestivalInfo, UtcWindow } from '../types/elements';
 import type { PanchangTranslations } from '../i18n/types';
 
 /** Everything the festival pipeline needs from the surrounding daily panchang. */
@@ -35,7 +35,7 @@ export interface DayFestivalInputs {
   /** First moonrise at/after local midnight, or `null` when not yet resolved. */
   moonriseUtc: Date | null;
   /** Bhadra window overlapping the Hindu day, or `null`. */
-  bhadraUtc: TimePeriod | null;
+  bhadraUtc: UtcWindow | null;
   getMoon: (d: Date) => number;
   getSun: (d: Date) => number;
   getBounds: (ref: Date) => NewMoonBounds;

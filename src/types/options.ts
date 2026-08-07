@@ -88,14 +88,15 @@ export type FestivalRegion =
 /**
  * Pre-v2.1 region identifiers accepted for back-compat. These are mapped
  * to canonical {@link FestivalRegion} values by `resolveRegionAlias` before
- * festival filtering. Slated for removal in v3.
+ * festival filtering. Still accepted in v5; they go in v6 with the other
+ * renamed aliases, so the whole deprecation surface retires at once.
  *
  * - `'tamil'`       → `'tamil-nadu'`
  * - `'bengal'`      → `'west-bengal'`
  * - `'north-india'` → `'all'` (Makar Sankranti is pan-Indian; use explicit
  *                              state slugs for Lohri / Govardhan / Bhai Dooj)
  *
- * @deprecated Use the equivalent {@link FestivalRegion} value. Removal in v3.
+ * @deprecated Use the equivalent {@link FestivalRegion} value. Removal in v6.
  */
 export type LegacyFestivalRegion = 'tamil' | 'bengal' | 'north-india';
 

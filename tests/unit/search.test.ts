@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { findTransitionTime, findDailyElements } from '../../src/utils/search';
+import { findTransitionTime, findDailyElements, STANDARD_PRECISION } from '../../src/utils/search';
 
 describe('findTransitionTime', () => {
   it('finds the moment a step function changes', () => {
@@ -31,14 +31,14 @@ describe('findDailyElements', () => {
 
     // index always returns 5 (no transition in the day window)
     // but findTransitionTime will extend the search and the clamped endTime = nextSunrise
-    const elementAtSunrise = { index: 5, name: 'TestElement', completionPercentage: 50, endTime: null };
+    const elementAtSunrise = { index: 5, name: 'TestElement', completionPercentage: 50, endTime: null as Date | null };
     const getIndexAtTime = (_d: Date) => 5;
     const computeElement = (_d: Date) => ({ ...elementAtSunrise });
 
     const results = findDailyElements(
       sunrise, nextSunrise, elementAtSunrise,
       getIndexAtTime, computeElement,
-      30, 36, 15, 2,
+      30, 36, STANDARD_PRECISION, 2,
     );
 
     expect(results).toHaveLength(1);
@@ -56,18 +56,18 @@ describe('findDailyElements', () => {
     const transitionAt = new Date('2025-01-14T12:00:00Z').getTime();
     const getIndexAtTime = (d: Date) => d.getTime() >= transitionAt ? 6 : 5;
 
-    const elementAtSunrise = { index: 5, name: 'First', completionPercentage: 30, endTime: null };
+    const elementAtSunrise = { index: 5, name: 'First', completionPercentage: 30, endTime: null as Date | null };
     const computeElement = (d: Date) => ({
       index: getIndexAtTime(d),
       name: 'Second',
       completionPercentage: 0,
-      endTime: null as null,
+      endTime: null as Date | null,
     });
 
     const results = findDailyElements(
       sunrise, nextSunrise, elementAtSunrise,
       getIndexAtTime, computeElement,
-      30, 36, 15, 2,
+      30, 36, STANDARD_PRECISION, 2,
     );
 
     expect(results).toHaveLength(2);
@@ -90,18 +90,18 @@ describe('findDailyElements', () => {
       return 5 + Math.floor(hoursFromSunrise / 4);
     };
     const startIndex = getIndexAtTime(sunrise);
-    const elementAtSunrise = { index: startIndex, name: 'E', completionPercentage: 0, endTime: null };
+    const elementAtSunrise = { index: startIndex, name: 'E', completionPercentage: 0, endTime: null as Date | null };
     const computeElement = (d: Date) => ({
       index: getIndexAtTime(d),
       name: 'E',
       completionPercentage: 0,
-      endTime: null as null,
+      endTime: null as Date | null,
     });
 
     const results = findDailyElements(
       sunrise, nextSunrise, elementAtSunrise,
       getIndexAtTime, computeElement,
-      30, 6, 10, 3, // maxPerDay = 3
+      30, 6, STANDARD_PRECISION, 3, // maxPerDay = 3
     );
 
     expect(results.length).toBeLessThanOrEqual(3);

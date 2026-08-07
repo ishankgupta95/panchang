@@ -1,5 +1,7 @@
 import { getDailyPanchang } from '../core/panchang';
 import { validateLocation, validateDate } from '../utils/validation';
+import { resolveUtcOffset } from '../utils/timezone';
+import type { MuhurtaFactor } from './muhurtaTableTypes';
 import type { GeoLocation } from '../types/location';
 import type { Language, AyanamsaType, MasaSystem } from '../types/options';
 import type { DailyPanchangResult } from '../types/panchang';
@@ -20,6 +22,8 @@ import type { DailyPanchangResult } from '../types/panchang';
  * when matched. Auspicious / inauspicious lists shift the score in the
  * direction implied by their name. Unmatched fields contribute neutrally.
  */
+export type { MuhurtaFactor } from './muhurtaTableTypes';
+
 export interface MuhurtaRule {
   /** Stable identifier — e.g. `'vivah'`, `'grihaPravesh'`. Used in result output. */
   occasion: string;
@@ -47,25 +51,6 @@ export interface MuhurtaRule {
   excludeGandaMula?: boolean;
   /** Panchaka (Moon in last 5 nakshatras) disqualifies the day. */
   excludePanchaka?: boolean;
-}
-
-/**
- * One scoring input, in machine-readable form.
- *
- * `MuhurtaScore.reasons` renders these as English sentences, which makes it
- * unsuitable for a localized UI or for programmatic filtering. `factors`
- * carries the same information without the prose: a stable `code`, the axis it
- * came from, the index that triggered it, and its effect on the score.
- */
-export interface MuhurtaFactor {
-  /** Stable identifier, e.g. `'auspicious_tithi'`, `'bhadra'`, `'jwalamukhi'`. */
-  code: string;
-  /** Which panchang axis produced it. `'exclusion'` means the day was zeroed. */
-  axis: 'tithi' | 'nakshatra' | 'vara' | 'yoga' | 'specialYoga' | 'exclusion';
-  /** The element index that triggered it, when the axis has one. */
-  index?: number;
-  /** Points contributed. Negative lowers the score; 0 for a hard exclusion. */
-  delta: number;
 }
 
 /** Per-day score result. */
@@ -179,7 +164,7 @@ export function scoreMuhurta(
  * console.log(dates.length, 'auspicious days; top score', dates[0]?.score);
  * ```
  */
-export function findAuspiciousDates(
+export function computeAuspiciousDatesInRange(
   rule: MuhurtaRule,
   start: Date,
   end: Date,
@@ -220,13 +205,13 @@ function scoreFromPanchang(p: DailyPanchangResult, rule: MuhurtaRule): MuhurtaSc
   let score = 50; // neutral baseline
   let passes = true;
 
-  const tithiAtSunrise = p.tithis[0]!.index;
-  const nakAtSunrise = p.nakshatras[0]!.index;
-  const yogaAtSunrise = p.yogas[0]!.index;
-  const varaIdx = p.vara.index;
+  const tithiAtSunrise = p.angas.tithis[0]!.index;
+  const nakAtSunrise = p.angas.nakshatras[0]!.index;
+  const yogaAtSunrise = p.angas.yogas[0]!.index;
+  const varaIdx = p.angas.vara.index;
 
   // Hard exclusions (zero score immediately if matched).
-  if (rule.excludeBhadra && p.bhadra !== null) {
+  if (rule.excludeBhadra && p.inauspicious.bhadra !== null) {
     return zero(p.date, 'Bhadra Kala active on this day', 'bhadra');
   }
   if (rule.excludeEkadashi) {
@@ -238,13 +223,13 @@ function scoreFromPanchang(p: DailyPanchangResult, rule: MuhurtaRule): MuhurtaSc
   if (rule.excludeEclipse && p.eclipse !== null) {
     return zero(p.date, `Eclipse overlap (${p.eclipse.subtype})`, 'eclipse');
   }
-  if (rule.excludeAdhikaMasa && p.chandramasa.isAdhika) {
+  if (rule.excludeAdhikaMasa && p.calendar.chandramasa.isAdhika) {
     return zero(p.date, 'Adhika (intercalary) lunar month', 'adhika_masa');
   }
-  if (rule.excludeGandaMula && p.gandaMula.active) {
-    return zero(p.date, `Ganda Mula nakshatra (${p.gandaMula.severity})`, 'ganda_mula');
+  if (rule.excludeGandaMula && p.inauspicious.gandaMula.active) {
+    return zero(p.date, `Ganda Mula nakshatra (${p.inauspicious.gandaMula.severity})`, 'ganda_mula');
   }
-  if (rule.excludePanchaka && p.panchaka) {
+  if (rule.excludePanchaka && p.inauspicious.panchaka) {
     return zero(p.date, 'Panchaka active', 'panchaka');
   }
   if (rule.requirePaksha) {
@@ -333,3 +318,35 @@ function zero(date: Date, reason: string, code: string): MuhurtaScore {
     factors: [{ code, axis: 'exclusion', delta: 0 }],
   };
 }
+
+/**
+ * Every scored day in the local calendar year `year`.
+ *
+ * The single-year shape a consumer reaches for first; a thin wrapper over
+ * {@link computeAuspiciousDatesInRange}.
+ *
+ * @example
+ * ```typescript
+ * const days = computeAuspiciousDatesForYear(2027, vivahRule, DELHI, { timezone: 330 });
+ * ```
+ */
+export function computeAuspiciousDatesForYear(
+  year: number,
+  rule: MuhurtaRule,
+  location: GeoLocation,
+  options: MuhurtaScoreOptions & { includeFailures?: boolean },
+): MuhurtaDay[] {
+  if (!Number.isInteger(year)) throw new RangeError(`year must be integer, got ${year}`);
+  const offset = resolveUtcOffset(options.timezone, new Date(Date.UTC(year, 6, 1)));
+  const start = new Date(Date.UTC(year, 0, 1) - offset * 60_000);
+  const end = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999) - offset * 60_000);
+  return computeAuspiciousDatesInRange(rule, start, end, location, options);
+}
+
+/**
+ * @deprecated Renamed to {@link computeAuspiciousDatesInRange} in v5, so that
+ * running the *engine* and reading a *table* stop sharing a prefix, and so the
+ * muhurta family matches festivals / eclipses / Moon phases. Kept through v5;
+ * see the README "Upgrading from 4.x" section.
+ */
+export const findAuspiciousDates = computeAuspiciousDatesInRange;

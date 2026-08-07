@@ -1,4 +1,4 @@
-import { Body, GeoVector, Ecliptic, MakeTime } from 'astronomy-engine';
+import { getTropicalPlanetLongitude, type PlanetBody } from '../astronomy/planet';
 import { computeAyanamsa, dateToJulianDay } from '../astronomy/ayanamsa';
 import { getSiderealSunLongitude } from '../astronomy/sun';
 import { getSiderealMoonLongitude } from '../astronomy/moon';
@@ -29,24 +29,23 @@ export function meanObliquity(T: number): number {
   return 23.439291111 - 0.013004167 * T - 0.000000164 * T * T + 0.000000504 * T * T * T;
 }
 
-/**
- * Tropical geocentric ecliptic longitude of a planet via astronomy-engine.
- * Uses GeoVector (geocentric) + Ecliptic conversion — correct for Vedic astrology.
- */
-function getTropicalPlanetLongitude(body: Body, date: Date): number {
-  const vec = GeoVector(body, MakeTime(date), true);
-  return Ecliptic(vec).elon;
-}
+export { getTropicalPlanetLongitude };
 
 /**
  * Retrograde detection: compare geocentric ecliptic longitude 1 hour apart.
  * Returns true if the longitude is decreasing (retrograde motion).
  * Handles the 359→0 wrap-around boundary.
+ *
+ * Before Phase 36.4 the two probes here were taken **without** aberration while
+ * the published longitude was taken **with** it — an inconsistency that could
+ * not affect the answer, since aberration is common to both probes and cancels
+ * in the difference, but which had no reason to exist. Both now go through the
+ * same apparent-position path.
  */
-function isRetrograde(body: Body, date: Date): boolean {
+function isRetrograde(body: PlanetBody, date: Date): boolean {
   const dt = 3600_000; // 1 hour in ms
-  const lon0 = Ecliptic(GeoVector(body, MakeTime(new Date(date.getTime() - dt)), false)).elon;
-  const lon1 = Ecliptic(GeoVector(body, MakeTime(new Date(date.getTime() + dt)), false)).elon;
+  const lon0 = getTropicalPlanetLongitude(body, new Date(date.getTime() - dt));
+  const lon1 = getTropicalPlanetLongitude(body, new Date(date.getTime() + dt));
   // Unwrap for boundary crossing
   let delta = lon1 - lon0;
   if (delta > 180) delta -= 360;
@@ -180,12 +179,12 @@ export function computePlanetaryPositions(
   // Moon — use existing helper (GeoMoon via Ecliptic, not EclipticLongitude)
   const moonSid = getSiderealMoonLongitude(date, ayanamsaType);
 
-  // Mars through Saturn — EclipticLongitude gives geocentric tropical lon
-  const marsTrop = getTropicalPlanetLongitude(Body.Mars, date);
-  const mercTrop = getTropicalPlanetLongitude(Body.Mercury, date);
-  const jupTrop = getTropicalPlanetLongitude(Body.Jupiter, date);
-  const venTrop = getTropicalPlanetLongitude(Body.Venus, date);
-  const satTrop = getTropicalPlanetLongitude(Body.Saturn, date);
+  // Mars through Saturn — apparent geocentric tropical longitude.
+  const marsTrop = getTropicalPlanetLongitude('mars', date);
+  const mercTrop = getTropicalPlanetLongitude('mercury', date);
+  const jupTrop = getTropicalPlanetLongitude('jupiter', date);
+  const venTrop = getTropicalPlanetLongitude('venus', date);
+  const satTrop = getTropicalPlanetLongitude('saturn', date);
 
   // Rahu — opt-in 'true' node uses Meeus periodic correction (typ. ±0.6°)
   // vs 'mean' node default (typ. ±0.5°, worst-case ±2°). Ketu always opposite.
@@ -194,11 +193,11 @@ export function computePlanetaryPositions(
   const ketuTrop = normalize360(rahuTrop + 180);
 
   // Retrograde: not applicable to Sun/Moon/nodes
-  const marsRetro = isRetrograde(Body.Mars, date);
-  const mercRetro = isRetrograde(Body.Mercury, date);
-  const jupRetro = isRetrograde(Body.Jupiter, date);
-  const venRetro = isRetrograde(Body.Venus, date);
-  const satRetro = isRetrograde(Body.Saturn, date);
+  const marsRetro = isRetrograde('mars', date);
+  const mercRetro = isRetrograde('mercury', date);
+  const jupRetro = isRetrograde('jupiter', date);
+  const venRetro = isRetrograde('venus', date);
+  const satRetro = isRetrograde('saturn', date);
 
   const g = (planet: GrahaName, sid: number, retro: boolean) =>
     buildGrahaPosition(planet, sid, retro, nakshatraName, rashiName);

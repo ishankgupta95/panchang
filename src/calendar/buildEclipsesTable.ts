@@ -9,7 +9,7 @@
 // returned JSON, and read it back through `getEclipsesForYear` /
 // `getEclipsesForDate` by passing it as their `source` argument.
 
-import { getEclipsesInRange } from './yearly';
+import { computeEclipsesInRange } from './yearly';
 import { isEclipseVisibleAnyPhase } from '../astronomy/eclipse';
 import type { GeoLocation } from '../types/location';
 import type { EclipseInfo } from '../types/elements';
@@ -86,7 +86,8 @@ function localizedName(
 function localizedDescription(
   kind: EclipseTableKind,
   subtype: EclipseTableSubtype,
-  magnitude: number,
+  /** Area fraction — the sentence ends in "% obscuration", not "% magnitude". */
+  obscuration: number,
   lang: EclipsesTableLanguage,
 ): string {
   const name = localizedName(kind, subtype, lang);
@@ -98,7 +99,7 @@ function localizedDescription(
       ? `${name} — केवल उपच्छाया छाया; सूतक नहीं।`
       : `${name} — penumbral shadow only; no sutak.`;
   }
-  const pct = Math.round(magnitude * 100);
+  const pct = Math.round(obscuration * 100);
   return lang === 'hi'
     ? `${name} — ${pct}% ग्रास।`
     : `${name} — ${pct}% obscuration.`;
@@ -124,7 +125,7 @@ function makeEntry(
   const description: LocalizedString = {};
   for (const lang of languages) {
     name[lang] = localizedName(kind, subtype, lang);
-    description[lang] = localizedDescription(kind, subtype, e.magnitude, lang);
+    description[lang] = localizedDescription(kind, subtype, e.obscuration, lang);
   }
 
   const entry: EclipseTableEntryRaw = {
@@ -134,6 +135,7 @@ function makeEntry(
     start: e.start.toISOString(),
     peak: e.peak.toISOString(),
     end: e.end.toISOString(),
+    obscuration: e.obscuration,
     magnitude: e.magnitude,
     visibleFromLocation: anyPhaseVisible,
     visibleAtPeak: e.visibleFromLocation,
@@ -196,7 +198,7 @@ export function buildEclipsesTable(
 
   // Visibility is per-phase: an eclipse counts as visible if the body clears
   // the horizon during any phase, not just at peak.
-  const eclipses = getEclipsesInRange(windowStart, windowEnd, location)
+  const eclipses = computeEclipsesInRange(windowStart, windowEnd, location)
     .map(e => ({ e, anyPhase: isEclipseVisibleAnyPhase(e, location) }))
     .filter(({ anyPhase }) => !visibleOnly || anyPhase);
 

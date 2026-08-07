@@ -23,7 +23,7 @@ describe('resolveRegionAlias', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     expect(resolveRegionAlias('tamil')).toBe('tamil-nadu');
     expect(warn).toHaveBeenCalledTimes(1);
-    const msg = warn.mock.calls[0][0] as string;
+    const msg = warn.mock.calls[0]![0] as string;
     expect(msg).toContain("'tamil'");
     expect(msg).toContain("'tamil-nadu'");
     expect(msg).toMatch(/deprecated|v3/i);

@@ -10,20 +10,33 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { MoonPhase, SearchMoonPhase } from 'astronomy-engine';
 import { boundingNewMoons, NewMoonCache } from '../../src/astronomy/newMoon';
+import { moonSunElongation, searchMoonPhase } from '../../src/astronomy/lunation';
 
 const DAY_MS = 86_400_000;
 
-/** Independent reference: the wide-scan formulation, inlined. */
+/**
+ * Independent reference: the wide-scan formulation, inlined.
+ *
+ * This used to call `astronomy-engine`'s `SearchMoonPhase`, and Phase 36.3
+ * found that it was answering a different question. `MoonPhase` is
+ * `PairLongitude(Moon, Sun)`, a **geometric** longitude difference; every tithi
+ * in this library is computed from **apparent** longitudes. The two disagree by
+ * roughly the solar aberration constant — measured 37–46 s — so the reported
+ * "new moon instant" and the Amavasya boundary it is supposed to *be* were two
+ * different numbers.
+ *
+ * They now agree to a millisecond. What this test pins is what its header always
+ * said it pinned: that the seeded window returns what the wide scan returns.
+ */
 function boundingNewMoonsByScan(ref: Date): { prev: Date; next: Date } {
-  const first = SearchMoonPhase(0, new Date(ref.getTime() - 40 * DAY_MS), 45);
+  const first = searchMoonPhase(0, new Date(ref.getTime() - 40 * DAY_MS), 45);
   if (!first) throw new Error('no new moon found');
-  let prev = first.date;
-  let next = SearchMoonPhase(0, new Date(prev.getTime() + DAY_MS), 45)!.date;
+  let prev = first;
+  let next = searchMoonPhase(0, new Date(prev.getTime() + DAY_MS), 45)!;
   while (next.getTime() <= ref.getTime()) {
     prev = next;
-    next = SearchMoonPhase(0, new Date(prev.getTime() + DAY_MS), 45)!.date;
+    next = searchMoonPhase(0, new Date(prev.getTime() + DAY_MS), 45)!;
   }
   return { prev, next };
 }
@@ -68,7 +81,7 @@ describe('boundingNewMoons', () => {
   it('holds at the boundary instants themselves', () => {
     // A reference exactly at a new moon must take it as `prev`, not `next`.
     const anchor = new Date(Date.UTC(2026, 5, 15));
-    const newMoon = SearchMoonPhase(0, anchor, 40)!.date;
+    const newMoon = searchMoonPhase(0, anchor, 40)!;
     const { prev, next } = boundingNewMoons(newMoon);
     expect(prev.getTime()).toBe(newMoon.getTime());
     expect(next.getTime()).toBeGreaterThan(newMoon.getTime());
@@ -84,7 +97,7 @@ describe('boundingNewMoons', () => {
     let worstErrorDays = 0;
     for (let i = 0; i < 400; i++) {
       const ref = new Date(Date.UTC(2020, 0, 1) + i * 9 * DAY_MS);
-      const seedMs = ref.getTime() - (MoonPhase(ref) / 360) * SYNODIC_MONTH_DAYS * DAY_MS;
+      const seedMs = ref.getTime() - (moonSunElongation(ref) / 360) * SYNODIC_MONTH_DAYS * DAY_MS;
       const { prev } = boundingNewMoonsByScan(ref);
       worstErrorDays = Math.max(worstErrorDays, Math.abs(seedMs - prev.getTime()) / DAY_MS);
     }

@@ -52,7 +52,7 @@ function runSweep(): SweepCounts {
     const r = getDailyPanchang(date, DELHI, { timezone: 330 });
     if (!r) continue;
     for (const y of r.specialYogas) {
-      if (y.type in counts) (counts as Record<string, number>)[y.type]!++;
+      if (y.type in counts) counts[y.type as keyof SweepCounts]++;
     }
   }
   return counts;
@@ -107,10 +107,10 @@ describe('v2.3 yogas — self-consistency on emission days', () => {
       if (!r) continue;
       if (r.specialYogas.some((y) => y.type === type)) {
         return {
-          moonIdx: r.nakshatras[0]!.index,
-          sunIdx: r.suryaNakshatra.index,
-          varaIdx: r.vara.index,
-          tithiIdx: r.tithis[0]!.index,
+          moonIdx: r.angas.nakshatras[0]!.index,
+          sunIdx: r.sun.nakshatra.index,
+          varaIdx: r.angas.vara.index,
+          tithiIdx: r.angas.tithis[0]!.index,
         };
       }
     }

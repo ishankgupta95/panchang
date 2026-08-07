@@ -1,3 +1,4 @@
+import { solveElementBoundary, type ElementAngle } from '../utils/search';
 import { getKaranaIndexAtTime } from './karana';
 import { KARANA_SPAN } from '../utils/constants';
 import type { BhadraInfo } from '../types/elements';
@@ -130,8 +131,21 @@ export function computeBhadraKaal(
 
   if (vishtiSampleTime === null || vishtiKaranaIndex < 0) return null;
 
-  const TOL_MS = 30_000;
-  const MAX_ITERS = 30;
+  /**
+   * The bracketing bisection stops here and the secant takes over.
+   *
+   * This used to bisect all the way to a 30-second tolerance and return the
+   * upper bracket, which put every published Bhadra window on a 30 s grid — so
+   * it moved in whole 30 s steps whenever anything upstream moved at all,
+   * against karana end-times that are accurate to 24 ms. Measured during Phase
+   * 36.2: 15.8 s of Bhadra movement from a 6.8 s karana shift.
+   */
+  const BRACKET_MS = 120_000;
+  const MAX_BRACKET_ITERS = 30;
+  const angle: ElementAngle = {
+    angleAt: (d: Date) => getMoon(d) - getSun(d),
+    spanDeg: 360 / KARANA_CYCLE_LENGTH,
+  };
 
   // Backward search for start
   let startTime: Date;
@@ -142,12 +156,15 @@ export function computeBhadraKaal(
     } else {
       let lo = searchStart.getTime();
       let hi = vishtiSampleTime.getTime();
-      for (let i = 0; i < MAX_ITERS && hi - lo > TOL_MS; i++) {
+      for (let i = 0; i < MAX_BRACKET_ITERS && hi - lo > BRACKET_MS; i++) {
         const mid = (lo + hi) / 2;
         if (karanaAt(new Date(mid)) === vishtiKaranaIndex) hi = mid;
         else lo = mid;
       }
-      startTime = new Date(hi);
+      const solved = solveElementBoundary(
+        lo, hi, angle, (ms) => karanaAt(new Date(ms)) !== vishtiKaranaIndex,
+      );
+      startTime = new Date(solved ?? hi);
     }
   }
 
@@ -160,12 +177,15 @@ export function computeBhadraKaal(
     } else {
       let lo = vishtiSampleTime.getTime();
       let hi = searchEnd.getTime();
-      for (let i = 0; i < MAX_ITERS && hi - lo > TOL_MS; i++) {
+      for (let i = 0; i < MAX_BRACKET_ITERS && hi - lo > BRACKET_MS; i++) {
         const mid = (lo + hi) / 2;
         if (karanaAt(new Date(mid)) === vishtiKaranaIndex) lo = mid;
         else hi = mid;
       }
-      endTime = new Date(hi);
+      const solved = solveElementBoundary(
+        lo, hi, angle, (ms) => karanaAt(new Date(ms)) === vishtiKaranaIndex,
+      );
+      endTime = new Date(solved ?? hi);
     }
   }
 

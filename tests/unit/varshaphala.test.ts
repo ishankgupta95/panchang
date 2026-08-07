@@ -7,7 +7,7 @@
  *      sun longitude to ≤ 0.0002° (twice the algorithm tolerance) and that
  *      the return falls within ±2 days of the calendar anniversary.
  *   2. **Newton-search robustness** — exercise the search function via the
- *      `_findSolarReturnForTest` internal export at age=1, age=10, age=50,
+ *      `findSolarReturn` internal export at age=1, age=10, age=50,
  *      with a range of natal seasons. Convergence + correctness only.
  *   3. **Muntha** — pin the rashi advance: `(natalLagna + age) mod 12`.
  *      Test for ages 0..23 across multiple natal lagnas.
@@ -33,7 +33,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   computeVarshaphala,
-  _findSolarReturnForTest,
+  findSolarReturn,
   _isDayBirthForTest,
   _triraashiPatiForTest,
   _evaluateSahamForTest,
@@ -129,11 +129,11 @@ describe('computeVarshaphala — solar-return convergence', () => {
 
 // ── 2. Newton-search robustness (internal) ────────────
 
-describe('_findSolarReturnForTest — internal Newton search', () => {
+describe('findSolarReturn — internal Newton search', () => {
   it('age=1 from arbitrary natal — sub-second precision', () => {
     const natal = new Date('1990-06-15T08:30:00Z');
     const natalSun = getSiderealSunLongitude(natal, 'lahiri');
-    const t = _findSolarReturnForTest(natal, 1, natalSun, 'lahiri');
+    const t = findSolarReturn(natal, 1, natalSun, 'lahiri');
     const sun = getSiderealSunLongitude(t, 'lahiri');
     let diff = sun - natalSun;
     diff = ((diff + 540) % 360) - 180;
@@ -143,7 +143,7 @@ describe('_findSolarReturnForTest — internal Newton search', () => {
   it('age=20 from January birth', () => {
     const natal = new Date('1985-01-12T03:00:00Z');
     const natalSun = getSiderealSunLongitude(natal, 'lahiri');
-    const t = _findSolarReturnForTest(natal, 20, natalSun, 'lahiri');
+    const t = findSolarReturn(natal, 20, natalSun, 'lahiri');
     const sun = getSiderealSunLongitude(t, 'lahiri');
     let diff = sun - natalSun;
     diff = ((diff + 540) % 360) - 180;
@@ -156,8 +156,8 @@ describe('_findSolarReturnForTest — internal Newton search', () => {
     // tropical longitude too — but the natal sidereal value does depend on it.
     const lahiriSun = getSiderealSunLongitude(natal, 'lahiri');
     const tirSun = getSiderealSunLongitude(natal, 'thirukanitham');
-    const tLah = _findSolarReturnForTest(natal, 5, lahiriSun, 'lahiri');
-    const tTir = _findSolarReturnForTest(natal, 5, tirSun, 'thirukanitham');
+    const tLah = findSolarReturn(natal, 5, lahiriSun, 'lahiri');
+    const tTir = findSolarReturn(natal, 5, tirSun, 'thirukanitham');
     // Both should converge to within ~1 minute of each other (same physical instant up to ayanamsa drift).
     const diffMin = Math.abs(tLah.getTime() - tTir.getTime()) / 60_000;
     expect(diffMin).toBeLessThan(2.0);

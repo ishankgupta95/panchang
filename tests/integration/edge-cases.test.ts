@@ -17,7 +17,7 @@ const TROMSO = { latitude: 69.65, longitude: 18.96 };
 
 describe('edge cases', () => {
   it('Tromsø in June returns null (midnight sun — Hindu day undefined)', () => {
-    const result = getDailyPanchang(noonUtc(2025, 6, 21), TROMSO, { timezone: 120 });
+    const result = getDailyPanchang(noonUtc(2025, 6, 21), TROMSO, { timezone: 120 })!;
     expect(result).toBeNull();
   });
 
@@ -43,18 +43,18 @@ describe('edge cases', () => {
   });
 
   it('negative longitude (New York) returns a valid result', () => {
-    const result = getDailyPanchang(noonUtc(2025, 7, 4), NYC, { timezone: -240 });
-    expect(result.sunrise).toBeInstanceOf(Date);
-    expect(result.tithis.length).toBeGreaterThanOrEqual(1);
-    expect(result.vara.englishName).toBe('Friday');
+    const result = getDailyPanchang(noonUtc(2025, 7, 4), NYC, { timezone: -240 })!;
+    expect(result.sun.rise).toBeInstanceOf(Date);
+    expect(result.angas.tithis.length).toBeGreaterThanOrEqual(1);
+    expect(result.angas.vara.englishName).toBe('Friday');
   });
 
   it('getInstantPanchang before sunrise returns previous calendar day vara', () => {
     // Pune sunrise on 2025-01-14 is ~01:39 UTC — use 00:30 UTC (well before sunrise)
     const beforeSunrise = new Date('2025-01-14T00:30:00Z');
-    const result = getInstantPanchang(beforeSunrise, PUNE);
+    const result = getInstantPanchang(beforeSunrise, PUNE)!;
     // 2025-01-14 is Tuesday; before-sunrise → vara should be Monday (previous day)
-    expect(result.vara.englishName).toBe('Monday');
+    expect(result.angas.vara.englishName).toBe('Monday');
   });
 
   it('computeEndTimes: false returns exactly 1 tithi/nakshatra/yoga/karana', () => {
@@ -62,11 +62,11 @@ describe('edge cases', () => {
       noonUtc(2025, 1, 14),
       PUNE,
       { timezone: 330, computeEndTimes: false },
-    );
-    expect(result.tithis).toHaveLength(1);
-    expect(result.nakshatras).toHaveLength(1);
-    expect(result.yogas).toHaveLength(1);
-    expect(result.karanas).toHaveLength(1);
+    )!;
+    expect(result.angas.tithis).toHaveLength(1);
+    expect(result.angas.nakshatras).toHaveLength(1);
+    expect(result.angas.yogas).toHaveLength(1);
+    expect(result.angas.karanas).toHaveLength(1);
   });
 });
 
@@ -98,16 +98,53 @@ describe('edge cases', () => {
 describe('element slivers at the day boundary', () => {
   const LONDON = { latitude: 51.5074, longitude: -0.1278 };
   const SLIVER_DAY = noonUtc(2027, 10, 5);
-  const TRUE_TRANSITION_UTC = Date.UTC(2027, 9, 6, 6, 8, 46, 935);
+  /**
+   * Re-pinned in Phase 36.2, when the Sun and Moon series became this
+   * library's own. Predicted before it was observed, per tests/TIERS.md:
+   *
+   *   yoga carries Moon + Sun at 0.590°/hr, so δ″ ⇒ δ × 1.69 s.
+   *   The two implementations differ by ~1.2″ (Moon) and ~0.6″ (Sun) typically,
+   *   which is ~2–3 s, worst ~11 s.
+   *
+   *   predicted: a shift of a few seconds, either direction
+   *   observed:  −1.416 s (06:08:46.935 → 06:08:45.519), i.e. 0.84″ combined
+   *
+   * Re-pinned again at the end of Phase 36, when the truncation budgets were
+   * raised to 0.4″ for both bodies. Predicted from the same coefficient:
+   * the *change* in each longitude is bounded by old truncation plus new, so
+   * (0.6 + 0.5)″ × 1.69 = 1.9 s worst. A before/after `notes/diff.mjs` over
+   * 241 MB of output put the whole yoga family at 569 ms max before this test
+   * was looked at.
+   *
+   *   predicted: ≤1.9 s, either direction
+   *   observed:  +0.378 s (06:08:45.519 → 06:08:45.897)
+   *
+   * Re-pinned a third time when `PROBE_COUNT` in the generator went from 600 to
+   * 100,000, so the truncation budgets are met over the sample size that
+   * verifies them rather than over one 170× smaller. The series grew and the
+   * longitudes moved toward the untruncated theory. Predicted from the same
+   * coefficient — the change in each longitude is bounded by the old truncation
+   * residual, so (0.9 + 0.9)″ × 1.69 = 3.0 s worst — and the whole yoga family
+   * came in at 442 ms max across 241 MB of before/after output:
+   *
+   *   predicted: ≤3.0 s, either direction
+   *   observed:  −0.196 s (06:08:45.897 → 06:08:45.701)
+   *
+   * The value is not a fixture in the usual sense — the third test below
+   * re-derives it by bisecting exact longitudes, independently of the
+   * library's own search. What it pins is agreement between the search and
+   * that bisection, and that agreement is unchanged.
+   */
+  const TRUE_TRANSITION_UTC = Date.UTC(2027, 9, 6, 6, 8, 45, 701);
 
   it('resolves the ~6s third yoga', () => {
     const r = getDailyPanchang(SLIVER_DAY, LONDON, { timezone: 0 });
     expect(r).not.toBeNull();
-    expect(r!.yogas).toHaveLength(3);
+    expect(r!.angas.yogas).toHaveLength(3);
 
-    const sliver = r!.yogas[2]!;
+    const sliver = r!.angas.yogas[2]!;
     expect(sliver.name).toBe('Shobhana');
-    expect(sliver.endTime!.getTime()).toBe(r!.nextSunrise.getTime());
+    expect(sliver.endTime!.getTime()).toBe(r!.sun.nextRise.getTime());
     const spanMs = sliver.endTime!.getTime() - sliver.startTime!.getTime();
     expect(spanMs).toBeGreaterThan(0);
     expect(spanMs).toBeLessThan(60_000);
@@ -117,7 +154,7 @@ describe('element slivers at the day boundary', () => {
     // The secant solve converges to the root. The residual is the bounded
     // forward walk that restores the never-early guarantee — one 25 ms step.
     const r = getDailyPanchang(SLIVER_DAY, LONDON, { timezone: 0 })!;
-    const error = r.yogas[1]!.endTime!.getTime() - TRUE_TRANSITION_UTC;
+    const error = r.angas.yogas[1]!.endTime!.getTime() - TRUE_TRANSITION_UTC;
     expect(error, `error ${error}ms`).toBeGreaterThanOrEqual(0);
     expect(error, `error ${error}ms`).toBeLessThanOrEqual(25);
   });
@@ -139,7 +176,7 @@ describe('element slivers at the day boundary', () => {
     }
     expect(hi).toBe(TRUE_TRANSITION_UTC);
     const r = getDailyPanchang(SLIVER_DAY, LONDON, { timezone: 0 })!;
-    expect(hi).toBeLessThan(r.nextSunrise.getTime());
-    expect(r.nextSunrise.getTime() - hi).toBeLessThan(30_000);
+    expect(hi).toBeLessThan(r.sun.nextRise.getTime());
+    expect(r.sun.nextRise.getTime() - hi).toBeLessThan(30_000);
   });
 });

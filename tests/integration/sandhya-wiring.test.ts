@@ -14,25 +14,25 @@ describe('Madhyahna / Sandhya wiring — daily panchang', () => {
 
   it('all five new fields are present', () => {
     expect(r).not.toBeNull();
-    expect(r.madhyahna).toBeDefined();
-    expect(r.pratahSandhya).toBeDefined();
-    expect(r.sayahnaSandhya).toBeDefined();
-    expect(typeof r.dinamanaMinutes).toBe('number');
-    expect(typeof r.ratrimanaMinutes).toBe('number');
+    expect(r.muhurtas.madhyahna).toBeDefined();
+    expect(r.muhurtas.pratahSandhya).toBeDefined();
+    expect(r.muhurtas.sayahnaSandhya).toBeDefined();
+    expect(typeof r.sun.dinamanaMinutes).toBe('number');
+    expect(typeof r.sun.ratrimanaMinutes).toBe('number');
   });
 
   it('madhyahna lands strictly between sunrise and sunset', () => {
-    expect(r.madhyahna.start.getTime()).toBeGreaterThan(r.sunrise.getTime());
-    expect(r.madhyahna.end.getTime()).toBeLessThan(r.sunset.getTime());
+    expect(r.muhurtas.madhyahna.start.getTime()).toBeGreaterThan(r.sun.rise.getTime());
+    expect(r.muhurtas.madhyahna.end.getTime()).toBeLessThan(r.sun.set.getTime());
   });
 
   it('madhyahna duration is 48 minutes', () => {
-    expect(r.madhyahna.end.getTime() - r.madhyahna.start.getTime()).toBe(48 * 60_000);
+    expect(r.muhurtas.madhyahna.end.getTime() - r.muhurtas.madhyahna.start.getTime()).toBe(48 * 60_000);
   });
 
   it('madhyahna is centered on the sunrise→sunset midpoint', () => {
-    const noonMs = (r.sunrise.getTime() + r.sunset.getTime()) / 2;
-    const centerMs = (r.madhyahna.start.getTime() + r.madhyahna.end.getTime()) / 2;
+    const noonMs = (r.sun.rise.getTime() + r.sun.set.getTime()) / 2;
+    const centerMs = (r.muhurtas.madhyahna.start.getTime() + r.muhurtas.madhyahna.end.getTime()) / 2;
     // Sub-millisecond, not exact: when sunrise + sunset is odd the true midpoint
     // lands on a half-millisecond, which an integer-ms Date cannot represent.
     // Asserting equality only held while that sum happened to be even.
@@ -40,31 +40,31 @@ describe('Madhyahna / Sandhya wiring — daily panchang', () => {
   });
 
   it('pratah sandhya ends at sunrise and is 3 night-ghatikas wide', () => {
-    expect(r.pratahSandhya.end.getTime()).toBe(r.sunrise.getTime());
-    expect(r.pratahSandhya.start.getTime()).toBeLessThan(r.sunrise.getTime());
-    const widthMs = r.pratahSandhya.end.getTime() - r.pratahSandhya.start.getTime();
-    const expectedMs = r.ratrimanaMinutes * 60_000 / 10;
+    expect(r.muhurtas.pratahSandhya.end.getTime()).toBe(r.sun.rise.getTime());
+    expect(r.muhurtas.pratahSandhya.start.getTime()).toBeLessThan(r.sun.rise.getTime());
+    const widthMs = r.muhurtas.pratahSandhya.end.getTime() - r.muhurtas.pratahSandhya.start.getTime();
+    const expectedMs = r.sun.ratrimanaMinutes * 60_000 / 10;
     expect(Math.abs(widthMs - expectedMs)).toBeLessThan(60_000);
   });
 
   it('sayahna sandhya starts at sunset and is 3 night-ghatikas wide', () => {
-    expect(r.sayahnaSandhya.start.getTime()).toBe(r.sunset.getTime());
-    expect(r.sayahnaSandhya.end.getTime()).toBeGreaterThan(r.sunset.getTime());
-    const widthMs = r.sayahnaSandhya.end.getTime() - r.sayahnaSandhya.start.getTime();
-    const expectedMs = r.ratrimanaMinutes * 60_000 / 10;
+    expect(r.muhurtas.sayahnaSandhya.start.getTime()).toBe(r.sun.set.getTime());
+    expect(r.muhurtas.sayahnaSandhya.end.getTime()).toBeGreaterThan(r.sun.set.getTime());
+    const widthMs = r.muhurtas.sayahnaSandhya.end.getTime() - r.muhurtas.sayahnaSandhya.start.getTime();
+    const expectedMs = r.sun.ratrimanaMinutes * 60_000 / 10;
     expect(Math.abs(widthMs - expectedMs)).toBeLessThan(60_000);
   });
 
   it('dinamanaMinutes equals dayDurationMinutes', () => {
-    expect(r.dinamanaMinutes).toBe(r.dayDurationMinutes);
+    expect(r.sun.dinamanaMinutes).toBe(r.sun.dayDurationMinutes);
   });
 
   it('ratrimanaMinutes equals nightDurationMinutes', () => {
-    expect(r.ratrimanaMinutes).toBe(r.nightDurationMinutes);
+    expect(r.sun.ratrimanaMinutes).toBe(r.sun.nightDurationMinutes);
   });
 
   it('dinamana + ratrimana ≈ 24 h (within 1 min rounding)', () => {
-    expect(Math.abs(r.dinamanaMinutes + r.ratrimanaMinutes - 1440)).toBeLessThanOrEqual(1);
+    expect(Math.abs(r.sun.dinamanaMinutes + r.sun.ratrimanaMinutes - 1440)).toBeLessThanOrEqual(1);
   });
 });
 
@@ -83,17 +83,17 @@ describe('Madhyahna / Sandhya wiring — multi-city sweep', () => {
     it(`${name}: pratah sandhya end == sunrise`, () => {
       const r = getDailyPanchang(NOON_2025_01_14, loc, { timezone: tz })!;
       expect(r).not.toBeNull();
-      expect(r.pratahSandhya.end.getTime()).toBe(r.sunrise.getTime());
+      expect(r.muhurtas.pratahSandhya.end.getTime()).toBe(r.sun.rise.getTime());
     });
 
     it(`${name}: sayahna sandhya start == sunset`, () => {
       const r = getDailyPanchang(NOON_2025_01_14, loc, { timezone: tz })!;
-      expect(r.sayahnaSandhya.start.getTime()).toBe(r.sunset.getTime());
+      expect(r.muhurtas.sayahnaSandhya.start.getTime()).toBe(r.sun.set.getTime());
     });
 
     it(`${name}: dinamana + ratrimana ≈ 1440 min`, () => {
       const r = getDailyPanchang(NOON_2025_01_14, loc, { timezone: tz })!;
-      expect(Math.abs(r.dinamanaMinutes + r.ratrimanaMinutes - 1440)).toBeLessThanOrEqual(1);
+      expect(Math.abs(r.sun.dinamanaMinutes + r.sun.ratrimanaMinutes - 1440)).toBeLessThanOrEqual(1);
     });
   }
 });
@@ -120,9 +120,10 @@ describe('Sandhya cross-check (DrikPanchang-style, ±2 min tolerance)', () => {
     it(`${city}: Pratah Sandhya end within ±2 min of expected sunrise`, () => {
       const r = getDailyPanchang(NOON_2025_01_14, loc, { timezone: tz })!;
       expect(r).not.toBeNull();
-      const end = r.pratahSandhya.end;
+      // v5: read the wall clock from the offset-carrying `*Local` string.
+      const [h, m] = r.muhurtas.pratahSandhya.endLocal.slice(11, 16).split(':').map(Number) as [number, number];
       const expectedMin = sunriseLocalHHMM[0] * 60 + sunriseLocalHHMM[1];
-      const actualMin = end.getUTCHours() * 60 + end.getUTCMinutes();
+      const actualMin = h * 60 + m;
       expect(Math.abs(actualMin - expectedMin)).toBeLessThanOrEqual(2);
     });
   }

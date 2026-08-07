@@ -1,5 +1,5 @@
 import { assertNakshatraIndex } from '../utils/validation';
-import type { TimePeriod } from '../types/elements';
+import type { UtcWindow } from '../types/elements';
 
 /**
  * Abhijit Muhurta: the 8th muhurta when daytime is divided into 15 equal parts.
@@ -36,7 +36,7 @@ export function computeAbhijitMuhurta(
   sunrise: Date,
   sunset: Date,
   varaIndex?: number,
-): TimePeriod | null {
+): UtcWindow | null {
   if (varaIndex === 3) return null;
 
   const dayDurationMs = sunset.getTime() - sunrise.getTime();
@@ -69,7 +69,7 @@ export function computeAbhijitMuhurta(
  * // bm.end === sunrise − (dayDuration/30)
  * ```
  */
-export function computeBrahmaMuhurta(sunrise: Date, sunset: Date): TimePeriod {
+export function computeBrahmaMuhurta(sunrise: Date, sunset: Date): UtcWindow {
   const dayDurationMs = sunset.getTime() - sunrise.getTime();
   const muhurtaDurationMs = dayDurationMs / 30;
 
@@ -88,7 +88,7 @@ export function computeBrahmaMuhurta(sunrise: Date, sunset: Date): TimePeriod {
  * @param sunrise Sunrise UTC Date.
  * @param sunset  Sunset UTC Date.
  */
-export function computeVijayaMuhurta(sunrise: Date, sunset: Date): TimePeriod {
+export function computeVijayaMuhurta(sunrise: Date, sunset: Date): UtcWindow {
   const dayDurationMs = sunset.getTime() - sunrise.getTime();
   const muhurtaDurationMs = dayDurationMs / 15;
   const start = new Date(sunrise.getTime() + 10 * muhurtaDurationMs);
@@ -106,7 +106,7 @@ export function computeVijayaMuhurta(sunrise: Date, sunset: Date): TimePeriod {
  *
  * @param sunset Sunset UTC Date.
  */
-export function computeGodhuliMuhurta(sunset: Date): TimePeriod {
+export function computeGodhuliMuhurta(sunset: Date): UtcWindow {
   const halfMs = 24 * 60_000;
   return {
     start: new Date(sunset.getTime() - halfMs),
@@ -125,7 +125,7 @@ export function computeGodhuliMuhurta(sunset: Date): TimePeriod {
  * @param sunset       Sunset UTC Date.
  * @param nextSunrise  Next day's sunrise UTC Date.
  */
-export function computeNishitaMuhurta(sunset: Date, nextSunrise: Date): TimePeriod {
+export function computeNishitaMuhurta(sunset: Date, nextSunrise: Date): UtcWindow {
   const nightDurationMs = nextSunrise.getTime() - sunset.getTime();
   const muhurtaDurationMs = nightDurationMs / 15;
   const start = new Date(sunset.getTime() + 7 * muhurtaDurationMs);
@@ -150,7 +150,7 @@ export function computeAmritKala(
   sunrise: Date,
   nextSunrise: Date,
   nakshatraAtSunrise: number,
-): TimePeriod | null {
+): UtcWindow | null {
   assertNakshatraIndex(nakshatraAtSunrise, 'nakshatraAtSunrise');
 
   const offsetGhatikas = AMRIT_KALA_OFFSET_GHATIKAS[nakshatraAtSunrise]!;
@@ -176,7 +176,7 @@ export function computeAmritKala(
  * @param sunset  Sunset UTC Date.
  * @returns       `{ start, end }` UTC Dates spanning solar noon ±24 min.
  */
-export function computeMadhyahna(sunrise: Date, sunset: Date): TimePeriod {
+export function computeMadhyahna(sunrise: Date, sunset: Date): UtcWindow {
   const halfMs = 24 * 60_000;
   const noonMs = (sunrise.getTime() + sunset.getTime()) / 2;
   return {
@@ -204,7 +204,7 @@ export function computePratahSandhya(
   sunrise: Date,
   sunset: Date,
   nextSunrise: Date,
-): TimePeriod {
+): UtcWindow {
   const widthMs = (nextSunrise.getTime() - sunset.getTime()) / 10;
   return {
     start: new Date(sunrise.getTime() - widthMs),
@@ -224,7 +224,7 @@ export function computePratahSandhya(
 export function computeSayahnaSandhya(
   sunset: Date,
   nextSunrise: Date,
-): TimePeriod {
+): UtcWindow {
   const widthMs = (nextSunrise.getTime() - sunset.getTime()) / 10;
   return {
     start: sunset,

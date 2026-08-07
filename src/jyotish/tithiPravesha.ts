@@ -1,5 +1,5 @@
 import { computeRashiChart } from './charts';
-import { _findSolarReturnForTest } from './varshaphala';
+import { findSolarReturn } from './varshaphala';
 import { getSiderealMoonLongitude } from '../astronomy/moon';
 import { getSiderealSunLongitude } from '../astronomy/sun';
 import { normalize360 } from '../utils/angle';
@@ -122,7 +122,7 @@ export function computeTithiPravesha(
   const natalSunRashi = Math.floor(natalSun / 30);
 
   // 2. Solar-return centre — Sun in natal sign for ~30d window centered here.
-  const solarReturn = _findSolarReturnForTest(natalBirth, yearAge, natalSun, ayanamsaType);
+  const solarReturn = findSolarReturn(natalBirth, yearAge, natalSun, ayanamsaType);
 
   // 3. Newton to the closest tithi match. If that lands on the wrong side
   //    of a sign boundary, shift by ±synodic period to land in natal sign.
@@ -188,7 +188,7 @@ const SYNODIC_MONTH_MS = 29.530589 * 86400_000;
  * closer-to-SR result and lets the caller's downstream assertions
  * surface the inconsistency.
  *
- * @internal — exported via `_findTithiPraveshaInNatalSignForTest`.
+ * @internal
  */
 function findTithiPraveshaInNatalSign(
   solarReturn: Date,
@@ -215,7 +215,6 @@ function findTithiPraveshaInNatalSign(
 }
 
 /** @internal */
-export const _findTithiPraveshaInNatalSignForTest = findTithiPraveshaInNatalSign;
 
 /**
  * Locate the UTC instant near `centerInstant` (the solar-return time)
@@ -238,7 +237,7 @@ export const _findTithiPraveshaInNatalSignForTest = findTithiPraveshaInNatalSign
  * motion is 13.18°/day, Sun's 0.99°/day; the 12.19°/day difference is
  * stable to ≪ 1 % over a day).
  *
- * @internal — exported via `_findTithiPraveshaForTest` for unit tests.
+ * @internal
  */
 function findTithiPravesha(
   centerInstant: Date,
@@ -266,7 +265,6 @@ function findTithiPravesha(
 // ── Test-only exports ──────────────────────────────────
 
 /** @internal */
-export const _findTithiPraveshaForTest = findTithiPravesha;
 /** @internal */
 export const _computeNatalTithiIndexForTest = computeNatalTithiIndex;
 

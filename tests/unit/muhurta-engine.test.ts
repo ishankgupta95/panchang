@@ -202,8 +202,8 @@ describe('findAuspiciousDates', () => {
 
   it('each result includes the panchang for the day', () => {
     expect(mayShort[0]!.panchang).toBeDefined();
-    expect(mayShort[0]!.panchang.tithis).toBeDefined();
-    expect(mayShort[0]!.panchang.vara).toBeDefined();
+    expect(mayShort[0]!.panchang.angas.tithis).toBeDefined();
+    expect(mayShort[0]!.panchang.angas.vara).toBeDefined();
   });
 
   it('throws on inverted range', () => {

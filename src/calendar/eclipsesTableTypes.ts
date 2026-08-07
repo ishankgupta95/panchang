@@ -42,7 +42,16 @@ export interface EclipseTableEntryRaw {
   peak: string;
   /** ISO UTC — end of the observable phase. */
   end: string;
-  /** Fraction of the disc obscured at peak, range [0, 1]. */
+  /**
+   * Fraction of the disc's **area** covered at peak, range [0, 1] (umbral for a
+   * lunar eclipse). Published as `magnitude` by tables built with 4.x — a table
+   * from that era has no `obscuration` key and must be rebuilt.
+   */
+  obscuration: number;
+  /**
+   * Eclipse **magnitude** — the *diameter* fraction catalogues publish. Above 1
+   * for a total eclipse, negative for a penumbral lunar one.
+   */
   magnitude: number;
   /**
    * True when the eclipse is observable from the reference location during at
@@ -71,6 +80,7 @@ export interface EclipseTableEntry {
   start: string;
   peak: string;
   end: string;
+  obscuration: number;
   magnitude: number;
   visibleFromLocation: boolean;
   visibleAtPeak: boolean;

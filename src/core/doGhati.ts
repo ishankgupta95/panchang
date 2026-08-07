@@ -1,4 +1,4 @@
-import type { DoGhatiInfo, DoGhatiSlot, ChoghadiyaQuality } from '../types/elements';
+import type { DoGhatiSlot, ChoghadiyaQuality, Unlocalized, UnlocalizedInfo } from '../types/elements';
 import { buildEqualSlots } from '../utils/slots';
 
 /**
@@ -59,7 +59,7 @@ function buildSlots(
   indexBase: 0 | 15,
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
-): DoGhatiSlot[] {
+): Unlocalized<DoGhatiSlot>[] {
   return buildEqualSlots(reference, durationMs, 15, (i, start, end) => {
     const idx = indexBase + i;
     const quality = DO_GHATI_QUALITY[idx]!;
@@ -90,7 +90,7 @@ export function computeDoGhati(
   nextSunrise: Date,
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
-): DoGhatiInfo {
+): UnlocalizedInfo<DoGhatiSlot> {
   const dayMs = sunset.getTime() - sunrise.getTime();
   const nightMs = nextSunrise.getTime() - sunset.getTime();
 

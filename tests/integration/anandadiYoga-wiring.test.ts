@@ -124,10 +124,10 @@ describe('Anandadi Yoga wiring — all 7 varas covered', () => {
       const date = new Date(NOON_2026_01_14.getTime() + day * 86_400_000);
       const r = getDailyPanchang(date, DELHI, { timezone: 330 });
       if (!r) continue;
-      const nakshatraIndex = Math.floor(r.siderealMoonAtSunrise / NAKSHATRA_SPAN);
-      const expected = ANANDADI_TABLE[r.vara.index]![nakshatraIndex]!;
+      const nakshatraIndex = Math.floor(r.moon.siderealLongitude / NAKSHATRA_SPAN);
+      const expected = ANANDADI_TABLE[r.angas.vara.index]![nakshatraIndex]!;
       expect(r.anandadiYoga.index).toBe(expected);
-      seenVaras.add(r.vara.index);
+      seenVaras.add(r.angas.vara.index);
     }
     expect(seenVaras).toEqual(new Set([0, 1, 2, 3, 4, 5, 6]));
   });

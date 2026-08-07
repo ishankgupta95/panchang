@@ -10,9 +10,9 @@ const DELHI = { latitude: 28.6139, longitude: 77.209 };
 const NOON_2025_01_14 = new Date(Date.UTC(2025, 0, 14, 12, 0, 0, 0));
 
 describe('Tarabala wiring — daily panchang', () => {
-  it('omits tarabala when janmaNakshatra is not provided', () => {
+  it('publishes tarabala as null when janmaNakshatra is not provided', () => {
     const r = getDailyPanchang(NOON_2025_01_14, DELHI, { timezone: 330 });
-    expect(r!.tarabala).toBeUndefined();
+    expect(r!.tarabala).toBeNull();
   });
 
   it('includes tarabala when janmaNakshatra is provided', () => {
@@ -26,7 +26,7 @@ describe('Tarabala wiring — daily panchang', () => {
   it('tarabala taraIndex matches ((nakshatraAtSunrise - janmaNakshatra) mod 27) mod 9', () => {
     const janma = 5; // Ardra
     const r = getDailyPanchang(NOON_2025_01_14, DELHI, { timezone: 330, janmaNakshatra: janma });
-    const transitNakshatra = r!.nakshatras[0]!.index;
+    const transitNakshatra = r!.angas.nakshatras[0]!.index;
     const expected = ((transitNakshatra - janma + 27) % 27) % 9;
     expect(r!.tarabala!.taraIndex).toBe(expected);
   });
@@ -58,9 +58,9 @@ describe('Tarabala wiring — daily panchang', () => {
 });
 
 describe('Tarabala wiring — instant panchang', () => {
-  it('omits tarabala when janmaNakshatra is not provided', () => {
+  it('publishes tarabala as null when janmaNakshatra is not provided', () => {
     const r = getInstantPanchang(NOON_2025_01_14, DELHI);
-    expect(r!.tarabala).toBeUndefined();
+    expect(r!.tarabala).toBeNull();
   });
 
   it('includes tarabala when janmaNakshatra is provided', () => {
@@ -72,7 +72,7 @@ describe('Tarabala wiring — instant panchang', () => {
   it('taraIndex matches offset from instant nakshatra', () => {
     const janma = 9; // Magha
     const r = getInstantPanchang(NOON_2025_01_14, DELHI, { janmaNakshatra: janma });
-    const transitNakshatra = r!.nakshatra.index;
+    const transitNakshatra = r!.angas.nakshatra.index;
     const expected = ((transitNakshatra - janma + 27) % 27) % 9;
     expect(r!.tarabala!.taraIndex).toBe(expected);
   });

@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { computeNakshatraFromLongitude, getNakshatraIndexAtTime } from '../../src/core/nakshatra';
+import { computeNakshatraFromLongitude } from '../../src/core/nakshatra';
 import { NAKSHATRA_SPAN } from '../../src/utils/constants';
 
 const NAKSHATRA_NAMES = [

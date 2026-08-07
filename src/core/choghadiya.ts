@@ -1,5 +1,5 @@
 import { buildEqualSlots, VARA_CHALDEAN_START } from '../utils/slots';
-import type { ChoghadiyaInfo, ChoghadiyaSlot, ChoghadiyaQuality } from '../types/elements';
+import type { ChoghadiyaSlot, ChoghadiyaQuality, Unlocalized, UnlocalizedInfo } from '../types/elements';
 
 /**
  * Quality for each of the 7 Choghadiya names (index 0–6):
@@ -34,7 +34,7 @@ function buildSlots(
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
   count: number,
-): ChoghadiyaSlot[] {
+): Unlocalized<ChoghadiyaSlot>[] {
   return buildEqualSlots(reference, durationMs, count, (i, start, end) => {
     const idx = (startIndex + i) % 7;
     const quality = CHOGHADIYA_QUALITY[idx]!;
@@ -63,7 +63,7 @@ export function computeChoghadiya(
   varaIndex: number,
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
-): ChoghadiyaInfo {
+): UnlocalizedInfo<ChoghadiyaSlot> {
   const dayMs   = sunset.getTime()      - sunrise.getTime();
   const nightMs = nextSunrise.getTime() - sunset.getTime();
 

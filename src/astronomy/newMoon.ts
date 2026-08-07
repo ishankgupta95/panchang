@@ -1,4 +1,4 @@
-import { MoonPhase, SearchMoonPhase } from 'astronomy-engine';
+import { moonSunElongation, searchMoonPhase, PHASE_AGREEMENT_MS } from './lunation';
 
 const DAY_MS = 86_400_000;
 
@@ -32,16 +32,16 @@ const SEED_HALF_WINDOW_DAYS = 2.5;
  * tenths of a degree near aphelion (June/July), which is precisely when Adhika
  * Jyeshtha / Ashadha occur, producing day-to-day-flickering false negatives.
  *
- * Uses astronomy-engine's `SearchMoonPhase(0, …)` — the moment Moon–Sun
- * elongation reaches 0° — which is accurate to seconds. The Moon's current
- * phase angle seeds a narrow search window, with the wide scan retained as a
- * fallback.
+ * Uses this library's own `searchMoonPhase(0, …)` from `lunation.ts` — the
+ * moment Moon–Sun elongation reaches 0°, converged to a millisecond. The Moon's
+ * current phase angle seeds a narrow search window, with the wide scan retained
+ * as a fallback.
  *
  * The seed never changes *which* lunation is returned: measured against the
  * wide scan at 8 h steps across 1900–2100 (219,147 samples), the
  * `prev ≤ ref < next` bracket was identical every time. It can move the
  * returned instants by up to ~175 ms on ~6% of inputs, because
- * `SearchMoonPhase` converges to a marginally different root when handed a
+ * `searchMoonPhase` converges to a marginally different root when handed a
  * different bracket. That is far below any resolution this library publishes,
  * but it is not literally zero — don't rely on bit-identical instants across
  * the two paths.
@@ -51,10 +51,22 @@ const SEED_HALF_WINDOW_DAYS = 2.5;
 export function boundingNewMoons(ref: Date): NewMoonBounds {
   // The phase angle is the fraction of the synodic cycle already elapsed, so
   // it places the preceding new moon directly — no scanning required.
-  const elapsedFraction = MoonPhase(ref) / 360;
+  const elapsedFraction = moonSunElongation(ref) / 360;
   const seedMs = ref.getTime() - elapsedFraction * SYNODIC_MONTH_DAYS * DAY_MS;
 
-  const prev = newMoonNear(seedMs);
+  const found = newMoonNear(seedMs);
+  // `found` may land a millisecond or two *after* `ref` when `ref` is itself a
+  // new-moon instant that some other call to `searchMoonPhase` rounded the other
+  // way — see PHASE_AGREEMENT_MS. An exact `<=` here rejected the fast path in
+  // that case and the scan fallback then returned the *previous* lunation, so
+  // the Chandra Masa of an instant sitting exactly on a new moon was a month
+  // out. Two instants that agree to within the search's own convergence are the
+  // same event; the pair is anchored at `ref` so `prev ≤ ref` still holds
+  // exactly, which is the contract every caller reads.
+  const prev = found !== null && found.getTime() > ref.getTime()
+    && found.getTime() - ref.getTime() <= PHASE_AGREEMENT_MS
+    ? new Date(ref.getTime())
+    : found;
   if (prev !== null && prev.getTime() <= ref.getTime()) {
     const next = newMoonNear(prev.getTime() + SYNODIC_MONTH_DAYS * DAY_MS);
     if (next !== null && next.getTime() > ref.getTime()) return { prev, next };
@@ -68,12 +80,12 @@ export function boundingNewMoons(ref: Date): NewMoonBounds {
  * `null` when the estimate was too far off for the window to contain one.
  */
 function newMoonNear(estimateMs: number): Date | null {
-  const event = SearchMoonPhase(
+  const event = searchMoonPhase(
     0,
     new Date(estimateMs - SEED_HALF_WINDOW_DAYS * DAY_MS),
     SEED_HALF_WINDOW_DAYS * 2,
   );
-  return event ? event.date : null;
+  return event;
 }
 
 /**
@@ -83,11 +95,11 @@ function newMoonNear(estimateMs: number): Date | null {
 function boundingNewMoonsByScan(ref: Date): NewMoonBounds {
   // Step back > one synodic month (~29.53 d) so the first new moon found is at
   // or before `ref`; 45 d is a comfortable search window for one lunation.
-  const first = SearchMoonPhase(0, new Date(ref.getTime() - 40 * DAY_MS), 45);
+  const first = searchMoonPhase(0, new Date(ref.getTime() - 40 * DAY_MS), 45);
   if (!first) {
     throw new Error('boundingNewMoons: no new moon found preceding reference instant');
   }
-  let prev = first.date;
+  let prev = first;
   let next = advanceToNextNewMoon(prev);
 
   // The first new moon after (ref − 40 d) can still precede `ref` by up to a
@@ -100,11 +112,11 @@ function boundingNewMoonsByScan(ref: Date): NewMoonBounds {
 }
 
 function advanceToNextNewMoon(after: Date): Date {
-  const event = SearchMoonPhase(0, new Date(after.getTime() + DAY_MS), 45);
+  const event = searchMoonPhase(0, new Date(after.getTime() + DAY_MS), 45);
   if (!event) {
     throw new Error('boundingNewMoons: no subsequent new moon found');
   }
-  return event.date;
+  return event;
 }
 
 /** Bounding new-moon pair for one lunar month: `prev ≤ ref < next`. */
@@ -116,7 +128,7 @@ export interface NewMoonBounds {
 /**
  * Memoizes {@link boundingNewMoons} across instants that share a lunar month.
  *
- * `boundingNewMoons` walks `SearchMoonPhase` over a 45-day window, which is one
+ * `boundingNewMoons` walks `searchMoonPhase` over a 45-day window, which is one
  * of the more expensive ephemeris operations in the library. A single
  * `getDailyPanchang` resolves the Chandra Masa for both today and the previous
  * day, and those fall in the same lunation on ~29 days out of 30 — so the

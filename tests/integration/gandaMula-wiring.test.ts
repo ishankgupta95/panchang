@@ -15,19 +15,21 @@ describe('Ganda Mula wiring — daily panchang', () => {
   it('field is always present and consistent with sunrise nakshatra', () => {
     const r = getDailyPanchang(NOON_2025_01_14, DELHI, { timezone: 330 });
     expect(r).not.toBeNull();
-    expect(r!.gandaMula).toBeDefined();
-    expect(typeof r!.gandaMula.active).toBe('boolean');
+    expect(r!.inauspicious.gandaMula).toBeDefined();
+    expect(typeof r!.inauspicious.gandaMula.active).toBe('boolean');
 
-    const sunriseNak = r!.nakshatras[0]!.index;
+    const sunriseNak = r!.angas.nakshatras[0]!.index;
     if (ROOT_SET.has(sunriseNak)) {
-      expect(r!.gandaMula.active).toBe(true);
-      expect(r!.gandaMula.nakshatraName).toBeTruthy();
-      expect(r!.gandaMula.severity).toBe(SEVERE_SET.has(sunriseNak) ? 'severe' : 'mild');
+      const gm = r!.inauspicious.gandaMula;
+      // `expect` does not narrow; this does, and fails just as loudly.
+      if (!gm.active) throw new Error(`expected Ganda Mula active for nakshatra ${sunriseNak}`);
+      expect(gm.nakshatraName).toBeTruthy();
+      expect(gm.severity).toBe(SEVERE_SET.has(sunriseNak) ? 'severe' : 'mild');
     } else {
-      expect(r!.gandaMula.active).toBe(false);
+      expect(r!.inauspicious.gandaMula.active).toBe(false);
       // Inactive narrows to `{ active: false }` — extra keys would violate the
       // discriminated union; runtime check below pins that.
-      expect(Object.keys(r!.gandaMula).sort()).toEqual(['active']);
+      expect(Object.keys(r!.inauspicious.gandaMula).sort()).toEqual(['active']);
     }
   });
 
@@ -39,8 +41,8 @@ describe('Ganda Mula wiring — daily panchang', () => {
       const date = new Date(Date.UTC(2025, 0, 14) + day * 86_400_000);
       const r = getDailyPanchang(date, DELHI, { timezone: 330 });
       if (!r) continue;
-      if (r.gandaMula.active && r.gandaMula.severity === 'severe') severeDays++;
-      else if (r.gandaMula.active && r.gandaMula.severity === 'mild') mildDays++;
+      if (r.inauspicious.gandaMula.active && r.inauspicious.gandaMula.severity === 'severe') severeDays++;
+      else if (r.inauspicious.gandaMula.active && r.inauspicious.gandaMula.severity === 'mild') mildDays++;
       else inactiveDays++;
     }
     // Moon visits each nakshatra ~1 day per 27-day cycle, so a 30-day sweep
@@ -56,8 +58,8 @@ describe('Ganda Mula wiring — daily panchang', () => {
     for (let day = 0; day < 30; day++) {
       const date = new Date(Date.UTC(2025, 0, 14) + day * 86_400_000);
       const r = getDailyPanchang(date, DELHI, { timezone: 330, language: 'hi' });
-      if (r?.gandaMula.active) {
-        expect(HI_ROOT_NAMES.has(r.gandaMula.nakshatraName!)).toBe(true);
+      if (r?.inauspicious.gandaMula.active) {
+        expect(HI_ROOT_NAMES.has(r.inauspicious.gandaMula.nakshatraName!)).toBe(true);
         return;
       }
     }
@@ -69,19 +71,20 @@ describe('Ganda Mula wiring — instant panchang', () => {
   it('field is always present and consistent with instant nakshatra', () => {
     const r = getInstantPanchang(NOON_2025_01_14, DELHI);
     expect(r).not.toBeNull();
-    expect(r!.gandaMula).toBeDefined();
-    expect(typeof r!.gandaMula.active).toBe('boolean');
+    expect(r!.inauspicious.gandaMula).toBeDefined();
+    expect(typeof r!.inauspicious.gandaMula.active).toBe('boolean');
 
-    const nak = r!.nakshatra.index;
+    const nak = r!.angas.nakshatra.index;
     if (ROOT_SET.has(nak)) {
-      expect(r!.gandaMula.active).toBe(true);
-      expect(r!.gandaMula.nakshatraName).toBeTruthy();
-      expect(r!.gandaMula.severity).toBe(SEVERE_SET.has(nak) ? 'severe' : 'mild');
+      const gm = r!.inauspicious.gandaMula;
+      if (!gm.active) throw new Error(`expected Ganda Mula active for nakshatra ${nak}`);
+      expect(gm.nakshatraName).toBeTruthy();
+      expect(gm.severity).toBe(SEVERE_SET.has(nak) ? 'severe' : 'mild');
     } else {
-      expect(r!.gandaMula.active).toBe(false);
+      expect(r!.inauspicious.gandaMula.active).toBe(false);
       // Inactive narrows to `{ active: false }` — extra keys would violate the
       // discriminated union; runtime check below pins that.
-      expect(Object.keys(r!.gandaMula).sort()).toEqual(['active']);
+      expect(Object.keys(r!.inauspicious.gandaMula).sort()).toEqual(['active']);
     }
   });
 
@@ -91,8 +94,8 @@ describe('Ganda Mula wiring — instant panchang', () => {
     for (let day = 0; day < 30; day++) {
       const date = new Date(NOON_2025_01_14.getTime() + day * 86_400_000);
       const r = getInstantPanchang(date, DELHI, { language: 'hi' });
-      if (r?.gandaMula.active) {
-        expect(HI_ROOT_NAMES.has(r.gandaMula.nakshatraName!)).toBe(true);
+      if (r?.inauspicious.gandaMula.active) {
+        expect(HI_ROOT_NAMES.has(r.inauspicious.gandaMula.nakshatraName!)).toBe(true);
         return;
       }
     }

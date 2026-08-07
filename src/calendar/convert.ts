@@ -83,19 +83,19 @@ export function convertGregorianToHindu(
       'NO_SUNRISE',
     );
   }
-  const tithiAtSunrise = panchang.tithis[0]!;
+  const tithiAtSunrise = panchang.angas.tithis[0]!;
   return {
     tithiName: tithiAtSunrise.name,
     tithi: tithiAtSunrise.index + 1,
     pakshaTithi: tithiAtSunrise.number,
     paksha: tithiAtSunrise.index < 15 ? 'shukla' : 'krishna',
-    masaName: panchang.chandramasa.name,
-    masaIndex: panchang.chandramasa.index,
-    isAdhika: panchang.chandramasa.isAdhika,
-    vikramSamvat: panchang.samvat.vikramSamvat,
-    shakaSamvat: panchang.samvat.shakaSamvat,
-    varaName: panchang.vara.name,
-    varaIndex: panchang.vara.index,
+    masaName: panchang.calendar.chandramasa.name,
+    masaIndex: panchang.calendar.chandramasa.index,
+    isAdhika: panchang.calendar.chandramasa.isAdhika,
+    vikramSamvat: panchang.calendar.samvat.vikramSamvat,
+    shakaSamvat: panchang.calendar.samvat.shakaSamvat,
+    varaName: panchang.angas.vara.name,
+    varaIndex: panchang.angas.vara.index,
   };
 }
 
@@ -167,12 +167,12 @@ export function convertHinduToGregorian(
     const d = new Date(t);
     const p = getDailyPanchang(d, location, options);
     if (p === null) continue;
-    const tithi = p.tithis[0]!.index;
-    const masa = p.chandramasa.index;
+    const tithi = p.angas.tithis[0]!.index;
+    const masa = p.calendar.chandramasa.index;
     if (tithi !== targetTithi) continue;
     if (masa !== coords.masaIndex) continue;
-    if (p.samvat.vikramSamvat !== coords.vikramSamvat) continue;
-    if (coords.adhikaOnly && !p.chandramasa.isAdhika) continue;
+    if (p.calendar.samvat.vikramSamvat !== coords.vikramSamvat) continue;
+    if (coords.adhikaOnly && !p.calendar.chandramasa.isAdhika) continue;
     out.push(p.date);
   }
   return out;
@@ -282,8 +282,8 @@ function findChaitraShuklaPratipada(
     const d = new Date(t);
     const p = getDailyPanchang(d, location, amantaOptions);
     if (p === null) continue;
-    const masa = p.chandramasa.index;
-    if (prevMasa !== null && prevMasa !== 0 && masa === 0 && !p.chandramasa.isAdhika) {
+    const masa = p.calendar.chandramasa.index;
+    if (prevMasa !== null && prevMasa !== 0 && masa === 0 && !p.calendar.chandramasa.isAdhika) {
       return p.date;
     }
     prevMasa = masa;
@@ -304,7 +304,7 @@ function findMeshaSankranti(
     const d = new Date(t);
     const p = getInstantPanchang(d, location, options);
     if (p === null) continue;
-    const rashi = Math.floor(p.siderealSun / 30) % 12;
+    const rashi = Math.floor(p.sun.siderealLongitude / 30) % 12;
     if (prevRashi !== null && prevRashi !== 0 && rashi === 0) {
       // Bisect to the day Sun crossed into Aries.
       // Coarse precision (1 day) is sufficient for region-specific almanacs.

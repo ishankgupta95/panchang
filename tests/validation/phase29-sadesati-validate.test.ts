@@ -1,4 +1,6 @@
 /**
+ * @tier 1  published Saturn transit dates (ProKerala / DrikPanchang)
+ *
  * Phase 29 Sade Sati cross-validation against published Saturn transit dates.
  *
  * Sade Sati = the ~7.5-year period during which transit Saturn occupies the

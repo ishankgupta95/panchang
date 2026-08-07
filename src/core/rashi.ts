@@ -1,5 +1,5 @@
 import { nakshatraOf } from '../utils/constants';
-import type { RashiInfo } from '../types/elements';
+import type { RashiInfo, NakshatraIndexInfo } from '../types/elements';
 
 /**
  * Compute Chandra Rashi — the Moon's sidereal zodiac sign.
@@ -31,7 +31,7 @@ export function computeChandraRashi(
 export function computeSuryaNakshatra(
   siderealSun: number,
   nameFn: (index: number) => string,
-): RashiInfo {
+): NakshatraIndexInfo {
   const index = nakshatraOf(siderealSun);
   return { index, name: nameFn(index) };
 }

@@ -1,4 +1,4 @@
-import type { GowriInfo, GowriSlot, ChoghadiyaQuality } from '../types/elements';
+import type { GowriSlot, ChoghadiyaQuality, Unlocalized, UnlocalizedInfo } from '../types/elements';
 import { buildEqualSlots } from '../utils/slots';
 
 /**
@@ -33,7 +33,7 @@ function buildSlots(
   startIndex: number,
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
-): GowriSlot[] {
+): Unlocalized<GowriSlot>[] {
   return buildEqualSlots(reference, durationMs, 8, (i, start, end) => {
     const idx = (startIndex + i) % 8;
     const quality = GOWRI_QUALITY[idx]!;
@@ -55,7 +55,7 @@ function buildSlots(
  * @param varaIndex  Weekday index: 0 = Sunday, 6 = Saturday.
  * @param nameFn     Callback returning translated Gowri slot name for index 0–7.
  * @param qualityNameFn  Callback returning translated quality name.
- * @returns          `GowriInfo` — `{ day: GowriSlot[8], night: GowriSlot[8] }`
+ * @returns          `GowriInfo` — `{ day: Unlocalized<GowriSlot>[8], night: Unlocalized<GowriSlot>[8] }`
  *                   with start/end times and quality for each slot.
  *
  * @example
@@ -77,7 +77,7 @@ export function computeGowriPanchangam(
   varaIndex: number,
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
-): GowriInfo {
+): UnlocalizedInfo<GowriSlot> {
   const dayMs   = sunset.getTime()      - sunrise.getTime();
   const nightMs = nextSunrise.getTime() - sunset.getTime();
 

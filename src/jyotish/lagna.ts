@@ -1,4 +1,4 @@
-import { SiderealTime } from 'astronomy-engine';
+import { greenwichApparentSiderealDegrees } from '../astronomy/topocentric';
 import { computeAyanamsa, dateToJulianDay } from '../astronomy/ayanamsa';
 import { computeSunrise } from '../astronomy/sunrise';
 import { getSiderealSunLongitude } from '../astronomy/sun';
@@ -24,7 +24,7 @@ import type { LagnaInfo, SripatiLagnaInfo } from '../types/jyotish';
  * sidereal (Vedic) by subtracting the ayanamsa.
  *
  * The local apparent sidereal time θ uses Greenwich apparent sidereal time
- * from astronomy-engine's `SiderealTime` (already accounts for nutation and
+ * from our own `gastDegrees` (which accounts for nutation and
  * Earth-rotation theory) plus the geographic longitude (positive east).
  *
  * @param birthDate    Instant of birth in UTC.
@@ -64,8 +64,7 @@ export function computeLagna(
   validateLocation(location);
 
   // Greenwich apparent sidereal time (hours) → degrees, then add longitude.
-  const gastHours = SiderealTime(birthDate);
-  const lstDeg = normalize360(gastHours * 15 + location.longitude);
+  const lstDeg = normalize360(greenwichApparentSiderealDegrees(birthDate) + location.longitude);
   const θ = degToRad(lstDeg);
 
   const T = (dateToJulianDay(birthDate) - 2451545.0) / 36525.0;
@@ -102,7 +101,7 @@ export function computeLagna(
  * the given location. Used by the time-derived special lagnas
  * (Hora / Ghati / Bhava) which advance from the *day's* sunrise.
  *
- * `astronomy-engine.SearchRiseSet` only searches forward, so we step
+ * The rise/set solver enumerates one UTC day at a time, so we step
  * back ~30 h to seed the search and then walk forward day-by-day until
  * the next sunrise would exceed `date`. This handles all three cases:
  *
@@ -326,6 +325,19 @@ export function computeSripatiLagna(
   lang: Language | undefined,
   options: { includeCusps: true },
 ): SripatiLagnaInfo;
+/**
+ * Explicit `{ includeCusps: false }` — same result as the no-options call.
+ * Without this overload the call matches neither of the other two and the
+ * compiler resolves it against the `includeCusps: true` signature, reporting
+ * `Type 'false' is not assignable to type 'true'`.
+ */
+export function computeSripatiLagna(
+  birthDate: Date,
+  location: GeoLocation,
+  ayanamsaType: AyanamsaType | undefined,
+  lang: Language | undefined,
+  options?: { includeCusps?: false },
+): LagnaInfo;
 export function computeSripatiLagna(
   birthDate: Date,
   location: GeoLocation,
@@ -339,8 +351,7 @@ export function computeSripatiLagna(
   // Sidereal MC via Meeus' tropical-MC formula: λ_MC = atan2(sin θ, cos θ · cos ε).
   // Replicated inline rather than importing computeBhava to avoid the
   // bhava.ts → lagna.ts back-edge (bhava.ts already imports computeLagna).
-  const gastHours = SiderealTime(birthDate);
-  const lstDeg = normalize360(gastHours * 15 + location.longitude);
+  const lstDeg = normalize360(greenwichApparentSiderealDegrees(birthDate) + location.longitude);
   const θ = degToRad(lstDeg);
   const T = (dateToJulianDay(birthDate) - 2451545.0) / 36525.0;
   const ε = degToRad(meanObliquity(T));

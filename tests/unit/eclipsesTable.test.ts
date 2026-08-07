@@ -77,7 +77,11 @@ describe('eclipse table reader', () => {
       );
       expect(totalLunar, 'expected a total lunar eclipse in the window').toBeDefined();
       expect(totalLunar!.eclipse.name).toBe('Total Lunar Eclipse');
-      expect(totalLunar!.eclipse.magnitude).toBeGreaterThan(0.9);
+      // Both quantities survive the build → JSON → read round trip, and they
+      // are the *two different* quantities: a total eclipse saturates
+      // obscuration at 1 while its magnitude runs past it.
+      expect(totalLunar!.eclipse.obscuration).toBeGreaterThan(0.9);
+      expect(totalLunar!.eclipse.magnitude).toBeGreaterThan(1);
     });
 
     it('flattens to hi when requested', () => {
@@ -86,6 +90,34 @@ describe('eclipse table reader', () => {
       const names = hiDays.flatMap(d => d.eclipses.map(e => e.name));
       // Hindi names all contain ग्रहण ("grahan").
       expect(names.every(n => n.includes('ग्रहण'))).toBe(true);
+    });
+
+    it('survives a JSON round trip, both numeric fields included', () => {
+      // A table's whole purpose is to be built once, cached as JSON and read
+      // back later, so the round trip is the shape that matters — and it is
+      // where a field added to the builder but not to the reader would show.
+      const revived = JSON.parse(JSON.stringify(table)) as typeof table;
+      const before = allEclipses();
+      const after: typeof before = [];
+      for (let y = START_YEAR; y <= END_YEAR; y++) {
+        for (const day of getEclipsesForYear(revived, y)!) {
+          for (const e of day.eclipses) after.push({ date: day.date, eclipse: e });
+        }
+      }
+      expect(after).toEqual(before);
+      expect(after.length).toBeGreaterThan(0);
+      for (const { eclipse } of after) {
+        expect(typeof eclipse.obscuration, `obscuration on ${eclipse.peak}`).toBe('number');
+        expect(typeof eclipse.magnitude, `magnitude on ${eclipse.peak}`).toBe('number');
+        expect(eclipse.obscuration).toBeGreaterThanOrEqual(0);
+        expect(eclipse.obscuration).toBeLessThanOrEqual(1);
+        // A penumbral lunar eclipse is the case that pins the two apart: no
+        // umbral contact, so zero area covered and a negative magnitude.
+        if (eclipse.kind === 'lunar' && eclipse.subtype === 'penumbral') {
+          expect(eclipse.obscuration).toBe(0);
+          expect(eclipse.magnitude).toBeLessThan(0);
+        }
+      }
     });
   });
 

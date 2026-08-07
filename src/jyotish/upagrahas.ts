@@ -1,8 +1,8 @@
+import { isSunAboveHorizon } from '../astronomy/horizon';
 import { computeLagna } from './lagna';
 import { computeSunrise, computeSunset } from '../astronomy/sunrise';
 import { getSiderealSunLongitude } from '../astronomy/sun';
 import { resolveMasaName } from '../i18n/resolver';
-import { Body, Equator, Horizon, MakeTime, Observer } from 'astronomy-engine';
 import { normalize360 } from '../utils/angle';
 import { GULIKA_SLOTS } from '../utils/constants';
 import { validateDate, validateLocation } from '../utils/validation';
@@ -237,11 +237,7 @@ export const _locateGulikaSegmentForTest = locateGulikaSegment;
  * self-contained.
  */
 function isDayBirth(date: Date, location: GeoLocation): boolean {
-  const observer = new Observer(location.latitude, location.longitude, location.elevation ?? 0);
-  const time = MakeTime(date);
-  const equ = Equator(Body.Sun, time, observer, true, true);
-  const hor = Horizon(time, observer, equ.ra, equ.dec, 'normal');
-  return hor.altitude > 0;
+  return isSunAboveHorizon(date, location);
 }
 
 /**

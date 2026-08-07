@@ -60,7 +60,7 @@ export interface SankrantiEvent {
  * console.log(ekadashis.length); // 24-26
  * ```
  */
-export function getEkadashiDatesForYear(
+export function computeEkadashiDatesForYear(
   year: number,
   location: GeoLocation,
   options: YearlyListingOptions,
@@ -120,7 +120,7 @@ export function getEkadashiDatesForYear(
  * sankrantis[9].rashiName; // 'Makara' (Capricorn) for Makar Sankranti
  * ```
  */
-export function getSankrantisForYear(
+export function computeSankrantisForYear(
   year: number,
   location: GeoLocation,
   options: YearlyListingOptions,
@@ -220,7 +220,7 @@ export function getSankrantisForYear(
  * days.forEach(d => console.log(d.date.toDateString(), d.festival.name));
  * ```
  */
-export function getFestivalsInRange(
+export function computeFestivalsInRange(
   start: Date,
   end: Date,
   location: GeoLocation,
@@ -329,7 +329,7 @@ export function getUpcomingEclipses(
  * eclipses.forEach(e => console.log(e.kind, e.subtype, e.peak.toISOString()));
  * ```
  */
-export function getEclipsesInRange(
+export function computeEclipsesInRange(
   start: Date,
   end: Date,
   location: GeoLocation,
@@ -370,3 +370,72 @@ export function getEclipsesInRange(
 
   return [...solar, ...lunar].sort((a, b) => a.peak.getTime() - b.peak.getTime());
 }
+
+// ── Single-year compute entry points ─────────────────────────────────────────
+//
+// `build*Table` needs a table wrapper and a year *range*; these are the shape a
+// consumer reaches for first — year in, results out — and are thin wrappers over
+// the range enumerators above. The `compute*` prefix marks them as running the
+// engine, against the `read*` prefix on the table accessors.
+
+/** Local-year window `[startUtc, endUtc]` for `year` at `timezone`. */
+function localYearWindow(year: number, timezone: number | string): [Date, Date] {
+  const offset = resolveUtcOffset(timezone, new Date(Date.UTC(year, 6, 1)));
+  return [
+    new Date(Date.UTC(year, 0, 1) - offset * 60_000),
+    new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999) - offset * 60_000),
+  ];
+}
+
+/**
+ * Every festival emission in the local calendar year `year`.
+ *
+ * @example
+ * ```typescript
+ * const days = computeFestivalsForYear(2027, DELHI, { timezone: 330 });
+ * ```
+ */
+export function computeFestivalsForYear(
+  year: number,
+  location: GeoLocation,
+  options: YearlyListingOptions,
+): FestivalDay[] {
+  if (!Number.isInteger(year)) throw new RangeError(`year must be integer, got ${year}`);
+  const [start, end] = localYearWindow(year, options.timezone);
+  return computeFestivalsInRange(start, end, location, options);
+}
+
+/**
+ * Every eclipse whose peak falls in the local calendar year `year`, as observed
+ * from `location`.
+ *
+ * @example
+ * ```typescript
+ * const eclipses = computeEclipsesForYear(2027, DELHI, { timezone: 330 });
+ * ```
+ */
+export function computeEclipsesForYear(
+  year: number,
+  location: GeoLocation,
+  options: { timezone: number | string },
+): EclipseInfo[] {
+  if (!Number.isInteger(year)) throw new RangeError(`year must be integer, got ${year}`);
+  const [start, end] = localYearWindow(year, options.timezone);
+  return computeEclipsesInRange(start, end, location);
+}
+
+/**
+ * @deprecated Renamed to {@link computeEkadashiDatesForYear} in v5, so that
+ * running the *engine* and reading a *table* stop sharing a `get*` prefix. Kept
+ * through v5; see the README "Upgrading from 4.x" section.
+ */
+export const getEkadashiDatesForYear = computeEkadashiDatesForYear;
+
+/** @deprecated Renamed to {@link computeSankrantisForYear} in v5. */
+export const getSankrantisForYear = computeSankrantisForYear;
+
+/** @deprecated Renamed to {@link computeFestivalsInRange} in v5. */
+export const getFestivalsInRange = computeFestivalsInRange;
+
+/** @deprecated Renamed to {@link computeEclipsesInRange} in v5. */
+export const getEclipsesInRange = computeEclipsesInRange;

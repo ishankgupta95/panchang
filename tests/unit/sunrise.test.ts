@@ -129,7 +129,7 @@ describe('sunrise definition', () => {
       const sunrise = computeSunrise(new Date(`${day}T00:00:00Z`), DELHI);
       const time = ae.MakeTime(sunrise);
       const eq = ae.Equator(ae.Body.Sun, time, observer, true, true);
-      const geometricAltitude = ae.Horizon(time, observer, eq.ra, eq.dec, null).altitude;
+      const geometricAltitude = ae.Horizon(time, observer, eq.ra, eq.dec, undefined).altitude;
       expect(
         geometricAltitude,
         `${day}: geometric solar altitude at sunrise was ${geometricAltitude.toFixed(4)}°`,

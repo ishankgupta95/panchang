@@ -11,9 +11,18 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
+    // The base config pins `rootDir` to `src` so the build emits a flat `dist`.
+    // Nothing is emitted here, and `tests/` sits outside `src`, so widen it.
+    "rootDir": ".",
     "declaration": false,
     "declarationMap": false,
     "sourceMap": false
   },
+  // `exclude` must be restated. It is inherited from the base config, where it
+  // lists `tests`, and `exclude` filters `include` — so extending without this
+  // line produced a config that named `tests` in `include` and then removed it
+  // again, type-checking only `src` while reporting success. Found in Phase
+  // 38.7, when a breaking result-shape change produced zero test errors.
+  "exclude": ["node_modules", "dist"],
   "include": ["src", "tests"]
 }

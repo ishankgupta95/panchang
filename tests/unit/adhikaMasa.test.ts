@@ -28,7 +28,7 @@ function istDay(dateStr: string): Date {
 function adhikaFor(dateStr: string): boolean {
   const r = getDailyPanchang(istDay(dateStr), UJJAIN, { timezone: TZ });
   if (!r) throw new Error(`no panchang for ${dateStr}`);
-  return r.chandramasa.isAdhika;
+  return r.calendar.chandramasa.isAdhika;
 }
 
 describe('Adhika Masa — Adhik Jyeshtha 2026 (Ujjain, IST)', () => {
@@ -67,8 +67,8 @@ describe('Adhika Masa — Adhik Jyeshtha 2026 (Ujjain, IST)', () => {
       timezone: TZ,
       masaSystem: 'amanta',
     });
-    expect(r!.chandramasa.name).toContain('Jyeshtha');
-    expect(r!.chandramasa.isAdhika).toBe(true);
+    expect(r!.calendar.chandramasa.name).toContain('Jyeshtha');
+    expect(r!.calendar.chandramasa.isAdhika).toBe(true);
   });
 
   // Purnimanta must carry the Adhika prefix through BOTH pakshas of the Adhika
@@ -82,13 +82,13 @@ describe('Adhika Masa — Adhik Jyeshtha 2026 (Ujjain, IST)', () => {
     ['2026-06-14', 'Krishna'],
   ])('purnimanta on %s (%s) is Adhika Jyeshtha', (d) => {
     const r = getDailyPanchang(istDay(d), UJJAIN, { timezone: TZ });
-    expect(r!.chandramasa.purnimantaName).toBe('Adhika Jyeshtha');
-    expect(r!.chandramasa.purnimantaIndex).toBe(r!.chandramasa.amantaIndex);
+    expect(r!.calendar.chandramasa.purnimantaName).toBe('Adhika Jyeshtha');
+    expect(r!.calendar.chandramasa.purnimantaIndex).toBe(r!.calendar.chandramasa.amantaIndex);
   });
 
   it('purnimanta returns to plain Jyeshtha in the Nija month (2026-06-20)', () => {
     const r = getDailyPanchang(istDay('2026-06-20'), UJJAIN, { timezone: TZ });
-    expect(r!.chandramasa.purnimantaName).toBe('Jyeshtha');
-    expect(r!.chandramasa.isAdhika).toBe(false);
+    expect(r!.calendar.chandramasa.purnimantaName).toBe('Jyeshtha');
+    expect(r!.calendar.chandramasa.isAdhika).toBe(false);
   });
 });

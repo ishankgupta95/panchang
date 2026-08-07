@@ -107,6 +107,66 @@ function secantBoundary(
 }
 
 /**
+ * Locate an element boundary inside a bracket, without being told which
+ * boundary it is.
+ *
+ * {@link findTransitionTime} knows the target angle because its caller hands it
+ * the current index. Three other modules — Varjyam, Bhadra and Panchaka Rahita
+ * — do not: they bisect a *predicate* (is the Moon in this nakshatra? is this
+ * karana Vishti? is this nakshatra in the Panchaka set?) and only know that it
+ * flips somewhere in the window. They were therefore stuck with bisection, and
+ * bisection to a 30-second tolerance, which quantised every window they produce
+ * onto a 30-second grid: measured during Phase 36.2, those windows moved up to
+ * 26.4 s whenever anything upstream moved 6.4 s, and the whole amplification was
+ * the tolerance.
+ *
+ * The missing piece is small. The angle is monotone, so the element index just
+ * *before* the flip determines the target: the boundary is at
+ * `(index + 1) × spanDeg`. Given that, the same secant solve the element
+ * end-times already use applies, and the result lands within 25 ms instead of
+ * 30 s — while costing fewer probes than the bisection it replaces, because
+ * secant converges in ~5 against bisection's ~12.
+ *
+ * @param loMs   Instant known to be **before** the boundary.
+ * @param hiMs   Instant known to be **after** it.
+ * @param angle  The continuous quantity behind the index.
+ * @param stillBefore  Predicate identifying the pre-boundary state, used to
+ *                     restore the never-early guarantee.
+ * @returns The boundary instant, or `null` if the secant declined — callers
+ *          keep their bisection as the fallback, exactly as this module does.
+ */
+export function solveElementBoundary(
+  loMs: number,
+  hiMs: number,
+  angle: ElementAngle,
+  stillBefore: (ms: number) => boolean,
+): number | null {
+  const indexAt = (ms: number): number =>
+    Math.floor((((angle.angleAt(new Date(ms)) % 360) + 360) % 360) / angle.spanDeg);
+  const target = ((((indexAt(loMs) + 1) * angle.spanDeg) % 360) + 360) % 360;
+  return secantBoundary(loMs, hiMs, target, angle, stillBefore);
+}
+
+/**
+ * The same solve, for a boundary that is **not** at an element index.
+ *
+ * Panchaka Rahita is the case: its boundaries are the Moon reaching 300° and
+ * 360°, and 300° is 22.5 nakshatras — mid-nakshatra, so
+ * {@link solveElementBoundary} would derive the wrong target from the index.
+ * Here the caller states the target directly, which it can, because it knows
+ * which of the two fixed longitudes it is crossing.
+ */
+export function solveAngleCrossing(
+  loMs: number,
+  hiMs: number,
+  targetDeg: number,
+  angleAt: (date: Date) => number,
+  stillBefore: (ms: number) => boolean,
+): number | null {
+  return secantBoundary(loMs, hiMs, targetDeg, { angleAt, spanDeg: 360 }, stillBefore);
+}
+
+/**
  * Binary search to find the UTC moment when a discrete element index transitions.
  *
  * When an {@link ElementAngle} is supplied this solves for the boundary by
@@ -268,6 +328,13 @@ export function findDailyElements<T extends { index: number; endTime: Date | nul
   const results: Array<T & { startTime: Date | null; isActiveAtSunrise: boolean }> = [];
   let cursor = new Date(sunriseUtc.getTime());
 
+  // Loop-invariant: the index at `nextSunriseUtc` is what every iteration
+  // compares against to decide whether the element it is holding runs to the end
+  // of the Hindu day. Reading it once is free of any behavioural change —
+  // `getIndexAtTime` is a pure function reading through the call's longitude
+  // memo — and saves one evaluation per element per day.
+  const indexAtNextSunrise = getIndexAtTime(nextSunriseUtc);
+
   while (cursor.getTime() < nextSunriseUtc.getTime()) {
     const element = results.length === 0 ? elementAtSunrise : computeElementAtTime(cursor);
 
@@ -281,7 +348,6 @@ export function findDailyElements<T extends { index: number; endTime: Date | nul
 
     // Check whether the element transitions before nextSunrise.
     // If not, clamp endTime to nextSunrise and finish.
-    const indexAtNextSunrise = getIndexAtTime(nextSunriseUtc);
     if (indexAtNextSunrise === element.index) {
       results.push(Object.assign({}, element, {
         startTime,

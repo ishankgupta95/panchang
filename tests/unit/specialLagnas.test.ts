@@ -314,7 +314,7 @@ describe('Sripati Lagna — includeCusps option (Phase 34e item 1)', () => {
       expect(c).toBeLessThan(360);
     }
     // cusp[0] is the lagna by construction.
-    expect(r.cusps[0]).toBeCloseTo(r.siderealLongitude, 8);
+    expect(r.cusps[0]!).toBeCloseTo(r.siderealLongitude, 8);
   });
 });
 
@@ -335,7 +335,7 @@ describe('Sripati cusps — antipodal + quadrant-sum invariants', () => {
       const { cusps } = computeSripatiLagna(date, loc, 'lahiri', 'en',
                                             { includeCusps: true });
       for (let i = 0; i < 6; i++) {
-        const delta = angularDelta(cusps[i + 6], cusps[i]);
+        const delta = angularDelta(cusps[i + 6]!, cusps[i]!);
         expect(Math.abs(Math.abs(delta) - 180)).toBeLessThan(1e-9);
       }
     });
@@ -343,10 +343,10 @@ describe('Sripati cusps — antipodal + quadrant-sum invariants', () => {
     it(`${name}: quadrant arcs sum to 360°`, () => {
       const { cusps } = computeSripatiLagna(date, loc, 'lahiri', 'en',
                                             { includeCusps: true });
-      const arcQ1 = mod360(cusps[3]  - cusps[0]);
-      const arcQ2 = mod360(cusps[6]  - cusps[3]);
-      const arcQ3 = mod360(cusps[9]  - cusps[6]);
-      const arcQ4 = mod360(cusps[0]  + 360 - cusps[9]);
+      const arcQ1 = mod360(cusps[3]!  - cusps[0]!);
+      const arcQ2 = mod360(cusps[6]!  - cusps[3]!);
+      const arcQ3 = mod360(cusps[9]!  - cusps[6]!);
+      const arcQ4 = mod360(cusps[0]!  + 360 - cusps[9]!);
       expect(arcQ1 + arcQ2 + arcQ3 + arcQ4).toBeCloseTo(360, 9);
       // Sripati symmetry: q1 == q3 and q2 == q4 (mod 360).
       expect(angularDelta(arcQ1, arcQ3)).toBeCloseTo(0, 9);
@@ -361,36 +361,36 @@ describe('Sripati cusps — antipodal + quadrant-sum invariants', () => {
       // *result* must match the trisection prediction.
       const { cusps } = computeSripatiLagna(date, loc, 'lahiri', 'en',
                                             { includeCusps: true });
-      const arcQ1 = mod360(cusps[3]  - cusps[0]);
-      const arcQ2 = mod360(cusps[6]  - cusps[3]);
-      const arcQ3 = mod360(cusps[9]  - cusps[6]);
-      const arcQ4 = mod360(cusps[0]  + 360 - cusps[9]);
-      expect(angularDelta(cusps[1],  mod360(cusps[0] + arcQ1 / 3))).toBeCloseTo(0, 9);
-      expect(angularDelta(cusps[2],  mod360(cusps[0] + 2 * arcQ1 / 3))).toBeCloseTo(0, 9);
-      expect(angularDelta(cusps[4],  mod360(cusps[3] + arcQ2 / 3))).toBeCloseTo(0, 9);
-      expect(angularDelta(cusps[5],  mod360(cusps[3] + 2 * arcQ2 / 3))).toBeCloseTo(0, 9);
-      expect(angularDelta(cusps[7],  mod360(cusps[6] + arcQ3 / 3))).toBeCloseTo(0, 9);
-      expect(angularDelta(cusps[8],  mod360(cusps[6] + 2 * arcQ3 / 3))).toBeCloseTo(0, 9);
-      expect(angularDelta(cusps[10], mod360(cusps[9] + arcQ4 / 3))).toBeCloseTo(0, 9);
-      expect(angularDelta(cusps[11], mod360(cusps[9] + 2 * arcQ4 / 3))).toBeCloseTo(0, 9);
+      const arcQ1 = mod360(cusps[3]!  - cusps[0]!);
+      const arcQ2 = mod360(cusps[6]!  - cusps[3]!);
+      const arcQ3 = mod360(cusps[9]!  - cusps[6]!);
+      const arcQ4 = mod360(cusps[0]!  + 360 - cusps[9]!);
+      expect(angularDelta(cusps[1]!,  mod360(cusps[0]! + arcQ1 / 3))).toBeCloseTo(0, 9);
+      expect(angularDelta(cusps[2]!,  mod360(cusps[0]! + 2 * arcQ1 / 3))).toBeCloseTo(0, 9);
+      expect(angularDelta(cusps[4]!,  mod360(cusps[3]! + arcQ2 / 3))).toBeCloseTo(0, 9);
+      expect(angularDelta(cusps[5]!,  mod360(cusps[3]! + 2 * arcQ2 / 3))).toBeCloseTo(0, 9);
+      expect(angularDelta(cusps[7]!,  mod360(cusps[6]! + arcQ3 / 3))).toBeCloseTo(0, 9);
+      expect(angularDelta(cusps[8]!,  mod360(cusps[6]! + 2 * arcQ3 / 3))).toBeCloseTo(0, 9);
+      expect(angularDelta(cusps[10]!, mod360(cusps[9]! + arcQ4 / 3))).toBeCloseTo(0, 9);
+      expect(angularDelta(cusps[11]!, mod360(cusps[9]! + 2 * arcQ4 / 3))).toBeCloseTo(0, 9);
     });
   }
 });
 
 describe('Sripati cusps — angular cusps match computeBhava ASC / MC', () => {
-  // Structural cross-check: cusps[0] = lagna, cusps[9] = sidereal MC,
+  // Structural cross-check: cusps[0]! = lagna, cusps[9]! = sidereal MC,
   // both already exposed by computeBhava on every BhavaChart.
-  it('cusps[0] equals BhavaChart.ascendantLongitude and cusps[9] equals BhavaChart.mcLongitude', () => {
+  it('cusps[0]! equals BhavaChart.ascendantLongitude and cusps[9]! equals BhavaChart.mcLongitude', () => {
     const date = new Date('1984-05-14T05:00:00Z'); // Zuckerberg-natal (mid latitude)
     const loc = { latitude: 40.70, longitude: -74.00 };
     const bhava = computeBhava(date, loc, { houseSystem: 'whole-sign' });
     const { cusps } = computeSripatiLagna(date, loc, 'lahiri', 'en',
                                           { includeCusps: true });
-    expect(angularDelta(cusps[0], bhava.ascendantLongitude)).toBeCloseTo(0, 8);
-    expect(angularDelta(cusps[9], bhava.mcLongitude)).toBeCloseTo(0, 8);
+    expect(angularDelta(cusps[0]!, bhava.ascendantLongitude)).toBeCloseTo(0, 8);
+    expect(angularDelta(cusps[9]!, bhava.mcLongitude)).toBeCloseTo(0, 8);
     // cusp[3] (IC) = MC + 180; cusp[6] (DSC) = ASC + 180.
-    expect(angularDelta(cusps[3], mod360(bhava.mcLongitude + 180))).toBeCloseTo(0, 8);
-    expect(angularDelta(cusps[6], mod360(bhava.ascendantLongitude + 180))).toBeCloseTo(0, 8);
+    expect(angularDelta(cusps[3]!, mod360(bhava.mcLongitude + 180))).toBeCloseTo(0, 8);
+    expect(angularDelta(cusps[6]!, mod360(bhava.ascendantLongitude + 180))).toBeCloseTo(0, 8);
   });
 });
 
@@ -470,7 +470,7 @@ describe('Sripati cusps — fixture pin sweep (hand-derived predictions)', () =>
       const { cusps } = computeSripatiLagna(date, loc, 'lahiri', 'en',
                                             { includeCusps: true });
       for (let i = 0; i < 12; i++) {
-        const delta = Math.abs(angularDelta(cusps[i], pin.cusps[i]));
+        const delta = Math.abs(angularDelta(cusps[i]!, pin.cusps[i]!));
         expect(delta).toBeLessThan(TOL);
       }
     });
@@ -500,7 +500,7 @@ describe('Sripati cusps — equator (φ=0) regression', () => {
     }
     // Antipodal symmetry survives at φ=0.
     for (let i = 0; i < 6; i++) {
-      const delta = angularDelta(cusps[i + 6], cusps[i]);
+      const delta = angularDelta(cusps[i + 6]!, cusps[i]!);
       expect(Math.abs(Math.abs(delta) - 180)).toBeLessThan(1e-9);
     }
   });

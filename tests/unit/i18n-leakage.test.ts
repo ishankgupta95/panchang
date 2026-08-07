@@ -51,10 +51,10 @@ describe('Hindi output carries no untranslated English', () => {
       if (r.eclipse !== null) {
         expect(r.eclipse.description, 'eclipse.description').not.toMatch(LATIN_RUN);
       }
-      if (r.bhadra !== null) {
+      if (r.inauspicious.bhadra !== null) {
         // `location` stays a machine key by design; `locationName` is display.
-        expect(['earth', 'heaven', 'paatal']).toContain(r.bhadra.location);
-        expect(r.bhadra.locationName, 'bhadra.locationName').not.toMatch(LATIN_RUN);
+        expect(['earth', 'heaven', 'paatal']).toContain(r.inauspicious.bhadra.location);
+        expect(r.inauspicious.bhadra.locationName, 'bhadra.locationName').not.toMatch(LATIN_RUN);
       }
     });
   }

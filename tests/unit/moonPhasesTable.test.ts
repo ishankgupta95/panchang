@@ -74,12 +74,12 @@ describe('Moon-phases table reader', () => {
   });
 
   describe('getMoonPhasesForDate', () => {
-    const sample = getMoonPhasesForYear(table, SAMPLE_YEAR)![0];
+    const sample = getMoonPhasesForYear(table, SAMPLE_YEAR)![0]!;
 
     it('accepts ISO YYYY-MM-DD strings', () => {
       const got = getMoonPhasesForDate(table, sample.date);
       expect(got.length).toBeGreaterThan(0);
-      expect(PHASES).toContain(got[0].phase);
+      expect(PHASES).toContain(got[0]!.phase);
     });
 
     it('accepts Date objects and converts via the table timezone (IST)', () => {
