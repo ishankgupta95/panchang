@@ -59,6 +59,10 @@ export interface PanchangTranslations {
    * display names surfaced as `BhadraInfo.locationName`.
    */
   bhadraLocationNames: { earth: string; heaven: string; paatal: string };
+  panchakaTypeNames: {
+    roga: string; raja: string; agni: string;
+    chora: string; mrityu: string; samanya: string;
+  };
   /**
    * Eclipse (Grahan) description parts.
    *

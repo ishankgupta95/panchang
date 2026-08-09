@@ -1,6 +1,6 @@
 import type {
   BirthChart, GrahaName, MangalDoshaInfo, MangalDoshaSeverity,
-  KaalSarpDoshaInfo, KaalSarpSubtype, PitruDoshaInfo,
+  MangalCompatibility, KaalSarpDoshaInfo, KaalSarpSubtype, PitruDoshaInfo,
 } from '../types/jyotish';
 import { RASHI_LORD } from './matchingTables';
 
@@ -29,7 +29,8 @@ const MARS_EXALTED_RASHI = 9; // Capricorn
  *     onto Mars (whole-sign: Mars rashi is 5th/7th/9th from Jupiter rashi).
  *
  * Mutual-mangalik cancellation (both partners afflicted) is a matching
- * rule, not a chart-only rule, and is not applied here.
+ * rule, not a chart-only rule, so it is not applied here — use
+ * {@link computeMangalCompatibility} for a pair.
  *
  * @param chart  Natal D1 chart from `computeRashiChart`.
  *
@@ -110,6 +111,64 @@ export function computeMangalDosha(chart: BirthChart): MangalDoshaInfo {
     fromVenus: { afflicted: fromVenusAfflicted, house: fromVenusHouse },
     cancellations,
   };
+}
+
+/**
+ * Assess Mangal Dosha for a couple, applying the mutual-Manglik cancellation.
+ *
+ * {@link computeMangalDosha} answers "is this native Manglik", which is not
+ * the question a match asks. The classical position — and the one mainstream
+ * matchmaking applies — is that when *both* partners are Manglik the two
+ * afflictions neutralise each other, so the pair is unafflicted. A Manglik
+ * matched with a non-Manglik is the case that carries the dosha.
+ *
+ * Chart-level cancellations run first, inside {@link computeMangalDosha}, so
+ * a native whose Mars is (say) exalted arrives here already unafflicted and
+ * cannot contribute to a mutual cancellation.
+ *
+ * Scope. This applies the binary rule. Sources note the neutralisation reads
+ * most cleanly when the two afflictions are of comparable strength, and
+ * {@link MangalDoshaInfo.severity} is carried through on both natives so a
+ * caller can weigh an anshik-against-purna pairing themselves; no severity
+ * threshold is imposed here, because the sources do not agree on one.
+ *
+ * @param boyChart   Natal D1 chart for the first native.
+ * @param girlChart  Natal D1 chart for the second native.
+ *
+ * @example
+ * ```typescript
+ * const m = computeMangalCompatibility(boyChart, girlChart);
+ * if (!m.afflicted) console.log(m.description);
+ * // "both natives Manglik — mutually cancelled"
+ * ```
+ */
+export function computeMangalCompatibility(
+  boyChart: BirthChart,
+  girlChart: BirthChart,
+): MangalCompatibility {
+  const boy = computeMangalDosha(boyChart);
+  const girl = computeMangalDosha(girlChart);
+  const cancellations: string[] = [];
+
+  let afflicted: boolean;
+  let description: string;
+
+  if (boy.afflicted && girl.afflicted) {
+    afflicted = false;
+    cancellations.push('both natives Manglik — mutual cancellation');
+    description = `both natives Manglik (${boy.severity} / ${girl.severity})`
+      + ' — mutually cancelled';
+  } else if (boy.afflicted || girl.afflicted) {
+    afflicted = true;
+    const which = boy.afflicted ? 'boy' : 'girl';
+    const severity = boy.afflicted ? boy.severity : girl.severity;
+    description = `only the ${which} is Manglik (${severity}) — dosha stands`;
+  } else {
+    afflicted = false;
+    description = 'neither native is Manglik';
+  }
+
+  return { boy, girl, afflicted, cancellations, description };
 }
 
 // ── Kaal Sarp Dosha ───────────────────────────────────

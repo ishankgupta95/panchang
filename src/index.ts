@@ -39,7 +39,9 @@ export { computeRashiChart, computeNavamsa } from './jyotish/charts';
 export { computeDivisionalChart } from './jyotish/divisionals';
 export { computeAshtakoot } from './jyotish/matching';
 export type { NatalMoon, KootName, KootScore, AshtakootResult } from './jyotish/matching';
-export { computeMangalDosha, computeKaalSarp, computePitruDosha } from './jyotish/doshas';
+export {
+  computeMangalDosha, computeMangalCompatibility, computeKaalSarp, computePitruDosha,
+} from './jyotish/doshas';
 export { computeSadeSati } from './jyotish/sadeSati';
 export { computeDignity } from './jyotish/dignity';
 export type { Dignity } from './jyotish/dignity';
@@ -126,6 +128,11 @@ export {
 export type {
   MuhurtaRule, MuhurtaScore, MuhurtaDay, MuhurtaScoreOptions, MuhurtaFactor,
 } from './muhurta/engine';
+export {
+  computePanchaka, classifyPanchaka, isPanchakaDosha, findPanchakaOnset,
+} from './core/panchaka';
+export { computeVaraTithiYogas } from './muhurta/varaTithiYogas';
+export type { VaraTithiYoga, VaraTithiYogaType } from './muhurta/varaTithiYogas';
 export { buildMuhurtaTable } from './muhurta/buildMuhurtaTable';
 export type { BuildMuhurtaTableOptions } from './muhurta/buildMuhurtaTable';
 export type {
@@ -212,7 +219,7 @@ export type {
   // return — those extra `*Local` fields are optional. 4.x exported the
   // functions but not the type, so annotating their result was impossible.
   EclipseInfo, EclipseSubtype,
-  GandaMulaInfo,
+  GandaMulaInfo, PanchakaInfo, PanchakaType,
   AnandadiYogaInfo,
   TimePeriod, UtcWindow, Unlocalized,
   PanchangErrorCode,
@@ -222,7 +229,7 @@ export type {
   ChandraBalamInfo, TarabalaInfo,
   LagnaInfo, SripatiLagnaInfo, HouseInfo, BhavaChart,
   PlanetPlacement, BirthChart, DivisionalChart, Divisional,
-  MangalDoshaInfo, MangalDoshaSeverity, SadeSatiInfo,
+  MangalDoshaInfo, MangalDoshaSeverity, MangalCompatibility, SadeSatiInfo,
   AspectMap, PlanetShadbala, ShadbalaResult,
   KaalSarpDoshaInfo, KaalSarpSubtype, PitruDoshaInfo,
   AshtakavargaResult, BhinnashtakaGrid,

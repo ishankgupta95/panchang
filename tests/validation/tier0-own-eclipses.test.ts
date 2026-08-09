@@ -578,9 +578,20 @@ describe('§36.5 Tier 0 — solar LOCAL circumstances vs NASA’s city catalogs'
     // Contact times are printed to the minute, so ±30 s is baked in and the
     // median |error| of 15 s is exactly what rounding to the minute produces.
     // Measured maxima 2026-08-07: C1 62.3 s, max 61.6 s, C4 56.5 s.
-    expect(Math.abs(begin.value), `first contact (s): ${begin.label}`).toBeLessThan(70);
-    expect(Math.abs(maximum.value), `maximum (s): ${maximum.label}`).toBeLessThan(70);
-    expect(Math.abs(end.value), `last contact (s): ${end.label}`).toBeLessThan(70);
+    //
+    // Raised 70 → 80 when ΔT stopped extrapolating Espenak–Meeus across the
+    // measured era. These catalogs are Espenak's, computed with Espenak–Meeus
+    // ΔT, so correcting ours necessarily walks away from them — by the ~6.5 s
+    // the two models now differ by. The worst cases moved to 2055–2056 (C1
+    // 73.7 s, max 71.4 s), which is the far future, where NASA's ΔT is itself
+    // an extrapolation and nobody's value is measured.
+    //
+    // What did *not* move is the historical half, and that is the one that
+    // means anything: its bias and its 50 s max below are unchanged. If a real
+    // geometry error ever appears it will show up there, not here.
+    expect(Math.abs(begin.value), `first contact (s): ${begin.label}`).toBeLessThan(80);
+    expect(Math.abs(maximum.value), `maximum (s): ${maximum.label}`).toBeLessThan(80);
+    expect(Math.abs(end.value), `last contact (s): ${end.label}`).toBeLessThan(80);
 
     /**
      * The ΔT split. These catalogs were computed in 2003; after that Espenak's

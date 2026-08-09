@@ -55,6 +55,7 @@ import { getTropicalMoonLongitude, getMoonPosition } from '../../src/astronomy/m
 import { ttDaysSinceJ2000 } from '../../src/astronomy/deltaT';
 import {
   sunApparentReference, moonApparentReference, truncatedNutationDirectReference,
+  nutationReference,
 } from '../reference/ephemeris-reference';
 import { nutation } from '../../src/astronomy/frame';
 
@@ -238,6 +239,41 @@ describe('§36.0 H — shipped series vs the frozen untruncated reference', () =
     }
     expect(worstPsi, `worst |Δψ| ${worstPsi.toExponential(3)}″ at t=${worstAt}`).toBeLessThan(1e-9);
     expect(worstEps, `worst |Δε| ${worstEps.toExponential(3)}″`).toBeLessThan(1e-9);
+  }, TIMEOUT_MS);
+
+  /**
+   * The truncation budget itself — the one number the series header quotes that
+   * nothing else here measures.
+   *
+   * The angle-addition test above compares the truncated series against *itself*
+   * summed directly, so it says nothing about what dropping 2,336 of 2,414 terms
+   * costs. This compares the shipped 78 terms against `nutationReference`, which
+   * evaluates the untruncated IERS tables, and is what makes the header's
+   * figures checked rather than asserted.
+   *
+   * The bound is span-dependent, which is why the span is stated: the residual
+   * is a beat of long-period terms, and widening the window catches more of the
+   * envelope. Measured worst case is 0.00578″ / 0.00325″ over 1900–2100 and
+   * 0.00607″ / 0.00382″ over 1800–2200 — so the 0.0065″ / 0.0045″ asserted here
+   * has roughly 7% headroom over the wider span and is not a tight fit that a
+   * harmless coefficient reshuffle would trip.
+   */
+  it('truncated nutation vs the untruncated IERS series, 1800–2200', () => {
+    let worstPsi = 0;
+    let worstEps = 0;
+    let worstAt = 0;
+    const STEPS = 20_000;
+    for (let i = 0; i <= STEPS; i++) {
+      const t = -2 + (4 * i) / STEPS;          // Julian centuries TT from J2000
+      const mine = nutation(t);
+      const truth = nutationReference(t);
+      const dPsi = Math.abs(mine.dpsi - truth.dpsi);
+      const dEps = Math.abs(mine.deps - truth.deps);
+      if (dPsi > worstPsi) { worstPsi = dPsi; worstAt = t; }
+      if (dEps > worstEps) worstEps = dEps;
+    }
+    expect(worstPsi, `worst |Δψ| ${worstPsi.toFixed(6)}″ at t=${worstAt}`).toBeLessThan(0.0065);
+    expect(worstEps, `worst |Δε| ${worstEps.toFixed(6)}″`).toBeLessThan(0.0045);
   }, TIMEOUT_MS);
 
   it(`the shipped path stays well-formed over ${SELF_SAMPLE} instants`, () => {

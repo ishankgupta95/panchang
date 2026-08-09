@@ -12,7 +12,7 @@
  * §36.2 has to reimplement ΔT. This file is what it will be judged against.
  *
  * Ground truth is `tests/fixtures/horizons-deltat.json`, derived from Horizons
- * by the method in `notes/horizons-deltat.mjs`.
+ * by the method described in that fixture's `_comment` (its generating script was never committed).
  *
  * ### The two regimes, and why they are tested differently
  *

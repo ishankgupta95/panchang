@@ -6,7 +6,7 @@
   reconstructed from the festivals-table release.
 -->
 
-## 5.0.0 — 2026-08-07
+## 5.0.0 — 2026-08-08
 
 **Major release.** Held until the ephemeris port landed (Phase 36.2–36.5) so the
 whole break arrives once: performance, the table/compute API, the corrected
@@ -130,6 +130,134 @@ Every breaking change has a before/after in the README's
 - **`astronomy-engine` is gone from `dependencies`.** It remains a
   devDependency, used by three Tier 0 tests to measure the baseline this
   release is held against.
+
+### Fixed — muhurta rules, Panchaka, Manglik
+
+Classical rules that had been flattened into absolute per-element verdicts, or
+that fell between two modules. Every item below changes output.
+
+- **26 defects across all 13 stock muhurta rules.** The lists were transcribed
+  by hand from 1-based classical numbers into 0-based indices, and the seams
+  showed: Shukla Chaturdashi — a **Rikta** tithi — was marked *auspicious* in 11
+  rules; `vivahRule` listed Ashtami where Navami belonged; Ashlesha sat in the
+  Mundan nakshatra list; Dashami was marked inauspicious for Griha Pravesh; and
+  12 of 13 rules covered only Shukla paksha in `auspiciousTithis`. Rules now
+  build their lists from `bothPakshas(...)`, `RIKTA` and a named nakshatra map
+  rather than raw indices, and `tests/unit/muhurta-rules-invariants.test.ts`
+  guards the five defect classes.
+- **Auspicious entries that no hard exclusion could ever let through.**
+  `vivahRule` named Magha, Mula and Revati — three of the eleven canonical vivah
+  nakshatras — while `excludeGandaMula` vetoed all three, and listed Ekadashi
+  while `excludeEkadashi` vetoed it. Both flags are dropped from `vivahRule`:
+  drikpanchang lists Ekadashi among the six *preferred* vivah tithis, and the
+  Ganda Mula rejection there is at *pada* granularity, which this model does not
+  resolve. Ashlesha and Jyeshtha remain rejected via `inauspiciousNakshatras`.
+- **Vara × Tithi yogas are now scored.** Siddha, Amrita, Dagdha, Visha,
+  Hutasana, Krakacha and Samvartaka — the combination layer classical muhurta
+  actually judges — via the new `computeVaraTithiYogas(vara, tithi)`, applied to
+  every rule unless `varaTithiYogas: false`. A Rikta tithi on a Saturday is now
+  partly redeemed by Siddha yoga instead of flatly penalised. Where an
+  auspicious and an inauspicious yoga both fire, both are surfaced and allowed
+  to net out; the sources mark those cells ambiguous and rank no table above
+  another.
+- **Bhadra is no longer a whole-day veto.** New
+  `bhadra?: 'ignore' | 'penalize' | 'exclude'` on `MuhurtaRule`; the stock rules
+  use `'penalize'`. Vishti karana sits at fixed positions in the tithi cycle, so
+  the old whole-day exclusion deterministically removed seven tithis — including
+  Shukla Ekadashi, a *preferred* vivah tithi. `excludeBhadra: true` still works
+  as an alias for `bhadra: 'exclude'`; when both are set, `bhadra` wins.
+- **Panchaka reports which of the five it is.** New `panchakaInfo` on daily and
+  instant results, alongside the unchanged `panchaka` boolean. The type is fixed
+  by the weekday the spell *began* on, so it cannot be derived from the day's
+  own vara; a Wednesday- or Thursday-onset spell (`'samanya'`) carries no named
+  affliction, and `excludePanchaka` no longer vetoes it. Exports
+  `classifyPanchaka`, `isPanchakaDosha`, `findPanchakaOnset`.
+- **`computeMangalCompatibility(boyChart, girlChart)`.** The mutual-Manglik
+  cancellation — both partners Manglik neutralises the dosha — was documented in
+  `doshas.ts` as "a matching rule" and deferred, and `matching.ts` never took it
+  up, so it existed nowhere. Chart-level cancellations still run first, so an
+  exalted-Mars native cannot mutually cancel a genuinely Manglik partner.
+- **`MuhurtaFactor.axis` gains `'karana'` and `'varaTithiYoga'`.** Widening only;
+  an exhaustive `switch` over the union needs the two new arms.
+- **Sarvartha Siddhi rebuilt from DrikPanchang's full 2026 listing.** Drik's
+  page serves one month at a time but takes `?date=DD/MM/YYYY`, so all twelve
+  months were pulled — 116 windows. Each window is a nakshatra's span clipped to
+  its Hindu day, so the table was *derived* from them rather than checked
+  against them. Ten cells changed: **added** Sun + Ashwini, Tue + Ashlesha,
+  Wed + Krittika; **removed** Sun + Shravana, Mon + Hasta, Tue + Uttara
+  Phalguni, Thu + Swati, Fri + Bharani, Fri + Chitra, Sat + Revati — each of the
+  seven occurred three to five times in 2026, often across most of the Hindu
+  day, with no drik window on any of those dates. The result reconciles
+  one-for-one over the year (116 windows, 116 days, nothing missed or spare) and
+  independently reproduces the published weekday lists at astrodevam.com /
+  shubhpanchang.com for six of seven varas.
+- **Griha Pravesh and Vahan Kharidi lists rebuilt against drik's published
+  calendars.** Three years of drik's dated shubh-dates pages (2025–2027 Mumbai;
+  121 and 311 published muhurat days) falsify several hand-transcribed entries.
+  Griha Pravesh: Magha / Hasta / Swati / Shravana appear 0–1 times in three
+  years and give way to Mrigashira and Chitra (15–17 each); Saturday — 23
+  published days, zero drik weekday rejections — moves from inauspicious to
+  auspicious; the `excludeEkadashi` hard veto is dropped (Ekadashi is drik's
+  third-most-used griha pravesh tithi) and Dashami / Ekadashi become
+  auspicious. Vahan Kharidi sheds the three Sthira nakshatras (0 occurrences in
+  three years) for the Chara / Mridu set drik's own prose names — Mrigashira,
+  Chitra, Swati, Dhanishtha, Shatabhisha, 30–37 occurrences each — and stops
+  banning Ashtami (44 occurrences) and Purnima (23); Sunday joins the
+  auspicious weekdays. Vivah survives the same screen untouched: its eleven
+  nakshatras are exactly drik's operative set, and drik applies no tithi or
+  weekday shuddhi to marriage at all. Pinned in
+  `tests/validation/drik-muhurta-lists.test.ts`.
+- **ΔT uses measurement where measurement exists.** Espenak–Meeus' post-2005
+  branches are a 2006 extrapolation that Earth's rotation did not follow — by
+  2026 it read ~5.9 s high and drifting +0.6 s/yr, and that lands directly on
+  every published tithi and nakshatra time. `deltaTSeconds` now takes ΔT from
+  the leap-second chain (`32.184 + (TAI − UTC)`) from 1972 to the handoff, and
+  resumes Espenak–Meeus *offset by the bias it had accrued* beyond it. Holding
+  the last observation flat instead would have run ~134 s adrift by 2100 and
+  wrecked agreement with NASA's eclipse canon; carrying the offset keeps that to
+  ~6.5 s. **Every published instant in the modern era moves by the ΔT delta**
+  (~5.7 s for 2025 dates).
+- **`getInstantPanchang` reported the wrong vara after ~19:00.** It searched for
+  sunrise from `date − 12 h`, which for an evening instant is already past that
+  morning's sunrise, so it took *tomorrow's* and rolled the weekday back a day.
+  Every evening query returned the previous vara — and with it the wrong Rahu
+  Kalam, Choghadiya, Anandadi yoga and special yogas. It now walks to the
+  sunrise that actually opens the Hindu day containing the instant.
+- **Special yogas are evaluated across the Hindu day, not at sunrise.**
+  Amrit Siddhi, Sarvartha Siddhi, Ravi / Guru Pushya, Jwalamukhi, Dwipushkar,
+  Tripushkar, Aadal / Vidaal and Ravi yoga qualify on whichever nakshatra is
+  running, and a qualifying nakshatra routinely opens *after* sunrise — the old
+  sunrise snapshot found only 5 of drik's 8 August Sarvartha Siddhi windows.
+  Each (tithi, nakshatra) pair is now evaluated where the two segments actually
+  overlap in time, so no combination is scored that never occurs. More yogas
+  fire than before, which is the point. `getDailyPanchang` with
+  `computeEndTimes: false` keeps the single-snapshot behaviour, since segment
+  times are what make overlap checking possible.
+- **Amrit Siddhi and Tripushkar validated against DrikPanchang's full 2026
+  listings** (Mumbai) — 24 and 16 occurrences, all reproduced exactly, no false
+  positives, pinned in `tests/validation/drik-special-yogas.test.ts`. Drik dates
+  a window by the calendar day its start falls in; this library attributes it to
+  the Hindu day, so a window closing at sunrise is listed by drik on D and
+  reported here on D−1. Same interval, different convention.
+- **Sarvartha Siddhi confirmed out-of-sample across four city-years.** The
+  2026-derived table was re-derived independently from drik's 2025 and 2027
+  Mumbai listings and its 2026 New Delhi listing — 471 published windows in
+  all. Every dataset exercises exactly the same 35 cells, and splitting each
+  window at nakshatra boundaries and sunrises leaves no segment longer than
+  2 minutes outside the table. The one disputed cell is settled: Sun + Ashwini
+  fires 17 times across the four datasets, Sun + Ashlesha (the astrodevam /
+  shubhpanchang variant) never occurs. A handful of drik's pre-dawn windows
+  turn out to be dated by Hindu day rather than by the start's civil date —
+  each start anchors to a nakshatra boundary that exists only on the following
+  date — which also corrects the mechanism behind the withdrawn
+  Sat + Punarvasu cell (that window is Pushya's pre-dawn span on Hindu Sunday
+  2026-10-04: Sun + Pushya, already carried). All four city-years reconcile in
+  `tests/validation/drik-special-yogas.test.ts`.
+- **Gana koot deliberately keeps no cancellation set** — now documented rather
+  than left looking like an oversight. Bhakoot and Nadi cancellations are
+  score-affecting in mainstream practice; the mitigations described for Gana are
+  interpretive ("loses significance"), one of them is circular for scoring, and
+  no consulted source restores the six points arithmetically.
 
 ### Added
 

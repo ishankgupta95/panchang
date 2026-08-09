@@ -50,7 +50,9 @@ import { computeSamvat } from './samvat';
 import { computeChandraRashi, computeSuryaNakshatra } from './rashi';
 import { computeChoghadiya } from './choghadiya';
 import { computeHora } from './hora';
-import { computePanchaka } from './panchaka';
+import {
+  computePanchaka, findPanchakaOnset, classifyPanchaka, isPanchakaDosha,
+} from './panchaka';
 import { computePanchakaRahita } from './panchakaRahita';
 import { computeDoGhati } from './doGhati';
 import { computeSpecialYogas } from './specialYogas';
@@ -82,8 +84,9 @@ import type {
 } from '../types/panchang';
 import type {
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo, TimePeriod,
-  ChoghadiyaQuality, FestivalInfo, UtcWindow, Unlocalized,
+  ChoghadiyaQuality, FestivalInfo, UtcWindow, Unlocalized, PanchakaInfo,
 } from '../types/elements';
+import type { PanchangTranslations } from '../i18n/types';
 
 /**
  * ## INTERPOLATE_ALWAYS — why the panchang entry points never pick a cache mode
@@ -200,6 +203,138 @@ const YOGA_ANGLE = (
  * @see getDailyPanchang — for sunrise-to-next-sunrise Hindu day with full
  *                        canonical-time festival dating.
  */
+/**
+ * Vara index of the Hindu day containing `utc`, in the caller's local-display
+ * convention.
+ *
+ * Falls back to the plain local calendar weekday when sunrise cannot be
+ * computed for that date. That only happens within a few days of a polar
+ * day/night boundary, and it costs accuracy only when the instant also falls
+ * between local midnight and sunrise — otherwise the two agree.
+ */
+function varaIndexAtInstant(
+  utc: Date,
+  location: GeoLocation,
+  offsetMinutes: number,
+  varaNames: readonly { name: string; short: string }[],
+): number {
+  const local = utcToLocalDisplay(utc, offsetMinutes);
+  try {
+    // Walk to the sunrise that *opens* the Hindu day containing `utc`. Searching
+    // from `utc − 12 h` finds tomorrow's sunrise for any evening instant and
+    // rolls the weekday back a day — the same defect `getInstantPanchang`
+    // carried. Here it would mistype a Panchaka spell that began after dark.
+    let sunrise = computeSunrise(new Date(utc.getTime() - 26 * 3600_000), location);
+    for (;;) {
+      const next = computeSunrise(new Date(sunrise.getTime() + 3600_000), location);
+      if (next.getTime() > utc.getTime()) break;
+      sunrise = next;
+    }
+    const localSunrise = utcToLocalDisplay(sunrise, offsetMinutes);
+    return computeVara(localSunrise, localSunrise, varaNames).index;
+  } catch (e: unknown) {
+    if (e instanceof PanchangError && (e.code === 'NO_SUNRISE' || e.code === 'NO_SUNSET')) {
+      return local.getUTCDay();
+    }
+    throw e;
+  }
+}
+
+/**
+ * Do two daily-element segments overlap in time?
+ *
+ * A missing bound means the segment was not resolved (the `computeEndTimes:
+ * false` path emits a single sunrise snapshot with null times), which is
+ * treated as unbounded so the pair still evaluates once.
+ */
+function segmentsOverlap(
+  a: { startTime: Date | null; endTime: Date | null },
+  b: { startTime: Date | null; endTime: Date | null },
+): boolean {
+  const aStart = a.startTime?.getTime() ?? -Infinity;
+  const aEnd = a.endTime?.getTime() ?? Infinity;
+  const bStart = b.startTime?.getTime() ?? -Infinity;
+  const bEnd = b.endTime?.getTime() ?? Infinity;
+  return aStart < bEnd && bStart < aEnd;
+}
+
+/**
+ * Special yogas across the whole Hindu day rather than its sunrise snapshot.
+ *
+ * The Vara × Nakshatra tables (Amrit Siddhi, Sarvartha Siddhi, Ravi / Guru
+ * Pushya) and the tithi × nakshatra ones (Jwalamukhi, Dwipushkar, Tripushkar)
+ * qualify on whichever nakshatra is running, and a qualifying nakshatra
+ * routinely begins *after* sunrise — DrikPanchang publishes exactly those
+ * windows. Reading only the sunrise values silently drops them: measured over
+ * August 2026 at Mumbai, the sunrise snapshot found 5 of the 8 Sarvartha Siddhi
+ * occurrences drik lists, missing all three whose nakshatra opened later in the
+ * day.
+ *
+ * A (tithi, nakshatra) pair is evaluated only where the two segments actually
+ * overlap in time. Crossing every tithi with every nakshatra would pair a tithi
+ * from early in the day with a nakshatra from late in it — a combination that
+ * never occurs, and which would fabricate yogas rather than find them.
+ *
+ * Yogas are de-duplicated by type, sunrise-active ones first, so a yoga running
+ * across a segment boundary is reported once.
+ */
+function computeSpecialYogasOverDay(
+  varaIndex: number,
+  tithis: readonly DailyTithiInfo[],
+  nakshatras: readonly DailyNakshatraInfo[],
+  suryaNakshatraIndex: number,
+  nameResolver: (type: string) => string,
+): ReturnType<typeof computeSpecialYogas> {
+  const out: ReturnType<typeof computeSpecialYogas> = [];
+  const seen = new Set<string>();
+  for (const tithi of tithis) {
+    for (const nakshatra of nakshatras) {
+      if (!segmentsOverlap(tithi, nakshatra)) continue;
+      const found = computeSpecialYogas(
+        varaIndex, tithi.index, nakshatra.index, suryaNakshatraIndex, nameResolver,
+      );
+      for (const yoga of found) {
+        if (seen.has(yoga.type)) continue;
+        seen.add(yoga.type);
+        out.push(yoga);
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Panchaka plus the classical type of the running spell.
+ *
+ * The type is fixed by the vara the Moon *entered* the Panchaka span on, so
+ * this reaches back for the onset rather than reading the current day — see
+ * {@link classifyPanchaka}.
+ */
+function buildPanchakaInfo(
+  referenceUtc: Date,
+  siderealMoonNow: number,
+  getMoon: (d: Date) => number,
+  varaIndexAt: (utc: Date) => number,
+  t: PanchangTranslations,
+): PanchakaInfo {
+  if (!computePanchaka(siderealMoonNow)) return { active: false };
+  const onset = findPanchakaOnset(referenceUtc, getMoon);
+  // `active` was just confirmed, so the onset is bracketed except in the
+  // degenerate case where the Moon has been in Panchaka for the whole search
+  // window — impossible at its real speed, but typed for safety.
+  if (onset === null) return { active: false };
+
+  const onsetVara = varaIndexAt(onset);
+  const type = classifyPanchaka(onsetVara);
+  return {
+    active: true,
+    type,
+    name: t.panchakaTypeNames[type],
+    isDosha: isPanchakaDosha(type),
+    onsetVara,
+  };
+}
+
 export function getInstantPanchang(
   date: Date,
   location: GeoLocation,
@@ -241,27 +376,43 @@ export function getInstantPanchang(
     resolveKaranaName(getKaranaIndex(siderealMoon, siderealSun), lang),
   );
 
-  // For Vara in instant mode, we need sunrise to know if the moment is before/after sunrise.
-  // No explicit timezone is supplied here — derive a longitude-based local-mean-time offset
-  // so the weekday reflects the observer's local calendar day rather than UTC's.
-  // (Without this shift, observers east of the Date Line / west of GMT can be off-by-one.)
+  // The Hindu day runs sunrise → next sunrise, so its vara is the weekday of
+  // the sunrise that *opened* it — the most recent one at or before `date`.
+  //
+  // This used to search from `date − 12 h`, which is only the opening sunrise
+  // for instants inside twelve hours of it. Ask for 20:00 and the search starts
+  // at 08:00, already past that morning's sunrise, so it returned *tomorrow's*
+  // and the weekday was rolled back a day: every evening instant reported the
+  // previous vara, and with it the wrong Rahu Kalam, Choghadiya, Anandadi yoga
+  // and special yogas.
+  //
+  // No explicit timezone is supplied here, so a longitude-based local-mean-time
+  // offset gives the observer's local calendar day rather than UTC's (without
+  // it, observers east of the Date Line / west of GMT are off by one).
+  //
   // Polar locations with no sunrise: return null to mirror getDailyPanchang's
   // contract — the Hindu-day weekday is undefined when sunrise doesn't occur.
+  const lmtOffsetMinutes = Math.round(location.longitude * 4);
   let sunriseUtc: Date;
   try {
-    sunriseUtc = computeSunrise(
-      new Date(date.getTime() - 12 * 3600_000),
-      location,
-    );
+    // 26 h back guarantees a sunrise strictly before `date`; then walk forward
+    // while the following sunrise is still not past it.
+    sunriseUtc = computeSunrise(new Date(date.getTime() - 26 * 3600_000), location);
+    for (;;) {
+      const next = computeSunrise(new Date(sunriseUtc.getTime() + 3600_000), location);
+      if (next.getTime() > date.getTime()) break;
+      sunriseUtc = next;
+    }
   } catch (e: unknown) {
     if (e instanceof PanchangError && (e.code === 'NO_SUNRISE' || e.code === 'NO_SUNSET')) {
       return null;
     }
     throw e;
   }
-  const lmtOffsetMinutes = Math.round(location.longitude * 4);
+  // `sunriseUtc` opens the Hindu day containing `date`, so the vara is simply
+  // its own weekday — no before/after test is left to make.
   const vara = computeVara(
-    utcToLocalDisplay(date, lmtOffsetMinutes),
+    utcToLocalDisplay(sunriseUtc, lmtOffsetMinutes),
     utcToLocalDisplay(sunriseUtc, lmtOffsetMinutes),
     t.varaNames,
   );
@@ -345,6 +496,12 @@ export function getInstantPanchang(
     lang,
   );
 
+  const panchakaInfo = buildPanchakaInfo(
+    date, siderealMoon, getMoon,
+    (utc) => varaIndexAtInstant(utc, location, lmtOffsetMinutes, t.varaNames),
+    t,
+  );
+
   return {
     timestamp: date,
     location,
@@ -353,7 +510,7 @@ export function getInstantPanchang(
     moon: { siderealLongitude: siderealMoon, rashi: chandraRashi },
     angas: { tithi, nakshatra, yoga, karana, vara },
     calendar: { chandramasa, samvat },
-    inauspicious: { panchaka: computePanchaka(siderealMoon), gandaMula },
+    inauspicious: { panchaka: computePanchaka(siderealMoon), panchakaInfo, gandaMula },
     specialYogas,
     anandadiYoga,
     festivals,
@@ -549,6 +706,11 @@ export function getDailyPanchang(
     ? getMoonset(moonriseUtc ?? localMidnightUtc, location)
     : null;
   const panchaka = computePanchaka(siderealMoonAtSunrise);
+  const panchakaInfo = buildPanchakaInfo(
+    sunriseUtc, siderealMoonAtSunrise, getMoon,
+    (utc) => varaIndexAtInstant(utc, location, offsetMinutes, t.varaNames),
+    t,
+  );
   const panchakaRahitaUtc = wantLunarWindows
     ? computePanchakaRahita(sunriseUtc, nextSunriseUtc, getMoon)
     : [];
@@ -558,12 +720,6 @@ export function getDailyPanchang(
     qualityNameFn,
   );
 
-  const specialYogas = computeSpecialYogas(
-    vara.index, tithiAtSunrise.index,
-    nakshatraOf(siderealMoonAtSunrise),
-    suryaNakshatra.index,
-    (type) => (t.specialYogaNames as Record<string, string>)[type] ?? type,
-  );
   const durMuhurtaUtc = computeDurMuhurta(sunriseUtc, sunsetUtc, vara.index);
 
   // Bhadra Kala window overlapping today's Hindu day. Computed whenever either
@@ -682,6 +838,14 @@ export function getDailyPanchang(
     yogas = [{ ...yogaAtSunrise, ...bare }];
     karanas = [{ ...karanaAtSunrise, ...bare }];
   }
+
+  // Evaluated here rather than at sunrise: the segment arrays above are what
+  // make time-overlap checking possible, and a qualifying nakshatra often
+  // opens after sunrise. See `computeSpecialYogasOverDay`.
+  const specialYogas = computeSpecialYogasOverDay(
+    vara.index, tithis, nakshatras, suryaNakshatra.index,
+    (type) => (t.specialYogaNames as Record<string, string>)[type] ?? type,
+  );
 
   // ── 7. Compute time-slot periods ─────────────────────
   const rahuKalam = computeRahuKalam(sunriseUtc, sunsetUtc, vara.index);
@@ -820,6 +984,7 @@ export function getDailyPanchang(
         : null,
       gandaMula,
       panchaka,
+      panchakaInfo,
       panchakaRahita: panchakaRahitaUtc.map(withLocal),
     },
     periods: {

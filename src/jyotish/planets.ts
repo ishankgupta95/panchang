@@ -87,8 +87,9 @@ function getMeanRahuLongitudeTropical(date: Date): number {
  *   Ω_true = Ω_mean − 1.4979° · sin(2D − 2F)
  *
  * where D is the Moon's mean elongation from the Sun and F is the Moon's
- * argument of latitude. Higher-order perturbations (sub-arcminute) are
- * neglected — adequate for Vedic transit purposes (sub-degree accuracy).
+ * argument of latitude. The next Meeus terms (−0.1500°·sin M and smaller) are
+ * neglected, so the residual against the full series is up to ~0.2° —
+ * adequate for Vedic transit purposes (sub-degree accuracy).
  */
 function getTrueRahuLongitudeTropical(date: Date): number {
   const T = (dateToJulianDay(date) - 2451545.0) / 36525.0;

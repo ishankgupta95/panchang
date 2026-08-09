@@ -14,7 +14,7 @@ export type {
   GowriSlot, GowriInfo,
   SpecialYogaInfo, FestivalInfo, BhadraInfo,
   EclipseInfo, EclipseSubtype,
-  GandaMulaInfo,
+  GandaMulaInfo, PanchakaInfo, PanchakaType,
   AnandadiYogaInfo,
 } from './elements';
 export type {
@@ -31,7 +31,7 @@ export type {
   ChandraBalamInfo, TarabalaInfo,
   LagnaInfo, SripatiLagnaInfo, HouseInfo, BhavaChart,
   PlanetPlacement, BirthChart, DivisionalChart, Divisional,
-  MangalDoshaInfo, MangalDoshaSeverity, SadeSatiInfo,
+  MangalDoshaInfo, MangalDoshaSeverity, MangalCompatibility, SadeSatiInfo,
   AspectMap, PlanetShadbala, ShadbalaResult,
   KaalSarpDoshaInfo, KaalSarpSubtype, PitruDoshaInfo,
   AshtakavargaResult, BhinnashtakaGrid,

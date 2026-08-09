@@ -21,7 +21,8 @@ export interface MuhurtaFactor {
   /** Stable identifier, e.g. `'auspicious_tithi'`, `'bhadra'`, `'jwalamukhi'`. */
   code: string;
   /** Which panchang axis produced it. `'exclusion'` means the day was zeroed. */
-  axis: 'tithi' | 'nakshatra' | 'vara' | 'yoga' | 'specialYoga' | 'exclusion';
+  axis: 'tithi' | 'nakshatra' | 'vara' | 'karana' | 'yoga' | 'specialYoga'
+    | 'varaTithiYoga' | 'exclusion';
   /** The element index that triggered it, when the axis has one. */
   index?: number;
   /** Points contributed. Negative lowers the score; 0 for a hard exclusion. */

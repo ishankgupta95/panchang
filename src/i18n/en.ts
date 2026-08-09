@@ -61,6 +61,10 @@ export const en: PanchangTranslations = {
   grahaNames: ['Sun', 'Venus', 'Mercury', 'Moon', 'Saturn', 'Jupiter', 'Mars'],
   qualityNames: { auspicious: 'Auspicious', inauspicious: 'Inauspicious', neutral: 'Neutral' },
   bhadraLocationNames: { earth: 'Earth', heaven: 'Heaven', paatal: 'Paatal' },
+  panchakaTypeNames: {
+    roga: 'Roga Panchaka', raja: 'Raja Panchaka', agni: 'Agni Panchaka',
+    chora: 'Chora Panchaka', mrityu: 'Mrityu Panchaka', samanya: 'Samanya Panchaka',
+  },
   eclipse: {
     template: '{subtype} {kind} eclipse — {percent}% obscuration, {visibility}.',
     kind: { solar: 'solar', lunar: 'lunar' },

@@ -1,5 +1,5 @@
 {
- "_comment": "Tier 0 ground truth for ΔT = TT − UT, derived from JPL Horizons by solving for the TT epoch whose lunar longitude matches a UT-tagged request at the same Julian date. Method and error budget are documented in notes/horizons-deltat.mjs. Regenerate with `node notes/horizons-deltat.mjs`.",
+ "_comment": "Tier 0 ground truth for ΔT = TT − UT, derived from JPL Horizons by solving for the TT epoch whose lunar longitude matches a UT-tagged request at the same Julian date. The generating script was never committed, so this fixture cannot currently be regenerated — only re-derived from scratch against Horizons by the method described above. Treat the values as frozen ground truth.",
  "source": "https://ssd.jpl.nasa.gov/api/horizons.api",
  "ephemeris": "DE441",
  "retrieved": "2026-08-06",

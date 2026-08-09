@@ -4,7 +4,7 @@ import type {
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, TimePeriod,
   ChandraMasaInfo, SamvatInfo, RashiInfo, NakshatraIndexInfo, ChoghadiyaInfo, HoraInfo,
   SpecialYogaInfo, FestivalInfo, GowriInfo, BhadraInfo, EclipseInfo,
-  GandaMulaInfo, AnandadiYogaInfo, DoGhatiInfo,
+  GandaMulaInfo, PanchakaInfo, AnandadiYogaInfo, DoGhatiInfo,
 } from './elements';
 import type { ChandraBalamInfo, TarabalaInfo } from './jyotish';
 
@@ -290,6 +290,17 @@ export interface InauspiciousWindows {
   /** Whether the Moon is in Panchaka (the last five nakshatras) at sunrise. */
   panchaka: boolean;
   /**
+   * Which Panchaka is running, and whether it carries a dosha at all.
+   *
+   * {@link DailyInauspicious.panchaka} answers only "is the Moon in the span",
+   * which flattens a graded classification: the tradition names five Panchakas
+   * and picks between them by the weekday the spell *began* on, so this cannot
+   * be derived from the day's own vara. A Wednesday- or Thursday-onset spell
+   * gets no named affliction at all (`isDosha: false`) and is the case most
+   * often mishandled by treating Panchaka as a plain flag.
+   */
+  panchakaInfo: PanchakaInfo;
+  /**
    * Slices of the Hindu day during which the Moon is OUTSIDE Panchaka
    * (i.e. outside the last five nakshatras: Dhanishtha 3rd–4th pada through
    * Revati). Because the Moon moves monotonically, this is at most ONE slice:
@@ -309,6 +320,11 @@ export interface InauspiciousWindows {
 export interface InstantInauspicious {
   /** Whether the Moon is in Panchaka at the queried instant. */
   panchaka: boolean;
+  /**
+   * Which Panchaka is running at the queried instant, and whether it carries
+   * a dosha. See {@link DailyInauspicious.panchakaInfo}.
+   */
+  panchakaInfo: PanchakaInfo;
   /** Ganda Mula — Moon-in-root-nakshatra detection at the queried instant. */
   gandaMula: GandaMulaInfo;
 }

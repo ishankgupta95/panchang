@@ -331,6 +331,30 @@ export interface MangalDoshaInfo {
   cancellations: string[];
 }
 
+/**
+ * Mangal Dosha assessed for a *couple* rather than a single chart.
+ *
+ * Manglik status is not a property either native carries into a match on
+ * their own: when both are afflicted the doshas are held to neutralise each
+ * other ("dosha samyoga"), so a pair of Mangliks is compatible where a
+ * Manglik and a non-Manglik is not. That rule cannot be expressed by
+ * {@link MangalDoshaInfo} alone, which is why it lives here.
+ */
+export interface MangalCompatibility {
+  /** Per-native Mangal status, each already carrying its own cancellations. */
+  boy: MangalDoshaInfo;
+  girl: MangalDoshaInfo;
+  /**
+   * Whether a Mangal affliction survives *for the match*. False when neither
+   * native is Manglik and false when both are — true only when exactly one is.
+   */
+  afflicted: boolean;
+  /** Pair-level cancellations applied, e.g. mutual Manglik. Empty when none. */
+  cancellations: string[];
+  /** Human-readable summary of the outcome. */
+  description: string;
+}
+
 // ── Sade Sati ─────────────────────────────────────────
 
 /**

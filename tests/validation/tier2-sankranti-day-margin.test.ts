@@ -92,19 +92,32 @@ describe('Tier 2 — the Reykjavik Tula Sankranti sits inside its own error bar'
     ).toBeLessThan(0);
   });
 
-  it('the margin is 7.1 s, against a solar error bar worth 7.8 s', () => {
-    // Observed 2026-08-07: −7.126 s. The band is ±2 s — see the header for why
-    // it is tight on purpose, and for what to do when it fails.
-    expect(marginSeconds).toBeGreaterThan(-9.2);
-    expect(marginSeconds).toBeLessThan(-5.1);
+  it('the margin is 1.4 s, now well inside a solar error bar worth 7.8 s', () => {
+    // Was −7.126 s. Correcting ΔT across the measured era (Espenak–Meeus reads
+    // ~5.7 s high in 2025) moved the transit later by exactly that amount while
+    // barely touching sunrise:
+    //
+    //   transit  +5.741 s   (ΔT 74.925 → 69.184, predicted and observed equal)
+    //   sunrise  −0.027 s
+    //   margin   −7.126 → −1.358 s
+    //
+    // Still negative, so the sankranti still files under Oct 16 and the two
+    // festival entries stay put. But the margin is now *smaller* than it was
+    // and far inside the 7.8 s solar error bar, so this case is genuinely
+    // undecided on accuracy grounds — it lands on Oct 16 by 1.4 s of a quantity
+    // we cannot resolve to better than ~8 s. The band below is the same ±2 s as
+    // before; it now straddles zero, which is the honest statement.
+    expect(marginSeconds).toBeGreaterThan(-3.4);
+    expect(marginSeconds).toBeLessThan(0);
   });
 
   it('pins the transit instant itself, which no published field exposes', () => {
-    // 2025-10-17T08:24:39.227Z, ±2 s. This is the number `diff.mjs` cannot see.
-    const pinned = Date.parse('2025-10-17T08:24:39.227Z');
+    // 2025-10-17T08:24:44.968Z, ±2 s — the old pin plus the 5.741 s ΔT shift.
+    // This is the number `diff.mjs` cannot see.
+    const pinned = Date.parse('2025-10-17T08:24:44.968Z');
     expect(Math.abs(transit.getTime() - pinned)).toBeLessThan(2000);
-    // And the sunrise it is racing, to ±1 s: 2025-10-17T08:24:46.353Z.
-    const pinnedSunrise = Date.parse('2025-10-17T08:24:46.353Z');
+    // And the sunrise it is racing, to ±1 s: 2025-10-17T08:24:46.326Z.
+    const pinnedSunrise = Date.parse('2025-10-17T08:24:46.326Z');
     expect(Math.abs(sunrise.getTime() - pinnedSunrise)).toBeLessThan(1000);
   });
 

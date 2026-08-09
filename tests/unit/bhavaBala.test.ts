@@ -492,8 +492,12 @@ const FIXTURE_PINS: ReadonlyArray<{ name: string; totals: readonly number[] }> =
   {
     name: 'Sachin Tendulkar',
     totals: [
-      563.7608, 424.5006, 247.2773, 350.0403, 310.2726, 330.334,
-      318.184, 299.5526, 357.9003, 293.7073, 379.5006, 386.8775,
+      // Houses 6 and 7 gained 0.0001 when ΔT switched to the leap-second chain
+      // for the measured era: at this 1973 birth the two differ by 0.582 s, and
+      // 0.582 s of planetary motion is a last-decimal effect on a virupa total.
+      // Predicted sub-0.001 before re-pinning; the other ten are unchanged.
+      563.7608, 424.5006, 247.2773, 350.0403, 310.2726, 330.3341,
+      318.1841, 299.5526, 357.9003, 293.7073, 379.5006, 386.8775,
     ],
   },
   {

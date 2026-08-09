@@ -8,15 +8,29 @@
  * `tests/validation/differential-ephemeris.test.ts` measures the difference —
  * so the budgets quoted below are checked, not asserted.
  *
+ * These are the **IAU 2000_R06** tables — 2000A with the IAU 2006 adjustments.
+ * Their leading Δψ term is −17.20642418″, not the −17.2064161″ of the plain
+ * IAU 2000A table, so checking this file against the wrong one of the two
+ * makes a correct series look broken.
+ *
  * Terms are kept above a 500 µas amplitude cut-off rather than by the
  * binary search the position series use, because nutation's spectrum has no
  * long tail worth searching: the whole series is ~2,400 terms and 78 of them
- * carry it to 5 milliarcseconds.
+ * carry it to 5 milliarcseconds. The cut lands in a clean gap, not mid-cluster.
  *
  * | series | terms kept | measured error |
  * |---|---|---|
  * | Δψ | 49 of 1358 | 0.00602″ |
  * | Δε | 29 of 1056 | 0.00392″ |
+ *
+ * The error column is the worst of 100000 probes over |t| ≤ 1.5 — 1850–2150,
+ * a half-century margin either side of the 1900–2100 the library accepts. It
+ * is span-dependent, because the residual is a beat of long-period terms: the
+ * same truncation measures ~0.0058" / 0.0033" over 1900–2100 and ~0.0061" /
+ * 0.0038" over 1800–2200. Quoting one figure without its span understates it.
+ * Asserted by the "truncated nutation vs the untruncated IERS series" case in
+ * tests/validation/differential-ephemeris.test.ts.
+
  */
 
 /** PSI: 49 of 1358 terms; error ≤ 0.00602″. Stride 3: sin, cos (arcsec), power of t. */

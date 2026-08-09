@@ -13,7 +13,8 @@ concatenated verbatim, separated by a `===== NAME =====` line.
 
 ## Who reads these
 
-- `notes/ephemeris-generate.mjs` truncates them into `src/astronomy/series/`
+- `notes/ephemeris-generate.sh` (bundling `notes/ephemeris-generate.src.ts`)
+  truncates them into `src/astronomy/series/`
   under a stated error budget, and prints the resulting term counts.
 - `tests/reference/` evaluates them **untruncated**, as the frozen reference
   implementation of PLAN.md §36.0 H. The shipped series is differential-tested

@@ -363,6 +363,39 @@ export type GandaMulaInfo =
   | { active: false }
   | { active: true; nakshatraName: string; severity: 'mild' | 'severe' };
 
+// ── Panchaka ─────────────────────────────────────────
+
+/**
+ * Which of the five Panchakas a spell is.
+ *
+ * `'samanya'` ("ordinary") covers a spell begun on a Wednesday or Thursday,
+ * which carries no named affliction — see {@link PanchakaInfo.isDosha}.
+ */
+export type PanchakaType = 'roga' | 'raja' | 'agni' | 'chora' | 'mrityu' | 'samanya';
+
+/**
+ * Panchaka — the Moon in the last five nakshatras (Dhanishtha 3rd pada
+ * through Revati), classically restricting five specific acts.
+ *
+ * Which Panchaka applies is fixed by the weekday the spell *began* on, and it
+ * holds for the whole spell — so this is not a property of the day in
+ * isolation. Two days with identical tithi, nakshatra and vara can carry
+ * different Panchaka types depending on when the Moon entered the span.
+ */
+export type PanchakaInfo =
+  | { active: false }
+  | {
+    active: true;
+    /** Stable identifier, e.g. `'mrityu'`. */
+    type: PanchakaType;
+    /** Localized display name. */
+    name: string;
+    /** False for `'samanya'` — the tradition attaches no dosha to it. */
+    isDosha: boolean;
+    /** Vara the spell began on (0 = Sunday), which is what fixed the type. */
+    onsetVara: number;
+  };
+
 // ── Anandadi Yoga (Vara × Nakshatra) ─────────────────
 
 /**

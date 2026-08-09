@@ -1,4 +1,5 @@
 import { getDailyPanchang } from '../core/panchang';
+import { computeVaraTithiYogas } from './varaTithiYogas';
 import { validateLocation, validateDate } from '../utils/validation';
 import { resolveUtcOffset } from '../utils/timezone';
 import type { MuhurtaFactor } from './muhurtaTableTypes';
@@ -37,7 +38,30 @@ export interface MuhurtaRule {
   inauspiciousVaras?: readonly number[];
   auspiciousYogas?: readonly number[];
   inauspiciousYogas?: readonly number[];
-  /** Bhadra (Vishti karana) on the day disqualifies it. */
+  /**
+   * How Bhadra (Vishti karana) affects the day. Defaults to `'ignore'`.
+   *
+   * Bhadra is classically a *window* to avoid within a day, not a whole-day
+   * disqualifier — and because Vishti karana sits at fixed positions in the
+   * tithi cycle, vetoing the whole day removes seven tithis outright
+   * (Shukla Chaturthi / Ekadashi / Chaturdashi and Krishna Tritiya /
+   * Shashthi / Dashami / Trayodashi), among them tithis the same sources
+   * list as *preferred*. `'penalize'` is therefore the better default for a
+   * day-granularity score; read `panchang.inauspicious.bhadra` for the
+   * interval and schedule around it.
+   *
+   * - `'ignore'`   — Bhadra does not affect the score.
+   * - `'penalize'` — soft −15, the same weight as any inauspicious axis.
+   * - `'exclude'`  — hard veto: score 0, `passes: false`.
+   */
+  bhadra?: 'ignore' | 'penalize' | 'exclude';
+  /**
+   * Bhadra (Vishti karana) on the day disqualifies it.
+   *
+   * @deprecated Use {@link MuhurtaRule.bhadra} instead — `excludeBhadra: true`
+   * is exactly `bhadra: 'exclude'`. Kept working indefinitely; when both are
+   * set, `bhadra` wins.
+   */
   excludeBhadra?: boolean;
   /** Ekadashi (tithi 10 / 25) on the day disqualifies it. */
   excludeEkadashi?: boolean;
@@ -49,8 +73,29 @@ export interface MuhurtaRule {
   excludeEclipse?: boolean;
   /** Ganda Mula nakshatras (severity-aware). */
   excludeGandaMula?: boolean;
-  /** Panchaka (Moon in last 5 nakshatras) disqualifies the day. */
+  /**
+   * Panchaka (Moon in last 5 nakshatras) disqualifies the day.
+   *
+   * Only a Panchaka that actually carries a dosha disqualifies: a spell that
+   * began on a Wednesday or Thursday ("Samanya") has no named affliction, and
+   * vetoing it would reject days the tradition does not object to. Read
+   * `panchang.inauspicious.panchakaInfo` for which of the five is running.
+   */
   excludePanchaka?: boolean;
+  /**
+   * Score the classical Vara x Tithi yogas (Siddha, Amrita, Dagdha, Visha,
+   * Hutasana, Krakacha, Samvartaka). Defaults to `true`.
+   *
+   * These are occasion-independent — they qualify *any* undertaking — so they
+   * live on the engine rather than in each rule's lists. Each matched yoga
+   * contributes its own factor: `+10` auspicious, `-15` inauspicious, the same
+   * weights as the per-anga axes. Where an auspicious and an inauspicious yoga
+   * both fire (a documented ambiguity in the sources — see
+   * {@link computeVaraTithiYogas}) the two simply net out.
+   *
+   * Set `false` for the pure per-anga scoring used before v5.1.
+   */
+  varaTithiYogas?: boolean;
 }
 
 /** Per-day score result. */
@@ -210,8 +255,11 @@ function scoreFromPanchang(p: DailyPanchangResult, rule: MuhurtaRule): MuhurtaSc
   const yogaAtSunrise = p.angas.yogas[0]!.index;
   const varaIdx = p.angas.vara.index;
 
+  // `bhadra` supersedes the deprecated `excludeBhadra` when both are set.
+  const bhadraMode = rule.bhadra ?? (rule.excludeBhadra ? 'exclude' : 'ignore');
+
   // Hard exclusions (zero score immediately if matched).
-  if (rule.excludeBhadra && p.inauspicious.bhadra !== null) {
+  if (bhadraMode === 'exclude' && p.inauspicious.bhadra !== null) {
     return zero(p.date, 'Bhadra Kala active on this day', 'bhadra');
   }
   if (rule.excludeEkadashi) {
@@ -229,8 +277,9 @@ function scoreFromPanchang(p: DailyPanchangResult, rule: MuhurtaRule): MuhurtaSc
   if (rule.excludeGandaMula && p.inauspicious.gandaMula.active) {
     return zero(p.date, `Ganda Mula nakshatra (${p.inauspicious.gandaMula.severity})`, 'ganda_mula');
   }
-  if (rule.excludePanchaka && p.inauspicious.panchaka) {
-    return zero(p.date, 'Panchaka active', 'panchaka');
+  const pk = p.inauspicious.panchakaInfo;
+  if (rule.excludePanchaka && pk.active && pk.isDosha) {
+    return zero(p.date, `Panchaka active (${pk.type})`, 'panchaka');
   }
   if (rule.requirePaksha) {
     const paksha = tithiAtSunrise < 15 ? 'shukla' : 'krishna';
@@ -278,6 +327,26 @@ function scoreFromPanchang(p: DailyPanchangResult, rule: MuhurtaRule): MuhurtaSc
     score -= 15;
     reasons.push(`inauspicious yoga (${yogaAtSunrise})`);
     factors.push({ code: 'inauspicious_yoga', axis: 'yoga', index: yogaAtSunrise, delta: -15 });
+  }
+
+  // Vara x Tithi yogas — the combination layer. Auspicious and inauspicious
+  // matches can co-occur; both are surfaced and allowed to net out, because
+  // no source ranks the tables against each other.
+  if (rule.varaTithiYogas !== false) {
+    for (const vty of computeVaraTithiYogas(varaIdx, tithiAtSunrise)) {
+      const delta = vty.polarity === 'auspicious' ? 10 : -15;
+      score += delta;
+      reasons.push(`${vty.type} yoga (vara x tithi, ${vty.polarity})`);
+      factors.push({ code: `vara_tithi_${vty.type}`, axis: 'varaTithiYoga', delta });
+    }
+  }
+
+  // Bhadra as a soft factor: the day stays usable, but the caller should
+  // schedule outside `panchang.inauspicious.bhadra`.
+  if (bhadraMode === 'penalize' && p.inauspicious.bhadra !== null) {
+    score -= 15;
+    reasons.push('Bhadra Kala active during part of the day');
+    factors.push({ code: 'bhadra', axis: 'karana', delta: -15 });
   }
 
   // Special yoga bonuses — Amrit Siddhi / Sarvartha Siddhi / Ravi Pushya /

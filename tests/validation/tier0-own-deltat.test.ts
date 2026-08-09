@@ -84,14 +84,52 @@ describe('36.2 — own ΔT vs Tier 0', () => {
     const END_JD = 2921000;   // ≈ +2500
     const N = 100_000;
     let worst = 0, worstJd = 0;
+    // Against `deltaTSecondsForYear`, not `deltaTSeconds`. What this test checks
+    // is that our transcription of Espenak–Meeus matches an independent one, and
+    // that is the polynomial. `deltaTSeconds` deliberately departs from the model
+    // wherever ΔT has actually been measured — pointing this at it would only
+    // re-measure that departure, which the observed-era test below states
+    // directly.
     for (let i = 0; i < N; i++) {
       const jd = START_JD + ((END_JD - START_JD) * i) / (N - 1);
-      const d = Math.abs(deltaTSeconds(dateForJdUt(jd)) - engineDeltaT(jd));
+      // Same instant → decimal-year mapping `deltaTSeconds` uses internally.
+      const year = 2000 + ((jd - 2451545.0) - 14) / 365.24217;
+      const d = Math.abs(deltaTSecondsForYear(year) - engineDeltaT(jd));
       if (d > worst) { worst = d; worstJd = jd; }
     }
     const worstYear = Math.round(2000 + (worstJd - 2451545) / 365.25);
     expect(worst, `worst divergence ${worst.toFixed(4)} s near year ${worstYear}`)
       .toBeLessThan(0.05);
+  });
+
+  /**
+   * The measured era, asserted against the leap-second chain rather than
+   * against any model. `TT − UTC = 32.184 + (TAI − UTC)` is exact, and leap
+   * seconds hold `|UT1 − UTC| ≤ 0.9 s`, so this is within 0.9 s of the TT − UT1
+   * the polynomials model — where Espenak–Meeus, extrapolating from 2006, is
+   * now ~6 s out.
+   */
+  it('tracks the leap-second chain across the measured era', () => {
+    const cases: [string, number][] = [
+      ['1980-06-01T00:00:00Z', 32.184 + 19],
+      ['1990-06-01T00:00:00Z', 32.184 + 25],
+      ['2000-06-01T00:00:00Z', 32.184 + 32],
+      ['2010-06-01T00:00:00Z', 32.184 + 34],
+      ['2016-06-01T00:00:00Z', 32.184 + 36],
+      ['2026-06-01T00:00:00Z', 32.184 + 37],
+    ];
+    for (const [iso, expected] of cases) {
+      expect(deltaTSeconds(new Date(iso)), iso).toBeCloseTo(expected, 9);
+    }
+  });
+
+  it('is continuous where measurement hands back to the model', () => {
+    // The model resumes carrying the offset it had accrued, so no step appears
+    // at the handoff — a jump there would put one in every derived time.
+    const handoff = Date.UTC(2027, 0, 1);
+    const before = deltaTSeconds(new Date(handoff - 1000));
+    const after = deltaTSeconds(new Date(handoff + 1000));
+    expect(Math.abs(after - before)).toBeLessThan(0.01);
   });
 
   it('every polynomial branch is continuous at its boundary', () => {
@@ -120,11 +158,17 @@ describe('36.2 — own ΔT vs Tier 0', () => {
   it('the TT helpers are consistent with ΔT', () => {
     const d = new Date('2025-06-15T00:00:00Z');
     const utDays = (d.getTime() - Date.UTC(2000, 0, 1, 12)) / 86_400_000;
-    // Round-trips to 10 ns on the primitive. Not bit-exact — recovering ΔT
+    // Round-trips to ~60 ns on the primitive. Not bit-exact — recovering ΔT
     // means subtracting two numbers of order 10⁴ days whose difference is
     // order 10⁻³ — but three orders of magnitude tighter than going via an
     // absolute JD, which is the point.
-    expect((ttDaysSinceJ2000(d) - utDays) * 86400).toBeCloseTo(deltaTSeconds(d), 7);
+    //
+    // The bound is one ulp of the day count, not anything about ΔT: at this
+    // epoch utDays ≈ 9.3 × 10³, so 1 ulp is ~1.8 × 10⁻¹² days ≈ 160 ns and no
+    // assertion tighter than that can hold. It read `7` while ΔT happened to
+    // land on a value that round-tripped inside 50 ns; that was luck, not a
+    // guarantee, and the observed-era value 69.184 does not share it.
+    expect((ttDaysSinceJ2000(d) - utDays) * 86400).toBeCloseTo(deltaTSeconds(d), 6);
     expect(julianCenturiesTt(d)).toBeCloseTo(ttDaysSinceJ2000(d) / 36525, 15);
     // Lossy on the absolute JD, by design and by ~10 µs — asserted so the size
     // of the loss is pinned rather than discovered later.

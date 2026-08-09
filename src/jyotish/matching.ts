@@ -234,6 +234,26 @@ function maitriLabel(v: number): string {
   return v === 1 ? 'friend' : v === -1 ? 'enemy' : 'neutral';
 }
 
+/**
+ * Gana koot. Note this is the one doshic koot that takes no `cancellations`
+ * array, which is deliberate rather than an omission.
+ *
+ * Bhakoot and Nadi cancellations are *score-affecting* in mainstream practice —
+ * they restore the koot to full marks, and DrikPanchang surfaces them as such,
+ * which is why {@link scoreBhakoot} and {@link scoreNadi} take the array and
+ * write into it. The mitigations described for Gana are a different kind of
+ * claim: the sources say a Gana mismatch "is mitigated" or "loses significance"
+ * when the Moon signs coincide, when the rashi lords are friends, or when the
+ * overall total is already strong — language about interpretation, not about
+ * restoring the six points. One of them (a total above 25/36) is circular for
+ * scoring anyway, since Gana feeds the total.
+ *
+ * No consulted source restores Gana points arithmetically, so doing so here
+ * would silently inflate every affected total away from what a reader checking
+ * against a published 36-guna calculator would see. The Gana score is reported
+ * raw; weighing a mismatch against Graha Maitri and Bhakoot is the astrologer's
+ * call, and `koots` carries everything needed to make it.
+ */
 function scoreGana(boy: NatalMoon, girl: NatalMoon): KootScore {
   const b = ganaIdx(NAKSHATRA_GANA[boy.nakshatra]!);
   const g = ganaIdx(NAKSHATRA_GANA[girl.nakshatra]!);

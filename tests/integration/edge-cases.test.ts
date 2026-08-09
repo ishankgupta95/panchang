@@ -130,12 +130,20 @@ describe('element slivers at the day boundary', () => {
    *   predicted: ≤3.0 s, either direction
    *   observed:  −0.196 s (06:08:45.897 → 06:08:45.701)
    *
+   * Moved again when ΔT stopped extrapolating Espenak–Meeus across the measured
+   * era. ΔT at this instant fell 76.147 → 69.662 s, and a smaller ΔT puts the
+   * Moon and Sun earlier for the same UT, so the transition has to move later in
+   * UT by exactly that difference:
+   *
+   *   predicted: +6.485 s (06:08:45.701 → 06:08:52.186)
+   *   observed:  +6.485 s, to the millisecond
+   *
    * The value is not a fixture in the usual sense — the third test below
    * re-derives it by bisecting exact longitudes, independently of the
    * library's own search. What it pins is agreement between the search and
    * that bisection, and that agreement is unchanged.
    */
-  const TRUE_TRANSITION_UTC = Date.UTC(2027, 9, 6, 6, 8, 45, 701);
+  const TRUE_TRANSITION_UTC = Date.UTC(2027, 9, 6, 6, 8, 52, 186);
 
   it('resolves the ~6s third yoga', () => {
     const r = getDailyPanchang(SLIVER_DAY, LONDON, { timezone: 0 });

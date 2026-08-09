@@ -94,7 +94,7 @@ Through 4.x it was ~50 flat fields; the groups are what tell you where to look.
 | `angas` | the five limbs — `tithis`, `nakshatras`, `yogas`, `karanas`, `vara` |
 | `calendar` | `masa` (solar), `chandramasa` (lunar), `samvat` |
 | `muhurtas` | `abhijit`, `brahma`, `vijaya`, `godhuli`, `nishita`, `amritKala`, `madhyahna`, `pratahSandhya`, `sayahnaSandhya`, `doGhati` |
-| `inauspicious` | `rahuKalam`, `gulikaKalam`, `yamaganda`, `durMuhurta`, `varjyam`, `bhadra`, `gandaMula`, `panchaka`, `panchakaRahita` |
+| `inauspicious` | `rahuKalam`, `gulikaKalam`, `yamaganda`, `durMuhurta`, `varjyam`, `bhadra`, `gandaMula`, `panchaka`, `panchakaInfo`, `panchakaRahita` |
 | `periods` | `choghadiya`, `hora`, `gowri` |
 
 Top level: `date`, `location`, `timezone`, `ayanamsa`, `specialYogas`,
@@ -126,7 +126,7 @@ Ekadashi split. For reliable festival dating, use `getDailyPanchang`.
 
 ## Upgrading from 4.x
 
-Two changes move numbers that 4.x produced, and one option is gone.
+Three changes move numbers that 4.x produced, and one option is gone.
 
 ### Lahiri ayanamsa corrected by +38″
 
@@ -149,6 +149,42 @@ Worst-case end-time drift vs Drik dropped from 131 s to 60 s, and the sign split
 by ayanamsa exposure — nakshatra and yoga early, tithi and karana late — is gone.
 If you have snapshot tests or cached charts from 4.x, expect them to need
 re-pinning.
+
+### ΔT now uses measurement, so every published time moves ~6 s
+
+4.x took ΔT (TT − UT) entirely from Espenak–Meeus. Its post-2005 branches are an
+extrapolation published in 2006, and Earth's rotation did not follow it — by
+2026 the model reads about **5.9 s high**, drifting a further ~0.6 s each year.
+Because this library reports *times*, that lands directly on published values.
+
+v5 takes ΔT from the leap-second chain (`32.184 + (TAI − UTC)`, exact, and
+within the 0.9 s band leap seconds maintain) wherever ΔT has actually been
+measured, and resumes Espenak–Meeus beyond it carrying the offset it had
+accrued. Against JPL Horizons the measured era now agrees to **0.005 s** at
+every decade from 1980, where 4.x was seconds out.
+
+| Output | Effect |
+|---|---|
+| Tithi / nakshatra / yoga / karana end-times | ~5.7 s later for 2025 dates, growing with the model's drift |
+| Sankranti and other transit instants | same shift — it is one uniform correction, not per-element |
+| Sunrise / sunset / moonrise / moonset | barely moved — the error scales against the 15°/hr sky rotation |
+| Dates a panchang element is *filed under* | unchanged except where a transit sits within seconds of sunrise |
+
+That last row is the one to know about. `computeSankrantisForYear` publishes a
+date, and the date is decided by whether the transit precedes sunrise. The 2025
+Tula Sankranti at Reykjavik is such a case: it still falls on Oct 16, but its
+margin narrowed from 7.1 s to 1.4 s. Locations at high latitude with a transit
+near sunrise are where a day could flip.
+
+### Instant-mode vara was wrong after ~19:00
+
+`getInstantPanchang` located sunrise by searching forward from `date − 12 h`.
+For an evening instant that start point is already past the morning's sunrise,
+so it found *tomorrow's* and rolled the weekday back a day. Any query after
+roughly 7 pm returned the previous vara — and with it the wrong Rahu Kalam,
+Gulika Kalam, Yamaganda, Choghadiya, Hora, Anandadi yoga and special yogas.
+`getDailyPanchang` was never affected. If you cached instant-mode results from
+4.x for evening timestamps, discard them.
 
 ### `precision` removed
 
@@ -529,6 +565,20 @@ r.inauspicious.varjyam;         // { start, end } | null
 r.inauspicious.gandaMula;       // { active, severity: 'mild'|'severe'|null, ... }
 r.inauspicious.bhadra;          // { start, end, location: 'earth'|'heaven'|'paatal', isActive } | null
 r.inauspicious.panchaka;        // boolean — Moon in last 5 nakshatras
+r.inauspicious.panchakaInfo;    // which of the five, and whether it's a dosha
+```
+
+Panchaka is not one undifferentiated affliction. The tradition names five and
+picks between them by **the weekday the spell began on** — so the type belongs
+to the spell, not the day, and two days with identical tithi, nakshatra and
+vara can carry different ones. A spell begun on a Wednesday or Thursday
+(`'samanya'`) carries no named affliction at all:
+
+```typescript
+const pk = r.inauspicious.panchakaInfo;
+if (pk.active && pk.isDosha) {
+  console.log(pk.name, '— began on vara', pk.onsetVara);  // e.g. "Mrityu Panchaka"
+}
 ```
 
 ## Time-Slot Systems
@@ -933,6 +983,14 @@ const richer = computeAshtakoot(
   { rashi: 0, nakshatra: 1, lagnaRashi: 1, navamsaRashi: 5 },
 );
 
+// Manglik is a PAIRWISE verdict, not a per-chart one: when both partners are
+// Manglik the two afflictions neutralise each other, so the pair is clean
+// where a Manglik/non-Manglik pair is not.
+const m = computeMangalCompatibility(boyChart, girlChart);
+m.afflicted;       // false when neither is Manglik AND when both are
+m.cancellations;   // ['both natives Manglik — mutual cancellation']
+m.boy; m.girl;     // each native's own MangalDoshaInfo, severity included
+
 // Pathu Porutham (Tamil/Kerala, 10-fold) — binary pass/fail per koot.
 // Three vetoes (Yoni, Rajju, Vedha) flip `recommended` regardless of count.
 const tp = computePathuPorutham(
@@ -1160,11 +1218,27 @@ const myRule: MuhurtaRule = {
   occasion: 'launch_party',
   auspiciousVaras: [3, 4, 5],
   auspiciousNakshatras: [11, 12, 21],
-  excludeBhadra: true,
+  bhadra: 'penalize',        // 'ignore' | 'penalize' | 'exclude'
   excludeEkadashi: true,
   excludeAdhikaMasa: true,
 };
 ```
+
+**Tithi and vara are scored jointly, not just per-anga.** The classical Vara ×
+Tithi yogas — Siddha, Amrita, Dagdha, Visha, Hutasana, Krakacha, Samvartaka —
+are applied to every rule, so a Rikta tithi landing on a Saturday is partly
+redeemed by Siddha yoga rather than flatly penalised. Set
+`varaTithiYogas: false` for the older per-anga-only scoring, or call
+`computeVaraTithiYogas(vara, tithi)` directly. Where an auspicious and an
+inauspicious yoga both fire — a documented ambiguity in the sources — both are
+surfaced as separate factors and allowed to net out.
+
+`bhadra` defaults to `'ignore'`; the stock rules use `'penalize'`. A whole-day
+`'exclude'` is rarely what you want: Vishti karana sits at fixed positions in
+the tithi cycle, so vetoing the day removes seven tithis outright — among them
+Shukla Ekadashi, which the same sources list as *preferred* for vivah. Read
+`panchang.inauspicious.bhadra` for the window and schedule around it.
+`excludeBhadra: true` still works as an alias for `bhadra: 'exclude'`.
 
 13 stock rules: vivah, griha pravesh, namakarana, vidyarambh, vahan kharidi,
 annaprashan, mundan, upanayanam, karnavedha, aksharabhyasam, seemantham, shop
@@ -1455,6 +1529,7 @@ getSiderealSunLongitude, getSiderealMoonLongitude, getAyanamsa
 computeRahuKalam, computeGulikaKalam, computeYamaganda
 computeVarjyam, computeGandaMula, computeAnandadiYoga
 computePanchakaRahita, computeDoGhati, computeGowriPanchangam
+computePanchaka, classifyPanchaka, isPanchakaDosha, findPanchakaOnset
 computeAbhijitMuhurta, computeBrahmaMuhurta, computeVijayaMuhurta
 computeGodhuliMuhurta, computeNishitaMuhurta, computeAmritKala
 computeMadhyahna, computePratahSandhya, computeSayahnaSandhya
@@ -1484,7 +1559,7 @@ computeVarshaphala, computeTithiPravesha, computeArudhas, computeUpagrahas, comp
 
 // Jyotish — compatibility, doshas
 computeAshtakoot, computePathuPorutham
-computeMangalDosha, computeKaalSarp, computePitruDosha
+computeMangalDosha, computeMangalCompatibility, computeKaalSarp, computePitruDosha
 
 // KP / Prashna
 computeKpSubLord, computeKpCuspalSubLords, computeKpSignificators
@@ -1492,6 +1567,7 @@ computePrashnaChart
 
 // Muhurta engine
 scoreMuhurta, computeAuspiciousDatesInRange, STOCK_MUHURTA_RULES
+computeVaraTithiYogas
 vivahRule, grihaPraveshRule, namakaranaRule, vidyarambhRule, vahanKharidiRule
 annaprashanRule, mundanRule, upanayanamRule, karnavedhaRule
 aksharabhyasamRule, seemanthamRule, shopOpeningRule, travelStartRule
@@ -1632,6 +1708,29 @@ counterpart — passing it to 4.3.1 is silently ignored and you get a full run.
 of that is not tuning: 4.3.1 ran `astronomy-engine`'s full lunar theory inside
 the eclipse search on every day containing a syzygy, and had no cache that
 survived a call.
+
+One surface moved the other way, and it is deliberate: the **raw longitude
+getters** (`getSiderealSunLongitude`, `getSiderealMoonLongitude`) cost about
+twice what they did in 4.3.1 per call — ~14 µs against ~7 µs for the Moon,
+~2.8 µs against ~1.4 µs for the Sun — because the own-ephemeris series keep
+roughly three times `astronomy-engine`'s accuracy against JPL DE441, and the
+evaluation is sine-bound, so more terms cost proportionally more. Every
+documented workflow (`getDailyPanchang`, `getInstantPanchang`, the year/range
+APIs, the static tables) amortizes those reads through caches and is faster
+than 4.3.1 by the factors above; the per-call price is only visible to code
+calling the raw getters in a tight loop over distinct instants. For scanning
+workloads, prefer the range APIs or `getDailyPanchang` — they read through
+interpolated longitude blocks precisely so that this cost is paid once per day
+rather than once per read.
+
+The same trade surfaces once more in the birth-chart *primitives*:
+`computeRashiChart` and `computeNavamsa` measure ~0.31 ms against ~0.09 ms on
+published 4.3.1 — a chart is fifteen full-accuracy planet evaluations (three
+per planet, for the retrograde probes) and nothing amortizes them. The deeper
+chart stack inverts it again: `computeShadbala` and `computeBhavaBala` come
+out ~2× *faster* than 4.3.1, because v5 computes the positions once and reuses
+them. At a third of a millisecond per chart this is irrelevant interactively;
+it is visible only to code building thousands of charts in a batch.
 
 Cost is dominated by ephemeris evaluations, so the lever that matters is the one
 that avoids them:

@@ -1,0 +1,314 @@
+{
+  "cold/default": {
+    "4.3.1-npm": {
+      "median": 5.81542,
+      "spreadPct": 4.605342348446035,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.38908,
+      "spreadPct": 10.301223398786883,
+      "speedupVsFirst": 14.946591960522257
+    }
+  },
+  "cold/no-end": {
+    "4.3.1-npm": {
+      "median": 5.29623,
+      "spreadPct": 7.689809543769805,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.36855,
+      "spreadPct": 8.397775064441726,
+      "speedupVsFirst": 14.370451770451773
+    }
+  },
+  "cold/no-festivals": {
+    "4.3.1-npm": {
+      "median": 5.70468,
+      "spreadPct": 6.165113555887449,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.37255,
+      "spreadPct": 6.9118239162528505,
+      "speedupVsFirst": 15.312521809153134
+    }
+  },
+  "cold/festivals+eclipse": {
+    "4.3.1-npm": {
+      "median": 5.75139,
+      "spreadPct": 5.319583613700344,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.39978,
+      "spreadPct": 11.64140277152433,
+      "speedupVsFirst": 14.386387513132222
+    }
+  },
+  "cold/sections-empty": {
+    "4.3.1-npm": {
+      "median": 5.83961,
+      "spreadPct": 3.160656276703423,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.25618,
+      "spreadPct": 9.778280896244812,
+      "speedupVsFirst": 22.794948864079945
+    }
+  },
+  "cold/sections-empty+no-end": {
+    "4.3.1-npm": {
+      "median": 5.54596,
+      "spreadPct": 3.7876219806850457,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.24999,
+      "spreadPct": 2.7761110444417674,
+      "speedupVsFirst": 22.184727389095563
+    }
+  },
+  "cold/all+no-end": {
+    "4.3.1-npm": {
+      "median": 5.61769,
+      "spreadPct": 1.9458175869440961,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.39141,
+      "spreadPct": 5.682021409774912,
+      "speedupVsFirst": 14.352443729082037
+    }
+  },
+  "cold/instant": {
+    "4.3.1-npm": {
+      "median": 0.41705,
+      "spreadPct": 7.6753386884066614,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.21117,
+      "spreadPct": 12.999005540559741,
+      "speedupVsFirst": 1.9749490931477007
+    }
+  },
+  "warm/default": {
+    "4.3.1-npm": {
+      "median": 6.04365,
+      "spreadPct": 4.179427994672088,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.1692,
+      "spreadPct": 7.074468085106372,
+      "speedupVsFirst": 35.718971631205676
+    }
+  },
+  "warm/no-end": {
+    "4.3.1-npm": {
+      "median": 5.57726,
+      "spreadPct": 3.669364526667217,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.14951,
+      "spreadPct": 1.7791452076784318,
+      "speedupVsFirst": 37.30359173299445
+    }
+  },
+  "warm/sections-empty+no-end": {
+    "4.3.1-npm": {
+      "median": 5.52002,
+      "spreadPct": 2.388034825960781,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.13812,
+      "spreadPct": 2.888792354474386,
+      "speedupVsFirst": 39.96539241239502
+    }
+  },
+  "warm/instant": {
+    "4.3.1-npm": {
+      "median": 0.37391,
+      "spreadPct": 0.5375625150437302,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.10275,
+      "spreadPct": 1.83941605839415,
+      "speedupVsFirst": 3.6390267639902683
+    }
+  },
+  "range/ekadashi": {
+    "4.3.1-npm": {
+      "median": 2239.4483,
+      "spreadPct": 0.6874175215386655,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 17.03957,
+      "spreadPct": 1.7761598444092184,
+      "speedupVsFirst": 131.42633881019296
+    }
+  },
+  "range/sankranti": {
+    "4.3.1-npm": {
+      "median": 146.71923,
+      "spreadPct": 1.704125628249278,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 3.15621,
+      "spreadPct": 1.0164089208259306,
+      "speedupVsFirst": 46.485889722166775
+    }
+  },
+  "range/festivals": {
+    "4.3.1-npm": {
+      "median": 2062.61459,
+      "spreadPct": 3.881811482774385,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 123.62961,
+      "spreadPct": 4.634399477600875,
+      "speedupVsFirst": 16.683823478857533
+    }
+  },
+  "chart/rashi": {
+    "4.3.1-npm": {
+      "median": 0.09494,
+      "spreadPct": 2.6227090794185868,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.31334,
+      "spreadPct": 1.8957043467160275,
+      "speedupVsFirst": 0.3029935533286526
+    }
+  },
+  "chart/navamsa": {
+    "4.3.1-npm": {
+      "median": 0.09342,
+      "spreadPct": 4.142581888246626,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.3113,
+      "spreadPct": 1.0793446835849578,
+      "speedupVsFirst": 0.30009637006103435
+    }
+  },
+  "chart/bhava": {
+    "4.3.1-npm": {
+      "median": 0.00412,
+      "spreadPct": 5.825242718446617,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.31134,
+      "spreadPct": 1.3168882893300082,
+      "speedupVsFirst": 0.01323312134643798
+    }
+  },
+  "chart/shadbala": {
+    "4.3.1-npm": {
+      "median": 0.71161,
+      "spreadPct": 1.0047638453647347,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.33048,
+      "spreadPct": 1.4463810215444222,
+      "speedupVsFirst": 2.1532619220527716
+    }
+  },
+  "chart/bhavabala": {
+    "4.3.1-npm": {
+      "median": 0.71743,
+      "spreadPct": 0.6857811911963431,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.33674,
+      "spreadPct": 1.1730118192077001,
+      "speedupVsFirst": 2.1305161252004514
+    }
+  },
+  "ctrl/ashtakavarga": {
+    "4.3.1-npm": {
+      "median": 0.00456,
+      "spreadPct": 2.6315789473684092,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.00451,
+      "spreadPct": 4.434589800443451,
+      "speedupVsFirst": 1.0110864745011086
+    }
+  },
+  "ctrl/yogas": {
+    "4.3.1-npm": {
+      "median": 0.00542,
+      "spreadPct": 8.302583025830256,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.00531,
+      "spreadPct": 5.461393596986808,
+      "speedupVsFirst": 1.0207156308851226
+    }
+  },
+  "prim/sunrise": {
+    "4.3.1-npm": {
+      "median": 0.03792,
+      "spreadPct": 1.3449367088607687,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.03863,
+      "spreadPct": 1.1907843644835674,
+      "speedupVsFirst": 0.9816205022003626
+    }
+  },
+  "prim/sunset": {
+    "4.3.1-npm": {
+      "median": 0.03467,
+      "spreadPct": 1.6440726853187024,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.03903,
+      "spreadPct": 3.689469638739423,
+      "speedupVsFirst": 0.8882910581603893
+    }
+  },
+  "prim/moonrise": {
+    "4.3.1-npm": {
+      "median": 0.07723,
+      "spreadPct": 1.9940437653761491,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.08189,
+      "spreadPct": 1.6363414336304893,
+      "speedupVsFirst": 0.9430943949200146
+    }
+  },
+  "prim/moonset": {
+    "4.3.1-npm": {
+      "median": 0.07666,
+      "spreadPct": 2.10018262457605,
+      "speedupVsFirst": 1
+    },
+    "5.0.0": {
+      "median": 0.08194,
+      "spreadPct": 1.4400781059311698,
+      "speedupVsFirst": 0.9355626067854529
+    }
+  }
+}

@@ -15,20 +15,74 @@
  * So it is validated on its own, against its own Tier 0 fixture, before
  * anything is built on top of it. See `tests/validation/tier0-deltat.test.ts`.
  *
- * ## Status: reference implementation, frozen, not yet wired in
+ * ## Status: reference implementation, frozen, and wired in
  *
  * §36.0 H's ordering is *correct first, frozen second, fast third*. This is the
  * reference: the published piecewise polynomials transcribed directly, with no
  * algebraic rearrangement, so it can be read against the source. It is also
  * what ships — a degree-7 polynomial evaluation has no optimization worth the
- * risk, so reference and optimized are the same code and the differential test
- * §36.0 H prescribes is instead run against `astronomy-engine`'s independent
- * implementation of the same model.
+ * risk, so reference and optimized are the same code.
  *
- * Nothing calls it yet. `MakeTime` still performs the UT→TT conversion
- * throughout `src/`, and swapping that over is the rest of 36.2's work; doing
- * it here would move published values for no reason while the surrounding
- * series are still external.
+ * `ttDaysSinceJ2000` is the UT→TT conversion for the whole library: sun, moon,
+ * planet, riseSet, horizon, topocentric and eclipseGeometry all route through
+ * it. (Through 4.x this read "nothing calls it yet, `MakeTime` still does the
+ * conversion" — that was true only while astronomy-engine was still a
+ * dependency, which v5 removed.)
+ *
+ * ## This is the one input here that ages
+ *
+ * Every other series in `src/astronomy/` is an analytical theory with fixed
+ * coefficients — VSOP87D, ELP2000-82B, the IAU 2000A nutation tables. They are
+ * not observations and do not go stale; they change only if the IAU adopts a
+ * new model, which has happened roughly twice in fifty years.
+ *
+ * ΔT is different: Earth's rotation is not predictable, so the post-2005
+ * branches below are an *extrapolation* published in 2006, and Earth has not
+ * followed it. Earth spun faster than Espenak–Meeus assumed, so the model now
+ * over-predicts. Against the leap-second chain (TT − UT1 = 32.184 + (TAI − UTC)
+ * − (UT1 − UTC), with |UT1 − UTC| ≤ 0.9 s by construction):
+ *
+ * | year | this model | observed | error |
+ * |---|---|---|---|
+ * | 2006 | 65.05 s | 65.18 s | −0.13 s |
+ * | 2015 | 69.01 s | 67.18 s | +1.83 s |
+ * | 2020 | 71.60 s | 69.18 s | +2.42 s |
+ * | 2026 | 75.07 s | 69.18 s | +5.89 s |
+ *
+ * Drifting roughly +0.6 s/year. Because the library reports *times*, that lands
+ * directly on published tithi and nakshatra end-times — though at ~6 s it is
+ * still an order of magnitude below the minute those are displayed to, and
+ * rise/set times are far less affected (the error scales against the 15°/hr sky
+ * rotation, so even 133 s of ΔT is ~0.4 s of sunrise).
+ *
+ * ### So the measured era uses measurement
+ *
+ * `deltaTSeconds` prefers the leap-second chain wherever ΔT has actually been
+ * measured, and resumes Espenak–Meeus *offset* beyond it. Three eras:
+ *
+ * | span | source | accuracy |
+ * |---|---|---|
+ * | before 1972 | Espenak–Meeus | fitted to eclipse/occultation records |
+ * | 1972 → handoff | `32.184 + (TAI − UTC)` | exact; ≤0.9 s from TT − UT1 |
+ * | after handoff | Espenak–Meeus + offset | model shape, measured bias removed |
+ *
+ * The middle row reproduces `tests/fixtures/horizons-deltat.json` to 0.005 s at
+ * every decade from 1980 — Horizons' post-1972 ΔT *is* that chain.
+ *
+ * Continuing the model *shifted* rather than holding the last observation flat
+ * is what keeps the far future usable. Holding flat abandons the secular
+ * slowing and runs ~134 s adrift by 2100, which wrecked agreement with NASA's
+ * Five Millennium Canon (solar first contact blew out to 338 s against a 70 s
+ * bound). Carrying the offset keeps the divergence at the ~6.5 s the two models
+ * genuinely differ by. That offset is an assumption — that a measured
+ * discrepancy persists rather than decays — and it is the conservative one.
+ *
+ * What this cost, all of it re-derived and confirmed before re-pinning: every
+ * published instant in the measured era moves by the ΔT delta (~5.7 s in 2025),
+ * and the Reykjavik Tula Sankranti of 2025 — a case that turns on the sign of
+ * `transit − sunrise` — saw its margin narrow from 7.1 s to 1.4 s. It still
+ * falls on Oct 16, but now by less than the solar error bar. See
+ * `tier2-sankranti-day-margin.test.ts`.
  *
  * ## Source
  *
@@ -47,11 +101,13 @@
  * accumulates: measured against Horizons' frozen-leap-second baseline it
  * reaches ~24 s by 2050 and ~134 s by 2100.
  *
- * This is preserved deliberately, not by accident. Switching to TT − UTC would
- * be wrong for the historical span (where UTC does not exist) and would make
- * the library disagree with every published panchang, which uses UT1-based
- * time. The exposure is pinned in `tier0-deltat.test.ts` so it stays a known
- * quantity.
+ * This is why the leap-second chain above is used only from 1972 on: before
+ * that UTC does not exist and there is nothing to chain, so the model stands.
+ * Within the chain's span the distinction costs at most 0.9 s — far less than
+ * the ~6 s of model bias it removes — so tracking UTC there is the better trade
+ * even for a UT1-based reading. Past 2035 the two genuinely part company, and
+ * the offset continuation keeps following UT1's shape rather than UTC's. The
+ * exposure is pinned in `tier0-deltat.test.ts` so it stays a known quantity.
  */
 
 /** Days per mean tropical year, for the day-count → decimal-year conversion. */
@@ -153,11 +209,96 @@ export function deltaTSecondsForYear(y: number): number {
  * against a UTC-tagged source anyway.
  */
 export function deltaTSeconds(date: Date): number {
+  const ms = date.getTime();
   // Days since J2000.0, in UT. The `− 14` reproduces Espenak's convention that
   // y = 2000 corresponds to 2000-Jan-15, the midpoint of January.
-  const utDays = (date.getTime() - Date.UTC(2000, 0, 1, 12)) / 86_400_000;
-  return deltaTSecondsForYear(2000 + (utDays - 14) / DAYS_PER_TROPICAL_YEAR);
+  const utDays = (ms - Date.UTC(2000, 0, 1, 12)) / 86_400_000;
+  const year = 2000 + (utDays - 14) / DAYS_PER_TROPICAL_YEAR;
+
+  // Before the UTC scale exists there is nothing to measure — Espenak–Meeus,
+  // fitted to eclipse and occultation records, is the model.
+  if (ms < LEAP_SECOND_EPOCH_MS) return deltaTSecondsForYear(year);
+  // Measured era: exact, from the leap-second chain.
+  if (ms <= OBSERVED_THROUGH_MS) return TT_MINUS_TAI + taiMinusUtc(ms);
+  // Beyond it, resume Espenak–Meeus carrying the offset it had accumulated by
+  // the handoff, so the curve's shape is kept and its bias is not.
+  return deltaTSecondsForYear(year) + OBSERVED_MINUS_MODEL_AT_HANDOFF;
 }
+
+/**
+ * TAI − UTC, the leap-second step function, as `[UTC epoch ms, seconds]`.
+ *
+ * The complete IERS list from the start of the modern UTC scale on 1972-01-01
+ * (10 s) through the most recent leap second, 2017-01-01 (37 s). Verified
+ * against `tests/fixtures/horizons-deltat.json` at every decade from 1980 —
+ * Horizons' post-1972 ΔT *is* `32.184 + (TAI − UTC)`, so that fixture checks
+ * this table rather than merely coexisting with it.
+ */
+const TAI_MINUS_UTC: readonly (readonly [number, number])[] = [
+  [Date.UTC(1972, 0, 1), 10], [Date.UTC(1972, 6, 1), 11], [Date.UTC(1973, 0, 1), 12],
+  [Date.UTC(1974, 0, 1), 13], [Date.UTC(1975, 0, 1), 14], [Date.UTC(1976, 0, 1), 15],
+  [Date.UTC(1977, 0, 1), 16], [Date.UTC(1978, 0, 1), 17], [Date.UTC(1979, 0, 1), 18],
+  [Date.UTC(1980, 0, 1), 19], [Date.UTC(1981, 6, 1), 20], [Date.UTC(1982, 6, 1), 21],
+  [Date.UTC(1983, 6, 1), 22], [Date.UTC(1985, 6, 1), 23], [Date.UTC(1988, 0, 1), 24],
+  [Date.UTC(1990, 0, 1), 25], [Date.UTC(1991, 0, 1), 26], [Date.UTC(1992, 6, 1), 27],
+  [Date.UTC(1993, 6, 1), 28], [Date.UTC(1994, 6, 1), 29], [Date.UTC(1996, 0, 1), 30],
+  [Date.UTC(1997, 6, 1), 31], [Date.UTC(1999, 0, 1), 32], [Date.UTC(2006, 0, 1), 33],
+  [Date.UTC(2009, 0, 1), 34], [Date.UTC(2012, 6, 1), 35], [Date.UTC(2015, 6, 1), 36],
+  [Date.UTC(2017, 0, 1), 37],
+];
+
+/** TT − TAI, fixed by definition. */
+const TT_MINUS_TAI = 32.184;
+
+/** Start of the modern UTC scale; before this there are no leap seconds to chain. */
+const LEAP_SECOND_EPOCH_MS = TAI_MINUS_UTC[0]![0];
+
+/**
+ * How far the measured era is taken to run.
+ *
+ * Leap seconds are announced only six months ahead, so beyond this the chain is
+ * an assumption rather than a measurement, and the model takes over. Bumping
+ * this forward is the maintenance action when a leap second is announced (or
+ * confirmed absent) — the table above and this date are the only things that
+ * need touching.
+ */
+const OBSERVED_THROUGH_MS = Date.UTC(2027, 0, 1);
+
+/** TAI − UTC at a UTC instant, holding the last announced value forward. */
+function taiMinusUtc(ms: number): number {
+  let offset = TAI_MINUS_UTC[0]![1];
+  for (const [epoch, seconds] of TAI_MINUS_UTC) {
+    if (ms < epoch) break;
+    offset = seconds;
+  }
+  return offset;
+}
+
+/**
+ * Observed minus modelled ΔT at {@link OBSERVED_THROUGH_MS} — the bias
+ * Espenak–Meeus has accumulated by the handoff, carried forward as a constant.
+ *
+ * Espenak–Meeus was published in 2006 and its post-2005 branches are an
+ * extrapolation; Earth then spun faster than it assumed, so by the handoff the
+ * model reads ~5.9 s high. Two ways to continue past measurement are wrong in
+ * opposite directions: holding the observed value flat abandons the secular
+ * slowing entirely (~134 s adrift by 2100, which wrecks agreement with NASA's
+ * Five Millennium Canon), while using the model raw keeps a bias we have
+ * measured and know to be there. Continuing the model *shifted* keeps its shape
+ * and drops its offset, so the far future stays within ~6 s of the canon
+ * instead of ~134.
+ *
+ * This is an assumption — that the accumulated offset persists rather than
+ * decays — and it is the conservative one: it asserts no new physics, only that
+ * a measured discrepancy does not spontaneously vanish. Adopting a newer
+ * published ΔT expression whole would supersede it.
+ */
+const OBSERVED_MINUS_MODEL_AT_HANDOFF: number = (() => {
+  const utDays = (OBSERVED_THROUGH_MS - Date.UTC(2000, 0, 1, 12)) / 86_400_000;
+  const year = 2000 + (utDays - 14) / DAYS_PER_TROPICAL_YEAR;
+  return TT_MINUS_TAI + taiMinusUtc(OBSERVED_THROUGH_MS) - deltaTSecondsForYear(year);
+})();
+
 
 /**
  * Days of Terrestrial Time since J2000.0 — the primitive every ephemeris series
