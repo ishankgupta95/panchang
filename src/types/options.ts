@@ -5,7 +5,6 @@ export type AyanamsaType =
   | 'true-chitra'
   | 'thirukanitham';
 export type Language = 'en' | 'hi';
-export type Precision = 'standard' | 'high';
 export type MasaSystem = 'purnimanta' | 'amanta';
 
 /**
@@ -89,14 +88,15 @@ export type FestivalRegion =
 /**
  * Pre-v2.1 region identifiers accepted for back-compat. These are mapped
  * to canonical {@link FestivalRegion} values by `resolveRegionAlias` before
- * festival filtering. Slated for removal in v3.
+ * festival filtering. Still accepted in v5; they go in v6 with the other
+ * renamed aliases, so the whole deprecation surface retires at once.
  *
  * - `'tamil'`       → `'tamil-nadu'`
  * - `'bengal'`      → `'west-bengal'`
  * - `'north-india'` → `'all'` (Makar Sankranti is pan-Indian; use explicit
  *                              state slugs for Lohri / Govardhan / Bhai Dooj)
  *
- * @deprecated Use the equivalent {@link FestivalRegion} value. Removal in v3.
+ * @deprecated Use the equivalent {@link FestivalRegion} value. Removal in v6.
  */
 export type LegacyFestivalRegion = 'tamil' | 'bengal' | 'north-india';
 
@@ -108,7 +108,6 @@ export interface InstantPanchangOptions {
   ayanamsa?: AyanamsaType;
   language?: Language;
   computeEndTimes?: boolean;
-  precision?: Precision;
   /** Lunar month naming system. Default: `'purnimanta'` (North Indian). */
   masaSystem?: MasaSystem;
   /**
@@ -131,7 +130,60 @@ export interface InstantPanchangOptions {
   region?: FestivalRegion | LegacyFestivalRegion;
 }
 
+/**
+ * An optional, individually-skippable block of `getDailyPanchang` work.
+ *
+ * Only the blocks backed by *ephemeris searches* are listed here — those are
+ * the ones with measurable cost. Everything else a daily panchang returns
+ * (the five elements, slot systems, muhurtas, inauspicious periods, masa /
+ * samvat / rashi) is arithmetic over the sunrise-sunset-nextSunrise triplet
+ * and is always computed, because skipping it would save nothing.
+ *
+ * - `'festivals'`    — festival detection. The most expensive block: it needs
+ *                      the prior day's sunrise/sunset, the following day's
+ *                      transit, per-kala tithi anchors, and the prior day's
+ *                      Chandra Masa.
+ * - `'eclipse'`      — eclipse overlapping the Hindu day.
+ * - `'moonTimes'`    — `moonrise` / `moonset`.
+ * - `'lunarWindows'` — Bhadra, Varjyam and Panchaka-Rahita windows, each of
+ *                      which binary-searches lunar longitude across the day.
+ *
+ * Omitting a section leaves its result fields at their documented empty value
+ * (`null`, or `[]`), never a partially-filled one — so this is purely a
+ * cost/detail trade, not a change in the result's shape.
+ */
+export type PanchangSection = 'festivals' | 'eclipse' | 'moonTimes' | 'lunarWindows';
+
 export interface PanchangOptions extends InstantPanchangOptions {
   /** UTC offset in minutes (e.g. 330 for IST) or a tz string. Required. */
   timezone: number | string;
+  /**
+   * Which optional, ephemeris-backed sections to compute. Defaults to all of
+   * them, so omitting this is exactly the pre-existing behaviour.
+   *
+   * Pass a narrower list when a caller only needs part of the result — a
+   * date-scanner reading nothing but the tithi at sunrise, say, or a calendar
+   * builder that wants festivals but no moon times.
+   *
+   * ```typescript
+   * // Tithi-only scan: skips every ephemeris search the day doesn't need.
+   * getDailyPanchang(d, loc, { timezone: 330, sections: [], computeEndTimes: false });
+   * ```
+   *
+   * See {@link PanchangSection} for what each value covers and why the rest of
+   * the result is always computed.
+   *
+   * **Narrowing is exactly output-neutral.** Every field a narrowed run does
+   * compute is identical — to the millisecond — to what a full run would have
+   * produced; narrowing only decides what is *skipped*, never what a computed
+   * value is. This holds because `LongitudeCache` memoizes on the exact
+   * instant, so its contents can never depend on which blocks ran first.
+   *
+   * (This was not always so. While the memo keyed on a 60-second bucket but
+   * stored the value computed at the first instant to fall in it, transition
+   * times could shift by up to 63 s depending on which sections were requested,
+   * and the element *count* could differ on a day whose last element was
+   * shorter than the search tolerance. Both are fixed.)
+   */
+  sections?: readonly PanchangSection[];
 }

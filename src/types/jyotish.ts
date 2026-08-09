@@ -229,6 +229,19 @@ export interface BirthChart {
   lagna: LagnaInfo;
   bhava: BhavaChart;
   planets: PlanetPlacement[];
+  /**
+   * The same nine placements keyed by graha, for direct lookup.
+   *
+   * `planets` stays the canonical ordered list — iterate that. Reach for this
+   * when you want one specific graha: `chart.byPlanet.Mars` replaces
+   * `chart.planets.find(p => p.planet === 'Mars')!`, which appeared ~20 times
+   * across the dosha / yoga / bala code and required a non-null assertion at
+   * every site even though the entry is always present.
+   *
+   * Both views reference the same objects, so a mutation through one is
+   * visible through the other.
+   */
+  byPlanet: Readonly<Record<GrahaName, PlanetPlacement>>;
 }
 
 /**
@@ -316,6 +329,30 @@ export interface MangalDoshaInfo {
   fromVenus: { afflicted: boolean; house: number };
   /** Cancellations that were applied. Empty when none triggered. */
   cancellations: string[];
+}
+
+/**
+ * Mangal Dosha assessed for a *couple* rather than a single chart.
+ *
+ * Manglik status is not a property either native carries into a match on
+ * their own: when both are afflicted the doshas are held to neutralise each
+ * other ("dosha samyoga"), so a pair of Mangliks is compatible where a
+ * Manglik and a non-Manglik is not. That rule cannot be expressed by
+ * {@link MangalDoshaInfo} alone, which is why it lives here.
+ */
+export interface MangalCompatibility {
+  /** Per-native Mangal status, each already carrying its own cancellations. */
+  boy: MangalDoshaInfo;
+  girl: MangalDoshaInfo;
+  /**
+   * Whether a Mangal affliction survives *for the match*. False when neither
+   * native is Manglik and false when both are — true only when exactly one is.
+   */
+  afflicted: boolean;
+  /** Pair-level cancellations applied, e.g. mutual Manglik. Empty when none. */
+  cancellations: string[];
+  /** Human-readable summary of the outcome. */
+  description: string;
 }
 
 // ── Sade Sati ─────────────────────────────────────────

@@ -1,4 +1,5 @@
-import type { HoraInfo, HoraSlot } from '../types/elements';
+import { buildEqualSlots, VARA_CHALDEAN_START } from '../utils/slots';
+import type { HoraSlot, Unlocalized, UnlocalizedInfo } from '../types/elements';
 
 /**
  * First daytime Hora planet index (Chaldean order) by weekday (Sun=0 … Sat=6).
@@ -11,7 +12,7 @@ import type { HoraInfo, HoraSlot } from '../types/elements';
  *   Friday    → Venus   (1)
  *   Saturday  → Saturn  (4)
  */
-const DAY_FIRST_HORA = [0, 3, 6, 2, 5, 1, 4] as const;
+const DAY_FIRST_HORA = VARA_CHALDEAN_START;
 
 function buildHoras(
   reference: Date,
@@ -19,19 +20,11 @@ function buildHoras(
   firstPlanetIndex: number,
   nameFn: (planetIndex: number) => string,
   count: number,
-): HoraSlot[] {
-  const horaMs = durationMs / count;
-  const horas: HoraSlot[] = [];
-  for (let i = 0; i < count; i++) {
+): Unlocalized<HoraSlot>[] {
+  return buildEqualSlots(reference, durationMs, count, (i, start, end) => {
     const planetIndex = (firstPlanetIndex + i) % 7;
-    horas.push({
-      start: new Date(reference.getTime() + i * horaMs),
-      end: new Date(reference.getTime() + (i + 1) * horaMs),
-      planetIndex,
-      planet: nameFn(planetIndex),
-    });
-  }
-  return horas;
+    return { start, end, planetIndex, planet: nameFn(planetIndex) };
+  });
 }
 
 /**
@@ -57,7 +50,7 @@ export function computeHora(
   nextSunrise: Date,
   varaIndex: number,
   nameFn: (planetIndex: number) => string,
-): HoraInfo {
+): UnlocalizedInfo<HoraSlot> {
   const dayMs   = sunset.getTime()      - sunrise.getTime();
   const nightMs = nextSunrise.getTime() - sunset.getTime();
   const firstDay   = DAY_FIRST_HORA[varaIndex]!;

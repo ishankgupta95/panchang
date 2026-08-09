@@ -1,4 +1,4 @@
-import { NAKSHATRA_SPAN, NAKSHATRA_PADA_SPAN } from '../utils/constants';
+import { NAKSHATRA_SPAN, NAKSHATRA_PADA_SPAN, nakshatraOf } from '../utils/constants';
 import type { NakshatraInfo } from '../types/elements';
 
 /**
@@ -12,7 +12,7 @@ export function computeNakshatraFromLongitude(
   siderealMoon: number,
   name: string,
 ): NakshatraInfo {
-  const index = Math.floor(siderealMoon / NAKSHATRA_SPAN);
+  const index = nakshatraOf(siderealMoon);
   const degreesInNakshatra = siderealMoon - index * NAKSHATRA_SPAN;
   const pada = Math.min(Math.floor(degreesInNakshatra / NAKSHATRA_PADA_SPAN) + 1, 4);
   const completionPercentage = (degreesInNakshatra / NAKSHATRA_SPAN) * 100;
@@ -30,5 +30,5 @@ export function getNakshatraIndexAtTime(
   date: Date,
   getCachedMoon: (d: Date) => number,
 ): number {
-  return Math.floor(getCachedMoon(date) / NAKSHATRA_SPAN);
+  return nakshatraOf(getCachedMoon(date));
 }

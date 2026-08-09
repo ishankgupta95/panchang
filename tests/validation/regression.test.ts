@@ -1,4 +1,6 @@
 /**
+ * @tier 2  our own output — a structural regression detector, no independent authority
+ *
  * Phase 16 — Validation Hardening
  *
  * Three suites:
@@ -27,8 +29,10 @@ function noonUtc(dateStr: string): Date {
 }
 
 /** Format a display Date as HH:MM (reading via getUTC* per library convention). */
-function fmtHHMM(d: Date): string {
-  return String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+// v5: published Dates are true instants; the local wall clock is in the
+// offset-carrying `*Local` ISO string.
+function fmtHHMM(local: string): string {
+  return local.slice(11, 16);
 }
 
 /** Return |a - b| in minutes, where a and b are HH:MM strings. */
@@ -47,75 +51,75 @@ describe('242-day structural regression (Pune, Sep 2025 – Apr 2026)', () => {
     const { date, location, timezone, expected } = fixture;
 
     describe(`${date}`, () => {
-      const r = getDailyPanchang(noonUtc(date), location, { timezone });
+      const r = getDailyPanchang(noonUtc(date), location, { timezone })!;
 
       it('does not throw', () => {
         expect(r).toBeDefined();
       });
 
       it(`vara.englishName === "${expected.varaEnglish}"`, () => {
-        expect(r.vara.englishName).toBe(expected.varaEnglish);
+        expect(r.angas.vara.englishName).toBe(expected.varaEnglish);
       });
 
       it('sunrise < sunset < nextSunrise', () => {
-        expect(r.sunrise.getTime()).toBeLessThan(r.sunset.getTime());
-        expect(r.sunset.getTime()).toBeLessThan(r.nextSunrise.getTime());
+        expect(r.sun.rise.getTime()).toBeLessThan(r.sun.set.getTime());
+        expect(r.sun.set.getTime()).toBeLessThan(r.sun.nextRise.getTime());
       });
 
       it('dayDurationMinutes is in (0, 960)', () => {
-        expect(r.dayDurationMinutes).toBeGreaterThan(0);
-        expect(r.dayDurationMinutes).toBeLessThan(960); // < 16 h near equator
+        expect(r.sun.dayDurationMinutes).toBeGreaterThan(0);
+        expect(r.sun.dayDurationMinutes).toBeLessThan(960); // < 16 h near equator
       });
 
       it(`tithis.length >= ${expected.tithiCountAtLeast}`, () => {
-        expect(r.tithis.length).toBeGreaterThanOrEqual(expected.tithiCountAtLeast);
-        expect(r.tithis.length).toBeLessThanOrEqual(3);
+        expect(r.angas.tithis.length).toBeGreaterThanOrEqual(expected.tithiCountAtLeast);
+        expect(r.angas.tithis.length).toBeLessThanOrEqual(3);
       });
 
       it(`nakshatras.length >= ${expected.nakshatraCountAtLeast}`, () => {
-        expect(r.nakshatras.length).toBeGreaterThanOrEqual(expected.nakshatraCountAtLeast);
-        expect(r.nakshatras.length).toBeLessThanOrEqual(3);
+        expect(r.angas.nakshatras.length).toBeGreaterThanOrEqual(expected.nakshatraCountAtLeast);
+        expect(r.angas.nakshatras.length).toBeLessThanOrEqual(3);
       });
 
       it('rahuKalam, gulikaKalam, yamaganda are ordered', () => {
-        expect(r.rahuKalam.start.getTime()).toBeLessThan(r.rahuKalam.end.getTime());
-        expect(r.gulikaKalam.start.getTime()).toBeLessThan(r.gulikaKalam.end.getTime());
-        expect(r.yamaganda.start.getTime()).toBeLessThan(r.yamaganda.end.getTime());
+        expect(r.inauspicious.rahuKalam.start.getTime()).toBeLessThan(r.inauspicious.rahuKalam.end.getTime());
+        expect(r.inauspicious.gulikaKalam.start.getTime()).toBeLessThan(r.inauspicious.gulikaKalam.end.getTime());
+        expect(r.inauspicious.yamaganda.start.getTime()).toBeLessThan(r.inauspicious.yamaganda.end.getTime());
       });
 
       // Drik convention: Abhijit is null on Wednesday (Buddha-vara). On
       // every other day the window must lie strictly within daytime.
       it('abhijitMuhurta is null on Wednesday, within daytime otherwise', () => {
         if (expected.varaEnglish === 'Wednesday') {
-          expect(r.abhijitMuhurta).toBeNull();
+          expect(r.muhurtas.abhijit).toBeNull();
         } else {
-          expect(r.abhijitMuhurta).not.toBeNull();
-          expect(r.abhijitMuhurta!.start.getTime()).toBeGreaterThan(r.sunrise.getTime());
-          expect(r.abhijitMuhurta!.end.getTime()).toBeLessThan(r.sunset.getTime());
+          expect(r.muhurtas.abhijit).not.toBeNull();
+          expect(r.muhurtas.abhijit!.start.getTime()).toBeGreaterThan(r.sun.rise.getTime());
+          expect(r.muhurtas.abhijit!.end.getTime()).toBeLessThan(r.sun.set.getTime());
         }
       });
 
       it('choghadiya has 8 day + 8 night slots covering sunrise→nextSunrise', () => {
-        expect(r.choghadiya.day).toHaveLength(8);
-        expect(r.choghadiya.night).toHaveLength(8);
-        expect(r.choghadiya.day[0]!.start.getTime()).toBe(r.sunrise.getTime());
-        expect(r.choghadiya.day[7]!.end.getTime()).toBe(r.sunset.getTime());
-        expect(r.choghadiya.night[0]!.start.getTime()).toBe(r.sunset.getTime());
-        expect(r.choghadiya.night[7]!.end.getTime()).toBe(r.nextSunrise.getTime());
+        expect(r.periods.choghadiya.day).toHaveLength(8);
+        expect(r.periods.choghadiya.night).toHaveLength(8);
+        expect(r.periods.choghadiya.day[0]!.start.getTime()).toBe(r.sun.rise.getTime());
+        expect(r.periods.choghadiya.day[7]!.end.getTime()).toBe(r.sun.set.getTime());
+        expect(r.periods.choghadiya.night[0]!.start.getTime()).toBe(r.sun.set.getTime());
+        expect(r.periods.choghadiya.night[7]!.end.getTime()).toBe(r.sun.nextRise.getTime());
       });
 
       it('gowriPanchangam has 8 day + 8 night slots covering sunrise→nextSunrise', () => {
-        expect(r.gowriPanchangam.day).toHaveLength(8);
-        expect(r.gowriPanchangam.night).toHaveLength(8);
-        expect(r.gowriPanchangam.day[0]!.start.getTime()).toBe(r.sunrise.getTime());
-        expect(r.gowriPanchangam.day[7]!.end.getTime()).toBe(r.sunset.getTime());
-        expect(r.gowriPanchangam.night[0]!.start.getTime()).toBe(r.sunset.getTime());
-        expect(r.gowriPanchangam.night[7]!.end.getTime()).toBe(r.nextSunrise.getTime());
+        expect(r.periods.gowri.day).toHaveLength(8);
+        expect(r.periods.gowri.night).toHaveLength(8);
+        expect(r.periods.gowri.day[0]!.start.getTime()).toBe(r.sun.rise.getTime());
+        expect(r.periods.gowri.day[7]!.end.getTime()).toBe(r.sun.set.getTime());
+        expect(r.periods.gowri.night[0]!.start.getTime()).toBe(r.sun.set.getTime());
+        expect(r.periods.gowri.night[7]!.end.getTime()).toBe(r.sun.nextRise.getTime());
       });
 
       it('hora has 12 day + 12 night slots', () => {
-        expect(r.hora.day).toHaveLength(12);
-        expect(r.hora.night).toHaveLength(12);
+        expect(r.periods.hora.day).toHaveLength(12);
+        expect(r.periods.hora.night).toHaveLength(12);
       });
 
       it('ayanamsa is in [23.5, 25.5] for 2025–2026', () => {
@@ -124,7 +128,7 @@ describe('242-day structural regression (Pune, Sep 2025 – Apr 2026)', () => {
       });
 
       it('durMuhurta has 2 ordered periods', () => {
-        const [dm1, dm2] = r.durMuhurta;
+        const [dm1, dm2] = r.inauspicious.durMuhurta;
         expect(dm1!.start.getTime()).toBeLessThan(dm1!.end.getTime());
         expect(dm2!.start.getTime()).toBeLessThan(dm2!.end.getTime());
       });
@@ -159,49 +163,49 @@ describe('precise-value regression (library-baseline)', () => {
     const { date, city, location, timezone, expected } = fixture;
 
     describe(`${date} / ${city}`, () => {
-      const r = getDailyPanchang(noonUtc(date), location, { timezone });
+      const r = getDailyPanchang(noonUtc(date), location, { timezone })!;
 
       it(`vara === "${expected.varaEnglish}"`, () => {
-        expect(r.vara.englishName).toBe(expected.varaEnglish);
+        expect(r.angas.vara.englishName).toBe(expected.varaEnglish);
       });
 
       if (expected.tithiAtSunrise) {
         const want = expected.tithiAtSunrise;
         it(`tithiAtSunrise === "${want}"`, () => {
-          expect(r.tithis[0]!.name).toBe(want);
+          expect(r.angas.tithis[0]!.name).toBe(want);
         });
       }
 
       if (expected.nakshatraAtSunrise) {
         const want = expected.nakshatraAtSunrise;
         it(`nakshatraAtSunrise === "${want}"`, () => {
-          expect(r.nakshatras[0]!.name).toBe(want);
+          expect(r.angas.nakshatras[0]!.name).toBe(want);
         });
       }
 
       if (expected.sunriseHHMM) {
         const want = expected.sunriseHHMM;
         it(`sunrise HH:MM within ±2 min of "${want}"`, () => {
-          expect(diffMinutes(fmtHHMM(r.sunrise), want)).toBeLessThanOrEqual(2);
+          expect(diffMinutes(fmtHHMM(r.sun.riseLocal), want)).toBeLessThanOrEqual(2);
         });
       }
 
       if (expected.sunsetHHMM) {
         const want = expected.sunsetHHMM;
         it(`sunset HH:MM within ±2 min of "${want}"`, () => {
-          expect(diffMinutes(fmtHHMM(r.sunset), want)).toBeLessThanOrEqual(2);
+          expect(diffMinutes(fmtHHMM(r.sun.setLocal), want)).toBeLessThanOrEqual(2);
         });
       }
 
       if (expected.chandramasaName) {
         const want = expected.chandramasaName;
         it(`chandramasa === "${want}"`, () => {
-          expect(r.chandramasa.name).toBe(want);
+          expect(r.calendar.chandramasa.name).toBe(want);
         });
       }
 
       it(`tithis.length >= ${expected.tithiCountAtLeast}`, () => {
-        expect(r.tithis.length).toBeGreaterThanOrEqual(expected.tithiCountAtLeast);
+        expect(r.angas.tithis.length).toBeGreaterThanOrEqual(expected.tithiCountAtLeast);
       });
     });
   }
@@ -227,26 +231,26 @@ const LONG_RANGE_CASES: Array<{ date: string; varaEnglish: string; ayanamsaMin: 
 describe('long-range regression (2030–2050)', () => {
   for (const { date, varaEnglish, ayanamsaMin, ayanamsaMax } of LONG_RANGE_CASES) {
     describe(`${date}`, () => {
-      const r = getDailyPanchang(noonUtc(date), PUNE, { timezone: 330 });
+      const r = getDailyPanchang(noonUtc(date), PUNE, { timezone: 330 })!;
 
       it('does not throw', () => {
         expect(r).toBeDefined();
       });
 
       it(`vara === "${varaEnglish}"`, () => {
-        expect(r.vara.englishName).toBe(varaEnglish);
+        expect(r.angas.vara.englishName).toBe(varaEnglish);
       });
 
       it('sunrise < sunset < nextSunrise', () => {
-        expect(r.sunrise.getTime()).toBeLessThan(r.sunset.getTime());
-        expect(r.sunset.getTime()).toBeLessThan(r.nextSunrise.getTime());
+        expect(r.sun.rise.getTime()).toBeLessThan(r.sun.set.getTime());
+        expect(r.sun.set.getTime()).toBeLessThan(r.sun.nextRise.getTime());
       });
 
       it('all Pancha Anga elements present', () => {
-        expect(r.tithis.length).toBeGreaterThanOrEqual(1);
-        expect(r.nakshatras.length).toBeGreaterThanOrEqual(1);
-        expect(r.yogas.length).toBeGreaterThanOrEqual(1);
-        expect(r.karanas.length).toBeGreaterThanOrEqual(1);
+        expect(r.angas.tithis.length).toBeGreaterThanOrEqual(1);
+        expect(r.angas.nakshatras.length).toBeGreaterThanOrEqual(1);
+        expect(r.angas.yogas.length).toBeGreaterThanOrEqual(1);
+        expect(r.angas.karanas.length).toBeGreaterThanOrEqual(1);
       });
 
       it(`ayanamsa in [${ayanamsaMin}, ${ayanamsaMax}]`, () => {
@@ -255,10 +259,10 @@ describe('long-range regression (2030–2050)', () => {
       });
 
       it('choghadiya and gowriPanchangam have 8+8 slots', () => {
-        expect(r.choghadiya.day).toHaveLength(8);
-        expect(r.choghadiya.night).toHaveLength(8);
-        expect(r.gowriPanchangam.day).toHaveLength(8);
-        expect(r.gowriPanchangam.night).toHaveLength(8);
+        expect(r.periods.choghadiya.day).toHaveLength(8);
+        expect(r.periods.choghadiya.night).toHaveLength(8);
+        expect(r.periods.gowri.day).toHaveLength(8);
+        expect(r.periods.gowri.night).toHaveLength(8);
       });
     });
   }

@@ -17,7 +17,7 @@
 import { describe, it, expect } from 'vitest';
 import { computeYogas } from '../../src/jyotish/yogas';
 import { YOGA_CATALOG } from '../../src/jyotish/yogasCatalog';
-import { computeRashiChart, computeNavamsa } from '../../src/jyotish/charts';
+import { computeRashiChart, computeNavamsa, indexPlanets } from '../../src/jyotish/charts';
 import type {
   BhavaChart, BirthChart, DivisionalChart, GrahaName, HouseInfo,
   LagnaInfo, PlanetPlacement, Yoga, YogaName,
@@ -96,7 +96,7 @@ function synthChart(spec: SynthSpec): BirthChart {
     };
   });
 
-  return { divisional: 'D1', lagna, bhava, planets };
+  return { divisional: 'D1', lagna, bhava, planets, byPlanet: indexPlanets(planets) };
 }
 
 /** Names of all matched yogas, deduped + sorted for stable pins. */

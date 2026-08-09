@@ -1,4 +1,6 @@
 /**
+ * @tier 1  ProKerala / DrikPanchang Guna Milan panels, plus BPHS table invariants
+ *
  * Phase 29 Ashtakoot Guna Milan cross-validation.
  *
  * ── Sourcing approach ───────────────────────────────────────────────────────
@@ -44,7 +46,7 @@
 import { describe, it, expect } from 'vitest';
 import { computeAshtakoot } from '../../src/jyotish/matching';
 import {
-  RASHI_VARNA, VARNA_RANK, NAKSHATRA_YONI, NAKSHATRA_GANA, NAKSHATRA_NADI,
+  RASHI_VARNA, VARNA_RANK, NAKSHATRA_GANA, NAKSHATRA_NADI,
   YONI_SCORE, BHAKOOT_DOSHIC_DISTANCES, INAUSPICIOUS_TARA_REMAINDERS,
 } from '../../src/jyotish/matchingTables';
 import fixtures from '../fixtures/ashtakoot-pairs.json';
@@ -57,7 +59,7 @@ describe('Ashtakoot tables — Varna (BPHS Ch.7)', () => {
   // varna across 12 rashis = 3.
   it('rashi-to-varna mapping has 3 of each varna across 12 rashis', () => {
     const counts: Record<string, number> = { brahmin: 0, kshatriya: 0, vaishya: 0, shudra: 0 };
-    for (const v of RASHI_VARNA) counts[v]++;
+    for (const v of RASHI_VARNA) counts[v] = (counts[v] ?? 0) + 1;
     expect(counts).toEqual({ brahmin: 3, kshatriya: 3, vaishya: 3, shudra: 3 });
   });
 
@@ -102,7 +104,7 @@ describe('Ashtakoot tables — Yoni (Brihat Samhita Ch.102 + Drik)', () => {
 describe('Ashtakoot tables — Gana (BPHS Ch.7)', () => {
   it('27 nakshatras split 9/9/9 across Deva/Manushya/Rakshasa (canonical)', () => {
     const counts: Record<string, number> = { deva: 0, manushya: 0, rakshasa: 0 };
-    for (const g of NAKSHATRA_GANA) counts[g]++;
+    for (const g of NAKSHATRA_GANA) counts[g] = (counts[g] ?? 0) + 1;
     expect(counts).toEqual({ deva: 9, manushya: 9, rakshasa: 9 });
   });
 });
@@ -110,7 +112,7 @@ describe('Ashtakoot tables — Gana (BPHS Ch.7)', () => {
 describe('Ashtakoot tables — Nadi (BPHS Ch.7)', () => {
   it('27 nakshatras split 9/9/9 across Adi/Madhya/Antya', () => {
     const counts: Record<string, number> = { adi: 0, madhya: 0, antya: 0 };
-    for (const n of NAKSHATRA_NADI) counts[n]++;
+    for (const n of NAKSHATRA_NADI) counts[n] = (counts[n] ?? 0) + 1;
     expect(counts).toEqual({ adi: 9, madhya: 9, antya: 9 });
   });
 });

@@ -1,4 +1,4 @@
-import { Body, Equator, Horizon, MakeTime, Observer } from 'astronomy-engine';
+import { isSunAboveHorizon } from '../astronomy/horizon';
 import { computeRashiChart } from './charts';
 import { computeShadbala } from './shadbala';
 import { computeLagna } from './lagna';
@@ -226,9 +226,12 @@ export function computeVarshaphala(
  * the loop exits in a handful of iterations because the Sun's apparent
  * sidereal motion is locally linear over 1-day windows.
  *
- * @internal — exported via `_findSolarReturnForTest` for unit tests.
+ * @internal — not re-exported from the package entry. `tithiPravesha.ts` needs
+ * it, and so do the unit tests; it used to reach both through a
+ * `_findSolarReturnForTest` alias, which made a production dependency look like
+ * a test hook.
  */
-function findSolarReturn(
+export function findSolarReturn(
   natalBirth: Date,
   yearAge: number,
   natalSun: number,
@@ -248,9 +251,6 @@ function findSolarReturn(
   return new Date(Math.round(t));
 }
 
-/** @internal */
-export const _findSolarReturnForTest = findSolarReturn;
-
 // ── Day / night detection ──────────────────────────────
 
 /**
@@ -262,11 +262,7 @@ export const _findSolarReturnForTest = findSolarReturn;
  * @internal — exported via `_isDayBirthForTest` for unit tests.
  */
 function isDayBirth(date: Date, location: GeoLocation): boolean {
-  const observer = new Observer(location.latitude, location.longitude, location.elevation ?? 0);
-  const time = MakeTime(date);
-  const equ = Equator(Body.Sun, time, observer, true, true);
-  const hor = Horizon(time, observer, equ.ra, equ.dec, 'normal');
-  return hor.altitude > 0;
+  return isSunAboveHorizon(date, location);
 }
 
 /** @internal */
@@ -338,7 +334,7 @@ function pickYearLord(
   const lagnaRashi = varshaChart.lagna.rashi.index;
   const lagnaLord = VISIBLE_GRAHAS_BY_INDEX[RASHI_LORD[lagnaRashi]!]!;
 
-  const sunPlacement = varshaChart.planets.find((p) => p.planet === 'Sun')!;
+  const sunPlacement = varshaChart.byPlanet.Sun;
   const sunRashiLord = VISIBLE_GRAHAS_BY_INDEX[RASHI_LORD[sunPlacement.rashi.index]!]!;
 
   const triraashi = triraashiPati(lagnaRashi, isDay);
@@ -385,12 +381,12 @@ function resolveOperand(
     case 'Jupiter':
     case 'Venus':
     case 'Saturn':
-      return varshaChart.planets.find((p) => p.planet === op)!.longitude;
+      return varshaChart.byPlanet[op].longitude;
     case 'Asc':
       return varshaChart.lagna.siderealLongitude;
     case 'AscLord': {
       const lord = VISIBLE_GRAHAS_BY_INDEX[RASHI_LORD[varshaChart.lagna.rashi.index]!]!;
-      return varshaChart.planets.find((p) => p.planet === lord)!.longitude;
+      return varshaChart.byPlanet[lord].longitude;
     }
     case 'House11Cusp': {
       const lagnaRashi = varshaChart.lagna.rashi.index;
@@ -467,4 +463,3 @@ export const _triraashiPatiForTest = triraashiPati;
 /** @internal */
 export const _evaluateSahamForTest = evaluateSaham;
 /** @internal */
-export const _resolveOperandForTest = resolveOperand;

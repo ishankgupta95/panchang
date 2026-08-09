@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  MOON_PHASES_META,
-  MOON_PHASES_YEAR_RANGE,
+  getMoonPhasesYearRange,
   getMoonPhasesForYear,
   getMoonPhasesForDate,
 } from '../../src/calendar/moonPhasesTable';
@@ -10,30 +9,43 @@ import { getMoonPhasesInRange } from '../../src/astronomy/moonPhase';
 
 const IST_OFFSET = 330;
 const PHASES = ['new', 'first_quarter', 'full', 'last_quarter'] as const;
-const SAMPLE_YEAR = MOON_PHASES_YEAR_RANGE.start;
+// The library ships no table, so the suite builds the one it reads. Three
+// fixed years keep the per-year invariants meaningful without being slow.
+const START_YEAR = 2025;
+const END_YEAR = 2027;
+const SAMPLE_YEAR = START_YEAR;
 
-describe('static Moon-phases table', () => {
+const table = buildMoonPhasesTable({
+  timezoneOffsetMinutes: IST_OFFSET,
+  startYear: START_YEAR,
+  endYear: END_YEAR,
+  languages: ['en', 'hi'],
+  referenceLocation: 'India (IST)',
+  note: 'test fixture',
+});
+
+describe('Moon-phases table reader', () => {
   describe('metadata', () => {
-    it('declares IST / en+hi', () => {
-      expect(MOON_PHASES_META.referenceLocation).toContain('IST');
-      expect(MOON_PHASES_META.timezoneOffsetMinutes).toBe(330);
-      expect([...MOON_PHASES_META.languages]).toEqual(['en', 'hi']);
+    it('stamps timezone and locales', () => {
+      expect(table._meta.referenceLocation).toContain('IST');
+      expect(table._meta.timezoneOffsetMinutes).toBe(330);
+      expect([...table._meta.languages]).toEqual(['en', 'hi']);
     });
 
-    it('spans a rolling 2-past / 5-future window (8 years inclusive)', () => {
-      expect(MOON_PHASES_YEAR_RANGE.end - MOON_PHASES_YEAR_RANGE.start).toBe(7);
+    it('reports its own year range', () => {
+      expect(getMoonPhasesYearRange(table)).toEqual({ start: START_YEAR, end: END_YEAR });
     });
   });
 
   describe('getMoonPhasesForYear', () => {
-    it('returns null outside the bundled range', () => {
-      expect(getMoonPhasesForYear(MOON_PHASES_YEAR_RANGE.start - 1)).toBeNull();
-      expect(getMoonPhasesForYear(MOON_PHASES_YEAR_RANGE.end + 1)).toBeNull();
+    it('returns null outside the table range', () => {
+      expect(getMoonPhasesForYear(table, START_YEAR - 1)).toBeNull();
+      expect(getMoonPhasesForYear(table, END_YEAR + 1)).toBeNull();
     });
 
     it('has ~49–50 events, sorted, all 4 phases, dates in-year', () => {
-      for (let y = MOON_PHASES_YEAR_RANGE.start; y <= MOON_PHASES_YEAR_RANGE.end; y++) {
-        const days = getMoonPhasesForYear(y);
+      for (let y = START_YEAR; y <= END_YEAR; y++) {
+        const days = getMoonPhasesForYear(table, y);
         expect(days, `year ${y}`).not.toBeNull();
         const dates = days!.map(d => d.date);
         expect(dates).toEqual([...dates].sort());
@@ -55,29 +67,29 @@ describe('static Moon-phases table', () => {
     });
 
     it('flattens to hi (पूर्णिमा for full, अमावस्या for new)', () => {
-      const flat = getMoonPhasesForYear(SAMPLE_YEAR, 'hi')!.flatMap(d => d.phases);
+      const flat = getMoonPhasesForYear(table, SAMPLE_YEAR, 'hi')!.flatMap(d => d.phases);
       expect(flat.find(p => p.phase === 'full')!.name).toBe('पूर्णिमा');
       expect(flat.find(p => p.phase === 'new')!.name).toBe('अमावस्या');
     });
   });
 
   describe('getMoonPhasesForDate', () => {
-    const sample = getMoonPhasesForYear(SAMPLE_YEAR)![0];
+    const sample = getMoonPhasesForYear(table, SAMPLE_YEAR)![0]!;
 
     it('accepts ISO YYYY-MM-DD strings', () => {
-      const got = getMoonPhasesForDate(sample.date);
+      const got = getMoonPhasesForDate(table, sample.date);
       expect(got.length).toBeGreaterThan(0);
-      expect(PHASES).toContain(got[0].phase);
+      expect(PHASES).toContain(got[0]!.phase);
     });
 
     it('accepts Date objects and converts via the table timezone (IST)', () => {
       const noonIst = new Date(`${sample.date}T06:30:00Z`);
-      expect(getMoonPhasesForDate(noonIst).map(p => p.phase))
+      expect(getMoonPhasesForDate(table, noonIst).map(p => p.phase))
         .toEqual(sample.phases.map(p => p.phase));
     });
 
     it('returns [] for out-of-range dates', () => {
-      expect(getMoonPhasesForDate(`${MOON_PHASES_YEAR_RANGE.start - 5}-01-01`)).toEqual([]);
+      expect(getMoonPhasesForDate(table, `${START_YEAR - 5}-01-01`)).toEqual([]);
     });
   });
 
@@ -91,7 +103,7 @@ describe('static Moon-phases table', () => {
         .map(p => `${toIstKey(p.time)}|${p.phase}`)
         .filter(k => k.slice(0, 4) === String(SAMPLE_YEAR))
         .sort();
-      const tableKeys = getMoonPhasesForYear(SAMPLE_YEAR)!
+      const tableKeys = getMoonPhasesForYear(table, SAMPLE_YEAR)!
         .flatMap(d => d.phases.map(p => `${d.date}|${p.phase}`))
         .sort();
       expect(tableKeys).toEqual(liveKeys);
@@ -99,14 +111,14 @@ describe('static Moon-phases table', () => {
   });
 });
 
-describe('buildMoonPhasesTable (timezone-specific, runtime)', () => {
+describe('buildMoonPhasesTable (other timezones)', () => {
   it('maps the same phase instant onto different local dates per timezone', () => {
     // The new moon at 2026-01-18T19:52Z is 2026-01-18 in UTC but 2026-01-19 in IST.
     const utc = buildMoonPhasesTable({ timezoneOffsetMinutes: 0, startYear: 2026, endYear: 2026, languages: ['en'] });
     const ist = buildMoonPhasesTable({ timezoneOffsetMinutes: IST_OFFSET, startYear: 2026, endYear: 2026, languages: ['en'] });
 
     const findNew = (f: typeof utc) =>
-      getMoonPhasesForYear(2026, 'en', f)!
+      getMoonPhasesForYear(f, 2026, 'en')!
         .flatMap(d => d.phases.map(p => ({ ...p, date: d.date })))
         .find(p => p.phase === 'new' && p.time.startsWith('2026-01-18'))!;
 
@@ -125,7 +137,7 @@ describe('buildMoonPhasesTable (timezone-specific, runtime)', () => {
       .map(p => `${toIstKey(p.time)}|${p.phase}`)
       .filter(k => k.slice(0, 4) === '2026')
       .sort();
-    const tableKeys = getMoonPhasesForYear(2026, 'en', built)!
+    const tableKeys = getMoonPhasesForYear(built, 2026, 'en')!
       .flatMap(d => d.phases.map(p => `${d.date}|${p.phase}`))
       .sort();
     expect(tableKeys).toEqual(liveKeys);
@@ -133,7 +145,7 @@ describe('buildMoonPhasesTable (timezone-specific, runtime)', () => {
 
   it('falls back gracefully when a missing locale is requested', () => {
     const built = buildMoonPhasesTable({ timezoneOffsetMinutes: IST_OFFSET, startYear: 2026, endYear: 2026, languages: ['en'] });
-    const full = getMoonPhasesForYear(2026, 'hi', built)!.flatMap(d => d.phases).find(p => p.phase === 'full');
+    const full = getMoonPhasesForYear(built, 2026, 'hi')!.flatMap(d => d.phases).find(p => p.phase === 'full');
     expect(full!.name).toBe('Full Moon'); // en fallback
   });
 

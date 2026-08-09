@@ -6,6 +6,472 @@
   reconstructed from the festivals-table release.
 -->
 
+## 5.0.0 — 2026-08-08
+
+**Major release.** Held until the ephemeris port landed (Phase 36.2–36.5) so the
+whole break arrives once: performance, the table/compute API, the corrected
+`Date` contract, the grouped result *and* zero dependencies.
+
+**`panchang-ts` now has no runtime dependencies at all.** The Sun, the Moon,
+Mercury–Saturn, ΔT, rise/set, the moon-phase search and both kinds of eclipse
+are this library's own code, validated against JPL Horizons / DE441 and the
+NASA/Espenak eclipse canon rather than against the implementation they replace.
+
+Every breaking change has a before/after in the README's
+[Upgrading from 4.x](README.md#upgrading-from-4x) section.
+
+### Breaking — the result object
+
+- **Every published `Date` is now a real instant.** Through 4.x each one was the
+  true instant *shifted* by the UTC offset, so `.getTime()` was not when the
+  event happened. `JSON.stringify` emitted a wrong instant labelled `Z`, `Intl`
+  with a `timeZone` rendered 12:39 pm for an 07:09 am sunrise, and every
+  comparison, diff, database write, date-fns or Temporal call was off by the
+  offset. Each instant gains a `*Local` companion — offset-carrying ISO 8601,
+  e.g. `"2025-01-14T07:09:44.172+05:30"` — which is what to read for display.
+  New export `formatInZone(date, offsetMinutes)` renders any instant the same
+  way. Migration: `x.getUTCHours()` → read `xLocal`.
+- **The result object is grouped.** ~50 flat top-level fields become seven
+  groups — `sun`, `moon`, `angas`, `calendar`, `muhurtas`, `inauspicious`,
+  `periods` — plus `date`, `location`, `timezone`, `ayanamsa`, `specialYogas`,
+  `anandadiYoga`, `festivals`, `eclipse`, `chandraBalam`, `tarabala` at the top
+  level. `getInstantPanchang` uses the same names for the subset an instant can
+  answer. Full rename table in the README.
+- **One rule for "not applicable".** Every field is always present; a scalar or
+  object that does not apply is `null`, a collection is `[]`. Only
+  `chandraBalam` and `tarabala` change behaviour — they were `?`-optional and
+  are now always present, `null` without `janmaRashi` / `janmaNakshatra`.
+  `sections` narrowing likewise nulls and empties rather than removing, so the
+  result *shape* never depends on the options.
+- **`timezone` is an object**: `{ offsetMinutes, zone? }`, so passing
+  `'America/New_York'` produces a result that can say which zone made it. The
+  DST limit is now stated rather than implied — the offset resolves once per
+  call, so a Hindu day containing a transition is computed at a single offset.
+- **`eclipse.magnitude` was publishing obscuration; it is renamed, and a real
+  magnitude joins it.** Through 4.x the field carried the fraction of the disc's
+  **area** covered. Every published catalogue — NASA/Espenak included — means
+  the fraction of its **diameter** by "magnitude", so anyone cross-checking a
+  panchang against a catalogue was comparing two different quantities that
+  happen to share a name and a range. The values were never wrong, only
+  mislabelled: `eclipse.magnitude` → **`eclipse.obscuration`**, unchanged to the
+  last bit, and it stays the number to render as a percentage (it is what
+  `description` prints). The new **`eclipse.magnitude`** is the catalogue
+  quantity, taken from geometry the library already computed and already
+  validated: it agrees with the canon's umbral magnitude to **0.0006** across
+  all 457 lunar eclipses of 1901–2100. Note that it is **not a [0, 1]
+  fraction** — a total eclipse exceeds 1, and a penumbral lunar eclipse is
+  *negative*, exactly as the canon prints it, because the Moon misses the umbra
+  entirely. Branch on `subtype === 'penumbral'` rather than clamping. The same
+  two fields replace the single one on tables built by `buildEclipsesTable`, so
+  a cached table built by 4.x must be rebuilt: read against 5.0.0 it yields
+  `obscuration: undefined` and a `magnitude` that is still an area fraction.
+- **`suryaNakshatra` is typed as a nakshatra**, not a rashi, and is published as
+  `sun.nakshatra`. Its index has always been 0..26; the type said `RashiInfo`
+  (0..11), so indexing a 12-element rashi array by it produced silent garbage
+  for two thirds of the year. Runtime value unchanged.
+- **`_debug` removed.** It was in the published type and written nowhere.
+
+### Breaking — values that move
+
+- **Lahiri ayanamsa corrected by +38″.** The constant sat 38 arcseconds behind
+  DrikPanchang's; the replacement was solved from Drik's own published values
+  across 1950–2050. Nakshatra end-times move ~69 s later, yoga ~129 s (it
+  carries the ayanamsa twice), planetary longitudes +0.0106°; tithi and karana
+  are unchanged because Moon − Sun cancels the ayanamsa. Drik drift 32.3 s →
+  17.4 s.
+- **Sunrise is single-valued per location-day.** It used to vary by up to 109 ms
+  depending on which caller asked and from which instant they searched. Now
+  canonically cached, shifting published sunrise by ≤108 ms.
+- **Moonrise / moonset are single-valued per location-day**, the same treatment,
+  shifting them by ≤182 ms. Nothing else in the result moves — verified over
+  11,520 daily results across six locations and three centuries.
+- **`getSankrantisForYear` day rule fixed.**
+- **Adhika Masa detection fixed** — `isAdhika` now uses the true bounding new
+  moons.
+- **Bundled JSON tables removed.** Consumers build and cache their own with the
+  `build*Table` functions; the engine-free subpaths remain.
+- **The ephemeris is this library's own, and published values move by about a
+  second.** Truncated VSOP87D and ELP2000-82B replace `astronomy-engine`'s
+  series, and the truncation budgets are set at a quarter of the accuracy
+  ceiling rather than a tenth of it. Measured against JPL Horizons / DE441 over
+  1900–2100: Sun 1.613″ → **0.323″**, Moon 3.747″ → **1.261″**, and every
+  planet between 3× and 23× inside its own ceiling. Measured movement in
+  published output, over 241 MB of results spanning 1912 / 2025 / 2088: tithi
+  and karana end times ≤776 ms, yoga ≤569 ms, nakshatra ≤368 ms, sunrise-
+  proportional windows ≤94 ms, **zero** changes to any index, name, boolean,
+  count or festival date. Drik parity is unchanged or marginally better on all
+  four elements (worst 60 s → 58 s).
+- **Eclipses are computed here too, and their contact times move.** Lunar
+  contacts were previously one semi-duration either side of greatest eclipse;
+  they are now solved individually against a Danjon-enlarged shadow. Solar
+  local circumstances come from a direct topocentric solve. Against NASA:
+  lunar type correct on all 457 eclipses of 1901–2100, greatest eclipse within
+  3.84 s, umbral magnitude within 0.0006; solar γ within 0.00015 Earth radii on all
+  452, and local contact times at ten cities within 43 s over 1901–2002 with a
+  −0.75 s bias — the residual there being NASA's own minute-level printing.
+- **`isBodyAboveHorizon(date, location, body)` takes `'sun' | 'moon'`.** Its
+  `body` parameter was an `astronomy-engine` enum member; that package is no
+  longer a dependency, so a public signature could not keep referring to it.
+
+### Breaking — API surface
+
+- **`read*` reads a table, `compute*` runs the engine**, across festivals /
+  eclipses / moon-phases / muhurta plus the Ekadashi and Sankranti year
+  helpers. Every 4.x name is kept as a deprecated alias bound to the same
+  function object.
+- **`compute*ForYear`** added for all four families.
+- **`precision` option removed** — redundant once element transitions are solved
+  by secant rather than binary search.
+- **`engines` is now `node >=22`**, up from `>=18`. Nothing in the library
+  requires it — v5 was verified to produce bit-identical output on Node 18, 22
+  and 24 — but 18 and 20 are both past end-of-life, and the field is a statement
+  about what is supported and tested rather than what happens to run. CI tests
+  22 and 24.
+- **`astronomy-engine` is gone from `dependencies`.** It remains a
+  devDependency, used by three Tier 0 tests to measure the baseline this
+  release is held against.
+
+### Fixed — muhurta rules, Panchaka, Manglik
+
+Classical rules that had been flattened into absolute per-element verdicts, or
+that fell between two modules. Every item below changes output.
+
+- **26 defects across all 13 stock muhurta rules.** The lists were transcribed
+  by hand from 1-based classical numbers into 0-based indices, and the seams
+  showed: Shukla Chaturdashi — a **Rikta** tithi — was marked *auspicious* in 11
+  rules; `vivahRule` listed Ashtami where Navami belonged; Ashlesha sat in the
+  Mundan nakshatra list; Dashami was marked inauspicious for Griha Pravesh; and
+  12 of 13 rules covered only Shukla paksha in `auspiciousTithis`. Rules now
+  build their lists from `bothPakshas(...)`, `RIKTA` and a named nakshatra map
+  rather than raw indices, and `tests/unit/muhurta-rules-invariants.test.ts`
+  guards the five defect classes.
+- **Auspicious entries that no hard exclusion could ever let through.**
+  `vivahRule` named Magha, Mula and Revati — three of the eleven canonical vivah
+  nakshatras — while `excludeGandaMula` vetoed all three, and listed Ekadashi
+  while `excludeEkadashi` vetoed it. Both flags are dropped from `vivahRule`:
+  drikpanchang lists Ekadashi among the six *preferred* vivah tithis, and the
+  Ganda Mula rejection there is at *pada* granularity, which this model does not
+  resolve. Ashlesha and Jyeshtha remain rejected via `inauspiciousNakshatras`.
+- **Vara × Tithi yogas are now scored.** Siddha, Amrita, Dagdha, Visha,
+  Hutasana, Krakacha and Samvartaka — the combination layer classical muhurta
+  actually judges — via the new `computeVaraTithiYogas(vara, tithi)`, applied to
+  every rule unless `varaTithiYogas: false`. A Rikta tithi on a Saturday is now
+  partly redeemed by Siddha yoga instead of flatly penalised. Where an
+  auspicious and an inauspicious yoga both fire, both are surfaced and allowed
+  to net out; the sources mark those cells ambiguous and rank no table above
+  another.
+- **Bhadra is no longer a whole-day veto.** New
+  `bhadra?: 'ignore' | 'penalize' | 'exclude'` on `MuhurtaRule`; the stock rules
+  use `'penalize'`. Vishti karana sits at fixed positions in the tithi cycle, so
+  the old whole-day exclusion deterministically removed seven tithis — including
+  Shukla Ekadashi, a *preferred* vivah tithi. `excludeBhadra: true` still works
+  as an alias for `bhadra: 'exclude'`; when both are set, `bhadra` wins.
+- **Panchaka reports which of the five it is.** New `panchakaInfo` on daily and
+  instant results, alongside the unchanged `panchaka` boolean. The type is fixed
+  by the weekday the spell *began* on, so it cannot be derived from the day's
+  own vara; a Wednesday- or Thursday-onset spell (`'samanya'`) carries no named
+  affliction, and `excludePanchaka` no longer vetoes it. Exports
+  `classifyPanchaka`, `isPanchakaDosha`, `findPanchakaOnset`.
+- **`computeMangalCompatibility(boyChart, girlChart)`.** The mutual-Manglik
+  cancellation — both partners Manglik neutralises the dosha — was documented in
+  `doshas.ts` as "a matching rule" and deferred, and `matching.ts` never took it
+  up, so it existed nowhere. Chart-level cancellations still run first, so an
+  exalted-Mars native cannot mutually cancel a genuinely Manglik partner.
+- **`MuhurtaFactor.axis` gains `'karana'` and `'varaTithiYoga'`.** Widening only;
+  an exhaustive `switch` over the union needs the two new arms.
+- **Sarvartha Siddhi rebuilt from DrikPanchang's full 2026 listing.** Drik's
+  page serves one month at a time but takes `?date=DD/MM/YYYY`, so all twelve
+  months were pulled — 116 windows. Each window is a nakshatra's span clipped to
+  its Hindu day, so the table was *derived* from them rather than checked
+  against them. Ten cells changed: **added** Sun + Ashwini, Tue + Ashlesha,
+  Wed + Krittika; **removed** Sun + Shravana, Mon + Hasta, Tue + Uttara
+  Phalguni, Thu + Swati, Fri + Bharani, Fri + Chitra, Sat + Revati — each of the
+  seven occurred three to five times in 2026, often across most of the Hindu
+  day, with no drik window on any of those dates. The result reconciles
+  one-for-one over the year (116 windows, 116 days, nothing missed or spare) and
+  independently reproduces the published weekday lists at astrodevam.com /
+  shubhpanchang.com for six of seven varas.
+- **Griha Pravesh and Vahan Kharidi lists rebuilt against drik's published
+  calendars.** Three years of drik's dated shubh-dates pages (2025–2027 Mumbai;
+  121 and 311 published muhurat days) falsify several hand-transcribed entries.
+  Griha Pravesh: Magha / Hasta / Swati / Shravana appear 0–1 times in three
+  years and give way to Mrigashira and Chitra (15–17 each); Saturday — 23
+  published days, zero drik weekday rejections — moves from inauspicious to
+  auspicious; the `excludeEkadashi` hard veto is dropped (Ekadashi is drik's
+  third-most-used griha pravesh tithi) and Dashami / Ekadashi become
+  auspicious. Vahan Kharidi sheds the three Sthira nakshatras (0 occurrences in
+  three years) for the Chara / Mridu set drik's own prose names — Mrigashira,
+  Chitra, Swati, Dhanishtha, Shatabhisha, 30–37 occurrences each — and stops
+  banning Ashtami (44 occurrences) and Purnima (23); Sunday joins the
+  auspicious weekdays. Vivah survives the same screen untouched: its eleven
+  nakshatras are exactly drik's operative set, and drik applies no tithi or
+  weekday shuddhi to marriage at all. Pinned in
+  `tests/validation/drik-muhurta-lists.test.ts`.
+- **ΔT uses measurement where measurement exists.** Espenak–Meeus' post-2005
+  branches are a 2006 extrapolation that Earth's rotation did not follow — by
+  2026 it read ~5.9 s high and drifting +0.6 s/yr, and that lands directly on
+  every published tithi and nakshatra time. `deltaTSeconds` now takes ΔT from
+  the leap-second chain (`32.184 + (TAI − UTC)`) from 1972 to the handoff, and
+  resumes Espenak–Meeus *offset by the bias it had accrued* beyond it. Holding
+  the last observation flat instead would have run ~134 s adrift by 2100 and
+  wrecked agreement with NASA's eclipse canon; carrying the offset keeps that to
+  ~6.5 s. **Every published instant in the modern era moves by the ΔT delta**
+  (~5.7 s for 2025 dates).
+- **`getInstantPanchang` reported the wrong vara after ~19:00.** It searched for
+  sunrise from `date − 12 h`, which for an evening instant is already past that
+  morning's sunrise, so it took *tomorrow's* and rolled the weekday back a day.
+  Every evening query returned the previous vara — and with it the wrong Rahu
+  Kalam, Choghadiya, Anandadi yoga and special yogas. It now walks to the
+  sunrise that actually opens the Hindu day containing the instant.
+- **Special yogas are evaluated across the Hindu day, not at sunrise.**
+  Amrit Siddhi, Sarvartha Siddhi, Ravi / Guru Pushya, Jwalamukhi, Dwipushkar,
+  Tripushkar, Aadal / Vidaal and Ravi yoga qualify on whichever nakshatra is
+  running, and a qualifying nakshatra routinely opens *after* sunrise — the old
+  sunrise snapshot found only 5 of drik's 8 August Sarvartha Siddhi windows.
+  Each (tithi, nakshatra) pair is now evaluated where the two segments actually
+  overlap in time, so no combination is scored that never occurs. More yogas
+  fire than before, which is the point. `getDailyPanchang` with
+  `computeEndTimes: false` keeps the single-snapshot behaviour, since segment
+  times are what make overlap checking possible.
+- **Amrit Siddhi and Tripushkar validated against DrikPanchang's full 2026
+  listings** (Mumbai) — 24 and 16 occurrences, all reproduced exactly, no false
+  positives, pinned in `tests/validation/drik-special-yogas.test.ts`. Drik dates
+  a window by the calendar day its start falls in; this library attributes it to
+  the Hindu day, so a window closing at sunrise is listed by drik on D and
+  reported here on D−1. Same interval, different convention.
+- **Sarvartha Siddhi confirmed out-of-sample across four city-years.** The
+  2026-derived table was re-derived independently from drik's 2025 and 2027
+  Mumbai listings and its 2026 New Delhi listing — 471 published windows in
+  all. Every dataset exercises exactly the same 35 cells, and splitting each
+  window at nakshatra boundaries and sunrises leaves no segment longer than
+  2 minutes outside the table. The one disputed cell is settled: Sun + Ashwini
+  fires 17 times across the four datasets, Sun + Ashlesha (the astrodevam /
+  shubhpanchang variant) never occurs. A handful of drik's pre-dawn windows
+  turn out to be dated by Hindu day rather than by the start's civil date —
+  each start anchors to a nakshatra boundary that exists only on the following
+  date — which also corrects the mechanism behind the withdrawn
+  Sat + Punarvasu cell (that window is Pushya's pre-dawn span on Hindu Sunday
+  2026-10-04: Sun + Pushya, already carried). All four city-years reconcile in
+  `tests/validation/drik-special-yogas.test.ts`.
+- **Gana koot deliberately keeps no cancellation set** — now documented rather
+  than left looking like an oversight. Bhakoot and Nadi cancellations are
+  score-affecting in mainstream practice; the mitigations described for Gana are
+  interpretive ("loses significance"), one of them is circular for scoring, and
+  no consulted source restores the six points arithmetically.
+
+### Added
+
+- **`buildMuhurtaTable` + the engine-free `panchang-ts/muhurta` subpath**
+  (1.70 KB ESM), completing the table family.
+- **Emitted tables are dictionary-encoded and carry `key`** — festivals
+  315.0 → 89.9 KB (28.5% of the former size).
+- **`EclipseInfo` and `EclipseSubtype` are exported.** 4.x published
+  `getUpcomingSolarEclipse` / `getUpcomingLunarEclipse` / `getEclipseDuringDay`
+  but not the type they return, so their result could be used and never
+  annotated. It is the same type as `DailyPanchangResult.eclipse`.
+- **`formatInZone`**, and the twelve result-section interfaces (`DailySun`,
+  `DailyMoon`, `DailyAngas`, `MuhurtaWindows`, `InauspiciousWindows`,
+  `DayPeriods`, …) are exported.
+- **Results are now identical across JavaScript engines.** The periodic series
+  call this library's own `sin`/`cos` rather than `Math.sin`/`Math.cos`, which
+  ECMA-262 does not require to be correctly rounded and which V8,
+  JavaScriptCore and Hermes round differently. A tithi boundary found by
+  root-finding over a few hundred sines therefore used to land microseconds
+  apart on iOS and on Android; it no longer does.
+
+### Performance
+
+Measured against the **published npm artifact** of 4.3.1, not against a source
+tree: `notes/vcompare/driver.mjs`, median of 11 processes per configuration per
+implementation, one configuration per process, rotating which implementation
+runs first so a scheduling stall lands on all of them. The `ctrl/*` control rows
+— pure arithmetic, no ephemeris — come out at 1.00×, which is the check that
+says the harness measured the library rather than the machine.
+
+| | 4.3.1 (npm) | 5.0.0 | |
+|---|---|---|---|
+| cold default | 6.0562 | **0.4105** | **−93.2%** (14.8×) |
+| cold `computeEndTimes: false` | 5.6322 | **0.3913** | −93.1% (14.4×) |
+| cold `getInstantPanchang` | 0.4344 | **0.2081** | −52.1% |
+| warm default | 6.1982 | **0.1677** | −97.3% (37.0×) |
+| warm `getInstantPanchang` | 0.3941 | **0.1044** | −73.5% |
+| `getFestivalsInRange`, ms/yr | 2177.1 | **130.5** | −94.0% (16.7×) |
+| `getEkadashiDatesForYear`, ms/yr | 2362.0 | **18.0** | −99.2% (131×) |
+| `getSankrantisForYear`, ms/yr | 153.7 | **3.29** | −97.9% (46.7×) |
+| `computeShadbala` / `computeBhavaBala` | 0.719 / 0.731 | **0.333 / 0.340** | −54% |
+| `computeSunrise`, cold | 0.0382 | **0.0389** | +1.8% |
+| `getSunset`, cold | 0.0353 | **0.0384** | +8.8% |
+| `getMoonrise`, cold | 0.0784 | **0.0827** | +5.5% |
+| `getMoonset`, cold | 0.0775 | **0.0826** | +6.6% |
+| **`computeRashiChart` / `computeNavamsa`** | 0.0975 / 0.0944 | **0.318 / 0.314** | **+226% / +233%** |
+
+**Charts are 3.3× slower, and that is a trade, not a regression.** It is
+entirely the planetary ephemeris, and it buys accuracy against DE441 that the
+old one could not reach: Mercury 6.504″ → **0.296″**, Venus 19.586″ → **0.862″**.
+A chart-heavy consumer pays about a fifth of a millisecond per chart and stops
+carrying a 6.5-arcsecond Mercury. `computeShadbala` and `computeBhavaBala` still
+come out ahead because they build the natal positions once and derive all seven
+charts from them.
+
+**A single cold rise/set primitive is between unchanged and ~9% slower**, and
+that is the honest statement — earlier drafts of these notes claimed −25% and
+−39% for the two rise calls, and did not mention the two set calls at all. All
+four are in the table above. The canonical per-location-day rise/set cache does
+not make one cold call cheaper; what it buys is that the second call for the
+same day is free, and that an event has one timestamp no matter who asks. The
+gain shows up in `getDailyPanchang` and in the range helpers, which is where
+those calls actually happen.
+
+*Measured a second way, for anyone comparing against the development history
+rather than against npm: the tree this work started from — version-labelled
+`4.3.1` but already carrying seven unpublished commits — runs the default call
+in 0.9749 ms, so against it the change is −57.9% rather than −93.2%. Both
+numbers are in [docs/v5-validation-report.md](docs/v5-validation-report.md)
+§ "Step 5, third pass", along with why the second one is not a 4.3.1 figure.*
+
+Two phases of work. **Structural** (36.1): Chebyshev interpolation of Sun/Moon
+longitudes over shared blocks, a canonical per-location-day rise/set cache for
+both bodies, the eclipse syzygy guard routed through the call's cache.
+**Then the own ephemeris**, which arrived 21% *slower* and left with the
+following, in order of what each was worth:
+
+- own `sin`/`cos` (`src/astronomy/trig.ts`) — **−54% of the lunar series
+  evaluation**, the single largest win in the release. `Math.sin` was measured
+  at 77% of that loop, most of it argument reduction for a range these series
+  never approach;
+- truncation budgets set at a quarter of the accuracy ceiling rather than a
+  tenth — **−19%** of a cold call;
+- nutation by angle addition — 156 transcendental calls become 28, cutting
+  `sumNutation` from 6.1% of self time to 1.1%;
+- the planetary light-time iteration from three passes to two, with Earth's
+  heliocentric vector memoized on the exact epoch — **−12% on `computeShadbala`
+  and `computeBhavaBala`**;
+- a table-driven `formatInZone`, and a 16-entry nutation memo sized for the
+  track nodes a calendar day actually reads;
+- **the rise/set position track fitted over four days instead of one** — the
+  last structural step, and the one that closed the gap. `riseSet.ts` had built
+  a 7-node Chebyshev fit of each body's equatorial position *per UTC day*; it
+  now builds an 11-node fit per four days, which is 2.75 full lunar series
+  evaluations a day against 7.0. Measured at **−16.4%** of a cold call, −45% on
+  `getMoonrise` and −26% on `computeSunrise`, and the accuracy is not traded for
+  it: the fit's error is 6 × 10⁻⁴″ either way, because at both widths it sits on
+  the millisecond quantization of `new Date()` rather than on the polynomial.
+  Eight-day blocks are a cliff (50× worse) — ELP carries argument families near
+  a five-day period — and `notes/track-fit.src.ts` is the sweep that says so.
+
+**The "roughly halved" target is met on both baselines**, which it had
+previously been claimed to clear by 3.9% on one machine and to miss on another.
+Against the tree the criterion was written for: 0.9749 → **0.4105 ms**, −57.9%.
+Against what users have: −93.2%.
+
+### Validation
+
+- **Tier 0 ground truth committed**: 1,750 geocentric apparent positions from
+  JPL Horizons / DE441 spanning 1900–2100, plus ΔT at 21 decades. Neither
+  originates from this library, which is what lets them adjudicate an ephemeris
+  change.
+- **Baseline error curve of the current implementation recorded** — max |error|
+  vs DE441: Sun 1.61″, Moon 3.75″, Mercury 6.50″, Venus 19.59″, Mars 11.10″,
+  Jupiter 9.66″, Saturn 11.15″. This is the ceiling the own-ephemeris work must
+  come in at or below.
+
+- **What shipped, against those ceilings** — max |error| vs DE441 over the same
+  250 epochs: Sun **0.32″**, Moon **1.26″**, Mercury **0.30″**, Venus **0.86″**,
+  Mars **1.29″**, Jupiter **0.84″**, Saturn **0.86″**. Every body is 3× to 23×
+  inside its ceiling; the Moon is the tightest at 2.97×.
+- **The generator's error figures are now measured over 100,000 epochs, not
+  600.** Each series' term count comes from a binary search on the *measured*
+  disagreement with the untruncated theory, so the budget it advertised was a
+  600-sample maximum — and the 100,000-instant differential test measured 13–25%
+  more than that. Raising the sample does not converge (the residual's supremum
+  over a two-century span is an extreme-value problem, and at 100,000 draws
+  consecutive probes are still 13 days apart), so it is anchored instead at
+  exactly the sample size the differential test uses. The generator can no
+  longer advertise a budget the test verifying it then exceeds. Series grew
+  9–34%; accuracy improved on every body.
+- **The planet path has its own Earth series.** A geocentric planetary direction
+  is `planet − Earth`, so it inherits Earth's heliocentric error amplified by
+  `r_E / Δ` — and Earth's series *is* the Sun's, whose budget was set for the
+  Sun. The generator now emits it twice: coarse for the solar path, ≤0.1″ for
+  `earthRect`, which the planets read. Mercury 0.50 → 0.30″ and Venus 1.22 →
+  0.86″, at +11% on `computeShadbala` and +11 KB of bundle.
+- **`buildMuhurtaTable` threw a `TypeError` from inside the scorer when `rule`
+  was omitted.** It validated `location`, `startYear` and `endYear` but not the
+  fourth required option, so a JavaScript caller got
+  `Cannot read properties of undefined (reading 'excludeBhadra')` four frames
+  deep instead of a message naming the problem. Found by installing the packed
+  tarball and using it as a consumer.
+- **`repository`, `homepage` and `bugs` were missing from `package.json`** —
+  absent since before 4.3.1, so npm showed no source link and no issue tracker.
+- **Dead module removed**: `src/utils/perf.ts` (`withTiming`) was imported by
+  nothing and carried the package's only non-example `console.log`.
+- **`boundingNewMoons` could put an instant sitting exactly on a new moon into
+  the previous lunation**, and therefore report the previous Chandra Masa for
+  it. `searchMoonPhase` rounds its converged root to a whole millisecond and the
+  same syzygy reached from a different seed can round the other way, so an exact
+  `prev <= ref` comparison rejected the fast path and the fallback scan then
+  walked back a month. Found by a test failing after the series were
+  regenerated, not by the regeneration causing it.
+- **Ten fixture-free cross-checks** (mean motion, closure identities, solver-vs-
+  bisection separation, ordering invariants) that contain no number produced by
+  this library and so cannot be re-pinned.
+- **The published eclipse fields are now checked, not just the geometry behind
+  them.** `EclipseInfo.magnitude` carried an obscuration through two Tier 0
+  files, 909 canon rows and 8,000-odd tests without a single failure, because
+  every assertion read `findLunarEclipse` directly and none read what the
+  panchang layer chose to publish out of it. The new assertions drive the public
+  entry points and compare the fields a consumer receives against the canon's
+  own columns — including the sign of the magnitude, which is what a well-meant
+  clamp into [0, 1] would destroy.
+- **The one place a sub-ten-second ephemeris movement can change a published
+  calendar date is now pinned.** `computeSankrantisForYear` publishes a date,
+  and the date is decided by whether the transit falls before or after that
+  morning's sunrise — so when the two are seconds apart, a movement inside the
+  release's own error bar flips the day, discontinuously, and the before/after
+  harness cannot see it coming because the only observable leaf is the date.
+  The Tula Sankranti of 2025 at Reykjavik sits **7.1 s before** sunrise, against
+  a solar accuracy worth **7.8 s** of transit instant. It is not a bug and it is
+  not fixed; it is now loud —
+  `tests/validation/tier2-sankranti-day-margin.test.ts` pins the instant, the
+  margin and the two festival entries that ride on it, and says in the file that
+  a failure means the day may have moved and the list must be re-checked by hand
+  rather than re-pinned.
+- **Test tiers are enforced by a test**, not a convention — see
+  [tests/TIERS.md](tests/TIERS.md).
+- `tsconfig.test.json` inherited an `exclude` that dropped `tests`, so
+  `npm run typecheck` had been checking only `src` while reporting success.
+  Fixed; the 483 pre-existing errors it had been hiding are cleared, including a
+  Varjyam test that had been dead since its imported constant was deleted.
+- **NASA/Espenak eclipse ground truth committed**: the Five Millennium Canon
+  (457 lunar + 452 solar rows, 1901–2100) and the city catalogs (788 solar local
+  circumstances at 10 sites). The second is what closes the gap PLAN.md §36.5
+  called "the thinnest Tier 0 coverage" — a geocentric canon cannot say when the
+  partial phase begins at Varanasi, and a differential test against the package
+  being removed would have carried no authority.
+- **Four frozen reference implementations and five differential tests.** Every
+  optimization is checked against a slow, obvious twin rather than against
+  intuition: the untruncated VSOP87D/ELP2000-82B/IAU-2000A series, a rise/set
+  solver that interpolates nothing, an eclipse solver that finds its roots by
+  exhaustive scan, and the direct per-term nutation summation.
+- **A finding that only Tier 0 could produce.** The lunar shadow enlargement is
+  Danjon's rule on the Earth's radius, not 2% on the shadow radii — identified
+  by inverting the canon's own 457 published magnitudes, which show the 2%
+  reading is not even self-consistent. Before the correction, two eclipses were
+  mis-typed.
+- **A finding about the reference, not the code.** The frozen eclipse solver
+  originally minimised by golden section, and golden section was *less accurate
+  than the fast path it was checking* — near a flat minimum it compares samples
+  that differ by ~10⁻¹⁴, below the noise floor of an `atan2` of a cross product.
+  Replaced by nested enumeration.
+
+**8,368 tests** across 121 files, green over five consecutive runs. Bundle
+584.0 KB CJS against 4.3.1's 395.5 KB (gzip 146.1 against 96.0 KB) — but the
+**installed footprint falls 4.87 MB → 1.74 MB**, because the coefficient tables
+this package now carries are a fraction of the dependency they replace.
+**Zero invariant-test changes** across the release, over three separate 241 MB
+before/after comparisons; three numeric fixture families re-pinned, each with
+the delta predicted before it was observed.
+
 ## 4.3.0
 
 **Minor release — eclipses + moon-phases static tables (Wave 6), plus an

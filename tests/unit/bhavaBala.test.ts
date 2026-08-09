@@ -25,7 +25,7 @@ import { describe, it, expect } from 'vitest';
 import {
   computeBhavaBala, computeShadbala, _BHAVA_DIK_VALUES_FOR_TEST,
 } from '../../src/jyotish/shadbala';
-import { computeRashiChart } from '../../src/jyotish/charts';
+import { computeRashiChart, indexPlanets } from '../../src/jyotish/charts';
 import type {
   BhavaChart, BirthChart, GrahaName, HouseInfo,
   LagnaInfo, PlanetPlacement,
@@ -126,7 +126,7 @@ function synthChart(spec: SynthSpec): BirthChart {
       isRetrograde: g === 'Rahu' || g === 'Ketu',
     };
   });
-  return { divisional: 'D1', lagna, bhava, planets };
+  return { divisional: 'D1', lagna, bhava, planets, byPlanet: indexPlanets(planets) };
 }
 
 // ── Structural invariants ─────────────────────────────
@@ -389,6 +389,18 @@ function computeSyntheticSthanaBala(chart: BirthChart, bhavaNumber: number): num
  * charts. Generated from the algorithm; serves as a regression detector
  * for the combined effect of ephemeris + Lahiri ayanamsa + the four
  * Bhava-Bala sums.
+ *
+ * Re-pinned in Phase 36.2, when the Sun and Moon series became this library's
+ * own. Predicted before observed, per tests/TIERS.md: the two implementations
+ * differ by ~1″ of longitude, which is 3 × 10⁻⁴ degrees, so on totals of order
+ * 500 Virupas a movement in the **4th decimal** was expected and nothing
+ * larger. Observed: every changed value moved by exactly ±0.0001, on four of
+ * the five charts. Sachin Tendulkar's did not move at all.
+ *
+ * This block is the most sensitive numeric pin in the suite — it is why it
+ * exists — and it has now been re-pinned twice for reasons of the same shape
+ * (Phase 36.1's canonical sunrise, and this). Both times the delta was
+ * predicted first and both times it landed in the 4th decimal.
  */
 const FIXTURE_PINS: ReadonlyArray<{ name: string; totals: readonly number[] }> = [
   // Re-pinned 2026-05-11 post-Phase-34e item 5 (Shadbala Saptavargaja +
@@ -404,39 +416,109 @@ const FIXTURE_PINS: ReadonlyArray<{ name: string; totals: readonly number[] }> =
   // range (Jupiter +206.25 V from heavy saptavargaja+ojha, Saturn
   // +120 V, Sun +183.75 V) so several previously-negative bhavaBala
   // totals (-53, -65, -40, -16) now turn positive after the increase.
+  //
+  // Re-pinned again when the Lahiri ayanamsa was corrected to match
+  // DrikPanchang (+0.010590°, see `LAHIRI_J2000_DEG`). Predicted before
+  // measuring, per the anti-circular workflow: a *rigid* shift of every
+  // sidereal longitude leaves all sign-based and relative-angular
+  // quantities untouched, so dik, drik and sthana must not move at all,
+  // and only the continuous shadbala sub-components of the cusp lord can
+  // respond. Confirmed exactly — across all 60 houses, Δdik = Δdrik =
+  // Δsthana = 0.0000, the whole change lands in bhavadhipati, max
+  // |Δtotal| is 0.0071 V (on totals of 50-800), no Dig-Bala value flipped
+  // (which would have signalled a crossed sign boundary), and max
+  // |Δshadbala| is 0.0071 V — i.e. per-house Δ is exactly
+  // Δshadbala[cuspLord], the same relationship as the previous re-pin.
+  //
+  // Re-pinned again when solar rise/set events became canonically cached
+  // (see `EVENT_CACHE` in src/astronomy/sunrise.ts). Predicted before
+  // measuring, per the anti-circular workflow. `SearchRiseSet` locates an
+  // event to within its own refinement tolerance, so the same sunrise came
+  // back up to ~109 ms apart depending on which caller's search start found
+  // it; anchoring every event to its UTC day fixes one value per event, and
+  // `computeShadbala` reads sunrise/sunset for the Kaala Bala day fraction.
+  // The prediction was therefore: no discrete quantity may move (a 108 ms
+  // shift cannot cross a sign or Dig-Bala boundary), and the continuous
+  // Kaala Bala terms must move by ~108 ms / 43.2e6 ms of a day — i.e. into
+  // the 4th decimal at most. Confirmed exactly: an isolation build carrying
+  // the interpolating longitude cache but the *old* sunrise reproduced all
+  // five fixtures byte-identically, so the entire movement is attributable
+  // to the rise/set change, and max |Δtotal| is 0.0009 V on totals of
+  // 54-819 (worst relative movement 1.1e-5).
+  //
+  // Re-pinned once for the whole of Phase 36.2-36.5 (the own ephemeris), at
+  // the end rather than after each sub-phase, so a single attributed delta is
+  // recorded instead of four rounds of churn. Three of those changes reach
+  // this fixture and one does not:
+  //
+  //   - the truncation budgets rose to 0.4" for the Sun and the Moon, moving
+  //     sidereal longitudes by <=0.27" (Sun) and <=0.19" (Moon) and sunrise by
+  //     <=94 ms, both measured in notes/diff.mjs before this was re-pinned;
+  //   - the planetary light-time iteration was restructured, worth ~1e-4";
+  //   - the nutation and trigonometry rewrites are arithmetic-only, bounded at
+  //     1e-9" and 6e-12 respectively, and so cannot reach the 4th decimal.
+  //
+  // Predicted before measuring: no discrete quantity may move (0.3" cannot
+  // cross a sign or Dig-Bala boundary), and the continuous Kaala Bala and
+  // Bhavadhipati terms move into the 3rd-4th decimal — |Δtotal| <= 0.005 V.
+  // Observed max |Δtotal| = **0.0009 V** (Narendra Modi, house 11,
+  // 462.8016 -> 462.8025), worst relative movement 1.6e-5, and the same
+  // magnitude as the rise/set re-pin above.
+  //
+  // Re-pinned once more at the close of Phase 36, again for several changes
+  // together rather than one per change:
+  //
+  //   - the rise/set position track went from a 7-node fit per UTC day to an
+  //     11-node fit per 4 days, which the differential test measures as moving
+  //     nothing at all (identical to 3 decimal places of a millisecond);
+  //   - the generator's PROBE_COUNT went 600 -> 100,000, so the series meet
+  //     their budgets over the sample size that verifies them; longitudes moved
+  //     <=0.20" (Sun) and <=0.15" (Moon) and sunrise <=38 ms;
+  //   - the planet path got its own <=0.1" Earth series, moving planetary
+  //     longitudes by <=0.23" in D1.
+  //
+  // Predicted: no discrete quantity moves, |Δtotal| <= 0.005 V. Observed
+  // **0.0001 V** across all 60 pinned numbers, of which 7 moved at all
+  // (Narendra Modi house 3, 330.1267 -> 330.1266); worst relative movement
+  // 4.3e-7, an order below the previous re-pin. Values regenerated by script
+  // from the library and diffed per house, not transcribed from the failure.
   {
     name: 'Narendra Modi',
     totals: [
-      378.4448, 367.5252, 330.1265, 344.4165, 332.5252, 294.1548,
-      283.0118, 492.0988, 310.6306, 434.1504, 462.8088, 348.0118,
+      378.445, 367.525, 330.1266, 344.4166, 332.525, 294.155,
+      283.0117, 492.0925, 310.6234, 434.1574, 462.8025, 348.0117,
     ],
   },
   {
     name: 'Sachin Tendulkar',
     totals: [
-      563.7607, 424.5077, 247.2705, 350.0473, 310.2725, 330.3341,
-      318.1841, 299.5525, 357.9073, 293.7005, 379.5077, 386.8776,
+      // Houses 6 and 7 gained 0.0001 when ΔT switched to the leap-second chain
+      // for the measured era: at this 1973 birth the two differ by 0.582 s, and
+      // 0.582 s of planetary motion is a last-decimal effect on a virupa total.
+      // Predicted sub-0.001 before re-pinning; the other ten are unchanged.
+      563.7608, 424.5006, 247.2773, 350.0403, 310.2726, 330.3341,
+      318.1841, 299.5526, 357.9003, 293.7073, 379.5006, 386.8775,
     ],
   },
   {
     name: 'Ratan Tata',
     totals: [
-      482.1611, 207.3089, 135.8789, 405.0211, 258.9007, 399.8465,
-      433.4519, 204.3893, 540.9573, 388.4519, 481.2765, 243.9007,
+      482.1613, 207.3087, 135.8787, 405.0213, 258.9072, 399.8396,
+      433.4584, 204.3894, 540.9573, 388.4584, 481.2696, 243.9072,
     ],
   },
   {
     name: 'Dhirubhai Ambani',
     totals: [
-      463.3512, 283.2021, 226.7721, 426.9212, 232.9455, 630.7439,
-      318.3524, 163.2057, 537.0813, 367.6424, 495.7439, 346.5155,
+      463.3511, 283.2022, 226.7722, 426.9211, 232.9383, 630.7367,
+      318.3524, 163.1985, 537.0814, 367.6424, 495.7367, 346.5083,
     ],
   },
   {
     name: 'Mukesh Ambani',
     totals: [
-      70.6601, 819.6299, 54.2434, 94.2434, 718.1999, 82.8001,
-      619.5074, 417.8971, 81.0038, 777.8928, 377.8971, 731.6474,
+      70.6604, 819.6296, 54.2438, 94.2438, 718.1996, 82.8004,
+      619.5139, 417.8971, 80.9971, 777.8853, 377.8971, 731.6539,
     ],
   },
 ];

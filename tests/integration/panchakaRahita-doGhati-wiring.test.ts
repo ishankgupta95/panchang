@@ -15,22 +15,22 @@ describe('Panchaka Rahita / Do Ghati wiring — fields present', () => {
 
   it('result is non-null and both fields exist', () => {
     expect(r).not.toBeNull();
-    expect(Array.isArray(r.panchakaRahita)).toBe(true);
-    expect(r.doGhatiMuhurta).toBeDefined();
-    expect(Array.isArray(r.doGhatiMuhurta.day)).toBe(true);
-    expect(Array.isArray(r.doGhatiMuhurta.night)).toBe(true);
+    expect(Array.isArray(r.inauspicious.panchakaRahita)).toBe(true);
+    expect(r.muhurtas.doGhati).toBeDefined();
+    expect(Array.isArray(r.muhurtas.doGhati.day)).toBe(true);
+    expect(Array.isArray(r.muhurtas.doGhati.night)).toBe(true);
   });
 
   it('Do Ghati has 15 day + 15 night slots', () => {
-    expect(r.doGhatiMuhurta.day).toHaveLength(15);
-    expect(r.doGhatiMuhurta.night).toHaveLength(15);
+    expect(r.muhurtas.doGhati.day).toHaveLength(15);
+    expect(r.muhurtas.doGhati.night).toHaveLength(15);
   });
 
   it('Panchaka Rahita slices are well-formed (start < end, within Hindu day)', () => {
-    for (const tp of r.panchakaRahita) {
+    for (const tp of r.inauspicious.panchakaRahita) {
       expect(tp.start.getTime()).toBeLessThan(tp.end.getTime());
-      expect(tp.start.getTime()).toBeGreaterThanOrEqual(r.sunrise.getTime() - 1000);
-      expect(tp.end.getTime()).toBeLessThanOrEqual(r.nextSunrise.getTime() + 1000);
+      expect(tp.start.getTime()).toBeGreaterThanOrEqual(r.sun.rise.getTime() - 1000);
+      expect(tp.end.getTime()).toBeLessThanOrEqual(r.sun.nextRise.getTime() + 1000);
     }
   });
 });
@@ -39,8 +39,8 @@ describe('Do Ghati wiring — slot durations sum to dayDuration / nightDuration'
   const r = getDailyPanchang(NOON_2025_01_14, DELHI, { timezone: 330 })!;
 
   it('day slot durations sum to dayDurationMs (within rounding)', () => {
-    const dayMs = r.sunset.getTime() - r.sunrise.getTime();
-    const sum = r.doGhatiMuhurta.day.reduce(
+    const dayMs = r.sun.set.getTime() - r.sun.rise.getTime();
+    const sum = r.muhurtas.doGhati.day.reduce(
       (acc, s) => acc + (s.end.getTime() - s.start.getTime()),
       0,
     );
@@ -48,8 +48,8 @@ describe('Do Ghati wiring — slot durations sum to dayDuration / nightDuration'
   });
 
   it('night slot durations sum to nightDurationMs (within rounding)', () => {
-    const nightMs = r.nextSunrise.getTime() - r.sunset.getTime();
-    const sum = r.doGhatiMuhurta.night.reduce(
+    const nightMs = r.sun.nextRise.getTime() - r.sun.set.getTime();
+    const sum = r.muhurtas.doGhati.night.reduce(
       (acc, s) => acc + (s.end.getTime() - s.start.getTime()),
       0,
     );
@@ -57,13 +57,13 @@ describe('Do Ghati wiring — slot durations sum to dayDuration / nightDuration'
   });
 
   it('day[0].start == sunrise and day[14].end == sunset', () => {
-    expect(r.doGhatiMuhurta.day[0]!.start.getTime()).toBe(r.sunrise.getTime());
-    expect(r.doGhatiMuhurta.day[14]!.end.getTime()).toBe(r.sunset.getTime());
+    expect(r.muhurtas.doGhati.day[0]!.start.getTime()).toBe(r.sun.rise.getTime());
+    expect(r.muhurtas.doGhati.day[14]!.end.getTime()).toBe(r.sun.set.getTime());
   });
 
   it('night[0].start == sunset and night[14].end == nextSunrise', () => {
-    expect(r.doGhatiMuhurta.night[0]!.start.getTime()).toBe(r.sunset.getTime());
-    expect(r.doGhatiMuhurta.night[14]!.end.getTime()).toBe(r.nextSunrise.getTime());
+    expect(r.muhurtas.doGhati.night[0]!.start.getTime()).toBe(r.sun.set.getTime());
+    expect(r.muhurtas.doGhati.night[14]!.end.getTime()).toBe(r.sun.nextRise.getTime());
   });
 });
 
@@ -74,18 +74,23 @@ describe('Do Ghati wiring — DrikPanchang cross-check', () => {
   it('Delhi 2025-01-14: Rudra 07:15–07:57, Mitra 08:39–09:21, Ishwara start 17:46', () => {
     const r = getDailyPanchang(NOON_2025_01_14, DELHI, { timezone: 330 })!;
 
-    const localHHMM = (d: Date) => d.getUTCHours() * 60 + d.getUTCMinutes();
-    const expectMinsClose = (actualMs: number, expectedHM: [number, number]) => {
-      const actualMin = localHHMM(new Date(actualMs));
+    // v5: published Dates are true instants; the local wall clock is in the
+    // offset-carrying `*Local` ISO string.
+    const localHHMM = (local: string) => {
+      const [h, m] = local.slice(11, 16).split(':').map(Number) as [number, number];
+      return h * 60 + m;
+    };
+    const expectMinsClose = (actualLocal: string, expectedHM: [number, number]) => {
+      const actualMin = localHHMM(actualLocal);
       const expectedMin = expectedHM[0] * 60 + expectedHM[1];
       expect(Math.abs(actualMin - expectedMin)).toBeLessThanOrEqual(2);
     };
 
-    expectMinsClose(r.doGhatiMuhurta.day[0]!.start.getTime(), [7, 15]);
-    expectMinsClose(r.doGhatiMuhurta.day[0]!.end.getTime(), [7, 57]);
-    expectMinsClose(r.doGhatiMuhurta.day[2]!.start.getTime(), [8, 39]);
-    expectMinsClose(r.doGhatiMuhurta.day[2]!.end.getTime(), [9, 21]);
-    expectMinsClose(r.doGhatiMuhurta.night[0]!.start.getTime(), [17, 46]);
+    expectMinsClose(r.muhurtas.doGhati.day[0]!.startLocal, [7, 15]);
+    expectMinsClose(r.muhurtas.doGhati.day[0]!.endLocal, [7, 57]);
+    expectMinsClose(r.muhurtas.doGhati.day[2]!.startLocal, [8, 39]);
+    expectMinsClose(r.muhurtas.doGhati.day[2]!.endLocal, [9, 21]);
+    expectMinsClose(r.muhurtas.doGhati.night[0]!.startLocal, [17, 46]);
   });
 });
 
@@ -97,11 +102,11 @@ describe('Do Ghati wiring — Hindi localization', () => {
     })!;
     // Devanagari range: U+0900–U+097F.
     const devanagari = /[ऀ-ॿ]/;
-    expect(r.doGhatiMuhurta.day[0]!.name).toMatch(devanagari);
-    expect(r.doGhatiMuhurta.night[0]!.name).toMatch(devanagari);
+    expect(r.muhurtas.doGhati.day[0]!.name).toMatch(devanagari);
+    expect(r.muhurtas.doGhati.night[0]!.name).toMatch(devanagari);
     // Specific check: Rudra → रुद्र.
-    expect(r.doGhatiMuhurta.day[0]!.name).toBe('रुद्र');
-    expect(r.doGhatiMuhurta.night[0]!.name).toBe('ईश्वर');
+    expect(r.muhurtas.doGhati.day[0]!.name).toBe('रुद्र');
+    expect(r.muhurtas.doGhati.night[0]!.name).toBe('ईश्वर');
   });
 
   it('localizes quality name to Hindi (शुभ / अशुभ)', () => {
@@ -109,7 +114,7 @@ describe('Do Ghati wiring — Hindi localization', () => {
       timezone: 330,
       language: 'hi',
     })!;
-    for (const slot of [...r.doGhatiMuhurta.day, ...r.doGhatiMuhurta.night]) {
+    for (const slot of [...r.muhurtas.doGhati.day, ...r.muhurtas.doGhati.night]) {
       expect(['शुभ', 'अशुभ', 'सामान्य']).toContain(slot.qualityName);
     }
   });
@@ -127,20 +132,20 @@ describe('Panchaka Rahita / Do Ghati — multi-day Delhi sweep', () => {
     if (!r) continue;
 
     // Always 15 + 15 slots.
-    expect(r.doGhatiMuhurta.day).toHaveLength(15);
-    expect(r.doGhatiMuhurta.night).toHaveLength(15);
+    expect(r.muhurtas.doGhati.day).toHaveLength(15);
+    expect(r.muhurtas.doGhati.night).toHaveLength(15);
 
     // Panchaka Rahita is at most 1 slice per day (proved in unit tests).
-    expect(r.panchakaRahita.length).toBeLessThanOrEqual(1);
+    expect(r.inauspicious.panchakaRahita.length).toBeLessThanOrEqual(1);
 
-    const slice = r.panchakaRahita[0];
+    const slice = r.inauspicious.panchakaRahita[0];
     const isFullDay =
       slice !== undefined &&
-      slice.start.getTime() === r.sunrise.getTime() &&
-      slice.end.getTime() === r.nextSunrise.getTime();
+      slice.start.getTime() === r.sun.rise.getTime() &&
+      slice.end.getTime() === r.sun.nextRise.getTime();
     const transitionDay = slice !== undefined && !isFullDay;
 
-    cases.push({ panchakaRahitaCount: r.panchakaRahita.length as 0 | 1, transitionDay });
+    cases.push({ panchakaRahitaCount: r.inauspicious.panchakaRahita.length as 0 | 1, transitionDay });
   }
 
   it('a 90-day sweep includes both empty and non-empty Panchaka Rahita days', () => {
@@ -169,8 +174,8 @@ describe('Panchaka Rahita — cross-check with `panchaka` boolean', () => {
       const date = new Date(Date.UTC(2025, 5, 1) + day * 86_400_000);
       const r = getDailyPanchang(date, DELHI, { timezone: 330 });
       if (!r) continue;
-      if (r.panchakaRahita.length === 0) {
-        expect(r.panchaka).toBe(true);
+      if (r.inauspicious.panchakaRahita.length === 0) {
+        expect(r.inauspicious.panchaka).toBe(true);
       }
     }
   });

@@ -1,23 +1,28 @@
 export type { GeoLocation } from './location';
 export type {
   PanchangOptions, InstantPanchangOptions, BirthChartOptions,
-  AyanamsaType, Language, Precision, MasaSystem, FestivalRegion, LegacyFestivalRegion,
-  HouseSystem,
+  AyanamsaType, Language, MasaSystem, FestivalRegion, LegacyFestivalRegion,
+  HouseSystem, PanchangSection,
 } from './options';
 export type {
-  TimePeriod, TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo,
+  TimePeriod, UtcWindow, Unlocalized, UnlocalizedInfo, TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo,
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
-  ChandraMasaInfo, SamvatInfo, RashiInfo,
+  ChandraMasaInfo, SamvatInfo, RashiInfo, NakshatraIndexInfo,
   ChoghadiyaSlot, ChoghadiyaInfo, ChoghadiyaQuality,
   DoGhatiSlot, DoGhatiInfo,
   HoraSlot, HoraInfo,
   GowriSlot, GowriInfo,
   SpecialYogaInfo, FestivalInfo, BhadraInfo,
   EclipseInfo, EclipseSubtype,
-  GandaMulaInfo,
+  GandaMulaInfo, PanchakaInfo, PanchakaType,
   AnandadiYogaInfo,
 } from './elements';
-export type { DailyPanchangResult, InstantPanchangResult, MasaInfo } from './panchang';
+export type {
+  DailyPanchangResult, InstantPanchangResult, MasaInfo, ResolvedTimezone,
+  SunPosition, MoonPosition, DailySun, DailyMoon,
+  DailyAngas, InstantAngas, CalendarLabels, DailyCalendarLabels,
+  MuhurtaWindows, InauspiciousWindows, InstantInauspicious, DayPeriods,
+} from './panchang';
 export { PanchangError } from './errors';
 export type { PanchangErrorCode } from './errors';
 export type {
@@ -26,7 +31,7 @@ export type {
   ChandraBalamInfo, TarabalaInfo,
   LagnaInfo, SripatiLagnaInfo, HouseInfo, BhavaChart,
   PlanetPlacement, BirthChart, DivisionalChart, Divisional,
-  MangalDoshaInfo, MangalDoshaSeverity, SadeSatiInfo,
+  MangalDoshaInfo, MangalDoshaSeverity, MangalCompatibility, SadeSatiInfo,
   AspectMap, PlanetShadbala, ShadbalaResult,
   KaalSarpDoshaInfo, KaalSarpSubtype, PitruDoshaInfo,
   AshtakavargaResult, BhinnashtakaGrid,

@@ -1,4 +1,5 @@
-import type { ChoghadiyaInfo, ChoghadiyaSlot, ChoghadiyaQuality } from '../types/elements';
+import { buildEqualSlots, VARA_CHALDEAN_START } from '../utils/slots';
+import type { ChoghadiyaSlot, ChoghadiyaQuality, Unlocalized, UnlocalizedInfo } from '../types/elements';
 
 /**
  * Quality for each of the 7 Choghadiya names (index 0–6):
@@ -15,10 +16,11 @@ const CHOGHADIYA_QUALITY: readonly ChoghadiyaQuality[] = [
 ];
 
 /**
- * First daytime Choghadiya index by weekday (Sun=0 … Sat=6).
- * The sequence then advances +1 (mod 7) for each subsequent slot.
+ * First daytime Choghadiya index by weekday (Sun=0 … Sat=6). Shared with Hora,
+ * which starts from the same weekday-lord ordering. The sequence then advances
+ * +1 (mod 7) for each subsequent slot.
  */
-const DAY_START_INDEX = [0, 3, 6, 2, 5, 1, 4] as const;
+const DAY_START_INDEX = VARA_CHALDEAN_START;
 
 /**
  * First nighttime Choghadiya index by weekday (Sun=0 … Sat=6).
@@ -32,22 +34,12 @@ function buildSlots(
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
   count: number,
-): ChoghadiyaSlot[] {
-  const slotMs = durationMs / count;
-  const slots: ChoghadiyaSlot[] = [];
-  for (let i = 0; i < count; i++) {
+): Unlocalized<ChoghadiyaSlot>[] {
+  return buildEqualSlots(reference, durationMs, count, (i, start, end) => {
     const idx = (startIndex + i) % 7;
     const quality = CHOGHADIYA_QUALITY[idx]!;
-    slots.push({
-      start: new Date(reference.getTime() + i * slotMs),
-      end: new Date(reference.getTime() + (i + 1) * slotMs),
-      index: idx,
-      name: nameFn(idx),
-      quality,
-      qualityName: qualityNameFn(quality),
-    });
-  }
-  return slots;
+    return { start, end, index: idx, name: nameFn(idx), quality, qualityName: qualityNameFn(quality) };
+  });
 }
 
 /**
@@ -71,7 +63,7 @@ export function computeChoghadiya(
   varaIndex: number,
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
-): ChoghadiyaInfo {
+): UnlocalizedInfo<ChoghadiyaSlot> {
   const dayMs   = sunset.getTime()      - sunrise.getTime();
   const nightMs = nextSunrise.getTime() - sunset.getTime();
 

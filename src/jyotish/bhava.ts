@@ -1,14 +1,12 @@
-import { SiderealTime } from 'astronomy-engine';
+import { greenwichApparentSiderealDegrees } from '../astronomy/topocentric';
 import { computeAyanamsa, dateToJulianDay } from '../astronomy/ayanamsa';
 import { meanObliquity } from './planets';
-import { computeLagna } from './lagna';
+import { computeNatalBasis, type NatalBasis } from './natalBasis';
 import { resolveMasaName } from '../i18n/resolver';
 import { normalize360, degToRad, radToDeg } from '../utils/angle';
 import { validateLocation, validateDate } from '../utils/validation';
 import { PanchangError } from '../types/errors';
-import type {
-  AyanamsaType, Language, HouseSystem, BirthChartOptions,
-} from '../types/options';
+import type { HouseSystem, BirthChartOptions } from '../types/options';
 import type { GeoLocation } from '../types/location';
 import type { BhavaChart, HouseInfo } from '../types/jyotish';
 
@@ -59,17 +57,24 @@ export function computeBhava(
 ): BhavaChart {
   validateDate(birthDate);
   validateLocation(location);
+  return bhavaFromBasis(
+    computeNatalBasis(birthDate, location, options),
+    options.houseSystem ?? 'whole-sign',
+  );
+}
 
-  const ayanamsaType: AyanamsaType = options.ayanamsa ?? 'lahiri';
-  const lang: Language = options.language ?? 'en';
-  const system: HouseSystem = options.houseSystem ?? 'whole-sign';
-
-  const lagna = computeLagna(birthDate, location, ayanamsaType, lang);
+/**
+ * Bhava cusps derived from an already-resolved {@link NatalBasis}.
+ *
+ * @internal Reuses the basis lagna. `computeRashiChart` previously called
+ * `computeLagna` itself *and* `computeBhava`, which computed it a second time.
+ */
+export function bhavaFromBasis(basis: NatalBasis, system: HouseSystem): BhavaChart {
+  const { birthDate, location, ayanamsaType, lang, lagna } = basis;
   const ascSidereal = lagna.siderealLongitude;
 
   // Common: tropical MC (used for 'placidus-kp', informational for the others).
-  const gastHours = SiderealTime(birthDate);
-  const lstDeg = normalize360(gastHours * 15 + location.longitude);
+  const lstDeg = normalize360(greenwichApparentSiderealDegrees(birthDate) + location.longitude);
   const T = (dateToJulianDay(birthDate) - 2451545.0) / 36525.0;
   const εRad = degToRad(meanObliquity(T));
   const mcTropical = computeMcTropical(lstDeg, εRad);

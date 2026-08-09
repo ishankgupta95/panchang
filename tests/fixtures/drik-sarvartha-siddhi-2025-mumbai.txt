@@ -1,0 +1,136 @@
+# Sarvartha Siddhi Yoga windows published by DrikPanchang for Mumbai, 2025.
+# Scraped 2026-08-09 from
+#   drikpanchang.com/yoga/sarvarthasiddhi-yoga-date-time.html?date=DD/MM/YYYY
+# (one month per page; the date parameter selects it; geoname-id selects the city).
+# Format: M/D|Weekday|start|end   — times are local, drik's own printing, rounded
+# to the minute. An end earlier than its start wraps to the next day. Drik
+# usually dates a window by the calendar day its start falls in; a handful of
+# windows lying entirely between midnight and sunrise are instead dated by
+# their HINDU day, so their printed times fall on the next civil date (their
+# start anchors to a nakshatra boundary there, not on the printed date).
+# The parity test consumes only the M/D column; weekday and times are context.
+# Note: the 3/2 and 3/3 windows lie on the SAME Hindu day (Sunday Mar 2) —
+# a morning Sun+U.Bhadrapada span and a pre-dawn Sun+Ashwini tail ending at
+# the Mar 3 sunrise. The test's sharedDay annotation accounts for it.
+1/5|Sun|08:18 PM|07:13 AM
+1/7|Tue|05:50 PM|07:14 AM
+1/11|Sat|07:14 AM|12:29 PM
+1/19|Sun|07:15 AM|07:15 AM
+1/24|Fri|05:08 AM|07:14 AM
+1/24|Fri|07:14 AM|07:07 AM
+1/26|Sun|08:26 AM|07:14 AM
+2/2|Sun|07:12 AM|12:52 AM
+2/4|Tue|07:12 AM|09:49 PM
+2/5|Wed|08:33 PM|07:11 AM
+2/10|Mon|06:01 PM|07:09 AM
+2/11|Tue|06:34 PM|07:08 AM
+2/16|Sun|07:06 AM|04:31 AM
+2/20|Thu|01:30 PM|07:03 AM
+2/21|Fri|07:03 AM|03:54 PM
+2/23|Sun|07:02 AM|06:42 PM
+3/2|Sun|06:57 AM|08:59 AM
+3/3|Mon|06:39 AM|06:56 AM
+3/5|Wed|02:37 AM|06:55 AM
+3/5|Wed|06:55 AM|06:54 AM
+3/9|Sun|11:55 PM|06:51 AM
+3/10|Mon|06:51 AM|12:51 AM
+3/11|Tue|06:50 AM|02:15 AM
+3/16|Sun|06:46 AM|11:45 AM
+3/19|Wed|08:50 PM|06:43 AM
+3/20|Thu|06:43 AM|11:31 PM
+3/24|Mon|04:18 AM|06:39 AM
+3/25|Tue|04:27 AM|06:38 AM
+3/30|Sun|04:35 PM|06:33 AM
+4/1|Tue|11:06 AM|06:32 AM
+4/2|Wed|06:32 AM|06:31 AM
+4/5|Sat|05:20 AM|06:29 AM
+4/6|Sun|06:28 AM|06:25 AM
+4/8|Tue|06:27 AM|07:55 AM
+4/16|Wed|06:20 AM|05:55 AM
+4/20|Sun|11:48 AM|06:17 AM
+4/21|Mon|12:37 PM|06:16 AM
+4/27|Sun|06:13 AM|12:38 AM
+4/29|Tue|06:12 AM|06:47 PM
+4/30|Wed|06:11 AM|06:10 AM
+5/2|Fri|01:04 PM|06:09 AM
+5/4|Sun|06:09 AM|12:53 PM
+5/11|Sun|03:15 AM|06:05 AM
+5/14|Wed|06:04 AM|11:47 AM
+5/18|Sun|06:03 AM|06:52 PM
+5/19|Mon|06:03 AM|07:29 PM
+5/23|Fri|04:02 PM|06:01 AM
+5/25|Sun|06:01 AM|11:12 AM
+5/27|Tue|05:32 AM|06:01 AM
+5/28|Wed|06:01 AM|12:29 AM
+5/29|Thu|10:38 PM|06:00 AM
+5/30|Fri|06:00 AM|09:29 PM
+6/5|Thu|03:35 AM|06:00 AM
+6/7|Sat|09:40 AM|06:00 AM
+6/9|Mon|03:31 PM|06:00 AM
+6/14|Sat|12:22 AM|06:01 AM
+6/19|Thu|11:17 PM|06:02 AM
+6/20|Fri|06:02 AM|06:02 AM
+6/23|Mon|03:16 PM|06:03 AM
+6/25|Wed|06:03 AM|10:40 AM
+6/26|Thu|08:46 AM|06:03 AM
+6/27|Fri|06:03 AM|07:22 AM
+7/2|Wed|11:07 AM|06:05 AM
+7/5|Sat|06:06 AM|07:51 PM
+7/7|Mon|06:07 AM|01:12 AM
+7/12|Sat|06:36 AM|06:09 AM
+7/16|Wed|05:46 AM|06:10 AM
+7/17|Thu|06:10 AM|06:10 AM
+7/18|Fri|06:10 AM|02:14 AM
+7/21|Mon|06:11 AM|06:12 AM
+7/24|Thu|06:13 AM|06:13 AM
+7/30|Wed|06:15 AM|09:53 PM
+8/4|Mon|06:16 AM|09:12 AM
+8/8|Fri|02:28 PM|06:18 AM
+8/9|Sat|06:18 AM|02:23 PM
+8/12|Tue|11:52 AM|06:19 AM
+8/14|Thu|06:19 AM|06:20 AM
+8/15|Fri|06:20 AM|07:36 AM
+8/17|Sun|04:38 AM|06:20 AM
+8/18|Mon|06:20 AM|02:06 AM
+8/21|Thu|06:21 AM|12:08 AM
+8/25|Mon|02:05 AM|06:22 AM
+9/5|Fri|06:24 AM|11:38 PM
+9/9|Tue|06:25 AM|06:07 PM
+9/11|Thu|06:25 AM|01:58 PM
+9/13|Sat|10:11 AM|06:26 AM
+9/15|Mon|06:26 AM|07:31 AM
+9/18|Thu|06:27 AM|06:32 AM
+9/21|Sun|09:32 AM|06:27 AM
+9/26|Fri|10:09 PM|06:28 AM
+9/29|Mon|03:55 AM|06:29 AM
+10/3|Fri|06:30 AM|09:34 AM
+10/6|Mon|06:16 AM|06:30 AM
+10/8|Wed|01:28 AM|06:31 AM
+10/11|Sat|06:31 AM|03:20 PM
+10/19|Sun|06:34 AM|06:34 AM
+10/24|Fri|04:51 AM|06:36 AM
+10/24|Fri|06:36 AM|06:36 AM
+10/26|Sun|10:46 AM|06:37 AM
+11/2|Sun|05:03 PM|06:40 AM
+11/4|Tue|12:34 PM|06:41 AM
+11/6|Thu|06:34 AM|06:41 AM
+11/10|Mon|06:48 PM|06:44 AM
+11/11|Tue|06:17 PM|06:44 AM
+11/16|Sun|06:46 AM|02:11 AM
+11/20|Thu|10:58 AM|06:49 AM
+11/21|Fri|06:49 AM|01:56 PM
+11/23|Sun|06:51 AM|07:28 PM
+11/30|Sun|06:55 AM|01:11 AM
+12/2|Tue|06:56 AM|08:51 PM
+12/3|Wed|05:59 PM|06:57 AM
+12/8|Mon|04:11 AM|07:00 AM
+12/8|Mon|07:00 AM|02:52 AM
+12/9|Tue|07:00 AM|02:22 AM
+12/14|Sun|07:03 AM|08:18 AM
+12/17|Wed|05:11 PM|07:06 AM
+12/18|Thu|07:06 AM|08:07 PM
+12/22|Mon|03:36 AM|07:08 AM
+12/23|Tue|05:32 AM|07:08 AM
+12/28|Sun|07:10 AM|08:43 AM
+12/31|Wed|03:58 AM|07:11 AM
+12/31|Wed|07:11 AM|07:12 AM

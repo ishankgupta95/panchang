@@ -40,9 +40,6 @@ import fixtures from '../fixtures/astrosage-charts.json';
 
 // ── Fixture helpers ────────────────────────────────────
 
-const RASHI = ['Mesha', 'Vrishabha', 'Mithuna', 'Karka', 'Simha', 'Kanya',
-               'Tula', 'Vrischika', 'Dhanu', 'Makara', 'Kumbha', 'Meena'] as const;
-
 type Fix = {
   name: string;
   dateLocal: string;

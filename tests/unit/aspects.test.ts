@@ -11,7 +11,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { computeAspects } from '../../src/jyotish/aspects';
-import { computeRashiChart } from '../../src/jyotish/charts';
+import { computeRashiChart, indexPlanets } from '../../src/jyotish/charts';
 import type { BirthChart, GrahaName, PlanetPlacement } from '../../src/types/jyotish';
 
 const DELHI = { latitude: 28.6139, longitude: 77.2090 };
@@ -33,6 +33,7 @@ function makeChart(houseByPlanet: Partial<Record<GrahaName, number>>): BirthChar
     isRetrograde: false,
   });
   const lagnaRashi = 0;
+  const planets = order.map((p) => stub(p, houseByPlanet[p] ?? 1));
   return {
     divisional: 'D1',
     lagna: {
@@ -53,7 +54,8 @@ function makeChart(houseByPlanet: Partial<Record<GrahaName, number>>): BirthChar
         degreeInRashi: 0,
       })),
     },
-    planets: order.map((p) => stub(p, houseByPlanet[p] ?? 1)),
+    planets,
+    byPlanet: indexPlanets(planets),
   };
   void lagnaRashi;
 }

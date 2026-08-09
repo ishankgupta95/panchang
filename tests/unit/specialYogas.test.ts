@@ -56,8 +56,11 @@ describe('computeSpecialYogas', () => {
     });
 
     it('does not detect for non-matching combination', () => {
-      // Sunday + Ashwini (0) — not in Sunday's set
-      const yogas = callLegacy(0, 5, 0);
+      // Sunday + Bharani (1) — not in Sunday's set.
+      // This used to use Sunday + Ashwini, which stopped being a negative when
+      // the table was rebuilt from DrikPanchang's 2026 windows: drik publishes
+      // five Sun + Ashwini occurrences, so that cell is now a positive.
+      const yogas = callLegacy(0, 5, 1);
       expect(yogas.some(y => y.type === 'sarvartha_siddhi')).toBe(false);
     });
   });

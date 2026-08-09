@@ -1,4 +1,5 @@
-import type { DoGhatiInfo, DoGhatiSlot, ChoghadiyaQuality } from '../types/elements';
+import type { DoGhatiSlot, ChoghadiyaQuality, Unlocalized, UnlocalizedInfo } from '../types/elements';
+import { buildEqualSlots } from '../utils/slots';
 
 /**
  * Quality classification for each of the 30 Do Ghati Muhurta slots.
@@ -58,27 +59,12 @@ function buildSlots(
   indexBase: 0 | 15,
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
-): DoGhatiSlot[] {
-  const refMs = reference.getTime();
-  const slotMs = durationMs / 15;
-  const slots: DoGhatiSlot[] = [];
-  for (let i = 0; i < 15; i++) {
+): Unlocalized<DoGhatiSlot>[] {
+  return buildEqualSlots(reference, durationMs, 15, (i, start, end) => {
     const idx = indexBase + i;
     const quality = DO_GHATI_QUALITY[idx]!;
-    // Anchor the final slot's `end` to `refMs + durationMs` exactly so the
-    // 15 slots cover the interval without floating-point drift.
-    const startMs = refMs + i * slotMs;
-    const endMs = i === 14 ? refMs + durationMs : refMs + (i + 1) * slotMs;
-    slots.push({
-      start: new Date(startMs),
-      end: new Date(endMs),
-      index: idx,
-      name: nameFn(idx),
-      quality,
-      qualityName: qualityNameFn(quality),
-    });
-  }
-  return slots;
+    return { start, end, index: idx, name: nameFn(idx), quality, qualityName: qualityNameFn(quality) };
+  });
 }
 
 /**
@@ -104,7 +90,7 @@ export function computeDoGhati(
   nextSunrise: Date,
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
-): DoGhatiInfo {
+): UnlocalizedInfo<DoGhatiSlot> {
   const dayMs = sunset.getTime() - sunrise.getTime();
   const nightMs = nextSunrise.getTime() - sunset.getTime();
 

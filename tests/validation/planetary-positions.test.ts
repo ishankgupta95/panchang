@@ -1,4 +1,6 @@
 /**
+ * @tier 1  DrikPanchang sidereal planetary positions, Lahiri/Delhi
+ *
  * Phase 18-3 — Drik Panchang cross-verification for planetary positions.
  *
  * Source: https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html

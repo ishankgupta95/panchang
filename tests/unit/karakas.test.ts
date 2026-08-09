@@ -19,7 +19,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { computeJaiminiKarakas } from '../../src/jyotish/karakas';
-import { computeRashiChart } from '../../src/jyotish/charts';
+import { computeRashiChart, indexPlanets } from '../../src/jyotish/charts';
 import type {
   BhavaChart, BirthChart, GrahaName, HouseInfo, Jaimini8Karakas,
   JaiminiKarakas, Karaka8Name, KarakaName, LagnaInfo, PlanetPlacement,
@@ -96,7 +96,7 @@ function synthChart(spec: SynthSpec): BirthChart {
       isRetrograde: g === 'Rahu' || g === 'Ketu',
     };
   });
-  return { divisional: 'D1', lagna, bhava, planets };
+  return { divisional: 'D1', lagna, bhava, planets, byPlanet: indexPlanets(planets) };
 }
 
 /** Lookup a planet's degree-in-rashi by graha name. */

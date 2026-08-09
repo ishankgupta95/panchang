@@ -1,8 +1,16 @@
 {
   "name": "panchang-ts",
-  "version": "4.3.1",
+  "version": "5.0.0",
   "description": "Pure TypeScript Hindu Panchang calculations. Tithi, Nakshatra, Yoga, Karana, Vara, and more. Offline-first, React Native compatible.",
   "author": "Ishank",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ishankgupta95/panchang-ts.git"
+  },
+  "homepage": "https://github.com/ishankgupta95/panchang-ts#readme",
+  "bugs": {
+    "url": "https://github.com/ishankgupta95/panchang-ts/issues"
+  },
   "license": "MIT",
   "keywords": [
     "panchang",
@@ -61,6 +69,16 @@
         "types": "./dist/calendar/moonPhasesTable.d.cts",
         "default": "./dist/calendar/moonPhasesTable.cjs"
       }
+    },
+    "./muhurta": {
+      "import": {
+        "types": "./dist/muhurta/muhurtaTable.d.ts",
+        "default": "./dist/muhurta/muhurtaTable.js"
+      },
+      "require": {
+        "types": "./dist/muhurta/muhurtaTable.d.cts",
+        "default": "./dist/muhurta/muhurtaTable.cjs"
+      }
     }
   },
   "files": [
@@ -71,7 +89,7 @@
   "sideEffects": false,
   "type": "module",
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "scripts": {
     "build": "tsup",
@@ -82,19 +100,18 @@
     "test:hermes": "bash scripts/hermes-check.sh",
     "bench": "vitest bench",
     "lint": "eslint src",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
     "prepublishOnly": "npm run build",
     "festivals:gen": "npm run build && node --experimental-strip-types scripts/generate-festivals-json.ts",
     "eclipses:gen": "npm run build && node --experimental-strip-types scripts/generate-eclipses-json.ts",
     "moon-phases:gen": "npm run build && node --experimental-strip-types scripts/generate-moon-phases-json.ts",
+    "muhurta:gen": "npm run build && node --experimental-strip-types scripts/generate-muhurta-json.ts",
     "changeset": "changeset",
     "release": "changeset publish"
   },
-  "dependencies": {
-    "astronomy-engine": "^2.1.19"
-  },
   "devDependencies": {
     "@changesets/cli": "^2.30.0",
+    "astronomy-engine": "^2.1.19",
     "@vitest/coverage-v8": "^4.1.0",
     "eslint": "^10.1.0",
     "hermes-parser": "^0.35.0",

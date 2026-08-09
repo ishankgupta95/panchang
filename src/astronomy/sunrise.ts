@@ -1,7 +1,15 @@
-import { Body, SearchRiseSet, MakeTime, Observer } from 'astronomy-engine';
 import { PanchangError } from '../types/errors';
 import { validateLocation } from '../utils/validation';
+import { resolveEvent, type RiseSetKind } from './riseSetCache';
 import type { GeoLocation } from '../types/location';
+
+/**
+ * Solar events go through the canonical per-UTC-day cache in `riseSetCache.ts`
+ * — see that file for why the search start had to stop being the cache key,
+ * and for why enumerating a whole day at once removed the three tuning
+ * parameters this used to carry.
+ */
+const SOLAR: RiseSetKind = { body: 'sun' };
 
 /**
  * Compute sunrise nearest to (and after) the given UTC search start.
@@ -29,13 +37,7 @@ export function computeSunrise(
   limitDays: number = 2
 ): Date {
   validateLocation(location);
-  const observer = new Observer(
-    location.latitude,
-    location.longitude,
-    location.elevation ?? 0
-  );
-  const astroTime = MakeTime(searchFromUtc);
-  const result = SearchRiseSet(Body.Sun, observer, +1, astroTime, limitDays);
+  const result = resolveEvent(SOLAR, +1, searchFromUtc, location, limitDays);
 
   if (!result) {
     throw new PanchangError(
@@ -46,7 +48,7 @@ export function computeSunrise(
     );
   }
 
-  return result.date;
+  return result;
 }
 
 /**
@@ -72,13 +74,7 @@ export function computeSunset(
   limitDays: number = 2
 ): Date {
   validateLocation(location);
-  const observer = new Observer(
-    location.latitude,
-    location.longitude,
-    location.elevation ?? 0
-  );
-  const astroTime = MakeTime(searchFromUtc);
-  const result = SearchRiseSet(Body.Sun, observer, -1, astroTime, limitDays);
+  const result = resolveEvent(SOLAR, -1, searchFromUtc, location, limitDays);
 
   if (!result) {
     throw new PanchangError(
@@ -88,5 +84,5 @@ export function computeSunset(
     );
   }
 
-  return result.date;
+  return result;
 }

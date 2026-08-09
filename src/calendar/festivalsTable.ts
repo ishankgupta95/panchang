@@ -1,65 +1,125 @@
-// Static festival table — pre-computed against Varanasi (IST). Ships as a
-// separate entry point (`panchang-ts/festivals`) so consumers that only
-// need the lookup don't pay the engine cost; this module imports the
-// bundled JSON but NOT the engine.
+// Engine-free reader for a festival table.
+//
+// Ships as a separate entry point (`panchang-ts/festivals`) that imports NO
+// astronomy code, so an app can read a table without pulling the engine into
+// its client bundle.
+//
+// **No table is bundled.** Festival dates depend on the observer — canonical
+// times (nishita / pradosha / chandrodaya) are location-dependent, so a table
+// computed for one place can be ±1 day wrong elsewhere, and any table shipped
+// here would also go stale. Build your own with `buildFestivalsTable` (from the
+// main `panchang-ts` entry, which does use the engine), cache the JSON at your
+// build time, and pass it to the accessors below. See the README
+// "Pre-computed table" section for the compute-and-cache pattern.
 //
 // Each entry carries text in one or more locales; choose via the optional
 // `lang` argument on the accessors (defaults to `'en'`).
 //
-// The bundled table is IST-only. For users elsewhere (EU / North America /
-// rest of world), festival dates can shift by ±1 day because canonical
-// times (nishita / pradosha / chandrodaya etc.) are observer-dependent.
-// Build a location-specific table at runtime with `buildFestivalsTable`
-// (from the main `panchang-ts` entry), cache it, and pass it as the
-// `source` argument to the accessors below. See the README "Pre-computed
-// table" section for the offline-RN compute-and-cache pattern.
+// Both table formats are accepted — see `festivalsTableTypes.ts` for why v1
+// tables (built before v5, with strings inlined and no `key`) still read.
 
-import festivalsData from '../data/festivals.json' with { type: 'json' };
 import type {
+  AnyFestivalsFile,
+  FestivalDictEntry,
   FestivalsFile,
+  FestivalsFileV1,
   FestivalsTableLanguage,
   FestivalTableDay,
   FestivalTableEntry,
   FestivalTableEntryRaw,
-  FestivalTableMeta,
 } from './festivalsTableTypes';
 
 export type {
   FestivalsTableLanguage,
   FestivalsTableType,
   LocalizedString,
-  FestivalTableEntryRaw,
+  FestivalDictEntry,
   FestivalTableEntry,
   FestivalTableDay,
   FestivalTableMeta,
-  RawFestivalTableDay,
+  PackedFestivalTableDay,
   FestivalsFile,
+  FestivalTableEntryRaw,
+  RawFestivalTableDay,
+  FestivalsFileV1,
+  AnyFestivalsFile,
 } from './festivalsTableTypes';
 
-const bundled = festivalsData as unknown as FestivalsFile;
+/**
+ * Inclusive Gregorian year range a table covers.
+ *
+ * Read straight off `_meta`; provided so callers can range-check without
+ * reaching into the file shape.
+ */
+export function readFestivalsYearRange(
+  source: AnyFestivalsFile,
+): { start: number; end: number } {
+  return { start: source._meta.startYear, end: source._meta.endYear };
+}
 
-/** Metadata describing what the bundled table was generated from. */
-export const FESTIVALS_META: FestivalTableMeta = bundled._meta;
+function isPacked(source: AnyFestivalsFile): source is FestivalsFile {
+  return Array.isArray((source as FestivalsFile)._dict);
+}
 
-/** Inclusive year range covered by the bundled table. */
-export const FESTIVALS_YEAR_RANGE = {
-  start: bundled._meta.startYear,
-  end: bundled._meta.endYear,
-} as const;
+/** Pick `lang`, falling back to whatever locale the table actually carries. */
+function pick(
+  s: Partial<Record<FestivalsTableLanguage, string>>,
+  lang: FestivalsTableLanguage,
+): string {
+  // A table generated with `languages: ['en']` and queried with `'hi'` should
+  // return the English string rather than an empty one. Names are never empty,
+  // so `?? ''` is a last-resort guard.
+  return s[lang] ?? Object.values(s)[0] ?? '';
+}
 
-function flatten(
+function flattenDict(
+  entry: FestivalDictEntry,
+  lang: FestivalsTableLanguage,
+): FestivalTableEntry {
+  const out: FestivalTableEntry = {
+    key: entry.key,
+    name: pick(entry.name, lang),
+    type: entry.type,
+  };
+  if (entry.description) out.description = pick(entry.description, lang);
+  return out;
+}
+
+function flattenV1(
   raw: FestivalTableEntryRaw,
   lang: FestivalsTableLanguage,
 ): FestivalTableEntry {
-  // Fall back to whatever locale exists if the requested one is missing
-  // (e.g. an app-built table generated with `languages: ['en']` queried
-  // with `'hi'`). Names are never empty, so `?? ''` is a last-resort guard.
-  const name = raw.name[lang] ?? Object.values(raw.name)[0] ?? '';
-  const out: FestivalTableEntry = { name, type: raw.type };
-  if (raw.description) {
-    out.description = raw.description[lang] ?? Object.values(raw.description)[0] ?? '';
-  }
+  // v1 tables predate the stable key, so there is nothing truthful to put here.
+  const out: FestivalTableEntry = { key: '', name: pick(raw.name, lang), type: raw.type };
+  if (raw.description) out.description = pick(raw.description, lang);
   return out;
+}
+
+function daysFor(
+  source: AnyFestivalsFile,
+  yearKey: string,
+  lang: FestivalsTableLanguage,
+): FestivalTableDay[] | null {
+  if (isPacked(source)) {
+    const days = source.years[yearKey];
+    if (!days) return null;
+    const dict = source._dict;
+    return days.map(d => ({
+      date: d.date,
+      // An index outside the dictionary means a corrupt or hand-edited table;
+      // drop the entry rather than emit an undefined-shaped object.
+      festivals: d.festivals
+        .map(i => dict[i])
+        .filter((e): e is FestivalDictEntry => e !== undefined)
+        .map(e => flattenDict(e, lang)),
+    }));
+  }
+  const days = (source as FestivalsFileV1).years[yearKey];
+  if (!days) return null;
+  return days.map(d => ({
+    date: d.date,
+    festivals: d.festivals.map(f => flattenV1(f, lang)),
+  }));
 }
 
 /**
@@ -67,23 +127,17 @@ function flatten(
  *
  * Returns `null` if `year` is outside the table's range.
  *
- * @param year Gregorian year.
- * @param lang `'en'` (default) or `'hi'`.
- * @param source Table to read from. Defaults to the bundled India (IST)
- *               table; pass a {@link buildFestivalsTable} result to read a
- *               location-specific table you built and cached.
+ * @param source Table to read from — a {@link buildFestivalsTable} result you
+ *               built and cached. Required: nothing is bundled.
+ * @param year   Gregorian year.
+ * @param lang   `'en'` (default) or `'hi'`.
  */
-export function getFestivalsForYear(
+export function readFestivalsForYear(
+  source: AnyFestivalsFile,
   year: number,
   lang: FestivalsTableLanguage = 'en',
-  source: FestivalsFile = bundled,
 ): FestivalTableDay[] | null {
-  const days = source.years[String(year)];
-  if (!days) return null;
-  return days.map(d => ({
-    date: d.date,
-    festivals: d.festivals.map(f => flatten(f, lang)),
-  }));
+  return daysFor(source, String(year), lang);
 }
 
 /**
@@ -92,27 +146,23 @@ export function getFestivalsForYear(
  * Returns an empty array if the date has no festivals or is outside the
  * table's range.
  *
- * @param date Either an ISO `YYYY-MM-DD` string (interpreted in the table's
- *             reference timezone) or a `Date` (its local calendar date in the
- *             table's reference timezone is used).
- * @param lang `'en'` (default) or `'hi'`.
- * @param source Table to read from. Defaults to the bundled India (IST)
- *               table; pass a {@link buildFestivalsTable} result for a
- *               location-specific table.
+ * @param source Table to read from. Required: nothing is bundled.
+ * @param date   Either an ISO `YYYY-MM-DD` string (interpreted in the table's
+ *               reference timezone) or a `Date` (its local calendar date in the
+ *               table's reference timezone is used).
+ * @param lang   `'en'` (default) or `'hi'`.
  */
-export function getFestivalsForDate(
+export function readFestivalsForDate(
+  source: AnyFestivalsFile,
   date: string | Date,
   lang: FestivalsTableLanguage = 'en',
-  source: FestivalsFile = bundled,
 ): FestivalTableEntry[] {
   const key = typeof date === 'string'
     ? date
     : toDateKey(date, source._meta.timezoneOffsetMinutes);
-  const yearKey = key.slice(0, 4);
-  const days = source.years[yearKey];
+  const days = daysFor(source, key.slice(0, 4), lang);
   if (!days) return [];
-  const day = days.find(d => d.date === key);
-  return day ? day.festivals.map(f => flatten(f, lang)) : [];
+  return days.find(d => d.date === key)?.festivals ?? [];
 }
 
 function toDateKey(d: Date, offsetMinutes: number): string {
@@ -122,3 +172,16 @@ function toDateKey(d: Date, offsetMinutes: number): string {
   const day = String(shifted.getUTCDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 }
+
+/**
+ * @deprecated Renamed to {@link readFestivalsForYear} in v5, so that reading a
+ * *table* and running the *engine* stop sharing a `get*` prefix. Kept through
+ * v5; see the README "Upgrading from 4.x" section.
+ */
+export const getFestivalsForYear = readFestivalsForYear;
+
+/** @deprecated Renamed to {@link readFestivalsForDate} in v5. */
+export const getFestivalsForDate = readFestivalsForDate;
+
+/** @deprecated Renamed to {@link readFestivalsYearRange} in v5. */
+export const getFestivalsYearRange = readFestivalsYearRange;

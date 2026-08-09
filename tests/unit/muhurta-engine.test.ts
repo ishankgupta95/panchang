@@ -63,6 +63,79 @@ describe('scoreMuhurta — hard exclusions', () => {
     expect(foundBhadra).toBe(true);
   });
 
+  /**
+   * Vishti karana sits at fixed positions in the tithi cycle, so a whole-day
+   * Bhadra veto removes seven tithis outright — including ones the sources
+   * list as preferred. `bhadra: 'penalize'` keeps the day scorable; these
+   * tests pin all three modes and the deprecated flag's behavior.
+   */
+  describe('bhadra mode', () => {
+    /** A day in April 2026 that carries Bhadra, found by sweeping. */
+    const bhadraDay = (() => {
+      for (let day = 1; day <= 20; day++) {
+        const d = new Date(Date.UTC(2026, 3, day));
+        const r = scoreMuhurta(d, DELHI, { occasion: 't', excludeBhadra: true }, { timezone: TZ });
+        if (r.factors[0]?.code === 'bhadra') return d;
+      }
+      throw new Error('no Bhadra day found in April 2026 — fixture assumption broken');
+    })();
+
+    it("'exclude' zeroes the day", () => {
+      const r = scoreMuhurta(bhadraDay, DELHI, { occasion: 't', bhadra: 'exclude' }, { timezone: TZ });
+      expect(r.score).toBe(0);
+      expect(r.passes).toBe(false);
+    });
+
+    it("'penalize' subtracts 15 but leaves the day scorable", () => {
+      const r = scoreMuhurta(bhadraDay, DELHI, { occasion: 't', bhadra: 'penalize' }, { timezone: TZ });
+      expect(r.score).toBe(35); // 50 neutral baseline − 15
+      expect(r.factors).toContainEqual({ code: 'bhadra', axis: 'karana', delta: -15 });
+    });
+
+    it("'ignore' is the default — no bhadra factor at all", () => {
+      for (const rule of [{ occasion: 't' }, { occasion: 't', bhadra: 'ignore' as const }]) {
+        const r = scoreMuhurta(bhadraDay, DELHI, rule, { timezone: TZ });
+        expect(r.factors.some((f) => f.code === 'bhadra')).toBe(false);
+      }
+    });
+
+    it('deprecated excludeBhadra still hard-vetoes', () => {
+      const r = scoreMuhurta(bhadraDay, DELHI, { occasion: 't', excludeBhadra: true }, { timezone: TZ });
+      expect(r.score).toBe(0);
+      expect(r.passes).toBe(false);
+    });
+
+    it('bhadra wins over excludeBhadra when both are set', () => {
+      const r = scoreMuhurta(
+        bhadraDay, DELHI,
+        { occasion: 't', excludeBhadra: true, bhadra: 'penalize' },
+        { timezone: TZ },
+      );
+      expect(r.score).toBe(35);
+      expect(r.passes).toBe(false); // 35 < 50, but not a hard exclusion
+      expect(r.factors).toContainEqual({ code: 'bhadra', axis: 'karana', delta: -15 });
+    });
+
+    it('the seven Bhadra-locked tithis are scorable again under the stock rules', () => {
+      // Shukla Chaturthi/Ekadashi/Chaturdashi + Krishna Tritiya/Shashthi/
+      // Dashami/Trayodashi always coincide with Bhadra, so a whole-day veto
+      // made them permanently unreachable. Vivah lists two of them.
+      const days = findAuspiciousDates(
+        vivahRule,
+        new Date(Date.UTC(2025, 11, 31, 18, 30)),
+        new Date(Date.UTC(2026, 11, 31, 18, 29)),
+        DELHI,
+        { timezone: TZ, includeFailures: true },
+      );
+      const scored = new Set<number>();
+      for (const d of days) {
+        for (const f of d.factors) if (f.code === 'auspicious_tithi') scored.add(f.index!);
+      }
+      const unreachable = (vivahRule.auspiciousTithis ?? []).filter((t) => !scored.has(t));
+      expect(unreachable).toEqual([]);
+    });
+  });
+
   it('excludeEkadashi: returns score 0 on Ekadashi', () => {
     // Ekadashi every ~14 days. Sweep until found.
     const rule: MuhurtaRule = { occasion: 'test', excludeEkadashi: true };
@@ -107,6 +180,9 @@ describe('scoreMuhurta — soft scoring', () => {
     const rule: MuhurtaRule = {
       occasion: 'test',
       auspiciousVaras: [4], // Thursday only
+      // Isolate the vara axis: the Vara x Tithi layer is on by default and
+      // would contribute its own points on whichever tithi these dates land.
+      varaTithiYogas: false,
     };
     // 2026-04-16 is a Thursday.
     const thursday = scoreMuhurta(new Date('2026-04-16'), DELHI, rule, { timezone: TZ });
@@ -202,8 +278,8 @@ describe('findAuspiciousDates', () => {
 
   it('each result includes the panchang for the day', () => {
     expect(mayShort[0]!.panchang).toBeDefined();
-    expect(mayShort[0]!.panchang.tithis).toBeDefined();
-    expect(mayShort[0]!.panchang.vara).toBeDefined();
+    expect(mayShort[0]!.panchang.angas.tithis).toBeDefined();
+    expect(mayShort[0]!.panchang.angas.vara).toBeDefined();
   });
 
   it('throws on inverted range', () => {

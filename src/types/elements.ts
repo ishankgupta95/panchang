@@ -1,12 +1,57 @@
+/**
+ * A window between two instants.
+ *
+ * ## Reading these
+ *
+ * `start` / `end` are **true instants**: `.getTime()` is the correct epoch
+ * millisecond, `JSON.stringify` emits the correct UTC moment, `Intl` with a
+ * `timeZone` renders the correct wall clock, and comparisons against any other
+ * timestamp are meaningful. Through 4.x they were the instant *shifted* by the
+ * UTC offset, so all four of those were silently wrong.
+ *
+ * `startLocal` / `endLocal` are offset-carrying ISO 8601 strings —
+ * `"2025-01-14T07:09:44.172+05:30"` — which is what you want for display and
+ * for anything that has to survive JSON. Use those instead of the 4.x
+ * `getUTCHours()` idiom.
+ */
 export interface TimePeriod {
+  /** True instant. `.getTime()` is correct epoch ms. */
   start: Date;
+  /** True instant. `.getTime()` is correct epoch ms. */
   end: Date;
+  /** `start` in the result's timezone, offset-carrying ISO 8601. */
+  startLocal: string;
+  /** `end` in the result's timezone, offset-carrying ISO 8601. */
+  endLocal: string;
+}
+
+/**
+ * A window as the core computation modules produce it: instants only, no
+ * rendered strings.
+ *
+ * The `*Local` strings are a *presentation* of an instant in a timezone, and the
+ * modules that compute windows — Choghadiya, Hora, the muhurtas, the
+ * inauspicious periods — have no timezone and no business acquiring one. They
+ * emit UTC instants; `getDailyPanchang` renders them once, at the publishing
+ * boundary, where the resolved offset actually lives. This type makes that
+ * split explicit instead of leaving every producer to remember it.
+ */
+export type Unlocalized<T extends TimePeriod> = Omit<T, 'startLocal' | 'endLocal'>;
+
+/** The bare `{ start, end }` a core module emits. Shorthand for `Unlocalized<TimePeriod>`. */
+export type UtcWindow = Unlocalized<TimePeriod>;
+
+/** A `{ day, night }` slot pair in its unlocalized form. See {@link Unlocalized}. */
+export interface UnlocalizedInfo<T extends TimePeriod> {
+  day: Unlocalized<T>[];
+  night: Unlocalized<T>[];
 }
 
 interface ElementBase {
   index: number;
   name: string;
   completionPercentage: number;
+  /** True instant the element ends, or `null` when not computed. */
   endTime: Date | null;
 }
 
@@ -36,7 +81,18 @@ export interface VaraInfo {
 // ── Daily mode wrappers ───────────────────────────────
 
 interface DailyElementBase {
+  /** True instant the element began — may precede sunrise. */
   startTime: Date | null;
+  /**
+   * `endTime` as offset-carrying ISO 8601; `null` whenever `endTime` is.
+   *
+   * Only the *daily* shapes carry the `*Local` strings: `getInstantPanchang`
+   * takes no timezone, so there is no zone to render a wall clock in and
+   * inventing one would be a lie.
+   */
+  endTimeLocal: string | null;
+  /** `startTime` as offset-carrying ISO 8601; `null` whenever `startTime` is. */
+  startTimeLocal: string | null;
   isActiveAtSunrise: boolean;
 }
 
@@ -49,6 +105,22 @@ export interface DailyKaranaInfo extends KaranaInfo, DailyElementBase {}
 
 export interface RashiInfo {
   /** 0 = Mesha … 11 = Meena */
+  index: number;
+  name: string;
+}
+
+/**
+ * A body's nakshatra — 0 = Ashwini … 26 = Revati.
+ *
+ * Structurally identical to {@link RashiInfo}, and deliberately a separate type
+ * anyway. `suryaNakshatra` was declared as `RashiInfo`, whose `index` is
+ * documented *"0 = Mesha … 11 = Meena"*, while the value it carries is
+ * `nakshatraOf(siderealSun)` — 0..26. Anyone indexing a 12-element rashi array
+ * by it got silent garbage for two thirds of the year, and the type said they
+ * were right to. Two names for two ranges is the whole point.
+ */
+export interface NakshatraIndexInfo {
+  /** 0 = Ashwini … 26 = Revati */
   index: number;
   name: string;
 }
@@ -181,6 +253,17 @@ export interface SpecialYogaInfo {
 // ── Festivals ────────────────────────────────────────
 
 export interface FestivalInfo {
+  /**
+   * Stable, language-independent identifier — e.g. `'diwali'`,
+   * `'makar_sankranti'`, `'sankashti_chaturthi'`.
+   *
+   * `name` is already localized, so it is not safe to match on: the same
+   * festival is `"Diwali"` under `language: 'en'` and `"दिवाली"` under `'hi'`.
+   * Use `key` to filter, attach icons, or deep-link, and `name` only to
+   * display. Keys are treated as part of the public contract and will not be
+   * renamed without a major version.
+   */
+  key: string;
   name: string;
   type:
     | 'major'
@@ -203,29 +286,61 @@ export type EclipseSubtype = 'partial' | 'total' | 'annular' | 'penumbral';
 export interface EclipseInfo {
   kind: 'solar' | 'lunar';
   subtype: EclipseSubtype;
-  /** UTC time the eclipse's observable phase begins. */
+  /** True instant the eclipse's observable phase begins. */
   start: Date;
-  /** UTC time of greatest eclipse. */
+  /** True instant of greatest eclipse. */
   peak: Date;
-  /** UTC time the eclipse's observable phase ends. */
+  /** True instant the eclipse's observable phase ends. */
   end: Date;
+  /** `start` as offset-carrying ISO 8601, when read off a daily panchang. */
+  startLocal?: string;
+  /** `peak` as offset-carrying ISO 8601, when read off a daily panchang. */
+  peakLocal?: string;
+  /** `end` as offset-carrying ISO 8601, when read off a daily panchang. */
+  endLocal?: string;
   /** True when the body is above the horizon at peak for the observer's location. */
   visibleFromLocation: boolean;
-  /** Fraction of the disc obscured at peak, range [0, 1]. */
+  /**
+   * Fraction of the disc's **area** covered at peak, range [0, 1] (umbral for a
+   * lunar eclipse, so a penumbral one reads 0). The number to show as a
+   * percentage; published as `magnitude` through 4.x.
+   */
+  obscuration: number;
+  /**
+   * Eclipse **magnitude** — the fraction of the body's *diameter* covered, the
+   * quantity catalogues publish. Exceeds 1 for a total eclipse and is
+   * **negative** for a penumbral lunar one. See `EclipseInfo.magnitude`.
+   */
   magnitude: number;
   /** Pre-eclipse impurity window start (sutak), or null when no sutak applies (penumbral lunar eclipse). */
   sutakStart: Date | null;
   /** End of sutak (moksha) — umbral last contact; null for penumbral lunar eclipses. */
   sutakEnd: Date | null;
+  /** `sutakStart` as offset-carrying ISO 8601, when read off a daily panchang. */
+  sutakStartLocal?: string | null;
+  /** `sutakEnd` as offset-carrying ISO 8601, when read off a daily panchang. */
+  sutakEndLocal?: string | null;
   description: string;
 }
 
 // ── Bhadra Kala (Vishti karana window) ───────────────
 
 export interface BhadraInfo {
+  /** True instant. See {@link TimePeriod}. */
   start: Date;
+  /** True instant. See {@link TimePeriod}. */
   end: Date;
+  /** `start` as offset-carrying ISO 8601, when read off a daily panchang. */
+  startLocal?: string;
+  /** `end` as offset-carrying ISO 8601, when read off a daily panchang. */
+  endLocal?: string;
+  /**
+   * Bhadra's residence — a stable machine-readable key, not display text.
+   * Use {@link BhadraInfo.locationName} to show it to a user.
+   */
   location: 'earth' | 'heaven' | 'paatal';
+  /** Localized display name for {@link BhadraInfo.location}. */
+  locationName: string;
   isActive: boolean;
 }
 
@@ -247,6 +362,39 @@ export interface BhadraInfo {
 export type GandaMulaInfo =
   | { active: false }
   | { active: true; nakshatraName: string; severity: 'mild' | 'severe' };
+
+// ── Panchaka ─────────────────────────────────────────
+
+/**
+ * Which of the five Panchakas a spell is.
+ *
+ * `'samanya'` ("ordinary") covers a spell begun on a Wednesday or Thursday,
+ * which carries no named affliction — see {@link PanchakaInfo.isDosha}.
+ */
+export type PanchakaType = 'roga' | 'raja' | 'agni' | 'chora' | 'mrityu' | 'samanya';
+
+/**
+ * Panchaka — the Moon in the last five nakshatras (Dhanishtha 3rd pada
+ * through Revati), classically restricting five specific acts.
+ *
+ * Which Panchaka applies is fixed by the weekday the spell *began* on, and it
+ * holds for the whole spell — so this is not a property of the day in
+ * isolation. Two days with identical tithi, nakshatra and vara can carry
+ * different Panchaka types depending on when the Moon entered the span.
+ */
+export type PanchakaInfo =
+  | { active: false }
+  | {
+    active: true;
+    /** Stable identifier, e.g. `'mrityu'`. */
+    type: PanchakaType;
+    /** Localized display name. */
+    name: string;
+    /** False for `'samanya'` — the tradition attaches no dosha to it. */
+    isDosha: boolean;
+    /** Vara the spell began on (0 = Sunday), which is what fixed the type. */
+    onsetVara: number;
+  };
 
 // ── Anandadi Yoga (Vara × Nakshatra) ─────────────────
 

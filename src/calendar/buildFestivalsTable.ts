@@ -8,15 +8,15 @@
 // returned JSON, and read it back through `getFestivalsForYear` /
 // `getFestivalsForDate` by passing it as their `source` argument.
 
-import { getFestivalsInRange } from './yearly';
+import { computeFestivalsInRange } from './yearly';
 import type { GeoLocation } from '../types/location';
 import type { AyanamsaType, MasaSystem, FestivalRegion } from '../types/options';
 import type {
+  FestivalDictEntry,
   FestivalsFile,
   FestivalsTableLanguage,
-  FestivalTableEntryRaw,
   LocalizedString,
-  RawFestivalTableDay,
+  PackedFestivalTableDay,
 } from './festivalsTableTypes';
 
 export interface BuildFestivalsTableOptions {
@@ -61,6 +61,30 @@ function toDateKey(d: Date, offsetMinutes: number): string {
 }
 
 /**
+ * Interns unique festival descriptors so each day can hold indices instead of
+ * repeating every localized string at every occurrence.
+ *
+ * The whole `(key, type, name, description)` tuple is the dedup unit, not the
+ * name alone: a festival's description is not a pure function of its key —
+ * Raksha Bandhan carries a different note depending on whether Bhadra overlaps
+ * the day — so keying on the name would merge entries that differ.
+ */
+class FestivalDictionary {
+  readonly entries: FestivalDictEntry[] = [];
+  private readonly index = new Map<string, number>();
+
+  intern(entry: FestivalDictEntry): number {
+    const id = JSON.stringify([entry.key, entry.type, entry.name, entry.description ?? null]);
+    const seen = this.index.get(id);
+    if (seen !== undefined) return seen;
+    const next = this.entries.length;
+    this.entries.push(entry);
+    this.index.set(id, next);
+    return next;
+  }
+}
+
+/**
  * Compute a festival table for the given location and year range.
  *
  * Runs the festival engine once per requested language and zips the runs
@@ -68,8 +92,11 @@ function toDateKey(d: Date, offsetMinutes: number): string {
  * runs align). Eclipses are dropped — their visibility is location-specific
  * and better served by `getUpcomingEclipses`.
  *
+ * The emitted table is dictionary-encoded and carries each festival's stable
+ * `key`; see `festivalsTableTypes.ts` for why.
+ *
  * @returns A {@link FestivalsFile} ready to serialize, cache, and feed back
- *          into the `getFestivalsForYear` / `getFestivalsForDate` accessors
+ *          into the `readFestivalsForYear` / `readFestivalsForDate` accessors
  *          via their `source` argument.
  */
 export function buildFestivalsTable(
@@ -99,17 +126,21 @@ export function buildFestivalsTable(
     throw new RangeError('languages must contain at least one locale');
   }
 
-  const years: Record<string, RawFestivalTableDay[]> = {};
+  const years: Record<string, PackedFestivalTableDay[]> = {};
+  // One dictionary across the whole table, not one per year: most festivals
+  // recur annually, so sharing it is where the compression comes from.
+  const dict = new FestivalDictionary();
 
   for (let year = startYear; year <= endYear; year++) {
     years[String(year)] = buildYear(
       year, location, timezoneOffsetMinutes, languages,
-      ayanamsa, masaSystem, region,
+      ayanamsa, masaSystem, region, dict,
     );
   }
 
   return {
     _meta: {
+      format: 2,
       referenceLocation,
       latitude: location.latitude,
       longitude: location.longitude,
@@ -123,6 +154,7 @@ export function buildFestivalsTable(
       generatedAt,
       note,
     },
+    _dict: dict.entries,
     years,
   };
 }
@@ -135,14 +167,15 @@ function buildYear(
   ayanamsa: AyanamsaType,
   masaSystem: MasaSystem,
   region: FestivalRegion,
-): RawFestivalTableDay[] {
+  dict: FestivalDictionary,
+): PackedFestivalTableDay[] {
   const start = new Date(Date.UTC(year, 0, 1));
   const end = new Date(Date.UTC(year, 11, 31));
 
   // One engine run per locale; selection is locale-independent so the runs
   // emit the same festivals in the same order — we zip them by index.
   const runs = languages.map(language =>
-    getFestivalsInRange(start, end, location, {
+    computeFestivalsInRange(start, end, location, {
       timezone: offsetMinutes,
       ayanamsa,
       masaSystem,
@@ -161,7 +194,7 @@ function buildYear(
     }
   }
 
-  const byDate = new Map<string, FestivalTableEntryRaw[]>();
+  const byDate = new Map<string, number[]>();
   for (let i = 0; i < len; i++) {
     const base = runs[0]![i]!;
     if (base.festival.type === 'eclipse') continue;
@@ -177,15 +210,20 @@ function buildYear(
       }
     }
 
-    const key = toDateKey(base.date, offsetMinutes);
-    let bucket = byDate.get(key);
+    const entry: FestivalDictEntry = {
+      key: base.festival.key,
+      type: base.festival.type,
+      name,
+    };
+    if (description) entry.description = description;
+
+    const dateKey = toDateKey(base.date, offsetMinutes);
+    let bucket = byDate.get(dateKey);
     if (!bucket) {
       bucket = [];
-      byDate.set(key, bucket);
+      byDate.set(dateKey, bucket);
     }
-    const entry: FestivalTableEntryRaw = { name, type: base.festival.type };
-    if (description) entry.description = description;
-    bucket.push(entry);
+    bucket.push(dict.intern(entry));
   }
 
   return [...byDate.keys()]

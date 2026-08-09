@@ -1,4 +1,4 @@
-import type { TimePeriod } from '../types/elements';
+import type { UtcWindow } from '../types/elements';
 
 /**
  * Dur Muhurta (inauspicious muhurta) positions per Vara.
@@ -27,13 +27,13 @@ const DUR_MUHURTA_INDICES: readonly (readonly [number, number])[] = [
  * @param sunrise   UTC sunrise Date.
  * @param sunset    UTC sunset Date.
  * @param varaIndex 0 = Sunday … 6 = Saturday.
- * @returns         Exactly two TimePeriod entries.
+ * @returns         Exactly two UtcWindow entries.
  */
 export function computeDurMuhurta(
   sunrise: Date,
   sunset: Date,
   varaIndex: number,
-): [TimePeriod, TimePeriod] {
+): [UtcWindow, UtcWindow] {
   const dayMs = sunset.getTime() - sunrise.getTime();
   const muhurtaMs = dayMs / 15;
   const sunriseMs = sunrise.getTime();

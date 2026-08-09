@@ -475,7 +475,7 @@ describe('Narayan variable — Sanjay Rath worked Einstein table validation', ()
   // against the §2 rules, exercising the same code path as the
   // fixture sweep but with synthetic input.)
 
-  function einsteinExpected(rashi: number, lord: string, lordRashi: number, exalt: number): number {
+  function einsteinExpected(rashi: number, _lord: string, lordRashi: number, exalt: number): number {
     const anti = !VISHAMA_PADA_SET.has(rashi);
     let y = inclusiveSignCount(rashi, lordRashi, anti) - 1 + exalt;
     return Math.min(12, Math.max(0, y));

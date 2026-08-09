@@ -6,6 +6,7 @@ export default defineConfig({
     'src/calendar/festivalsTable.ts',
     'src/calendar/eclipsesTable.ts',
     'src/calendar/moonPhasesTable.ts',
+    'src/muhurta/muhurtaTable.ts',
   ],
   format: ['cjs', 'esm'],
   dts: true,
@@ -16,5 +17,8 @@ export default defineConfig({
   outDir: 'dist',
   treeshake: true,
   minify: false,
-  noExternal: ['astronomy-engine'],
+  // No `noExternal` any more: as of v5 the package has **no runtime
+  // dependencies at all**, so there is nothing left to bundle in. The entry it
+  // named — `astronomy-engine` — is a devDependency now, used only by the Tier 0
+  // tests that measure the baseline this library was held to.
 });

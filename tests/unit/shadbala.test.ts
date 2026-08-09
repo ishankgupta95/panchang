@@ -15,7 +15,14 @@
 import { describe, it, expect } from 'vitest';
 import { computeShadbala } from '../../src/jyotish/shadbala';
 import { computeRashiChart } from '../../src/jyotish/charts';
-import type { GrahaName } from '../../src/types/jyotish';
+import type { ShadbalaResult } from '../../src/types/jyotish';
+
+/**
+ * The seven grahas Shadbala is defined for. Not `GrahaName` — that union also
+ * carries Rahu and Ketu, which have no classical Shadbala and are absent from
+ * `ShadbalaResult`, so indexing the result by it is an error.
+ */
+type ShadbalaGraha = keyof ShadbalaResult;
 
 const DELHI = { latitude: 28.6139, longitude: 77.2090 };
 const SAMPLE = new Date('1995-08-15T05:30:00Z');
@@ -33,7 +40,7 @@ describe('computeShadbala — output structure', () => {
 
   it('every planet has six sub-strengths plus total', () => {
     const r = computeShadbala(SAMPLE, DELHI);
-    const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+    const grahas: ShadbalaGraha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
     for (const g of grahas) {
       const b = r[g];
       expect(b).toHaveProperty('sthana');
@@ -48,7 +55,7 @@ describe('computeShadbala — output structure', () => {
 
   it('total equals the sum of the six components (drik clamped to ≥0)', () => {
     const r = computeShadbala(SAMPLE, DELHI);
-    const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+    const grahas: ShadbalaGraha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
     for (const g of grahas) {
       const b = r[g];
       const expected = b.sthana + b.dig + b.kala + b.chesta + b.naisargika + Math.max(0, b.drik);
@@ -58,7 +65,7 @@ describe('computeShadbala — output structure', () => {
 
   it('all sub-balas are non-negative (drik may be negative pre-clamp)', () => {
     const r = computeShadbala(SAMPLE, DELHI);
-    const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+    const grahas: ShadbalaGraha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
     for (const g of grahas) {
       const b = r[g];
       expect(b.sthana).toBeGreaterThanOrEqual(0);
@@ -108,7 +115,7 @@ describe('computeShadbala — Sthana (positional) — Uchcha at exaltation/debil
     // Uchcha + Saptavargaja + Ojha-Yugma + Drekkana; theoretical max =
     // 60 + 7·45 + 30 + 15 = 420 V.
     const r = computeShadbala(SAMPLE, DELHI);
-    const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+    const grahas: ShadbalaGraha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
     for (const g of grahas) {
       expect(r[g].sthana).toBeGreaterThanOrEqual(0);
       expect(r[g].sthana).toBeLessThanOrEqual(420);
@@ -119,7 +126,7 @@ describe('computeShadbala — Sthana (positional) — Uchcha at exaltation/debil
 describe('computeShadbala — Dig (directional) Bala', () => {
   it('Dig ∈ [0, 60]', () => {
     const r = computeShadbala(SAMPLE, DELHI);
-    const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+    const grahas: ShadbalaGraha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
     for (const g of grahas) {
       expect(r[g].dig).toBeGreaterThanOrEqual(0);
       expect(r[g].dig).toBeLessThanOrEqual(60);
@@ -161,7 +168,7 @@ describe('computeShadbala — Paksha (lunar phase) component of Kala Bala', () =
 describe('computeShadbala — Chesta (motional) Bala', () => {
   it('Chesta ∈ [0, 60]', () => {
     const r = computeShadbala(SAMPLE, DELHI);
-    const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+    const grahas: ShadbalaGraha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
     for (const g of grahas) {
       expect(r[g].chesta).toBeGreaterThanOrEqual(0);
       expect(r[g].chesta).toBeLessThanOrEqual(60);
@@ -224,7 +231,7 @@ describe('computeShadbala — Chesta (motional) Bala', () => {
 describe('computeShadbala — Drik (aspectual) Bala', () => {
   it('Drik value is finite (may be negative pre-clamp)', () => {
     const r = computeShadbala(SAMPLE, DELHI);
-    const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+    const grahas: ShadbalaGraha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
     for (const g of grahas) {
       expect(Number.isFinite(r[g].drik)).toBe(true);
     }
@@ -234,7 +241,7 @@ describe('computeShadbala — Drik (aspectual) Bala', () => {
 describe('computeShadbala — Kala Bala bounds', () => {
   it('Kala ∈ [0, 120] (Nathonatha + Paksha, each ≤60 V)', () => {
     const r = computeShadbala(SAMPLE, DELHI);
-    const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+    const grahas: ShadbalaGraha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
     for (const g of grahas) {
       expect(r[g].kala).toBeGreaterThanOrEqual(0);
       expect(r[g].kala).toBeLessThanOrEqual(120);
@@ -254,7 +261,7 @@ describe('computeShadbala — Kala Bala bounds', () => {
 describe('computeShadbala — sanity: typical totals are in expected range', () => {
   it('totals fall in roughly [50, 500] V — covers most natal-chart cases', () => {
     const r = computeShadbala(SAMPLE, DELHI);
-    const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+    const grahas: ShadbalaGraha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
     for (const g of grahas) {
       expect(r[g].total).toBeGreaterThan(0);
       expect(r[g].total).toBeLessThan(500);
@@ -264,7 +271,7 @@ describe('computeShadbala — sanity: typical totals are in expected range', () 
   it('multiple call invocations are stable for the same input', () => {
     const a = computeShadbala(SAMPLE, DELHI);
     const b = computeShadbala(SAMPLE, DELHI);
-    const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+    const grahas: ShadbalaGraha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
     for (const g of grahas) {
       expect(a[g].total).toBe(b[g].total);
     }
@@ -294,7 +301,7 @@ describe('computeShadbala — Sthana Bala sub-components (Phase 34e item 5)', ()
     // (even when debilitated in every varga), so EVERY graha now has
     // sthana ≥ 13 V even at 0-Uchcha. Most grahas clear 60 V easily.
     const r = computeShadbala(SAMPLE, DELHI);
-    const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+    const grahas: ShadbalaGraha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
     const above60 = grahas.some((g) => r[g].sthana > 60);
     expect(above60).toBe(true);
   });
@@ -303,7 +310,7 @@ describe('computeShadbala — Sthana Bala sub-components (Phase 34e item 5)', ()
     // Saptavargaja's worst case is 1.875 V × 7 vargas = 13.125 V.
     // Uchcha/Ojha/Drekkana add 0-105 V on top. So sthana ≥ 13.125 V always.
     const r = computeShadbala(SAMPLE, DELHI);
-    const grahas: GrahaName[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+    const grahas: ShadbalaGraha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
     for (const g of grahas) {
       expect(r[g].sthana).toBeGreaterThanOrEqual(13.125);
     }
@@ -320,7 +327,7 @@ describe('computeShadbala — Sthana Bala sub-components (Phase 34e item 5)', ()
       Sun: 10, Moon: 33, Mars: 298, Mercury: 165,
       Jupiter: 95, Venus: 357, Saturn: 200,
     };
-    for (const g of ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'] as GrahaName[]) {
+    for (const g of ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'] as ShadbalaGraha[]) {
       const lon = chart.planets.find((p) => p.planet === g)!.longitude;
       const arc = Math.abs(((lon - UCHCHA_DEG[g]! + 540) % 360) - 180);
       const uchchaOnly = ((180 - arc) / 180) * 60;

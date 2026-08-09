@@ -35,16 +35,60 @@ export const AMRIT_SIDDHI_TABLE: ReadonlyMap<number, number> = new Map([
  *
  * Lookup: vara index → set of nakshatra indices (0-based, 0–26).
  *
- * Source: traditional Muhurta Chintamani / Drik Panchang tables.
+ * ## Derived from DrikPanchang, not merely checked against it (2026-08-08)
+ *
+ * Every Sarvartha Siddhi window drik publishes for 2026 at Mumbai — **116 of
+ * them, all twelve months** — was fetched via the page's `?date=DD/MM/YYYY`
+ * parameter. Each window is a nakshatra's span clipped to its Hindu day, so the
+ * nakshatra live at the window's midpoint paired with that day's vara gives the
+ * cell drik actually used. That recovers 35 distinct pairs, and this table is
+ * now exactly that set.
+ *
+ * Ten cells changed. Three were absent and drik uses them repeatedly —
+ * Sun + Ashwini (5 windows), Tue + Ashlesha (3), Wed + Krittika (2).
+ * Seven were present and are falsified: each pairing
+ * *occurred* three to five times during 2026, often spanning most of the Hindu
+ * day, and drik published no window on any of those dates —
+ * Sun + Shravana, Mon + Hasta, Tue + Uttara Phalguni, Thu + Swati,
+ * Fri + Bharani, Fri + Chitra, Sat + Revati. (Sat + Revati is the clearest:
+ * five Saturdays, one of them with Revati running 06:51 to 05:55 the next
+ * morning, and silence from drik each time.)
+ *
+ * The corrected table then reproduces the published weekday lists at
+ * astrodevam.com / shubhpanchang.com **exactly for six of the seven varas** —
+ * Monday, Tuesday, Wednesday, Thursday and Friday match name for name, having
+ * been derived independently from occurrence data. That agreement is the real
+ * check here; it is not something a mis-derivation would produce by accident.
+ *
+ * Sunday is the one row where the two sources disagree: the secondary tables
+ * list Ashlesha where drik's windows give Ashwini. That dispute is now
+ * settled out-of-sample: Mumbai 2025, Mumbai 2027 and New Delhi 2026 were
+ * scraped independently (2026-08-09), and across all four city-years
+ * Sun + Ashwini fires 17 times while Sun + Ashlesha never occurs. Each of the
+ * four datasets independently exercises exactly these 35 cells, and splitting
+ * all 471 published windows at nakshatra boundaries and sunrises leaves no
+ * segment longer than 2 minutes outside this table (the ≤2-minute strays are
+ * drik's minute-rounding at boundaries).
+ *
+ * A Sat + Punarvasu cell was briefly added too and then withdrawn — adding it
+ * bought one extra match at the cost of five spurious Saturdays. The window
+ * that seemed to call for it (2026-10-04, 12:13 AM–06:30 AM) is one of the
+ * rare pre-dawn windows drik dates by *Hindu day*: its clock times fall on
+ * Oct 5 civil, where its start anchors to a nakshatra boundary, making it
+ * Pushya's pre-dawn span on Hindu Sunday Oct 4 — Sun + Pushya, a cell this
+ * table already carries. With the table as it stands each dataset reconciles
+ * exactly (one drik 2025 pair shares a single Hindu day), which is the check
+ * `tests/validation/drik-special-yogas.test.ts` now holds across all four
+ * city-years.
  */
 export const SARVARTHA_SIDDHI_TABLE: ReadonlyMap<number, ReadonlySet<number>> = new Map([
-  [0, new Set([7, 11, 12, 20, 21, 25])],  // Sunday:    Pushya, UPhalguni, Hasta, UAshadha, Shravana, UBhadrapada
-  [1, new Set([3, 4, 7, 12, 16, 21])],    // Monday:    Rohini, Mrigashira, Pushya, Hasta, Anuradha, Shravana
-  [2, new Set([0, 2, 11, 20, 25])],       // Tuesday:   Ashwini, Krittika, UPhalguni, UAshadha, UBhadrapada
-  [3, new Set([1, 3, 4, 12, 16])],        // Wednesday: Bharani, Rohini, Mrigashira, Hasta, Anuradha
-  [4, new Set([0, 6, 7, 14, 16, 26])],    // Thursday:  Ashwini, Punarvasu, Pushya, Swati, Anuradha, Revati
-  [5, new Set([0, 1, 6, 13, 21, 26])],    // Friday:    Ashwini, Bharani, Punarvasu, Chitra, Shravana, Revati
-  [6, new Set([3, 14, 21, 26])],           // Saturday:  Rohini, Swati, Shravana, Revati
+  [0, new Set([0, 7, 11, 12, 18, 20, 25])], // Sunday:    Ashwini, Pushya, UPhalguni, Hasta, Mula, UAshadha, UBhadrapada
+  [1, new Set([3, 4, 7, 16, 21])],          // Monday:    Rohini, Mrigashira, Pushya, Anuradha, Shravana
+  [2, new Set([0, 2, 8, 25])],              // Tuesday:   Ashwini, Krittika, Ashlesha, UBhadrapada
+  [3, new Set([2, 3, 4, 12, 16])],          // Wednesday: Krittika, Rohini, Mrigashira, Hasta, Anuradha
+  [4, new Set([0, 6, 7, 16, 26])],          // Thursday:  Ashwini, Punarvasu, Pushya, Anuradha, Revati
+  [5, new Set([0, 6, 16, 21, 26])],         // Friday:    Ashwini, Punarvasu, Anuradha, Shravana, Revati
+  [6, new Set([3, 14, 21])],                // Saturday:  Rohini, Swati, Shravana
 ]);
 
 // ── Pushkar / Jwalamukhi rule data (Step 28-6, v2.3) ────────────────────────

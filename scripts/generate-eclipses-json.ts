@@ -1,18 +1,19 @@
 /**
  * Eclipses JSON Generator
  *
- * Thin CLI wrapper around `buildEclipsesTable` that produces the bundled
- * India table at `src/data/eclipses.json`. The window is dynamic — 2 years
- * past through 5 years future relative to the run date — matching the
- * festivals generator, so the two tables cover the same span.
+ * Thin CLI wrapper around `buildEclipsesTable`, kept as a worked example of
+ * the compute-and-cache pattern. The library ships **no** pre-computed table:
+ * generate your own, commit it to *your* project, and read it back with
+ * `panchang-ts/eclipses`.
  *
- * The table is computed for Varanasi (IST) and lists only eclipses visible
- * from there (the eclipsed body above the horizon at greatest eclipse). Within
- * India visibility is essentially uniform; users elsewhere should build a
- * location-specific table at runtime with `buildEclipsesTable` and cache it.
+ * The window is dynamic — 2 years past through 5 years future relative to the
+ * run date. The reference location below is Varanasi (IST) and only eclipses
+ * visible from there are listed (eclipsed body above the horizon); change it to
+ * your own, since visibility — and therefore sutak — is location-dependent.
  *
  * Usage:
- *   npm run eclipses:gen   # builds the lib, then runs this
+ *   npm run eclipses:gen                 # -> ./eclipses.json
+ *   npm run eclipses:gen -- path/out.json
  */
 
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -70,7 +71,9 @@ function main(): void {
 
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
-  const outPath = resolve(__dirname, '..', 'src', 'data', 'eclipses.json');
+  // Output path: first CLI arg, else `<name>` in the current directory.
+  // Nothing is written into the package — consumers own their table.
+  const outPath = resolve(process.argv[2] ?? 'eclipses.json');
   mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(outPath, JSON.stringify(file, null, 2) + '\n', 'utf8');
 

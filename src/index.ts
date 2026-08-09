@@ -39,7 +39,9 @@ export { computeRashiChart, computeNavamsa } from './jyotish/charts';
 export { computeDivisionalChart } from './jyotish/divisionals';
 export { computeAshtakoot } from './jyotish/matching';
 export type { NatalMoon, KootName, KootScore, AshtakootResult } from './jyotish/matching';
-export { computeMangalDosha, computeKaalSarp, computePitruDosha } from './jyotish/doshas';
+export {
+  computeMangalDosha, computeMangalCompatibility, computeKaalSarp, computePitruDosha,
+} from './jyotish/doshas';
 export { computeSadeSati } from './jyotish/sadeSati';
 export { computeDignity } from './jyotish/dignity';
 export type { Dignity } from './jyotish/dignity';
@@ -84,6 +86,10 @@ export { getSiderealSunLongitude } from './astronomy/sun';
 export { getSiderealMoonLongitude } from './astronomy/moon';
 export { computeAyanamsa as getAyanamsa } from './astronomy/ayanamsa';
 
+// Rendering a published instant as a wall clock. Every `*Local` string in a
+// result is produced by this; exported so callers can render other zones too.
+export { formatInZone } from './utils/timezone';
+
 // Inauspicious periods & muhurta
 export { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './core/inauspicious';
 export { computeVarjyam } from './core/varjyam';
@@ -106,14 +112,33 @@ export {
 } from './astronomy/eclipse';
 
 // Lunar phases (Tithi-instants: new / quarters / full)
-export { getMoonPhasesInRange } from './astronomy/moonPhase';
+export {
+  computeMoonPhasesInRange, computeMoonPhasesForYear,
+  /** @deprecated Renamed to `computeMoonPhasesInRange` in v5. */
+  getMoonPhasesInRange,
+} from './astronomy/moonPhase';
 export type { MoonPhaseName, MoonPhaseEvent } from './astronomy/moonPhase';
 
 // Muhurta scoring engine + stock rules
-export { scoreMuhurta, findAuspiciousDates } from './muhurta/engine';
-export type {
-  MuhurtaRule, MuhurtaScore, MuhurtaDay, MuhurtaScoreOptions,
+export {
+  scoreMuhurta, computeAuspiciousDatesInRange, computeAuspiciousDatesForYear,
+  /** @deprecated Renamed to `computeAuspiciousDatesInRange` in v5. */
+  findAuspiciousDates,
 } from './muhurta/engine';
+export type {
+  MuhurtaRule, MuhurtaScore, MuhurtaDay, MuhurtaScoreOptions, MuhurtaFactor,
+} from './muhurta/engine';
+export {
+  computePanchaka, classifyPanchaka, isPanchakaDosha, findPanchakaOnset,
+} from './core/panchaka';
+export { computeVaraTithiYogas } from './muhurta/varaTithiYogas';
+export type { VaraTithiYoga, VaraTithiYogaType } from './muhurta/varaTithiYogas';
+export { buildMuhurtaTable } from './muhurta/buildMuhurtaTable';
+export type { BuildMuhurtaTableOptions } from './muhurta/buildMuhurtaTable';
+export type {
+  MuhurtaFile, MuhurtaTableMeta, MuhurtaTableDay, MuhurtaTableLanguage,
+  PackedMuhurtaTableDay,
+} from './muhurta/muhurtaTableTypes';
 export {
   vivahRule, grihaPraveshRule, namakaranaRule, vidyarambhRule,
   vahanKharidiRule, annaprashanRule, mundanRule, upanayanamRule,
@@ -128,8 +153,18 @@ export {
 } from './calendar/convert';
 export type { HinduCalendarCoords, ConvertOptions } from './calendar/convert';
 export {
-  getEkadashiDatesForYear, getSankrantisForYear,
-  getFestivalsInRange, getUpcomingEclipses, getEclipsesInRange,
+  computeEkadashiDatesForYear, computeSankrantisForYear,
+  computeFestivalsInRange, computeFestivalsForYear,
+  computeEclipsesInRange, computeEclipsesForYear,
+  getUpcomingEclipses,
+  /** @deprecated Renamed to `computeEkadashiDatesForYear` in v5. */
+  getEkadashiDatesForYear,
+  /** @deprecated Renamed to `computeSankrantisForYear` in v5. */
+  getSankrantisForYear,
+  /** @deprecated Renamed to `computeFestivalsInRange` in v5. */
+  getFestivalsInRange,
+  /** @deprecated Renamed to `computeEclipsesInRange` in v5. */
+  getEclipsesInRange,
 } from './calendar/yearly';
 export type {
   YearlyListingOptions, FestivalDay, SankrantiEvent,
@@ -139,7 +174,8 @@ export type { BuildFestivalsTableOptions } from './calendar/buildFestivalsTable'
 export type {
   FestivalsFile, FestivalsTableLanguage, FestivalsTableType,
   FestivalTableMeta, FestivalTableDay, FestivalTableEntry,
-  FestivalTableEntryRaw, RawFestivalTableDay, LocalizedString,
+  FestivalDictEntry, PackedFestivalTableDay, AnyFestivalsFile,
+  FestivalsFileV1, FestivalTableEntryRaw, RawFestivalTableDay, LocalizedString,
 } from './calendar/festivalsTableTypes';
 export { buildEclipsesTable } from './calendar/buildEclipsesTable';
 export type { BuildEclipsesTableOptions } from './calendar/buildEclipsesTable';
@@ -153,6 +189,8 @@ export type { BuildMoonPhasesTableOptions } from './calendar/buildMoonPhasesTabl
 export type {
   MoonPhasesFile, MoonPhasesTableLanguage, MoonPhaseTableName,
   MoonPhaseTableMeta, MoonPhaseTableDay, MoonPhaseTableEntry,
+  MoonPhaseDictEntry, PackedMoonPhaseEvent, PackedMoonPhaseTableDay,
+  AnyMoonPhasesFile, MoonPhasesFileV1,
   MoonPhaseTableEntryRaw, RawMoonPhaseTableDay,
 } from './calendar/moonPhasesTableTypes';
 
@@ -160,21 +198,30 @@ export type {
 export type {
   GeoLocation,
   PanchangOptions, InstantPanchangOptions, BirthChartOptions,
-  AyanamsaType, Language, Precision, MasaSystem, FestivalRegion, LegacyFestivalRegion,
-  HouseSystem,
-  DailyPanchangResult, InstantPanchangResult,
+  AyanamsaType, Language, MasaSystem, FestivalRegion, LegacyFestivalRegion,
+  HouseSystem, PanchangSection,
+  DailyPanchangResult, InstantPanchangResult, ResolvedTimezone,
+  // Result sections (v5 grouping — see DailyPanchangResult)
+  SunPosition, MoonPosition, DailySun, DailyMoon,
+  DailyAngas, InstantAngas, CalendarLabels, DailyCalendarLabels,
+  MuhurtaWindows, InauspiciousWindows, InstantInauspicious, DayPeriods,
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, MasaInfo,
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
-  ChandraMasaInfo, SamvatInfo, RashiInfo,
+  ChandraMasaInfo, SamvatInfo, RashiInfo, NakshatraIndexInfo,
   ChoghadiyaSlot, ChoghadiyaInfo, ChoghadiyaQuality,
   DoGhatiSlot, DoGhatiInfo,
   HoraSlot, HoraInfo,
   GowriSlot, GowriInfo,
   SpecialYogaInfo, FestivalInfo,
   BhadraInfo,
-  GandaMulaInfo,
+  // `DailyPanchangResult.eclipse`, and assignable from what
+  // `getUpcomingSolarEclipse` / `getUpcomingLunarEclipse` / `getEclipseDuringDay`
+  // return — those extra `*Local` fields are optional. 4.x exported the
+  // functions but not the type, so annotating their result was impossible.
+  EclipseInfo, EclipseSubtype,
+  GandaMulaInfo, PanchakaInfo, PanchakaType,
   AnandadiYogaInfo,
-  TimePeriod,
+  TimePeriod, UtcWindow, Unlocalized,
   PanchangErrorCode,
   // Jyotish types
   GrahaName, GrahaPosition, PlanetaryPositions,
@@ -182,7 +229,7 @@ export type {
   ChandraBalamInfo, TarabalaInfo,
   LagnaInfo, SripatiLagnaInfo, HouseInfo, BhavaChart,
   PlanetPlacement, BirthChart, DivisionalChart, Divisional,
-  MangalDoshaInfo, MangalDoshaSeverity, SadeSatiInfo,
+  MangalDoshaInfo, MangalDoshaSeverity, MangalCompatibility, SadeSatiInfo,
   AspectMap, PlanetShadbala, ShadbalaResult,
   KaalSarpDoshaInfo, KaalSarpSubtype, PitruDoshaInfo,
   AshtakavargaResult, BhinnashtakaGrid,

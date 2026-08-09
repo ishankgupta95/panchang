@@ -1,4 +1,5 @@
-import type { GowriInfo, GowriSlot, ChoghadiyaQuality } from '../types/elements';
+import type { GowriSlot, ChoghadiyaQuality, Unlocalized, UnlocalizedInfo } from '../types/elements';
+import { buildEqualSlots } from '../utils/slots';
 
 /**
  * Quality for each of the 8 Gowri Panchangam slot names (index 0–7):
@@ -32,22 +33,12 @@ function buildSlots(
   startIndex: number,
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
-): GowriSlot[] {
-  const slotMs = durationMs / 8;
-  const slots: GowriSlot[] = [];
-  for (let i = 0; i < 8; i++) {
+): Unlocalized<GowriSlot>[] {
+  return buildEqualSlots(reference, durationMs, 8, (i, start, end) => {
     const idx = (startIndex + i) % 8;
     const quality = GOWRI_QUALITY[idx]!;
-    slots.push({
-      start: new Date(reference.getTime() + i * slotMs),
-      end: new Date(reference.getTime() + (i + 1) * slotMs),
-      index: idx,
-      name: nameFn(idx),
-      quality,
-      qualityName: qualityNameFn(quality),
-    });
-  }
-  return slots;
+    return { start, end, index: idx, name: nameFn(idx), quality, qualityName: qualityNameFn(quality) };
+  });
 }
 
 /**
@@ -64,7 +55,7 @@ function buildSlots(
  * @param varaIndex  Weekday index: 0 = Sunday, 6 = Saturday.
  * @param nameFn     Callback returning translated Gowri slot name for index 0–7.
  * @param qualityNameFn  Callback returning translated quality name.
- * @returns          `GowriInfo` — `{ day: GowriSlot[8], night: GowriSlot[8] }`
+ * @returns          `GowriInfo` — `{ day: Unlocalized<GowriSlot>[8], night: Unlocalized<GowriSlot>[8] }`
  *                   with start/end times and quality for each slot.
  *
  * @example
@@ -86,7 +77,7 @@ export function computeGowriPanchangam(
   varaIndex: number,
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
-): GowriInfo {
+): UnlocalizedInfo<GowriSlot> {
   const dayMs   = sunset.getTime()      - sunrise.getTime();
   const nightMs = nextSunrise.getTime() - sunset.getTime();
 

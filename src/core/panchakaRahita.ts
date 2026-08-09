@@ -1,4 +1,5 @@
-import type { TimePeriod } from '../types/elements';
+import { solveAngleCrossing } from '../utils/search';
+import type { UtcWindow } from '../types/elements';
 
 /**
  * Windows of the Hindu day during which the Moon is OUTSIDE Panchaka.
@@ -40,7 +41,7 @@ import type { TimePeriod } from '../types/elements';
  * @param sunriseUtc       UTC sunrise — start of the Hindu day.
  * @param nextSunriseUtc   UTC of the following day's local sunrise — end of the Hindu day.
  * @param getMoon          Sidereal Moon longitude (degrees, [0, 360)) at a UTC instant.
- * @returns                Array of `TimePeriod` slices when Panchaka is INACTIVE
+ * @returns                Array of `UtcWindow` slices when Panchaka is INACTIVE
  *                         during the Hindu day. Empty when Panchaka pervades the
  *                         entire day; single-element when no transition or when
  *                         a transition partitions the day.
@@ -49,7 +50,7 @@ export function computePanchakaRahita(
   sunriseUtc: Date,
   nextSunriseUtc: Date,
   getMoon: (d: Date) => number,
-): TimePeriod[] {
+): UtcWindow[] {
   const inPanchakaAt = (d: Date) => getMoon(d) >= 300;
 
   const startInP = inPanchakaAt(sunriseUtc);
@@ -59,8 +60,11 @@ export function computePanchakaRahita(
     return startInP ? [] : [{ start: sunriseUtc, end: nextSunriseUtc }];
   }
 
-  // Endpoints disagree → exactly one boundary crossing in the window.
-  const crossing = bisectBoundary(sunriseUtc, nextSunriseUtc, inPanchakaAt);
+  // Endpoints disagree → exactly one boundary crossing in the window. The Moon
+  // moves forward, so entering Panchaka is the 300° crossing and leaving it is
+  // the 360°/0° one.
+  const targetDeg = startInP ? 0 : 300;
+  const crossing = bisectBoundary(sunriseUtc, nextSunriseUtc, inPanchakaAt, targetDeg, getMoon);
   return startInP
     ? [{ start: crossing, end: nextSunriseUtc }] // exits Panchaka mid-day
     : [{ start: sunriseUtc, end: crossing }];    // enters Panchaka mid-day
@@ -70,23 +74,32 @@ export function computePanchakaRahita(
  * Locate the UTC moment where `predicate` flips between `loUtc` and `hiUtc`.
  * Caller guarantees `predicate(lo) !== predicate(hi)`.
  *
- * Tolerance ~30 s — finer than the ~1 min granularity DrikPanchang publishes.
+ * Bisection narrows the bracket; {@link solveAngleCrossing} finishes it. The
+ * bisection used to be the whole answer at a 30-second tolerance, returning the
+ * upper bracket — so every published Panchaka Rahita window sat on a 30 s grid
+ * and moved in whole steps whenever anything upstream moved at all. Measured
+ * during Phase 36.2: 21.1 s of movement from a 6.4 s nakshatra shift.
  */
 function bisectBoundary(
   loUtc: Date,
   hiUtc: Date,
   predicate: (d: Date) => boolean,
+  targetDeg: number,
+  getMoon: (d: Date) => number,
 ): Date {
-  const TOL_MS = 30_000;
+  const BRACKET_MS = 120_000;
   const MAX_ITERS = 30;
   const startState = predicate(loUtc);
   let lo = loUtc.getTime();
   let hi = hiUtc.getTime();
 
-  for (let i = 0; i < MAX_ITERS && hi - lo > TOL_MS; i++) {
+  for (let i = 0; i < MAX_ITERS && hi - lo > BRACKET_MS; i++) {
     const mid = Math.floor((lo + hi) / 2);
     if (predicate(new Date(mid)) === startState) lo = mid;
     else hi = mid;
   }
-  return new Date(hi);
+  const solved = solveAngleCrossing(
+    lo, hi, targetDeg, getMoon, (ms) => predicate(new Date(ms)) === startState,
+  );
+  return new Date(solved ?? hi);
 }

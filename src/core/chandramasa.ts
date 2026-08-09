@@ -1,6 +1,6 @@
 import type { ChandraMasaInfo } from '../types/elements';
 import type { MasaSystem } from '../types/options';
-import { boundingNewMoons } from '../astronomy/newMoon';
+import { boundingNewMoons, type NewMoonBounds } from '../astronomy/newMoon';
 
 /**
  * Compute the current Chandra Masa (Hindu lunar month).
@@ -34,6 +34,11 @@ import { boundingNewMoons } from '../astronomy/newMoon';
  *                      system the primary `index`/`name` fields represent.
  * @param refDate       Reference instant (UTC) — used to locate the bounding new moons.
  * @param getSiderealSun  Returns the sidereal Sun longitude (degrees) at a given instant.
+ * @param getBounds     Resolves the new moons bounding `refDate`'s lunar month.
+ *                      Defaults to an uncached {@link boundingNewMoons}; pass a
+ *                      `NewMoonCache`-backed lookup when several instants in the
+ *                      same lunation are resolved together (as `getDailyPanchang`
+ *                      does for today and the prior day).
  */
 export function computeChandraMasa(
   siderealSun: number,
@@ -42,13 +47,14 @@ export function computeChandraMasa(
   system: MasaSystem = 'purnimanta',
   refDate: Date,
   getSiderealSun: (d: Date) => number,
+  getBounds: (ref: Date) => NewMoonBounds = boundingNewMoons,
 ): ChandraMasaInfo {
   // Moon–Sun elongation in [0, 360)
   const elongation = ((siderealMoon - siderealSun) + 360) % 360;
 
   // ── Bounding Amavasyas of the current lunar month ────
   // Use the true new-moon instants and the sidereal Sun rashi at each.
-  const { prev, next } = boundingNewMoons(refDate);
+  const { prev, next } = getBounds(refDate);
   const sunAtPrevNewMoon = ((getSiderealSun(prev) % 360) + 360) % 360;
   const sunAtNextNewMoon = ((getSiderealSun(next) % 360) + 360) % 360;
   const solarMonthAtPrev = Math.floor(sunAtPrevNewMoon / 30);

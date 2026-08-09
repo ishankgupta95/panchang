@@ -52,7 +52,7 @@ function runSweep(): SweepCounts {
     const r = getDailyPanchang(date, DELHI, { timezone: 330 });
     if (!r) continue;
     for (const y of r.specialYogas) {
-      if (y.type in counts) (counts as Record<string, number>)[y.type]!++;
+      if (y.type in counts) counts[y.type as keyof SweepCounts]++;
     }
   }
   return counts;
@@ -98,74 +98,96 @@ describe('v2.3 yogas — self-consistency on emission days', () => {
   // guards against future regressions in the orchestrator wiring (e.g. if
   // suryaNakshatra ever stops being passed in).
 
-  function findDayWith(type: string): {
-    moonIdx: number; sunIdx: number; varaIdx: number; tithiIdx: number;
-  } | null {
+  /**
+   * Special yogas are evaluated across the whole Hindu day, not at its sunrise
+   * snapshot — a qualifying nakshatra often opens after sunrise. So an emission
+   * is justified by *some* (tithi, nakshatra) pair that actually co-occurs
+   * during the day, which is what these assertions check. Reading
+   * `nakshatras[0]` / `tithis[0]` would only ever see the sunrise pair.
+   */
+  interface DayFacts {
+    /** (tithiIdx, nakshatraIdx) pairs whose segments overlap in time. */
+    pairs: { tithiIdx: number; moonIdx: number }[];
+    moonIdxs: number[];
+    sunIdx: number;
+    varaIdx: number;
+  }
+
+  function findDayWith(type: string): DayFacts | null {
     for (let day = 0; day < SWEEP_DAYS; day++) {
       const date = new Date(SWEEP_START.getTime() + day * 86_400_000);
       const r = getDailyPanchang(date, DELHI, { timezone: 330 });
       if (!r) continue;
-      if (r.specialYogas.some((y) => y.type === type)) {
-        return {
-          moonIdx: r.nakshatras[0]!.index,
-          sunIdx: r.suryaNakshatra.index,
-          varaIdx: r.vara.index,
-          tithiIdx: r.tithis[0]!.index,
-        };
+      if (!r.specialYogas.some((y) => y.type === type)) continue;
+
+      const span = (x: { startTime: Date | null; endTime: Date | null }) => ({
+        s: x.startTime?.getTime() ?? -Infinity,
+        e: x.endTime?.getTime() ?? Infinity,
+      });
+      const pairs: { tithiIdx: number; moonIdx: number }[] = [];
+      for (const t of r.angas.tithis) {
+        for (const n of r.angas.nakshatras) {
+          const a = span(t), b = span(n);
+          if (a.s < b.e && b.s < a.e) pairs.push({ tithiIdx: t.index, moonIdx: n.index });
+        }
       }
+      return {
+        pairs,
+        moonIdxs: r.angas.nakshatras.map((n) => n.index),
+        sunIdx: r.sun.nakshatra.index,
+        varaIdx: r.angas.vara.index,
+      };
     }
     return null;
   }
 
+  /** Does any nakshatra of the day sit at one of `allowed` distances from the Sun? */
+  const someDistance = (d: DayFacts, allowed: number[], to28: boolean): boolean => {
+    const conv = (n: number) => (to28 ? (n < 21 ? n + 1 : n + 2) : n);
+    const mod = to28 ? 28 : 27;
+    return d.moonIdxs.some((m) => allowed.includes(((conv(m) - conv(d.sunIdx) + mod) % mod) + 1));
+  };
+
   it('Aadal day → 28-distance is one of {2,7,9,14,16,21,23,28}', () => {
     const d = findDayWith('aadal');
     expect(d).not.toBeNull();
-    const to28 = (n: number) => (n < 21 ? n + 1 : n + 2);
-    const dist = ((to28(d!.moonIdx) - to28(d!.sunIdx) + 28) % 28) + 1;
-    expect([2, 7, 9, 14, 16, 21, 23, 28]).toContain(dist);
+    expect(someDistance(d!, [2, 7, 9, 14, 16, 21, 23, 28], true)).toBe(true);
   });
 
   it('Vidaal day → 28-distance is one of {3,6,10,13,17,20,24,27}', () => {
     const d = findDayWith('vidaal');
     expect(d).not.toBeNull();
-    const to28 = (n: number) => (n < 21 ? n + 1 : n + 2);
-    const dist = ((to28(d!.moonIdx) - to28(d!.sunIdx) + 28) % 28) + 1;
-    expect([3, 6, 10, 13, 17, 20, 24, 27]).toContain(dist);
+    expect(someDistance(d!, [3, 6, 10, 13, 17, 20, 24, 27], true)).toBe(true);
   });
 
   it('Ravi day → 27-distance is one of {4,6,9,10,13,20}', () => {
     const d = findDayWith('ravi');
     expect(d).not.toBeNull();
-    const dist = ((d!.moonIdx - d!.sunIdx + 27) % 27) + 1;
-    expect([4, 6, 9, 10, 13, 20]).toContain(dist);
+    expect(someDistance(d!, [4, 6, 9, 10, 13, 20], false)).toBe(true);
   });
 
   it('Jwalamukhi day → tithi-number-in-paksha × nakshatra is one of the 5 rows', () => {
     const d = findDayWith('jwalamukhi');
     expect(d).not.toBeNull();
-    const number = (d!.tithiIdx % 15) + 1;
-    const expected: Record<number, number> = {
-      1: 18, 5: 1, 8: 2, 9: 3, 10: 8,
-    };
-    expect(expected[number]).toBe(d!.moonIdx);
+    const rows: Record<number, number> = { 1: 18, 5: 1, 8: 2, 9: 3, 10: 8 };
+    expect(d!.pairs.some((p) => rows[(p.tithiIdx % 15) + 1] === p.moonIdx)).toBe(true);
   });
 
   it('Dwipushkar day → vara ∈ {0,2,6} ∧ tithi-number ∈ {2,7,12} ∧ nakshatra ∈ {4,13,22}', () => {
     const d = findDayWith('dwipushkar');
     expect(d).not.toBeNull();
-    const number = (d!.tithiIdx % 15) + 1;
     expect([0, 2, 6]).toContain(d!.varaIdx);
-    expect([2, 7, 12]).toContain(number);
-    expect([4, 13, 22]).toContain(d!.moonIdx);
+    expect(d!.pairs.some((p) =>
+      [2, 7, 12].includes((p.tithiIdx % 15) + 1) && [4, 13, 22].includes(p.moonIdx))).toBe(true);
   });
 
   it('Tripushkar day → vara ∈ {0,2,6} ∧ tithi-number ∈ {2,7,12} ∧ nakshatra ∈ {2,6,11,15,20,24}', () => {
     const d = findDayWith('tripushkar');
     expect(d).not.toBeNull();
-    const number = (d!.tithiIdx % 15) + 1;
     expect([0, 2, 6]).toContain(d!.varaIdx);
-    expect([2, 7, 12]).toContain(number);
-    expect([2, 6, 11, 15, 20, 24]).toContain(d!.moonIdx);
+    expect(d!.pairs.some((p) =>
+      [2, 7, 12].includes((p.tithiIdx % 15) + 1)
+      && [2, 6, 11, 15, 20, 24].includes(p.moonIdx))).toBe(true);
   });
 });
 

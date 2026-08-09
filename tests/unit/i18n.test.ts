@@ -26,7 +26,7 @@ const languages = [
 ];
 
 describe('i18n translation completeness', () => {
-  for (const { code, pack, label } of languages) {
+  for (const { pack, label } of languages) {
     describe(label, () => {
       it('has 14 tithi names (per paksha)', () => {
         expect(pack.tithiNames).toHaveLength(14);

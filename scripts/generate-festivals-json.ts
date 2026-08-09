@@ -1,17 +1,19 @@
 /**
  * Festivals JSON Generator
  *
- * Thin CLI wrapper around `buildFestivalsTable` that produces the bundled
- * India table at `src/data/festivals.json`. The window is dynamic — 2 years
- * past through 5 years future relative to the run date — so re-running keeps
- * the table fresh without editing constants.
+ * Thin CLI wrapper around `buildFestivalsTable`, kept as a worked example of
+ * the compute-and-cache pattern. The library ships **no** pre-computed table:
+ * generate your own, commit it to *your* project, and read it back with
+ * `panchang-ts/festivals`.
  *
- * The table is computed for Varanasi (IST). Within India these dates are
- * essentially universal; users elsewhere should build a location-specific
- * table at runtime with `buildFestivalsTable` and cache it (see README).
+ * The window is dynamic — 2 years past through 5 years future relative to the
+ * run date — so re-running keeps the table fresh without editing constants.
+ * The reference location below is Varanasi (IST); change it to your own, since
+ * festival dates outside India can shift by ±1 day.
  *
  * Usage:
- *   npm run festivals:gen   # builds the lib, then runs this
+ *   npm run festivals:gen                 # -> ./festivals.json
+ *   npm run festivals:gen -- path/out.json
  */
 
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -65,7 +67,9 @@ function main(): void {
 
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = dirname(__filename);
-  const outPath = resolve(__dirname, '..', 'src', 'data', 'festivals.json');
+  // Output path: first CLI arg, else `<name>` in the current directory.
+  // Nothing is written into the package — consumers own their table.
+  const outPath = resolve(process.argv[2] ?? 'festivals.json');
   mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(outPath, JSON.stringify(file, null, 2) + '\n', 'utf8');
 

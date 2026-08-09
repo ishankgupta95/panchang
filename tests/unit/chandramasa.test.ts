@@ -110,6 +110,9 @@ describe('computeChandraMasa', () => {
       expect(purnimanta.purnimantaIndex).toBe(purnimanta.amantaIndex);
       expect(purnimanta.purnimantaName).toBe(purnimanta.amantaName);
       expect(purnimanta.purnimantaName.startsWith('Adhika ')).toBe(true);
+      // "in both systems": the amanta result carries the same Adhika name.
+      expect(amanta.isAdhika).toBe(true);
+      expect(amanta.name).toBe(purnimanta.name);
     });
 
     it('amanta system sets index/name to amanta values', () => {

@@ -1,0 +1,6923 @@
+{
+ "vivah": [
+  {
+   "date": "2025-01-16",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2025-01-17",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2025-01-18",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2025-01-19",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-01-20",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-01-21",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-01-23",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-01-24",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-01-26",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-01-27",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-02-02",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2025-02-03",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-02-06",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Navami",
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-02-07",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-02-12",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2025-02-13",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2025-02-14",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-02-15",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-02-16",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2025-02-18",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-02-19",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Saptami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-02-21",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2025-02-23",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-02-25",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Dwadashi",
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-03-01",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Dwitiya",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-03-02",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Tritiya",
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2025-03-06",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-03-07",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Ashtami",
+    "Navami"
+   ]
+  },
+  {
+   "date": "2025-03-12",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Chaturdashi"
+   ]
+  },
+  {
+   "date": "2025-04-14",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2025-04-16",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2025-04-18",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-04-19",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-04-20",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Saptami",
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-04-21",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-04-25",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2025-04-29",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-04-30",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-05-01",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2025-05-05",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2025-05-06",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Navami",
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-05-08",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Phalguni",
+    "Hasta"
+   ],
+   "tithis": [
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2025-05-10",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Swati",
+    "Chitra"
+   ],
+   "tithis": [
+    "Chaturdashi"
+   ]
+  },
+  {
+   "date": "2025-05-14",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2025-05-15",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2025-05-16",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2025-05-17",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2025-05-18",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-05-22",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-05-23",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Ekadashi",
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2025-05-24",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2025-05-27",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2025-05-28",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2025-06-02",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2025-06-04",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Phalguni",
+    "Hasta"
+   ],
+   "tithis": [
+    "Navami",
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-06-05",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-06-07",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2025-06-08",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Vishakha",
+    "Swati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-06-09",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Chaturdashi"
+   ]
+  },
+  {
+   "date": "2025-11-02",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Dwadashi",
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-11-03",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-11-06",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2025-11-08",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2025-11-12",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2025-11-13",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2025-11-16",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2025-11-17",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-11-18",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Chaturdashi",
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-11-21",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2025-11-22",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-11-23",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-11-25",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-11-30",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-12-04",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Purnima",
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2025-12-05",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Pratipada",
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2025-12-06",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2026-02-04",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2026-02-05",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Phalguni",
+    "Hasta"
+   ],
+   "tithis": [
+    "Chaturthi",
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2026-02-06",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2026-02-08",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2026-02-10",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2026-02-12",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-02-14",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-02-19",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-02-20",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Tritiya",
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2026-02-21",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Panchami",
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2026-02-24",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2026-02-25",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Navami",
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-02-26",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-03-02",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Chaturdashi"
+   ]
+  },
+  {
+   "date": "2026-03-03",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Purva Phalguni",
+    "Magha"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2026-03-04",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2026-03-07",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Chaturthi",
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2026-03-08",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2026-03-09",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2026-03-11",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2026-03-12",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2026-04-15",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-04-20",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Tritiya",
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2026-04-21",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2026-04-25",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-04-26",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-04-27",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Phalguni",
+    "Purva Phalguni"
+   ],
+   "tithis": [
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2026-04-28",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Uttara Phalguni",
+    "Hasta"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-04-29",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Trayodashi",
+    "Chaturdashi"
+   ]
+  },
+  {
+   "date": "2026-05-01",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2026-05-03",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2026-05-05",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2026-05-06",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Chaturthi",
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2026-05-07",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2026-05-08",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2026-05-13",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2026-05-14",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Dwadashi",
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-06-21",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2026-06-22",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Ashtami",
+    "Navami"
+   ]
+  },
+  {
+   "date": "2026-06-23",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2026-06-24",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-06-25",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-06-26",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Dwadashi",
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-06-27",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-06-29",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2026-07-01",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2026-07-06",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2026-07-07",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Saptami",
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2026-07-11",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Dwadashi",
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-07-12",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-11-21",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2026-11-24",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2026-11-25",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Pratipada",
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2026-11-26",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dwitiya",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-12-02",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Navami",
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-12-03",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Phalguni",
+    "Hasta"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-12-04",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-12-05",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Dwadashi",
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-12-06",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-12-11",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-12-12",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Tritiya",
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2027-01-15",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2027-01-18",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini",
+    "Krittika"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-01-19",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dwadashi",
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-01-20",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-01-24",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-01-26",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Uttara Phalguni",
+    "Hasta"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-01-27",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-01-30",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2027-01-31",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-02-02",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2027-02-03",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2027-02-09",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2027-02-10",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2027-02-11",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-02-14",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2027-02-15",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2027-02-21",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-02-22",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Dwitiya",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-02-25",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-02-26",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-02-27",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-02-28",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-03-01",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Navami",
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-03-02",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-03-03",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-03-04",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2027-03-09",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Pratipada",
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2027-03-10",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Dwitiya",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-03-14",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2027-04-18",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Dwadashi",
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-04-19",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Chaturdashi"
+   ]
+  },
+  {
+   "date": "2027-04-21",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Pratipada",
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2027-04-23",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-04-24",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Jyeshtha",
+    "Anuradha"
+   ],
+   "tithis": [
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2027-04-25",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-04-26",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-04-27",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2027-04-28",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Saptami",
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-05-04",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-05-07",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2027-05-08",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-05-09",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Tritiya",
+    "Chaturthi"
+   ]
+  },
+  {
+   "date": "2027-05-13",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Ashtami",
+    "Navami"
+   ]
+  },
+  {
+   "date": "2027-05-14",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2027-05-15",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-05-16",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2027-05-17",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2027-05-18",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Chaturdashi"
+   ]
+  },
+  {
+   "date": "2027-05-19",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Chaturdashi"
+   ]
+  },
+  {
+   "date": "2027-05-20",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-05-21",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-05-22",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-05-23",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-05-24",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-05-25",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-05-30",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-05-31",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-06-01",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-06-05",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-06-09",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-06-10",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Shashthi",
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2027-06-11",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Ashtami",
+    "Navami"
+   ]
+  },
+  {
+   "date": "2027-06-12",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2027-06-13",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-06-15",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2027-06-16",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Trayodashi",
+    "Chaturdashi"
+   ]
+  },
+  {
+   "date": "2027-06-17",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Chaturdashi"
+   ]
+  },
+  {
+   "date": "2027-06-19",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-06-20",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Uttara Ashadha",
+    "Purva Ashadha"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2027-06-21",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Dwitiya",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-06-26",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Saptami",
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-06-27",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Ashtami",
+    "Navami"
+   ]
+  },
+  {
+   "date": "2027-06-28",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2027-07-07",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-07-08",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-07-09",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Shashthi",
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2027-07-11",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Navami"
+   ]
+  },
+  {
+   "date": "2027-07-12",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Navami",
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-11-10",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2027-11-11",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-11-15",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2027-11-16",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-11-20",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-11-21",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Magha"
+   ],
+   "tithis": [
+    "Ashtami",
+    "Navami"
+   ]
+  },
+  {
+   "date": "2027-11-23",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Uttara Phalguni",
+    "Hasta"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-11-24",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Ekadashi",
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2027-11-25",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-11-26",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-11-29",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Mula"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2027-12-02",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-12-07",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Navami",
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-12-08",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-12-09",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-12-12",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Chaturdashi"
+   ]
+  },
+  {
+   "date": "2027-12-13",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Purnima",
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-12-14",
+   "weekday": "Tuesday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  }
+ ],
+ "grihaPravesh": [
+  {
+   "date": "2025-02-06",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-02-07",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-02-08",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-02-14",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-02-15",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-02-17",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2025-03-01",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Dwitiya",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-03-05",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2025-03-06",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2025-03-14",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2025-03-15",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2025-04-30",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-05-01",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2025-05-07",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-05-08",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-05-09",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-05-10",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-05-14",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2025-05-17",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2025-05-22",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-05-23",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-05-28",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2025-06-04",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-06-06",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-10-23",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-10-24",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-10-29",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2025-11-03",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-11-06",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2025-11-07",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dwitiya",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-11-08",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Chaturthi",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-11-14",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-11-15",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-11-24",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2025-11-29",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-12-01",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-12-05",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Pratipada",
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2025-12-06",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2026-02-04",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-02-06",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Chitra",
+    "Hasta"
+   ],
+   "tithis": [
+    "Shashthi",
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2026-02-11",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Jyeshtha",
+    "Anuradha"
+   ],
+   "tithis": [
+    "Dashami",
+    "Navami"
+   ]
+  },
+  {
+   "date": "2026-02-19",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-02-20",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-02-21",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2026-02-25",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-02-26",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-03-04",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Pratipada",
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2026-03-05",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2026-03-06",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-03-09",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2026-03-13",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-03-14",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-04-20",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-05-04",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-05-08",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2026-05-13",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-06-24",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-06-26",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-06-27",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-07-01",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2026-07-02",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2026-07-06",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2026-11-11",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2026-11-14",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2026-11-20",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-11-21",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Ashwini",
+    "Revati"
+   ],
+   "tithis": [
+    "Trayodashi",
+    "Dwadashi"
+   ]
+  },
+  {
+   "date": "2026-11-25",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Pratipada",
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2026-11-26",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dwitiya",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-12-02",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-12-03",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-12-04",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-12-11",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-12-12",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-12-18",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-12-19",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-12-30",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2027-01-01",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-02-10",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-02-11",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-02-15",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-02-22",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Dwitiya",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-02-24",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-02-25",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-02-27",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2027-03-03",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-03-04",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Dwadashi",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-03-10",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Dwitiya",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-03-11",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-03-15",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2027-03-22",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-03-24",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Dwitiya",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-03-26",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-03-27",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-03-31",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-04-01",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-05-07",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2027-05-08",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dwitiya",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-05-15",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-05-17",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-05-20",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-05-21",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-05-24",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-05-31",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-06-05",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2027-06-14",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-06-16",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-06-21",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Dwitiya",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-06-26",
+   "weekday": "Saturday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2027-11-01",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-11-04",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2027-11-05",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Saptami"
+   ]
+  },
+  {
+   "date": "2027-11-10",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Bhadrapada"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-11-11",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-11-12",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-11-15",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Dwitiya"
+   ]
+  },
+  {
+   "date": "2027-11-22",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Uttara Phalguni"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-12-02",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Uttara Ashadha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-12-08",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Uttara Bhadrapada",
+    "Revati"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-12-09",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-12-13",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-12-22",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  }
+ ],
+ "vahanKharidi": [
+  {
+   "date": "2025-01-02",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Shravana",
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-01-06",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-01-13",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Purnima",
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2025-01-19",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-01-20",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-01-22",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-01-24",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-01-31",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-02-03",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-02-07",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-02-09",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-02-10",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-02-17",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-02-19",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Saptami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-02-20",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-02-21",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-02-26",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-03-02",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-03-06",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-03-07",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-03-09",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Punarvasu",
+    "Pushya"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-03-10",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Dwadashi",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-03-16",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-03-17",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Chitra",
+    "Swati"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-03-19",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-03-20",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-03-27",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-04-02",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-04-03",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-04-06",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-04-13",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Chitra",
+    "Swati"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2025-04-14",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2025-04-16",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-04-21",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-04-23",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Dhanishtha",
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-04-24",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-04-30",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-05-01",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2025-05-02",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-05-04",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-05-09",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Hasta",
+    "Chitra"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-05-11",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2025-05-12",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Vishakha",
+    "Swati"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2025-05-18",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-05-19",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Saptami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-05-23",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-06-05",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-06-06",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-06-08",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-06-15",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Shravana",
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2025-06-16",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Dhanishtha",
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-06-20",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-06-23",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-06-27",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-07-02",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-07-03",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-07-04",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-07-13",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-07-17",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-07-21",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-07-30",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Hasta",
+    "Chitra"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-08-01",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-08-03",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-08-04",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-08-08",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2025-08-10",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2025-08-11",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-08-13",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2025-08-14",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-08-17",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-08-18",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-08-20",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Punarvasu",
+    "Pushya"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-08-21",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-08-27",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2025-08-28",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Chitra",
+    "Swati"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-08-29",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-08-31",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-09-05",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Shravana",
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-09-07",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2025-09-24",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Chitra",
+    "Swati"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-09-25",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Chaturthi",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-10-02",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-10-03",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Shravana",
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-10-05",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-10-10",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2025-10-12",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-10-13",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-10-15",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-10-24",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-10-29",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-10-30",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-10-31",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Dhanishtha",
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2025-11-03",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-11-07",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-11-09",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-11-10",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Punarvasu",
+    "Pushya"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-11-17",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Chitra",
+    "Swati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-11-26",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-11-28",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2025-12-01",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-12-04",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2025-12-05",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2025-12-07",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2025-12-08",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2025-12-14",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Hasta",
+    "Chitra"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-12-15",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Chitra",
+    "Swati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2025-12-17",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2025-12-24",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2025-12-25",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Dhanishtha",
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-12-26",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2025-12-28",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2026-01-01",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-01-02",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2026-01-04",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2026-01-05",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-01-11",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2026-01-12",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-01-14",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-01-21",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Dhanishtha",
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-01-28",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-01-29",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-02-01",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2026-02-06",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Hasta",
+    "Chitra"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2026-02-11",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Jyeshtha",
+    "Anuradha"
+   ],
+   "tithis": [
+    "Dashami",
+    "Navami"
+   ]
+  },
+  {
+   "date": "2026-02-26",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-02-27",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-03-01",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-03-05",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-03-06",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Hasta",
+    "Chitra"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-03-08",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2026-03-09",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2026-03-15",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-03-16",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-03-23",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2026-03-25",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2026-03-27",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Punarvasu",
+    "Pushya"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-04-01",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2026-04-02",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Hasta",
+    "Chitra"
+   ],
+   "tithis": [
+    "Purnima",
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2026-04-03",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2026-04-06",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2026-04-12",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Shravana",
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-04-13",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Dhanishtha",
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-04-20",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-04-23",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2026-04-24",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2026-04-29",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-05-01",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Purnima",
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2026-05-04",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-05-10",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2026-05-11",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-05-14",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-06-17",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Punarvasu",
+    "Pushya"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-06-22",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2026-06-24",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Chitra",
+    "Swati"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-06-25",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-07-02",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-07-03",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-07-05",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2026-07-08",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2026-07-12",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-07-19",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2026-07-24",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-07-29",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Purnima",
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2026-07-30",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Shravana",
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2026-08-07",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2026-08-09",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-08-10",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-08-16",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Hasta",
+    "Chitra"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2026-08-17",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Chitra",
+    "Swati"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2026-08-20",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2026-08-26",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-08-27",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Dhanishtha",
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2026-08-28",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Purnima",
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2026-08-31",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-09-04",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2026-09-06",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-09-07",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-09-13",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Hasta",
+    "Chitra"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-09-14",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Chaturthi",
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-09-16",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2026-09-17",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2026-09-24",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Dhanishtha",
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-10-21",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Dhanishtha",
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-10-22",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-10-25",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2026-10-28",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-10-30",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2026-11-01",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2026-11-06",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Hasta",
+    "Chitra"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-11-25",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2026-11-26",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2026-11-29",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2026-12-03",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-12-04",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Hasta",
+    "Chitra"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2026-12-06",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2026-12-13",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2026-12-14",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Shravana",
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2026-12-23",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2026-12-30",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2026-12-31",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-01-01",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Chitra",
+    "Swati"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-01-04",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-01-10",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Shravana",
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-01-11",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-01-15",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-01-18",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-01-20",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-01-21",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2027-01-22",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Punarvasu",
+    "Pushya"
+   ],
+   "tithis": [
+    "Purnima",
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-01-27",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Hasta",
+    "Chitra"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-01-29",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-01-31",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-02-11",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-02-18",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Punarvasu",
+    "Pushya"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-02-19",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-02-24",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-02-25",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Chitra",
+    "Swati"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-02-26",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-02-28",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-03-05",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Shravana",
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-03-10",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-03-11",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-03-14",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-03-15",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-03-17",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Punarvasu",
+    "Pushya"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-03-18",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-03-22",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-03-24",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Chitra",
+    "Swati"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-03-25",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-03-26",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-04-01",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-04-02",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Shravana",
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-04-04",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-04-11",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-04-12",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-04-14",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Punarvasu",
+    "Pushya"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-04-21",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-04-23",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-04-28",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-04-29",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-04-30",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Dhanishtha",
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-05-09",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-05-10",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-05-16",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-05-17",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-05-20",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Purnima",
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-05-21",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-05-26",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-05-28",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-05-31",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-06-07",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-06-13",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Hasta",
+    "Chitra"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-06-14",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Chitra",
+    "Swati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-06-16",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-06-23",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-06-24",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Dhanishtha",
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-06-25",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-06-27",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-07-01",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-07-02",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-07-11",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Chitra"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-07-12",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-07-14",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-07-19",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-07-21",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Dhanishtha",
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-07-25",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-07-29",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-08-06",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-08-11",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-08-16",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Shravana",
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2027-08-18",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-08-22",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-08-25",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Rohini"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-08-26",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-08-27",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-08-29",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-09-02",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-09-03",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-09-05",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-09-13",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-09-15",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Purnima"
+   ]
+  },
+  {
+   "date": "2027-10-04",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Panchami"
+   ]
+  },
+  {
+   "date": "2027-10-10",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Shravana",
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-10-11",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-10-15",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Purnima",
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-10-20",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-10-22",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Punarvasu",
+    "Pushya"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-10-27",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-10-31",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-11-01",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Anuradha"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-11-08",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Dashami"
+   ]
+  },
+  {
+   "date": "2027-11-11",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-11-12",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-11-15",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini",
+    "Krittika"
+   ],
+   "tithis": [
+    "Dwitiya",
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-11-18",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Punarvasu",
+    "Pushya"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-11-19",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Pushya"
+   ],
+   "tithis": [
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-11-24",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Hasta"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-11-25",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Chitra",
+    "Swati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-11-26",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Trayodashi"
+   ]
+  },
+  {
+   "date": "2027-12-03",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Shravana",
+    "Dhanishtha"
+   ],
+   "tithis": [
+    "Panchami",
+    "Shashthi"
+   ]
+  },
+  {
+   "date": "2027-12-05",
+   "weekday": "Sunday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-12-06",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Shatabhisha"
+   ],
+   "tithis": [
+    "Ashtami"
+   ]
+  },
+  {
+   "date": "2027-12-08",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-12-09",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Revati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-12-13",
+   "weekday": "Monday",
+   "nakshatras": [
+    "Rohini",
+    "Mrigashira"
+   ],
+   "tithis": [
+    "Purnima",
+    "Pratipada"
+   ]
+  },
+  {
+   "date": "2027-12-15",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Punarvasu"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-12-16",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Punarvasu",
+    "Pushya"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-12-22",
+   "weekday": "Wednesday",
+   "nakshatras": [
+    "Chitra",
+    "Swati"
+   ],
+   "tithis": [
+    "Dashami",
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-12-23",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Swati"
+   ],
+   "tithis": [
+    "Ekadashi"
+   ]
+  },
+  {
+   "date": "2027-12-30",
+   "weekday": "Thursday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Tritiya"
+   ]
+  },
+  {
+   "date": "2027-12-31",
+   "weekday": "Friday",
+   "nakshatras": [
+    "Shravana"
+   ],
+   "tithis": [
+    "Chaturthi",
+    "Tritiya"
+   ]
+  }
+ ]
+}

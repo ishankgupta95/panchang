@@ -1,7 +1,8 @@
 import { getNakshatraIndexAtTime } from './nakshatra';
+import { solveElementBoundary, type ElementAngle } from '../utils/search';
 import { VARJYAM_OFFSET_GHATIKAS } from '../utils/constants';
 import { assertNakshatraIndex } from '../utils/validation';
-import type { TimePeriod } from '../types/elements';
+import type { UtcWindow } from '../types/elements';
 
 /**
  * Lookback / lookforward window for the bisections that locate the
@@ -11,6 +12,17 @@ import type { TimePeriod } from '../types/elements';
  */
 const NAKSHATRA_LOOKBACK_HOURS = 30;
 const NAKSHATRA_LOOKFORWARD_HOURS = 30;
+
+/**
+ * How narrow the bracketing bisection has to get before the secant takes over.
+ *
+ * Two minutes, which is ~9 probes over a 30-hour window. The secant needs only
+ * a bracket the residual is monotone across, and the Moon's longitude is
+ * monotone over far more than two minutes — the tighter value is there so the
+ * secant's first extrapolation starts close, not because it needs it.
+ */
+const BRACKET_MS = 120_000;
+const MAX_BRACKET_ITERS = 30;
 
 /**
  * Varjyam (Vishaghati / Nakshatra Thyajyam) — a forbidden ~1.5h window per
@@ -50,7 +62,7 @@ const NAKSHATRA_LOOKFORWARD_HOURS = 30;
  * @param sunriseUtc             UTC of local sunrise — start of the Hindu day.
  * @param nextSunriseUtc         UTC of the following day's local sunrise.
  * @param getMoon                Sidereal Moon longitude (degrees) at a UTC instant.
- * @returns                      The Varjyam `TimePeriod`, or `null` when the
+ * @returns                      The Varjyam `UtcWindow`, or `null` when the
  *                               computed window has no overlap with the Hindu day,
  *                               or when the nakshatra's boundaries cannot be located.
  */
@@ -59,15 +71,16 @@ export function computeVarjyam(
   sunriseUtc: Date,
   nextSunriseUtc: Date,
   getMoon: (d: Date) => number,
-): TimePeriod | null {
+): UtcWindow | null {
   assertNakshatraIndex(currentNakshatraIndex, 'currentNakshatraIndex');
 
   const getIndex = (d: Date) => getNakshatraIndexAtTime(d, getMoon);
+  const angle: ElementAngle = { angleAt: getMoon, spanDeg: 360 / 27 };
 
-  const nakshatraStartUtc = findNakshatraStart(sunriseUtc, currentNakshatraIndex, getIndex);
+  const nakshatraStartUtc = findNakshatraStart(sunriseUtc, currentNakshatraIndex, getIndex, angle);
   if (nakshatraStartUtc === null) return null;
 
-  const nakshatraEndUtc = findNakshatraEnd(sunriseUtc, currentNakshatraIndex, getIndex);
+  const nakshatraEndUtc = findNakshatraEnd(sunriseUtc, currentNakshatraIndex, getIndex, angle);
   if (nakshatraEndUtc === null) return null;
 
   const nakshatraDurationMs = nakshatraEndUtc.getTime() - nakshatraStartUtc.getTime();
@@ -89,8 +102,15 @@ export function computeVarjyam(
 /**
  * Locate the leftmost UTC moment the Moon was already inside `currentIndex`.
  *
- * Bisects "Moon-index === currentIndex" over
- * `[sunrise − NAKSHATRA_LOOKBACK_HOURS, sunrise]`. Tolerance: ~30 s.
+ * Brackets "Moon-index === currentIndex" over
+ * `[sunrise − NAKSHATRA_LOOKBACK_HOURS, sunrise]` by bisection, then solves the
+ * bracket exactly with {@link solveElementBoundary}.
+ *
+ * The bisection used to *be* the answer, at a 30-second tolerance, and that was
+ * the dominant error in every Varjyam window this module publishes — the
+ * boundary was quantised onto a 30 s grid while the nakshatra end-times it
+ * should have matched were accurate to 24 ms. Bisection now only has to narrow
+ * the bracket enough for the secant to take over, which is {@link BRACKET_MS}.
  *
  * Returns `null` when the Moon is still in `currentIndex` at the lookback
  * boundary — astronomically impossible, so this branch indicates inconsistent
@@ -101,21 +121,21 @@ function findNakshatraStart(
   sunriseUtc: Date,
   currentIndex: number,
   getIndexAt: (d: Date) => number,
+  angle: ElementAngle,
 ): Date | null {
-  const TOL_MS = 30_000;
-  const MAX_ITERS = 30;
   const lookbackMs = NAKSHATRA_LOOKBACK_HOURS * 3600_000;
   let lo = sunriseUtc.getTime() - lookbackMs;
   let hi = sunriseUtc.getTime();
 
   if (getIndexAt(new Date(lo)) === currentIndex) return null;
 
-  for (let i = 0; i < MAX_ITERS && hi - lo > TOL_MS; i++) {
+  for (let i = 0; i < MAX_BRACKET_ITERS && hi - lo > BRACKET_MS; i++) {
     const mid = Math.floor((lo + hi) / 2);
     if (getIndexAt(new Date(mid)) === currentIndex) hi = mid;
     else lo = mid;
   }
-  return new Date(hi);
+  const solved = solveElementBoundary(lo, hi, angle, (ms) => getIndexAt(new Date(ms)) !== currentIndex);
+  return new Date(solved ?? hi);
 }
 
 /**
@@ -123,8 +143,9 @@ function findNakshatraStart(
  * searching forward from `sunriseUtc`. This is the start instant of the
  * next nakshatra; equivalently, the end of the active nakshatra.
  *
- * Bisects on `getIndexAt(d) !== currentIndex` over
- * `[sunrise, sunrise + NAKSHATRA_LOOKFORWARD_HOURS]`. Tolerance: ~30 s.
+ * Brackets on `getIndexAt(d) !== currentIndex` over
+ * `[sunrise, sunrise + NAKSHATRA_LOOKFORWARD_HOURS]`, then solves — see
+ * {@link findNakshatraStart} for why the bisection stops being the answer.
  *
  * Returns `null` when the Moon is still in `currentIndex` at the lookforward
  * boundary — astronomically impossible, so this branch likewise indicates
@@ -134,19 +155,19 @@ function findNakshatraEnd(
   sunriseUtc: Date,
   currentIndex: number,
   getIndexAt: (d: Date) => number,
+  angle: ElementAngle,
 ): Date | null {
-  const TOL_MS = 30_000;
-  const MAX_ITERS = 30;
   const lookforwardMs = NAKSHATRA_LOOKFORWARD_HOURS * 3600_000;
   let lo = sunriseUtc.getTime();
   let hi = sunriseUtc.getTime() + lookforwardMs;
 
   if (getIndexAt(new Date(hi)) === currentIndex) return null;
 
-  for (let i = 0; i < MAX_ITERS && hi - lo > TOL_MS; i++) {
+  for (let i = 0; i < MAX_BRACKET_ITERS && hi - lo > BRACKET_MS; i++) {
     const mid = Math.floor((lo + hi) / 2);
     if (getIndexAt(new Date(mid)) === currentIndex) lo = mid;
     else hi = mid;
   }
-  return new Date(hi);
+  const solved = solveElementBoundary(lo, hi, angle, (ms) => getIndexAt(new Date(ms)) === currentIndex);
+  return new Date(solved ?? hi);
 }

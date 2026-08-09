@@ -78,8 +78,8 @@ JSDoc with `@param` / `@returns` / `@example`.
 | 31 | Ashtakavarga + Yoga detection + Jaimini Karakas + Bhava Bala (Wave 4a — pan-Indian Parashara core) | v3.2.0 | ✅ |
 | 32 | Varshaphala + Tithi Pravesha + Arudha + Special Lagnas + Upagrahas + Argala (Wave 4b — North-Indian + remaining classical layers) | v3.3.0 | ✅ |
 | 33 | Pathu Porutham + Narayan Dasha + KP sub-lord layer + Prashna foundation (Wave 4c — South-Indian regional features) | v3.4.0 | ✅ |
-| 34 | Drik Panchang / pandit parity sweep — doshas, marriage-matching cancellations, yoga bhanga, fixture harness, specialist completeness (sub-phases 34a–34e) | v4.x (4.0.0 baseline) | ✅ code-complete |
-| 35 | Static data tables (engine-free subpaths) — festivals, eclipses, moon-phases; bundled JSON + runtime builders (Wave 6 — offline distribution) | v4.2.0 → v4.3.0 | 🚧 eclipses + moon-phases code-complete, uncommitted |
+| 34 | Drik Panchang / pandit parity sweep — doshas, marriage-matching cancellations, yoga bhanga, fixture harness, specialist completeness (sub-phases 34a–34e) | v4.x (4.0.0 baseline) | ✅ (34e item 2, Arudha bhanga, deferred on the ≥2-source bar) |
+| 35 | Static data tables (engine-free subpaths) — festivals, eclipses, moon-phases; runtime builders (Wave 6 — offline distribution). **Bundled JSONs removed in v5 — consumers build and cache their own; see the Phase 35 v5 note.** | v4.2.0 → v4.3.0 | ✅ superseded by the v5 note — bundled JSONs removed, subpaths are engine-free readers |
 
 State as of v3.4.0: **7,707 tests** passing across 95 files. Bundle ~361 KB CJS.
 Festival registry: 80+ entries. Diaspora cross-verified across 5 non-IST cities.
@@ -111,6 +111,18 @@ next minor). Each ships bundled JSON + a runtime `build*Table` for other locatio
 | Planet rashi placement (D1, 21 charts × 9 planets) | exact | exact 189/189 |
 | Planet degree-in-rashi (21 R-tier charts) | ±0.5° | ≤0.5° |
 | Sade Sati arc boundary (20 charts) | ±2 days | ≤2 days |
+
+**Tier 0 — JPL Horizons / DE441, 1900–2100** (added Phase 36.0; these are the
+only assertions with independent authority — see [tests/TIERS.md](tests/TIERS.md)):
+
+| Element | Max \|error\| | Mean | As time at the body's rate |
+|---|---|---|---|
+| Sun apparent ecliptic longitude | 1.61″ | 0.52″ | 39 s |
+| Moon apparent ecliptic longitude | 3.75″ | 0.88″ | 6.8 s |
+| Mercury / Venus / Mars | 6.50″ / 19.59″ / 11.10″ | 1.67 / 1.78 / 1.51″ | — |
+| Jupiter / Saturn | 9.66″ / 11.15″ | 2.86 / 3.11″ | — |
+| ΔT (TT − UT), 1900–2010 | 0.83 s | — | 0.83 s on any longitude-crossing time |
+| Secant solver vs exact bisection | 24 ms | — | 24 ms |
 
 **Documented rule-choice tradeoffs** (not bugs — see README "Festival Detection
 — Documented Tradeoff" section):
@@ -1021,7 +1033,7 @@ output shape is identical to a natal chart.
 
 ---
 
-## Phase 34 — Drik Panchang / Pandit Parity Sweep (Wave 5) — 🚧 in progress
+## Phase 34 — Drik Panchang / Pandit Parity Sweep (Wave 5) — ✅ code-complete
 
 **Status (2026-05-11).** Phase 34a + 34b + 34c + 34d all code-complete.
 **Phase 34e (Wave 5 final sub-phase) code-complete** — 5 of 6 items
@@ -1968,12 +1980,22 @@ Narayan variable ~1d, Shadbala sub-components ~1d).
 
 ---
 
-## Phase 35 — Static Data Tables (Wave 6, offline distribution) — 🚧 in progress
+## Phase 35 — Static Data Tables (Wave 6, offline distribution) — ✅ superseded by the v5 note below
 
 **Status (2026-05-30).** Festivals table shipped (v4.2.0). Eclipses +
 moon-phases tables code-complete and verified, **uncommitted** (user commits
 manually — [[feedback_no_commit]]). Proposed next release **v4.3.0** (additive
 minor).
+
+> **Superseded 2026-08-06 (v5).** The three bundled JSONs (`src/data/`) are
+> **removed**. Shipping pre-computed tables baked a location and a year window
+> into the package: correct only near the reference site, stale the moment the
+> window rolled, and 726 KB of object literal parsed at startup for anyone who
+> imported one. The subpath entries survive as **engine-free readers** — the
+> `source` table is now a required first argument, and consumers build their own
+> with `build*Table`, cache the JSON, and read it back. The `*:gen` scripts
+> remain as worked examples, now writing to a path the caller chooses. See
+> Phase 37 for the rest of the table/compute API work.
 
 **Why.** Mobile / offline / RN consumers want festival dates, eclipse timings,
 and lunar phases without pulling the calculation engine (astronomy-engine) into
@@ -1989,14 +2011,23 @@ expansive ones.
 
 | Subpath | Accessors | Builder | Generator | Bundled JSON |
 |---------|-----------|---------|-----------|--------------|
-| `panchang-ts/festivals` | `getFestivalsForYear` / `…ForDate` | `buildFestivalsTable` | `festivals:gen` | `src/data/festivals.json` (v4.2.0) |
-| `panchang-ts/eclipses` | `getEclipsesForYear` / `…ForDate` | `buildEclipsesTable` | `eclipses:gen` | `src/data/eclipses.json` |
-| `panchang-ts/moon-phases` | `getMoonPhasesForYear` / `…ForDate` | `buildMoonPhasesTable` | `moon-phases:gen` | `src/data/moonPhases.json` |
+| `panchang-ts/festivals` | `readFestivalsForYear` / `…ForDate` | `buildFestivalsTable` | `festivals:gen` | **none — removed in v5** |
+| `panchang-ts/eclipses` | `readEclipsesForYear` / `…ForDate` | `buildEclipsesTable` | `eclipses:gen` | **none — removed in v5** |
+| `panchang-ts/moon-phases` | `readMoonPhasesForYear` / `…ForDate` | `buildMoonPhasesTable` | `moon-phases:gen` | **none — removed in v5** |
+| `panchang-ts/muhurta` | `readMuhurtaForYear` / `…ForDate` | `buildMuhurtaTable` | `muhurta:gen` | **none — new in v5** |
 
-All three: rolling **2-past / 5-future** window, en + hi, `_meta` + `years`
-shape, `source` arg on accessors so a runtime-built table is a drop-in for the
-bundled one. Each is bundled into its own tsup entry, so importing one never
-drags in the engine or the other tables' data.
+**Updated for v5.** This table read `getFestivalsForYear` etc. and named
+`src/data/festivals.json` / `eclipses.json` / `moonPhases.json` as bundled data.
+Both halves are out of date: v5 renamed every table accessor to `read*` (the
+`get*` names survive as deprecated aliases), and it **removed the bundled JSON
+entirely** — there is no `src/data/` and no `.json` under `src/` at all.
+Consumers build and cache their own; the `*:gen` scripts are worked examples
+that write to a path you give them, not to the package.
+
+All four: en + hi, `_meta` + `years` shape, dictionary-encoded with a stable
+`key`, `source` arg on the accessors taking whatever the builder produced. Each
+is its own tsup entry, so importing one never drags in the engine or the other
+tables' data.
 
 ### Eclipses (`getEclipsesInRange`, `isEclipseVisibleAnyPhase`)
 
@@ -2019,13 +2050,12 @@ drags in the engine or the other tables' data.
   each instant mapped to its IST date. Distinct from the same-named *tithis*
   (~24h windows). ~49 events/year.
 
-### Bootstrap gotcha (all three tables)
+### Bootstrap gotcha (all three tables) — resolved
 
-`*:gen` runs `npm run build` first (inlining the *previous* JSON), then writes
-the new JSON — so `dist/` lags one generation until the next plain
-`npm run build`. Harmless at publish (`prepublishOnly` builds from the committed
-src/data JSON); run a final `npm run build` after a fresh-table `:gen` if testing
-dist locally.
+`*:gen` used to run `npm run build` first (inlining the *previous* JSON) and
+then write the new JSON, so `dist/` lagged one generation. With no JSON bundled
+(see the v5 note above) the cycle is gone: the generators read the built engine
+and write to an external path.
 
 ### Phase 35 deferred / future-scope
 
@@ -2049,7 +2079,10 @@ dist locally.
 | 32 | Wave 4b | Varshaphala + Tithi Pravesha + Arudha + Special Lagnas + Upagrahas + Argala | 8–9d | v3.3 ✅ |
 | 33 | Wave 4c | Pathu Porutham + Narayan Dasha + KP sub-lord + Prashna foundation | 7–8d | v3.4 ✅ |
 | 34 | Wave 5 | Drik Panchang / Pandit Parity Sweep (doshas, matching, yogas, fixtures, specialist completeness) | 13–19d | one minor per sub-phase on top of `package.json` 4.0.0 ✅ code-complete |
-| 35 | Wave 6 | Static Data Tables — festivals / eclipses / moon-phases (engine-free subpaths + runtime builders) | 2–3d | v4.2.0 (festivals) → v4.3.0 (eclipses + moon-phases) 🚧 |
+| 35 | Wave 6 | Static Data Tables — festivals / eclipses / moon-phases (engine-free subpaths + runtime builders) | 2–3d | v4.2.0 (festivals) → v4.3.0 (eclipses + moon-phases) ✅ |
+| 36 | Wave 7 | Own Astronomy Core + Ephemeris Cost Reduction (36.0 validation protocol gates all of it) | 36.0: 2–3d · 36.1: 1–2d · 36.2–36.5: 3–6w | v5 ✅ **all of 36.0–36.5 done; zero runtime dependencies; one exit criterion missed and measured** |
+| 37 | Wave 7 | Unified Table/Compute API for Static Data (+ muhurta table, ~4× smaller JSON) | 3–5d | v5 ✅ |
+| 38 | Wave 7 | Result-Shape & Public API Corrections (real Date instants, `_debug`, null-vs-optional, grouped result) | 4–6d | v5 ✅ |
 
 **Decisions locked across the roadmap:**
 - en + hi only (no new locales).
@@ -2101,3 +2134,902 @@ dharmagya / dharmagya-website repos, not here.
 A v4.0 major bump is reserved for any future breaking change in the
 public type surface; nothing on this list inherently requires v4 —
 each item is additive and would land as a v3.x minor.
+
+---
+
+## Phase 36 — Own Astronomy Core + Ephemeris Cost Reduction (Wave 7, v5) — ✅ done, with one measured shortfall
+
+**Why.** Two goals that share the same work: (a) stop depending on
+`astronomy-engine`, so a library meant to stay correct for decades does not
+inherit someone else's release cadence; (b) cut the ephemeris cost, which the
+2026-08-06 audit ([notes/v5-audit.md](notes/v5-audit.md)) measured at **84.8% of
+self time**.
+
+**The measurement that shapes this phase.** That 84.8% is *real math, not
+overhead* — reimplementing the same theory buys nothing on its own:
+
+| Measurement | Value | Consequence |
+|---|---|---|
+| Moon longitude (`Ecliptic(GeoMoon)`) | 7.9 µs | the periodic series is the floor |
+| `EclipticGeoMoon` (skips precession+nutation) | 7.87 µs, bit-identical | frame conversion is ~free; no win there |
+| `SearchRiseSet(Moon)` | **10.7 `CalcMoon` evaluations**, 0.099 ms | **the real cost** |
+| `SearchRiseSet(Sun)` | 0 `CalcMoon`, 0.041 ms | solar path already cheap |
+| Moon longitude reads/day *after* §36.1 | ~6.5 → ~0.05 ms | ephemeris becomes ~5% of a call |
+
+So: **rise/set root-finding, not the longitude series, is what to attack first**,
+and it needs no new astronomical theory at all. Accuracy also forbids a cheaper
+series — Meeus's abridged ELP (60 terms) runs ~10″ ≈ **18 s of tithi time**,
+against current Drik drift of 17–20 s that is already dominated by Drik
+publishing to the minute. Halving runtime by doubling error is not a trade this
+library makes.
+
+`astronomy-engine`'s lunar theory is Montenbruck & Pfleger (`astronomy.js:2791`);
+Sun and planets are VSOP87.
+
+### 36.0 Validation protocol — build this FIRST, before any new math — ✅ done
+
+**Status 2026-08-06.** Built, in full, before any own-ephemeris code exists.
+Deliverables and the findings they produced are in
+[docs/v5-validation-report.md](docs/v5-validation-report.md) § Step 4; the
+policy consumers of this plan need is in [tests/TIERS.md](tests/TIERS.md).
+
+| item | state |
+|---|---|
+| A — three tiers named | `tests/TIERS.md` |
+| B — Tier 0 fixtures committed first | `tests/fixtures/horizons-positions.json` (1,750 positions, DE441, 1900–2100) + `horizons-deltat.json` (21 decades) |
+| C — baseline error curve of the current code | measured; table below |
+| D — the same measurement as the acceptance gate | `tests/validation/tier0-horizons.test.ts` |
+| E — sensitivity coefficients | `tests/TIERS.md` |
+| F — invariant/tolerance split, enforced by a test | `@tier` markers + `tests/validation/tier-policy.test.ts` |
+| G — fixture-free cross-checks | `tier0-crosschecks.test.ts` (10) + `tier0-deltat.test.ts` (5) |
+| H — freeze a reference implementation | **36.2's first act**; nothing exists to freeze yet |
+
+**Baseline — `astronomy-engine` vs DE441, max |error| over 1900–2100.** These
+are the ceiling 36.2/36.4 must come in at or below, across the whole span:
+
+| Sun | Moon | Mercury | Venus | Mars | Jupiter | Saturn |
+|---|---|---|---|---|---|---|
+| 1.61″ | 3.75″ | 6.50″ | 19.59″ | 11.10″ | 9.66″ | 11.15″ |
+
+Three findings worth carrying into 36.2:
+
+- **The Moon's max is 3.75″, not the 0.83″ §36.0 D sketched** — 0.83″ was the
+  *mean* (measured 0.88″). Judge on the max.
+- **`GeoMoon` omits light-time retardation** (+0.706″, predicted 0.70″ and
+  confirmed). Applying it cuts the Moon's max error to 3.07″ and reveals a
+  −0.41″ theory bias that the missing term had been masking. 36.2 must include
+  the retardation.
+- **ΔT: the library models TT − UT1 but is fed UTC.** Fine while leap seconds
+  continue; CGPM 2022 resolved to stop them by 2035, after which the exposure
+  grows to 133 s by 2100 — and a ΔT error moves a tithi end-time by its full
+  size. Pinned so 36.2 reproduces it deliberately.
+
+Also measured: the secant solver sits within **24 ms** of an exact bisection of
+the same index function, against a Moon error worth 6.8 s. The solver is not the
+binding constraint.
+
+---
+
+#### Original specification (retained — it is the standard the work was held to)
+
+
+**The problem this solves.** Our 8,233 tests are pinned to current output, so
+they cannot adjudicate a new ephemeris. When one fails after a logic change
+there are three indistinguishable explanations: the new logic is wrong; the new
+logic is right and the fixture encoded the old error; or both sit within
+tolerance of truth and the diff is noise. Deciding that from inside the repo is
+impossible, and "the tests went green after I updated them" is not evidence of
+anything. **No fixture may be touched until this protocol says which case it
+is.**
+
+#### A. Three tiers of authority — know which tier every assertion sits in
+
+| Tier | Source | Authority | Can it adjudicate a change? |
+|---|---|---|---|
+| **0** | JPL Horizons (DE440/441), Swiss Ephemeris, NASA eclipse canon | Independent ground truth | **Yes — the only tier that can** |
+| **1** | DrikPanchang published panchang | Rule-level reference, ±30 s quantized (publishes to the minute) | Only for *rule* questions, not ephemeris accuracy |
+| **2** | Our own pinned fixtures | Regression detector, zero independent authority | **No** |
+
+Most of the suite is Tier 2. That is fine — Tier 2 is what catches accidents —
+but Tier 2 can only ever say "something changed", never "the change was wrong".
+
+#### B. Commit external ground truth as a fixture, before touching any code
+
+Pull ~2,000 geocentric apparent positions (Sun, Moon, Mercury–Saturn, lunar
+nodes) from **JPL Horizons** spanning 1900–2100, weighted toward 1950–2050, and
+commit as `tests/fixtures/horizons-*.json`. This is legitimately non-circular:
+it does not originate from our code, and it does not change when our code does.
+
+Add NASA/Espenak eclipse-canon contact times for the eclipse work, and a set of
+Drik-published ayanamsa values (Tier 1, already partly present).
+
+#### C. Characterize the CURRENT code against Tier 0 first — the step everyone skips
+
+Before writing one line of new ephemeris, measure **astronomy-engine's own
+error** against the Horizons fixture across the whole span. That produces a
+baseline error curve, and with it a numeric definition of "at least as good as
+today". Without this baseline, "more precise" is an opinion.
+
+#### D. Then measure the new implementation against the same fixture
+
+Now "better or worse" is arithmetic, not judgement:
+
+```
+Moon longitude, max |error| vs Horizons, 1900–2100
+  astronomy-engine (baseline)   0.83″
+  new implementation            0.41″   → better, accept
+  new implementation            3.2″    → worse, reject
+```
+
+**Accept only if the new error is ≤ baseline across the whole span**, not just
+on average and not just near 2025. Report max, mean, and the worst epoch.
+
+#### E. Predict every fixture delta before observing it
+
+This is the discipline that makes re-pinning legitimate. The sensitivity
+coefficients are known and already used in this repo:
+
+- Moon moves 0.549°/hr ≈ 1977″/hr → **δ arcsec of Moon longitude ⇒ δ × 1.82 s**
+  of tithi/karana boundary movement.
+- Nakshatra carries the ayanamsa **once**, yoga **twice**; tithi and karana
+  carry it **zero** times (Moon − Sun cancels it).
+- Sun moves 0.041°/hr → a δ arcsec Sun error moves a sankranti by δ × 24 s.
+
+So: from the Tier 0 delta measured in D, **write down the expected fixture
+movement first**. Then run the suite.
+
+- Movement matches the prediction → legitimate re-pin. Record the predicted and
+  observed numbers in the commit message.
+- Movement is larger, or moves a fixture the error budget says should not move
+  at all (e.g. a tithi end-time shifting when only the ayanamsa changed) →
+  **that is a bug**, not an improvement. Do not re-pin. Find it.
+
+This is exactly how the +38″ ayanamsa correction was validated: the
+tithi/karana-vs-nakshatra/yoga *sign split* identified the wrong constant, and
+the prediction "tithi and karana are untouched" was confirmed before anything
+was re-pinned. Institutionalize that.
+
+#### F. Split the suite so "don't change tests" is structural, not a promise
+
+Two kinds of assertion, and they get different rules:
+
+- **Invariant tests — may NEVER change.** These encode facts about the domain,
+  not about our arithmetic: tithi/nakshatra/yoga/karana *index* at sunrise,
+  festival calendar dates, `start ≤ peak ≤ end`, sunrise < sunset, the 30 tithis
+  of a lunation summing to the synodic month, 12 sankrantis spanning one
+  sidereal year, every name/boolean/index output. **If one of these breaks, the
+  new code is wrong — full stop.** No tolerance, no re-pin, no discussion.
+- **Numeric tolerance tests — may move, with receipts.** Pinned instants, each
+  carrying a provenance comment stating which tier justifies the number and to
+  what accuracy. Re-pin only via rule E.
+
+Mark the tiers in the test files so the rule is visible at the point of
+temptation.
+
+#### G. Cross-checks that need no fixture at all
+
+Independent signals that catch whole classes of error without any pinned value:
+
+- **Solver vs ephemeris separation.** Compare each reported transition against
+  an exact bisection of the *same* index function. That bounds the *solver's*
+  contribution independently of the ephemeris (already measured at ≤24 ms) — so
+  when a time moves you know which half moved.
+- **Mean-motion round-trip.** The longitude derivative must match the known mean
+  motion of each body to within the theory's stated accuracy.
+- **Closure identities.** Tithis per lunation, sankrantis per year, moon phases
+  per year: all have known counts and spans that a wrong theory breaks loudly.
+- **Delta-T isolation.** A Delta-T error shifts everything *uniformly* — test it
+  on its own so it cannot hide inside a longitude comparison.
+
+#### H. Freeze a reference implementation — this dissolves the optimization problem
+
+Write the new ephemeris **twice**:
+
+1. **Reference**: slow, obvious, transcribed straight from the literature with
+   no algebraic cleverness. Validate *this* against Tier 0 (steps C–D). Once it
+   passes, **freeze it** and keep it in the repo as a test-only module.
+2. **Optimized**: whatever it takes to be fast.
+
+The optimized version is then verified by **differential testing against the
+frozen reference** over ~100k pseudo-random instants, asserting max delta below
+a stated threshold — not against fixtures, not against Tier 0, and not against
+intuition. Every future optimization is checked the same way, forever, at
+essentially zero cost.
+
+This is already the pattern that validated the Chebyshev interpolation (fitted
+values checked against exact evaluation, max error quoted as a *time* error).
+Making it explicit means the correctness question is asked **once**, and every
+subsequent performance change is a cheap, mechanical proof.
+
+**Ordering is not negotiable: correct first, frozen second, fast third.**
+Optimizing before the reference is frozen leaves nothing to check the
+optimization against, which is how a fast wrong answer ships.
+
+### 36.1 Structural wins — no new theory (do these first) — ✅ 5 of 6 landed
+
+**Status 2026-08-06.** Items 1, 3, 4, 5, 6 are implemented; item 2 (interpolated
+lunar rise/set) is **deferred to 36.3** — see the sub-section below. Full
+before/after measurements, the predicted-vs-observed delta for every change that
+moved a number, and the reasoning behind each decision are in
+[docs/v5-validation-report.md](docs/v5-validation-report.md). Headlines, median
+of 7 processes, ms/call.
+
+**"Before" is the tree this phase started from — git HEAD, whose `package.json`
+said `4.3.1` but which already carried seven unpublished commits. It is not the
+published 4.3.1, which runs the same default call in 6.0562 ms.** Every row in
+this table is that same tree before and after 36.1, which is what a before/after
+is for; the distinction and the three-way measurement are in
+[docs/v5-validation-report.md](docs/v5-validation-report.md) § "Step 5, third
+pass".
+
+| | before (pre-36 tree) | after | |
+|---|---|---|---|
+| cold default | 0.9345 | **0.7885** | −15.6% |
+| cold `sections: []` | 0.4227 | **0.2847** | −32.6% |
+| cold all + `computeEndTimes: false` | 1.1876 | **0.7983** | −32.8% |
+| cold `getInstantPanchang` | 0.3185 | **0.2342** | −26.5% |
+| warm default | 0.6291 | **0.1757** | −72.1% |
+| warm `getInstantPanchang` | 0.2447 | **0.1415** | −42.2% |
+| `getFestivalsInRange`, ms/yr | 336.1 | **233.4** | −30.6% |
+
+Regressions, all deliberate and priced: cold `sections: []` + no end-times +5.4%
+(the one shape interpolation does not pay for), standalone `getMoonrise` +12% /
+`getMoonset` +15% (the price of canonical single-valued lunar events, against a
+3.6× win on any repeated day).
+
+Zero invariant-test changes, zero fixture re-pins, 8,233 tests green throughout.
+The only published values that moved are `moonrise` / `moonset`, by ≤182 ms,
+which is the search-start jitter the canonical cache exists to remove.
+
+Each is self-contained, non-breaking, and provable against the existing suite.
+
+1. ✅ **Share Chebyshev blocks across calls.** `LongitudeCache` is constructed per
+   `getDailyPanchang`, so a calendar scan rebuilds 4-day Moon and 8-day Sun
+   blocks *every day*. Hoist the block maps to module scope with an entry cap +
+   clear-on-overflow, matching `EVENT_CACHE` in `sunrise.ts`.
+   *Prototyped 2026-08-06: `GeoMoon` 21.5→6.5/day, `SunPosition` 29.1→5.1/day,
+   `sections: []` −34%, `getInstantPanchang` −29%, default warm call −23%, and
+   **all 8,235 tests passed unchanged**.*
+   Safe because a block is a pure function of its block index over **tropical**
+   longitudes — ayanamsa is applied per read, so blocks are ayanamsa-independent
+   too. Same order-independence argument `cache.ts` already documents.
+2. **Interpolated lunar rise/set.** Build a Chebyshev interpolant of the Moon's
+   RA/Dec over the day and solve rise/set against the polynomial. Turns 10.7
+   full theory evaluations into 10.7 polynomial evaluations. Expected ~10× on
+   the single most expensive primitive; a default day runs two of them
+   (moonrise + moonset ≈ 0.18 ms measured).
+   **→ DEFERRED to 36.3.** `SearchRiseSet` takes no injected ephemeris, so this
+   means writing our own rise/set solver — duplicating the un-exported
+   `HorizonDipAngle`, `BodyRadiusAu`, `REFRACTION_NEAR_HORIZON` and
+   `MaxAltitudeSlope`, then re-implementing the ascent scan and root solve. That
+   is 36.3's port arriving early, and §36.0 H says the optimized implementation
+   does not come before there is something authoritative to check it against.
+   Worth ~−0.16 ms (−21%) on a cold default call, so it should be taken — after
+   36.0. The seam is ready: both bodies now resolve through `riseSetCache.ts`,
+   and `notes/lunarcheck.src.ts` is the differential test (153,600
+   comparisons, Quito to Alert at 82.5 °N).
+3. ✅ **Canonical lunar event cache.** Give `moonrise.ts` the per-UTC-day event
+   cache `sunrise.ts` already has, keyed on
+   `(direction, lat, lon, elevation, dayIndex)`. Buys the same single-valuedness
+   property sunrise gained, plus reuse across consecutive days and between the
+   `'moonTimes'` section and the festival block's Karva Chauth / Sankashti
+   anchors.
+4. ✅ **Fix the cache-mode heuristic.** `doEndTimes ? 'interpolated' : 'exact'` is
+   right for a narrowed call and wrong for a full one: with all sections on,
+   `computeEndTimes: false` is *slower* (0.53 → 0.62 ms warm). Choose the mode
+   from expected read volume, e.g. `doEndTimes || wantFestivals`.
+   **→ Implemented differently, deliberately.** `doEndTimes || wantFestivals`
+   makes the mode — and so the published numbers, since the two modes differ by
+   ≤2.0e-7° — a function of `options.sections`, which is exactly the neutrality
+   `tests/unit/sections.test.ts` guards. Instead both entry points **always
+   interpolate**, so output depends on neither `sections` nor `computeEndTimes`.
+   That is a stronger guarantee than the one at risk, and it retires a
+   pre-existing discrepancy where the same day published a different
+   `siderealMoonAtSunrise` with and without end-times. See `INTERPOLATE_ALWAYS`
+   in `panchang.ts`.
+5. ✅ **Route the eclipse syzygy guard through the call's cache.** `eclipse.ts`
+   calls `getTropicalMoonLongitude` / `getTropicalSunLongitude` directly, so
+   `sections: ['eclipse']` costs the same 21.5 `GeoMoon`/day as a full call.
+   Keep the guard (4 evaluations to skip a search costing hundreds — it is
+   well-designed); just let the interpolant answer them.
+6. ✅ **Search-layer cleanups.** Hoist the loop-invariant
+   `getIndexAtTime(nextSunriseUtc)` out of `findDailyElements`
+   (`search.ts:284`); check whether `findTransitionTime`'s up-front bracket
+   probe can be reused by the secant solve.
+
+**Gate.** Re-profile after 36.1. If the ephemeris has dropped to a few percent
+of runtime, the *performance* case for 36.2+ is gone and the decision becomes
+purely about independence and bundle size — decide it on those terms, honestly.
+
+### 36.2 Own Sun + Moon ecliptic longitude — ✅ done
+
+**Status 2026-08-06.** ΔT is **done, validated against Tier 0 and frozen**
+(`src/astronomy/deltaT.ts`, `tests/validation/tier0-own-deltat.test.ts`): equal
+to the baseline against Horizons over 1900–2010 (0.831 s), and within 0.05 s of
+an independent transcription over 100,000 instants spanning −500 → +2500. Not
+wired in — `MakeTime` still performs the conversion throughout `src/`, and
+swapping it while the surrounding series are still external would move published
+values for no benefit.
+
+`ttDaysSinceJ2000` rather than a Julian Date is the primitive the series take: a
+JD near the present leaves only ~10 µs of double resolution, days-since-J2000
+reaches picoseconds.
+
+**The Sun and Moon series are blocked on a sourcing decision, not on effort.**
+They are hundreds to thousands of periodic-term coefficients — data, not logic —
+and the only sound way to obtain them is from an authoritative source. Three
+defensible options (vendor the published VSOP87D/ELP2000-82B tables with a fetch
+script; port from `astronomy-engine`'s MIT-licensed embedding; generate a
+truncated series offline to a stated budget), with their trade-offs measured
+rather than guessed, are laid out in
+[docs/v5-validation-report.md](docs/v5-validation-report.md) § Step 5. Every
+remaining sub-phase sits behind that choice.
+
+Two Step 4 measurements bear on it: the Moon's accuracy bar is **3.75″ max**
+(not the 0.83″ §36.0 D sketched — that was the mean), and adding the missing
+light-time retardation is a free 18% improvement whichever series is chosen.
+
+---
+
+The tractable, high-confidence piece. Replaces `GeoMoon`, `SunPosition`,
+`Ecliptic`.
+
+- Moon: full-precision analytical theory to ≤1″ (M&P-class or truncated
+  ELP2000-82B retaining enough terms for the budget). **Not** an abridged
+  60-term series.
+- Sun: VSOP87D truncated to ≤1″.
+- Compute **sidereal directly** where possible, folding the ayanamsa in rather
+  than the current tropical → subtract round-trip.
+- Own Delta-T (Espenak–Meeus, as `astronomy-engine` uses). Getting this wrong
+  shifts everything uniformly and looks plausible — pin it with its own tests.
+
+**Validation is the real cost of this phase, not the series** — and it is
+governed entirely by §36.0. In short: write the *reference* implementation
+first, measure it against the committed JPL Horizons fixture, compare to the
+baseline error curve taken from the current code, predict every fixture delta
+from the measured longitude delta before running the suite, and only then
+re-pin. Re-pinning fixtures to new ephemeris output without that chain is the
+circular trap [[feedback_fixture_repinning]] forbids.
+
+Sequence for this sub-phase, strictly: reference implementation → Tier 0
+validation → **freeze** → optimized implementation → differential test against
+the frozen reference (§36.0 H). Do not begin optimizing before the freeze.
+
+### 36.3 Own rise/set + moon-phase search — ✅ done
+
+Near-free once 36.1 and 36.2 exist.
+
+- Rise/set: root-find altitude(t) against the interpolant, with topocentric
+  parallax and the same refraction model (Meeus). Replaces `SearchRiseSet`,
+  `Horizon`, `Equator`, `SiderealTime`, `Observer`.
+- Moon phases: root-find elongation, which the library already computes.
+  Replaces `MoonPhase`, `SearchMoonPhase`, `SearchMoonQuarter`,
+  `NextMoonQuarter`.
+
+### 36.4 Own planetary positions (jyotish) — ✅ done
+
+VSOP87 for Mercury–Saturn plus the lunar nodes. Bulky but mechanical and low
+risk; replaces `GeoVector`. Retrograde detection falls out of the longitude
+derivative.
+
+### 36.5 Eclipses — last, because hardest; not optional-forever — ✅ done
+
+**The goal is zero dependencies, and that includes eclipses.**
+`astronomy-engine` is a **migration waypoint, not an end state**: it stays only
+while modules are being ported, and it is dropped when this one lands. Eclipses
+go last purely because they are the hardest, not because they are exempt.
+
+> **Corrected 2026-08-06.** An earlier draft recommended keeping
+> `astronomy-engine` as a permanent *optional* dependency for this path. That
+> was incoherent — an optional dependency still sits in `package.json`, still
+> ships to every eclipse user, still inherits an external release cadence, and
+> adds conditional-loading complexity on top. It buys almost none of the
+> independence while paying most of the cost. Two premises behind it were also
+> wrong: (a) "no cheap external ground truth" — NASA's Five Millennium Canon
+> (Espenak/Meeus) publishes Besselian elements *and* local circumstances for
+> every eclipse −1999…+3000, which is usable ground truth and arguably usable
+> input; (b) the 57 KB tree-shaken size was cited as a reason to keep it, when a
+> large chunk is a reason to *replace* it. Difficulty is the only real argument,
+> and difficulty is a sequencing question, not an exemption.
+
+**Eclipses are not one problem — they split, and the halves differ a lot:**
+
+- **Lunar (Chandra Grahan) — tractable.** Pure shadow geometry: Earth's umbra /
+  penumbra radius at the Moon's distance versus the Moon's angular separation
+  from the antisolar point. Meeus ch. 54. It needs only Sun and Moon positions,
+  which 36.2 already provides. Contact times fall out of solving
+  `separation = sum of radii`. "Local circumstances" collapses to *is the Moon
+  above the horizon*, which 36.3 already computes. Do this one first.
+- **Solar (Surya Grahan) — the genuinely hard part.** Local contact times,
+  subtype and obscuration need Besselian elements projected onto the fundamental
+  plane with the observer on a rotating ellipsoid. Meeus ch. 54 plus the
+  Explanatory Supplement.
+
+**Validation (Tier 0):** NASA/Espenak canon contact times and published local
+circumstances for a sample of eclipses across the supported span, for several
+observer locations including at least one where the eclipse is partial and one
+where it is not visible at all.
+
+**Status 2026-08-07 — done, and the escape hatch was not needed.** Both halves
+are ported and both are validated against NASA rather than against the
+implementation they replace. Two fixtures, 1,697 rows:
+
+- `tests/fixtures/nasa-eclipses.json` — the Five Millennium Canon, 457 lunar +
+  452 solar rows for 1901–2100.
+- `tests/fixtures/nasa-eclipse-local.json` — **788 local circumstances at 10
+  cities**, from *Solar Eclipse Visibility from Major Cities*. The per-eclipse
+  `SEcirc` URL family this plan guessed at does not exist; the same data is
+  published per *city*, which is better — the catalogs are complete over
+  0001–3000 CE, so an eclipse's **absence** from a city's list is itself
+  ground truth, and that is what supplies the "not visible at all" case.
+
+Headline results: lunar type correct on all 457, greatest eclipse within 3.84 s,
+magnitudes within 0.0005; solar γ within 0.00015 Earth radii on all 452; local
+contact times at ten cities within 43 s with a **−0.75 s bias** over 1901–2002.
+The 2003–2100 half carries a +16.6 s bias that is a **ΔT-model difference, not
+an ephemeris error** — it is zero where ΔT is observed and grows smoothly only
+where it is predicted, and it is asserted as its own bounded band rather than
+averaged into the historical figure.
+
+One finding came out of this that a Tier 2 suite would have missed entirely: the
+lunar shadow enlargement is **Danjon's rule applied to the Earth's radius**
+(1 + 1/85 − 1/594), not 2% applied to the shadow radii. The canon's own 457
+magnitudes were inverted to identify which, and the 2% reading is not even
+self-consistent. Before the correction, two eclipses were mis-typed. See
+[docs/v5-validation-report.md](docs/v5-validation-report.md) § Step 5.
+
+### Bundle-size context (measured, tree-shaken + minified)
+
+| Import | Minified | Gzipped |
+|---|---|---|
+| `getDailyPanchang` only (whole library) | 141 KB | 49 KB |
+| — of which `astronomy-engine` Sun+Moon | 36 KB | 16 KB |
+| — of which + rise/set + horizon | 55 KB | 24 KB |
+| `astronomy-engine` eclipse cluster alone | 57 KB | 25 KB |
+
+Tree-shaking already spares us ~350 KB of `astronomy-engine`, so own code buys
+maybe 20–40 KB minified for the core — real for Hermes, not transformative.
+**Independence, not size, is the honest headline argument.** Note the eclipse
+cluster is the single largest chunk: replacing it is the biggest size win
+available, which is a reason to do it, not to avoid it.
+
+### Phase 36 — exit criteria, assessed
+
+**Status 2026-08-07, second pass — every criterion is now met.** The one
+shortfall recorded in the first pass (the default call at 0.501 ms against
+0.47) was closed structurally, without trading accuracy; the details are below.
+Full evidence in [docs/v5-validation-report.md](docs/v5-validation-report.md)
+§ Step 5; the predict-then-observe ledger is
+[notes/v5-step5-predictions.md](notes/v5-step5-predictions.md).
+
+| criterion | result |
+|---|---|
+| Tier 0 fixtures committed before any new ephemeris code | ✅ Horizons positions + ΔT (36.0), NASA eclipse canon + city catalogs (36.5) |
+| baseline error curve of the *current* code recorded | ✅ seven bodies, `tier0-horizons.test.ts` |
+| every own module ≤ baseline over 1900–2100 | ✅ 2.8× (Moon) to 16× (Venus) inside |
+| invariant/tolerance split, tiers marked, enforced by a test | ✅ eight Tier 0 files, `tier-policy.test.ts` |
+| **zero invariant-test changes** | ✅ 0 across 241 MB of before/after output |
+| every numeric re-pin predicted before observed | ✅ two re-pins, both with predicted-vs-observed recorded |
+| frozen reference + ≥100k-instant differential | ✅ four reference modules, five differential tests |
+| 36.1 landed, output-neutral, numbers recorded | ✅ (2026-08-06) |
+| **default distinct-day call meaningfully under 1.10 ms** | ✅ 1.10 → **0.4105 ms** |
+| **narrowed calls and `getInstantPanchang` roughly halved** | ✅ `sections: []` 0.4209 → **0.2660** (−36.8%), instant 0.3198 → **0.2081** (−34.9%) |
+| **default call roughly halved** (0.93 → ~0.47) | ✅ **0.9749 → 0.4105, −57.9%** against the tree the criterion was written for; −93.2% against published 4.3.1 (6.0562 → 0.4105) |
+| Drik parity no worse than ≤60 s | ✅ 58 s worst, unchanged by any of this phase's value-moving work |
+| `astronomy-engine` removed from `dependencies` | ✅ zero runtime dependencies |
+| lunar eclipses ported before solar | ✅ |
+
+**Which baseline these figures are against.** All three performance criteria
+were written against the tree Phase 36 started from — git HEAD, version-labelled
+`4.3.1` but carrying seven commits that were never published. The exit-criteria
+table above is therefore assessed against *that* tree, which is what makes the
+assessment auditable, and each row carries the published-4.3.1 figure beside it
+because that is what an upgrading user experiences. The two differ by 6× on a
+default call, every release-note table quoting "4.3.1" was quoting the first
+while labelling it the second, and the whole account — including the two rows
+whose *direction* was wrong — is in
+[docs/v5-validation-report.md](docs/v5-validation-report.md) § "Step 5, third
+pass".
+
+**How the last 6.4% was closed.** The first pass reported `cold/default` at
+0.501 ms and named the rise/set track as the remaining lever, on the estimate
+that it was "roughly 80% of the lunar series cost against only ~2.55 direct
+longitude reads". Counting evaluations rather than reading a profile said
+otherwise, and the correction is the useful part:
+
+| per default day, all sections | ELP terms | share |
+|---|---|---|
+| `getTropicalMoonLongitude` — 17.4 reads × 566 terms | 9,854 | 54% |
+| the rise/set track — 7.0 reads × 969 terms | 6,802 | 37% |
+| `getMoonPosition` (eclipse) — 1.3 reads × 1,363 terms | 1,745 | 9% |
+
+The track was **37%**, not 80%. And of those 17.4 longitude reads only 2.5 are
+`cache.ts`'s Chebyshev block builder — the other ~15 belong to the **new-moon
+phase search** that seeds Chandra Masa, at 2.07 searches a day and ~6 elongations
+each. Both are real levers; the numbers now say which is which, and the second
+one is recorded here because it is the next step down and nobody had seen it.
+
+The track was taken, because it needs no new caching semantics.
+`TRACK_BLOCK_DAYS = 4` with `TRACK_NODES = 11` replaces the 7-node per-day fit:
+2.75 lunar evaluations a day against 7.0, ELP terms 18,405 → 14,296 (−22%), and
+**`cold/default` 0.4972 → 0.4154 ms (−16.4%)**, with `getMoonrise` −45% and
+`computeSunrise` −26%.
+
+**No accuracy is traded, and that is measured rather than asserted**
+(`notes/track-fit.src.ts` is the sweep). The fit's worst angular error is
+6.1 × 10⁻⁴″ at 4 d × 11 against 6.4 × 10⁻⁴″ at 1 d × 7 — both sitting on the
+millisecond quantization of `new Date()` rather than on the polynomial, so the
+extra width is free. `differential-riseset.test.ts` reports **identical**
+figures before and after, to three decimal places of a millisecond, with 0
+event-count mismatches. Eight-day blocks are a genuine cliff — 3.7 × 10⁻²″, 50×
+worse, at *more* nodes — because ELP carries argument families near a five-day
+period.
+
+The two value-moving changes that followed spent some of it back: the
+generator's `PROBE_COUNT` at 100,000 costs +9.9%, and the planet path's own
+Earth series +11% on charts and nothing elsewhere. Net **0.4105 ms** as
+finally measured, against a target of 0.47.
+
+**The load-sensitivity caveat this section used to carry did not reproduce.**
+It read: the same build measures 0.4518 at load average 3.3 and 0.5023 at load
+5–6, so the absolute figure swings by more than the 3.9% margin it clears. The
+three-way sweep got **0.4173** with the load average running from 4.2 to 7.1,
+and its idle repeat **0.4105** at load ~3.6 — a 1.6% spread, with the busier run
+the faster one. The conclusion that survives is the harness README's: read the *ratio*, which is taken interleaved and is immune to this by
+construction, and treat any absolute millisecond figure as carrying its machine.
+With the baseline corrected the criterion is no longer a near-miss on either
+side, so nothing rests on the absolute number anyway.
+
+**What the chart stack costs, stated where the exit criteria are assessed.**
+`computeRashiChart` 0.0975 → **0.318 ms** and `computeNavamsa` 0.0944 →
+**0.314** against published 4.3.1 — 3.3× slower, entirely the planetary
+ephemeris, and the deliberate price of Mercury 6.504″ → 0.296″ and Venus
+19.586″ → 0.862″. The three-way view adds one thing the two-way view hid:
+against the **pre-Phase-36 tree** `computeShadbala` regresses 0.112 → 0.333
+(3×), while against **published 4.3.1** it improves 0.719 → 0.333 (2.2×). Both are true, and quoting only the
+favourable one would be the same error as the baseline itself.
+
+What was rejected, and stays rejected:
+
+- **Cutting the lunar longitude budget from 0.4″ to 0.6″**, worth ~5%. It takes
+  the Moon's margin against its 3.747″ ceiling below §36.0's 3× floor — and
+  there is now *less* room for it, not more: the honest 100,000-probe truncation
+  put the Moon at 1.261″, a margin of 2.97×.
+- **Angle-addition on the ELP main-problem group**, §36.5's own first candidate.
+  Measured at −34% against a `Math.sin` baseline that `src/astronomy/trig.ts`
+  had already beaten by −54%. Folding four integer multipliers costs more than
+  the reduced sine it would replace.
+- **`TRACK_NODES` 6 or 5 per day, `SCAN_STEP_DAYS` 18 or 24 min.** Swept at
+  −1.6% and −1.8%, inside the run-to-run spread.
+
+**Two further exit-criteria consequences of the corrected baseline.** The
+`sections: []` and `getInstantPanchang` criteria are assessed against the
+pre-Phase-36 tree above because published 4.3.1 **has no `sections` option at
+all** — the string does not occur in its bundle, the argument is silently
+ignored, and that call measures a full 5.98 ms run there. A "narrowed call"
+comparison against it is not like-for-like and is excluded rather than quietly
+made. `computeBhava` is excluded for the same class of reason: it computes the
+full planetary set in 5.0.0 and in the pre-36 tree, and does not in published
+4.3.1.
+
+**Two test bounds changed shape rather than value.** `tests/unit/sections.test.ts`
+and `tests/perf/perf.test.ts` each asserted that `sections: []` costs under a
+fraction of a full run, and that bound had been raised twice — 0.5 → 0.62 —
+each time because the *denominator* improved. A ratio cannot distinguish
+"narrowing got worse" from "the full call got better", so both are now absolute
+ms/day ceilings on the narrowed call alone. The measurement that set them is
+also worth recording: the same call reads 0.2602 ms/day in a single process,
+0.357–0.383 with its own file alone, and 0.384–0.479 during a full-suite run,
+because vitest's parallel workers inflate it ~1.7×. That spread is about as wide
+as the regression the test looks for, so the ceiling is deliberately loose
+(0.80) and the 1.5× case is left to the direction assertion and to the
+contention-free figure in `notes/bench-*.json`.
+
+---
+
+#### Original exit criteria (retained — this is what the work was held to)
+
+**Validation (gates everything else):**
+
+- Tier 0 fixture (`tests/fixtures/horizons-*.json`) committed **before** any new
+  ephemeris code exists.
+- Baseline error curve of the *current* code vs Tier 0 recorded here, so
+  "better" has a number behind it.
+- Every own-ephemeris module measured against Tier 0 over 1900–2100, max error
+  **≤ baseline across the whole span** — not just on average, not just near 2025.
+- The suite split into invariant vs numeric-tolerance assertions (§36.0 F), with
+  tiers marked in the files.
+- **Zero invariant-test changes.** Any index, name, boolean or festival date
+  that moves is a bug, and the phase does not exit until it is explained and
+  fixed — never re-pinned.
+- Every numeric re-pin carries a delta **predicted before it was observed**,
+  with predicted and observed values in the commit message.
+- A frozen reference implementation lives in the repo, and the shipped optimized
+  path is differential-tested against it over ≥100k instants.
+
+**Performance:**
+
+- 36.1 landed, output-neutral (`tests/unit/sections.test.ts` green), with
+  before/after numbers recorded here.
+- Default distinct-day call meaningfully under the current 1.10 ms; narrowed
+  calls and `getInstantPanchang` roughly halved.
+- Drik parity (Tier 1) no worse than the current ≤60 s worst-case end-time
+  drift.
+
+**Scope:**
+
+- `astronomy-engine` removed from `dependencies` entirely, or — if solar local
+  circumstances failed Tier 0 validation — a written finding with the
+  measurements that says exactly why, and the fallback chosen on that evidence.
+- Lunar eclipses ported before solar (they are a different, much easier
+  problem — see 36.5).
+
+### Known limits of this protocol — state them rather than pretend
+
+- ~~**Solar local circumstances are the thinnest Tier 0 coverage.**~~
+  **Resolved 2026-08-07, and the limit turned out to be elsewhere.** 788 local
+  circumstances at 10 cities were assembled in one fetch script, and
+  obscuration, magnitude, altitude and azimuth all validate at the fixture's own
+  print resolution. What *cannot* be validated is the **future** half: after
+  2003, where Espenak's ΔT is a prediction and ours is a different one, a local
+  circumstance has no time scale in which the difference cancels. That is now
+  the thinnest coverage in the release, it is measured (+16.6 s mean, +25.8 s
+  worst bucket), and it is the same ΔT exposure §36.0 G already documents rather
+  than a new one.
+- **Drik is Tier 1, not Tier 0.** It publishes to the minute and applies its own
+  rule interpretations. It can never certify sub-minute ephemeris accuracy; it
+  can only certify that we pick the same *day* and the same *rule*.
+- **Tier 0 covers positions, not rules.** Horizons cannot tell us whether
+  Janmashtami falls on the right day. Rule correctness stays a Tier 1 question,
+  which is why the invariant/tolerance split in §36.0 F matters: rules live in
+  the invariant half.
+
+---
+
+## Phase 37 — Unified Table/Compute API for Static Data (Wave 7, v5) — ✅ shipped
+
+**Status 2026-08-06.** All four exit criteria met. `read*` reads a table,
+`compute*` runs the engine, across festivals / eclipses / moon-phases / muhurta
+plus the Ekadashi and Sankranti year helpers; every 4.x name kept as a
+deprecated alias bound to the same function object. `compute*ForYear` added for
+all four families. `buildMuhurtaTable` + the engine-free `panchang-ts/muhurta`
+subpath (1.70 KB ESM) complete the family. Emitted tables are dictionary-encoded
+and carry `key`: festivals **315.0 → 89.9 KB (28.5%)**, moon phases
+**106.1 → 29.7 KB (28.0%)**, resolved output identical across 40 comparisons.
+v1 tables still read, because consumers cache these files. Measurements in
+[docs/v5-validation-report.md](docs/v5-validation-report.md).
+
+**Why.** The dynamic builders mostly exist already (Phase 35) but the family is
+inconsistent, one member is missing, and the emitted tables are ~4× larger than
+they need to be.
+
+**What exists today.** Three bundled JSONs — `src/data/festivals.json`,
+`eclipses.json`, `moonPhases.json` — each with a runtime builder
+(`buildFestivalsTable` / `buildEclipsesTable` / `buildMoonPhasesTable`, taking
+`startYear`/`endYear` + location) and a range enumerator (`getFestivalsInRange`,
+`getEclipsesInRange`, `getMoonPhasesInRange`). **There is no muhurta JSON** —
+`STOCK_MUHURTA_RULES` is rule *definitions* in code, and `findAuspiciousDates`
+computes on the fly.
+
+### 37.1 Name the two modes apart
+
+`getFestivalsForYear(year, lang, source)` reads a **table**;
+`getFestivalsInRange(start, end, location, options)` runs the **engine**. Two
+near-identical names with different inputs and different semantics is the single
+most confusing thing in the calendar API. Settle on one convention across all
+four families, e.g. `computeFestivalsForYear(...)` (engine) vs
+`readFestivalsForYear(...)` (table), and keep the old names as deprecated
+aliases through v5.
+
+### 37.2 Add the missing single-year compute entry points
+
+`buildFestivalsTable` requires a table wrapper and a year *range*. Add the
+obvious thing a consumer reaches for first — year in, results out:
+
+```ts
+computeFestivalsForYear(2027, location, { timezone: 330 })   // → FestivalDay[]
+computeEclipsesForYear(2027, location, { timezone: 330 })
+computeMoonPhasesForYear(2027, { timezone: 330 })
+computeAuspiciousDatesForYear(2027, vivahRule, location, { timezone: 330 })
+```
+
+Each is a thin wrapper over the existing range enumerator. `build*Table` stays
+as the "generate a cacheable JSON" path.
+
+### 37.3 Bring muhurta into the family
+
+The gap. Add `buildMuhurtaTable` + a `panchang-ts/muhurta` engine-free subpath
+so consumers can precompute auspicious dates per occasion and ship the JSON,
+exactly as they can for festivals today. This is what makes the family coherent
+rather than three-out-of-four.
+
+### 37.4 Shrink the emitted tables (~4×)
+
+The bundled JSONs are gone as of v5, so this is now about what `build*Table`
+**emits** — the file consumers cache and parse in their own app, where the
+parse-time cost lands on them.
+
+Both large tables repeat every localized string at every occurrence:
+
+| Table | Entries | Unique strings | JSON now | Dictionary-encoded |
+|---|---|---|---|---|
+| festivals | 2,112 | **83** names, 59 descriptions | 260 KB | **68 KB** (26%) |
+| moon phases | 396 | **4** names, 4 descriptions | 87 KB | **23 KB** (27%) |
+
+Emit `key` + a string dictionary; resolve names at read time. Note gzip already
+hides this on the wire (35 KB) — **this is a parse-time and memory win**, which
+is precisely the constraint that bites on Hermes, where the bundled
+`festivalsTable.js` is 726 KB of object literal (plus 3,167 `\uXXXX` escapes
+inflating the Devanagari) parsed at startup.
+
+This also closes a v5 gap from the audit: `FestivalInfo` gained a stable `key`,
+but `FestivalTableEntry` did not — so the static table is currently both larger
+*and* less useful than engine output. One change fixes both.
+
+### Phase 37 exit criteria
+
+- One naming convention across festivals / eclipses / moon-phases / muhurta,
+  old names deprecated not removed.
+- `compute*ForYear` for all four families.
+- `panchang-ts/muhurta` subpath + `buildMuhurtaTable` shipped.
+- Emitted tables carry `key`; festivals and moon-phases output at ≤30% of
+  current size with identical resolved output.
+- The `*:gen` example scripts still produce a readable table end to end.
+
+---
+
+## Phase 38 — Result-Shape & Public API Corrections (Wave 7, v5) — ✅ shipped
+
+**Status 2026-08-06.** All seven items done. 38.1 (real `Date` instants +
+`*Local` offset-carrying ISO strings + `formatInZone`), 38.2 (`_debug`
+deleted), 38.3 (`suryaNakshatra` typed `NakshatraIndexInfo`), 38.4
+(optional-vs-null settled), 38.5 (aliases documented, `masa` vs `chandramasa`
+clarified), 38.6 (`timezone` echoes `{offsetMinutes, zone?}`, DST limit stated)
+and 38.7 (the result object grouped).
+
+1,138 assertions moved — 476 for 38.1/38.6, 601 property renames for 38.7, 61
+non-null assertions — all mechanical, **zero re-pins, zero invariant changes**,
+Drik tolerances untouched. 8,277 tests green; `npm run typecheck` clean.
+
+Fixing 38.7 required fixing `tsconfig.test.json` first: it inherited
+`exclude: ["…", "tests"]` from the base config, so `npm run typecheck` had been
+checking only `src` while claiming to check the suite. That surfaced 483
+pre-existing errors, including a Varjyam test that had been dead since its
+imported constant was deleted. Full account in
+[docs/v5-validation-report.md](docs/v5-validation-report.md) § Step 3.
+
+**Why.** The 2026-08-06 audit ([notes/v5-audit.md](notes/v5-audit.md)) §2 found
+the result object is where this library diverges most from what a TypeScript
+consumer expects. Every item here is a **breaking change**, which is exactly why
+they belong in v5 and nowhere else — carrying them forward means another year of
+the same bugs. Phases 36 and 37 are performance and data-shape; this is the
+public contract.
+
+### 38.1 Published `Date`s must be real instants — the flagship change
+
+Every `Date` in a result is currently `trueInstant + offsetMinutes`, so its
+`getTime()` is **not** when the event happened:
+
+```
+result.sunrise.toISOString()   2025-01-14T07:09:44.172Z
+true sunrise                   2025-01-14T01:39:44.172Z   ← 330 min apart
+```
+
+The README tells consumers to read it with `getUTC*`, which works right up until
+they do anything else. What silently breaks: `JSON.stringify` (emits a wrong
+instant labelled `Z`), `Intl.DateTimeFormat` with a `timeZone` (renders
+**12:39 pm** instead of 07:09 am), any comparison or diff against a real
+timestamp, date-fns / luxon / `Temporal.Instant`, and storage in a
+`timestamptz` column.
+
+Temporal reached **Stage 4 in March 2026** (ECMAScript 2026; shipping in Chrome
+144+ and Firefox 139+), and `Temporal.ZonedDateTime` is precisely the "instant
+*in* a zone" type this library has been hand-rolling incorrectly.
+
+**Target shape:**
+
+```ts
+sunrise: Date          // real instant — .getTime() is correct epoch ms
+sunriseLocal: string   // "2025-01-14T07:09:44+05:30" — offset-carrying ISO
+```
+
+plus an exported `formatInZone(date, tz)`. An offset-carrying ISO string is the
+one representation that survives JSON, is unambiguous, parses correctly
+everywhere, and converts to `Temporal.ZonedDateTime` in one call.
+
+Migration for consumers is mechanical (`getUTCHours()` → read `*Local`, or
+format the instant). Applies to every `Date` in `DailyPanchangResult`,
+`InstantPanchangResult`, every `TimePeriod`, and the chart/dasha results.
+
+### 38.2 Delete `_debug`
+
+`DailyPanchangResult._debug?: { totalMs, sunriseMs, elementsMs, endTimesMs }` is
+in the published type and written **nowhere** in `src/`. Dead API surface
+promising timing data we never emit. Remove it. If timing is ever wanted it
+belongs behind an explicit option — non-deterministic values do not belong in a
+result object consumers may snapshot or cache.
+
+### 38.3 Fix `suryaNakshatra`'s type
+
+`computeSuryaNakshatra` (`rashi.ts:31`) returns `RashiInfo`, whose `index` is
+documented *"0 = Mesha … 11 = Meena"*. The value is `nakshatraOf(siderealSun)` —
+**0..26**. Anyone indexing a 12-element rashi array by it gets silent garbage
+for two thirds of the year. Give it its own type.
+
+### 38.4 Settle optional-vs-null — ✅ done
+
+Three conventions for "not applicable" coexisted and consumers could not predict
+which they would get: `| null` (`bhadra`, `varjyam`, `eclipse`), `?`-optional
+(`chandraBalam`, `tarabala`), empty array (`panchakaRahita`, `festivals`).
+
+**Resolved to the "always present" rule, not the conditional return type.** A
+conditional type keyed on the options object would make `DailyPanchangResult`
+generic, taxing every consumer annotation and internal signature to save two
+`!`s — so this plan's own tiebreaker applied: *predictable beats clever*. The
+rule now stated in the type and the README:
+
+> Every field is always present. A scalar or object that does not apply is
+> `null`; a collection that does not apply is `[]`.
+
+Only `chandraBalam` and `tarabala` moved. The rule also covers `sections`
+narrowing, so the result *shape* no longer depends on the options at all.
+
+### 38.5 Retire redundant aliases and naming drift
+
+- `dayDurationMinutes` / `dinamanaMinutes` and `nightDurationMinutes` /
+  `ratrimanaMinutes` are the same numbers twice. Keep one pair, or state
+  plainly in the type that they are aliases.
+- Casing drifts: `chandramasa` vs `chandraRashi` vs `suryaNakshatra`.
+  `chandramasa` is the odd one out.
+- `masa` (`{index, name}`, solar) sits beside `chandramasa` (lunar) with nothing
+  saying so. Document or rename.
+
+### 38.6 Echo the resolved timezone
+
+Options take `number | string`; the result carries `timezone: number`. Pass
+`'America/New_York'` and the result cannot tell you which zone produced it —
+which matters precisely because of 38.1. Return
+`{ offsetMinutes: number; zone?: string }`.
+
+Related: `resolveUtcOffset` resolves the offset **once** per call from a
+reference date, so a day containing a DST transition is computed at a single
+offset. Correct for almost every day — document the limit explicitly instead of
+the current blanket "DST resolves automatically".
+
+### 38.7 Group the result object — ✅ done
+
+~50 flat top-level fields → **seven groups** plus ten top-level fields, landing
+in the same release as 38.1 exactly as the condition required.
+
+| group | holds |
+|---|---|
+| `sun` | `rise` / `set` / `nextRise` (+ `*Local`), day/night lengths + classical aliases, `siderealLongitude`, `nakshatra` |
+| `moon` | `rise` / `set` (+ `*Local`), `siderealLongitude`, `rashi` |
+| `angas` | `tithis`, `nakshatras`, `yogas`, `karanas`, `vara` |
+| `calendar` | `masa`, `chandramasa`, `samvat` |
+| `muhurtas` | `abhijit`, `brahma`, `vijaya`, `godhuli`, `nishita`, `amritKala`, `madhyahna`, `pratahSandhya`, `sayahnaSandhya`, `doGhati` |
+| `inauspicious` | `rahuKalam`, `gulikaKalam`, `yamaganda`, `durMuhurta`, `varjyam`, `bhadra`, `gandaMula`, `panchaka`, `panchakaRahita` |
+| `periods` | `choghadiya`, `hora`, `gowri` |
+
+Top level: `date`, `location`, `timezone`, `ayanamsa`, `specialYogas`,
+`anandadiYoga`, `festivals`, `eclipse`, `chandraBalam`, `tarabala`.
+`getInstantPanchang` takes the same names for the subset an instant can answer.
+
+601 property reads migrated, driven from `tsc`'s own diagnostics rather than by
+pattern. Cost: none measurable (cold default 0.7924 → 0.7790 ms). Judgement
+calls — `masa` in `calendar` rather than `sun`, `panchakaRahita` beside
+`panchaka`, no `yogas` group — are argued in the validation report.
+
+### Phase 38 exit criteria
+
+- No `Date` in any public result is offset-shifted; `JSON.stringify` round-trips
+  to the correct instant; `Intl` with a `timeZone` renders the right wall clock.
+- A test asserts each published instant against the primitive that produced it
+  (the audit's repro, kept as a regression net).
+- `_debug` gone; `suryaNakshatra` correctly typed; one optional-vs-null rule
+  applied across the result.
+- README migration section covers every rename with a before/after.
+- An explicit, recorded decision on 38.7 rather than a drift.
+
+**All met** as of 2026-08-06. The README carries a full 4.x → v5 rename table
+for every grouped field plus the optional-vs-null diff.

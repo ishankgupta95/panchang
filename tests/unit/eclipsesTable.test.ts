@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  ECLIPSES_META,
-  ECLIPSES_YEAR_RANGE,
+  getEclipsesYearRange,
   getEclipsesForYear,
   getEclipsesForDate,
 } from '../../src/calendar/eclipsesTable';
@@ -12,42 +11,56 @@ import { isEclipseVisibleAnyPhase } from '../../src/astronomy/eclipse';
 const VARANASI = { latitude: 25.3176, longitude: 82.9739 };
 const IST_OFFSET = 330;
 
-// The bundled window rolls (2 past / 5 future), and any given year may have
-// zero India-visible eclipses, so tests resolve sample data dynamically from
-// the table rather than hardcoding a year.
-function allBundledEclipses() {
+// The library ships no table, so the suite builds the one it reads.
+// 2025–2027 against Varanasi is a fixed span known to hold both a total lunar
+// (2025-09-07, with sutak) and penumbral lunars (2027, no sutak), plus the
+// 2026-03-03 any-phase case where the Moon rises already eclipsed.
+const START_YEAR = 2025;
+const END_YEAR = 2027;
+
+const table = buildEclipsesTable({
+  location: VARANASI,
+  timezoneOffsetMinutes: IST_OFFSET,
+  startYear: START_YEAR,
+  endYear: END_YEAR,
+  languages: ['en', 'hi'],
+  referenceLocation: 'Varanasi',
+  note: 'test fixture',
+});
+
+function allEclipses() {
   const out: { date: string; eclipse: ReturnType<typeof getEclipsesForDate>[number] }[] = [];
-  for (let y = ECLIPSES_YEAR_RANGE.start; y <= ECLIPSES_YEAR_RANGE.end; y++) {
-    for (const day of getEclipsesForYear(y)!) {
+  for (let y = START_YEAR; y <= END_YEAR; y++) {
+    for (const day of getEclipsesForYear(table, y)!) {
       for (const e of day.eclipses) out.push({ date: day.date, eclipse: e });
     }
   }
   return out;
 }
 
-describe('static eclipse table', () => {
+describe('eclipse table reader', () => {
   describe('metadata', () => {
-    it('declares Varanasi / IST / visible-only / en+hi', () => {
-      expect(ECLIPSES_META.referenceLocation).toBe('Varanasi');
-      expect(ECLIPSES_META.timezoneOffsetMinutes).toBe(330);
-      expect(ECLIPSES_META.visibleOnly).toBe(true);
-      expect([...ECLIPSES_META.languages]).toEqual(['en', 'hi']);
+    it('stamps location / timezone / visibleOnly / locales', () => {
+      expect(table._meta.referenceLocation).toBe('Varanasi');
+      expect(table._meta.timezoneOffsetMinutes).toBe(330);
+      expect(table._meta.visibleOnly).toBe(true);
+      expect([...table._meta.languages]).toEqual(['en', 'hi']);
     });
 
-    it('spans a rolling 2-past / 5-future window (8 years inclusive)', () => {
-      expect(ECLIPSES_YEAR_RANGE.end - ECLIPSES_YEAR_RANGE.start).toBe(7);
+    it('reports its own year range', () => {
+      expect(getEclipsesYearRange(table)).toEqual({ start: START_YEAR, end: END_YEAR });
     });
   });
 
   describe('getEclipsesForYear', () => {
-    it('returns null outside the bundled range', () => {
-      expect(getEclipsesForYear(ECLIPSES_YEAR_RANGE.start - 1)).toBeNull();
-      expect(getEclipsesForYear(ECLIPSES_YEAR_RANGE.end + 1)).toBeNull();
+    it('returns null outside the table range', () => {
+      expect(getEclipsesForYear(table, START_YEAR - 1)).toBeNull();
+      expect(getEclipsesForYear(table, END_YEAR + 1)).toBeNull();
     });
 
     it('returns a (possibly empty) sorted array for every in-range year', () => {
-      for (let y = ECLIPSES_YEAR_RANGE.start; y <= ECLIPSES_YEAR_RANGE.end; y++) {
-        const days = getEclipsesForYear(y);
+      for (let y = START_YEAR; y <= END_YEAR; y++) {
+        const days = getEclipsesForYear(table, y);
         expect(days, `year ${y}`).not.toBeNull();
         const dates = days!.map(d => d.date);
         expect(dates).toEqual([...dates].sort());
@@ -57,32 +70,61 @@ describe('static eclipse table', () => {
     });
 
     it('contains real eclipses across the window, including a total lunar', () => {
-      const all = allBundledEclipses();
+      const all = allEclipses();
       expect(all.length).toBeGreaterThan(0);
-      // Total lunar eclipses recur often enough that an 8-year India-visible
-      // window always has at least one.
       const totalLunar = all.find(
         e => e.eclipse.kind === 'lunar' && e.eclipse.subtype === 'total',
       );
       expect(totalLunar, 'expected a total lunar eclipse in the window').toBeDefined();
       expect(totalLunar!.eclipse.name).toBe('Total Lunar Eclipse');
-      expect(totalLunar!.eclipse.magnitude).toBeGreaterThan(0.9);
+      // Both quantities survive the build → JSON → read round trip, and they
+      // are the *two different* quantities: a total eclipse saturates
+      // obscuration at 1 while its magnitude runs past it.
+      expect(totalLunar!.eclipse.obscuration).toBeGreaterThan(0.9);
+      expect(totalLunar!.eclipse.magnitude).toBeGreaterThan(1);
     });
 
     it('flattens to hi when requested', () => {
-      const all = allBundledEclipses();
-      const someYear = all[0]!.date.slice(0, 4);
-      const hiDays = getEclipsesForYear(Number(someYear), 'hi')!;
+      const someYear = Number(allEclipses()[0]!.date.slice(0, 4));
+      const hiDays = getEclipsesForYear(table, someYear, 'hi')!;
       const names = hiDays.flatMap(d => d.eclipses.map(e => e.name));
       // Hindi names all contain ग्रहण ("grahan").
       expect(names.every(n => n.includes('ग्रहण'))).toBe(true);
+    });
+
+    it('survives a JSON round trip, both numeric fields included', () => {
+      // A table's whole purpose is to be built once, cached as JSON and read
+      // back later, so the round trip is the shape that matters — and it is
+      // where a field added to the builder but not to the reader would show.
+      const revived = JSON.parse(JSON.stringify(table)) as typeof table;
+      const before = allEclipses();
+      const after: typeof before = [];
+      for (let y = START_YEAR; y <= END_YEAR; y++) {
+        for (const day of getEclipsesForYear(revived, y)!) {
+          for (const e of day.eclipses) after.push({ date: day.date, eclipse: e });
+        }
+      }
+      expect(after).toEqual(before);
+      expect(after.length).toBeGreaterThan(0);
+      for (const { eclipse } of after) {
+        expect(typeof eclipse.obscuration, `obscuration on ${eclipse.peak}`).toBe('number');
+        expect(typeof eclipse.magnitude, `magnitude on ${eclipse.peak}`).toBe('number');
+        expect(eclipse.obscuration).toBeGreaterThanOrEqual(0);
+        expect(eclipse.obscuration).toBeLessThanOrEqual(1);
+        // A penumbral lunar eclipse is the case that pins the two apart: no
+        // umbral contact, so zero area covered and a negative magnitude.
+        if (eclipse.kind === 'lunar' && eclipse.subtype === 'penumbral') {
+          expect(eclipse.obscuration).toBe(0);
+          expect(eclipse.magnitude).toBeLessThan(0);
+        }
+      }
     });
   });
 
   describe('sutak invariants (drik / pandit consensus)', () => {
     it('umbral lunar + all solar eclipses carry sutak; penumbral lunar do not', () => {
-      for (const { eclipse } of allBundledEclipses()) {
-        expect(eclipse.visibleFromLocation).toBe(true); // bundled table is visible-only (any phase)
+      for (const { eclipse } of allEclipses()) {
+        expect(eclipse.visibleFromLocation).toBe(true); // built visible-only (any phase)
         expect(typeof eclipse.visibleAtPeak).toBe('boolean');
         if (eclipse.kind === 'lunar' && eclipse.subtype === 'penumbral') {
           expect(eclipse.sutak, `penumbral on ${eclipse.peak}`).toBeUndefined();
@@ -100,7 +142,7 @@ describe('static eclipse table', () => {
     });
 
     it('orders each eclipse start ≤ peak ≤ end', () => {
-      for (const { eclipse } of allBundledEclipses()) {
+      for (const { eclipse } of allEclipses()) {
         const s = new Date(eclipse.start).getTime();
         const p = new Date(eclipse.peak).getTime();
         const e = new Date(eclipse.end).getTime();
@@ -111,145 +153,116 @@ describe('static eclipse table', () => {
   });
 
   describe('getEclipsesForDate', () => {
-    const sample = allBundledEclipses()[0]!;
+    const sample = allEclipses()[0]!;
 
     it('accepts ISO YYYY-MM-DD strings', () => {
-      const got = getEclipsesForDate(sample.date);
+      const got = getEclipsesForDate(table, sample.date);
       expect(got.some(e => e.peak === sample.eclipse.peak)).toBe(true);
     });
 
     it('accepts Date objects and converts via the table timezone (IST)', () => {
       // Noon IST on the eclipse's local date — unambiguous in IST.
       const noonIst = new Date(`${sample.date}T06:30:00Z`);
-      const got = getEclipsesForDate(noonIst);
+      const got = getEclipsesForDate(table, noonIst);
       expect(got.some(e => e.peak === sample.eclipse.peak)).toBe(true);
     });
 
     it('returns hi names when lang=hi', () => {
-      const got = getEclipsesForDate(sample.date, 'hi');
+      const got = getEclipsesForDate(table, sample.date, 'hi');
       expect(got.every(e => e.name.includes('ग्रहण'))).toBe(true);
     });
 
     it('returns [] for dates with no eclipse and out-of-range dates', () => {
-      expect(getEclipsesForDate(`${ECLIPSES_YEAR_RANGE.start - 5}-01-01`)).toEqual([]);
+      expect(getEclipsesForDate(table, `${START_YEAR - 5}-01-01`)).toEqual([]);
       // A date guaranteed to have no eclipse (eclipses never fall on consecutive days).
       const dayAfter = new Date(`${sample.date}T00:00:00Z`);
       dayAfter.setUTCDate(dayAfter.getUTCDate() + 1);
       const key = dayAfter.toISOString().slice(0, 10);
       if (key.slice(0, 4) === sample.date.slice(0, 4)) {
-        expect(getEclipsesForDate(key)).toEqual([]);
+        expect(getEclipsesForDate(table, key)).toEqual([]);
       }
+    });
+  });
+
+  describe('known eclipses in the built window', () => {
+    it('produces the 2025-09-07 total lunar eclipse with a sutak window', () => {
+      const days = getEclipsesForYear(table, 2025);
+      expect(days).not.toBeNull();
+      const total = days!.flatMap(d => d.eclipses).find(e => e.subtype === 'total');
+      expect(total).toBeDefined();
+      expect(total!.kind).toBe('lunar');
+      expect(total!.peak.slice(0, 10)).toBe('2025-09-07');
+      expect(total!.sutak).toBeDefined();
+    });
+
+    it('emits penumbral lunar eclipses (2027) without sutak', () => {
+      const penumbral = getEclipsesForYear(table, 2027)!
+        .flatMap(d => d.eclipses)
+        .filter(e => e.subtype === 'penumbral');
+      expect(penumbral.length).toBeGreaterThan(0);
+      expect(penumbral.every(e => e.sutak === undefined)).toBe(true);
+    });
+
+    it('includes the 2026-03-03 total lunar via the any-phase rule (peak below horizon)', () => {
+      // From Varanasi the Moon rises already eclipsed: greatest eclipse is below
+      // the horizon, but the closing phases are visible — so it is listed, with
+      // visibleAtPeak=false, and (being umbral) still carries sutak.
+      const e2026 = getEclipsesForYear(table, 2026)!
+        .flatMap(d => d.eclipses)
+        .find(e => e.peak.slice(0, 10) === '2026-03-03');
+      expect(e2026).toBeDefined();
+      expect(e2026!.kind).toBe('lunar');
+      expect(e2026!.visibleFromLocation).toBe(true); // any phase visible
+      expect(e2026!.visibleAtPeak).toBe(false);      // peak below horizon
+      expect(e2026!.sutak).toBeDefined();            // umbral → sutak applies
     });
   });
 
   describe('parity with live getEclipsesInRange for Varanasi', () => {
-    it('matches the live visible-only computation (kind/subtype per date)', () => {
-      // Recompute a year that the bundled table shows has eclipses.
-      const sampleYear = Number(allBundledEclipses()[0]!.date.slice(0, 4));
+    it('matches the live visible-only computation over the whole span', () => {
       const live = getEclipsesInRange(
-        new Date(Date.UTC(sampleYear, 0, 1)),
-        new Date(Date.UTC(sampleYear, 11, 31, 23, 59, 59, 999)),
+        new Date(Date.UTC(START_YEAR, 0, 1)),
+        new Date(Date.UTC(END_YEAR, 11, 31, 23, 59, 59, 999)),
         VARANASI,
       ).filter(e => isEclipseVisibleAnyPhase(e, VARANASI));
-
       const liveKeys = live.map(e => `${toIstKey(e.peak)}|${e.kind}|${e.subtype}`).sort();
-      const tableKeys = getEclipsesForYear(sampleYear)!
-        .flatMap(d => d.eclipses.map(e => `${d.date}|${e.kind}|${e.subtype}`))
-        .sort();
-      expect(tableKeys).toEqual(liveKeys);
+      const tableKeys: string[] = [];
+      for (let y = START_YEAR; y <= END_YEAR; y++) {
+        for (const d of getEclipsesForYear(table, y)!) {
+          for (const e of d.eclipses) tableKeys.push(`${d.date}|${e.kind}|${e.subtype}`);
+        }
+      }
+      expect(tableKeys.sort()).toEqual(liveKeys);
     });
   });
 });
 
-describe('buildEclipsesTable (location-specific, runtime)', () => {
-  // 2025–2027 against Varanasi: a fixed span (independent of the rolling
-  // bundled window) known to hold both a total lunar (2025, with sutak) and
-  // penumbral lunars (2027, no sutak). en only — keeps this fast.
-  const built = buildEclipsesTable({
-    location: VARANASI,
-    timezoneOffsetMinutes: IST_OFFSET,
-    startYear: 2025,
-    endYear: 2027,
-    languages: ['en'],
-    referenceLocation: 'Varanasi',
-    note: 'test',
-  });
-
-  it('stamps the requested location / timezone / visibleOnly default into _meta', () => {
-    expect(built._meta.referenceLocation).toBe('Varanasi');
-    expect(built._meta.timezoneOffsetMinutes).toBe(IST_OFFSET);
-    expect(built._meta.visibleOnly).toBe(true);
-    expect(built._meta.startYear).toBe(2025);
-    expect(built._meta.endYear).toBe(2027);
-  });
-
-  it('produces the 2025-09-07 total lunar eclipse with a sutak window', () => {
-    const days = getEclipsesForYear(2025, 'en', built);
-    expect(days).not.toBeNull();
-    const total = days!.flatMap(d => d.eclipses).find(e => e.subtype === 'total');
-    expect(total).toBeDefined();
-    expect(total!.kind).toBe('lunar');
-    expect(total!.peak.slice(0, 10)).toBe('2025-09-07');
-    expect(total!.sutak).toBeDefined();
-  });
-
-  it('emits penumbral lunar eclipses (2027) without sutak', () => {
-    const penumbral = getEclipsesForYear(2027, 'en', built)!
-      .flatMap(d => d.eclipses)
-      .filter(e => e.subtype === 'penumbral');
-    expect(penumbral.length).toBeGreaterThan(0);
-    expect(penumbral.every(e => e.sutak === undefined)).toBe(true);
-  });
-
-  it('includes the 2026-03-03 total lunar via the any-phase rule (peak below horizon)', () => {
-    // From Varanasi the Moon rises already eclipsed: greatest eclipse is below
-    // the horizon, but the closing phases are visible — so it is listed, with
-    // visibleAtPeak=false, and (being umbral) still carries sutak.
-    const e2026 = getEclipsesForYear(2026, 'en', built)!
-      .flatMap(d => d.eclipses)
-      .find(e => e.peak.slice(0, 10) === '2026-03-03');
-    expect(e2026).toBeDefined();
-    expect(e2026!.kind).toBe('lunar');
-    expect(e2026!.visibleFromLocation).toBe(true); // any phase visible
-    expect(e2026!.visibleAtPeak).toBe(false);      // peak below horizon
-    expect(e2026!.sutak).toBeDefined();            // umbral → sutak applies
-  });
-
-  it('matches live getEclipsesInRange for the same location/span', () => {
-    const live = getEclipsesInRange(
-      new Date(Date.UTC(2025, 0, 1)),
-      new Date(Date.UTC(2027, 11, 31, 23, 59, 59, 999)),
-      VARANASI,
-    ).filter(e => isEclipseVisibleAnyPhase(e, VARANASI));
-    const liveKeys = live.map(e => `${toIstKey(e.peak)}|${e.kind}|${e.subtype}`).sort();
-    const tableKeys: string[] = [];
-    for (let y = 2025; y <= 2027; y++) {
-      for (const d of getEclipsesForYear(y, 'en', built)!) {
-        for (const e of d.eclipses) tableKeys.push(`${d.date}|${e.kind}|${e.subtype}`);
-      }
-    }
-    expect(tableKeys.sort()).toEqual(liveKeys);
-  });
-
+describe('buildEclipsesTable options', () => {
   it('visibleOnly:false includes at least as many eclipses as the default', () => {
     const all = buildEclipsesTable({
       location: VARANASI,
       timezoneOffsetMinutes: IST_OFFSET,
-      startYear: 2025,
-      endYear: 2027,
+      startYear: START_YEAR,
+      endYear: END_YEAR,
       languages: ['en'],
       visibleOnly: false,
     });
-    const count = (f: typeof built) =>
+    const count = (f: typeof table) =>
       Object.values(f.years).reduce((s, d) => s + d.reduce((s2, x) => s2 + x.eclipses.length, 0), 0);
-    expect(built._meta.visibleOnly).toBe(true);
+    expect(table._meta.visibleOnly).toBe(true);
     expect(all._meta.visibleOnly).toBe(false);
-    expect(count(all)).toBeGreaterThanOrEqual(count(built));
+    expect(count(all)).toBeGreaterThanOrEqual(count(table));
   });
 
   it('falls back gracefully when a missing locale is requested', () => {
-    // built only has 'en'; asking for 'hi' should yield the en string.
-    const days = getEclipsesForYear(2025, 'hi', built)!;
+    const enOnly = buildEclipsesTable({
+      location: VARANASI,
+      timezoneOffsetMinutes: IST_OFFSET,
+      startYear: 2025,
+      endYear: 2025,
+      languages: ['en'],
+    });
+    const days = getEclipsesForYear(enOnly, 2025, 'hi')!;
     const total = days.flatMap(d => d.eclipses).find(e => e.subtype === 'total');
     expect(total).toBeDefined();
     expect(total!.name).toBe('Total Lunar Eclipse'); // en fallback

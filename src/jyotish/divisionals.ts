@@ -1,15 +1,10 @@
-import { computeLagna } from './lagna';
-import { computeNavamsa } from './charts';
-import { computePlanetaryPositions } from './planets';
-import { resolveMasaName, resolveNakshatraName } from '../i18n/resolver';
+import { navamsaFromBasis } from './charts';
+import { computeNatalBasis, grahaList, type NatalBasis } from './natalBasis';
+import { resolveMasaName } from '../i18n/resolver';
 import { normalize360 } from '../utils/angle';
-import { validateLocation, validateDate } from '../utils/validation';
-import type { AyanamsaType, Language, BirthChartOptions } from '../types/options';
+import type { BirthChartOptions } from '../types/options';
 import type { GeoLocation } from '../types/location';
-import type {
-  Divisional, DivisionalChart, PlanetPlacement,
-  GrahaPosition, GrahaName,
-} from '../types/jyotish';
+import type { Divisional, DivisionalChart, PlanetPlacement } from '../types/jyotish';
 
 /**
  * Compute a divisional (varga) chart. Each rashi in the natal frame is split
@@ -60,40 +55,30 @@ export function computeDivisionalChart(
   divisional: Divisional,
   options: BirthChartOptions = {},
 ): DivisionalChart {
-  validateDate(birthDate);
-  validateLocation(location);
-
-  if (divisional === 'D9') return computeNavamsa(birthDate, location, options);
-
-  const ayanamsaType: AyanamsaType = options.ayanamsa ?? 'lahiri';
-  const lang: Language = options.language ?? 'en';
-
-  const lagna = computeLagna(birthDate, location, ayanamsaType, lang);
-  const positions = computePlanetaryPositions(
-    birthDate,
-    ayanamsaType,
-    (idx) => resolveNakshatraName(idx, lang),
-    (idx) => resolveMasaName(idx, lang),
-    options.nodeType ?? 'mean',
+  return divisionalChartFromBasis(
+    computeNatalBasis(birthDate, location, options),
+    divisional,
   );
+}
 
+/**
+ * Divisional chart derived from an already-resolved {@link NatalBasis}.
+ *
+ * @internal Lets a caller that needs several vargas at one instant —
+ * `computeShadbala` needs six — pay for the planetary positions once.
+ */
+export function divisionalChartFromBasis(
+  basis: NatalBasis,
+  divisional: Divisional,
+): DivisionalChart {
+  if (divisional === 'D9') return navamsaFromBasis(basis);
+
+  const { lang } = basis;
   const transform = transformFor(divisional);
-  const divLagnaLon = transform(lagna.siderealLongitude);
+  const divLagnaLon = transform(basis.lagna.siderealLongitude);
   const divLagnaRashi = Math.floor(divLagnaLon / 30);
 
-  const grahaList: { key: GrahaName; pos: GrahaPosition }[] = [
-    { key: 'Sun', pos: positions.sun },
-    { key: 'Moon', pos: positions.moon },
-    { key: 'Mars', pos: positions.mars },
-    { key: 'Mercury', pos: positions.mercury },
-    { key: 'Jupiter', pos: positions.jupiter },
-    { key: 'Venus', pos: positions.venus },
-    { key: 'Saturn', pos: positions.saturn },
-    { key: 'Rahu', pos: positions.rahu },
-    { key: 'Ketu', pos: positions.ketu },
-  ];
-
-  const planets: PlanetPlacement[] = grahaList.map(({ key, pos }) => {
+  const planets: PlanetPlacement[] = grahaList(basis).map(({ key, pos }) => {
     const dLon = transform(pos.siderealLongitude);
     const dRashi = Math.floor(dLon / 30);
     return {

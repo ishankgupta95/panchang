@@ -1,4 +1,4 @@
-import { NAKSHATRA_SPAN } from '../utils/constants';
+import { NAKSHATRA_SPAN, nakshatraOf } from '../utils/constants';
 import { getSiderealMoonLongitude } from '../astronomy/moon';
 import { computeLagna } from './lagna';
 import { computeRashiChart } from './charts';
@@ -68,7 +68,7 @@ export function computeVimshottariDasha(
   birthDate: Date,
   moonSiderealLon: number,
 ): VimshottariDashaResult {
-  const nakIdx = Math.floor(moonSiderealLon / NAKSHATRA_SPAN);
+  const nakIdx = nakshatraOf(moonSiderealLon);
   const degInNak = moonSiderealLon - nakIdx * NAKSHATRA_SPAN;
   // Fraction of current nakshatra already elapsed at birth
   const elapsedFraction = degInNak / NAKSHATRA_SPAN;
@@ -300,7 +300,7 @@ export function computeAshtottariDasha(
   moonSiderealLon: number,
 ): VimshottariDashaResult {
   validateDate(birthDate);
-  const nakIdx = Math.floor(moonSiderealLon / NAKSHATRA_SPAN);
+  const nakIdx = nakshatraOf(moonSiderealLon);
   const degInNak = moonSiderealLon - nakIdx * NAKSHATRA_SPAN;
   const elapsedInNak = degInNak / NAKSHATRA_SPAN;
   // Position from Krittika (index 2) along the 27-nakshatra cycle, 0..27.
@@ -459,7 +459,7 @@ export function computeYoginiDasha(
   moonSiderealLon: number,
 ): YoginiDashaResult {
   validateDate(birthDate);
-  const nakIdx = Math.floor(moonSiderealLon / NAKSHATRA_SPAN);
+  const nakIdx = nakshatraOf(moonSiderealLon);
   const degInNak = moonSiderealLon - nakIdx * NAKSHATRA_SPAN;
   const elapsedFraction = degInNak / NAKSHATRA_SPAN;
 

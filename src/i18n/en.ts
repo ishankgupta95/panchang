@@ -60,6 +60,22 @@ export const en: PanchangTranslations = {
   ],
   grahaNames: ['Sun', 'Venus', 'Mercury', 'Moon', 'Saturn', 'Jupiter', 'Mars'],
   qualityNames: { auspicious: 'Auspicious', inauspicious: 'Inauspicious', neutral: 'Neutral' },
+  bhadraLocationNames: { earth: 'Earth', heaven: 'Heaven', paatal: 'Paatal' },
+  panchakaTypeNames: {
+    roga: 'Roga Panchaka', raja: 'Raja Panchaka', agni: 'Agni Panchaka',
+    chora: 'Chora Panchaka', mrityu: 'Mrityu Panchaka', samanya: 'Samanya Panchaka',
+  },
+  eclipse: {
+    template: '{subtype} {kind} eclipse — {percent}% obscuration, {visibility}.',
+    kind: { solar: 'solar', lunar: 'lunar' },
+    subtype: {
+      partial: 'Partial', total: 'Total', annular: 'Annular', penumbral: 'Penumbral',
+    },
+    visibility: {
+      visible: 'visible from location',
+      notVisible: 'not visible from location',
+    },
+  },
   specialYogaNames: {
     amrit_siddhi: 'Amrit Siddhi Yoga',
     sarvartha_siddhi: 'Sarvartha Siddhi Yoga',

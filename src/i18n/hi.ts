@@ -60,6 +60,22 @@ export const hi: PanchangTranslations = {
   ],
   grahaNames: ['सूर्य', 'शुक्र', 'बुध', 'चंद्र', 'शनि', 'गुरु', 'मंगल'],
   qualityNames: { auspicious: 'शुभ', inauspicious: 'अशुभ', neutral: 'सामान्य' },
+  bhadraLocationNames: { earth: 'पृथ्वी', heaven: 'स्वर्ग', paatal: 'पाताल' },
+  panchakaTypeNames: {
+    roga: 'रोग पंचक', raja: 'राज पंचक', agni: 'अग्नि पंचक',
+    chora: 'चोर पंचक', mrityu: 'मृत्यु पंचक', samanya: 'सामान्य पंचक',
+  },
+  eclipse: {
+    template: '{subtype} {kind} — {percent}% ग्रस्त, {visibility}।',
+    kind: { solar: 'सूर्य ग्रहण', lunar: 'चंद्र ग्रहण' },
+    subtype: {
+      partial: 'आंशिक', total: 'पूर्ण', annular: 'वलयाकार', penumbral: 'उपच्छाया',
+    },
+    visibility: {
+      visible: 'इस स्थान से दृश्य',
+      notVisible: 'इस स्थान से अदृश्य',
+    },
+  },
   specialYogaNames: {
     amrit_siddhi: 'अमृत सिद्धि योग',
     sarvartha_siddhi: 'सर्वार्थ सिद्धि योग',

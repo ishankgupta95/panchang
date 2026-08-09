@@ -1,4 +1,6 @@
 /**
+ * @tier 1  DrikPanchang sunrise/sunset at HH:MM granularity
+ *
  * Phase 19-5 — Seconds-precision audit for sunrise/sunset vs Drik fixtures.
  *
  * Drik publishes sunrise/sunset at HH:MM granularity. We compute at
@@ -20,8 +22,11 @@ function noonUtc(s: string) {
   return new Date(Date.UTC(y, m - 1, d, 12, 0, 0, 0));
 }
 
-function secondsOfDay(d: Date) {
-  return d.getUTCHours() * 3600 + d.getUTCMinutes() * 60 + d.getUTCSeconds();
+// v5: published Dates are true instants, so local wall clock comes from the
+// offset-carrying `*Local` ISO string rather than from getUTC* on a shifted Date.
+function secondsOfDay(local: string) {
+  const [h, m, s] = local.slice(11, 19).split(':').map(Number) as [number, number, number];
+  return h * 3600 + m * 60 + s;
 }
 
 function drikMidpointSeconds(hhmm: string) {
@@ -45,11 +50,11 @@ const SECONDS_TOL = 45;
 
 describe('Phase 19-5 seconds-precision audit', () => {
   for (const f of fixtures as Fixture[]) {
-    const r = getDailyPanchang(noonUtc(f.date), f.location, { timezone: f.timezone });
+    const r = getDailyPanchang(noonUtc(f.date), f.location, { timezone: f.timezone })!;
 
     for (const kind of ['sunrise', 'sunset'] as const) {
       const hhmm = kind === 'sunrise' ? f.expected.sunriseHHMM : f.expected.sunsetHHMM;
-      const actual = r[kind];
+      const actual = kind === 'sunrise' ? r.sun.riseLocal : r.sun.setLocal;
       const deltaSec = secondsOfDay(actual) - drikMidpointSeconds(hhmm);
 
       it(`${f.date} ${f.city} ${kind} within ±${SECONDS_TOL}s of Drik midpoint (${hhmm})`, () => {

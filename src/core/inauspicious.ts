@@ -1,4 +1,4 @@
-import type { TimePeriod } from '../types/elements';
+import type { UtcWindow } from '../types/elements';
 import { RAHU_KALAM_SLOTS, YAMAGANDA_SLOTS, GULIKA_SLOTS } from '../utils/constants';
 
 /**
@@ -14,7 +14,7 @@ export function computeInauspiciousPeriod(
   sunset: Date,
   varaIndex: number,
   slotTable: readonly number[],
-): TimePeriod {
+): UtcWindow {
   const dayDurationMs = sunset.getTime() - sunrise.getTime();
   const slotDurationMs = dayDurationMs / 8;
   const slotIndex = slotTable[varaIndex]!;
@@ -43,7 +43,7 @@ export function computeInauspiciousPeriod(
  * const rk = computeRahuKalam(sr, ss, 2); // Tuesday
  * ```
  */
-export function computeRahuKalam(sunrise: Date, sunset: Date, varaIndex: number): TimePeriod {
+export function computeRahuKalam(sunrise: Date, sunset: Date, varaIndex: number): UtcWindow {
   return computeInauspiciousPeriod(sunrise, sunset, varaIndex, RAHU_KALAM_SLOTS);
 }
 
@@ -61,7 +61,7 @@ export function computeRahuKalam(sunrise: Date, sunset: Date, varaIndex: number)
  * const gk = computeGulikaKalam(sunrise, sunset, 2); // Tuesday
  * ```
  */
-export function computeGulikaKalam(sunrise: Date, sunset: Date, varaIndex: number): TimePeriod {
+export function computeGulikaKalam(sunrise: Date, sunset: Date, varaIndex: number): UtcWindow {
   return computeInauspiciousPeriod(sunrise, sunset, varaIndex, GULIKA_SLOTS);
 }
 
@@ -79,6 +79,6 @@ export function computeGulikaKalam(sunrise: Date, sunset: Date, varaIndex: numbe
  * const yg = computeYamaganda(sunrise, sunset, 2); // Tuesday
  * ```
  */
-export function computeYamaganda(sunrise: Date, sunset: Date, varaIndex: number): TimePeriod {
+export function computeYamaganda(sunrise: Date, sunset: Date, varaIndex: number): UtcWindow {
   return computeInauspiciousPeriod(sunrise, sunset, varaIndex, YAMAGANDA_SLOTS);
 }

@@ -1,4 +1,6 @@
 /**
+ * @tier 1  AstroSage R-tier celebrity charts
+ *
  * Phase 29 birth-chart cross-validation against AstroSage celebrity charts.
  *
  * Source corpus: 21 charts marked **Reference (R)** by AstroSage's own data-

@@ -7,7 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { computeKaalSarp, computePitruDosha } from '../../src/jyotish/doshas';
-import { computeRashiChart } from '../../src/jyotish/charts';
+import { computeRashiChart, indexPlanets } from '../../src/jyotish/charts';
 import type { BirthChart, GrahaName, PlanetPlacement } from '../../src/types/jyotish';
 
 const DELHI = { latitude: 28.6139, longitude: 77.2090 };
@@ -33,6 +33,7 @@ function makeChart(
       isRetrograde: false,
     };
   };
+  const planets = order.map((p) => planet(p, longitudes[p] ?? 0));
   return {
     divisional: 'D1',
     lagna: {
@@ -56,7 +57,8 @@ function makeChart(
         };
       }),
     },
-    planets: order.map((p) => planet(p, longitudes[p] ?? 0)),
+    planets,
+    byPlanet: indexPlanets(planets),
   };
 }
 

@@ -1,4 +1,6 @@
 /**
+ * @tier 1  DrikPanchang.com day-panchang, 50 scraped fixtures
+ *
  * Phase 28 cross-validation against DrikPanchang.com.
  *
  * Coverage: 10 cities × 5 dates = 50 fixtures spanning seasons + Adhika
@@ -62,6 +64,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { getDailyPanchang } from '../../src/core/panchang';
+import { formatInZone } from '../../src/utils/timezone';
 import fixtures from '../fixtures/drikpanchang-phase28.json';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -80,14 +83,26 @@ function parseHHMM(s: string): number {
   return h * 60 + m + (off ? Number(off) * 1440 : 0);
 }
 
-function dateToMinutes(d: Date, dateStr: string): number {
-  const [y, mo, da] = dateStr.split('-').map(Number) as [number, number, number];
-  const midnight = Date.UTC(y, mo - 1, da, 0, 0, 0);
-  return Math.round((d.getTime() - midnight) / 60000);
+/**
+ * Minutes from local midnight of `dateStr`, read from an offset-carrying ISO
+ * string.
+ *
+ * v5: published `Date`s are true instants, so subtracting a UTC midnight no
+ * longer yields a local wall clock. The `*Local` string already carries the
+ * offset, so the day component of the string is what tells us whether the event
+ * rolled past midnight.
+ */
+function localMinutes(local: string, dateStr: string): number {
+  const dayDelta = Math.round(
+    (Date.parse(`${local.slice(0, 10)}T00:00:00Z`) - Date.parse(`${dateStr}T00:00:00Z`))
+    / 86_400_000,
+  );
+  const [h, m] = local.slice(11, 16).split(':').map(Number) as [number, number];
+  return dayDelta * 1440 + h * 60 + m;
 }
 
-function diffMin(libDate: Date, fixHHMM: string, dateStr: string): number {
-  return Math.abs(dateToMinutes(libDate, dateStr) - parseHHMM(fixHHMM));
+function diffMin(libLocal: string, fixHHMM: string, dateStr: string): number {
+  return Math.abs(localMinutes(libLocal, dateStr) - parseHHMM(fixHHMM));
 }
 
 /**
@@ -168,20 +183,27 @@ describe('Phase 28 cross-validation against DrikPanchang (50 fixtures)', () => {
 
       // ── STRICT (Drik agreement) ──
       it(`sunrise within ±${SUNRISE_TOL_MIN} min`, () => {
-        expect(diffMin(result.sunrise, f.expected.sunriseHHMM, f.date))
+        expect(diffMin(result.sun.riseLocal, f.expected.sunriseHHMM, f.date))
           .toBeLessThanOrEqual(SUNRISE_TOL_MIN);
       });
       it(`sunset within ±${SUNRISE_TOL_MIN} min`, () => {
-        expect(diffMin(result.sunset, f.expected.sunsetHHMM, f.date))
+        expect(diffMin(result.sun.setLocal, f.expected.sunsetHHMM, f.date))
           .toBeLessThanOrEqual(SUNRISE_TOL_MIN);
       });
 
       if (f.expected.madhyahnaHHMM) {
         it(`Madhyahna midpoint within ±${STRICT_TOL_MIN} min`, () => {
+          // Averaging two instants is now meaningful arithmetic — in 4.x both
+          // were offset-shifted, so the midpoint was too. `formatInZone` renders
+          // the derived instant in the result's own zone.
           const mid = new Date(
-            (result.madhyahna.start.getTime() + result.madhyahna.end.getTime()) / 2,
+            (result.muhurtas.madhyahna.start.getTime() + result.muhurtas.madhyahna.end.getTime()) / 2,
           );
-          expect(diffMin(mid, f.expected.madhyahnaHHMM!, f.date))
+          expect(diffMin(
+            formatInZone(mid, result.timezone.offsetMinutes),
+            f.expected.madhyahnaHHMM!,
+            f.date,
+          ))
             .toBeLessThanOrEqual(STRICT_TOL_MIN);
         });
       }
@@ -193,7 +215,7 @@ describe('Phase 28 cross-validation against DrikPanchang (50 fixtures)', () => {
       }
 
       it(`Ganda Mula active === ${f.expected.gandaMulaActive}`, () => {
-        expect(result.gandaMula.active).toBe(f.expected.gandaMulaActive);
+        expect(result.inauspicious.gandaMula.active).toBe(f.expected.gandaMulaActive);
       });
 
       // ── STRICT (Sandhya — elastic ghatikas of nighttime, ±2 min vs Drik) ──
@@ -201,22 +223,22 @@ describe('Phase 28 cross-validation against DrikPanchang (50 fixtures)', () => {
 
       if (f.expected.pratahSandhyaStartHHMM && f.expected.pratahSandhyaEndHHMM) {
         it(`Pratah Sandhya start within ±${SANDHYA_TOL_MIN} min of Drik`, () => {
-          expect(diffMin(result.pratahSandhya.start, f.expected.pratahSandhyaStartHHMM!, f.date))
+          expect(diffMin(result.muhurtas.pratahSandhya.startLocal, f.expected.pratahSandhyaStartHHMM!, f.date))
             .toBeLessThanOrEqual(SANDHYA_TOL_MIN);
         });
         it(`Pratah Sandhya end within ±${SANDHYA_TOL_MIN} min of Drik`, () => {
-          expect(diffMin(result.pratahSandhya.end, f.expected.pratahSandhyaEndHHMM!, f.date))
+          expect(diffMin(result.muhurtas.pratahSandhya.endLocal, f.expected.pratahSandhyaEndHHMM!, f.date))
             .toBeLessThanOrEqual(SANDHYA_TOL_MIN);
         });
       }
 
       if (f.expected.sayahnaSandhyaStartHHMM && f.expected.sayahnaSandhyaEndHHMM) {
         it(`Sayahna Sandhya start within ±${SANDHYA_TOL_MIN} min of Drik`, () => {
-          expect(diffMin(result.sayahnaSandhya.start, f.expected.sayahnaSandhyaStartHHMM!, f.date))
+          expect(diffMin(result.muhurtas.sayahnaSandhya.startLocal, f.expected.sayahnaSandhyaStartHHMM!, f.date))
             .toBeLessThanOrEqual(SANDHYA_TOL_MIN);
         });
         it(`Sayahna Sandhya end within ±${SANDHYA_TOL_MIN} min of Drik`, () => {
-          expect(diffMin(result.sayahnaSandhya.end, f.expected.sayahnaSandhyaEndHHMM!, f.date))
+          expect(diffMin(result.muhurtas.sayahnaSandhya.endLocal, f.expected.sayahnaSandhyaEndHHMM!, f.date))
             .toBeLessThanOrEqual(SANDHYA_TOL_MIN);
         });
       }
@@ -229,15 +251,15 @@ describe('Phase 28 cross-validation against DrikPanchang (50 fixtures)', () => {
       // single-nakshatra day where Drik shows a window is a real failure.
       if (f.expected.varjyamStartHHMM && f.expected.varjyamEndHHMM) {
         it(`Varjyam matches Drik (or null only on transition days)`, () => {
-          if (result.varjyam) {
-            expect(diffMin(result.varjyam.start, f.expected.varjyamStartHHMM!, f.date))
+          if (result.inauspicious.varjyam) {
+            expect(diffMin(result.inauspicious.varjyam.startLocal, f.expected.varjyamStartHHMM!, f.date))
               .toBeLessThanOrEqual(SANDHYA_TOL_MIN);
-            expect(diffMin(result.varjyam.end, f.expected.varjyamEndHHMM!, f.date))
+            expect(diffMin(result.inauspicious.varjyam.endLocal, f.expected.varjyamEndHHMM!, f.date))
               .toBeLessThanOrEqual(SANDHYA_TOL_MIN);
           } else {
             // Drik published a window but library returned null. Permitted
             // only on transition days (multiple nakshatras span the Hindu day).
-            expect(result.nakshatras.length).toBeGreaterThan(1);
+            expect(result.angas.nakshatras.length).toBeGreaterThan(1);
           }
         });
       }
@@ -302,13 +324,13 @@ describe('Phase 28 cross-validation — aggregate', () => {
       if (f.expected.pratahSandhyaStartHHMM) {
         pratahMaxDiff = Math.max(
           pratahMaxDiff,
-          diffMin(r.pratahSandhya.start, f.expected.pratahSandhyaStartHHMM, f.date),
+          diffMin(r.muhurtas.pratahSandhya.startLocal, f.expected.pratahSandhyaStartHHMM, f.date),
         );
       }
       if (f.expected.sayahnaSandhyaStartHHMM) {
         sayahnaMaxDiff = Math.max(
           sayahnaMaxDiff,
-          diffMin(r.sayahnaSandhya.start, f.expected.sayahnaSandhyaStartHHMM, f.date),
+          diffMin(r.muhurtas.sayahnaSandhya.startLocal, f.expected.sayahnaSandhyaStartHHMM, f.date),
         );
       }
     }
@@ -325,12 +347,12 @@ describe('Phase 28 cross-validation — aggregate', () => {
         timezone: f.timezone,
         language: 'en',
       });
-      if (r === null || r.varjyam === null) continue;
+      if (r === null || r.inauspicious.varjyam === null) continue;
       emitted++;
       maxDiff = Math.max(
         maxDiff,
-        diffMin(r.varjyam.start, f.expected.varjyamStartHHMM, f.date),
-        diffMin(r.varjyam.end, f.expected.varjyamEndHHMM, f.date),
+        diffMin(r.inauspicious.varjyam.startLocal, f.expected.varjyamStartHHMM, f.date),
+        diffMin(r.inauspicious.varjyam.endLocal, f.expected.varjyamEndHHMM, f.date),
       );
     }
     // We expect a meaningful share of fixtures to emit a Varjyam window;

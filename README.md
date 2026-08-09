@@ -5,7 +5,7 @@
 Pure TypeScript Hindu Panchang (almanac), Jyotish, and Birth Chart calculations.
 Zero native dependencies. Works offline in React Native (Hermes), Node.js, and browsers.
 
-**Fast** (~0.1 ms names-only, ~0.5 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,164 tests across 100 files**
+**Fast** (~0.25 ms trimmed, ~0.41 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,368 tests across 121 files**
 
 ---
 
@@ -31,26 +31,84 @@ const result = getDailyPanchang(
 // → DailyPanchangResult | null. Null only at polar latitudes where
 //   sunrise can't be computed. Anywhere else, narrow with `if (!result) return;`.
 
-console.log(result!.tithis[0].name);          // "Krishna Chaturdashi"
-console.log(result!.nakshatras[0].name);      // "Mrigashira"
-console.log(result!.vara.name);               // "Mangalawara"
-console.log(result!.chandramasa.name);        // "Magha"
-console.log(result!.samvat.vikramSamvat);     // 2081
+console.log(result!.angas.tithis[0].name);          // "Krishna Chaturdashi"
+console.log(result!.angas.nakshatras[0].name);      // "Mrigashira"
+console.log(result!.angas.vara.name);               // "Mangalawara"
+console.log(result!.calendar.chandramasa.name);        // "Magha"
+console.log(result!.calendar.samvat.vikramSamvat);     // 2081
 ```
 
 ### Reading Output Times
 
-All `Date` objects are **offset-adjusted** to the requested timezone. Read time
-components via `getUTC*` — `.getHours()` would use your system zone:
+Every `Date` in a result is a **real instant** — `.getTime()` is the correct
+epoch millisecond. Every instant has a `*Local` companion: an offset-carrying
+ISO 8601 string, which is what you want for display.
 
 ```typescript
-const sunrise = result!.sunrise;
-const h = sunrise.getUTCHours();    // 7
-const m = sunrise.getUTCMinutes();  // 4 → 07:04 local time
+result!.sun.rise;            // Date — 2025-01-14T01:39:44.172Z (the actual moment)
+result!.sun.riseLocal;       // "2025-01-14T07:09:44.172+05:30"
+result!.inauspicious.rahuKalam.start;    // Date
+result!.inauspicious.rahuKalam.startLocal;
+
+// Just the wall clock:
+result!.sun.riseLocal.slice(11, 16);   // "07:09"
+
+// Anything else works too, because the Date is genuinely correct:
+new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', timeStyle: 'short' })
+  .format(result!.sun.rise);           // "7:09 am"
+Temporal.Instant.from(result!.sun.riseLocal);
 ```
 
-`moonrise` / `moonset` can be `null` — the Moon occasionally does not rise or
-set on a given calendar day, which is normal.
+For an instant you derive yourself, `formatInZone` renders it the same way:
+
+```typescript
+import { formatInZone } from 'panchang-ts';
+const noon = new Date((result!.sun.rise.getTime() + result!.sun.set.getTime()) / 2);
+formatInZone(noon, result!.timezone.offsetMinutes);  // "2025-01-14T12:27:31.086+05:30"
+```
+
+> **Changed in v5 — this is the breaking change most likely to affect you.**
+> Through 4.x every published `Date` was the true instant *shifted* by the UTC
+> offset, and the README told you to read it back with `getUTC*`. That worked
+> only as long as you did nothing else with the value: `JSON.stringify` emitted
+> a wrong instant labelled `Z`, `Intl` with a `timeZone` rendered 12:39 pm for
+> an 07:09 am sunrise, and any comparison, diff, database write, date-fns or
+> Temporal call was off by the offset.
+>
+> Migration is mechanical: `x.getUTCHours()` → read `xLocal`, or format the
+> instant. See [Upgrading from 4.x](#upgrading-from-4x).
+
+`moon.rise` / `moon.set` can be `null` — the Moon occasionally does not rise or
+set on a given calendar day, which is normal. `moon.riseLocal` / `moon.setLocal`
+are `null` exactly when they are.
+
+### The result is grouped
+
+`DailyPanchangResult` has seven groups plus a handful of top-level fields.
+Through 4.x it was ~50 flat fields; the groups are what tell you where to look.
+
+| Group | Holds |
+|---|---|
+| `sun` | `rise` / `set` / `nextRise` (+ `*Local`), day and night lengths, the Sun's `siderealLongitude` and `nakshatra` |
+| `moon` | `rise` / `set` (+ `*Local`), the Moon's `siderealLongitude` and `rashi` |
+| `angas` | the five limbs — `tithis`, `nakshatras`, `yogas`, `karanas`, `vara` |
+| `calendar` | `masa` (solar), `chandramasa` (lunar), `samvat` |
+| `muhurtas` | `abhijit`, `brahma`, `vijaya`, `godhuli`, `nishita`, `amritKala`, `madhyahna`, `pratahSandhya`, `sayahnaSandhya`, `doGhati` |
+| `inauspicious` | `rahuKalam`, `gulikaKalam`, `yamaganda`, `durMuhurta`, `varjyam`, `bhadra`, `gandaMula`, `panchaka`, `panchakaInfo`, `panchakaRahita` |
+| `periods` | `choghadiya`, `hora`, `gowri` |
+
+Top level: `date`, `location`, `timezone`, `ayanamsa`, `specialYogas`,
+`anandadiYoga`, `festivals`, `eclipse`, `chandraBalam`, `tarabala`.
+
+**Nothing is optional.** Every field is always present. A value that does not
+apply is `null`; a collection that does not apply is `[]`. That holds whether
+the reason is the domain (no Bhadra window today) or your options (you did not
+pass `janmaRashi`, so `chandraBalam` is `null`) — the result *shape* never
+depends on what you passed.
+
+`getInstantPanchang` uses the same group names for the subset an instant can
+answer: `sun`, `moon`, `angas`, `calendar`, `inauspicious`. There is no
+`muhurtas` or `periods`, because those are properties of a Hindu *day*.
 
 ### `getDailyPanchang` vs `getInstantPanchang`
 
@@ -63,6 +121,329 @@ set on a given calendar day, which is normal.
 at the given instant — it skips canonical-time refinements (madhyahna /
 pradosha / nishita / chandrodaya), transit-based Sankranti, and Smarta/Vaishnava
 Ekadashi split. For reliable festival dating, use `getDailyPanchang`.
+
+---
+
+## Upgrading from 4.x
+
+Three changes move numbers that 4.x produced, and one option is gone.
+
+### Lahiri ayanamsa corrected by +38″
+
+The library's Lahiri constant sat 38 arcseconds behind DrikPanchang's — it used
+`23.853211°` at J2000 (the widely-repeated 23° 51′ 11.6″ figure) where Drik
+computes `23.863801°`. The replacement was solved from Drik's own published
+values across 1950–2050, which agree on it to within 0.01″ — a century-wide
+baseline, so the precession polynomial is pinned too, not just the epoch
+constant. Every sidereal output moves with it:
+
+| Output | Effect |
+|---|---|
+| Nakshatra end-times | ~69 s later than 4.x (carries the ayanamsa once) |
+| Yoga end-times | ~129 s later than 4.x (carries it twice) |
+| Planetary longitudes, rashi, pada, lagna, divisionals, dashas | shifted +0.0106° |
+| Tithi / karana end-times | unchanged — Moon − Sun cancels the ayanamsa |
+| Raman / KP / True Chitra / Thirukanitham | moved by the same +38″; their offsets from Lahiri are preserved |
+
+Worst-case end-time drift vs Drik dropped from 131 s to 60 s, and the sign split
+by ayanamsa exposure — nakshatra and yoga early, tithi and karana late — is gone.
+If you have snapshot tests or cached charts from 4.x, expect them to need
+re-pinning.
+
+### ΔT now uses measurement, so every published time moves ~6 s
+
+4.x took ΔT (TT − UT) entirely from Espenak–Meeus. Its post-2005 branches are an
+extrapolation published in 2006, and Earth's rotation did not follow it — by
+2026 the model reads about **5.9 s high**, drifting a further ~0.6 s each year.
+Because this library reports *times*, that lands directly on published values.
+
+v5 takes ΔT from the leap-second chain (`32.184 + (TAI − UTC)`, exact, and
+within the 0.9 s band leap seconds maintain) wherever ΔT has actually been
+measured, and resumes Espenak–Meeus beyond it carrying the offset it had
+accrued. Against JPL Horizons the measured era now agrees to **0.005 s** at
+every decade from 1980, where 4.x was seconds out.
+
+| Output | Effect |
+|---|---|
+| Tithi / nakshatra / yoga / karana end-times | ~5.7 s later for 2025 dates, growing with the model's drift |
+| Sankranti and other transit instants | same shift — it is one uniform correction, not per-element |
+| Sunrise / sunset / moonrise / moonset | barely moved — the error scales against the 15°/hr sky rotation |
+| Dates a panchang element is *filed under* | unchanged except where a transit sits within seconds of sunrise |
+
+That last row is the one to know about. `computeSankrantisForYear` publishes a
+date, and the date is decided by whether the transit precedes sunrise. The 2025
+Tula Sankranti at Reykjavik is such a case: it still falls on Oct 16, but its
+margin narrowed from 7.1 s to 1.4 s. Locations at high latitude with a transit
+near sunrise are where a day could flip.
+
+### Instant-mode vara was wrong after ~19:00
+
+`getInstantPanchang` located sunrise by searching forward from `date − 12 h`.
+For an evening instant that start point is already past the morning's sunrise,
+so it found *tomorrow's* and rolled the weekday back a day. Any query after
+roughly 7 pm returned the previous vara — and with it the wrong Rahu Kalam,
+Gulika Kalam, Yamaganda, Choghadiya, Hora, Anandadi yoga and special yogas.
+`getDailyPanchang` was never affected. If you cached instant-mode results from
+4.x for evening timestamps, discard them.
+
+### `precision` removed
+
+`precision: 'standard' | 'high'` and the `Precision` type no longer exist.
+Element transitions are now solved by secant iteration, which converges to the
+root rather than stopping at a fixed tolerance, so there is nothing left for the
+option to select — and the tighter setting no longer buys anything. Removing it
+from your options object is the whole migration; leaving it in is a type error,
+not a silent no-op.
+
+### Sunrise is single-valued per location-day
+
+Solar rise/set is computed from a canonical anchor and cached per location-day,
+so it no longer depends on which instant the caller happened to start searching
+from. Values shift by ≤108 ms vs 4.x, and two calls for the same day now agree
+exactly instead of differing by up to 109 ms. Windows derived proportionally
+from the day length — Varjyam, Bhadra, the slot systems — move by a little more
+than that. This removes an inconsistency rather than introducing an
+approximation: 4.x returned a different sunrise depending on which caller asked.
+
+### Moonrise and moonset are single-valued per location-day
+
+The same treatment sunrise received, now applied to the Moon. `getMoonrise` /
+`getMoonset` resolve through a canonical per-UTC-day cache, so an event has one
+timestamp no matter which caller asks or from which instant they searched.
+Published `moon.rise` / `moon.set` shift by **≤182 ms** vs 4.x. Nothing else in the
+result moves — verified over 11,520 daily results across six locations and three
+centuries: zero changes to any index, name, boolean, festival date or other
+timestamp.
+
+### `read*` for tables, `compute*` for the engine
+
+`getFestivalsForYear` read a pre-built table; `getFestivalsInRange` ran the
+engine. Two near-identical names, completely different inputs and semantics. v5
+settles one convention across all four families — festivals, eclipses, moon
+phases and muhurta:
+
+| 4.x | v5 | what it does |
+|---|---|---|
+| `getFestivalsForYear` | `readFestivalsForYear` | reads a table |
+| `getFestivalsForDate` | `readFestivalsForDate` | reads a table |
+| `getFestivalsYearRange` | `readFestivalsYearRange` | reads a table |
+| `getEclipsesForYear` / `ForDate` / `YearRange` | `readEclipsesForYear` / … | reads a table |
+| `getMoonPhasesForYear` / `ForDate` / `YearRange` | `readMoonPhasesForYear` / … | reads a table |
+| — | `readMuhurtaForYear` / `ForDate` / `YearRange` | **new** — reads a table |
+| — | `readBestMuhurtaDays` | **new** — top-scoring days |
+| `getFestivalsInRange` | `computeFestivalsInRange` | runs the engine |
+| `getEclipsesInRange` | `computeEclipsesInRange` | runs the engine |
+| `getMoonPhasesInRange` | `computeMoonPhasesInRange` | runs the engine |
+| `findAuspiciousDates` | `computeAuspiciousDatesInRange` | runs the engine |
+| `getEkadashiDatesForYear` | `computeEkadashiDatesForYear` | runs the engine |
+| `getSankrantisForYear` | `computeSankrantisForYear` | runs the engine |
+
+**Every 4.x name still works** — they are deprecated aliases pointing at the same
+functions, kept through v5. Nothing breaks today; the old names will go in v6.
+
+New single-year entry points, the shape most callers reach for first:
+
+```ts
+computeFestivalsForYear(2027, location, { timezone: 330 });
+computeEclipsesForYear(2027, location, { timezone: 330 });
+computeMoonPhasesForYear(2027, { timezone: 330 });
+computeAuspiciousDatesForYear(2027, vivahRule, location, { timezone: 330 });
+```
+
+### `buildMuhurtaTable` + the `panchang-ts/muhurta` subpath
+
+Festivals, eclipses and moon phases each had a builder and an engine-free
+reader; muhurta had neither, so finding auspicious dates meant running the full
+engine on device for every query. v5 completes the family:
+
+```ts
+// build once (build time, or first launch), then persist the JSON
+import { buildMuhurtaTable, vivahRule } from 'panchang-ts';
+const table = buildMuhurtaTable({
+  rule: vivahRule, location: DELHI, timezoneOffsetMinutes: 330,
+  startYear: 2026, endYear: 2031,
+});
+
+// read it back with no astronomy code in the bundle (~1.7 KB)
+import { readBestMuhurtaDays } from 'panchang-ts/muhurta';
+readBestMuhurtaDays(table, 5);   // top 5 days, highest score first
+```
+
+Only days that pass the rule are stored unless you pass `includeFailures: true`.
+
+### Built tables are dictionary-encoded and carry `key`
+
+`build*Table` now emits a `_dict` of unique entries with each day holding
+indices, rather than repeating every localized string at every occurrence. A
+10-year festival table goes from 315 KB to **89.9 KB (28.5%)**; a 10-year
+moon-phase table from 106 KB to **29.7 KB (28.0%)**. Resolved output is
+identical — verified across every year and both locales.
+
+Gzip already hid most of this on the wire, so the win is **parse time and
+resident memory**, which is the constraint that actually bites on Hermes.
+
+Festival table entries also gained the stable `key` the engine has been
+returning since 4.x, so a table is no longer both larger *and* less useful than
+engine output.
+
+**Tables you already cached still read.** The reader detects the format, so a v1
+table built with 4.x keeps working; only `key` is unavailable from it, and comes
+back as `''`.
+
+### Published `Date`s are real instants — the flagship change
+
+```diff
+- result.sunrise.getTime()      // NOT when sunrise happened (off by the UTC offset)
+- result.sunrise.getUTCHours()  // the documented 4.x idiom
++ result.sun.rise.getTime()     // correct epoch ms
++ result.sun.riseLocal          // "2025-01-14T07:09:44.172+05:30"
+```
+
+Applies to **every** `Date` in `DailyPanchangResult` and to every `TimePeriod` —
+`sun.rise`, `sun.set`, `sun.nextRise`, `moon.rise`, `moon.set`, all the muhurtas
+and inauspicious periods, all four slot systems, the element
+`startTime`/`endTime` arrays, the eclipse contacts and sutak window. Each gains
+a `*Local` companion: `sun.riseLocal`, `inauspicious.rahuKalam.startLocal`,
+`angas.tithis[0].endTimeLocal`, and so on.
+
+| you had | you now write |
+|---|---|
+| `r.sun.rise.getUTCHours()` | `r.sun.riseLocal.slice(11, 13)` |
+| `` `${h}:${m}` `` from `getUTC*` | `r.sun.riseLocal.slice(11, 16)` |
+| `r.inauspicious.rahuKalam.start.getUTCHours()` | `r.inauspicious.rahuKalam.startLocal.slice(11, 13)` |
+| `r.angas.tithis[0].endTime` for display | `r.angas.tithis[0].endTimeLocal` |
+| a `Date` you derived yourself | `formatInZone(d, r.timezone.offsetMinutes)` |
+
+`getInstantPanchang` results carry **no** `*Local` fields: that call takes no
+timezone, so there is no zone to render a wall clock in.
+
+**Cost:** rendering the strings adds ~0.04 ms per daily panchang — invisible on
+a cold call (0.7885 → 0.7924 ms) and ~20% of a fully cached warm one
+(0.176 → 0.215 ms). Both pairs are the tree measured against itself when the
+change landed, mid-Phase-36; the release finally warms to **0.17 ms**, against
+published 4.3.1's **6.20 ms**.
+
+### `result.timezone` is now an object
+
+```diff
+- result.timezone            // 330
++ result.timezone            // { offsetMinutes: 330, zone: 'Asia/Kolkata' }
++ result.timezone.offsetMinutes
+```
+
+`options.timezone` has always accepted `number | string`, but the result carried
+only a number — so passing `'America/New_York'` produced a result that could not
+say which zone produced it. `zone` is present only when you passed a zone name.
+
+**The DST limit, now stated explicitly.** The offset is resolved **once per
+call** from a reference date, so a Hindu day containing a DST transition is
+computed at a single offset throughout. Correct for almost every day; on the one
+or two transition days a year, times after the jump are shifted by its size.
+4.x documented this as a blanket "DST resolves automatically", which was not the
+whole truth.
+
+### The result object is grouped
+
+`DailyPanchangResult` had ~50 flat top-level fields mixing five categories.
+v5 sorts them into seven groups — see [The result is grouped](#the-result-is-grouped)
+for the full table. This is a large break, and it lands in the same release as
+the `Date` change on purpose: migrating both at once is one pass over your read
+sites, not two.
+
+Every rename, in full:
+
+| 4.x | v5 |
+|---|---|
+| `sunrise` / `sunset` / `nextSunrise` | `sun.rise` / `sun.set` / `sun.nextRise` |
+| `sunriseLocal` / `sunsetLocal` / `nextSunriseLocal` | `sun.riseLocal` / `sun.setLocal` / `sun.nextRiseLocal` |
+| `dayDurationMinutes` / `nightDurationMinutes` | `sun.dayDurationMinutes` / `sun.nightDurationMinutes` |
+| `dinamanaMinutes` / `ratrimanaMinutes` | `sun.dinamanaMinutes` / `sun.ratrimanaMinutes` |
+| `siderealSunAtSunrise` | `sun.siderealLongitude` |
+| `suryaNakshatra` | `sun.nakshatra` |
+| `moonrise` / `moonset` | `moon.rise` / `moon.set` |
+| `moonriseLocal` / `moonsetLocal` | `moon.riseLocal` / `moon.setLocal` |
+| `siderealMoonAtSunrise` | `moon.siderealLongitude` |
+| `chandraRashi` | `moon.rashi` |
+| `tithis` / `nakshatras` / `yogas` / `karanas` / `vara` | `angas.*` (same names) |
+| `masa` / `chandramasa` / `samvat` | `calendar.*` (same names) |
+| `abhijitMuhurta` / `brahmaMuhurta` / `vijayaMuhurta` | `muhurtas.abhijit` / `muhurtas.brahma` / `muhurtas.vijaya` |
+| `godhuliMuhurta` / `nishitaMuhurta` | `muhurtas.godhuli` / `muhurtas.nishita` |
+| `amritKala` / `madhyahna` / `pratahSandhya` / `sayahnaSandhya` | `muhurtas.*` (same names) |
+| `doGhatiMuhurta` | `muhurtas.doGhati` |
+| `rahuKalam` / `gulikaKalam` / `yamaganda` / `durMuhurta` | `inauspicious.*` (same names) |
+| `varjyam` / `bhadra` / `gandaMula` / `panchaka` / `panchakaRahita` | `inauspicious.*` (same names) |
+| `choghadiya` / `hora` | `periods.choghadiya` / `periods.hora` |
+| `gowriPanchangam` | `periods.gowri` |
+| `eclipse.magnitude` (disc *area*) | `eclipse.obscuration` — same value; the new `eclipse.magnitude` is the *diameter* fraction catalogues publish, and is negative for a penumbral lunar eclipse |
+
+Unmoved: `date`, `location`, `timezone`, `ayanamsa`, `specialYogas`,
+`anandadiYoga`, `festivals`, `eclipse`, `chandraBalam`, `tarabala`.
+
+For `getInstantPanchang`: `tithi` / `nakshatra` / `yoga` / `karana` / `vara` →
+`angas.*`; `siderealSun` → `sun.siderealLongitude`; `siderealMoon` →
+`moon.siderealLongitude`; `suryaNakshatra` → `sun.nakshatra`; `chandraRashi` →
+`moon.rashi`; `chandramasa` / `samvat` → `calendar.*`; `panchaka` / `gandaMula`
+→ `inauspicious.*`.
+
+### One rule for "not applicable": always present, `null` or `[]`
+
+4.x used three conventions and you could not predict which you would get —
+`| null` for `bhadra` / `varjyam` / `eclipse`, `?`-optional for `chandraBalam` /
+`tarabala`, and an empty array for `panchakaRahita` / `festivals`. v5 has one
+rule: **every field is always present**, a value that does not apply is `null`,
+and a collection that does not apply is `[]`.
+
+```diff
+- if ('chandraBalam' in r) …        // 4.x: field absent without janmaRashi
+- r.chandraBalam!.house             // and the `!` was mandatory
++ if (r.chandraBalam !== null) …    // v5: always present, null when unasked
++ r.chandraBalam?.house
+```
+
+Only `chandraBalam` and `tarabala` changed behaviour; everything else already
+followed the rule. `toBeUndefined()`-style checks against them become
+`toBeNull()`.
+
+### `suryaNakshatra` is typed as a nakshatra, not a rashi
+
+Now published as `sun.nakshatra`. Its `index` has always been 0..26 (Ashwini …
+Revati). Its *type* said `RashiInfo`, documented "0 = Mesha … 11 = Meena", so
+anyone indexing a 12-element rashi array by it got silent garbage for two thirds
+of the year. The runtime value is unchanged; the type is now
+`NakshatraIndexInfo` and TypeScript will point at the misuse.
+
+### `_debug` removed
+
+`DailyPanchangResult._debug` was declared in the published type and written
+nowhere in the library. It never carried data. If you referenced it, it was
+always `undefined`.
+
+### Alias fields documented rather than removed
+
+`sun.dinamanaMinutes` / `sun.dayDurationMinutes` and `sun.ratrimanaMinutes` /
+`sun.nightDurationMinutes` are the same numbers under classical and English
+names. Both pairs stay — consumers use both vocabularies — and the types now say
+plainly that they are aliases, never independently computed.
+
+`calendar.chandramasa` keeps its casing beside `moon.rashi` and `sun.nakshatra`.
+Renaming it would break every consumer for a casing preference. The type now
+documents that `calendar.masa` is the **solar** month and `calendar.chandramasa`
+the **lunar** one, which was previously left to guesswork.
+
+### Additive, but worth knowing
+
+- `EclipseInfo` / `EclipseSubtype` are now exported. 4.x shipped
+  `getUpcomingLunarEclipse` and friends without the type they return.
+- `festivals[].key` — stable, language-independent festival id. Match on this,
+  never on `name`.
+- `bhadra.locationName` — localized display name; `bhadra.location` stays the
+  machine-readable key.
+- `MuhurtaScore.factors` — structured scoring inputs alongside English `reasons`.
+- `BirthChart.byPlanet` — the nine placements keyed by graha.
+- `eclipse.description` is now localized. Under `language: 'hi'` it was
+  previously emitted in English, including inside `festivals[].description`.
+- `sections` on `getDailyPanchang` — opt into a narrower, cheaper call. See
+  [Performance](#performance).
 
 ---
 
@@ -112,16 +493,16 @@ over per-feature helpers.
 ```typescript
 const r = getDailyPanchang(date, location, { timezone: 330 })!;
 
-r.tithis.forEach(t => console.log(t.name, t.paksha, t.completionPercentage, t.endTime));
-r.nakshatras.forEach(n => console.log(n.name, n.pada, n.endTime));
-r.yogas.forEach(y => console.log(y.name, y.endTime));
-r.karanas.forEach(k => console.log(k.name, k.type, k.endTime));
-console.log(r.vara.name, r.vara.englishName);   // "Mangalawara", "Tuesday"
+r.angas.tithis.forEach(t => console.log(t.name, t.paksha, t.completionPercentage, t.endTime));
+r.angas.nakshatras.forEach(n => console.log(n.name, n.pada, n.endTime));
+r.angas.yogas.forEach(y => console.log(y.name, y.endTime));
+r.angas.karanas.forEach(k => console.log(k.name, k.type, k.endTime));
+console.log(r.angas.vara.name, r.angas.vara.englishName);   // "Mangalawara", "Tuesday"
 
 // Single-instant snapshot:
 import { getInstantPanchang } from 'panchang-ts';
 const i = getInstantPanchang(new Date(), location)!;
-console.log(i.tithi.name, i.nakshatra.name, i.yoga.name, i.karana.name, i.vara.name);
+console.log(i.angas.tithi.name, i.angas.nakshatra.name, i.angas.yoga.name, i.angas.karana.name, i.angas.vara.name);
 ```
 
 ## Lunar & Solar Calendar
@@ -129,16 +510,16 @@ console.log(i.tithi.name, i.nakshatra.name, i.yoga.name, i.karana.name, i.vara.n
 ```typescript
 const r = getDailyPanchang(date, loc, { timezone: 330, masaSystem: 'purnimanta' })!;
 
-r.chandramasa.name;           // active system (default: Purnimanta / North Indian)
-r.chandramasa.amantaName;     // South Indian
-r.chandramasa.purnimantaName; // North Indian
-r.chandramasa.isAdhika;       // true during leap months
-r.samvat.vikramSamvat;        // 2081
-r.samvat.shakaSamvat;         // 1946
+r.calendar.chandramasa.name;           // active system (default: Purnimanta / North Indian)
+r.calendar.chandramasa.amantaName;     // South Indian
+r.calendar.chandramasa.purnimantaName; // North Indian
+r.calendar.chandramasa.isAdhika;       // true during leap months
+r.calendar.samvat.vikramSamvat;        // 2081
+r.calendar.samvat.shakaSamvat;         // 1946
 
-r.masa.name;                  // current solar month (Mesha … Meena)
-r.suryaNakshatra.name;        // Sun's nakshatra
-r.chandraRashi.name;          // Moon sign
+r.calendar.masa.name;                  // current solar month (Mesha … Meena)
+r.sun.nakshatra.name;        // Sun's nakshatra
+r.moon.rashi.name;          // Moon sign
 ```
 
 ## Sun, Moon & Muhurta
@@ -153,36 +534,51 @@ const moonset  = getMoonset(localMidnightUtc, loc);
 
 // Or read off the daily result:
 const r = getDailyPanchang(date, loc, { timezone: 330 })!;
-r.sunrise; r.sunset; r.moonrise; r.moonset; r.nextSunrise;
-r.dayDurationMinutes; r.nightDurationMinutes;
+r.sun.rise; r.sun.set; r.moon.rise; r.moon.set; r.sun.nextRise;
+r.sun.dayDurationMinutes; r.sun.nightDurationMinutes;
 
 // Auspicious muhurtas
-r.brahmaMuhurta;     // two muhurtas before sunrise
-r.abhijitMuhurta;    // 8th day-muhurta; null on Wednesday (Drik convention)
-r.vijayaMuhurta;     // 11th day-muhurta
-r.godhuliMuhurta;    // "cow-dust" sunset muhurta
-r.nishitaMuhurta;    // midnight muhurta (Shivaratri)
-r.madhyahna;         // solar noon ±24 min
-r.pratahSandhya;     // dawn twilight, ends at sunrise
-r.sayahnaSandhya;    // dusk twilight, starts at sunset
-r.amritKala;         // nakshatra-specific window (null when nakshatra has none)
+r.muhurtas.brahma;     // two muhurtas before sunrise
+r.muhurtas.abhijit;    // 8th day-muhurta; null on Wednesday (Drik convention)
+r.muhurtas.vijaya;     // 11th day-muhurta
+r.muhurtas.godhuli;    // "cow-dust" sunset muhurta
+r.muhurtas.nishita;    // midnight muhurta (Shivaratri)
+r.muhurtas.madhyahna;         // solar noon ±24 min
+r.muhurtas.pratahSandhya;     // dawn twilight, ends at sunrise
+r.muhurtas.sayahnaSandhya;    // dusk twilight, starts at sunset
+r.muhurtas.amritKala;         // nakshatra-specific window (null when nakshatra has none)
 ```
 
-`pratahSandhya` / `sayahnaSandhya` width = `nightDuration / 10` (~62–81 min).
+`muhurtas.pratahSandhya` / `muhurtas.sayahnaSandhya` width =
+`sun.nightDurationMinutes / 10` (~62–81 min).
 
 ## Inauspicious Periods
 
 ```typescript
 const r = getDailyPanchang(date, loc, { timezone: 330 })!;
 
-r.rahuKalam;       // { start, end }
-r.gulikaKalam;
-r.yamaganda;
-r.durMuhurta;      // two ~48-min windows
-r.varjyam;         // { start, end } | null
-r.gandaMula;       // { active, severity: 'mild'|'severe'|null, ... }
-r.bhadra;          // { start, end, location: 'earth'|'heaven'|'paatal', isActive } | null
-r.panchaka;        // boolean — Moon in last 5 nakshatras
+r.inauspicious.rahuKalam;       // { start, end }
+r.inauspicious.gulikaKalam;
+r.inauspicious.yamaganda;
+r.inauspicious.durMuhurta;      // two ~48-min windows
+r.inauspicious.varjyam;         // { start, end } | null
+r.inauspicious.gandaMula;       // { active, severity: 'mild'|'severe'|null, ... }
+r.inauspicious.bhadra;          // { start, end, location: 'earth'|'heaven'|'paatal', isActive } | null
+r.inauspicious.panchaka;        // boolean — Moon in last 5 nakshatras
+r.inauspicious.panchakaInfo;    // which of the five, and whether it's a dosha
+```
+
+Panchaka is not one undifferentiated affliction. The tradition names five and
+picks between them by **the weekday the spell began on** — so the type belongs
+to the spell, not the day, and two days with identical tithi, nakshatra and
+vara can carry different ones. A spell begun on a Wednesday or Thursday
+(`'samanya'`) carries no named affliction at all:
+
+```typescript
+const pk = r.inauspicious.panchakaInfo;
+if (pk.active && pk.isDosha) {
+  console.log(pk.name, '— began on vara', pk.onsetVara);  // e.g. "Mrityu Panchaka"
+}
 ```
 
 ## Time-Slot Systems
@@ -191,19 +587,19 @@ r.panchaka;        // boolean — Moon in last 5 nakshatras
 const r = getDailyPanchang(date, loc, { timezone: 330 })!;
 
 // Choghadiya — 8 day + 8 night named, rated slots (Amrit, Kaal, Shubh, Rog, …)
-r.choghadiya.day.forEach(s => console.log(s.name, s.qualityName, s.start, s.end));
+r.periods.choghadiya.day.forEach(s => console.log(s.name, s.qualityName, s.start, s.end));
 
 // Gowri Panchangam ("Nalla Neram") — 8 day + 8 night Tamil slots
-r.gowriPanchangam.day.forEach(s => console.log(s.name, s.qualityName));
+r.periods.gowri.day.forEach(s => console.log(s.name, s.qualityName));
 
 // Hora — 12 day + 12 night planetary hours (Chaldean order)
-r.hora.day.forEach(h => console.log(h.planet, h.start, h.end));
+r.periods.hora.day.forEach(h => console.log(h.planet, h.start, h.end));
 
 // Do Ghati Muhurta — 15 day + 15 night ~48-min deity-keyed slots (no vara rotation)
-r.doGhatiMuhurta.day.forEach(g => console.log(g.name, g.start, g.end));
+r.muhurtas.doGhati.day.forEach(g => console.log(g.name, g.start, g.end));
 
 // Panchaka Rahita — slices of the day FREE of Panchaka ([] when it pervades)
-r.panchakaRahita.forEach(slice => console.log(slice.start, slice.end));
+r.inauspicious.panchakaRahita.forEach(slice => console.log(slice.start, slice.end));
 ```
 
 ## Special Yogas
@@ -232,11 +628,19 @@ observances (Masik Shivaratri, Pushya days, Shravan Somvar…).
 
 ```typescript
 r.festivals.forEach(f => {
+  // key:  stable, language-independent id — 'diwali', 'makar_sankranti', …
   // type: major | minor | ekadashi | smarta_ekadashi | vaishnava_ekadashi
   //     | pradosha | sankranti | eclipse
-  console.log(f.name, f.type, f.deferralDate);
+  console.log(f.key, f.name, f.type, f.deferralDate);
 });
+
+// `name` is localized, so match on `key` — never on `name`.
+const hasDiwali = r.festivals.some(f => f.key === 'diwali');
 ```
+
+`key` is on engine results (`getDailyPanchang`, `getInstantPanchang`,
+`computeFestivalsInRange`). Entries read back out of a `buildFestivalsTable` table
+carry `name` / `type` / `description` only.
 
 ### Regional scoping
 
@@ -262,79 +666,60 @@ getDailyPanchang(jan13, amritsar, { timezone: 330, region: 'punjab' })!
 legacy slugs `'tamil'`, `'bengal'`, `'north-india'` are still accepted and
 mapped internally.
 
-### Pre-computed table (bundled, India / IST)
+### Pre-computed table — build your own and cache it
 
-If you want festival *dates* without running the engine, import the static
-table at `panchang-ts/festivals`. It bundles a rolling **2-years-past /
-5-years-future** window pre-computed against Varanasi (IST). Within India
-these dates are essentially universal.
+If you want festival *dates* without running the engine in your app, compute a
+table once with `buildFestivalsTable`, cache the JSON, and read it back through
+the engine-free `panchang-ts/festivals` entry point.
+
+**The library ships no pre-computed table.** Festival dates are
+observer-dependent — canonical times (nishita / pradosha / chandrodaya …) shift
+with the timezone offset, so a table built for one place can be ±1 day wrong
+elsewhere — and any table baked into the package would also go stale. Building
+your own means it is correct for *your* users and covers whatever years you
+want.
 
 ```typescript
+import { buildFestivalsTable } from 'panchang-ts';            // uses the engine
 import {
-  getFestivalsForYear,
-  getFestivalsForDate,
-  FESTIVALS_META,
-  FESTIVALS_YEAR_RANGE,
-} from 'panchang-ts/festivals';
+  readFestivalsForYear,
+  readFestivalsForDate,
+  readFestivalsYearRange,
+} from 'panchang-ts/festivals';                                // engine-free
 
-const yr = FESTIVALS_YEAR_RANGE.start;          // e.g. { start: 2024, end: 2031 }
-getFestivalsForYear(yr)!.length;                // ~150 festival days
-const diwali = getFestivalsForYear(yr)!
-  .find(d => d.festivals.some(f => f.name === 'Diwali'))!.date;
-getFestivalsForDate(diwali);                    // [Narak Chaturdashi, Diwali]
-getFestivalsForDate(diwali, 'hi');              // [नरक चतुर्दशी, दिवाली]
-FESTIVALS_META.referenceLocation;               // "Varanasi"
-FESTIVALS_META.languages;                       // ["en", "hi"]
-```
-
-This entry point is engine-free — it ships only the JSON + accessors, so
-importing it won't pull the calculation engine into your bundle. Both `en`
-and `hi` are bundled (names *and* descriptions); pass the locale as the
-second argument. Eclipses are excluded here (visibility is location-dependent)
-— they ship as their own bundled table at `panchang-ts/eclipses` (see
-[Eclipses](#eclipses)).
-
-### Festivals outside India — build a location table and cache it
-
-The bundled table is **IST-only**. Elsewhere (Europe, North America, rest
-of world) festival dates can shift by ±1 day, because canonical times
-(nishita / pradosha / chandrodaya …) are observer-dependent — and the shift
-tracks the timezone offset, not the "region", so a single per-continent
-table would mis-date boundary-day festivals.
-
-For an offline app serving users worldwide, the right pattern is
-**compute-once-then-cache for the user's actual location**. Build a
-location-specific table with `buildFestivalsTable` (from the main entry —
-it uses the engine), persist the returned JSON, then read it back through
-the same accessors via their `source` argument:
-
-```typescript
-import { buildFestivalsTable } from 'panchang-ts';
-import { getFestivalsForYear, getFestivalsForDate } from 'panchang-ts/festivals';
-
-// On first use at the user's location (a few seconds on-device — run it in
-// the background / chunk by year), then cache `table` to disk/MMKV.
+// Build once — at your build time, or on first launch in the background.
 const table = buildFestivalsTable({
-  location: { latitude: 40.7128, longitude: -74.006 },
-  timezoneOffsetMinutes: -300,   // US Eastern (EST); 0 = UK, 330 = IST
+  location: { latitude: 25.3176, longitude: 82.9739 },   // Varanasi
+  timezoneOffsetMinutes: 330,    // IST; -300 = US Eastern, 0 = UK
   startYear: 2024,
   endYear: 2031,
-  languages: ['en'],             // omit hi to halve the size
+  languages: ['en', 'hi'],       // drop 'hi' to halve the size
+  referenceLocation: 'Varanasi',
 });
+// …persist `table` as JSON (disk / MMKV / your bundler's asset pipeline).
 
-// Later reads are instant lookups against the cached table:
-getFestivalsForYear(2026, 'en', table);
-getFestivalsForDate('2026-11-08', 'en', table);  // key is in the table's tz
+// Later reads are instant lookups — no engine, no ephemeris.
+readFestivalsYearRange(table);                    // { start: 2024, end: 2031 }
+readFestivalsForYear(table, 2026)!.length;        // ~150 festival days
+const diwali = readFestivalsForYear(table, 2026)!
+  .find(d => d.festivals.some(f => f.name === 'Diwali'))!.date;
+readFestivalsForDate(table, diwali);              // [Narak Chaturdashi, Diwali]
+readFestivalsForDate(table, diwali, 'hi');        // [नरक चतुर्दशी, दिवाली]
 ```
 
-`buildFestivalsTable` returns the same `FestivalsFile` shape as the bundled
-data, so a cached table and the bundled India table are interchangeable as
-the `source` argument. India-majority apps can lean on the bundled table for
-zero first-load latency and only compute-and-cache for non-IST users.
+`panchang-ts/festivals` imports no astronomy code, so a client bundle that only
+*reads* a table never pulls in the engine. Keep `buildFestivalsTable` on the
+build/server side (or behind a one-time on-device warm-up) and ship only the
+JSON.
 
-**Other notes:** Karva Chauth / Dhanteras / Diwali emit with Purnimanta
-paksha naming. To regenerate the bundled India table after a registry
-change, run `npm run festivals:gen` (rolling window, no constants to edit).
+Eclipses are excluded here — visibility is location-dependent, so they get their
+own table at `panchang-ts/eclipses` (see [Eclipses](#eclipses)).
+
+`npm run festivals:gen` is a worked example of the whole pattern; it writes a
+rolling 2-past / 5-future window to `./festivals.json` (or a path you pass).
+
+**Other notes:** Karva Chauth / Dhanteras / Diwali emit with Purnimanta paksha
+naming.
 
 ## Eclipses
 
@@ -343,7 +728,9 @@ const r = getDailyPanchang(date, loc, { timezone: 330 })!;
 if (r.eclipse) {
   r.eclipse.kind;                 // 'solar' | 'lunar'
   r.eclipse.subtype;              // 'partial' | 'total' | 'annular' | 'penumbral'
-  r.eclipse.magnitude;            // 0..1 fraction obscured at peak
+  r.eclipse.obscuration;          // 0..1 fraction of the disc AREA covered
+  r.eclipse.magnitude;            // catalogue magnitude — DIAMETER fraction;
+                                  // >1 when total, negative when penumbral
   r.eclipse.visibleFromLocation;  // body above horizon at peak?
   r.eclipse.start; r.eclipse.peak; r.eclipse.end;
   r.eclipse.sutakStart; r.eclipse.sutakEnd;
@@ -354,65 +741,61 @@ import { getUpcomingSolarEclipse, getUpcomingLunarEclipse } from 'panchang-ts';
 const next = getUpcomingSolarEclipse(new Date(), loc, 365 /* days */);
 ```
 
-### Pre-computed table (bundled, India / IST)
+### Pre-computed table — build your own and cache it
 
-Like the festivals table, eclipse data ships as a static, engine-free entry
-at `panchang-ts/eclipses` — a rolling **2-years-past / 5-years-future** window
-pre-computed against Varanasi (IST). It lists every eclipse **visible from
-there during any phase** (so an eclipse already in progress at moon/sunrise or
-moon/sunset is included); the `visibleAtPeak` flag tells you whether greatest
-eclipse itself is observable. Within India visibility is essentially uniform.
+Same pattern as festivals: build a table with `buildEclipsesTable`, cache it,
+read it back through the engine-free `panchang-ts/eclipses` entry point.
+
+**No table is bundled.** Which eclipses are visible — and therefore which carry
+`sutak` — is location-dependent, so a table is only meaningful for the place it
+was built for.
 
 ```typescript
+import { buildEclipsesTable } from 'panchang-ts';            // uses the engine
 import {
-  getEclipsesForYear,
-  getEclipsesForDate,
-  ECLIPSES_META,
-  ECLIPSES_YEAR_RANGE,
-} from 'panchang-ts/eclipses';
+  readEclipsesForYear,
+  readEclipsesForDate,
+  readEclipsesYearRange,
+} from 'panchang-ts/eclipses';                                // engine-free
 
-const e = getEclipsesForYear(2025)![0].eclipses[0];
+const table = buildEclipsesTable({
+  location: { latitude: 25.3176, longitude: 82.9739 },   // Varanasi
+  timezoneOffsetMinutes: 330,
+  startYear: 2024,
+  endYear: 2031,
+  languages: ['en', 'hi'],
+  // visibleOnly: false → also include eclipses below the horizon (no sutak)
+});
+// …persist `table` as JSON, then:
+
+readEclipsesYearRange(table);            // { start: 2024, end: 2031 }
+const e = readEclipsesForYear(table, 2025)![0].eclipses[0];
 e.kind;                 // 'lunar'
 e.subtype;              // 'total'
 e.start; e.peak; e.end; // ISO UTC strings
-e.magnitude;            // 0..1 obscuration at peak
-e.visibleFromLocation;  // visible during any phase? (always true in bundled table)
+e.obscuration;          // 0..1 disc area covered at peak
+e.magnitude;            // catalogue magnitude (diameter); >1 total, <0 penumbral
+e.visibleFromLocation;  // visible during any phase?
 e.visibleAtPeak;        // is greatest eclipse itself above the horizon?
 e.sutak;                // { start, end } — see note below
-getEclipsesForDate('2025-09-07', 'hi');  // [पूर्ण चंद्र ग्रहण]
-ECLIPSES_META.referenceLocation;         // "Varanasi"
+readEclipsesForDate(table, '2025-09-07', 'hi');  // [पूर्ण चंद्र ग्रहण]
 ```
 
-Each entry carries `en` + `hi` text. Solar eclipses report the subtype seen
-**locally** (a globally-total eclipse may read `partial` from Varanasi). The
-`sutak` window is present only where it applies — all visible solar eclipses
-and visible **umbral** (partial/total) lunar eclipses; **penumbral** lunar
-eclipses carry no `sutak` and are not religiously observed (drik / pandit
-consensus). For full astronomical detail (e.g. eclipses *not* visible in
-India), use `getUpcomingEclipses` / `getEclipsesInRange` from the main entry.
+By default a table lists every eclipse **visible from the location during any
+phase** (so one already in progress at moon/sunrise or moon/sunset is included);
+`visibleAtPeak` tells you whether greatest eclipse itself is observable.
 
-**Outside India:** which eclipses are visible — and thus carry `sutak` —
-differs by location. Build and cache a location-specific table with
-`buildEclipsesTable` (main entry, uses the engine), then read it back via the
-same accessors' `source` argument — the same compute-once-then-cache pattern
-as festivals:
+Solar eclipses report the subtype seen **locally** (a globally-total eclipse may
+read `partial` from a given place). The `sutak` window is present only where it
+applies — all visible solar eclipses and visible **umbral** (partial/total)
+lunar eclipses; **penumbral** lunar eclipses carry no `sutak` and are not
+religiously observed (drik / pandit consensus).
 
-```typescript
-import { buildEclipsesTable } from 'panchang-ts';
-import { getEclipsesForYear } from 'panchang-ts/eclipses';
+For one-off astronomical detail without building a table, use
+`getUpcomingEclipses` / `computeEclipsesInRange` from the main entry.
 
-const table = buildEclipsesTable({
-  location: { latitude: 51.5074, longitude: -0.1278 },
-  timezoneOffsetMinutes: 0,        // UK / GMT
-  startYear: 2024,
-  endYear: 2031,
-  // visibleOnly: false → also include eclipses below the horizon (no sutak)
-});
-getEclipsesForYear(2025, 'en', table);
-```
-
-To regenerate the bundled India table, run `npm run eclipses:gen` (rolling
-window, no constants to edit).
+`npm run eclipses:gen` is a worked example; it writes a rolling 2-past /
+5-future window to `./eclipses.json` (or a path you pass).
 
 ## Moon Phases
 
@@ -422,48 +805,44 @@ astronomical quarter moments, distinct from the same-named *tithis*, which are
 ~24h windows.)
 
 ```typescript
-import { getMoonPhasesInRange } from 'panchang-ts';
-const phases = getMoonPhasesInRange(new Date('2026-01-01'), new Date('2026-12-31'));
+import { computeMoonPhasesInRange } from 'panchang-ts';
+const phases = computeMoonPhasesInRange(new Date('2026-01-01'), new Date('2026-12-31'));
 phases.forEach(p => console.log(p.phase, p.time.toISOString()));  // ~49 / year
 ```
 
-### Pre-computed table (bundled, India / IST)
+### Pre-computed table — build your own and cache it
 
-Same engine-free pattern as festivals and eclipses, at `panchang-ts/moon-phases`
-— a rolling **2-years-past / 5-years-future** window. Phases are global
-instants; the bundled table maps each onto its **IST** calendar date (so a new
-moon at 19:52 UTC on Jan 18 is listed under Jan 19 in India).
+Same pattern again, at `panchang-ts/moon-phases`. Phases are **global instants**,
+so `buildMoonPhasesTable` takes only a `timezoneOffsetMinutes` (no coordinates)
+— the timezone just decides which calendar date each instant lands on (a new
+moon at 19:52 UTC on Jan 18 is listed under Jan 19 in IST).
 
 ```typescript
+import { buildMoonPhasesTable } from 'panchang-ts';          // uses the engine
 import {
-  getMoonPhasesForYear,
-  getMoonPhasesForDate,
-  MOON_PHASES_META,
-  MOON_PHASES_YEAR_RANGE,
-} from 'panchang-ts/moon-phases';
+  readMoonPhasesForYear,
+  readMoonPhasesForDate,
+  readMoonPhasesYearRange,
+} from 'panchang-ts/moon-phases';                             // engine-free
 
-getMoonPhasesForYear(2026)!.length;            // ~49 phase days
-getMoonPhasesForDate('2026-01-03');            // [{ phase: 'full', name: 'Full Moon', ... }]
-getMoonPhasesForDate('2026-01-03', 'hi');      // [{ phase: 'full', name: 'पूर्णिमा', ... }]
+const table = buildMoonPhasesTable({
+  timezoneOffsetMinutes: 330,    // IST; -300 = US Eastern
+  startYear: 2024,
+  endYear: 2031,
+  languages: ['en', 'hi'],
+});
+// …persist `table` as JSON, then:
+
+readMoonPhasesYearRange(table);                        // { start: 2024, end: 2031 }
+readMoonPhasesForYear(table, 2026)!.length;            // ~49 phase days
+readMoonPhasesForDate(table, '2026-01-03');            // [{ phase: 'full', name: 'Full Moon', … }]
+readMoonPhasesForDate(table, '2026-01-03', 'hi');      // [{ phase: 'full', name: 'पूर्णिमा', … }]
 ```
 
 Each entry carries `phase`, the phase `time` (ISO UTC), and `en` + `hi` text.
-For another timezone, build and cache a table with `buildMoonPhasesTable` (main
-entry) and pass it as the accessors' `source` argument — it takes only a
-`timezoneOffsetMinutes` (no coordinates, since phases are location-independent):
 
-```typescript
-import { buildMoonPhasesTable } from 'panchang-ts';
-import { getMoonPhasesForYear } from 'panchang-ts/moon-phases';
-
-const table = buildMoonPhasesTable({
-  timezoneOffsetMinutes: -300,   // US Eastern
-  startYear: 2024, endYear: 2031,
-});
-getMoonPhasesForYear(2026, 'en', table);
-```
-
-Regenerate the bundled India table with `npm run moon-phases:gen`.
+`npm run moon-phases:gen` is a worked example; it writes a rolling 2-past /
+5-future window to `./moonPhases.json` (or a path you pass).
 
 ## Planetary Positions
 
@@ -526,8 +905,8 @@ const r = getDailyPanchang(date, loc, {
   janmaRashi: 3,        // 0 = Mesha … 11 = Meena
   janmaNakshatra: 0,    // 0 = Ashwini … 26 = Revati
 })!;
-r.chandraBalam!;  // { house, quality: 'strong'|'weak', name, englishName }
-r.tarabala!;      // { taraIndex, name, englishName, quality }
+r.chandraBalam;  // { house, quality: 'strong'|'weak', name, englishName } — null without janmaRashi
+r.tarabala;      // { taraIndex, name, englishName, quality } — null without janmaNakshatra
 
 import { computeSadeSati } from 'panchang-ts';
 const ss = computeSadeSati(natalMoonRashiIndex, new Date());
@@ -553,6 +932,12 @@ const lagna = computeLagna(birth, loc, 'lahiri', 'en');
 // Bhava — 'whole-sign' (default) | 'equal' | 'placidus-kp'.
 // Placidus-KP throws PanchangError('CIRCUMPOLAR') beyond ±66.5°.
 const houses = computeBhava(birth, loc, { houseSystem: 'whole-sign' });
+
+// `chart.planets` is the ordered list; `chart.byPlanet` is the same nine
+// placements keyed by graha, for direct lookup without a linear scan.
+const chart = computeRashiChart(birth, loc);
+chart.byPlanet.Mars.house;        // instead of chart.planets.find(...)!
+chart.planets.map(p => p.rashi);  // iterate the list as before
 
 // D1 — full Rashi chart with 9-graha house placement.
 const d1 = computeRashiChart(birth, loc, { houseSystem: 'whole-sign' });
@@ -597,6 +982,14 @@ const richer = computeAshtakoot(
   { rashi: 4, nakshatra: 9, lagnaRashi: 7, navamsaRashi: 2 },
   { rashi: 0, nakshatra: 1, lagnaRashi: 1, navamsaRashi: 5 },
 );
+
+// Manglik is a PAIRWISE verdict, not a per-chart one: when both partners are
+// Manglik the two afflictions neutralise each other, so the pair is clean
+// where a Manglik/non-Manglik pair is not.
+const m = computeMangalCompatibility(boyChart, girlChart);
+m.afflicted;       // false when neither is Manglik AND when both are
+m.cancellations;   // ['both natives Manglik — mutual cancellation']
+m.boy; m.girl;     // each native's own MangalDoshaInfo, severity included
 
 // Pathu Porutham (Tamil/Kerala, 10-fold) — binary pass/fail per koot.
 // Three vetoes (Yoni, Rajju, Vedha) flip `recommended` regardless of count.
@@ -802,12 +1195,17 @@ to `computePrashnaChart` for traditional Vedic Prashna.
 ## Muhurta Engine
 
 ```typescript
-import { scoreMuhurta, findAuspiciousDates, vivahRule } from 'panchang-ts';
+import { scoreMuhurta, computeAuspiciousDatesInRange, vivahRule } from 'panchang-ts';
 
 const r = scoreMuhurta(new Date('2026-05-12'), DELHI, vivahRule, { timezone: 330 });
-// → { date, score: 0..100, passes: boolean, reasons: string[] }
+// → { date, score: 0..100, passes: boolean,
+//     reasons: string[],           // diagnostic English
+//     factors: MuhurtaFactor[] }   // { code, axis, index?, delta } — stable
 
-const dates = findAuspiciousDates(
+r.factors.filter(f => f.delta < 0);              // what cost the day points
+r.factors.some(f => f.axis === 'exclusion');     // hard-excluded?
+
+const dates = computeAuspiciousDatesInRange(
   vivahRule,
   new Date('2026-05-01'),
   new Date('2026-05-31'),
@@ -820,20 +1218,97 @@ const myRule: MuhurtaRule = {
   occasion: 'launch_party',
   auspiciousVaras: [3, 4, 5],
   auspiciousNakshatras: [11, 12, 21],
-  excludeBhadra: true,
+  bhadra: 'penalize',        // 'ignore' | 'penalize' | 'exclude'
   excludeEkadashi: true,
   excludeAdhikaMasa: true,
 };
 ```
 
+**Tithi and vara are scored jointly, not just per-anga.** The classical Vara ×
+Tithi yogas — Siddha, Amrita, Dagdha, Visha, Hutasana, Krakacha, Samvartaka —
+are applied to every rule, so a Rikta tithi landing on a Saturday is partly
+redeemed by Siddha yoga rather than flatly penalised. Set
+`varaTithiYogas: false` for the older per-anga-only scoring, or call
+`computeVaraTithiYogas(vara, tithi)` directly. Where an auspicious and an
+inauspicious yoga both fire — a documented ambiguity in the sources — both are
+surfaced as separate factors and allowed to net out.
+
+`bhadra` defaults to `'ignore'`; the stock rules use `'penalize'`. A whole-day
+`'exclude'` is rarely what you want: Vishti karana sits at fixed positions in
+the tithi cycle, so vetoing the day removes seven tithis outright — among them
+Shukla Ekadashi, which the same sources list as *preferred* for vivah. Read
+`panchang.inauspicious.bhadra` for the window and schedule around it.
+`excludeBhadra: true` still works as an alias for `bhadra: 'exclude'`.
+
 13 stock rules: vivah, griha pravesh, namakarana, vidyarambh, vahan kharidi,
 annaprashan, mundan, upanayanam, karnavedha, aksharabhyasam, seemantham, shop
 opening, travel start.
+
+### Pre-computed table — build your own and cache it
+
+Scoring a year of days runs the engine ~365 times. If your app asks the same
+question repeatedly, compute the answer once and ship the JSON — the same
+pattern the festival, eclipse and Moon-phase tables use.
+
+```typescript
+import { buildMuhurtaTable, vivahRule } from 'panchang-ts';
+
+const table = buildMuhurtaTable({
+  rule: vivahRule,
+  location: { latitude: 25.3176, longitude: 82.9739 },
+  timezoneOffsetMinutes: 330,
+  startYear: 2026,
+  endYear: 2031,
+  referenceLocation: 'Varanasi',
+});
+// persist JSON.stringify(table) — 6 years of vivah dates is ~74 KB
+```
+
+Read it back through the engine-free `panchang-ts/muhurta` entry (~1.7 KB, no
+astronomy code in your bundle):
+
+```typescript
+import {
+  readMuhurtaForYear,
+  readMuhurtaForDate,
+  readMuhurtaYearRange,
+  readMuhurtaOccasion,
+  readBestMuhurtaDays,
+} from 'panchang-ts/muhurta';
+
+const table = JSON.parse(await (await fetch('/muhurta-vivah.json')).text());
+
+readMuhurtaOccasion(table);          // 'vivah'
+readMuhurtaYearRange(table);         // { start: 2026, end: 2031 }
+readMuhurtaForYear(table, 2026);     // MuhurtaTableDay[] — passing days, by date
+readMuhurtaForDate(table, '2026-11-11');
+readBestMuhurtaDays(table, 5);       // top 5 across the table, highest first
+```
+
+Only days that **pass** the rule are stored by default; pass
+`includeFailures: true` to keep every day with its score. Scores are location-
+*and* rule-dependent, so a table built for Varanasi and `vivah` says nothing
+about another place or occasion.
+
+`npm run muhurta:gen` is a worked example script
+([scripts/generate-muhurta-json.ts](scripts/generate-muhurta-json.ts)):
+
+```bash
+npm run muhurta:gen -- muhurta-vivah.json vivah
+```
 
 Scoring: starts at 50; +10 per matching auspicious axis (tithi / nakshatra /
 vara / yoga), -15 per inauspicious axis, hard exclusions zero the score.
 Special yogas (Amrit Siddhi, Sarvartha Siddhi, Ravi/Guru Pushya) add +5;
 Jwalamukhi subtracts -10. Clamped 0..100; `passes: true` when score ≥ 50.
+
+Every scoring input appears in both `reasons` (English prose, diagnostic, not a
+stable format) and `factors` (structured, with a stable `code`). Localize and
+filter on `factors`.
+
+`scoreMuhurta` computes only the sections it actually scores against, so it is
+cheaper than a full `getDailyPanchang`. `computeAuspiciousDatesInRange` does not narrow —
+each returned day carries its complete `panchang` for callers to drill into.
 
 ## Calendar Conversion
 
@@ -841,8 +1316,8 @@ Jwalamukhi subtracts -10. Clamped 0..100; `passes: true` when score ≥ 50.
 import {
   convertGregorianToHindu, convertHinduToGregorian,
   getKaliYugaYear, getHinduNewYear,
-  getEkadashiDatesForYear, getSankrantisForYear,
-  getFestivalsInRange, getUpcomingEclipses, getEclipsesInRange,
+  computeEkadashiDatesForYear, computeSankrantisForYear,
+  computeFestivalsInRange, getUpcomingEclipses, computeEclipsesInRange,
 } from 'panchang-ts';
 
 // Gregorian → Hindu coords at sunrise
@@ -857,9 +1332,9 @@ const dates = convertHinduToGregorian(
 getKaliYugaYear(new Date('2026-04-01'));                       // 5127
 getHinduNewYear(2026, 'tamil-nadu', DELHI, { timezone: 330 }); // Puthandu
 
-getEkadashiDatesForYear(2026, DELHI, { timezone: 330 });       // ~24 Date[]
-getSankrantisForYear(2026, DELHI, { timezone: 330 });          // 12 SankrantiEvent[]
-getFestivalsInRange(start, end, DELHI, { timezone: 330 });     // FestivalDay[]
+computeEkadashiDatesForYear(2026, DELHI, { timezone: 330 });       // ~24 Date[]
+computeSankrantisForYear(2026, DELHI, { timezone: 330 });          // 12 SankrantiEvent[]
+computeFestivalsInRange(start, end, DELHI, { timezone: 330 });     // FestivalDay[]
 getUpcomingEclipses(new Date(), DELHI, 5);
 ```
 
@@ -872,11 +1347,11 @@ tithi (e.g. Ugadi 2026), falls back to the Amanta-Chaitra-masa boundary.
 
 ```typescript
 const hi = getDailyPanchang(date, loc, { timezone: 330, language: 'hi' })!;
-hi.tithis[0].name;          // "कृष्ण चतुर्दशी"
-hi.vara.name;               // "मंगलवार"
-hi.chandramasa.name;        // "माघ"
-hi.choghadiya.day[0].name;  // "अमृत"
-hi.vara.englishName;        // "Tuesday" — englishName always English
+hi.angas.tithis[0].name;          // "कृष्ण चतुर्दशी"
+hi.angas.vara.name;               // "मंगलवार"
+hi.calendar.chandramasa.name;        // "माघ"
+hi.periods.choghadiya.day[0].name;  // "अमृत"
+hi.angas.vara.englishName;        // "Tuesday" — englishName always English
 
 // All options:
 const r = getDailyPanchang(date, loc, {
@@ -885,10 +1360,10 @@ const r = getDailyPanchang(date, loc, {
   language: 'en',                         // en | hi
   masaSystem: 'purnimanta',               // purnimanta | amanta
   region: 'all',                          // 21 state slugs + 'nepal' + 'all'
-  computeEndTimes: true,                  // false → ~5x speedup, names only
-  precision: 'standard',                  // standard (15 iter) | high (25 iter)
-  janmaRashi: undefined,                  // pass to add r.chandraBalam
-  janmaNakshatra: undefined,              // pass to add r.tarabala
+  computeEndTimes: true,                  // false → skip transition searches
+  sections: undefined,                    // undefined = all; see Performance
+  janmaRashi: undefined,                  // pass to populate r.chandraBalam (else null)
+  janmaNakshatra: undefined,              // pass to populate r.tarabala (else null)
 });
 ```
 
@@ -898,6 +1373,21 @@ versions lack — pass a number on those targets. DST resolves automatically for
 IANA zones.
 
 ---
+
+### Localized vs machine-readable fields
+
+Every user-facing string follows `language`. Where a value is also meaningful to
+code, the two are separate fields — the stable key never changes with language:
+
+| Machine-readable | Localized display |
+|---|---|
+| `festival.key` (`'diwali'`) | `festival.name` (`"दिवाली"`) |
+| `bhadra.location` (`'paatal'`) | `bhadra.locationName` (`"पाताल"`) |
+| `eclipse.kind` / `eclipse.subtype` | `eclipse.description` |
+| `muhurtaScore.factors[].code` | `muhurtaScore.reasons` (English only) |
+
+`MuhurtaScore.reasons` is diagnostic English and not a stable format; use
+`factors` for anything shown to a user or branched on in code.
 
 ## Types & Exports
 
@@ -927,7 +1417,8 @@ interface VaraInfo {
 }
 
 interface FestivalInfo {
-  name: string;
+  key: string;          // stable, language-independent id — match on this
+  name: string;         // localized — display only
   type: 'major' | 'minor' | 'ekadashi' | 'smarta_ekadashi' | 'vaishnava_ekadashi'
       | 'pradosha' | 'sankranti' | 'eclipse';
   description?: string;
@@ -958,7 +1449,11 @@ interface EclipseInfo {
   subtype: 'partial' | 'total' | 'annular' | 'penumbral';
   start: Date; peak: Date; end: Date;
   visibleFromLocation: boolean;
-  magnitude: number;        // [0, 1] at peak
+  obscuration: number;      // disc AREA covered at peak, [0, 1]
+  magnitude: number;        // catalogue magnitude — disc DIAMETER covered.
+                            // Not [0, 1]: >1 for a total eclipse, negative
+                            // for a penumbral lunar one (the Moon misses
+                            // the umbra), exactly as NASA's canon prints it.
   sutakStart: Date;         // 12 h pre-solar / 9 h pre-lunar
   sutakEnd: Date;
   description: string;
@@ -967,6 +1462,7 @@ interface EclipseInfo {
 interface BhadraInfo {
   start: Date; end: Date;
   location: 'earth' | 'heaven' | 'paatal';   // 'earth' = malefic for all work
+  locationName: string;                      // localized display name
   isActive: boolean;
 }
 ```
@@ -1033,6 +1529,7 @@ getSiderealSunLongitude, getSiderealMoonLongitude, getAyanamsa
 computeRahuKalam, computeGulikaKalam, computeYamaganda
 computeVarjyam, computeGandaMula, computeAnandadiYoga
 computePanchakaRahita, computeDoGhati, computeGowriPanchangam
+computePanchaka, classifyPanchaka, isPanchakaDosha, findPanchakaOnset
 computeAbhijitMuhurta, computeBrahmaMuhurta, computeVijayaMuhurta
 computeGodhuliMuhurta, computeNishitaMuhurta, computeAmritKala
 computeMadhyahna, computePratahSandhya, computeSayahnaSandhya
@@ -1042,7 +1539,7 @@ getUpcomingSolarEclipse, getUpcomingLunarEclipse, getEclipseDuringDay
 isEclipseVisibleAnyPhase
 
 // Moon phases (new / quarters / full as precise instants)
-getMoonPhasesInRange
+computeMoonPhasesInRange
 
 // Jyotish — planets, dashas, transits
 computePlanetaryPositions, GRAHA_ABBR
@@ -1062,14 +1559,15 @@ computeVarshaphala, computeTithiPravesha, computeArudhas, computeUpagrahas, comp
 
 // Jyotish — compatibility, doshas
 computeAshtakoot, computePathuPorutham
-computeMangalDosha, computeKaalSarp, computePitruDosha
+computeMangalDosha, computeMangalCompatibility, computeKaalSarp, computePitruDosha
 
 // KP / Prashna
 computeKpSubLord, computeKpCuspalSubLords, computeKpSignificators
 computePrashnaChart
 
 // Muhurta engine
-scoreMuhurta, findAuspiciousDates, STOCK_MUHURTA_RULES
+scoreMuhurta, computeAuspiciousDatesInRange, STOCK_MUHURTA_RULES
+computeVaraTithiYogas
 vivahRule, grihaPraveshRule, namakaranaRule, vidyarambhRule, vahanKharidiRule
 annaprashanRule, mundanRule, upanayanamRule, karnavedhaRule
 aksharabhyasamRule, seemanthamRule, shopOpeningRule, travelStartRule
@@ -1077,11 +1575,12 @@ aksharabhyasamRule, seemanthamRule, shopOpeningRule, travelStartRule
 // Calendar conversion + yearly listings
 convertGregorianToHindu, convertHinduToGregorian
 getKaliYugaYear, getHinduNewYear, computeSamvat
-getEkadashiDatesForYear, getSankrantisForYear, getFestivalsInRange
-getUpcomingEclipses, getEclipsesInRange
+computeEkadashiDatesForYear, computeSankrantisForYear, computeFestivalsInRange
+getUpcomingEclipses, computeEclipsesInRange
 
-// Static data tables (engine-using runtime builders; bundled JSON at
-// panchang-ts/festivals, panchang-ts/eclipses, panchang-ts/moon-phases)
+// Static data tables — build one, cache the JSON, then read it back through
+// the engine-free panchang-ts/festivals · /eclipses · /moon-phases entries.
+// No table ships with the package.
 buildFestivalsTable, buildEclipsesTable, buildMoonPhasesTable
 
 // Errors
@@ -1103,14 +1602,18 @@ Two-pass rendering pattern for smooth UI:
 import { getDailyPanchang } from 'panchang-ts';
 import { InteractionManager } from 'react-native';
 
-// Pass 1 — instant, names only (~0.1 ms Node, <100 ms Hermes)
+// Pass 1 — cheapest useful result: elements, slots, muhurtas
+// (~0.25 ms Node on a new date, ~0.14 ms on one already seen).
+// `sections` is the lever; `computeEndTimes: false` only helps once it is
+// narrowed, and slightly hurts on a full-section call.
 const fast = getDailyPanchang(date, location, {
   timezone: 330,
+  sections: [],
   computeEndTimes: false,
 });
 setState(fast);
 
-// Pass 2 — background, full with end-times (~0.5 ms Node, <500 ms Hermes)
+// Pass 2 — background, everything (~0.41 ms Node)
 InteractionManager.runAfterInteractions(() => {
   setState(getDailyPanchang(date, location, { timezone: 330 }));
 });
@@ -1120,7 +1623,7 @@ InteractionManager.runAfterInteractions(() => {
 
 ## Accuracy
 
-8,164 tests across 100 files, including fixtures cross-verified against reference
+8,368 tests across 121 files, including fixtures cross-verified against reference
 panchang calculations spanning 2025–2026 across 10 Indian cities plus New York,
 London, Sydney, Dubai, Singapore (diaspora fixtures cover DST on
 `America/New_York`).
@@ -1130,8 +1633,8 @@ London, Sydney, Dubai, Singapore (diaspora fixtures cover DST on
 | Sunrise / Sunset | ≤29 s observed vs reference minute-midpoint (±45 s tolerance) |
 | Moonrise / Moonset | Meeus apparent-upper-limb (refraction + parallax); ~3–5 min vs simpler-horizon authorities is expected |
 | Tithi / Nakshatra / Yoga / Karana names | Exact match vs reference |
-| Tithi / Nakshatra / Yoga / Karana end-times | ±3 min tolerance, max 2.01 min observed |
-| Ayanamsa | ±0.005° vs Swiss Ephemeris |
+| Tithi / Nakshatra / Yoga / Karana end-times | ≤60 s vs Drik across all 20 audited comparisons (tithi 46 s, karana 51 s, nakshatra 24 s, yoga 60 s) |
+| Ayanamsa (Lahiri) | Reproduces DrikPanchang's published value to ~0.01″ across 1950–2050 |
 | Planetary positions (Sun–Saturn) | ±0.02° sidereal |
 | Planetary positions (Rahu/Ketu, mean node) | ≤0.5° typical; ±2° tolerance |
 | Planetary positions (Rahu/Ketu, true node) | ≤0.6° typical (Meeus periodic correction) |
@@ -1139,6 +1642,18 @@ London, Sydney, Dubai, Singapore (diaspora fixtures cover DST on
 | D1 / D9 house placement | Exact match vs reference for 9-graha placement |
 | Ashtakoot total | ±1 point per pair across 30+ matched pairs |
 | Sade Sati arc start/end | ±1–2 days vs authoritative ephemerides |
+
+**End-time drift.** Drik publishes end times to the minute, so each comparison
+above carries ±30 s of quantization — that, not the search, dominates what is
+left. Two independent checks bound the library's own contribution: the reported
+value matches an exact bisection of the same index function to ≤24 ms, and Sun
+and Moon agree with Drik's sidereal positions to well under an arcsecond
+(`tests/validation/element-endtime-audit.test.ts` carries the working).
+
+**Ayanamsa.** Only Lahiri is verified against an external reference — Drik
+publishes no value for the other four. Raman, KP, True Chitrapaksha and
+Thirukanitham are held at their historical offsets from Lahiri, so correcting
+Lahiri carried them along rather than silently changing how each relates to it.
 
 **Detection notes.** **Aadal / Vidaal** follow the classical Moon-from-Sun
 nakshatra-distance rule (AstroShastra, HoraSarvam, Ernst Wilhelm), NOT the
@@ -1166,13 +1681,160 @@ Jayanti — matches the canonical date across 2025 and 2026 fixtures.
 
 ## Performance
 
-| Mode | Node.js | Hermes (budget Android) |
-|---|---|---|
-| Names-only (`computeEndTimes: false`) | ~0.1 ms | <100 ms |
-| Full with end-times | ~0.5 ms | <500 ms |
+Measured at Pune on an Apple M-series laptop under Node 24, median of 11
+processes per configuration. Treat them as relative guidance, not a spec — they
+move with hardware, latitude and date.
+
+Two columns, because they differ and both are real. **Distinct days** is the
+calendar-scan cost: every call misses the solar rise/set cache. **Same day
+repeated** is what a UI that re-renders one date sees, and what `npm run bench`
+reports. The last column is the **published 4.3.1 package**, installed from npm
+and benchmarked beside this one.
+
+| `getDailyPanchang` call | Distinct days | Same day repeated | 4.3.1 (distinct) |
+|---|---|---|---|
+| Default (all sections + end-times) | **~0.41 ms** | **~0.17 ms** | ~6.06 ms |
+| `computeEndTimes: false` | ~0.39 ms | ~0.15 ms | ~5.63 ms |
+| Without `'festivals'` | ~0.39 ms | — | n/a |
+| `sections: ['festivals', 'eclipse']` | ~0.40 ms | — | n/a |
+| `sections: []` | ~0.27 ms | — | n/a |
+| `sections: []` + `computeEndTimes: false` | ~0.25 ms | ~0.14 ms | n/a |
+| `getInstantPanchang` | ~0.21 ms | ~0.10 ms | ~0.43 ms |
+
+`sections` did not exist before v5, so the rows using it have no 4.3.1
+counterpart — passing it to 4.3.1 is silently ignored and you get a full run.
+
+**A default day is ~15× cheaper than in 4.3.1**, and a repeated day ~37×. Most
+of that is not tuning: 4.3.1 ran `astronomy-engine`'s full lunar theory inside
+the eclipse search on every day containing a syzygy, and had no cache that
+survived a call.
+
+One surface moved the other way, and it is deliberate: the **raw longitude
+getters** (`getSiderealSunLongitude`, `getSiderealMoonLongitude`) cost about
+twice what they did in 4.3.1 per call — ~14 µs against ~7 µs for the Moon,
+~2.8 µs against ~1.4 µs for the Sun — because the own-ephemeris series keep
+roughly three times `astronomy-engine`'s accuracy against JPL DE441, and the
+evaluation is sine-bound, so more terms cost proportionally more. Every
+documented workflow (`getDailyPanchang`, `getInstantPanchang`, the year/range
+APIs, the static tables) amortizes those reads through caches and is faster
+than 4.3.1 by the factors above; the per-call price is only visible to code
+calling the raw getters in a tight loop over distinct instants. For scanning
+workloads, prefer the range APIs or `getDailyPanchang` — they read through
+interpolated longitude blocks precisely so that this cost is paid once per day
+rather than once per read.
+
+The same trade surfaces once more in the birth-chart *primitives*:
+`computeRashiChart` and `computeNavamsa` measure ~0.31 ms against ~0.09 ms on
+published 4.3.1 — a chart is fifteen full-accuracy planet evaluations (three
+per planet, for the retrograde probes) and nothing amortizes them. The deeper
+chart stack inverts it again: `computeShadbala` and `computeBhavaBala` come
+out ~2× *faster* than 4.3.1, because v5 computes the positions once and reuses
+them. At a third of a millisecond per chart this is irrelevant interactively;
+it is visible only to code building thousands of charts in a batch.
+
+Cost is dominated by ephemeris evaluations, so the lever that matters is the one
+that avoids them:
+
+- **`sections`** — skip the optional ephemeris-backed blocks you don't need.
+  Dropping `'festivals'` takes a default call from ~0.41 ms to ~0.39 ms cold,
+  and dropping everything takes it to ~0.27 ms. See
+  [Narrowing the work](#narrowing-the-work).
+- **`computeEndTimes: false`** — a small win, never a large one. It skips the
+  transition searches, but those read through the same interpolated longitude
+  blocks the rest of the call has already built, so what it saves is arithmetic
+  rather than ephemeris: ~5% cold, ~10% warm. Use it to drop `endTime` fields
+  you don't want, not to go faster.
+
+  *Changed in v5.* Both entry points now always interpolate, so output depends
+  on neither `sections` nor `computeEndTimes` — see `INTERPOLATE_ALWAYS` in
+  `src/core/panchang.ts`. Earlier development builds chose the longitude cache's
+  mode from `computeEndTimes`, which made asking for *less* output cost *more*
+  on a full call; that is gone.
+
+Repeated calls for the same location-day are cheaper because solar rise/set
+events are cached process-wide, keyed on `(direction, lat, lon, elevation, UTC
+day)` and bounded at 20,000 entries. The cache makes sunrise single-valued as
+well as fast — see [Upgrading from 4.x](#sunrise-is-single-valued-per-location-day).
+It does not make a *single* cold rise/set call cheaper — against 4.3.1
+`getSunrise` is +1.8%, `getSunset` +8.8%, `getMoonrise` +5.5% and `getMoonset`
++6.6%, i.e. unchanged to slightly worse — what it removes is the second and
+every later call for the same day.
+
+Range helpers apply the same narrowing internally:
+`computeEkadashiDatesForYear` reads only the tithi at sunrise and so runs with
+every optional section off (**~18 ms** for a full year, against ~2,360 ms in
+4.3.1); `computeFestivalsInRange` keeps only `'festivals'` and `'eclipse'`
+(**~131 ms/year**, against ~2,180); `computeSankrantisForYear` needs only the
+Sun, so it scans one solar longitude per day and bisects the 12 transits rather
+than building a panchang each day (**~3.3 ms/year**, against ~154).
 
 Birth-chart helpers are independent — calling them does not add work to
-`getDailyPanchang`.
+`getDailyPanchang`. Within them, `computeShadbala` and `computeBhavaBala` build
+the natal positions once and derive all seven charts from them (~0.33 ms each,
+against ~0.72 in 4.3.1).
+
+**Charts are the one place v5 is slower.** `computeRashiChart` and
+`computeNavamsa` cost **~0.32 ms** against ~0.10 in 4.3.1 — 3.3×, entirely the
+planetary ephemeris, and the deliberate price of an order-of-magnitude accuracy
+gain against JPL DE441 (Mercury 6.50″ → 0.30″, Venus 19.59″ → 0.86″). If you
+build many charts and do not need that precision, 4.x was cheaper; nothing else
+in the library regressed.
+
+### Narrowing the work
+
+`PanchangSection` lists the four optional blocks. Everything else a daily
+panchang returns — the five elements, slot systems, muhurtas, inauspicious
+periods, masa / samvat / rashi — is arithmetic over the sunrise / sunset /
+next-sunrise triplet and is always computed, because skipping it would save
+nothing.
+
+| Section | Covers | Fields when omitted |
+|---|---|---|
+| `'festivals'` | Festival detection — needs the prior day's sunrise/sunset, the next day's transit, per-kala tithi anchors, and the prior day's Chandra Masa | `festivals: []` — but an eclipse entry is still prepended when `'eclipse'` is on |
+| `'eclipse'` | Eclipse overlapping the Hindu day | `eclipse: null` |
+| `'moonTimes'` | `moon.rise` / `moon.set` | `null` |
+| `'lunarWindows'` | Bhadra, Varjyam, Panchaka-Rahita — each binary-searches lunar longitude across the day | `null` / `[]` |
+
+```typescript
+// Everything (default).
+getDailyPanchang(date, loc, { timezone: 330 });
+
+// Festivals only — no moon times, no Bhadra/Varjyam windows.
+getDailyPanchang(date, loc, {
+  timezone: 330,
+  sections: ['festivals', 'eclipse'],
+});
+
+// Cheapest useful call: elements, slots, muhurtas and inauspicious periods
+// only. Those are arithmetic on the sunrise triplet and are always computed.
+getDailyPanchang(date, loc, {
+  timezone: 330,
+  sections: [],
+  computeEndTimes: false,
+});
+```
+
+Omitting a section leaves its fields at their documented empty value (`null`
+or `[]`) — never a half-filled one.
+
+Narrowing is **exactly output-neutral**: every field a narrowed call does
+compute is identical, to the millisecond, to what the full call would have
+returned. `sections` only decides what is skipped, never what a computed value
+is. (This is guaranteed by `LongitudeCache` memoizing on the exact instant. It
+was not true while that memo binned longitudes into 60-second buckets, when
+narrowing could shift transition times by up to 63 s.)
+
+### A note on Hermes / React Native
+
+Earlier versions of this table also quoted Hermes figures. Those were budget
+targets from the project plan, never measurements: `npm run test:hermes` runs
+`hermes-parser` over the built bundle to prove the syntax is Hermes-compatible,
+which is a *parse* check and does not execute anything. Hermes numbers will be
+published here once they are actually measured on device.
+
+What does carry over is the shape of the cost: it is dominated by ephemeris
+math, so the `sections` and `computeEndTimes` levers above have the same
+proportional effect on any runtime.
 
 ---
 
