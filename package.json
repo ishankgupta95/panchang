@@ -1,6 +1,6 @@
 {
   "name": "panchang-ts",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Pure TypeScript Hindu Panchang calculations. Tithi, Nakshatra, Yoga, Karana, Vara, and more. Offline-first, React Native compatible.",
   "author": "Ishank",
   "repository": {
