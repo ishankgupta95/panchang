@@ -1,4 +1,4 @@
-import { assertNakshatraIndex } from '../utils/validation';
+import { collectNakshatraOffsetWindows } from './varjyam';
 import type { UtcWindow } from '../types/elements';
 
 /**
@@ -134,34 +134,40 @@ export function computeNishitaMuhurta(sunset: Date, nextSunrise: Date): UtcWindo
 }
 
 /**
- * Amrit Kala (Amrita Ghatika): a 4-ghatika (≈96 min) auspicious window keyed
- * to the nakshatra active at sunrise. The offset from sunrise in ghatikas is
- * classical (Muhurta Chintamani); ghatika length is 1/60 of the ahoratra
- * (sunrise-to-nextSunrise).
+ * Amrit Kala (Amrita Ghatika / drik's "Amrit Kalam") windows of a Hindu day,
+ * in start order.
  *
- * Returns `null` when the computed window would extend past `nextSunrise`
- * (i.e., spills into tomorrow).
+ * Amrit Kala shares Varjyam's architecture exactly (2026-08-14 audit,
+ * recovered from 54 drik windows across two cities covering all 27
+ * nakshatras, offset spread ≤0.1 ghati): each window is anchored at its
+ * nakshatra's OWN START, offset by {@link AMRIT_KALA_OFFSET_GHATIKAS}
+ * elapsed ghatikas in the **nakshatra-elastic frame** (1 ghatika =
+ * nakshatraDuration / 60), and spans exactly 4 such ghatikas (~84–108 min).
+ * A window belongs to the Hindu day its START falls in — post-midnight
+ * windows print on the prior day's page — giving 0..2 windows per day.
  *
- * @param sunrise          Sunrise UTC Date.
- * @param nextSunrise      Next day's sunrise UTC Date.
- * @param nakshatraAtSunrise  Nakshatra index (0–26) at sunrise.
+ * An earlier revision anchored the window at sunrise with ahoratra-elastic
+ * ghatikas keyed to the sunrise nakshatra and dropped windows crossing next
+ * sunrise; that model disagreed with drik by up to ~16 h.
+ *
+ * @param sunriseUtc      UTC of local sunrise — start of the Hindu day.
+ * @param nextSunriseUtc  UTC of the following day's local sunrise.
+ * @param getMoon         Sidereal Moon longitude (degrees) at a UTC instant.
  */
-export function computeAmritKala(
-  sunrise: Date,
-  nextSunrise: Date,
-  nakshatraAtSunrise: number,
-): UtcWindow | null {
-  assertNakshatraIndex(nakshatraAtSunrise, 'nakshatraAtSunrise');
-
-  const offsetGhatikas = AMRIT_KALA_OFFSET_GHATIKAS[nakshatraAtSunrise]!;
-  const ahoratraMs = nextSunrise.getTime() - sunrise.getTime();
-  const ghatikaMs = ahoratraMs / 60;
-  const startMs = sunrise.getTime() + offsetGhatikas * ghatikaMs;
-  const endMs = startMs + 4 * ghatikaMs;
-
-  if (endMs > nextSunrise.getTime()) return null;
-
-  return { start: new Date(startMs), end: new Date(endMs) };
+export function computeAmritKalaWindows(
+  sunriseUtc: Date,
+  nextSunriseUtc: Date,
+  getMoon: (d: Date) => number,
+): UtcWindow[] {
+  return collectNakshatraOffsetWindows(
+    sunriseUtc, nextSunriseUtc, getMoon,
+    (nakshatraIndex, nakshatraStartUtc, nakshatraEndUtc) => {
+      const ghatikaMs = (nakshatraEndUtc.getTime() - nakshatraStartUtc.getTime()) / 60;
+      const startMs = nakshatraStartUtc.getTime()
+        + AMRIT_KALA_OFFSET_GHATIKAS[nakshatraIndex]! * ghatikaMs;
+      return [{ start: new Date(startMs), end: new Date(startMs + 4 * ghatikaMs) }];
+    },
+  );
 }
 
 /**
@@ -233,42 +239,49 @@ export function computeSayahnaSandhya(
 }
 
 /**
- * Amrita Ghatika offsets (in ghatikas from sunrise) for each of 27 nakshatras,
- * drawn from Muhurta Chintamani. Each window is 4 ghatikas long.
+ * Amrita Ghatika offsets — elapsed ghatikas from the NAKSHATRA'S START to
+ * the beginning of its Amrit Kala window, in the nakshatra-elastic frame
+ * (1 ghatika = nakshatraDuration / 60). Each window spans 4 such ghatikas.
  *
- * The "ghatika" here is elastic — `ahoratra / 60` — not the fixed 24-minute
- * Varjyam ghatika; see `computeAmritKala` above. Compared with
- * `VARJYAM_OFFSET_GHATIKAS` (offset from nakshatra start, fixed 24-min
- * ghatikas) the values disagree at indices 3 (Rohini), 18 (Mula), 26 (Revati).
- * The arrays are independently sourced — accidental cross-pollination is
- * caught by the regression test in `tests/unit/varjyam.test.ts`.
+ * Recovered from the DrikPanchang engine (2026-08-14 audit): 54 printed
+ * "Amrit Kalam" windows over 58 day-pages across Jaipur Feb-2027 and
+ * Kolkata Nov-2026 cover all 27 nakshatras with a per-nakshatra spread of
+ * ≤0.1 ghati against the located nakshatra boundaries. Single-corpus (drik
+ * engine only) — no independently published Amrita-Ghati table with this
+ * anchoring convention was found at fix time; drik is the project's parity
+ * oracle, so the table ships with that caveat recorded in the CHANGELOG.
+ *
+ * Structurally this is `VARJYAM_OFFSET_GHATIKAS`' sibling — same anchoring,
+ * same frame, same width, different offsets (auspicious rather than tyajya).
+ * The tables agree at some indices by coincidence; the wholesale pin in
+ * `tests/unit/varjyam.test.ts` keeps a stray cross-table copy from shipping.
  */
 export const AMRIT_KALA_OFFSET_GHATIKAS: readonly number[] = [
-  50, // 0  Ashwini
-  24, // 1  Bharani
-  30, // 2  Krittika
-  26, // 3  Rohini
-  14, // 4  Mrigashira
-  21, // 5  Ardra
-  30, // 6  Punarvasu
-  20, // 7  Pushya
-  32, // 8  Ashlesha
-  30, // 9  Magha
-  20, // 10 Purva Phalguni
-  18, // 11 Uttara Phalguni
-  21, // 12 Hasta
-  20, // 13 Chitra
-  14, // 14 Swati
-  14, // 15 Vishakha
-  10, // 16 Anuradha
-  14, // 17 Jyeshtha
-  20, // 18 Mula
-  24, // 19 Purva Ashadha
-  20, // 20 Uttara Ashadha
-  10, // 21 Shravana
-  10, // 22 Dhanishtha
-  18, // 23 Shatabhisha
-  16, // 24 Purva Bhadrapada
-  24, // 25 Uttara Bhadrapada
-  20, // 26 Revati
+  42, // 0  Ashwini
+  48, // 1  Bharani
+  54, // 2  Krittika
+  52, // 3  Rohini
+  38, // 4  Mrigashira
+  35, // 5  Ardra
+  54, // 6  Punarvasu
+  44, // 7  Pushya
+  56, // 8  Ashlesha
+  54, // 9  Magha
+  44, // 10 Purva Phalguni
+  42, // 11 Uttara Phalguni
+  45, // 12 Hasta
+  44, // 13 Chitra
+  38, // 14 Swati
+  38, // 15 Vishakha
+  34, // 16 Anuradha
+  38, // 17 Jyeshtha
+  44, // 18 Mula
+  48, // 19 Purva Ashadha
+  44, // 20 Uttara Ashadha
+  34, // 21 Shravana
+  34, // 22 Dhanishtha
+  42, // 23 Shatabhisha
+  40, // 24 Purva Bhadrapada
+  48, // 25 Uttara Bhadrapada
+  54, // 26 Revati
 ];

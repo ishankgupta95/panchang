@@ -557,23 +557,41 @@ describe('Dhana Yoga (2-11) and Dhana Yoga (5-9)', () => {
 });
 
 describe('Vasumati Yoga', () => {
-  it('positive — natural benefics in houses 3, 6, 11, 12 from Aries lagna', () => {
+  // Upachayas are 3, 6, 10, 11 (Raman §21) — an earlier rule tested the
+  // 12th (a vyaya house, never an upachaya) and required all four houses
+  // filled rather than all benefics placed.
+  it('positive — all natural benefics in upachayas (3, 6, 10, 11) from Aries lagna', () => {
     const chart = synthChart({
       lagnaRashi: 0,
       Mercury: 2, // Gemini → 3rd
       Moon: 5,    // Virgo → 6th
+      Jupiter: 9, // Capricorn → 10th
       Venus: 10,  // Aquarius → 11th
-      Jupiter: 11,// Pisces → 12th
       Sun: 4, Mars: 6, Saturn: 7,
     });
     expect(find(computeYogas(chart), 'Vasumati Yoga')).toBeDefined();
   });
 
-  it('negative — only 3 of 4 required houses filled', () => {
+  it('positive — two benefics sharing an upachaya still qualifies', () => {
     const chart = synthChart({
       lagnaRashi: 0,
-      Mercury: 2, Moon: 5, Venus: 10,
-      Jupiter: 0, // Pisces empty
+      Mercury: 2, // Gemini → 3rd
+      Moon: 2,    // Gemini → 3rd (shared)
+      Jupiter: 5, // Virgo → 6th
+      Venus: 10,  // Aquarius → 11th
+      Sun: 4, Mars: 6, Saturn: 7,
+    });
+    expect(find(computeYogas(chart), 'Vasumati Yoga')).toBeDefined();
+  });
+
+  it('negative — a benefic in the 12th (not an upachaya) breaks the yoga', () => {
+    const chart = synthChart({
+      lagnaRashi: 0,
+      Mercury: 2, // 3rd
+      Moon: 5,    // 6th
+      Venus: 10,  // 11th
+      Jupiter: 11, // Pisces → 12th — the old rule wrongly accepted this
+      Sun: 4, Mars: 6, Saturn: 7,
     });
     expect(find(computeYogas(chart), 'Vasumati Yoga')).toBeUndefined();
   });
@@ -890,12 +908,15 @@ const FIXTURE_PINS: ReadonlyArray<{ name: string; expected: readonly YogaName[] 
   },
   {
     name: 'Dhirubhai Ambani',
+    // 'Raja Yoga' dropped 2026-08-13 with the mutual-aspect correction: this
+    // chart's kendra/trikona lord pair was connected by a one-way special
+    // aspect only, which is not a classical sambandha. Predicted before
+    // re-pinning: the narrowing can only remove Raja Yoga entries, never add.
     expected: [
       'Anapha',
       'Daridra Yoga',
       'Durudhura',
       'Gajakesari',
-      'Raja Yoga',
       'Sunapha',
       'Ubhayachari',
       'Vargottama',

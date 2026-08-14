@@ -127,10 +127,12 @@ describe('242-day structural regression (Pune, Sep 2025 – Apr 2026)', () => {
         expect(r.ayanamsa).toBeLessThan(25.5);
       });
 
-      it('durMuhurta has 2 ordered periods', () => {
-        const [dm1, dm2] = r.inauspicious.durMuhurta;
-        expect(dm1!.start.getTime()).toBeLessThan(dm1!.end.getTime());
-        expect(dm2!.start.getTime()).toBeLessThan(dm2!.end.getTime());
+      it('durMuhurta has 1-2 ordered periods (1 on Sun/Wed)', () => {
+        const dms = r.inauspicious.durMuhurta;
+        expect(dms.length).toBe([0, 3].includes(r.angas.vara.index) ? 1 : 2);
+        for (const dm of dms) {
+          expect(dm.start.getTime()).toBeLessThan(dm.end.getTime());
+        }
       });
     });
   }

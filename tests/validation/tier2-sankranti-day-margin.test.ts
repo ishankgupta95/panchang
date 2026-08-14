@@ -1,50 +1,31 @@
 /**
  * @tier 2  this library's own output — a regression detector, not an authority
  *
- * # The one place a sub-ten-second ephemeris movement changes a published date
+ * # A sub-ten-second ephemeris pin at a former day-attribution knife edge
  *
- * `computeSankrantisForYear` publishes a **date**, never the transit instant.
- * The date is decided by which Hindu day contains the transit, and a Hindu day
- * starts at sunrise — so the only thing standing between "Oct 16" and "Oct 17"
- * is the sign of `transit − sunrise`. When that difference is seconds, a
- * movement far inside the release's own error bar flips a published calendar
- * date, and it flips *discontinuously*: there is no intermediate reading.
+ * `computeSankrantisForYear` publishes a **date** (and, since the SK-1 fix, the
+ * transit `moment`). Through 5.1 the date was decided by which *Hindu day*
+ * (sunrise → next sunrise) contained the transit, so the sign of
+ * `transit − sunrise` alone separated "Oct 16" from "Oct 17" — and the Tula
+ * Sankranti of 2025 at Reykjavik sat **1.4 s** on the Oct 16 side of that
+ * edge, inside the release's own solar error bar (0.3233″ ≈ 7.8 s of
+ * sankranti instant at 24 s per arcsecond).
  *
- * The Tula Sankranti of 2025 at Reykjavik is that case. The transit sits about
- * **7.1 s before** that morning's sunrise, against a solar accuracy of 0.3233″
- * (`tier0-own-sun-moon.test.ts`) which is worth **~7.8 s** of sankranti instant
- * at 24 s per arcsecond. The margin is inside the error bar. It has held
- * through every value-moving change of Phase 36, but it holds by less than the
- * accuracy the release claims.
+ * The 2026-08-14 audit (SK-1) replaced the attribution rule with drik's:
+ * daylight transits carry their own civil day, and a transit between sunset
+ * and the next sunrise files under the NEXT sunrise's day. Under that rule
+ * this margin **no longer decides the date**: a hair before sunrise is a
+ * night transit filed under Oct 17, and a hair after is a daylight transit
+ * filed under Oct 17 too. The equivalent knife edge now lives at *sunset*
+ * crossings, and this transit sits ~14 h from the nearest one.
  *
- * ## Why this file has to exist
- *
- * `notes/dump.sh` + `diff.mjs` compare published output before and after a
- * change, and they cannot see this at all: the published leaf is the *date*,
- * so the harness reports nothing until the day has already flipped, at which
- * point it reports a moved festival date and no way to tell whether that was
- * the ephemeris improving or regressing. Nothing else pins the instant. This
- * file pins the instant **and the margin**, so the movement is visible while it
- * is still seconds away from mattering.
- *
- * ## What to do when this fails — the part that matters
- *
- * **Do not re-pin it to make it pass.** A failure here means the margin moved,
- * and the margin is the only warning that exists:
- *
- * 1. Read the reported margin. If it is still negative, the day did **not**
- *    flip — the sankranti list is unchanged and the only question is whether
- *    the movement is explained. Explain it from the Tier 0 delta (§36.0 E),
- *    then re-pin the band with the predicted and observed numbers recorded.
- * 2. If it has gone **positive**, the Tula Sankranti has moved to Oct 17 and
- *    `sankranti` and `kati_bihu` have moved with it. That is a published
- *    calendar date changing, which TIERS.md puts in the invariant half. Re-check
- *    the whole sankranti list by hand against DrikPanchang before touching a
- *    single number here, and record the decision — a date is not a tolerance.
- *
- * The tolerance below is ±2 s on a 7.1 s margin deliberately: a quarter of the
- * error bar, so this fails while there is still room to think, not at the
- * moment the date changes.
+ * The file stays, for the part `notes/dump.sh` + `diff.mjs` still cannot see:
+ * it pins the transit instant and the sunrise it used to race, to seconds.
+ * A movement here is an ephemeris movement, full stop — explain it from the
+ * Tier 0 delta (§36.0 E) before re-pinning, with predicted and observed
+ * numbers recorded. The date assertions below are TIERS.md invariants: if
+ * `Tula 2025 → Oct 17 (Reykjavik)` ever changes, the attribution rule
+ * changed, and that needs drik evidence, not a re-pin.
  */
 import { describe, it, expect } from 'vitest';
 import { getSiderealSunLongitude } from '../../src/astronomy/sun';
@@ -60,9 +41,8 @@ const TIMEZONE = 0;
 /**
  * The Sun's sidereal longitude crossing of `degrees`, to the millisecond.
  *
- * Bisected rather than read off `computeSankrantisForYear`, which stops at a
- * 1 s bracket and then publishes only the date — the instant this file exists
- * to watch is not reachable through the public API at all.
+ * Bisected rather than read off `computeSankrantisForYear`, whose `moment`
+ * stops at a 1 s bracket — the pins below are tighter than that.
  */
 function transitInstant(degrees: number, afterUtc: number, beforeUtc: number): Date {
   let lo = afterUtc;
@@ -75,24 +55,14 @@ function transitInstant(degrees: number, afterUtc: number, beforeUtc: number): D
   return new Date(hi);
 }
 
-describe('Tier 2 — the Reykjavik Tula Sankranti sits inside its own error bar', () => {
+describe('Tier 2 — the Reykjavik Tula Sankranti ephemeris pin', () => {
   /** Tula begins at 180° of sidereal longitude. */
   const transit = transitInstant(180, Date.UTC(2025, 9, 15), Date.UTC(2025, 9, 19));
   /** Sunrise is canonical per location-day, so any instant on Oct 17 gives it. */
   const sunrise = computeSunrise(new Date('2025-10-17T00:00:00Z'), REYKJAVIK);
   const marginSeconds = (transit.getTime() - sunrise.getTime()) / 1000;
 
-  it('the transit falls before that morning’s sunrise — which is what files it under Oct 16', () => {
-    expect(
-      marginSeconds,
-      `Tula transit ${transit.toISOString()} vs Reykjavik sunrise ${sunrise.toISOString()}: `
-      + `margin ${marginSeconds.toFixed(3)} s. A positive margin means the sankranti has moved `
-      + 'to Oct 17 and taken two festival entries with it — read this file’s header before '
-      + 'changing anything.',
-    ).toBeLessThan(0);
-  });
-
-  it('the margin is 1.4 s, now well inside a solar error bar worth 7.8 s', () => {
+  it('the margin is 1.4 s before sunrise — an ephemeris pin, no longer a date decider', () => {
     // Was −7.126 s. Correcting ΔT across the measured era (Espenak–Meeus reads
     // ~5.7 s high in 2025) moved the transit later by exactly that amount while
     // barely touching sunrise:
@@ -101,49 +71,53 @@ describe('Tier 2 — the Reykjavik Tula Sankranti sits inside its own error bar'
     //   sunrise  −0.027 s
     //   margin   −7.126 → −1.358 s
     //
-    // Still negative, so the sankranti still files under Oct 16 and the two
-    // festival entries stay put. But the margin is now *smaller* than it was
-    // and far inside the 7.8 s solar error bar, so this case is genuinely
-    // undecided on accuracy grounds — it lands on Oct 16 by 1.4 s of a quantity
-    // we cannot resolve to better than ~8 s. The band below is the same ±2 s as
-    // before; it now straddles zero, which is the honest statement.
+    // The ±2 s band straddling zero is retained as a drift alarm even though
+    // the sign no longer selects the published day (see header).
     expect(marginSeconds).toBeGreaterThan(-3.4);
-    expect(marginSeconds).toBeLessThan(0);
+    expect(marginSeconds).toBeLessThan(0.7);
   });
 
-  it('pins the transit instant itself, which no published field exposes', () => {
+  it('pins the transit instant itself, which `diff.mjs` cannot see', () => {
     // 2025-10-17T08:24:44.968Z, ±2 s — the old pin plus the 5.741 s ΔT shift.
-    // This is the number `diff.mjs` cannot see.
     const pinned = Date.parse('2025-10-17T08:24:44.968Z');
     expect(Math.abs(transit.getTime() - pinned)).toBeLessThan(2000);
-    // And the sunrise it is racing, to ±1 s: 2025-10-17T08:24:46.326Z.
+    // And the sunrise it used to race, to ±1 s: 2025-10-17T08:24:46.326Z.
     const pinnedSunrise = Date.parse('2025-10-17T08:24:46.326Z');
     expect(Math.abs(sunrise.getTime() - pinnedSunrise)).toBeLessThan(1000);
   });
 
-  it('the published list files Tula under Oct 16, and the festivals follow it', () => {
+  it('the published `moment` agrees with the bisected instant to its 1 s bracket', () => {
+    const sankrantis = computeSankrantisForYear(2025, REYKJAVIK, { timezone: TIMEZONE });
+    const tula = sankrantis.find(s => s.rashiName === 'Tula');
+    expect(tula).toBeDefined();
+    expect(Math.abs(tula!.moment.getTime() - transit.getTime())).toBeLessThan(1500);
+  });
+
+  it('the published list files Tula under Oct 17 (night transit → next sunrise\'s day)', () => {
+    // Pre-SK-1 this filed under Oct 16 (the Hindu day containing the transit).
+    // Under drik's rule a pre-sunrise transit belongs to the day that sunrise
+    // begins — predicted before the fix ran, observed to match.
     const sankrantis = computeSankrantisForYear(2025, REYKJAVIK, { timezone: TIMEZONE });
     const tula = sankrantis.find(s => s.rashiName === 'Tula');
     expect(tula, 'Tula Sankranti must be in the 2025 list').toBeDefined();
-    expect(tula!.date.toISOString().slice(0, 10)).toBe('2025-10-16');
+    expect(tula!.date.toISOString().slice(0, 10)).toBe('2025-10-17');
     // Twelve transits to a sidereal year, whatever the margins do (TIERS.md).
     expect(sankrantis).toHaveLength(12);
 
     // `getDailyPanchang` returns null where there is no sunrise to anchor the
-    // Hindu day to. Reykjavik has one in October — but the whole subject of
-    // this file is a margin against that sunrise, so the null case is asserted
-    // away rather than silenced with a `!`.
+    // Hindu day to. Reykjavik has one in October — but this file is about
+    // per-day attribution, so the null case is asserted away rather than
+    // silenced with a `!`.
     const oct16 = getDailyPanchang(new Date('2025-10-16T00:00:00Z'), REYKJAVIK, { timezone: TIMEZONE });
     const oct17 = getDailyPanchang(new Date('2025-10-17T00:00:00Z'), REYKJAVIK, { timezone: TIMEZONE });
     expect(oct16, 'Reykjavik has a sunrise on 2025-10-16').not.toBeNull();
     expect(oct17, 'Reykjavik has a sunrise on 2025-10-17').not.toBeNull();
     const keysOn = (p: NonNullable<typeof oct16>): string[] => p.festivals.map(f => f.key);
 
-    // The two entries derived from this transit. If they appear on Oct 17
-    // instead, the margin above went positive and this is the consequence.
-    expect(keysOn(oct16!)).toContain('sankranti');
-    expect(keysOn(oct16!)).toContain('kati_bihu');
-    expect(keysOn(oct17!)).not.toContain('sankranti');
-    expect(keysOn(oct17!)).not.toContain('kati_bihu');
+    // The two entries derived from this transit follow the date.
+    expect(keysOn(oct17!)).toContain('sankranti');
+    expect(keysOn(oct17!)).toContain('kati_bihu');
+    expect(keysOn(oct16!)).not.toContain('sankranti');
+    expect(keysOn(oct16!)).not.toContain('kati_bihu');
   });
 });

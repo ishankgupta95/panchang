@@ -9,16 +9,25 @@ export type { FestivalRegion };
  * - `sunrise`     — tithi-at-sunrise (default; most Shukla-paksha tithi festivals).
  * - `madhyahna`   — tithi at mid-day (e.g. Akshaya Tritiya, Ganesh Chaturthi).
  * - `aparahna`    — tithi in late afternoon (~4th of 5 day-parts; Raksha Bandhan).
+ * - `aparahna-full` — Vijayadashami's ladder: the day the tithi covers the
+ *                  ENTIRE aparahna kala wins; when neither day does, the day
+ *                  the tithi ends wins (para-viddha). See `prevailsInKala`.
  * - `pradosha`    — tithi at sunset / early evening (Diwali, Dhanteras, Pradosha Vrata).
- * - `nishita`     — tithi at local midnight (Janmashtami, Maha Shivaratri).
+ * - `nishita`     — tithi at local midnight (Maha Shivaratri).
+ * - `janmashtami-nishita` — Janmashtami's Smarta ladder: the udaya-Ashtami
+ *                  day wins when Ashtami or Rohini touches its nishita
+ *                  muhurta, else the day Ashtami covers nishita. See
+ *                  `prevailsInKala`.
  * - `chandrodaya` — tithi at moonrise (Karva Chauth, Sankashti Chaturthi).
  */
 export type FestivalDateRule =
   | 'sunrise'
   | 'madhyahna'
   | 'aparahna'
+  | 'aparahna-full'
   | 'pradosha'
   | 'nishita'
+  | 'janmashtami-nishita'
   | 'chandrodaya';
 
 /**
@@ -99,12 +108,22 @@ interface SankrantiRegionalRule {
 }
 
 const SANKRANTI_REGIONAL: Readonly<Record<number, readonly SankrantiRegionalRule[]>> = {
-  // Mesha (0) — solar new year across regions
+  // Mesha (0) — solar new year across regions.
+  //
+  // Only the traditions that share the generic Sankranti observance day live
+  // here. Vaisakhi (Punjab), Vishu (Kerala) and Pohela Boishakh (West Bengal)
+  // key off the transit moment differently and land on other dates in some
+  // years, so they are emitted from their own context flags below — see the
+  // drik 2025–2029 table in dayFestivals.ts.
   0: [
-    { key: 'baisakhi',         regions: ['punjab', 'haryana'],    type: 'major' },
-    { key: 'vishu',            regions: ['kerala'],               type: 'major' },
-    { key: 'pohela_boishakh',  regions: ['west-bengal'],          type: 'major' },
+    // Puthandu = the transit-day rule exactly (drik 2025–2029: Apr 14 ×5).
     { key: 'puthandu',         regions: ['tamil-nadu'],           type: 'major' },
+    // Bohag Bihu shares the day here for want of a reference: DrikPanchang
+    // publishes no Bohag/Rongali Bihu date page, so the Assamese rule could
+    // not be pinned to the ≥2-source bar. Assamese practice generally follows
+    // the Bengali reckoning (new year the day AFTER the transit's civil day),
+    // which would put it with `pohela_boishakh` rather than here — left on the
+    // transit day pending a citable source rather than guessed at.
     { key: 'bohag_bihu',       regions: ['assam'],                type: 'major' },
   ],
   // Karka (3) — Dakshinayana (Sun's southward course begins)
@@ -184,7 +203,7 @@ const FESTIVAL_REGISTRY: readonly FestivalRule[] = [
   // just before aparahna. We use sunrise for compatibility with published panchangs.
   // Bhadra kala disqualifies tying of the rakhi; we emit an exclusion notice.
   { key: 'raksha_bandhan',     masa: 4,  tithi: 14, type: 'major', bhadraExclude: true },
-  { key: 'krishna_janmashtami', masa: 4, tithi: 22, type: 'major', dateRule: 'nishita', adhikaBehaviour: 'shift-to-nija' },
+  { key: 'krishna_janmashtami', masa: 4, tithi: 22, type: 'major', dateRule: 'janmashtami-nishita', adhikaBehaviour: 'shift-to-nija' },
   // Bhadrapada (5)
   { key: 'ganesh_chaturthi',   masa: 5,  tithi: 3,  type: 'major', dateRule: 'madhyahna' },
   { key: 'anant_chaturdashi',  masa: 5,  tithi: 13, type: 'major' },
@@ -192,17 +211,22 @@ const FESTIVAL_REGISTRY: readonly FestivalRule[] = [
   { key: 'navaratri',          masa: 6,  tithi: 0,  type: 'major' },
   { key: 'durga_ashtami',      masa: 6,  tithi: 7,  type: 'major' },
   { key: 'maha_navami',        masa: 6,  tithi: 8,  type: 'major' },
-  { key: 'dussehra',           masa: 6,  tithi: 9,  type: 'major' },
+  // Vijayadashami keys on APARAHNA, not sunrise: the day Dashami covers the
+  // whole aparahna kala, else the day the tithi ends. Verified against 11
+  // drik years 2020–2030 (incl. Oct 20 2026 and Oct 9 2027, both of which a
+  // sunrise rule mis-dates by one day).
+  { key: 'dussehra',           masa: 6,  tithi: 9,  type: 'major', dateRule: 'aparahna-full' },
   { key: 'sharad_purnima',     masa: 6,  tithi: 14, type: 'major' },
   // Ashwin (6) — Krishna Paksha festivals (Amanta: Ashwin; Purnimanta calls these "Kartika")
   //
-  // Karva Chauth and Narak Chaturdashi are classically chandrodaya (moonrise)
-  // festivals, but in practice (a) published panchangs including Drik use
-  // "tithi-at-sunrise" as the simple inclusive rule; (b) Narak Chaturdashi's
+  // Karva Chauth keys on the Chaturthi prevailing at MOONRISE — the vrat
+  // breaks on sighting the moon. Drik 2027 discriminates this from a sunrise
+  // rule: Chaturthi Oct 18 17:52 → Oct 19 16:42, moonrise Oct 18 19:30 is
+  // inside the tithi while Oct 19's 20:24 is past it → drik day Oct 18, and
+  // a sunrise rule says Oct 19. Narak Chaturdashi stays on sunrise: its
   // pre-dawn moon often falls outside the sunrise-to-nextSunrise Hindu day
-  // window. We therefore use sunrise here. The 'chandrodaya' dateRule is
-  // retained in the type system for custom use and for Sankashti Chaturthi.
-  { key: 'karva_chauth',       masa: 6,  tithi: 18, type: 'major', namingSystem: 'purnimanta' },
+  // window.
+  { key: 'karva_chauth',       masa: 6,  tithi: 18, type: 'major', dateRule: 'chandrodaya', namingSystem: 'purnimanta' },
   { key: 'dhanteras',          masa: 6,  tithi: 27, type: 'major', dateRule: 'pradosha', namingSystem: 'purnimanta' },
   { key: 'narak_chaturdashi',  masa: 6,  tithi: 28, type: 'major', namingSystem: 'purnimanta' },
   { key: 'diwali',             masa: 6,  tithi: 29, type: 'major', dateRule: 'pradosha', namingSystem: 'purnimanta' },
@@ -382,6 +406,28 @@ export interface FestivalComputeContext {
    * the festival was already emitted yesterday and today is suppressed.
    */
   priorDayTithiByRule?: Partial<Record<FestivalDateRule, number>>;
+  /**
+   * Optional: yesterday's tithi at the START of each kala. Needed by the
+   * `aparahna-full` ladder (Vijayadashami) to tell "yesterday fully covered
+   * the kala" (suppress today) apart from "yesterday only brushed its end"
+   * (today, the tithi's end day, emits).
+   */
+  priorDayTithiByRuleStart?: Partial<Record<FestivalDateRule, number>>;
+  /**
+   * Optional: Janmashtami nishita features, supplied on Krishna Saptami /
+   * Ashtami days. Drives the `janmashtami-nishita` ladder; when absent the
+   * rule degrades to plain nishita prevalence.
+   */
+  janmashtamiNishita?: {
+    /** Ashtami touches this day's nishita muhurta. */
+    ashtamiAtNishita: boolean;
+    /** Rohini touches this day's nishita muhurta. */
+    rohiniAtNishita: boolean;
+    /** Tomorrow is the udaya-Ashtami day and its nishita has Ashtami or Rohini. */
+    nextDayClaims: boolean;
+    /** Yesterday was an udaya-Ashtami day that already claimed (vriddha). */
+    prevDayClaimed: boolean;
+  };
   /** Rashi (0–11) the Sun enters during this Hindu day, or null if no transit. */
   sankrantiRashi?: number | null;
   /**
@@ -399,16 +445,80 @@ export interface FestivalComputeContext {
    */
   prevDaySankrantiRashi?: number | null;
   /**
+   * Vaisakhi (Punjab/Haryana): true on the CIVIL day containing the Mesha
+   * transit — which is the day before the generic Sankranti day when the
+   * transit falls between sunset and midnight (drik 2028: Apr 13, not Apr 14).
+   */
+  vaisakhiToday?: boolean;
+  /**
+   * Vishu (Kerala): true on the day of the first sunrise at or after the Mesha
+   * transit — the day after the generic Sankranti day for a daylight transit
+   * (drik 2026 and 2027: Apr 15, not Apr 14).
+   */
+  vishuToday?: boolean;
+  /**
+   * Pohela Boishakh (West Bengal): true on the day after the Mesha transit's
+   * civil day; the transit day itself is Chaitra Sankranti, the last day of
+   * the outgoing year (drik 2025/2026/2027/2029: Apr 15).
+   */
+  pohelaBoishakhToday?: boolean;
+  /**
    * True when the Ekadashi at sunrise is Dashami-viddha (i.e., Dashami was
-   * active at arunodaya, ~96 minutes before sunrise). Smarta schools shift
-   * the fast to the next day in that case; Vaishnava always fasts today.
+   * active at arunodaya, ~96 minutes before sunrise). The Smarta fast is still
+   * observed on this udaya-vyapini day; it is the Vaishnava fast that rejects
+   * a viddha Ekadashi and defers to tomorrow's Dwadashi.
    */
   ekadashiDashamiViddha?: boolean;
   /**
    * True when yesterday was a Dashami-viddha Ekadashi-at-sunrise day and
-   * today is Dwadashi-at-sunrise — the Smarta fast lands here.
+   * today is Dwadashi-at-sunrise — the Vaishnava fast lands here.
    */
-  smartaDwadashiToday?: boolean;
+  vaishnavaDwadashiToday?: boolean;
+  /**
+   * True when the whole Ekadashi tithi falls between today's and tomorrow's
+   * sunrises (sunrise holds Dashami, next sunrise Dwadashi). The Smarta fast
+   * is observed TODAY — the day the tithi begins — per DrikPanchang's
+   * published kshaya cases (e.g. Devutthana Ekadashi 2026-11-20).
+   */
+  ekadashiKshayaToday?: boolean;
+  /**
+   * True the day after a kshaya Ekadashi (yesterday's sunrise held Dashami,
+   * today's holds Dwadashi). The Vaishnava ("Gauna") fast is observed today.
+   */
+  ekadashiGaunaToday?: boolean;
+  /**
+   * True on the first day of a VRIDDHA DWADASHI (Pakshavardhini) that follows
+   * an ordinary Ekadashi-at-sunrise day: yesterday's sunrise held Ekadashi,
+   * today's and tomorrow's both hold the same Dwadashi. The Smarta fast stayed
+   * on yesterday's Ekadashi; the alternate (Vaishnava) fast is observed today.
+   */
+  ekadashiVriddhaDwadashiToday?: boolean;
+  /**
+   * True on an Ekadashi-at-sunrise day whose following Dwadashi is vriddha
+   * (prevails at the next two sunrises). The Vaishnava fast moves to that
+   * Dwadashi, so this day carries the Smarta fast alone.
+   */
+  ekadashiVriddhaDwadashiTomorrow?: boolean;
+  /**
+   * True when tomorrow's sunrise holds Ekadashi but the sunrise after that
+   * holds Trayodashi — a kshaya Dwadashi (Trisprisha). With no sunrise inside
+   * Dwadashi there is no valid parana morning, and the fast (all traditions)
+   * advances to today, the day the Ekadashi tithi begins (drik: Pausha
+   * Putrada 2027 = Jan 18).
+   */
+  ekadashiTrisprishaToday?: boolean;
+  /**
+   * True on the Ekadashi-at-sunrise day whose following Dwadashi is kshaya
+   * (next sunrise already Trayodashi): the fast was observed yesterday, so
+   * this day emits no Ekadashi entries.
+   */
+  ekadashiTrisprishaYesterday?: boolean;
+  /**
+   * True when Ekadashi prevails at today's AND tomorrow's sunrise (vriddha).
+   * No fast is observed today — the observance is tomorrow's Mahadwadashi
+   * (drik lists nothing on the first day; e.g. 2026-05-26 vs 05-27).
+   */
+  ekadashiVriddhaFirstDay?: boolean;
   /**
    * Moonrise within the Hindu day, if any. Used to annotate chandrodaya-rule
    * festivals with a human-friendly moonrise timestamp.
@@ -493,9 +603,71 @@ export function computeFestivals(
    * place.
    */
   const prevailsInKala = (targetTithi: number, dateRule: FestivalDateRule): boolean => {
+    if (dateRule === 'janmashtami-nishita') {
+      // Drik's Smarta Janmashtami ladder (7 drik years 2024–2030):
+      //   1. The UDAYA-Ashtami day (Ashtami at sunrise) wins when Ashtami OR
+      //      Rohini touches its nishita muhurta — Rohini alone decided
+      //      2027/2029/2030 against the previous day's Ashtami-at-nishita.
+      //   2. Otherwise the day Ashtami covers nishita wins, Saptami-viddha
+      //      or not (2025: drik prints Aug 15 though Ashtami begins
+      //      11:49 PM, because Aug 16's nishita has neither).
+      //   3. Rohini alone never pulls the festival onto a Navami day (2028).
+      const jn = ctx.janmashtamiNishita;
+      if (jn === undefined) {
+        // No nishita features supplied (instant mode / bare contexts):
+        // degrade to plain nishita prevalence.
+        return prevailsInKala(targetTithi, 'nishita');
+      }
+      if (ctx.tithiIndex === targetTithi) {
+        return (jn.ashtamiAtNishita || jn.rohiniAtNishita) && !jn.prevDayClaimed;
+      }
+      return jn.ashtamiAtNishita && !jn.nextDayClaims;
+    }
+    if (dateRule === 'aparahna-full') {
+      // Vijayadashami's ladder, recovered from 11 drik years (2020–2030):
+      //   1. The day the tithi covers the ENTIRE aparahna kala wins
+      //      (Dashami at both the 3/5 and 4/5 daylight anchors).
+      //   2. Covers both days' aparahna fully (vriddha, ≥ ~26.3 h tithi —
+      //      not observed in the sweep): the first day. Drik notes Shravana
+      //      nakshatra "plays an important role" there; unvalidatable until
+      //      such a year occurs.
+      //   3. Covers neither fully → the day the tithi ENDS (para-viddha:
+      //      drik 2022 rejected a partial-aparahna first day for a
+      //      no-aparahna second day, and 2023 took a partial second day).
+      const startTithi = ctx.tithiByRuleStart?.aparahna;
+      const endTithi = ctx.tithiByRule?.aparahna;
+      const priorStartTithi = ctx.priorDayTithiByRuleStart?.aparahna;
+      const priorEndTithi = ctx.priorDayTithiByRule?.aparahna;
+      const fullToday = startTithi === targetTithi && endTithi === targetTithi;
+      const fullYesterday = priorStartTithi === targetTithi && priorEndTithi === targetTithi;
+      if (fullToday) return !fullYesterday;
+      if (fullYesterday) return false;
+      // Neither day fully covers the kala: emit on the day the tithi ends —
+      // it was current earlier today (sunrise, madhyahna, or aparahna start)
+      // and gone by the aparahna end.
+      const currentToday =
+        ctx.tithiIndex === targetTithi ||
+        startTithi === targetTithi ||
+        ctx.tithiByRule?.madhyahna === targetTithi;
+      return currentToday && endTithi !== targetTithi;
+    }
     const endTithi = tithiForRule(dateRule);
     const startTithi = tithiForRuleStart(dateRule);
     const priorEndTithi = priorDayTithiForRule(dateRule);
+
+    if (dateRule === 'chandrodaya') {
+      // Chandrodaya is a single instant, not a span — the span dedupes below
+      // can never fire, so the vriddha case (a tithi > ~24.9 h covering two
+      // consecutive moonrises) is deduped here: the first day emits.
+      if (endTithi === targetTithi) return priorEndTithi !== targetTithi;
+      // Fallback: the tithi touches NO moonrise on either day (began after
+      // yesterday's moonrise, ended before today's) — fall back to sunrise
+      // prevalence. Drik does this: Karwa Chauth 2025 (Delhi), Chaturthi
+      // Oct 9 22:54 → Oct 10 19:39 vs moonrises 19:23 / 20:13, drik prints
+      // Oct 10. A tithi at today's sunrise can never survive to tomorrow's
+      // moonrise (would need > ~38 h), so no forward look is required.
+      return ctx.tithiIndex === targetTithi && priorEndTithi !== targetTithi;
+    }
 
     const matchedByEnd = endTithi === targetTithi;
     const matchedByStart =
@@ -609,63 +781,133 @@ export function computeFestivals(
   const isEkadashiAtSunrise = ctx.tithiIndex === 10 || ctx.tithiIndex === 25;
   const paksha: 0 | 1 = ctx.tithiIndex === 10 ? 0 : ctx.tithiIndex === 25 ? 1 : 0;
 
-  if (isEkadashiAtSunrise) {
-    // Named Ekadashi (description).
-    const namedKey = ekadashiNameKey(ctx.chandraMasaIndex, paksha, ctx.isAdhika);
-    const namedDescription = nameResolver(namedKey);
-
-    // Vaishnava always fasts on the Ekadashi-at-sunrise day.
+  if (isEkadashiAtSunrise && ctx.ekadashiVriddhaFirstDay) {
+    // Vriddha first day: Ekadashi will still be at sunrise tomorrow, and the
+    // fast (a Mahadwadashi) is observed then. Nothing emits today.
+  } else if (isEkadashiAtSunrise && ctx.ekadashiTrisprishaYesterday) {
+    // Trisprisha (kshaya Dwadashi): the Smarta fast was advanced to
+    // yesterday, the day the tithi began; today — drik's "Trisparsha
+    // Mahadwadashi" — carries the Vaishnava (Gauna) fast only.
     results.push({
       key: 'vaishnava_ekadashi',
       name: nameResolver('vaishnava_ekadashi'),
       type: 'vaishnava_ekadashi',
-      description: namedDescription,
+      description: nameResolver(ekadashiNameKey(ctx.chandraMasaIndex, paksha, ctx.isAdhika)),
     });
+  } else if (isEkadashiAtSunrise) {
+    // Named Ekadashi (description).
+    const namedKey = ekadashiNameKey(ctx.chandraMasaIndex, paksha, ctx.isAdhika);
+    const namedDescription = nameResolver(namedKey);
 
-    if (ctx.ekadashiDashamiViddha) {
-      // Smarta deferred to tomorrow (Dwadashi).
-      const deferral: FestivalInfo = {
-        key: 'smarta_ekadashi',
-        name: nameResolver('smarta_ekadashi'),
-        type: 'smarta_ekadashi',
-        description: nameResolver('desc_ekadashi_deferred_to_dwadashi')
-          .replace('{name}', namedDescription),
-      };
-      results.push(deferral);
-      // Generic `ekadashi` with note for ergonomics.
+    // Smarta always fasts on the Ekadashi-at-sunrise (udaya-vyapini) day —
+    // drik prints the unqualified name there in every split it publishes. The
+    // Vaishnava fast leaves this day for tomorrow's Dwadashi in two cases: a
+    // Dashami-viddha Ekadashi, and a vriddha (Pakshavardhini) Dwadashi.
+    const vaishnavaTomorrow =
+      ctx.ekadashiDashamiViddha === true || ctx.ekadashiVriddhaDwadashiTomorrow === true;
+    if (!vaishnavaTomorrow) {
+      // Neither split applies: Smarta and Vaishnava coincide.
       results.push({
-        key: 'ekadashi',
-        name: nameResolver('ekadashi'),
-        type: 'ekadashi',
-        description: nameResolver('desc_ekadashi_viddha_smarta_next'),
-      });
-    } else {
-      // Non-viddha: Smarta and Vaishnava coincide.
-      results.push({
-        key: 'smarta_ekadashi',
-        name: nameResolver('smarta_ekadashi'),
-        type: 'smarta_ekadashi',
-        description: namedDescription,
-      });
-      results.push({
-        key: 'ekadashi',
-        name: nameResolver('ekadashi'),
-        type: 'ekadashi',
+        key: 'vaishnava_ekadashi',
+        name: nameResolver('vaishnava_ekadashi'),
+        type: 'vaishnava_ekadashi',
         description: namedDescription,
       });
     }
-  } else if (ctx.smartaDwadashiToday) {
-    // Smarta fast landed on Dwadashi today after yesterday's viddha Ekadashi.
     results.push({
       key: 'smarta_ekadashi',
       name: nameResolver('smarta_ekadashi'),
       type: 'smarta_ekadashi',
-      description: nameResolver('desc_ekadashi_viddha_smarta_today'),
+      description: namedDescription,
+    });
+    results.push({
+      key: 'ekadashi',
+      name: nameResolver('ekadashi'),
+      type: 'ekadashi',
+      description: ctx.ekadashiDashamiViddha === true
+        ? nameResolver('desc_ekadashi_viddha_vaishnava_next')
+        : ctx.ekadashiVriddhaDwadashiTomorrow === true
+          ? nameResolver('desc_ekadashi_vriddha_dwadashi_next')
+          : namedDescription,
+    });
+  } else if (ctx.ekadashiTrisprishaToday) {
+    // Trisprisha (kshaya Dwadashi): the Ekadashi begins after this sunrise
+    // and the Dwadashi that follows it contains no sunrise, so there is no
+    // valid parana morning within Dwadashi — the SMARTA fast advances to
+    // today, the day the tithi begins; the Vaishnava (Gauna) fast stays on
+    // the Ekadashi-at-sunrise day tomorrow (drik: Devutthana 2025 = Nov 1 +
+    // "Trisparsha Mahadwadashi / Vaishnava" Nov 2; Pausha Putrada 2027 =
+    // Jan 18 + Gauna/Vaishnava Jan 19).
+    const triPaksha: 0 | 1 = ctx.tithiIndex === 9 ? 0 : 1;
+    const namedDescription = nameResolver(
+      ekadashiNameKey(ctx.chandraMasaIndex, triPaksha, ctx.isAdhika),
+    );
+    results.push({
+      key: 'smarta_ekadashi',
+      name: nameResolver('smarta_ekadashi'),
+      type: 'smarta_ekadashi',
+      description: namedDescription,
+    });
+    results.push({
+      key: 'ekadashi',
+      name: nameResolver('ekadashi'),
+      type: 'ekadashi',
+      description: namedDescription,
+    });
+  } else if (ctx.ekadashiKshayaToday) {
+    // Kshaya: the Ekadashi tithi begins after this sunrise and ends before the
+    // next one. The Smarta fast is observed today (drik: Yogini 2026-07-10,
+    // Devutthana 2026-11-20); the Vaishnava Gauna fast follows tomorrow.
+    const kshayaPaksha: 0 | 1 = ctx.tithiIndex === 9 ? 0 : 1;
+    const namedDescription = nameResolver(
+      ekadashiNameKey(ctx.chandraMasaIndex, kshayaPaksha, ctx.isAdhika),
+    );
+    results.push({
+      key: 'smarta_ekadashi',
+      name: nameResolver('smarta_ekadashi'),
+      type: 'smarta_ekadashi',
+      description: namedDescription,
+    });
+    results.push({
+      key: 'ekadashi',
+      name: nameResolver('ekadashi'),
+      type: 'ekadashi',
+      description: namedDescription,
+    });
+  } else if (ctx.ekadashiGaunaToday) {
+    // Day after a kshaya Ekadashi: the Vaishnava (Gauna) fast.
+    const gaunaPaksha: 0 | 1 = ctx.tithiIndex === 11 ? 0 : 1;
+    results.push({
+      key: 'vaishnava_ekadashi',
+      name: nameResolver('vaishnava_ekadashi'),
+      type: 'vaishnava_ekadashi',
+      description: nameResolver(
+        ekadashiNameKey(ctx.chandraMasaIndex, gaunaPaksha, ctx.isAdhika),
+      ),
+    });
+  } else if (ctx.vaishnavaDwadashiToday) {
+    // Vaishnava fast landed on Dwadashi today after yesterday's viddha Ekadashi.
+    results.push({
+      key: 'vaishnava_ekadashi',
+      name: nameResolver('vaishnava_ekadashi'),
+      type: 'vaishnava_ekadashi',
+      description: nameResolver('desc_ekadashi_viddha_vaishnava_today'),
+    });
+  } else if (ctx.ekadashiVriddhaDwadashiToday) {
+    // Vriddha (Pakshavardhini) Dwadashi: the Smarta fast was yesterday's
+    // Ekadashi; the alternate Vaishnava fast is observed today.
+    results.push({
+      key: 'vaishnava_ekadashi',
+      name: nameResolver('vaishnava_ekadashi'),
+      type: 'vaishnava_ekadashi',
+      description: nameResolver('desc_ekadashi_vriddha_dwadashi_vaishnava'),
     });
   }
 
   // ── Sankashti Chaturthi — Krishna Chaturthi (18) at moonrise ──
-  if (tithiForRule('chandrodaya') === 18) {
+  // Same vriddha dedupe as Karva Chauth: a Chaturthi covering two
+  // consecutive moonrises emits on the first day only.
+  if (tithiForRule('chandrodaya') === 18 && priorDayTithiForRule('chandrodaya') !== 18) {
     results.push({ key: 'sankashti_chaturthi', name: nameResolver('sankashti_chaturthi'), type: 'major' });
   }
 
@@ -751,6 +993,31 @@ export function computeFestivals(
           description: rashiName,
         });
       }
+    }
+  }
+
+  // ── Regional solar new years that do NOT share the transit day ──
+  // Vaisakhi keys off the transit's civil day, Vishu off the first sunrise at
+  // or after it, Pohela Boishakh off the day after the transit's civil day.
+  // The flags are computed in dayFestivals (see the drik 2025–2029 table
+  // there); instant-mode callers omit them and simply emit nothing.
+  {
+    const MESHA_NEW_YEARS: readonly {
+      flag: boolean | undefined; key: string; regions: readonly FestivalRegion[];
+    }[] = [
+      { flag: ctx.vaisakhiToday,       key: 'baisakhi',        regions: ['punjab', 'haryana'] },
+      { flag: ctx.vishuToday,          key: 'vishu',           regions: ['kerala'] },
+      { flag: ctx.pohelaBoishakhToday, key: 'pohela_boishakh', regions: ['west-bengal'] },
+    ];
+    for (const r of MESHA_NEW_YEARS) {
+      if (r.flag !== true) continue;
+      if (region !== 'all' && !r.regions.includes(region)) continue;
+      results.push({
+        key: r.key,
+        name: nameResolver(r.key),
+        type: 'sankranti',
+        description: rashiNameResolver ? rashiNameResolver(0) : 'Rashi 0',
+      });
     }
   }
 

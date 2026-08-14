@@ -138,6 +138,66 @@ describe('Gana koot', () => {
   });
 });
 
+describe('Gana opt-in cancellation (options.ganaCancellation)', () => {
+  // Manushya–Rakshasa (score 0) with SAME rashi-lord: Bharani-in-Aries vs
+  // Jyeshtha-in-Scorpio, both lorded by Mars.
+  const sameLordBoy: NatalMoon = { rashi: 0, nakshatra: 1 };
+  const sameLordGirl: NatalMoon = { rashi: 7, nakshatra: 17 };
+
+  it('default (no options) leaves the doshic score untouched — drik parity', () => {
+    const r = computeAshtakoot(sameLordBoy, sameLordGirl);
+    expect(r.koots[5]!.score).toBe(0);
+    expect(r.cancellations.some((c) => c.startsWith('Gana'))).toBe(false);
+  });
+
+  it('explicit false is byte-identical to omitting options', () => {
+    const bare = computeAshtakoot(sameLordBoy, sameLordGirl);
+    const explicit = computeAshtakoot(sameLordBoy, sameLordGirl, { ganaCancellation: false });
+    expect(JSON.stringify(explicit)).toBe(JSON.stringify(bare));
+  });
+
+  it('same rashi-lord restores a 0-score Manushya–Rakshasa pair to 6', () => {
+    const r = computeAshtakoot(sameLordBoy, sameLordGirl, { ganaCancellation: true });
+    expect(r.koots[5]!.score).toBe(6);
+    expect(r.cancellations).toContain('Gana: same rashi-lord');
+    // 6 more points than the default-mode total, nothing else moved.
+    expect(r.totalScore).toBe(computeAshtakoot(sameLordBoy, sameLordGirl).totalScore + 6);
+  });
+
+  it('mutual rashi-lord friendship restores a 1-score Deva–Rakshasa pair to 6', () => {
+    // Pushya-in-Cancer (Deva, lord Moon) vs Magha-in-Leo (Rakshasa, lord
+    // Sun). GANA_SCORE[deva][rakshasa] = 1; Sun ↔ Moon are mutual friends.
+    const boy: NatalMoon = { rashi: 3, nakshatra: 7 };
+    const girl: NatalMoon = { rashi: 4, nakshatra: 9 };
+    expect(computeAshtakoot(boy, girl).koots[5]!.score).toBe(1);
+
+    const r = computeAshtakoot(boy, girl, { ganaCancellation: true });
+    expect(r.koots[5]!.score).toBe(6);
+    expect(r.cancellations).toContain('Gana: mutual friendship of rashi-lords');
+  });
+
+  it('doshic pair whose lords are neither same nor mutual friends stays doshic', () => {
+    // Bharani-in-Aries (Manushya, lord Mars) vs Shatabhisha-in-Aquarius
+    // (Rakshasa, lord Saturn). Mars→Saturn neutral, Saturn→Mars enemy.
+    const r = computeAshtakoot(
+      { rashi: 0, nakshatra: 1 }, { rashi: 10, nakshatra: 23 },
+      { ganaCancellation: true },
+    );
+    expect(r.koots[5]!.score).toBe(0);
+    expect(r.cancellations.some((c) => c.startsWith('Gana'))).toBe(false);
+  });
+
+  it('non-doshic Deva–Manushya (5) is not touched even with same lord', () => {
+    // Ashwini-in-Aries vs Bharani-in-Aries: same lord, but score 5 is no dosha.
+    const r = computeAshtakoot(
+      { rashi: 0, nakshatra: 0 }, { rashi: 0, nakshatra: 1 },
+      { ganaCancellation: true },
+    );
+    expect(r.koots[5]!.score).toBe(5);
+    expect(r.cancellations.some((c) => c.startsWith('Gana'))).toBe(false);
+  });
+});
+
 describe('Bhakoot koot', () => {
   it('full 7 marks at distance (1, 1) — same rashi', () => {
     const r = computeAshtakoot({ rashi: 4, nakshatra: 9 }, { rashi: 4, nakshatra: 11 });

@@ -41,6 +41,16 @@ export type Unlocalized<T extends TimePeriod> = Omit<T, 'startLocal' | 'endLocal
 /** The bare `{ start, end }` a core module emits. Shorthand for `Unlocalized<TimePeriod>`. */
 export type UtcWindow = Unlocalized<TimePeriod>;
 
+/**
+ * A Dur Muhurta window: a {@link TimePeriod} tagged with the half of the day
+ * its ordinal counts in. `day` ordinals divide sunrise→sunset into 15 equal
+ * muhurtas; `night` ordinals divide sunset→nextSunrise the same way (only
+ * Tuesday's second window is a night one, per the classical table).
+ */
+export interface DurMuhurtaPeriod extends TimePeriod {
+  segment: 'day' | 'night';
+}
+
 /** A `{ day, night }` slot pair in its unlocalized form. See {@link Unlocalized}. */
 export interface UnlocalizedInfo<T extends TimePeriod> {
   day: Unlocalized<T>[];
@@ -80,6 +90,19 @@ export interface VaraInfo {
 
 // ── Daily mode wrappers ───────────────────────────────
 
+/**
+ * How the daily arrays treat time at the day's edges — the two bounds are
+ * deliberately asymmetric:
+ *
+ * - `startTime` of the first element is the **true** boundary instant, however
+ *   far before sunrise it falls.
+ * - `endTime` of the element still running at next sunrise is **clamped to
+ *   next sunrise**, so each day's segments tile exactly [sunrise, nextSunrise].
+ *   The true end of that element is published the *following* day, where it is
+ *   the first element and its `endTime` is searched for real. To render the
+ *   drik-style "Vishakha upto 6:16 AM, Aug 20" for an element that outlives
+ *   the day, read the next day's first element.
+ */
 interface DailyElementBase {
   /** True instant the element began — may precede sunrise. */
   startTime: Date | null;
@@ -275,8 +298,6 @@ export interface FestivalInfo {
     | 'sankranti'
     | 'eclipse';
   description?: string;
-  /** Smarta-only: when Ekadashi is Dashami-viddha, the Dwadashi fast day. */
-  deferralDate?: Date;
 }
 
 // ── Eclipse (Grahan) ─────────────────────────────────
@@ -325,6 +346,26 @@ export interface EclipseInfo {
 
 // ── Bhadra Kala (Vishti karana window) ───────────────
 
+/**
+ * One piece of a Bhadra window over which the vasa (residence) is constant.
+ * The vasa follows the Moon's rashi, so a mid-window rashi transition splits
+ * the window — drik prints e.g. "Patala upto 02:30 AM, then Swarga".
+ */
+export interface BhadraVasaSegment {
+  /** True instant. See {@link TimePeriod}. */
+  start: Date;
+  /** True instant. See {@link TimePeriod}. */
+  end: Date;
+  /** `start` as offset-carrying ISO 8601, when read off a daily panchang. */
+  startLocal?: string;
+  /** `end` as offset-carrying ISO 8601, when read off a daily panchang. */
+  endLocal?: string;
+  /** Stable machine-readable key; see {@link BhadraInfo.location}. */
+  location: 'earth' | 'heaven' | 'paatal';
+  /** Localized display name for {@link BhadraVasaSegment.location}. */
+  locationName: string;
+}
+
 export interface BhadraInfo {
   /** True instant. See {@link TimePeriod}. */
   start: Date;
@@ -337,10 +378,20 @@ export interface BhadraInfo {
   /**
    * Bhadra's residence — a stable machine-readable key, not display text.
    * Use {@link BhadraInfo.locationName} to show it to a user.
+   *
+   * Keyed on the Moon's rashi **at the window's start**; when the Moon
+   * changes rashi mid-window the vasa changes with it — read
+   * {@link BhadraInfo.vasa} for the full piecewise breakdown.
    */
   location: 'earth' | 'heaven' | 'paatal';
   /** Localized display name for {@link BhadraInfo.location}. */
   locationName: string;
+  /**
+   * Piecewise vasa: one segment per Moon rashi the window spans, in time
+   * order, tiling [start, end]. A single segment on most days; two when the
+   * Moon crosses a rashi boundary mid-window.
+   */
+  vasa: BhadraVasaSegment[];
   isActive: boolean;
 }
 

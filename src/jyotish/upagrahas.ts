@@ -174,18 +174,21 @@ function locateGulikaSegment(
   // Determine the weekday index 0..6 (Sunday..Saturday) of the *birth's
   // panchang day*. The panchang day starts at sunrise — for births
   // between midnight and sunrise the weekday belongs to the prior
-  // calendar day. We use `getDay()` of the sunrise that anchors the
-  // birth's panchang day.
-  const baseSunrise = day
-    ? findSunriseBeforeBirth(birthDate, location)
-    : findSunriseBeforeBirth(birthDate, location);
-  const varaIndex = baseSunrise.getUTCDay();
-  // Note: getUTCDay returns 0 = Sunday … 6 = Saturday based on UTC
-  // time. For panchang purposes the weekday is determined by the
-  // local date of sunrise; near midnight UTC the local weekday could
-  // differ. The simplification here matches the convention in the rest
-  // of the library (`computeRahuKalam` etc. take `varaIndex` from the
-  // caller; here we derive it locally for upagraha self-containment).
+  // calendar day. We use the weekday of the sunrise that anchors the
+  // birth's panchang day, read in LOCAL mean time.
+  const baseSunrise = findSunriseBeforeBirth(birthDate, location);
+  // The weekday must come from the LOCAL date of that sunrise, not the UTC
+  // date: whenever local sunrise falls before 00:00 UTC (lon ≳ 97.5 °E
+  // year-round — Bangkok, China, Japan; the ~82–97 °E band in summer,
+  // Kolkata included), `getUTCDay()` names yesterday and selects the wrong
+  // Gulika slot (~15–25° of ascendant). Shifting by the longitude-derived
+  // LMT before taking the weekday fixes the date without needing a
+  // timezone: sunrise is always mid-morning LMT, so even a ±3 h civil-vs-LMT
+  // skew cannot cross midnight. Same trap documented at
+  // `src/core/panchang.ts` (vara from `utcToLocalDisplay`).
+  const varaIndex = new Date(
+    baseSunrise.getTime() + (location.longitude / 15) * 3600_000,
+  ).getUTCDay();
 
   let segStart: Date;
   let segEnd: Date;

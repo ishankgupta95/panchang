@@ -3,7 +3,10 @@
     "_source": "DrikPanchang.com — verified 2025-01-14, Delhi. Sunrise/sunset/tithi/nakshatra/yoga/karana match DrikPanchang for Delhi.",
     "date": "2025-01-14",
     "city": "Delhi",
-    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "location": {
+      "latitude": 28.6139,
+      "longitude": 77.209
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Tuesday",
@@ -34,7 +37,10 @@
     "_source": "DrikPanchang.com — verified 2025-01-01, Delhi. Wednesday → Abhijit Muhurta is null per Drik / Smarta Buddha-vara convention.",
     "date": "2025-01-01",
     "city": "Delhi",
-    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "location": {
+      "latitude": 28.6139,
+      "longitude": 77.209
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Wednesday",
@@ -65,7 +71,10 @@
     "_source": "DrikPanchang.com — verified 2025-03-26, Delhi. Wednesday → Abhijit Muhurta is null per Drik / Smarta Buddha-vara convention.",
     "date": "2025-03-26",
     "city": "Delhi",
-    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "location": {
+      "latitude": 28.6139,
+      "longitude": 77.209
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Wednesday",
@@ -96,7 +105,10 @@
     "_source": "Library baseline — 2025-04-12, Chennai. Tithi/Nakshatra/Yoga/Karana/Vara verified vs DrikPanchang.",
     "date": "2025-04-12",
     "city": "Chennai",
-    "location": { "latitude": 13.0827, "longitude": 80.2707 },
+    "location": {
+      "latitude": 13.0827,
+      "longitude": 80.2707
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Saturday",
@@ -116,7 +128,9 @@
       "yamagandaEndHHMM": "15:15",
       "abhijitMuhurtaStartHHMM": "11:44",
       "abhijitMuhurtaEndHHMM": "12:34",
-      "festivals": ["Hanuman Jayanti"],
+      "festivals": [
+        "Hanuman Jayanti"
+      ],
       "tithiEndHHMM": "05:51+1",
       "nakshatraEndHHMM": "18:08",
       "yogaEndHHMM": "20:41",
@@ -127,7 +141,10 @@
     "_source": "DrikPanchang.com — verified 2025-08-15, Delhi",
     "date": "2025-08-15",
     "city": "Delhi",
-    "location": { "latitude": 28.6139, "longitude": 77.209 },
+    "location": {
+      "latitude": 28.6139,
+      "longitude": 77.209
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Friday",
@@ -158,7 +175,10 @@
     "_source": "DrikPanchang.com — verified 2025-10-20, Bangalore. Diwali-eve / Narak Chaturdashi.",
     "date": "2025-10-20",
     "city": "Bangalore",
-    "location": { "latitude": 12.9716, "longitude": 77.5946 },
+    "location": {
+      "latitude": 12.9716,
+      "longitude": 77.5946
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Monday",
@@ -178,14 +198,19 @@
       "yamagandaEndHHMM": "12:04",
       "abhijitMuhurtaStartHHMM": "11:40",
       "abhijitMuhurtaEndHHMM": "12:27",
-      "festivals": ["Narak Chaturdashi"]
+      "festivals": [
+        "Narak Chaturdashi"
+      ]
     }
   },
   {
-    "_source": "Library baseline — 2025-11-02, Mumbai. Ekadashi day.",
+    "_source": "DrikPanchang 2025 ekadashi list (Mumbai): Devutthana Ekadashi = Nov 1 (Smarta, Trisprisha advance - Dwadashi ends Nov 3 05:07 before sunrise); Nov 2 = Trisparsha Mahadwadashi / Vaishnava Devutthana Ekadashi. Was a library baseline captured under the pre-2026-08-14 sunrise-only rule, which mislabeled Nov 2 as the main Ekadashi day.",
     "date": "2025-11-02",
     "city": "Mumbai",
-    "location": { "latitude": 19.076, "longitude": 72.8777 },
+    "location": {
+      "latitude": 19.076,
+      "longitude": 72.8777
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Sunday",
@@ -205,14 +230,19 @@
       "yamagandaEndHHMM": "13:47",
       "abhijitMuhurtaStartHHMM": "11:59",
       "abhijitMuhurtaEndHHMM": "12:44",
-      "festivals": ["Ekadashi"]
+      "festivals": [
+        "Vaishnava Ekadashi"
+      ]
     }
   },
   {
     "_source": "Library baseline — 2026-03-30, Pune",
     "date": "2026-03-30",
     "city": "Pune",
-    "location": { "latitude": 18.5204, "longitude": 73.8567 },
+    "location": {
+      "latitude": 18.5204,
+      "longitude": 73.8567
+    },
     "timezone": 330,
     "expected": {
       "varaEnglish": "Monday",

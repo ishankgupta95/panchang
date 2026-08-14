@@ -34,7 +34,10 @@ import { LongitudeCache } from '../../src/astronomy/cache';
 import { getTithiIndexAtTime } from '../../src/core/tithi';
 import { getNakshatraIndexAtTime } from '../../src/core/nakshatra';
 import { getKaranaIndexAtTime } from '../../src/core/karana';
-import { VARJYAM_OFFSET_GHATIKAS } from '../../src/utils/constants';
+import {
+  VARJYAM_OFFSET_GHATIKAS,
+  VARJYAM_SECOND_OFFSET_GHATIKAS,
+} from '../../src/utils/constants';
 
 const PUNE = { latitude: 18.5204, longitude: 73.8567 };
 const TZ = 330;
@@ -332,19 +335,27 @@ describe('§36.0 G — solver vs ephemeris separation', () => {
         }
       }
 
-      const varjyam = r.inauspicious.varjyam;
-      if (varjyam) {
+      for (const varjyam of r.inauspicious.varjyam) {
         // Window = 4 of the nakshatra's 60 ghatikas, so duration = 15 × width.
+        // Each window lies inside its own nakshatra (offsets run 0..56, width
+        // 4, out of 60 ghatikas), so the owning nakshatra is the one active at
+        // the window's midpoint — sunrise's nakshatra would be wrong for the
+        // second window of a transition day. Mula carries two spells; try
+        // each tabulated offset and keep the one that recovers a boundary.
         const duration = (varjyam.end.getTime() - varjyam.start.getTime()) * 15;
-        const offset = VARJYAM_OFFSET_GHATIKAS[
-          getNakshatraIndexAtTime(r.sun.rise, moonAt)
-        ];
-        if (offset !== undefined) {
+        const midMs = (varjyam.start.getTime() + varjyam.end.getTime()) / 2;
+        const nakIdx = getNakshatraIndexAtTime(new Date(midMs), moonAt);
+        const offsets = [VARJYAM_OFFSET_GHATIKAS[nakIdx]];
+        const secondOffset = VARJYAM_SECOND_OFFSET_GHATIKAS[nakIdx];
+        if (secondOffset !== undefined) offsets.push(secondOffset);
+        for (const offset of offsets) {
+          if (offset === undefined) continue;
           const nakStart = varjyam.start.getTime() - (offset / 60) * duration;
           const exact = bisect(nakStart, nakshatraIdx);
           if (exact !== null && Math.abs(exact - nakStart) < 3600_000) {
             worstVarjyam = Math.max(worstVarjyam, Math.abs(exact - nakStart));
             checked++;
+            break;
           }
         }
       }

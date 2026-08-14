@@ -48,33 +48,59 @@ describe('Ashtottari Dasha — cycle constants', () => {
   });
 });
 
-describe('Ashtottari Dasha — starting lord by Moon nakshatra', () => {
-  // Krittika (nakshatra 2) anchors the Sun period at 0° elapsed.
-  it('Moon at start of Krittika → Sun starting lord', () => {
-    const moonLon = 2 * NAKSHATRA_SPAN; // 0% into Krittika
+describe('Ashtottari Dasha — starting lord by Moon nakshatra (classical group table)', () => {
+  // Classical Ardradi group allocation (PyJHora ashtottari.py seed dict;
+  // Maitreya 8 AshtottariDasa.cpp): Sun = Ardra..Ashlesha, Moon =
+  // Magha..U.Phalguni, Mars = Hasta..Vishakha, Mercury = Anuradha..Mula,
+  // Saturn = P.Ashadha..Shravana, Jupiter = Dhanishta..P.Bhadra, Rahu =
+  // U.Bhadra..Bharani, Venus = Krittika..Mrigashira.
+  it('Moon at start of Ardra → Sun starting lord with full 6-year balance', () => {
+    const moonLon = 5 * NAKSHATRA_SPAN; // 0% into Ardra
     const r = computeAshtottariDasha(SAMPLE, moonLon);
     expect(r.mahaDashas[0]!.lord).toBe('Sun');
+    const balanceYears =
+      (r.mahaDashas[0]!.endDate.getTime() - r.mahaDashas[0]!.startDate.getTime())
+      / (365.25 * 24 * 3600 * 1000);
+    expect(balanceYears).toBeCloseTo(6, 5);
   });
 
-  it('Moon at end of Sun period → starts in Moon', () => {
-    // Sun period covers 1.5 nakshatras starting at Krittika.
-    // End of Sun = 1.5 nakshatras after Krittika = 0.5 into Mrigashira.
-    const moonLon = (2 + 1.5) * NAKSHATRA_SPAN; // exactly at Sun→Moon boundary
+  it('Moon at start of Magha (end of Sun group) → starts in Moon', () => {
+    const moonLon = 9 * NAKSHATRA_SPAN; // Magha begins the Moon group
     const r = computeAshtottariDasha(SAMPLE, moonLon);
     expect(r.mahaDashas[0]!.lord).toBe('Moon');
   });
 
-  it('Moon at start of Ashwini (just before Krittika in proportion-space) → ends in Venus period', () => {
-    // Ashwini is 2 nakshatras before Krittika in zodiacal terms, so in
-    // the Krittika-anchored cycle relPos = 25 (= 27-2). Venus boundary
-    // ends at position 27. So Ashwini falls in Venus's allocation.
-    const moonLon = 0; // start of Ashwini
+  it('Moon at start of Krittika → Venus starting lord (Venus rules Krittika–Mrigashira)', () => {
+    const moonLon = 2 * NAKSHATRA_SPAN;
     const r = computeAshtottariDasha(SAMPLE, moonLon);
     expect(r.mahaDashas[0]!.lord).toBe('Venus');
+    const balanceYears =
+      (r.mahaDashas[0]!.endDate.getTime() - r.mahaDashas[0]!.startDate.getTime())
+      / (365.25 * 24 * 3600 * 1000);
+    expect(balanceYears).toBeCloseTo(21, 5);
+  });
+
+  it('Moon at start of Ashwini → Rahu starting lord, half the group elapsed', () => {
+    // Ashwini is the THIRD star of Rahu's wrapping group (U.Bhadra, Revati,
+    // Ashwini, Bharani), so 2/4 of the group has elapsed → balance = 6 of 12.
+    const moonLon = 0;
+    const r = computeAshtottariDasha(SAMPLE, moonLon);
+    expect(r.mahaDashas[0]!.lord).toBe('Rahu');
+    const balanceYears =
+      (r.mahaDashas[0]!.endDate.getTime() - r.mahaDashas[0]!.startDate.getTime())
+      / (365.25 * 24 * 3600 * 1000);
+    expect(balanceYears).toBeCloseTo(6, 5);
+  });
+
+  it('every nakshatra maps to exactly one lord group', () => {
+    for (let nak = 0; nak < 27; nak++) {
+      const r = computeAshtottariDasha(SAMPLE, (nak + 0.5) * NAKSHATRA_SPAN);
+      expect(r.mahaDashas[0]!.lord).toBeDefined();
+    }
   });
 
   it('cycle progresses through all 8 lords starting from the active one', () => {
-    const r = computeAshtottariDasha(SAMPLE, 2 * NAKSHATRA_SPAN);
+    const r = computeAshtottariDasha(SAMPLE, 5 * NAKSHATRA_SPAN);
     const lords = r.mahaDashas.map((m) => m.lord);
     expect(lords).toHaveLength(8);
     expect(lords[0]).toBe('Sun');
@@ -151,27 +177,41 @@ describe('Yogini Dasha — cycle constants', () => {
   });
 });
 
-describe('Yogini Dasha — starting Yogini by nakshatra', () => {
-  it('Moon at Ashwini (0) → starts at Mangala', () => {
+describe('Yogini Dasha — starting Yogini by nakshatra (Devi-Bhagavata formula)', () => {
+  // Classical rule: (1-based janma nakshatra + 3) mod 8; remainder 1 =
+  // Mangala … 0 = Sankata. Equivalent to (nakIdx + 3) % 8 with 0-based
+  // indices. Worked examples from the published primers: Anuradha (#17)
+  // → Bhramari (vedicastro.com); Pushya (#8) → Dhanya (myzodiaq). PyJHora
+  // yogini.py's star lists ({6,14,22} → Mangala, {1,9,17,25} → Bhramari)
+  // encode exactly this formula.
+  it('Moon at Ashwini (0) → starts at Bhramari (Mars)', () => {
     const r = computeYoginiDasha(SAMPLE, 0);
-    expect(r.mahaDashas[0]!.yogini).toBe('Mangala');
-    expect(r.mahaDashas[0]!.lord).toBe('Moon');
+    expect(r.mahaDashas[0]!.yogini).toBe('Bhramari');
+    expect(r.mahaDashas[0]!.lord).toBe('Mars');
   });
 
-  it('Moon at Bharani (1) → starts at Pingala', () => {
+  it('Moon at Bharani (1) → starts at Bhadrika (Mercury)', () => {
     const r = computeYoginiDasha(SAMPLE, 1 * NAKSHATRA_SPAN);
-    expect(r.mahaDashas[0]!.yogini).toBe('Pingala');
-    expect(r.mahaDashas[0]!.lord).toBe('Sun');
+    expect(r.mahaDashas[0]!.yogini).toBe('Bhadrika');
+    expect(r.mahaDashas[0]!.lord).toBe('Mercury');
   });
 
-  it('Moon at Pushya (7) → wraps to Mangala (8 mod 8 = 0)', () => {
+  it('Moon at Pushya (7) → Dhanya (published worked example)', () => {
     const r = computeYoginiDasha(SAMPLE, 7 * NAKSHATRA_SPAN);
-    expect(r.mahaDashas[0]!.yogini).toBe('Sankata');
+    expect(r.mahaDashas[0]!.yogini).toBe('Dhanya');
+    expect(r.mahaDashas[0]!.lord).toBe('Jupiter');
   });
 
-  it('Moon at Ashlesha (8) → Mangala (8 mod 8 = 0, cycle wraps)', () => {
-    const r = computeYoginiDasha(SAMPLE, 8 * NAKSHATRA_SPAN);
-    expect(r.mahaDashas[0]!.yogini).toBe('Mangala');
+  it('Moon at Anuradha (16) → Bhramari (published worked example)', () => {
+    const r = computeYoginiDasha(SAMPLE, 16 * NAKSHATRA_SPAN);
+    expect(r.mahaDashas[0]!.yogini).toBe('Bhramari');
+  });
+
+  it('Moon in Ardra (5), Chitra (13) or Shravana (21) → Mangala (PyJHora star list)', () => {
+    for (const nak of [5, 13, 21]) {
+      const r = computeYoginiDasha(SAMPLE, nak * NAKSHATRA_SPAN);
+      expect(r.mahaDashas[0]!.yogini, `nakshatra ${nak}`).toBe('Mangala');
+    }
   });
 
   it('cycle progresses through all 8 Yoginis', () => {

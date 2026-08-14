@@ -361,6 +361,15 @@ describe('Phase 34d — Ashtakoot Guna Milan parity (perfect-36 regression net)'
           expect(r.cancellations.some((c) => c.startsWith('Nadi'))).toBe(true);
         });
       }
+
+      // The Gana-cancellation opt-in must not disturb drik parity: default
+      // mode applies no Gana cancellation at all, and on these perfect-36
+      // pairs even the raised flag is a no-op (36/36 has no Gana dosha to
+      // cancel), so both outputs stay byte-identical to the pinned fixture.
+      it('ganaCancellation flag leaves this drik-parity pair byte-identical', () => {
+        const flagged = computeAshtakoot(pair.boy, pair.girl, { ganaCancellation: true });
+        expect(JSON.stringify(flagged)).toBe(JSON.stringify(r));
+      });
     });
   }
 });

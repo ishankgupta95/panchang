@@ -236,9 +236,10 @@ export const en: PanchangTranslations = {
     surya_grahan: 'Surya Grahan (Solar Eclipse)',
     chandra_grahan: 'Chandra Grahan (Lunar Eclipse)',
     // Festival description templates ({name}/{masa}/{time} substituted at use)
-    desc_ekadashi_deferred_to_dwadashi: '{name} — deferred to Dwadashi (Dashami-viddha)',
-    desc_ekadashi_viddha_smarta_next: 'Dashami-viddha: Smarta fast observed next day (Dwadashi); Vaishnava fast today.',
-    desc_ekadashi_viddha_smarta_today: 'Dashami-viddha Ekadashi: Smarta fast observed today (Dwadashi).',
+    desc_ekadashi_viddha_vaishnava_next: 'Dashami-viddha: Smarta fast observed today; Vaishnava fast next day (Dwadashi).',
+    desc_ekadashi_viddha_vaishnava_today: 'Dashami-viddha Ekadashi: Vaishnava fast observed today (Dwadashi).',
+    desc_ekadashi_vriddha_dwadashi_next: 'Vriddha Dwadashi: Smarta fast observed today; Vaishnava fast next day (Dwadashi).',
+    desc_ekadashi_vriddha_dwadashi_vaishnava: 'Vriddha Dwadashi: Vaishnava fast observed today; the Smarta fast was yesterday.',
     desc_purnimanta_krishna_paksha: 'Purnimanta: {masa} Krishna Paksha',
     desc_bhadra_observe_after: 'Observe after Bhadra ends at {time}',
   },

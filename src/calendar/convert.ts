@@ -1,5 +1,8 @@
-import { getDailyPanchang, getInstantPanchang } from '../core/panchang';
-import { computeSamvat } from '../core/samvat';
+import { getDailyPanchang } from '../core/panchang';
+import { computeSamvat, chaitraNewMoon } from '../core/samvat';
+import { computeSunrise, computeSunset } from '../astronomy/sunrise';
+import { getSiderealSunLongitude } from '../astronomy/sun';
+import { resolveUtcOffset } from '../utils/timezone';
 import { validateLocation, validateDate } from '../utils/validation';
 import { PanchangError } from '../types/errors';
 import type { GeoLocation } from '../types/location';
@@ -152,10 +155,21 @@ export function convertHinduToGregorian(
   // anchors at Chaitra Shukla Pratipada in late March of (vikramSamvat - 57).
   // Each chandra masa is ~30 days; we sweep a ±50-day window around the
   // expected masa midpoint to absorb adhika-masa shifts and tithi placement.
+  //
+  // One coordinate wraps around the year: under purnimanta, Chaitra *Krishna*
+  // is the closing fortnight of the VS year — it precedes the samvat increment,
+  // so it carries masaIndex 0 with the OLD samvat while falling ~12 months
+  // after that samvat's Chaitra Shukla anchor. Anchoring it like every other
+  // masa put the sweep a year early and the conversion returned []. That
+  // fortnight gets its own window around the FOLLOWING March instead.
   const ceYear = coords.vikramSamvat - 57;
   const dayMs = 24 * 3600_000;
-  const anchorMs = Date.UTC(ceYear, 2, 25);    // ~late March
-  const masaMidMs = anchorMs + coords.masaIndex * 30 * dayMs;
+  const masaSystem = options.masaSystem ?? 'purnimanta';
+  const wrapsYearEnd =
+    masaSystem === 'purnimanta' && coords.masaIndex === 0 && coords.paksha === 'krishna';
+  const masaMidMs = wrapsYearEnd
+    ? Date.UTC(ceYear + 1, 2, 10)
+    : Date.UTC(ceYear, 2, 25) + coords.masaIndex * 30 * dayMs;
   const start = new Date(masaMidMs - 50 * dayMs);
   const end = new Date(masaMidMs + 60 * dayMs);
   const targetTithi = coords.paksha === 'shukla'
@@ -184,23 +198,28 @@ const KALIYUGA_EPOCH_YEAR = -3101; // 3102 BCE (proleptic) / Kali Yuga begins 18
 
 /**
  * Compute the Kali Yuga year for a given Gregorian date. Kali Yuga began
- * on 18 February 3102 BCE per traditional reckoning; this helper returns
- * the integer year-count from that epoch.
+ * on 18 February 3102 BCE per traditional reckoning, but published
+ * panchangs (DrikPanchang) increment the year at **Chaitra Shukla
+ * Pratipada** — the same luni-solar new year as Vikram Samvat, keeping
+ * `Kali − Vikram = 3044` on both sides of the boundary — not at the
+ * epoch's Gregorian anniversary. An earlier revision used the Feb-18
+ * anniversary, which mislabeled every date in [Feb 18, Chaitra
+ * Pratipada) by one year (~1 month/year). Anchored on the same
+ * `chaitraNewMoon` boundary as `computeSamvat` for consistency.
+ *
+ * Drik pins (2026-08-14 audit): 2026-01-01 → 5126, 2026-03-01 → 5126,
+ * 2026-03-20 → 5127, 2026-08-19 → 5127.
  *
  * @example
  * ```typescript
- * getKaliYugaYear(new Date('2026-01-01')); // 5126 (before the 18 Feb epoch anniversary)
+ * getKaliYugaYear(new Date('2026-01-01')); // 5126 (before Chaitra Pratipada 2026)
  * ```
  */
 export function getKaliYugaYear(date: Date): number {
   validateDate(date);
-  // Approximate: KY year = CE year - (-3101) = CE + 3101 (proleptic Gregorian).
-  // For dates before 18 Feb in any year, subtract 1.
   const y = date.getUTCFullYear();
-  const m = date.getUTCMonth();
-  const d = date.getUTCDate();
-  const beforeEpochAnniv = m < 1 || (m === 1 && d < 18);
-  return y - KALIYUGA_EPOCH_YEAR - (beforeEpochAnniv ? 1 : 0);
+  const pastNewYear = date.getTime() >= chaitraNewMoon(y);
+  return y - KALIYUGA_EPOCH_YEAR + (pastNewYear ? 0 : -1);
 }
 
 /**
@@ -210,13 +229,21 @@ export function getKaliYugaYear(date: Date): number {
  *   - **Most regions** (Maharashtra Gudi Padwa, Andhra/Karnataka Ugadi,
  *     Sindhi Cheti Chand, Vikrami Samvat North) — Chaitra Shukla Pratipada,
  *     ≈ March/April.
- *   - **Tamil Nadu (Puthandu)** — Mesha Sankranti, ≈ April 14.
- *   - **Punjab (Baisakhi)** — Mesha Sankranti, ≈ April 13/14 (same solar
- *     anchor as Puthandu).
- *   - **Kerala (Vishu)** — Mesha Sankranti, same anchor.
- *   - **Bengal (Pohela Boishakh)** — Mesha Sankranti, ≈ April 14 (Bengali
- *     calendar uses solar months only).
- *   - **Assam (Bohag Bihu)** — Mesha Sankranti.
+ *   - **Tamil Nadu (Puthandu)** — the Mesha Sankranti observance day: a
+ *     daylight transit keeps its own day, a night transit moves to the next
+ *     sunrise's day. ≈ April 14.
+ *   - **Punjab (Baisakhi)** — the civil day containing the transit, so an
+ *     evening transit lands a day earlier than Puthandu (2028: April 13).
+ *   - **Kerala (Vishu)** — the day of the first sunrise at or after the
+ *     transit, so a daytime transit lands a day later (2026/2027: April 15).
+ *   - **Bengal (Pohela Boishakh)** — the day after the transit's civil day;
+ *     the transit day itself is Chaitra Sankranti, the outgoing year's last.
+ *   - **Assam (Bohag Bihu)** — the Sankranti observance day (as Tamil Nadu).
+ *     DrikPanchang publishes no Bohag Bihu date page, so this one is not
+ *     pinned to a reference; Assamese practice may follow Bengal's rule.
+ *
+ * The four solar rules are validated against DrikPanchang 2025–2029 — see the
+ * table on {@link MeshaDayRule}.
  *
  * For **`'all'`** and the default we return Chaitra Shukla Pratipada
  * (the most-widely-celebrated point); other regions use their solar anchor.
@@ -254,8 +281,9 @@ export function getHinduNewYear(
   );
 
   if (useSolarAnchor) {
-    // Mesha Sankranti — Sun's transit into Aries (rashi 0). Sweep April.
-    return findMeshaSankranti(gregorianYear, location, options);
+    // Mesha Sankranti — Sun's transit into Aries (rashi 0). Which calendar day
+    // that lands on is region-specific; see `meshaDayRuleFor`.
+    return findMeshaSankranti(gregorianYear, region, location, options);
   }
 
   // Default: Chaitra Shukla Pratipada — sweep mid-March through mid-April.
@@ -274,45 +302,151 @@ function findChaitraShuklaPratipada(
   // Dwitiya; we still pick the first day where Amanta masa == Chaitra
   // since that is the masa-boundary day under the Amanta system.
   const amantaOptions = { ...options, masaSystem: 'amanta' as const };
+  // End mid-May: in an Adhika-Chaitra year the celebrated (nija) pratipada
+  // lands a whole month late — 2029's falls on April 14 — so April 30 leaves
+  // little margin and mid-May none of the risk.
   const start = new Date(Date.UTC(gregorianYear, 1, 15));  // mid-Feb
-  const end = new Date(Date.UTC(gregorianYear, 3, 30));    // April 30
+  const end = new Date(Date.UTC(gregorianYear, 4, 15));    // mid-May
   const dayMs = 24 * 3600_000;
-  let prevMasa: number | null = null;
+  let prev: { masa: number; adhika: boolean } | null = null;
   for (let t = start.getTime(); t <= end.getTime(); t += dayMs) {
     const d = new Date(t);
     const p = getDailyPanchang(d, location, amantaOptions);
     if (p === null) continue;
     const masa = p.calendar.chandramasa.index;
-    if (prevMasa !== null && prevMasa !== 0 && masa === 0 && !p.calendar.chandramasa.isAdhika) {
+    const adhika = p.calendar.chandramasa.isAdhika;
+    // The new year day is the first day of NIJA Chaitra. In an ordinary year
+    // the previous day is Phalguna; in an Adhika-Chaitra year it is Adhika
+    // Chaitra — same index 0, adhika flag set — which a plain `prevMasa !== 0`
+    // guard mistook for "already in Chaitra", leaving the transition
+    // undetectable and the whole function returning null (e.g. 2029).
+    // DrikPanchang confirms the celebrated day is the nija pratipada there:
+    // Ugadi / Gudi Padwa 2029 on April 14, not the adhika pratipada in March.
+    if (masa === 0 && !adhika && prev !== null && (prev.masa !== 0 || prev.adhika)) {
       return p.date;
     }
-    prevMasa = masa;
+    prev = { masa, adhika };
   }
   return null;
 }
 
+/**
+ * Day rules the Mesha-anchored regional new years use. Each names the window
+ * that must contain the transit moment for a day to be the new year.
+ *
+ * Validated against DrikPanchang 2025–2029, whose transit moments
+ * (Apr 14 03:30, Apr 14 09:39, Apr 14 15:33, Apr 13 21:47, Apr 14 03:56 IST)
+ * span pre-dawn, morning, afternoon and post-sunset:
+ *
+ * | rule           | region        | 2025 | 2026 | 2027 | 2028 | 2029 |
+ * |----------------|---------------|------|------|------|------|------|
+ * | `sankranti-day`| Tamil Nadu    |  14  |  14  |  14  |  14  |  14  |
+ * | `civil-day`    | Punjab        |  14  |  14  |  14  |  13  |  14  |
+ * | `next-sunrise` | Kerala        |  14  |  15  |  15  |  14  |  14  |
+ * | `civil-day+1`  | West Bengal   |  15  |  15  |  15  |  14  |  15  |
+ */
+type MeshaDayRule = 'sankranti-day' | 'civil-day' | 'next-sunrise' | 'civil-day-plus-1';
+
+function meshaDayRuleFor(region: FestivalRegion | LegacyFestivalRegion): MeshaDayRule {
+  switch (region) {
+    case 'punjab':
+      return 'civil-day';
+    case 'kerala':
+      return 'next-sunrise';
+    case 'bengal':
+    case 'west-bengal':
+      return 'civil-day-plus-1';
+    // Tamil Nadu takes the generic Sankranti observance day. Assam rides it
+    // too: DrikPanchang publishes no Bohag Bihu date page, so the Assamese
+    // rule is not pinned to a reference — see SANKRANTI_REGIONAL in
+    // core/festivals.ts.
+    default:
+      return 'sankranti-day';
+  }
+}
+
 function findMeshaSankranti(
   gregorianYear: number,
+  region: FestivalRegion | LegacyFestivalRegion,
   location: GeoLocation,
   options: ConvertOptions,
 ): Date | null {
-  const start = new Date(Date.UTC(gregorianYear, 3, 1));   // April 1
-  const end = new Date(Date.UTC(gregorianYear, 3, 30));    // April 30
+  const offset = resolveUtcOffset(options.timezone, new Date(Date.UTC(gregorianYear, 3, 1)));
+  const ayanamsa = options.ayanamsa ?? 'lahiri';
+  const rashiAt = (ms: number) =>
+    Math.floor(getSiderealSunLongitude(new Date(ms), ayanamsa) / 30) % 12;
+
+  // Locate the Mesha transit to the second. Meena → Mesha always falls in the
+  // first half of April; scanning from April 1 with a one-day step and then
+  // bisecting reads ~15 solar longitudes instead of the 30 full instant
+  // panchangs the day-resolution sweep used to build.
   const dayMs = 24 * 3600_000;
-  let prevRashi: number | null = null;
-  for (let t = start.getTime(); t <= end.getTime(); t += dayMs) {
-    const d = new Date(t);
-    const p = getInstantPanchang(d, location, options);
-    if (p === null) continue;
-    const rashi = Math.floor(p.sun.siderealLongitude / 30) % 12;
-    if (prevRashi !== null && prevRashi !== 0 && rashi === 0) {
-      // Bisect to the day Sun crossed into Aries.
-      // Coarse precision (1 day) is sufficient for region-specific almanacs.
-      return d;
+  const scanStart = Date.UTC(gregorianYear, 3, 1) - offset * 60_000 - dayMs;
+  const scanEnd = Date.UTC(gregorianYear, 3, 20) - offset * 60_000;
+  let transitMs: number | null = null;
+  let prevMs = scanStart;
+  let prevRashi = rashiAt(prevMs);
+  for (let t = scanStart + dayMs; t <= scanEnd; t += dayMs) {
+    const rashi = rashiAt(t);
+    if (rashi !== prevRashi && rashi === 0) {
+      let lo = prevMs, hi = t;
+      while (hi - lo > 1000) {
+        const mid = Math.floor((lo + hi) / 2);
+        if (rashiAt(mid) === prevRashi) lo = mid; else hi = mid;
+      }
+      transitMs = hi;
+      break;
     }
+    prevMs = t;
     prevRashi = rashi;
   }
-  return null;
+  if (transitMs === null) return null;
+
+  /** Local civil date (as a UTC-midnight Date) of an instant, shifted by n days. */
+  const civilDay = (ms: number, dayShift = 0): Date => {
+    const local = new Date(ms + offset * 60_000);
+    return new Date(Date.UTC(
+      local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate() + dayShift,
+    ));
+  };
+
+  const rule = meshaDayRuleFor(region);
+  if (rule === 'civil-day') return civilDay(transitMs);
+  if (rule === 'civil-day-plus-1') return civilDay(transitMs, 1);
+
+  // The remaining two rules are sunrise-relative. Walk to the sunrise that
+  // opens the Hindu day containing the transit, exactly as
+  // `computeSankrantisForYear` does, so the two surfaces cannot drift apart.
+  try {
+    let dayStart = computeSunrise(new Date(transitMs - 30 * 3600_000), location);
+    for (let i = 0; i < 3; i++) {
+      const next = computeSunrise(computeSunset(dayStart, location), location);
+      if (next.getTime() <= transitMs) dayStart = next; else break;
+    }
+    if (rule === 'next-sunrise') {
+      // Kerala: the day of the first sunrise at or after the transit. The
+      // transit is inside dayStart's Hindu day, so that is dayStart's own day
+      // when the transit preceded its sunrise and the following one otherwise.
+      const sunriseAfter = dayStart.getTime() >= transitMs
+        ? dayStart
+        : computeSunrise(computeSunset(dayStart, location), location);
+      return civilDay(sunriseAfter.getTime());
+    }
+    // Tamil Nadu / default: drik's Sankranti observance day — a daylight
+    // transit keeps its own day, a night transit moves to the next sunrise's.
+    const dayEnd = computeSunset(dayStart, location);
+    const anchor = transitMs <= dayEnd.getTime()
+      ? dayStart
+      : computeSunrise(dayEnd, location);
+    return civilDay(anchor.getTime());
+  } catch (e: unknown) {
+    if (!(e instanceof PanchangError && (e.code === 'NO_SUNRISE' || e.code === 'NO_SUNSET'))) {
+      throw e;
+    }
+    // Polar day/night: no sunrise to anchor to — fall back to the transit's
+    // own civil date rather than returning null.
+    return civilDay(transitMs);
+  }
 }
 
 // Re-export computeSamvat for callers who want raw era numbers without the

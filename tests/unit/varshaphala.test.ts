@@ -384,38 +384,42 @@ function synthVarshaChart(spec: {
 describe('Saham evaluation — Punya / Vidya hand-checks', () => {
   /**
    * Synthetic chart: Asc=10°, Sun=80°, Moon=200°.
-   * Day birth: Punya = Moon - Sun + Asc = 200 - 80 + 10 = 130°.
-   * Night birth: Punya = Sun - Moon + Asc = 80 - 200 + 10 = -110 → 250°.
-   * Day Vidya = Sun - Moon + Asc = 80 - 200 + 10 → 250°.
-   * Night Vidya = Moon - Sun + Asc = 130°.
-   * (Vidya is Punya's swap; the two are reciprocal.)
+   *
+   * All expectations apply the classical Tajika COMPLETION RULE (Tajika
+   * Neelakanthi; PVR Rao; AstroVeda): after X − Y + Z, walk the zodiac
+   * from Y toward X; if Z is not met on the way, add 30°. E.g. day Punya:
+   * walking Sun (80°) → Moon (200°) never meets the Asc (10°), so
+   * 130° + 30° = 160°. An earlier revision omitted the rule and these
+   * hand-checks pinned the uncorrected values.
    */
-  it('day birth: Punya = Moon - Sun + Asc', () => {
+  it('day birth: Punya = Moon - Sun + Asc (+30 completion)', () => {
     const chart = synthVarshaChart({ ascLon: 10, sunLon: 80, moonLon: 200 });
     const punyaFormula = SAHAM_FORMULAS.find((f) => f.name === 'Punya')!;
     const lon = _evaluateSahamForTest(punyaFormula, true, chart, {});
-    expect(lon).toBeCloseTo(130, 6);
+    // 200 - 80 + 10 = 130; Asc not in [Sun → Moon) → +30 → 160.
+    expect(lon).toBeCloseTo(160, 6);
   });
 
-  it('night birth: Punya = Sun - Moon + Asc (= 250° in test scenario)', () => {
+  it('night birth: Punya = Sun - Moon + Asc (Asc inside the walk, no correction)', () => {
     const chart = synthVarshaChart({ ascLon: 10, sunLon: 80, moonLon: 200 });
     const punyaFormula = SAHAM_FORMULAS.find((f) => f.name === 'Punya')!;
     const lon = _evaluateSahamForTest(punyaFormula, false, chart, {});
+    // 80 - 200 + 10 → 250; walking Moon (200°) → Sun (80°) passes 10° → no +30.
     expect(lon).toBeCloseTo(250, 6);
   });
 
-  it('day birth: Vidya = Sun - Moon + Asc (= 250°)', () => {
+  it('day birth: Vidya = Sun - Moon + Asc (no correction)', () => {
     const chart = synthVarshaChart({ ascLon: 10, sunLon: 80, moonLon: 200 });
     const vidyaFormula = SAHAM_FORMULAS.find((f) => f.name === 'Vidya')!;
     const lon = _evaluateSahamForTest(vidyaFormula, true, chart, {});
     expect(lon).toBeCloseTo(250, 6);
   });
 
-  it('night birth: Vidya = Moon - Sun + Asc (= 130°) — reciprocal of day Punya', () => {
+  it('night birth: Vidya = Moon - Sun + Asc (+30 completion)', () => {
     const chart = synthVarshaChart({ ascLon: 10, sunLon: 80, moonLon: 200 });
     const vidyaFormula = SAHAM_FORMULAS.find((f) => f.name === 'Vidya')!;
     const lon = _evaluateSahamForTest(vidyaFormula, false, chart, {});
-    expect(lon).toBeCloseTo(130, 6);
+    expect(lon).toBeCloseTo(160, 6);
   });
 
   it('Yasas swaps Jupiter and Punya for night birth (per Tag-to-Adawal)', () => {
@@ -423,21 +427,25 @@ describe('Saham evaluation — Punya / Vidya hand-checks', () => {
       ascLon: 10, sunLon: 80, moonLon: 200, jupiterLon: 90,
     });
     const yasasFormula = SAHAM_FORMULAS.find((f) => f.name === 'Yasas')!;
-    // Day: Yasas = Jupiter - Punya + Asc = 90 - 130 + 10 = -30 → 330.
+    // Day: 90 - 130 + 10 = -30 → 330; walking Punya (130°) → Jupiter (90°)
+    // covers 320° and passes the Asc (10°) → no correction.
     const dayLon = _evaluateSahamForTest(yasasFormula, true, chart, { Punya: 130 });
     expect(dayLon).toBeCloseTo(330, 6);
-    // Night: Yasas = Punya - Jupiter + Asc = 250 - 90 + 10 = 170.
+    // Night: 250 - 90 + 10 = 170; walking Jupiter (90°) → Punya (250°)
+    // never meets the Asc → +30 → 200.
     const nightLon = _evaluateSahamForTest(yasasFormula, false, chart, { Punya: 250 });
-    expect(nightLon).toBeCloseTo(170, 6);
+    expect(nightLon).toBeCloseTo(200, 6);
   });
 
   it('Roga = Saturn - Moon + Asc under day swap (per Tag-to-Adawal)', () => {
     const chart = synthVarshaChart({ ascLon: 10, sunLon: 80, moonLon: 200, saturnLon: 280 });
     const rogaFormula = SAHAM_FORMULAS.find((f) => f.name === 'Roga')!;
-    // Day: Saturn - Moon + Asc = 280 - 200 + 10 = 90°.
+    // Day: 280 - 200 + 10 = 90; walking Moon (200°) → Saturn (280°) never
+    // meets the Asc → +30 → 120.
     const dayLon = _evaluateSahamForTest(rogaFormula, true, chart, {});
-    expect(dayLon).toBeCloseTo(90, 6);
-    // Night: Moon - Saturn + Asc = 200 - 280 + 10 = -70 → 290°.
+    expect(dayLon).toBeCloseTo(120, 6);
+    // Night: 200 - 280 + 10 → 290; walking Saturn (280°) → Moon (200°)
+    // passes the Asc (10°) → no correction.
     const nightLon = _evaluateSahamForTest(rogaFormula, false, chart, {});
     expect(nightLon).toBeCloseTo(290, 6);
   });
@@ -447,12 +455,14 @@ describe('Saham evaluation — Punya / Vidya hand-checks', () => {
       ascLon: 10, sunLon: 80, moonLon: 200, jupiterLon: 90, venusLon: 50,
     });
     const mitraFormula = SAHAM_FORMULAS.find((f) => f.name === 'Mitra')!;
-    // Day: Jupiter - Punya + Venus = 90 - 130 + 50 = 10.
+    // Day: 90 - 130 + 50 = 10; walking Punya (130°) → Jupiter (90°) passes
+    // Venus (50°) → no correction.
     const dayLon = _evaluateSahamForTest(mitraFormula, true, chart, { Punya: 130 });
     expect(dayLon).toBeCloseTo(10, 6);
-    // Night: Punya - Jupiter + Venus = 250 - 90 + 50 = 210.
+    // Night: 250 - 90 + 50 = 210; walking Jupiter (90°) → Punya (250°)
+    // never meets Venus (50°) → +30 → 240.
     const nightLon = _evaluateSahamForTest(mitraFormula, false, chart, { Punya: 250 });
-    expect(nightLon).toBeCloseTo(210, 6);
+    expect(nightLon).toBeCloseTo(240, 6);
   });
 
   it('Rajya = Saturn - Sun + Asc under day swap (per Tag-to-Adawal)', () => {
@@ -460,10 +470,12 @@ describe('Saham evaluation — Punya / Vidya hand-checks', () => {
       ascLon: 10, sunLon: 80, moonLon: 200, saturnLon: 280,
     });
     const rajyaFormula = SAHAM_FORMULAS.find((f) => f.name === 'Rajya')!;
-    // Day: Saturn - Sun + Asc = 280 - 80 + 10 = 210.
+    // Day: 280 - 80 + 10 = 210; walking Sun (80°) → Saturn (280°) never
+    // meets the Asc → +30 → 240.
     const dayLon = _evaluateSahamForTest(rajyaFormula, true, chart, {});
-    expect(dayLon).toBeCloseTo(210, 6);
-    // Night: Sun - Saturn + Asc = 80 - 280 + 10 = -190 → 170.
+    expect(dayLon).toBeCloseTo(240, 6);
+    // Night: 80 - 280 + 10 → 170; walking Saturn (280°) → Sun (80°) passes
+    // the Asc (10°) → no correction.
     const nightLon = _evaluateSahamForTest(rajyaFormula, false, chart, {});
     expect(nightLon).toBeCloseTo(170, 6);
   });
@@ -521,14 +533,18 @@ describe('Fixture sweep — structural invariants on 5 R-tier charts', () => {
     expect(VISIBLE_GRAHAS).toContain(v.yearLord);
   });
 
-  it('Punya & Vidya are 360°-reciprocal: lon(Punya) + lon(Vidya) ≡ 2·Asc (mod 360°)', () => {
-    // Sanity: Punya = Moon - Sun + Asc; Vidya = Sun - Moon + Asc (with same swap).
-    // Sum = 2·Asc (mod 360). Holds for both day and night birth.
+  it('Punya & Vidya are reciprocal: lon(Punya) + lon(Vidya) ≡ 2·Asc + 30 (mod 360°)', () => {
+    // Punya = Moon - Sun + Asc; Vidya = Sun - Moon + Asc (with the same
+    // swap). Their uncorrected sum is 2·Asc, and the Tajika completion
+    // rule adds 30° to EXACTLY ONE of the pair: the Asc lies in exactly
+    // one of the two complementary walks (Sun→Moon vs Moon→Sun), so one
+    // saham always takes the correction and the other never does. Holds
+    // for both day and night birth.
     for (const name of FIXTURE_NAMES) {
       const { utc, loc } = fixture(name);
       const v = computeVarshaphala(utc, 30, loc);
       const sum = (v.sahams.Punya.longitude + v.sahams.Vidya.longitude) % 360;
-      const expected = (2 * v.varshaLagna.siderealLongitude) % 360;
+      const expected = (2 * v.varshaLagna.siderealLongitude + 30) % 360;
       let diff = sum - expected;
       diff = ((diff + 540) % 360) - 180;
       expect(Math.abs(diff)).toBeLessThan(0.001);

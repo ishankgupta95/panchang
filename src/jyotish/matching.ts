@@ -46,6 +46,37 @@ export interface NatalMoon {
 
 export type KootName = 'Varna' | 'Vashya' | 'Tara' | 'Yoni' | 'Graha Maitri' | 'Gana' | 'Bhakoot' | 'Nadi';
 
+/** Behaviour switches for {@link computeAshtakoot}. Every flag defaults off. */
+export interface AshtakootOptions {
+  /**
+   * Opt in to Gana-dosha cancellation. Default `false` — DrikPanchang's
+   * published 36-guna table applies no Gana cancellation, and drik parity is
+   * this library's default standard, so the flag must be raised explicitly.
+   *
+   * When enabled, a doshic Gana score (≤ 1: the Deva–Rakshasa and
+   * Manushya–Rakshasa cells) is restored to the full 6 when the classical
+   * cancellation holds:
+   *   - **same rashi-lord** — both Moons in signs ruled by one graha
+   *     (subsumes the "same rashi, different nakshatra" wording some
+   *     sources use), or
+   *   - **mutual friendship of rashi-lords** — Naisargika Maitri shows each
+   *     lord as the other's friend.
+   *
+   * Sourcing (≥2 independent lineages; each condition on all of them):
+   * Truthstar / MysticGazer dosha-cancellation corpus ("If the Rashi lord
+   * of both the partners is either a common planet or mutual friends"),
+   * AstroSight ("friendship of Lords of Moon signs"; dosha = 0/1-point
+   * cells), and JagannathHora, which states outright that the cancellation
+   * restores full points. Conditions attested only once or framed as
+   * interpretive are NOT encoded: boy→girl nakshatra count ≥ 14, navamsha
+   * *ascendant* lords (a chart point this signature does not carry — the
+   * optional `navamsaRashi` field is the Moon's navamsa sign, a different
+   * thing), "no Bhakoot dosha" (so broad it would fire on most charts),
+   * same nakshatra-lord, and "total > 25" (circular — Gana feeds the total).
+   */
+  ganaCancellation?: boolean;
+}
+
 export interface KootScore {
   name: KootName;
   /** Earned score for this koot. */
@@ -107,6 +138,11 @@ export interface AshtakootResult {
  * are supplied so the default behaviour stays aligned with drik panchang's
  * published Ashtakoot output for the bare rashi+nakshatra signature.
  *
+ *   **Gana** (opt-in via `options.ganaCancellation` — see
+ *   {@link AshtakootOptions} for conditions and sourcing):
+ *     - Same rashi-lord
+ *     - Mutual rashi-lord friendship
+ *
  * @example
  * ```typescript
  * const result = computeAshtakoot(
@@ -117,7 +153,11 @@ export interface AshtakootResult {
  * result.koots.find(k => k.name === 'Nadi')?.score;
  * ```
  */
-export function computeAshtakoot(boy: NatalMoon, girl: NatalMoon): AshtakootResult {
+export function computeAshtakoot(
+  boy: NatalMoon,
+  girl: NatalMoon,
+  options: AshtakootOptions = {},
+): AshtakootResult {
   validateNatalMoon(boy, 'boy');
   validateNatalMoon(girl, 'girl');
 
@@ -129,7 +169,7 @@ export function computeAshtakoot(boy: NatalMoon, girl: NatalMoon): AshtakootResu
     scoreTara(boy, girl),
     scoreYoni(boy, girl),
     scoreGrahaMaitri(boy, girl),
-    scoreGana(boy, girl),
+    scoreGana(boy, girl, cancellations, options.ganaCancellation === true),
     scoreBhakoot(boy, girl, cancellations),
     scoreNadi(boy, girl, cancellations),
   ];
@@ -235,35 +275,50 @@ function maitriLabel(v: number): string {
 }
 
 /**
- * Gana koot. Note this is the one doshic koot that takes no `cancellations`
- * array, which is deliberate rather than an omission.
+ * Gana koot. Cancellation is OPT-IN (`applyCancellation`), unlike Bhakoot
+ * and Nadi whose cancellations always run — a deliberate asymmetry.
  *
- * Bhakoot and Nadi cancellations are *score-affecting* in mainstream practice —
- * they restore the koot to full marks, and DrikPanchang surfaces them as such,
- * which is why {@link scoreBhakoot} and {@link scoreNadi} take the array and
- * write into it. The mitigations described for Gana are a different kind of
- * claim: the sources say a Gana mismatch "is mitigated" or "loses significance"
- * when the Moon signs coincide, when the rashi lords are friends, or when the
- * overall total is already strong — language about interpretation, not about
- * restoring the six points. One of them (a total above 25/36) is circular for
- * scoring anyway, since Gana feeds the total.
+ * Bhakoot and Nadi cancellations are *score-affecting* in mainstream
+ * practice — DrikPanchang's own 36-guna table restores those koots to full
+ * marks. Drik applies NO Gana cancellation, and drik parity is this
+ * library's default standard, so restoring Gana points by default would
+ * silently inflate every affected total away from what a reader checking
+ * against a published 36-guna calculator would see.
  *
- * No consulted source restores Gana points arithmetically, so doing so here
- * would silently inflate every affected total away from what a reader checking
- * against a published 36-guna calculator would see. The Gana score is reported
- * raw; weighing a mismatch against Graha Maitri and Bhakoot is the astrologer's
- * call, and `koots` carries everything needed to make it.
+ * The cancellation itself (same or mutually friendly rashi-lords → full 6;
+ * doshic cells are the two scores ≤ 1) is nonetheless well-attested across
+ * independent pandit corpora — sourcing and the list of deliberately
+ * EXCLUDED weaker conditions live on {@link AshtakootOptions}.
  */
-function scoreGana(boy: NatalMoon, girl: NatalMoon): KootScore {
+function scoreGana(
+  boy: NatalMoon,
+  girl: NatalMoon,
+  cancellations: string[],
+  applyCancellation: boolean,
+): KootScore {
   const b = ganaIdx(NAKSHATRA_GANA[boy.nakshatra]!);
   const g = ganaIdx(NAKSHATRA_GANA[girl.nakshatra]!);
-  const score = GANA_SCORE[b]![g]!;
-  return {
-    name: 'Gana',
-    score,
-    maxScore: 6,
-    description: `${NAKSHATRA_GANA[boy.nakshatra]} ↔ ${NAKSHATRA_GANA[girl.nakshatra]}`,
-  };
+  let score = GANA_SCORE[b]![g]!;
+  let description = `${NAKSHATRA_GANA[boy.nakshatra]} ↔ ${NAKSHATRA_GANA[girl.nakshatra]}`;
+
+  // Doshic cells: Manushya–Rakshasa (0) and Deva–Rakshasa (1). The 5-point
+  // Deva–Manushya cell is not a dosha in any consulted source.
+  if (applyCancellation && score <= 1) {
+    const boyLord = RASHI_LORD[boy.rashi]!;
+    const girlLord = RASHI_LORD[girl.rashi]!;
+    const sameLord = boyLord === girlLord;
+    const mutualFriend =
+      NAISARGIKA_MAITRI[boyLord]![girlLord] === 1 &&
+      NAISARGIKA_MAITRI[girlLord]![boyLord] === 1;
+    if (sameLord || mutualFriend) {
+      score = 6;
+      const reason = sameLord ? 'same rashi-lord' : 'mutual friendship of rashi-lords';
+      description += ` — cancelled by ${reason}`;
+      cancellations.push(`Gana: ${reason}`);
+    }
+  }
+
+  return { name: 'Gana', score, maxScore: 6, description };
 }
 
 function scoreBhakoot(boy: NatalMoon, girl: NatalMoon, cancellations: string[]): KootScore {

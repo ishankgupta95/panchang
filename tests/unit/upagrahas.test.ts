@@ -22,6 +22,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { computeUpagrahas, _locateGulikaSegmentForTest } from '../../src/jyotish/upagrahas';
+import { getDailyPanchang } from '../../src/core/panchang';
 import { computeLagna } from '../../src/jyotish/lagna';
 import { getSiderealSunLongitude } from '../../src/astronomy/sun';
 import { computeSunrise, computeSunset } from '../../src/astronomy/sunrise';
@@ -272,3 +273,46 @@ describe('Upagrahas — sanity vs Sun longitude', () => {
 // Reference computeSunset to silence unused-import lint if applicable.
 void computeSunset;
 void computeLagna;
+
+// ── 8. UP-1 (2026-08-14 audit) — weekday from the LOCAL date of sunrise ──
+
+describe('Upagrahas — LMT weekday (eastern-longitude births)', () => {
+  it('Bangkok Friday-noon birth uses the FRIDAY day slot (gulika ≈ 138.857°)', () => {
+    // 2026-08-14T05:00Z = Friday 12:00 local in Bangkok (UTC+7). Local
+    // sunrise (~06:04 local) is ~23:04 UTC on THURSDAY, so `getUTCDay()`
+    // named Thursday and picked its Gulika slot: 162.129° — the Thursday
+    // slot-1... wrong day entirely. The LMT-shifted weekday names Friday;
+    // the Friday slot-1 segment-start ascendant is 138.857° (predicted from
+    // the audit's probe before the fix ran, observed to match).
+    const BANGKOK = { latitude: 13.7563, longitude: 100.5018 };
+    const u = computeUpagrahas(new Date('2026-08-14T05:00:00Z'), BANGKOK);
+    expect(u.gulika.longitude).toBeCloseTo(138.857, 1);
+  });
+
+  it('segment weekday agrees with getDailyPanchang\'s vara at Delhi, Bangkok and Tokyo', () => {
+    // For a mid-day birth, the Gulika segment start encodes the chosen
+    // weekday slot: segStart = sunrise + slot × dayLen/8. Recover the slot
+    // against getDailyPanchang's own sunrise/sunset and check it equals the
+    // day-slot table entry for getDailyPanchang's vara — the two code paths
+    // must name the same weekday. Pre-fix, Bangkok and Tokyo disagreed on
+    // every day (their local sunrise falls before 00:00 UTC).
+    const DAY_SLOTS = [6, 5, 4, 3, 2, 1, 0]; // GULIKA_SLOTS (Sun..Sat)
+    const cases = [
+      { name: 'Delhi', loc: { latitude: 28.6139, longitude: 77.209 }, tz: 330 },
+      { name: 'Bangkok', loc: { latitude: 13.7563, longitude: 100.5018 }, tz: 420 },
+      { name: 'Tokyo', loc: { latitude: 35.6762, longitude: 139.6503 }, tz: 540 },
+    ];
+    for (const c of cases) {
+      for (let d = 10; d <= 16; d++) {
+        // Local noon on 2026-08-<d>.
+        const birth = new Date(Date.UTC(2026, 7, d, 12) - c.tz * 60_000);
+        const p = getDailyPanchang(birth, c.loc, { timezone: c.tz })!;
+        const seg = _locateGulikaSegmentForTest(birth, c.loc);
+        const segLen = (p.sun.set.getTime() - p.sun.rise.getTime()) / 8;
+        const slot = Math.round((seg.start.getTime() - p.sun.rise.getTime()) / segLen);
+        expect(slot, `${c.name} 2026-08-${d} (vara ${p.angas.vara.index})`)
+          .toBe(DAY_SLOTS[p.angas.vara.index]);
+      }
+    }
+  });
+});

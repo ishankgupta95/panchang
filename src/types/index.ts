@@ -5,14 +5,14 @@ export type {
   HouseSystem, PanchangSection,
 } from './options';
 export type {
-  TimePeriod, UtcWindow, Unlocalized, UnlocalizedInfo, TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo,
+  TimePeriod, UtcWindow, Unlocalized, UnlocalizedInfo, DurMuhurtaPeriod, TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo,
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo,
   ChandraMasaInfo, SamvatInfo, RashiInfo, NakshatraIndexInfo,
   ChoghadiyaSlot, ChoghadiyaInfo, ChoghadiyaQuality,
   DoGhatiSlot, DoGhatiInfo,
   HoraSlot, HoraInfo,
   GowriSlot, GowriInfo,
-  SpecialYogaInfo, FestivalInfo, BhadraInfo,
+  SpecialYogaInfo, FestivalInfo, BhadraInfo, BhadraVasaSegment,
   EclipseInfo, EclipseSubtype,
   GandaMulaInfo, PanchakaInfo, PanchakaType,
   AnandadiYogaInfo,

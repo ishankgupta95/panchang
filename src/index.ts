@@ -38,7 +38,7 @@ export { computeBhava } from './jyotish/bhava';
 export { computeRashiChart, computeNavamsa } from './jyotish/charts';
 export { computeDivisionalChart } from './jyotish/divisionals';
 export { computeAshtakoot } from './jyotish/matching';
-export type { NatalMoon, KootName, KootScore, AshtakootResult } from './jyotish/matching';
+export type { NatalMoon, KootName, KootScore, AshtakootResult, AshtakootOptions } from './jyotish/matching';
 export {
   computeMangalDosha, computeMangalCompatibility, computeKaalSarp, computePitruDosha,
 } from './jyotish/doshas';
@@ -92,7 +92,7 @@ export { formatInZone } from './utils/timezone';
 
 // Inauspicious periods & muhurta
 export { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './core/inauspicious';
-export { computeVarjyam } from './core/varjyam';
+export { computeVarjyam, computeVarjyamWindows } from './core/varjyam';
 export { computeGandaMula } from './core/gandaMula';
 export { computeAnandadiYoga } from './core/anandadiYoga';
 export { computePanchakaRahita } from './core/panchakaRahita';
@@ -100,7 +100,7 @@ export { computeDoGhati } from './core/doGhati';
 export {
   computeAbhijitMuhurta, computeBrahmaMuhurta,
   computeVijayaMuhurta, computeGodhuliMuhurta,
-  computeNishitaMuhurta, computeAmritKala,
+  computeNishitaMuhurta, computeAmritKalaWindows,
   computeMadhyahna, computePratahSandhya, computeSayahnaSandhya,
 } from './core/muhurta';
 export { computeGowriPanchangam } from './core/gowri';
@@ -213,7 +213,7 @@ export type {
   HoraSlot, HoraInfo,
   GowriSlot, GowriInfo,
   SpecialYogaInfo, FestivalInfo,
-  BhadraInfo,
+  BhadraInfo, BhadraVasaSegment,
   // `DailyPanchangResult.eclipse`, and assignable from what
   // `getUpcomingSolarEclipse` / `getUpcomingLunarEclipse` / `getEclipseDuringDay`
   // return — those extra `*Local` fields are optional. 4.x exported the
@@ -221,7 +221,7 @@ export type {
   EclipseInfo, EclipseSubtype,
   GandaMulaInfo, PanchakaInfo, PanchakaType,
   AnandadiYogaInfo,
-  TimePeriod, UtcWindow, Unlocalized,
+  TimePeriod, UtcWindow, Unlocalized, DurMuhurtaPeriod,
   PanchangErrorCode,
   // Jyotish types
   GrahaName, GrahaPosition, PlanetaryPositions,

@@ -8,7 +8,7 @@
 
 import { describe, it, expect } from 'vitest';
 import {
-  scoreMuhurta, findAuspiciousDates, vivahRule,
+  scoreMuhurta, findAuspiciousDates, computeAuspiciousDatesInRange, vivahRule,
   shopOpeningRule, namakaranaRule, STOCK_MUHURTA_RULES,
 } from '../../src/index';
 import type { MuhurtaRule } from '../../src/muhurta/engine';
@@ -88,8 +88,16 @@ describe('scoreMuhurta — hard exclusions', () => {
 
     it("'penalize' subtracts 15 but leaves the day scorable", () => {
       const r = scoreMuhurta(bhadraDay, DELHI, { occasion: 't', bhadra: 'penalize' }, { timezone: TZ });
-      expect(r.score).toBe(35); // 50 neutral baseline − 15
+      // 50 neutral − 15 bhadra + 5 sarvartha_siddhi. The +5 appeared with
+      // the MU-1 fix (2026-08-14): scoreMuhurta stopped passing
+      // `computeEndTimes: false`, so the post-sunrise nakshatra window that
+      // makes 2026-04-01 a Sarvartha Siddhi day is visible — matching what
+      // computeAuspiciousDatesInRange always scored for this day (40).
+      expect(r.score).toBe(40);
       expect(r.factors).toContainEqual({ code: 'bhadra', axis: 'karana', delta: -15 });
+      expect(r.factors).toContainEqual(
+        expect.objectContaining({ code: 'sarvartha_siddhi', delta: 5 }),
+      );
     });
 
     it("'ignore' is the default — no bhadra factor at all", () => {
@@ -111,8 +119,10 @@ describe('scoreMuhurta — hard exclusions', () => {
         { occasion: 't', excludeBhadra: true, bhadra: 'penalize' },
         { timezone: TZ },
       );
-      expect(r.score).toBe(35);
-      expect(r.passes).toBe(false); // 35 < 50, but not a hard exclusion
+      // 40 = 50 − 15 bhadra + 5 sarvartha_siddhi (see the 'penalize' test
+      // above for the MU-1 trace).
+      expect(r.score).toBe(40);
+      expect(r.passes).toBe(false); // 40 < 50, but not a hard exclusion
       expect(r.factors).toContainEqual({ code: 'bhadra', axis: 'karana', delta: -15 });
     });
 
@@ -315,5 +325,51 @@ describe('Vivah rule — scoring sanity', () => {
     // one Ganda-Mula day.
     expect(passes.length).toBeGreaterThan(0);
     expect(fails.length).toBeGreaterThan(0);
+  });
+});
+
+describe('scoreMuhurta ≡ computeAuspiciousDatesInRange — single-day agreement (MU-1)', () => {
+  // Through 5.1 scoreMuhurta passed `computeEndTimes: false`, so vara ×
+  // nakshatra special yogas that begin post-sunrise (amrit_siddhi /
+  // sarvartha_siddhi +5, jwalamukhi −10) were scored by the range API but
+  // not by scoreMuhurta — same day, two answers. This sweep holds the two
+  // entry points to identical scores, pass flags and factor multisets over
+  // 66 days spread across seasons (2026-04-15 … 2027-06-15, one day per
+  // ~6.4-day stride), which the pre-fix code fails on every day whose
+  // special yoga opens after sunrise.
+  it('66 spread days: identical score, passes and factor multiset', () => {
+    const start = Date.UTC(2026, 3, 15, 12);
+    const strideMs = Math.round(6.4 * 86_400_000);
+    let checked = 0;
+    for (let i = 0; i < 66; i++) {
+      const d = new Date(start + i * strideMs);
+      const single = scoreMuhurta(d, DELHI, vivahRule, { timezone: TZ });
+      const [ranged] = computeAuspiciousDatesInRange(
+        vivahRule, d, d, DELHI, { timezone: TZ, includeFailures: true },
+      );
+      expect(ranged, `range API returned a row for ${d.toISOString()}`).toBeDefined();
+      expect(single.score, `score ${d.toISOString()}`).toBe(ranged!.score);
+      expect(single.passes, `passes ${d.toISOString()}`).toBe(ranged!.passes);
+      const multiset = (fs: { code: unknown; delta: number }[]) =>
+        fs.map((f) => `${String(f.code)}:${f.delta}`).sort();
+      expect(multiset(single.factors), `factors ${d.toISOString()}`)
+        .toEqual(multiset(ranged!.factors));
+      checked++;
+    }
+    expect(checked).toBe(66);
+  });
+
+  it('the MU-1 repro days converge at 60 (vivah, Delhi)', () => {
+    // 2027-05-04: amrit_siddhi + sarvartha_siddhi arrive with a post-sunrise
+    // nakshatra window; pre-fix scoreMuhurta said 50 while the range API and
+    // buildMuhurtaTable said 60. 2027-09-29: sarvartha_siddhi, 55 vs 60.
+    const may4 = scoreMuhurta(new Date(Date.UTC(2027, 4, 4, 12)), DELHI, vivahRule, { timezone: TZ });
+    expect(may4.score).toBe(60);
+    expect(may4.factors).toContainEqual(expect.objectContaining({ code: 'amrit_siddhi' }));
+    expect(may4.factors).toContainEqual(expect.objectContaining({ code: 'sarvartha_siddhi' }));
+
+    const sep29 = scoreMuhurta(new Date(Date.UTC(2027, 8, 29, 12)), DELHI, vivahRule, { timezone: TZ });
+    expect(sep29.score).toBe(60);
+    expect(sep29.factors).toContainEqual(expect.objectContaining({ code: 'sarvartha_siddhi' }));
   });
 });

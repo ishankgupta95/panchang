@@ -88,6 +88,24 @@ describe('convertHinduToGregorian — round-trip', () => {
     expect(sameDay).toBe(true);
   }, 60_000);
 
+  it('purnimanta Chaitra Krishna round-trips (the fortnight that wraps the VS year)', () => {
+    // Under purnimanta, Chaitra Krishna precedes the samvat increment, so its
+    // VS year is the OLD one and the date lies ~12 months after that year's
+    // Chaitra Shukla anchor. The reverse search used to anchor its window at
+    // the year's start and returned [] for exactly this fortnight.
+    const original = new Date(Date.UTC(2026, 2, 15, 12)); // 2026-03-15
+    const fwd = convertGregorianToHindu(original, DELHI, { timezone: TZ });
+    expect(fwd.masaIndex).toBe(0);
+    expect(fwd.paksha).toBe('krishna');
+    expect(fwd.vikramSamvat).toBe(2082);
+    const back = convertHinduToGregorian(
+      { vikramSamvat: fwd.vikramSamvat, masaIndex: fwd.masaIndex, paksha: fwd.paksha, pakshaTithi: fwd.pakshaTithi },
+      DELHI,
+      { timezone: TZ },
+    );
+    expect(back.some((d) => d.toISOString().slice(0, 10) === '2026-03-15')).toBe(true);
+  }, 60_000);
+
   it('throws on out-of-range pakshaTithi', () => {
     expect(() => convertHinduToGregorian(
       { vikramSamvat: 2083, masaIndex: 0, paksha: 'shukla', pakshaTithi: 16 },
@@ -105,25 +123,34 @@ describe('convertHinduToGregorian — round-trip', () => {
   });
 });
 
-describe('getKaliYugaYear', () => {
+describe('getKaliYugaYear (increments at Chaitra Shukla Pratipada — CV-1)', () => {
+  // Drik increments Kali at the luni-solar new year, keeping
+  // Kali − Vikram = 3044 year-round; the pre-fix Feb-18 epoch-anniversary
+  // convention mislabeled every date in [Feb 18, Chaitra Pratipada).
   it('CE 2000-01-01 = Kali Yuga 5100', () => {
-    // Anniversary is 18 Feb. Before Feb 18 in any year, KY is 1 lower.
-    // 2000-01-01: KY = 2000 - (-3101) - 1 = 5100.
     expect(getKaliYugaYear(new Date('2000-01-01'))).toBe(5100);
   });
 
-  it('CE 2000-03-01 = Kali Yuga 5101', () => {
-    // After Feb 18: KY = 2000 + 3101 = 5101.
-    expect(getKaliYugaYear(new Date('2000-03-01'))).toBe(5101);
+  it('CE 2000-03-01 = Kali Yuga 5100 (still before Chaitra 2000, ≈ Apr 5)', () => {
+    // Pre-fix this said 5101 (past Feb 18). Chaitra Pratipada 2000 fell in
+    // early April, so March 1 is still the old year.
+    expect(getKaliYugaYear(new Date('2000-03-01'))).toBe(5100);
   });
 
   it('CE 2026-04-01 = Kali Yuga 5127', () => {
     expect(getKaliYugaYear(new Date('2026-04-01'))).toBe(5127);
   });
 
-  it('handles dates around the 18-Feb epoch boundary', () => {
+  it('drik pins for 2026 (Chaitra Pratipada ≈ Mar 19-20)', () => {
+    expect(getKaliYugaYear(new Date('2026-01-01'))).toBe(5126);
+    expect(getKaliYugaYear(new Date('2026-03-01'))).toBe(5126); // drik day page
+    expect(getKaliYugaYear(new Date('2026-03-20'))).toBe(5127);
+    expect(getKaliYugaYear(new Date('2026-08-19'))).toBe(5127); // drik day page
+  });
+
+  it('the old Feb-18 boundary no longer flips the year', () => {
     expect(getKaliYugaYear(new Date('2026-02-17'))).toBe(5126);
-    expect(getKaliYugaYear(new Date('2026-02-18'))).toBe(5127);
+    expect(getKaliYugaYear(new Date('2026-02-18'))).toBe(5126);
   });
 });
 
@@ -134,6 +161,18 @@ describe('getHinduNewYear', () => {
     const month = d!.getUTCMonth();
     expect(month === 2 || month === 3).toBe(true); // March (2) or April (3)
   }, 30_000);
+
+  it('Adhika-Chaitra year (2029): returns the NIJA pratipada, not null', () => {
+    // 2029 inserts Adhika Chaitra before Nija Chaitra. The old detector
+    // tracked only the previous masa index, saw 0 (adhika) before 0 (nija),
+    // and returned null for the whole year. DrikPanchang places Ugadi and
+    // Gudi Padwa 2029 on April 14 — the nija Chaitra Shukla Pratipada —
+    // even though Vikram Samvat 2086 already begins at the adhika pratipada
+    // in March.
+    const d = getHinduNewYear(2029, 'all', DELHI, { timezone: TZ });
+    expect(d).not.toBeNull();
+    expect(d!.toISOString().slice(0, 10)).toBe('2029-04-14');
+  }, 60_000);
 
   it('Tamil Nadu: Mesha Sankranti in mid-April', () => {
     const d = getHinduNewYear(2026, 'tamil-nadu', DELHI, { timezone: TZ });

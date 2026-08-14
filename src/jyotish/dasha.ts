@@ -59,15 +59,16 @@ const MS_PER_YEAR = 365.25 * 24 * 3600 * 1000;
  * const birth = new Date('1990-06-15T10:30:00Z');
  * const moonLon = getSiderealMoonLongitude(birth, 'lahiri');
  * const dasha = computeVimshottariDasha(birth, moonLon);
- * dasha.startLord;                // e.g. "Venus"
- * dasha.mahadashas[0].lord;       // same as startLord
- * dasha.mahadashas[0].antardashas.length; // 9
+ * dasha.currentMahaDashaLord;
+ * dasha.mahaDashas[0].lord;
+ * dasha.mahaDashas[0].antarDashas.length; // 9
  * ```
  */
 export function computeVimshottariDasha(
   birthDate: Date,
   moonSiderealLon: number,
 ): VimshottariDashaResult {
+  validateDate(birthDate);
   const nakIdx = nakshatraOf(moonSiderealLon);
   const degInNak = moonSiderealLon - nakIdx * NAKSHATRA_SPAN;
   // Fraction of current nakshatra already elapsed at birth
@@ -251,19 +252,37 @@ export const ASHTOTTARI_YEARS: Record<string, number> = {
 const ASHTOTTARI_TOTAL_YEARS = 108;
 
 /**
- * Cumulative nakshatra-position boundaries for each Ashtottari lord, anchored
- * at Krittika = 0 (Krittika begins the Sun-period). Each lord's allocation is
- * proportional to its years: `27 × lord_years / 108`.
+ * Nakshatra indices (0 = Ashwini) allocated to each Ashtottari lord, in
+ * {@link ASHTOTTARI_ORDER} order — the classical GROUP allocation: each of
+ * the four malefics (Sun, Mars, Saturn, Rahu) rules four nakshatras, each
+ * benefic (Moon, Mercury, Jupiter, Venus) three, with Sun's group seeded at
+ * Ardra (the "Ardradi" reckoning).
+ *
+ * Sources (independent implementations, identical longitude spans):
+ * PyJHora `ashtottari.py` (`ashtottari_adhipathi_dict_seed`, seed star 6 =
+ * Ardra; 27-star form — Saturn: P.Ashadha, U.Ashadha, Shravana) and
+ * Maitreya 8 `AshtottariDasa.cpp` (28-star form counting Abhijit inside
+ * Saturn's group). The two differ only in whether Abhijit is *named*:
+ * Abhijit's arc lies wholly inside [P.Ashadha start, Shravana end], so
+ * Saturn's group covers the same 40° either way and lord-at-birth plus
+ * balance agree. Jyotish literature states the same structure ("all the
+ * malefics have been allocated four nakshatras each, the benefics three").
+ *
+ * The pre-audit implementation split the zodiac PROPORTIONALLY to each
+ * lord's years from a Krittika anchor (Sun's segment = 1.5 nakshatras from
+ * Krittika, etc.) — matching no consulted source; every lord-at-birth it
+ * produced outside Sun's first half-nakshatra was potentially wrong.
  */
-const ASHTOTTARI_CUMULATIVE: readonly number[] = (() => {
-  const out: number[] = [];
-  let cum = 0;
-  for (const lord of ASHTOTTARI_ORDER) {
-    cum += (ASHTOTTARI_YEARS[lord]! * 27) / ASHTOTTARI_TOTAL_YEARS;
-    out.push(cum);
-  }
-  return out;
-})();
+export const ASHTOTTARI_NAKSHATRA_GROUPS: readonly (readonly number[])[] = [
+  [5, 6, 7, 8],     // Sun     — Ardra, Punarvasu, Pushya, Ashlesha
+  [9, 10, 11],      // Moon    — Magha, P.Phalguni, U.Phalguni
+  [12, 13, 14, 15], // Mars    — Hasta, Chitra, Swati, Vishakha
+  [16, 17, 18],     // Mercury — Anuradha, Jyeshtha, Mula
+  [19, 20, 21],     // Saturn  — P.Ashadha, U.Ashadha, Shravana (incl. Abhijit's arc)
+  [22, 23, 24],     // Jupiter — Dhanishta, Shatabhisha, P.Bhadra
+  [25, 26, 0, 1],   // Rahu    — U.Bhadra, Revati, Ashwini, Bharani
+  [2, 3, 4],        // Venus   — Krittika, Rohini, Mrigashira
+];
 
 /**
  * Compute the complete Ashtottari Dasha sequence from the birth moment.
@@ -276,13 +295,16 @@ const ASHTOTTARI_CUMULATIVE: readonly number[] = (() => {
  * **Lord cycle (Satya Acharya):** Sun (6 y) → Moon (15) → Mars (8) → Mercury
  * (17) → Saturn (10) → Jupiter (19) → Rahu (12) → Venus (21).
  *
- * **Starting lord:** anchored at Krittika = Sun. The Moon's nakshatra
- * position relative to Krittika determines the active lord at birth and the
- * elapsed fraction of that lord's period.
+ * **Starting lord:** the Moon's birth nakshatra selects the lord via the
+ * classical group allocation {@link ASHTOTTARI_NAKSHATRA_GROUPS} (Ardradi:
+ * Sun's four nakshatras begin at Ardra; malefics rule four nakshatras each,
+ * benefics three). The elapsed fraction of the *group* fixes the balance:
+ * `balance = (1 − elapsedFractionOfGroup) × lord_years`.
  *
  * Antardashas inside each Mahadasha follow the same 8-lord cycle order
  * starting from the Mahadasha lord, with proportional split (`lord_years /
- * 108 × maha_duration`).
+ * 108 × maha_duration`) — PyJHora's default convention; Maitreya 8 runs
+ * Ashtottari bhuktis in the reverse direction, a variant not exposed here.
  *
  * @param birthDate       UTC birth time.
  * @param moonSiderealLon Sidereal longitude of the Moon at birth [0, 360).
@@ -303,21 +325,14 @@ export function computeAshtottariDasha(
   const nakIdx = nakshatraOf(moonSiderealLon);
   const degInNak = moonSiderealLon - nakIdx * NAKSHATRA_SPAN;
   const elapsedInNak = degInNak / NAKSHATRA_SPAN;
-  // Position from Krittika (index 2) along the 27-nakshatra cycle, 0..27.
-  const relPos = (((nakIdx - 2) + 27) % 27) + elapsedInNak;
 
-  // Find which lord segment relPos falls in.
-  let lordIdx = 0;
-  for (let i = 0; i < ASHTOTTARI_ORDER.length; i++) {
-    if (relPos < ASHTOTTARI_CUMULATIVE[i]!) {
-      lordIdx = i;
-      break;
-    }
-  }
+  // Classical group allocation: the birth nakshatra's group names the lord;
+  // the fraction of the group already traversed fixes the balance.
+  const lordIdx = ASHTOTTARI_NAKSHATRA_GROUPS.findIndex((g) => g.includes(nakIdx));
+  const group = ASHTOTTARI_NAKSHATRA_GROUPS[lordIdx]!;
   const startLord = ASHTOTTARI_ORDER[lordIdx]!;
-  const segStart = lordIdx === 0 ? 0 : ASHTOTTARI_CUMULATIVE[lordIdx - 1]!;
-  const segWidth = ASHTOTTARI_CUMULATIVE[lordIdx]! - segStart;
-  const elapsedInLord = (relPos - segStart) / segWidth; // 0..1
+  const posInGroup = group.indexOf(nakIdx);
+  const elapsedInLord = (posInGroup + elapsedInNak) / group.length; // 0..1
   const balanceMs = (1 - elapsedInLord) * ASHTOTTARI_YEARS[startLord]! * MS_PER_YEAR;
 
   const mahaDashas: MahaDasha[] = [];
@@ -434,9 +449,16 @@ export interface YoginiDashaResult {
  * Siddha → Sankata. Sources: Sanjay Rath, *Yogini Dashas* (1999); Charak,
  * *Predictive Astrology* (Ch. 18).
  *
- * **Starting Yogini:** indexed by the Moon's nakshatra at birth. Ashwini
- * (nakshatra 0) → Mangala (Yogini 0); the cycle then increments mod 8 with
- * each subsequent nakshatra.
+ * **Starting Yogini:** the classical Devi-Bhagavata formula — add 3 to the
+ * 1-based janma nakshatra number and take the remainder mod 8; remainder 1
+ * = Mangala, 2 = Pingala, …, 0 = Sankata. In 0-based terms:
+ * `startYoginiIdx = (nakIdx + 3) % 8`, so Ashwini → Bhramari, Pushya →
+ * Dhanya, Anuradha → Bhramari (the standard worked examples). Confirmed
+ * against vedicastro.com's Yogini primer (Anuradha, #17 → Bhramari) and
+ * PyJHora `yogini.py`, whose per-Yogini star lists ({6,14,22} → Mangala,
+ * {1,9,17,25} → Bhramari, …) are exactly this formula. The pre-audit code
+ * used `nakIdx % 8` (Ashwini → Mangala), which mis-assigned the starting
+ * Yogini for every birth — off by three positions in the cycle.
  *
  * Each Mahadasha is divided into 8 antardashas in the same 8-Yogini cycle
  * order starting from the Mahadasha Yogini, each antardasha spanning
@@ -463,7 +485,9 @@ export function computeYoginiDasha(
   const degInNak = moonSiderealLon - nakIdx * NAKSHATRA_SPAN;
   const elapsedFraction = degInNak / NAKSHATRA_SPAN;
 
-  const startYoginiIdx = nakIdx % 8;
+  // (1-based nakshatra + 3) mod 8, remainder 1 = Mangala … 0 = Sankata —
+  // which reduces to (nakIdx + 3) % 8 in 0-based index terms.
+  const startYoginiIdx = (nakIdx + 3) % 8;
   const startYogini = YOGINI_ORDER[startYoginiIdx]!;
   const startYears = YOGINI_YEARS[startYogini];
   const balanceMs = (1 - elapsedFraction) * startYears * MS_PER_YEAR;

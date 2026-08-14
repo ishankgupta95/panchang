@@ -13,9 +13,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { computeShadbala } from '../../src/jyotish/shadbala';
-import { computeRashiChart } from '../../src/jyotish/charts';
-import type { ShadbalaResult } from '../../src/types/jyotish';
+import { computeShadbala, _ojhaYugmaBalaForTest } from '../../src/jyotish/shadbala';
+import { computeRashiChart, computeNavamsa } from '../../src/jyotish/charts';
+import type { Divisional, DivisionalChart, GrahaName, ShadbalaResult } from '../../src/types/jyotish';
 
 /**
  * The seven grahas Shadbala is defined for. Not `GrahaName` — that union also
@@ -313,6 +313,31 @@ describe('computeShadbala — Sthana Bala sub-components (Phase 34e item 5)', ()
     const grahas: ShadbalaGraha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
     for (const g of grahas) {
       expect(r[g].sthana).toBeGreaterThanOrEqual(13.125);
+    }
+  });
+
+  it('Ojha-Yugma grouping: Mercury and Saturn gain in ODD signs, only Moon and Venus in even', () => {
+    // BPHS Ch.27 v18-19 (Santhanam), B.V. Raman "Graha and Bhava Balas",
+    // Saravali: Moon and Venus alone prefer even rashi/navamsa; Sun, Mars,
+    // Jupiter AND the neuters Mercury, Saturn all gain 15 V per odd
+    // placement. An earlier revision grouped Mercury/Saturn with the even
+    // gainers (from a mistranslated verse), flipping their 0↔30 V.
+    const chart = computeRashiChart(SAMPLE, DELHI);
+    const d9 = computeNavamsa(SAMPLE, DELHI);
+    const dc = { D9: d9 } as Record<Divisional, DivisionalChart>;
+    const parity = (g: GrahaName) => ({
+      d1Odd: chart.byPlanet[g].rashi.index % 2 === 0,
+      d9Odd: d9.planets.find((p) => p.planet === g)!.rashi.index % 2 === 0,
+    });
+    for (const g of ['Sun', 'Mars', 'Jupiter', 'Mercury', 'Saturn'] as GrahaName[]) {
+      const { d1Odd, d9Odd } = parity(g);
+      expect(_ojhaYugmaBalaForTest(g, chart, dc), g)
+        .toBe((d1Odd ? 15 : 0) + (d9Odd ? 15 : 0));
+    }
+    for (const g of ['Moon', 'Venus'] as GrahaName[]) {
+      const { d1Odd, d9Odd } = parity(g);
+      expect(_ojhaYugmaBalaForTest(g, chart, dc), g)
+        .toBe((d1Odd ? 0 : 15) + (d9Odd ? 0 : 15));
     }
   });
 

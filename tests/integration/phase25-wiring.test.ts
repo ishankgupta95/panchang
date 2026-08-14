@@ -41,11 +41,14 @@ describe('Phase 25 — muhurta wiring in getDailyPanchang', () => {
     expect(startHour === 23 || endHour === 0 || (startHour === 0 && endHour === 0)).toBe(true);
   });
 
-  it('amritKala is either null or a valid window within the Hindu day', () => {
-    if (r.muhurtas.amritKala) {
-      expect(r.muhurtas.amritKala.start.getTime()).toBeLessThan(r.muhurtas.amritKala.end.getTime());
-      expect(r.muhurtas.amritKala.start.getTime()).toBeGreaterThanOrEqual(r.sun.rise.getTime() - 1000);
-      expect(r.muhurtas.amritKala.end.getTime()).toBeLessThanOrEqual(r.sun.nextRise.getTime() + 1000);
+  it('amritKala windows are ordered and START inside the Hindu day', () => {
+    // v5.2: TimePeriod[] on the varjyam architecture — a window's START is
+    // attributed to the Hindu day; its end may run past next sunrise.
+    expect(r.muhurtas.amritKala.length).toBeLessThanOrEqual(2);
+    for (const w of r.muhurtas.amritKala) {
+      expect(w.start.getTime()).toBeLessThan(w.end.getTime());
+      expect(w.start.getTime()).toBeGreaterThanOrEqual(r.sun.rise.getTime() - 1000);
+      expect(w.start.getTime()).toBeLessThan(r.sun.nextRise.getTime());
     }
   });
 });

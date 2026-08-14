@@ -29,15 +29,29 @@ export interface YearlyListingOptions {
 
 /** A festival emission with its calendar date. */
 export interface FestivalDay {
-  /** UTC sunrise of the day on which the festival was emitted. */
+  /**
+   * The request instant for the emission day, echoed from
+   * `DailyPanchangResult.date`. `computeFestivalsForYear` iterates **local
+   * midnights**, so for positive-offset zones this instant falls on the
+   * *previous* UTC date — render it in the request timezone (`formatInZone`)
+   * to recover the calendar day; `toISOString().slice(0, 10)` is off by one
+   * for any zone east of Greenwich. (This was long documented as "UTC sunrise",
+   * which it has never been.)
+   */
   date: Date;
   festival: FestivalInfo;
 }
 
 /** A solar transit (Sankranti) marker. */
 export interface SankrantiEvent {
-  /** Date of the Sankranti (the day containing the transit). */
+  /**
+   * Civil day the Sankranti is observed on. A transit during daylight
+   * (sunrise→sunset) carries its own day; a transit between sunset and the
+   * next sunrise belongs to the NEXT sunrise's day (drik's rule).
+   */
   date: Date;
+  /** Exact UTC instant of the transit (±1 s). */
+  moment: Date;
   /** Rashi the Sun transitioned INTO (0..11). */
   rashi: number;
   /** Localized rashi name. */
@@ -45,10 +59,22 @@ export interface SankrantiEvent {
 }
 
 /**
- * Collect all Ekadashi dates in a Gregorian year for the given location.
- * Ekadashi falls twice per lunar month (Shukla and Krishna), so the result
- * has roughly 24 entries per year (occasionally 25 in adhika-masa years
- * because the extra month adds two more Ekadashis).
+ * Collect the Smarta Ekadashi fast dates in a Gregorian year for the given
+ * location. Ekadashi falls twice per lunar month (Shukla and Krishna), so the
+ * result has roughly 24 entries per year (25–26 in adhika-masa years).
+ *
+ * Three tithi geometries decide the day, all read off consecutive sunrises:
+ * - **Normal**: Ekadashi prevails at exactly one sunrise → that day.
+ * - **Kshaya**: the tithi falls wholly between two sunrises (sunrise tithi
+ *   jumps Dashami → Dwadashi) → the day the tithi begins. A pure
+ *   sunrise-prevalence scan emits nothing here, which silently dropped
+ *   Devutthana Ekadashi 2026 (drik: Nov 20).
+ * - **Vriddha**: Ekadashi prevails at two consecutive sunrises → the second
+ *   day only (a Mahadwadashi; drik lists no fast on the first day).
+ *
+ * The rare arunodaya (Dashami-viddha) deferral is NOT applied here — this is
+ * a cheap scan; use the festival engine (`computeFestivalsForYear`, type
+ * `smarta_ekadashi`) when exact viddha handling matters.
  *
  * @param year     Gregorian year.
  * @param location Observer coordinates.
@@ -89,7 +115,10 @@ export function computeEkadashiDatesForYear(
   // days it used to drop (measured: Tromsø 2024 goes from 16 dates to 17).
   // Keeping the triplet makes the rewrite bit-identical — verified across
   // 7 locations × 4 years, including Tromsø, Reykjavík and Anchorage.
-  for (let t = start.getTime(); t <= end.getTime(); t += dayMs) {
+  // One day of lookahead past Dec 31: the kshaya and vriddha rules both read
+  // the NEXT day's sunrise tithi, so each day is judged one iteration later.
+  const days: Array<{ d: Date; tithi: number }> = [];
+  for (let t = start.getTime(); t <= end.getTime() + dayMs; t += dayMs) {
     const d = new Date(t);
     let sunriseUtc: Date;
     try {
@@ -103,7 +132,41 @@ export function computeEkadashiDatesForYear(
       getSiderealMoonLongitude(sunriseUtc, ayanamsa),
       getSiderealSunLongitude(sunriseUtc, ayanamsa),
     );
-    if (tithiIndex === 10 || tithiIndex === 25) out.push(d);
+    days.push({ d, tithi: tithiIndex });
+  }
+
+  for (let i = 0; i < days.length; i++) {
+    const { d, tithi } = days[i]!;
+    if (d.getTime() > end.getTime()) break; // the lookahead day itself
+    // Polar no-sunrise days leave gaps; the lookahead rules only make sense
+    // against the immediately following sunrise, so a gap reads as "unknown"
+    // (vriddha cannot be diagnosed → emit; kshaya cannot be diagnosed → skip).
+    const nextEntry = days[i + 1];
+    const next = nextEntry !== undefined && nextEntry.d.getTime() - d.getTime() === dayMs
+      ? nextEntry.tithi
+      : undefined;
+    const isEkadashi = tithi === 10 || tithi === 25;
+    // Vriddha: skip the first of two consecutive Ekadashi sunrises.
+    if (isEkadashi && next !== tithi) {
+      // Kshaya-DWADASHI (Trisprisha): the next sunrise is already Trayodashi,
+      // so the following Dwadashi contains no sunrise and there is no valid
+      // parana morning within it — the fast advances one day, to the day the
+      // Ekadashi tithi begins (drik: Pausha Putrada 2027 = Jan 18, parana
+      // Jan 19 within the pre-sunrise remainder of Dwadashi).
+      if ((next === 12 || next === 27) && i > 0) {
+        const prevEntry = days[i - 1]!;
+        if (d.getTime() - prevEntry.d.getTime() === dayMs) {
+          out.push(prevEntry.d);
+          continue;
+        }
+      }
+      out.push(d);
+      continue;
+    }
+    // Kshaya EKADASHI: Dashami at this sunrise, Dwadashi at the next — the
+    // Ekadashi between them touches neither; the fast is on its begin day
+    // (today).
+    if ((tithi === 9 && next === 11) || (tithi === 24 && next === 26)) out.push(d);
   }
   return out;
 }
@@ -162,36 +225,39 @@ export function computeSankrantisForYear(
 
     // Which calendar day the Sankranti belongs to.
     //
-    // The Hindu day runs sunrise → next sunrise, and Sankranti is observed on
-    // the day *containing* the transit — the same rule `computeDayFestivals`
-    // applies, which is the one verified against DrikPanchang. Reporting the
-    // local date of that day's sunrise keeps the two APIs in agreement.
-    //
-    // This function previously sampled the Sun at 00:00 **UTC** each day and
-    // reported the first sample already in the new rashi. For any eastern
-    // timezone that samples mid-morning local time (05:30 IST), so a transit
-    // later in the day was pushed to the following date — Makara Sankranti
-    // 2025 came out as Jan 15 while `getDailyPanchang` emitted
-    // `makar_sankranti` on Jan 14, matching Drik.
-    let dayStart: Date;
+    // Drik's rule (2026-08-14 audit, verified on the full 2027 table): a
+    // transit during daylight [sunrise, sunset] is observed on that civil
+    // day; a transit between sunset and the next sunrise is observed on the
+    // NEXT sunrise's civil day — 2027 Makara (Jan 14 21:14 IST → Jan 15),
+    // Tula (Oct 18 02:12 → Oct 18) and Vrishchika (Nov 17 02:02 → Nov 17)
+    // are the night transits that discriminate it. An earlier revision
+    // attributed the whole Hindu day (sunrise → next sunrise) to the sunrise
+    // date, which mis-dated every post-sunset transit by one day. (Earlier
+    // still, sampling at 00:00 UTC mis-dated afternoon transits for eastern
+    // timezones — Makara 2025 came out Jan 15 against drik's Jan 14.)
+    let anchor: Date;
     try {
-      dayStart = computeSunrise(new Date(hi - 30 * 3600_000), location);
+      let dayStart = computeSunrise(new Date(hi - 30 * 3600_000), location);
       for (let i = 0; i < 3; i++) {
         const next = computeSunrise(computeSunset(dayStart, location), location);
         if (next.getTime() <= hi) dayStart = next; else break;
       }
+      const dayEnd = computeSunset(dayStart, location);
+      anchor = hi <= dayEnd.getTime()
+        ? dayStart                          // daylight transit → its own day
+        : computeSunrise(dayEnd, location); // night transit → next sunrise's day
     } catch {
       // Polar day/night: no sunrise to anchor to, so fall back to the local
       // calendar date of the transit itself rather than dropping the event.
-      dayStart = transitUtc;
+      anchor = transitUtc;
     }
 
-    const local = utcToLocalDisplay(dayStart, offset);
+    const local = utcToLocalDisplay(anchor, offset);
     const date = new Date(Date.UTC(
       local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate(),
     ));
     if (local.getUTCFullYear() === year) {
-      out.push({ date, rashi, rashiName: resolveMasaName(rashi, lang) });
+      out.push({ date, moment: transitUtc, rashi, rashiName: resolveMasaName(rashi, lang) });
     }
 
     prevMs = t;

@@ -1,53 +1,64 @@
-import type { UtcWindow } from '../types/elements';
+import type { DurMuhurtaPeriod, Unlocalized } from '../types/elements';
+
+/** A Dur Muhurta window as the core module emits it (no local strings yet). */
+export type DurMuhurtaWindow = Unlocalized<DurMuhurtaPeriod>;
 
 /**
- * Dur Muhurta (inauspicious muhurta) positions per Vara.
+ * Dur Muhurta (inauspicious muhurta) ordinals per Vara.
  *
- * Each entry is a pair of 0-based muhurta indices within the 15 daytime
- * muhurtas (sunrise to sunset divided into 15 equal parts, each ~48 min).
+ * Classical Muhurta-Chintamani table, as printed by DrikPanchang — verified
+ * against 58 consecutive drik day-pages across Jaipur and Kolkata with zero
+ * exceptions (2026-08-14 audit). Ordinals are 0-based: a `day` ordinal counts
+ * within the 15 equal muhurtas from sunrise to sunset, a `night` ordinal
+ * within the 15 equal muhurtas from sunset to the next sunrise.
  *
- * Source: traditional Muhurta Chintamani / Drik Panchang tables.
+ * Most weekdays carry one or two day windows; Tuesday alone adds a night
+ * window (its 7th night muhurta), and Sunday and Wednesday carry a single
+ * window only.
  */
-const DUR_MUHURTA_INDICES: readonly (readonly [number, number])[] = [
-  [7, 13],  // Sunday
-  [3, 10],  // Monday
-  [5, 14],  // Tuesday
-  [2, 11],  // Wednesday
-  [6, 12],  // Thursday
-  [4, 9],   // Friday
-  [1, 8],   // Saturday
+const DUR_MUHURTA_ORDINALS: readonly (readonly {
+  readonly ordinal: number;
+  readonly segment: 'day' | 'night';
+}[])[] = [
+  [{ ordinal: 13, segment: 'day' }],                                        // Sunday
+  [{ ordinal: 8, segment: 'day' }, { ordinal: 11, segment: 'day' }],        // Monday
+  [{ ordinal: 3, segment: 'day' }, { ordinal: 6, segment: 'night' }],       // Tuesday
+  [{ ordinal: 7, segment: 'day' }],                                         // Wednesday
+  [{ ordinal: 5, segment: 'day' }, { ordinal: 11, segment: 'day' }],        // Thursday
+  [{ ordinal: 3, segment: 'day' }, { ordinal: 8, segment: 'day' }],         // Friday
+  [{ ordinal: 0, segment: 'day' }, { ordinal: 1, segment: 'day' }],         // Saturday
 ];
 
 /**
- * Compute the two Dur Muhurta (inauspicious) windows for a given day.
+ * Compute the Dur Muhurta (inauspicious) windows for a given day.
  *
- * Divides the daytime (sunrise→sunset) into 15 equal muhurtas (~48 min each)
- * and returns the two inauspicious windows based on the Vara.
+ * Divides the daytime (sunrise→sunset) and the nighttime (sunset→nextSunrise)
+ * into 15 equal muhurtas each and returns the windows the Vara marks as
+ * inauspicious — one or two per weekday, where Tuesday's second window falls
+ * at night.
  *
- * @param sunrise   UTC sunrise Date.
- * @param sunset    UTC sunset Date.
- * @param varaIndex 0 = Sunday … 6 = Saturday.
- * @returns         Exactly two UtcWindow entries.
+ * @param sunrise     UTC sunrise Date.
+ * @param sunset      UTC sunset Date.
+ * @param nextSunrise UTC next-day sunrise Date (anchors night ordinals).
+ * @param varaIndex   0 = Sunday … 6 = Saturday.
+ * @returns           1–2 windows in start order, each tagged `day` or `night`.
  */
 export function computeDurMuhurta(
   sunrise: Date,
   sunset: Date,
+  nextSunrise: Date,
   varaIndex: number,
-): [UtcWindow, UtcWindow] {
-  const dayMs = sunset.getTime() - sunrise.getTime();
-  const muhurtaMs = dayMs / 15;
-  const sunriseMs = sunrise.getTime();
+): DurMuhurtaWindow[] {
+  const dayMuhurtaMs = (sunset.getTime() - sunrise.getTime()) / 15;
+  const nightMuhurtaMs = (nextSunrise.getTime() - sunset.getTime()) / 15;
 
-  const [idx1, idx2] = DUR_MUHURTA_INDICES[varaIndex]!;
-
-  return [
-    {
-      start: new Date(sunriseMs + idx1 * muhurtaMs),
-      end: new Date(sunriseMs + (idx1 + 1) * muhurtaMs),
-    },
-    {
-      start: new Date(sunriseMs + idx2 * muhurtaMs),
-      end: new Date(sunriseMs + (idx2 + 1) * muhurtaMs),
-    },
-  ];
+  return DUR_MUHURTA_ORDINALS[varaIndex]!.map(({ ordinal, segment }) => {
+    const baseMs = segment === 'day' ? sunrise.getTime() : sunset.getTime();
+    const muhurtaMs = segment === 'day' ? dayMuhurtaMs : nightMuhurtaMs;
+    return {
+      start: new Date(baseMs + ordinal * muhurtaMs),
+      end: new Date(baseMs + (ordinal + 1) * muhurtaMs),
+      segment,
+    };
+  });
 }

@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { computeVarjyam } from '../../src/core/varjyam';
+import { computeVarjyam, computeVarjyamWindows } from '../../src/core/varjyam';
 import {
   VARJYAM_OFFSET_GHATIKAS,
   NAKSHATRA_SPAN,
@@ -101,20 +101,26 @@ describe('computeVarjyam — synthetic Moon (deterministic offsets, 24-min ghati
       .toBeLessThan(60_000);
   });
 
-  // Mula (18): offset 56 ghatikas = 22:24. With nakshatra starting at sunrise,
-  // the window lands at +22:24 → +24:00 (clipped naturally by nakshatra end).
-  it('Mula starting at sunrise → window 22:24 to 24:00 after sunrise', () => {
+  // Mula (18) is the dual-spell nakshatra: elapsed ghatikas 20 AND 56
+  // (VARJYAM_SECOND_OFFSET_GHATIKAS). With the nakshatra starting at sunrise
+  // both spells lie in the day: [+8:00, +9:36] and [+22:24, +24:00]. The
+  // single-window primitive reports the EARLIEST; the windows API reports both.
+  it('Mula starting at sunrise → dual spells 8:00–9:36 and 22:24–24:00 after sunrise', () => {
     const sunrise = new Date('2025-06-01T00:00:00Z');
     const nextSunrise = new Date(sunrise.getTime() + 24 * 3600_000);
     const moon = syntheticMoon(sunrise, 18);
 
-    const window = computeVarjyam(18, sunrise, nextSunrise, moon);
-    expect(window).not.toBeNull();
-    if (!window) return;
+    const first = computeVarjyam(18, sunrise, nextSunrise, moon);
+    expect(first).not.toBeNull();
+    const spell20StartMs = sunrise.getTime() + 20 * 24 * 60_000; // 8:00 after sunrise
+    expect(Math.abs(first!.start.getTime() - spell20StartMs)).toBeLessThan(60_000);
 
-    const expectedStartMs = sunrise.getTime() + 56 * 24 * 60_000; // 22:24 after sunrise
-    expect(Math.abs(window.start.getTime() - expectedStartMs)).toBeLessThan(60_000);
-    expect(Math.abs(window.end.getTime() - nextSunrise.getTime())).toBeLessThan(60_000);
+    const windows = computeVarjyamWindows(sunrise, nextSunrise, moon);
+    expect(windows.length).toBe(2);
+    const spell56StartMs = sunrise.getTime() + 56 * 24 * 60_000; // 22:24 after sunrise
+    expect(Math.abs(windows[0]!.start.getTime() - spell20StartMs)).toBeLessThan(60_000);
+    expect(Math.abs(windows[1]!.start.getTime() - spell56StartMs)).toBeLessThan(60_000);
+    expect(Math.abs(windows[1]!.end.getTime() - nextSunrise.getTime())).toBeLessThan(60_000);
   });
 
   it('window length is 96 min for every nakshatra under 24h-per-nakshatra synthetic Moon', () => {
@@ -153,6 +159,68 @@ describe('computeVarjyam — synthetic Moon (deterministic offsets, 24-min ghati
   });
 });
 
+describe('computeVarjyamWindows — synthetic Moon (multi-window walk)', () => {
+  // 27-day synthetic period → every nakshatra spans exactly 24 h, 1 elastic
+  // ghatika = 24 min. All offsets below are in those round units.
+
+  it('transition day yields BOTH windows, in start order', () => {
+    // Ashwini (offset 50 g = 20 h) starting 12 h before sunrise:
+    //   window 1 = [+8:00, +9:36] after sunrise.
+    // Bharani (offset 24 g = 9.6 h) starts +12 h:
+    //   window 2 = [+21:36, +23:12] after sunrise.
+    const sunrise = new Date('2025-06-01T00:00:00Z');
+    const nextSunrise = new Date(sunrise.getTime() + 24 * 3600_000);
+    const moon = syntheticMoon(new Date(sunrise.getTime() - 12 * 3600_000), 0);
+
+    const windows = computeVarjyamWindows(sunrise, nextSunrise, moon);
+    expect(windows.length).toBe(2);
+
+    const w1StartMs = sunrise.getTime() + 8 * 3600_000;
+    const w2StartMs = sunrise.getTime() + 21.6 * 3600_000;
+    expect(Math.abs(windows[0]!.start.getTime() - w1StartMs)).toBeLessThan(60_000);
+    expect(Math.abs(windows[1]!.start.getTime() - w2StartMs)).toBeLessThan(60_000);
+    for (const w of windows) {
+      expect(Math.abs((w.end.getTime() - w.start.getTime()) - 96 * 60_000))
+        .toBeLessThan(60_000);
+    }
+
+    // The single-window primitive reports only the sunrise nakshatra's window.
+    const single = computeVarjyam(0, sunrise, nextSunrise, moon);
+    expect(single).not.toBeNull();
+    expect(Math.abs(single!.start.getTime() - w1StartMs)).toBeLessThan(60_000);
+  });
+
+  it('recovers the successor window the single-window contract dropped', () => {
+    // Vishakha (offset 14 g = 5.6 h) started 20 h before sunrise: its window
+    // ended ~14 h before sunrise → computeVarjyam returns null. Anuradha
+    // (offset 10 g = 4 h) begins +4 h, so its window [+8:00, +9:36] falls
+    // inside the day — the multi-window walk must find it.
+    const sunrise = new Date('2025-06-01T00:00:00Z');
+    const nextSunrise = new Date(sunrise.getTime() + 24 * 3600_000);
+    const moon = syntheticMoon(new Date(sunrise.getTime() - 20 * 3600_000), 15);
+
+    expect(computeVarjyam(15, sunrise, nextSunrise, moon)).toBeNull();
+
+    const windows = computeVarjyamWindows(sunrise, nextSunrise, moon);
+    expect(windows.length).toBe(1);
+    const expectedStartMs = sunrise.getTime() + 8 * 3600_000;
+    expect(Math.abs(windows[0]!.start.getTime() - expectedStartMs)).toBeLessThan(60_000);
+  });
+
+  it('returns [] when no window of any spanning nakshatra starts within the day', () => {
+    // Revati (offset 30 g = 12 h) started 19.5 h before sunrise: its window
+    // ended ~5.9 h before sunrise. Ashwini (offset 50 g = 20 h) begins
+    // +4.5 h: its window starts +24.5 h — past next sunrise. The walk then
+    // stops (next nakshatra begins ≥ day end), so the day has no Varjyam.
+    const sunrise = new Date('2025-06-01T00:00:00Z');
+    const nextSunrise = new Date(sunrise.getTime() + 24 * 3600_000);
+    const moon = syntheticMoon(new Date(sunrise.getTime() - 19.5 * 3600_000), 26);
+
+    const windows = computeVarjyamWindows(sunrise, nextSunrise, moon);
+    expect(windows).toEqual([]);
+  });
+});
+
 describe('VARJYAM_OFFSET_GHATIKAS table sanity', () => {
   it('has exactly 27 entries', () => {
     expect(VARJYAM_OFFSET_GHATIKAS.length).toBe(27);
@@ -179,33 +247,30 @@ describe('VARJYAM_OFFSET_GHATIKAS table sanity', () => {
 });
 
 describe('VARJYAM_OFFSET_GHATIKAS vs AMRIT_KALA_OFFSET_GHATIKAS — cross-table pin', () => {
-  // The two tables are NOT redundant — they anchor on different reference
-  // points (nakshatra start vs sunrise) and their ghatikas are elastic to
-  // different reference durations (nakshatra duration vs ahoratra). They
-  // share most values by classical-source coincidence but disagree at
-  // exactly three indices: Rohini (3), Mula (18), Revati (26). This test
-  // pins the divergence so an accidental copy from one table to the other
-  // fails immediately.
+  // Since the 2026-08-14 audit both tables share the SAME architecture —
+  // offset from the nakshatra's start, in nakshatra-elastic ghatikas — but
+  // carry independent drik-derived values (tyajya vs amrita windows). The
+  // wholesale pin below keeps an accidental copy from one table to the
+  // other from shipping silently.
 
   it('both tables have 27 entries', () => {
     expect(VARJYAM_OFFSET_GHATIKAS.length).toBe(27);
     expect(AMRIT_KALA_OFFSET_GHATIKAS.length).toBe(27);
   });
 
-  it('tables disagree at exactly indices 3, 18, 26', () => {
-    const disagreements: number[] = [];
-    for (let i = 0; i < 27; i++) {
-      if (VARJYAM_OFFSET_GHATIKAS[i] !== AMRIT_KALA_OFFSET_GHATIKAS[i]) {
-        disagreements.push(i);
-      }
-    }
-    expect(disagreements).toEqual([3, 18, 26]);
+  it('AMRIT_KALA_OFFSET_GHATIKAS matches the drik-recovered table verbatim', () => {
+    // 54 drik windows, 2 cities, all 27 nakshatras, spread ≤0.1 ghati
+    // (2026-08-14 audit). ProKerala's Telugu panchangam independently
+    // confirms the architecture and most values, but implies Mula ≈ 45 and
+    // U.Bhadrapada ≈ 47.5 — drik (44 / 48) is the project's parity bar.
+    expect([...AMRIT_KALA_OFFSET_GHATIKAS]).toEqual([
+      42, 48, 54, 52, 38, 35, 54, 44, 56, 54, 44, 42, 45, 44,
+      38, 38, 34, 38, 44, 48, 44, 34, 34, 42, 40, 48, 54,
+    ]);
   });
 
-  it('AMRIT_KALA values at the three divergent indices', () => {
-    expect(AMRIT_KALA_OFFSET_GHATIKAS[3]).toBe(26);   // Rohini
-    expect(AMRIT_KALA_OFFSET_GHATIKAS[18]).toBe(20);  // Mula
-    expect(AMRIT_KALA_OFFSET_GHATIKAS[26]).toBe(20);  // Revati
+  it('the tables are genuinely different (no wholesale cross-copy)', () => {
+    expect([...AMRIT_KALA_OFFSET_GHATIKAS]).not.toEqual([...VARJYAM_OFFSET_GHATIKAS]);
   });
 });
 

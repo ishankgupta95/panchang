@@ -71,12 +71,12 @@ export const KARANA_SEARCH_HOURS = 18;
 // guides that derive from Muhurta-chintamani Ch. 4 and BPHS Ch. 71.
 //
 // NOTE — the Amrit-Kala offset table in `src/core/muhurta.ts`
-// (`AMRIT_KALA_OFFSET_GHATIKAS`) is structurally similar but anchors on
-// SUNRISE rather than nakshatra start, and its ghatikas are elastic to the
-// AHORATRA (sunrise → nextSunrise), not to the nakshatra. The two arrays
-// disagree at indices 3 (Rohini), 18 (Mula), and 26 (Revati); the regression
-// test in `tests/unit/varjyam.test.ts` pins the divergence so a stray
-// cross-table copy fails loudly.
+// (`AMRIT_KALA_OFFSET_GHATIKAS`) shares this table's architecture exactly
+// (offset from the nakshatra's start, nakshatra-elastic ghatikas, 4-ghatika
+// width — established by the 2026-08-14 audit) but carries independent
+// drik-derived offsets for the auspicious Amrita window. The wholesale pin
+// in `tests/unit/varjyam.test.ts` keeps a stray cross-table copy from
+// shipping.
 export const VARJYAM_OFFSET_GHATIKAS: readonly number[] = [
   50, // 0  Ashwini           — Tyajya 51–54
   24, // 1  Bharani           — Tyajya 25–28
@@ -106,6 +106,21 @@ export const VARJYAM_OFFSET_GHATIKAS: readonly number[] = [
   24, // 25 Uttara Bhadrapada — Tyajya 25–28
   30, // 26 Revati            — Tyajya 31–34
 ];
+
+// Second tyajya spell for the nakshatras that carry TWO Varjyam windows.
+//
+// Only Mula. Empirically mapped from DrikPanchang's daily engine over two
+// full nakshatra cycles (Aug 1 – Sep 30 2026, Ujjain): every drik-printed
+// Varjyam window attributes to its nakshatra's single tabulated offset above
+// EXCEPT Mula, which drik prints at BOTH 20 and 56 elapsed ghatikas (on
+// 2026-09-19 both spells land in one Hindu day and drik prints the pair).
+// ProKerala's Telugu panchangam independently prints the same two windows
+// for that day. The two values are each classically attested: B.V. Raman's
+// "Muhurta" tyajya list gives Moola = 20; the 57–60 (= 56 elapsed) spell is
+// the one in the main table above (drik tutorial + Telugu/Tamil tables).
+export const VARJYAM_SECOND_OFFSET_GHATIKAS: Readonly<Record<number, number>> = {
+  18: 20, // Mula — first spell 21–24, second 57–60 (main table)
+};
 
 // ── Anandadi Yoga (Vara × Nakshatra) ────────────────────
 //

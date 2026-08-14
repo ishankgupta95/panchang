@@ -174,10 +174,11 @@ const UCHCHA_DEG: Record<Exclude<GrahaName, 'Rahu' | 'Ketu'>, number> = {
  * library uses the lower bound for ambiguous cases (15 V for friend,
  * 3.75 V for enemy) — see notes/phase34e-shadbala-research.md §2.1.
  *
- * Ojha-Yugma Bala: per BPHS Ch.27 verse 18-19. Masculine grahas
- * (Sun, Mars, Jupiter) get +15 V each for odd Rashi (D1) and odd
- * Navamsa (D9). Feminine + eunuch (Moon, Mercury, Venus, Saturn)
- * get +15 V for even Rashi and even Navamsa. Max 30 V per graha.
+ * Ojha-Yugma Bala: per BPHS Ch.27 verse 18-19. Sun, Mars, Jupiter,
+ * Mercury and Saturn get +15 V each for odd Rashi (D1) and odd
+ * Navamsa (D9); Moon and Venus get +15 V for even Rashi and even
+ * Navamsa. Max 30 V per graha. (Note the split differs from the
+ * Drekkana gender triple below — see `OJHA_ODD_GAINERS`.)
  *
  * Drekkana Bala: per BPHS Ch.27 verse 20. Male grahas (Sun, Mars,
  * Jupiter) get +15 V in the 1st decanate (0-10°); Eunuch (Mercury,
@@ -244,8 +245,18 @@ function saptavargajaBala(
   return total;
 }
 
-const OJHA_MASCULINE: ReadonlySet<GrahaName> = new Set(['Sun', 'Mars', 'Jupiter']);
-const OJHA_FEMININE: ReadonlySet<GrahaName> = new Set(['Moon', 'Mercury', 'Venus', 'Saturn']);
+/**
+ * Ojha-Yugma groups. The split is NOT the Drekkana gender triple: only the
+ * two female grahas (Moon, Venus) prefer even signs — Sun, Mars, Jupiter
+ * AND the two neuters Mercury, Saturn all gain in odd signs. BPHS Ch.27
+ * v18–19 (Santhanam), B.V. Raman "Graha and Bhava Balas", Saravali's and
+ * PJC's Sthana Bala expositions all agree. An earlier revision grouped
+ * Mercury and Saturn with the even-sign gainers on the strength of a
+ * mistranslated verse quoted in notes/phase34e-shadbala-research.md §2.2,
+ * flipping their contribution (0 ↔ 30 V) whenever D1 and D9 parities agreed.
+ */
+const OJHA_ODD_GAINERS: ReadonlySet<GrahaName> = new Set(['Sun', 'Mars', 'Jupiter', 'Mercury', 'Saturn']);
+const OJHA_EVEN_GAINERS: ReadonlySet<GrahaName> = new Set(['Moon', 'Venus']);
 
 function ojhaYugmaBala(
   graha: GrahaName,
@@ -260,10 +271,10 @@ function ojhaYugmaBala(
   const d1Odd = (d1Rashi % 2) === 0;
   const d9Odd = (d9Rashi % 2) === 0;
   let total = 0;
-  if (OJHA_MASCULINE.has(graha)) {
+  if (OJHA_ODD_GAINERS.has(graha)) {
     if (d1Odd) total += 15;
     if (d9Odd) total += 15;
-  } else if (OJHA_FEMININE.has(graha)) {
+  } else if (OJHA_EVEN_GAINERS.has(graha)) {
     if (!d1Odd) total += 15;
     if (!d9Odd) total += 15;
   }
@@ -652,3 +663,9 @@ export function computeBhavaBala(
  * @internal
  */
 export const _BHAVA_DIK_VALUES_FOR_TEST = BHAVA_DIK_VALUES;
+
+/**
+ * @internal Exposed so the Ojha-Yugma grouping (Mercury/Saturn are ODD-sign
+ * gainers, not even — see `OJHA_ODD_GAINERS`) stays locked by a direct test.
+ */
+export const _ojhaYugmaBalaForTest = ojhaYugmaBala;

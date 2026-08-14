@@ -105,7 +105,11 @@ describe('computeAyanamsa', () => {
       ['true-chitra', -0.0006],
       ['krishnamurti', -0.079605],
       ['thirukanitham', +0.018456],
-      ['raman', -1.392722],
+      // Measured against SwissEph SIDM_RAMAN (the eMagazine's engine) on
+      // 2026-08-13 — no longer a carried-forward traditional offset; see
+      // AYANAMSA_OFFSET_FROM_LAHIRI.raman and the tier-1 validation test
+      // in tests/validation/raman-ayanamsa-sweph.test.ts.
+      ['raman', -1.453010],
     ];
     for (const [system, offset] of OFFSETS) {
       expect(

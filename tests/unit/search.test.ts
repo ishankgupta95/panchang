@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { findTransitionTime, findDailyElements, STANDARD_PRECISION } from '../../src/utils/search';
+import { findTransitionTime, findStartTime, findDailyElements, STANDARD_PRECISION } from '../../src/utils/search';
 
 describe('findTransitionTime', () => {
   it('finds the moment a step function changes', () => {
@@ -24,6 +24,36 @@ describe('findTransitionTime', () => {
   });
 });
 
+describe('findStartTime', () => {
+  // Linear angle at 0.5°/h with a 12° span → 24 h per element. Index 6 begins
+  // when the angle reaches 72°; place that boundary 2 h before `fromUtc`, so
+  // the −36 h probe lands in index 4 — *two* elements back. A sunrise element
+  // that began recently always looks like this (a ~13 h karana puts the probe
+  // three or four back), and the regression here is returning the raw window
+  // edge for it instead of the boundary.
+  const fromUtc = new Date('2026-08-15T00:30:00Z');
+  const boundaryAt = fromUtc.getTime() - 2 * 3600_000;
+  const RATE = 0.5 / 3600_000; // deg per ms
+  const angleAt = (d: Date) => 72 + (d.getTime() - boundaryAt) * RATE;
+  const getIndex = (d: Date) => Math.floor((((angleAt(d) % 360) + 360) % 360) / 12);
+
+  it('finds a boundary whose window-edge probe is two elements back (secant path)', () => {
+    expect(getIndex(new Date(fromUtc.getTime() - 36 * 3600_000))).toBe(4);
+    const start = findStartTime(fromUtc, 6, getIndex, 36, 15, 30_000, { angleAt, spanDeg: 12 });
+    expect(Math.abs(start.getTime() - boundaryAt)).toBeLessThan(1000);
+  });
+
+  it('finds the same boundary on the bisection fallback', () => {
+    const start = findStartTime(fromUtc, 6, getIndex);
+    expect(Math.abs(start.getTime() - boundaryAt)).toBeLessThan(31_000);
+  });
+
+  it('saturates to the window edge only when the element is older than the window', () => {
+    const start = findStartTime(fromUtc, 6, () => 6);
+    expect(start.getTime()).toBe(fromUtc.getTime() - 36 * 3600_000);
+  });
+});
+
 describe('findDailyElements', () => {
   it('collects a single element when no transition before nextSunrise', () => {
     const sunrise = new Date('2025-01-14T01:00:00Z');
@@ -38,7 +68,7 @@ describe('findDailyElements', () => {
     const results = findDailyElements(
       sunrise, nextSunrise, elementAtSunrise,
       getIndexAtTime, computeElement,
-      30, 36, STANDARD_PRECISION, 2,
+      36, STANDARD_PRECISION, 2,
     );
 
     expect(results).toHaveLength(1);
@@ -67,7 +97,7 @@ describe('findDailyElements', () => {
     const results = findDailyElements(
       sunrise, nextSunrise, elementAtSunrise,
       getIndexAtTime, computeElement,
-      30, 36, STANDARD_PRECISION, 2,
+      36, STANDARD_PRECISION, 2,
     );
 
     expect(results).toHaveLength(2);
@@ -101,7 +131,7 @@ describe('findDailyElements', () => {
     const results = findDailyElements(
       sunrise, nextSunrise, elementAtSunrise,
       getIndexAtTime, computeElement,
-      30, 6, STANDARD_PRECISION, 3, // maxPerDay = 3
+      6, STANDARD_PRECISION, 3, // maxPerDay = 3
     );
 
     expect(results.length).toBeLessThanOrEqual(3);

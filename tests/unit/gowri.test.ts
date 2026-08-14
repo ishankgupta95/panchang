@@ -86,53 +86,55 @@ describe('computeGowriPanchangam', () => {
     });
   });
 
-  describe('starting index by vara', () => {
-    // Day start indices: [6, 5, 4, 3, 2, 1, 0] for Sun..Sat
-    const dayStartIndices = [6, 5, 4, 3, 2, 1, 0];
-    // Night start indices: [2, 1, 0, 7, 6, 5, 4] for Sun..Sat
-    const nightStartIndices = [2, 1, 0, 7, 6, 5, 4];
+  describe('full weekday grid matches the drik-published Pambu table', () => {
+    // Transcribed from DrikPanchang's Gowri Panchangam (Chennai) and verified
+    // to reproduce identically across two separate weeks (2026-08-13…19 and
+    // 2026-08-22…28) — the grid is keyed only on weekday. Drik-name mapping:
+    // Uthi→Udyog, Amirdha→Amrit, Rogam→Roga, Laabam→Laabh, Sugam→Shubh,
+    // Visham→Kaal, Dhanam→Dhan, Soram→Chal.
+    const DAY_GRID = [
+      ['Udyog', 'Amrit', 'Roga', 'Laabh', 'Dhan', 'Shubh', 'Chal', 'Kaal'],   // Sun
+      ['Amrit', 'Kaal', 'Roga', 'Laabh', 'Dhan', 'Shubh', 'Chal', 'Udyog'],   // Mon
+      ['Roga', 'Laabh', 'Dhan', 'Shubh', 'Chal', 'Udyog', 'Kaal', 'Amrit'],   // Tue
+      ['Laabh', 'Dhan', 'Shubh', 'Chal', 'Kaal', 'Udyog', 'Amrit', 'Roga'],   // Wed
+      ['Dhan', 'Shubh', 'Chal', 'Udyog', 'Amrit', 'Kaal', 'Roga', 'Laabh'],   // Thu
+      ['Shubh', 'Chal', 'Udyog', 'Kaal', 'Amrit', 'Roga', 'Laabh', 'Dhan'],   // Fri
+      ['Chal', 'Udyog', 'Kaal', 'Amrit', 'Roga', 'Laabh', 'Dhan', 'Shubh'],   // Sat
+    ];
+    const NIGHT_GRID = [
+      ['Dhan', 'Shubh', 'Chal', 'Kaal', 'Udyog', 'Amrit', 'Roga', 'Laabh'],   // Sun
+      ['Shubh', 'Chal', 'Udyog', 'Amrit', 'Kaal', 'Roga', 'Laabh', 'Dhan'],   // Mon
+      ['Chal', 'Udyog', 'Kaal', 'Amrit', 'Roga', 'Laabh', 'Dhan', 'Shubh'],   // Tue
+      ['Udyog', 'Amrit', 'Roga', 'Laabh', 'Dhan', 'Shubh', 'Chal', 'Kaal'],   // Wed
+      ['Amrit', 'Kaal', 'Roga', 'Laabh', 'Dhan', 'Shubh', 'Chal', 'Udyog'],   // Thu
+      ['Roga', 'Laabh', 'Dhan', 'Shubh', 'Chal', 'Udyog', 'Kaal', 'Amrit'],   // Fri
+      // Saturday night carries Chal twice and no Roga — the columns are NOT
+      // permutations, which is why a rotation model cannot express this table.
+      ['Laabh', 'Dhan', 'Shubh', 'Chal', 'Udyog', 'Kaal', 'Amrit', 'Chal'],   // Sat
+    ];
+    const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     for (let vara = 0; vara < 7; vara++) {
-      it(`Sunday (vara=${vara}): first day slot index = ${dayStartIndices[vara]}`, () => {
+      it(`${WEEKDAYS[vara]}: day + night slot names match the drik grid`, () => {
         const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, vara, nameFn, qualityNameFn);
-        expect(g.day[0]!.index).toBe(dayStartIndices[vara]);
-      });
-
-      it(`Sunday (vara=${vara}): first night slot index = ${nightStartIndices[vara]}`, () => {
-        const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, vara, nameFn, qualityNameFn);
-        expect(g.night[0]!.index).toBe(nightStartIndices[vara]);
+        expect(g.day.map((s) => s.name)).toEqual(DAY_GRID[vara]);
+        expect(g.night.map((s) => s.name)).toEqual(NIGHT_GRID[vara]);
       });
     }
   });
 
-  describe('slot index advances +1 mod 8', () => {
-    it('day slots follow mod-8 cycle from starting index', () => {
-      // Sunday: day start index = 6
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn, qualityNameFn);
-      for (let i = 0; i < 8; i++) {
-        expect(g.day[i]!.index).toBe((6 + i) % 8);
-      }
-    });
-
-    it('night slots follow mod-8 cycle from starting index', () => {
-      // Sunday: night start index = 2
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 0, nameFn, qualityNameFn);
-      for (let i = 0; i < 8; i++) {
-        expect(g.night[i]!.index).toBe((2 + i) % 8);
-      }
-    });
-  });
-
   describe('quality mapping', () => {
+    // Drik/Pambu split: 5 auspicious (Uthi/Udyog, Amirdha, Laabam, Sugam,
+    // Dhanam), 3 inauspicious (Rogam, Visham/Kaal, Soram/Chal), no neutrals.
     const QUALITY_MAP: Record<number, string> = {
-      0: 'neutral',      // Udyog
-      1: 'auspicious',   // Amrit
-      2: 'inauspicious', // Roga
-      3: 'auspicious',   // Laabh
-      4: 'auspicious',   // Shubh
-      5: 'inauspicious', // Kaal
-      6: 'auspicious',   // Dhan
-      7: 'neutral',      // Chal
+      0: 'auspicious',   // Udyog  (Uthi — Good)
+      1: 'auspicious',   // Amrit  (Amirdha — Best)
+      2: 'inauspicious', // Roga   (Rogam — Evil)
+      3: 'auspicious',   // Laabh  (Laabam — Gain)
+      4: 'auspicious',   // Shubh  (Sugam — Good)
+      5: 'inauspicious', // Kaal   (Visham — Bad)
+      6: 'auspicious',   // Dhan   (Dhanam — Wealth)
+      7: 'inauspicious', // Chal   (Soram — Bad)
     };
 
     it('day slots have correct quality for their index', () => {
@@ -156,21 +158,6 @@ describe('computeGowriPanchangam', () => {
       for (const slot of [...g.day, ...g.night]) {
         expect(slot.name).toBe(nameFn(slot.index));
       }
-    });
-  });
-
-  describe('Saturday (varaIndex=6)', () => {
-    // Day start index = 0 (Udyog), Night start index = 4 (Shubh)
-    it('Saturday day starts at index 0 (Udyog)', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 6, nameFn, qualityNameFn);
-      expect(g.day[0]!.index).toBe(0);
-      expect(g.day[0]!.name).toBe('Udyog');
-    });
-
-    it('Saturday night starts at index 4 (Shubh)', () => {
-      const g = computeGowriPanchangam(sunrise, sunset, nextSunrise, 6, nameFn, qualityNameFn);
-      expect(g.night[0]!.index).toBe(4);
-      expect(g.night[0]!.name).toBe('Shubh');
     });
   });
 });

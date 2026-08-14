@@ -16,16 +16,22 @@
  */
 
 /**
- * The five Rajju (rope) groups, classed by where on the bride's body the
- * rope-knot is said to fall. Same-Rajju matches are classically considered
- * a strong veto — repetition of the same rajju is held to threaten the
- * husband's longevity.
+ * The five Rajju (rope) groups, classed by where on the body the rope-knot
+ * is said to fall. Same-Rajju matches are classically considered a strong
+ * veto — repetition of the same rajju is held to threaten the husband's
+ * longevity.
  *
- * Convention used: the standard Tamil Pathu-Porutham 5-band classification
- * (Pada / Kati / Nabhi / Kantha / Sira), arranged so that Ashwini begins
- * the cycle at the head (Sira) and the body bands repeat thrice through
- * the 27 nakshatras with mirrored ascending/descending directions. See
- * AstroVed and ProKerala references.
+ * The ladder starts at the FEET: Ashwini is Pada, the bands climb
+ * Pada → Kati → Nabhi → Kantha to the single-nakshatra peak Sira at
+ * Mrigashira, then mirror back down to Pada at Ashlesha; the 9-nakshatra
+ * half-cycle (Pada, Kati, Nabhi, Kantha, Sira, Kantha, Nabhi, Kati, Pada)
+ * repeats three times. That yields the canonical groups every published
+ * table agrees on — Pada: Ashwini, Ashlesha, Magha, Jyeshtha, Mula,
+ * Revati; Sira: Mrigashira, Chitra, Dhanishtha ONLY (AstroVed Rajju
+ * Porutham, ProKerala, Hindu-Blog Rajju Kootta, all fetched 2026-08-13).
+ * An earlier revision ran the ladder upside-down (Ashwini at Sira), which
+ * is not a relabeling: the peak-vs-valley doubling differs, so same-rajju
+ * verdicts flipped for pairs like Mrigashira–Ardra and Rohini–Ardra.
  *
  * Some Telugu / Malayali traditions use slightly different groupings;
  * those regional variants are not modelled here (PLAN.md "Out of scope
@@ -34,33 +40,33 @@
 export type Rajju = 'Pada' | 'Kati' | 'Nabhi' | 'Kantha' | 'Sira';
 
 export const NAKSHATRA_RAJJU: readonly Rajju[] = [
-  'Sira',   // 0  Ashwini
-  'Kantha', // 1  Bharani
+  'Pada',   // 0  Ashwini
+  'Kati',   // 1  Bharani
   'Nabhi',  // 2  Krittika
-  'Kati',   // 3  Rohini
-  'Pada',   // 4  Mrigashira
-  'Pada',   // 5  Ardra
-  'Kati',   // 6  Punarvasu
-  'Nabhi',  // 7  Pushya
-  'Kantha', // 8  Ashlesha
-  'Sira',   // 9  Magha
-  'Kantha', // 10 P. Phalguni
+  'Kantha', // 3  Rohini
+  'Sira',   // 4  Mrigashira
+  'Kantha', // 5  Ardra
+  'Nabhi',  // 6  Punarvasu
+  'Kati',   // 7  Pushya
+  'Pada',   // 8  Ashlesha
+  'Pada',   // 9  Magha
+  'Kati',   // 10 P. Phalguni
   'Nabhi',  // 11 U. Phalguni
-  'Kati',   // 12 Hasta
-  'Pada',   // 13 Chitra
-  'Pada',   // 14 Swati
-  'Kati',   // 15 Vishakha
-  'Nabhi',  // 16 Anuradha
-  'Kantha', // 17 Jyeshtha
-  'Sira',   // 18 Mula
-  'Kantha', // 19 P. Ashadha
+  'Kantha', // 12 Hasta
+  'Sira',   // 13 Chitra
+  'Kantha', // 14 Swati
+  'Nabhi',  // 15 Vishakha
+  'Kati',   // 16 Anuradha
+  'Pada',   // 17 Jyeshtha
+  'Pada',   // 18 Mula
+  'Kati',   // 19 P. Ashadha
   'Nabhi',  // 20 U. Ashadha
-  'Kati',   // 21 Shravana
-  'Pada',   // 22 Dhanishtha
-  'Pada',   // 23 Shatabhisha
-  'Kati',   // 24 P. Bhadrapada
-  'Nabhi',  // 25 U. Bhadrapada
-  'Kantha', // 26 Revati
+  'Kantha', // 21 Shravana
+  'Sira',   // 22 Dhanishtha
+  'Kantha', // 23 Shatabhisha
+  'Nabhi',  // 24 P. Bhadrapada
+  'Kati',   // 25 U. Bhadrapada
+  'Pada',   // 26 Revati
 ];
 
 /**
@@ -68,10 +74,14 @@ export const NAKSHATRA_RAJJU: readonly Rajju[] = [
  * the zodiac. Same-vedha matches are considered a strong veto in Tamil
  * tradition.
  *
- * Source: *Jathaka Tatva* / AstroVed Vedha Porutham table — 13 mutually
- * exclusive nakshatra pairs covering 26 of the 27 nakshatras (Hasta is
- * sometimes paired with Revati; classical sources differ — we follow the
- * AstroVed enumeration which leaves one nakshatra unpaired in practice).
+ * The canonical published table (13 pairs; verified 2026-08-13 against
+ * two independent porutham references — the "10 Porutham" compatibility
+ * guide and PriestServices' star-matching table, agreeing with Jataka
+ * Parijata's enumeration). **Chitra (13) is the one nakshatra with no
+ * Vedha partner.** An earlier revision used a tidy mirror-symmetric
+ * enumeration (pairs summing to 17 / 44, Dhanishtha unpaired) that
+ * matched the real table on only its first four rows — the classical
+ * list is not symmetric.
  *
  * The table is unordered — `vedhaOf(a)` returns whichever nakshatra is
  * on the other side of the pair, or null if `a` has no Vedha partner.
@@ -81,16 +91,16 @@ export const VEDHA_PAIRS: readonly (readonly [number, number])[] = [
   [1, 16],  // Bharani ↔ Anuradha
   [2, 15],  // Krittika ↔ Vishakha
   [3, 14],  // Rohini ↔ Swati
-  [4, 13],  // Mrigashira ↔ Chitra
-  [5, 12],  // Ardra ↔ Hasta
-  [6, 11],  // Punarvasu ↔ U. Phalguni
-  [7, 10],  // Pushya ↔ P. Phalguni
-  [8, 9],   // Ashlesha ↔ Magha
-  [18, 26], // Mula ↔ Revati
-  [19, 25], // P. Ashadha ↔ U. Bhadrapada
-  [20, 24], // U. Ashadha ↔ P. Bhadrapada
-  [21, 23], // Shravana ↔ Shatabhisha
-  // Dhanishtha (22) intentionally unpaired in the AstroVed enumeration.
+  [4, 22],  // Mrigashira ↔ Dhanishtha
+  [5, 21],  // Ardra ↔ Shravana
+  [6, 20],  // Punarvasu ↔ U. Ashadha
+  [7, 19],  // Pushya ↔ P. Ashadha
+  [8, 18],  // Ashlesha ↔ Mula
+  [9, 26],  // Magha ↔ Revati
+  [10, 25], // P. Phalguni ↔ U. Bhadrapada
+  [11, 24], // U. Phalguni ↔ P. Bhadrapada
+  [12, 23], // Hasta ↔ Shatabhisha
+  // Chitra (13) has no Vedha partner in the canonical table.
 ];
 
 /**
@@ -106,9 +116,12 @@ export function vedhaOf(nakIdx: number): number | null {
 }
 
 /**
- * Auspicious Mahendra distances — 1-indexed nakshatra distance from the
- * boy's nakshatra to the girl's, mod 27. Per AstroVed Mahendra Porutham:
- * favorable distances are 4, 7, 10, 13, 16, 19, 22, and 25.
+ * Auspicious Mahendra distances — 1-indexed nakshatra distance counted
+ * from the GIRL's nakshatra to the boy's (the classical direction, and
+ * the one `scoreMahendra` implements). Per AstroVed Mahendra Porutham:
+ * favorable distances are 4, 7, 10, 13, 16, 19, 22, and 25. The set is
+ * closed under d → 29 − d, so the verdict happens to be
+ * direction-independent.
  */
 export const MAHENDRA_AUSPICIOUS_DISTANCES: readonly number[] = [
   4, 7, 10, 13, 16, 19, 22, 25,

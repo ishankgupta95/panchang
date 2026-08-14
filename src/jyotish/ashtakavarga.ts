@@ -53,7 +53,7 @@ import type {
  *   { latitude: 28.6139, longitude: 77.2090 },
  * );
  * const av = computeAshtakavarga(chart);
- * av.sarvashtaka;             // 12 cells, 0..56 each, sum = 336
+ * av.sarvashtaka;             // 12 cells, 0..56 each, sum = 337
  * av.bhinnashtaka.Jupiter;    // Jupiter's 12-cell grid, sum = 56
  *
  * const withReductions = computeAshtakavarga(chart, { reductions: true });
@@ -171,27 +171,21 @@ function applyReductions(
 
 /**
  * Trikona Sodhana — within each elemental triad of rashis 4 houses apart,
- * reduce all three cells in the receiver's grid by their minimum. If any
- * one cell in the triad was already 0, all three become 0. Equivalent
- * formulation: the reduced cell value is `cell - min(triad)` if no cell
- * is zero, else 0.
+ * reduce all three cells in the receiver's grid by their minimum. When any
+ * cell in the triad is already 0 the minimum is 0 and NOTHING is reduced —
+ * this IS PVR's Rule 1 ("if a rashi has no bindus, no reduction in the
+ * triad") and matches Maitreya 8's plain subtract-the-min. An earlier
+ * revision zeroed the whole triad in that case, which no reference does
+ * (AV-1, 2026-08-14 audit; repro: (0,3,5) → refs keep (0,3,5), ours gave
+ * (0,0,0)).
  */
 function applyTrikonaSodhana(grid: BhinnashtakaGrid): BhinnashtakaGrid {
   const out = grid.slice();
   for (const triad of TRIKONA_TRIADS) {
-    const a = out[triad[0]]!;
-    const b = out[triad[1]]!;
-    const c = out[triad[2]]!;
-    if (a === 0 || b === 0 || c === 0) {
-      out[triad[0]] = 0;
-      out[triad[1]] = 0;
-      out[triad[2]] = 0;
-    } else {
-      const m = Math.min(a, b, c);
-      out[triad[0]] = a - m;
-      out[triad[1]] = b - m;
-      out[triad[2]] = c - m;
-    }
+    const m = Math.min(out[triad[0]]!, out[triad[1]]!, out[triad[2]]!);
+    out[triad[0]]! -= m;
+    out[triad[1]]! -= m;
+    out[triad[2]]! -= m;
   }
   return out;
 }
@@ -199,19 +193,22 @@ function applyTrikonaSodhana(grid: BhinnashtakaGrid): BhinnashtakaGrid {
 /**
  * Ekadhipatya Sodhana — within each pair of rashis sharing a single
  * graha-lord, reduce based on which rashi is occupied (by a graha
- * Sun..Saturn) in the natal chart:
+ * Sun..Saturn) in the natal chart. The PVR Narasimha Rao / PyJHora form
+ * (which reproduces PVR's published Chart 7 pindas; Maitreya 8 differs
+ * only in the one-occupied sub-case, where it subtracts instead of
+ * replacing — no recension blanket-zeroes):
  *
- *   - Both rashis occupied: no change.
- *   - Both rashis vacant: zero out the lower-value cell; if the values
- *     are equal, zero both.
- *   - One occupied, one vacant: zero the vacant cell if its value is
- *     ≥ the occupied cell; if its value is < the occupied cell, zero
- *     out only the vacant cell anyway (the unoccupied rashi cannot
- *     "hold" bindus when its lord-pair sibling has a planet).
+ *   1. Either cell already 0: skip the pair.
+ *   2. Both rashis occupied: skip.
+ *   3. Exactly one occupied: if the vacant cell ≤ the occupied cell,
+ *      the vacant cell becomes 0; if greater, it is reduced TO the
+ *      occupied cell's value.
+ *   4. Both vacant: unequal → BOTH become the minimum; equal → both 0.
  *
- * The "vacant cell zeroed" rule is the most-cited Santhanam BPHS Ch. 67
- * formulation. Cancer (lord Moon) and Leo (lord Sun) are excluded —
- * they have unique rulers.
+ * An earlier revision zeroed the vacant/lower cell in every non-skip case
+ * (AV-2, 2026-08-14 audit — 7 of PVR Chart 7's 84 cells wrong, Mercury's
+ * reduced row summing 7 against the published 12). Cancer (lord Moon) and
+ * Leo (lord Sun) are excluded from the pairs — they have unique rulers.
  */
 function applyEkadhipatyaSodhana(
   grid: BhinnashtakaGrid,
@@ -222,23 +219,29 @@ function applyEkadhipatyaSodhana(
     const [a, b] = pair;
     const aOcc = occupied.has(a);
     const bOcc = occupied.has(b);
-    const aVal = out[a]!;
-    const bVal = out[b]!;
 
-    if (aOcc && bOcc) {
-      // Both occupied — no reduction.
-      continue;
-    }
+    // Rule 1: a zero cell ends the pair's reduction.
+    if (out[a]! === 0 || out[b]! === 0) continue;
+    // Rule 2: both occupied — no reduction.
+    if (aOcc && bOcc) continue;
+
     if (!aOcc && !bOcc) {
-      // Both vacant — zero the lower cell; zero both if equal.
-      if (aVal < bVal) out[a] = 0;
-      else if (bVal < aVal) out[b] = 0;
-      else { out[a] = 0; out[b] = 0; }
+      // Rule 4: both vacant — unequal → both take the minimum; equal → both 0.
+      if (out[a]! !== out[b]!) {
+        const m = Math.min(out[a]!, out[b]!);
+        out[a] = m;
+        out[b] = m;
+      } else {
+        out[a] = 0;
+        out[b] = 0;
+      }
       continue;
     }
-    // Exactly one occupied — zero the vacant cell.
-    if (!aOcc) out[a] = 0;
-    else out[b] = 0;
+
+    // Rule 3: exactly one occupied.
+    const occIdx = aOcc ? a : b;
+    const vacIdx = aOcc ? b : a;
+    out[vacIdx] = out[vacIdx]! <= out[occIdx]! ? 0 : out[occIdx]!;
   }
   return out;
 }

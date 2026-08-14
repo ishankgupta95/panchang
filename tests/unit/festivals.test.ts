@@ -11,11 +11,14 @@ const rashiResolver = (idx: number) => `Rashi ${idx}`;
 const DESCRIPTION_TEMPLATES_EN: Record<string, string> = {
   desc_purnimanta_krishna_paksha: 'Purnimanta: {masa} Krishna Paksha',
   desc_bhadra_observe_after: 'Observe after Bhadra ends at {time}',
-  desc_ekadashi_deferred_to_dwadashi: '{name} — deferred to Dwadashi (Dashami-viddha)',
-  desc_ekadashi_viddha_smarta_next:
-    'Dashami-viddha: Smarta fast observed next day (Dwadashi); Vaishnava fast today.',
-  desc_ekadashi_viddha_smarta_today:
-    'Dashami-viddha Ekadashi: Smarta fast observed today (Dwadashi).',
+  desc_ekadashi_viddha_vaishnava_next:
+    'Dashami-viddha: Smarta fast observed today; Vaishnava fast next day (Dwadashi).',
+  desc_ekadashi_viddha_vaishnava_today:
+    'Dashami-viddha Ekadashi: Vaishnava fast observed today (Dwadashi).',
+  desc_ekadashi_vriddha_dwadashi_next:
+    'Vriddha Dwadashi: Smarta fast observed today; Vaishnava fast next day (Dwadashi).',
+  desc_ekadashi_vriddha_dwadashi_vaishnava:
+    'Vriddha Dwadashi: Vaishnava fast observed today; the Smarta fast was yesterday.',
 };
 const enDescResolver = (key: string): string =>
   DESCRIPTION_TEMPLATES_EN[key] ?? key;
@@ -216,25 +219,35 @@ describe('computeFestivals', () => {
       expect(r.some(f => f.type === 'ekadashi')).toBe(true);
     });
 
-    it('on viddha day: Vaishnava today, Smarta deferred to Dwadashi', () => {
+    it('on viddha day: Smarta today, Vaishnava deferred to Dwadashi', () => {
+      // Drik prints the unqualified (Smarta) name on the viddha day and
+      // "Vaishnava <name>" the day after — see the 5 pairs pinned in
+      // tests/validation/ekadashi-2026-drik.test.ts.
       const r = computeFestivals(
         ctx({ tithiIndex: 10, ekadashiDashamiViddha: true }),
         enDescResolver,
       );
-      const smarta = r.find(f => f.type === 'smarta_ekadashi');
-      const vaishnava = r.find(f => f.type === 'vaishnava_ekadashi');
-      expect(vaishnava).toBeDefined();
-      expect(smarta).toBeDefined();
-      expect(smarta!.description).toMatch(/deferred/);
-    });
-
-    it('emits Smarta Ekadashi on Dwadashi day when yesterday was viddha', () => {
-      const r = computeFestivals(
-        ctx({ tithiIndex: 11, smartaDwadashiToday: true }),
-        resolver,
-      );
       expect(r.some(f => f.type === 'smarta_ekadashi')).toBe(true);
       expect(r.some(f => f.type === 'vaishnava_ekadashi')).toBe(false);
+      expect(r.find(f => f.type === 'ekadashi')!.description).toMatch(/Vaishnava fast next day/);
+    });
+
+    it('emits Vaishnava Ekadashi on Dwadashi day when yesterday was viddha', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 11, vaishnavaDwadashiToday: true }),
+        resolver,
+      );
+      expect(r.some(f => f.type === 'vaishnava_ekadashi')).toBe(true);
+      expect(r.some(f => f.type === 'smarta_ekadashi')).toBe(false);
+    });
+
+    it('emits Vaishnava Ekadashi on the first day of a vriddha Dwadashi', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 11, ekadashiVriddhaDwadashiToday: true }),
+        resolver,
+      );
+      expect(r.some(f => f.type === 'vaishnava_ekadashi')).toBe(true);
+      expect(r.some(f => f.type === 'smarta_ekadashi')).toBe(false);
     });
   });
 
@@ -498,14 +511,24 @@ describe('computeFestivals', () => {
       expect(names).toContain('ayyappa_makara_jyothi');
     });
 
-    it('emits Baisakhi + Vishu + Puthandu + Pohela Boishakh + Bohag Bihu on Mesha (rashi 0)', () => {
+    it('emits Puthandu + Bohag Bihu on the Mesha transit day (rashi 0)', () => {
+      // Only the two traditions that share drik's Sankranti observance day.
       const r = computeFestivals(ctx({ sankrantiRashi: 0 }), resolver, rashiResolver);
       const names = r.map(f => f.name);
-      expect(names).toContain('baisakhi');
-      expect(names).toContain('vishu');
       expect(names).toContain('puthandu');
-      expect(names).toContain('pohela_boishakh');
       expect(names).toContain('bohag_bihu');
+      // The other three key off the transit MOMENT and can land on other days.
+      expect(names).not.toContain('baisakhi');
+      expect(names).not.toContain('vishu');
+      expect(names).not.toContain('pohela_boishakh');
+    });
+
+    it('emits Baisakhi / Vishu / Pohela Boishakh from their own day flags', () => {
+      const names = (c: Partial<FestivalComputeContext>) =>
+        computeFestivals(ctx(c), resolver, rashiResolver).map(f => f.name);
+      expect(names({ vaisakhiToday: true })).toContain('baisakhi');
+      expect(names({ vishuToday: true })).toContain('vishu');
+      expect(names({ pohelaBoishakhToday: true })).toContain('pohela_boishakh');
     });
 
     it('emits Dakshinayana on Karka (rashi 3) regardless of region', () => {
@@ -524,7 +547,9 @@ describe('computeFestivals', () => {
     });
 
     it('region=kerala picks Vishu on Mesha and Ayyappa on Makara', () => {
-      const mesha = computeFestivals(ctx({ sankrantiRashi: 0, region: 'kerala' }), resolver, rashiResolver);
+      // Vishu no longer rides the Sankranti day: it keys off the first sunrise
+      // at or after the transit, which is a day later for a daylight transit.
+      const mesha = computeFestivals(ctx({ vishuToday: true, region: 'kerala' }), resolver, rashiResolver);
       expect(mesha.some(f => f.name === 'vishu')).toBe(true);
       expect(mesha.some(f => f.name === 'baisakhi')).toBe(false);
 
@@ -928,7 +953,7 @@ describe('computeFestivals', () => {
       { region: 'karnataka',        ctx: ctx({ tithiIndex: 14, chandraMasaIndex: 0, region: 'karnataka' }),          expectKey: 'karaga' },
       { region: 'andhra-pradesh',   ctx: ctx({ chandraMasaIndex: 4, varaIndex: 5, tithiIndex: 12, region: 'andhra-pradesh' }), expectKey: 'varamahalakshmi' },
       { region: 'telangana',        ctx: ctx({ chandraMasaIndex: 3, varaIndex: 0, region: 'telangana' }),            expectKey: 'bonalu' },
-      { region: 'west-bengal',      ctx: ctx({ sankrantiRashi: 0, region: 'west-bengal' }),                          expectKey: 'pohela_boishakh' },
+      { region: 'west-bengal',      ctx: ctx({ pohelaBoishakhToday: true, region: 'west-bengal' }),                  expectKey: 'pohela_boishakh' },
       { region: 'odisha',           ctx: ctx({ sankrantiRashi: 3, region: 'odisha' }),                               expectKey: 'raja_sankranti' },
       { region: 'assam',            ctx: ctx({ sankrantiRashi: 0, region: 'assam' }),                                expectKey: 'bohag_bihu' },
       { region: 'bihar',            ctx: ctx({ tithiIndex: 1, chandraMasaIndex: 7, region: 'bihar' }),               expectKey: 'bhai_dooj' },
@@ -937,7 +962,7 @@ describe('computeFestivals', () => {
       { region: 'maharashtra',      ctx: ctx({ tithiIndex: 0, chandraMasaIndex: 0, region: 'maharashtra' }),         expectKey: 'gudi_padwa' },
       { region: 'goa',              ctx: ctx({ tithiIndex: 0, chandraMasaIndex: 0, region: 'goa' }),                 expectKey: 'gudi_padwa' },
       { region: 'rajasthan',        ctx: ctx({ tithiIndex: 2, chandraMasaIndex: 0, region: 'rajasthan' }),           expectKey: 'gangaur' },
-      { region: 'punjab',           ctx: ctx({ sankrantiRashi: 0, region: 'punjab' }),                               expectKey: 'baisakhi' },
+      { region: 'punjab',           ctx: ctx({ vaisakhiToday: true, region: 'punjab' }),                             expectKey: 'baisakhi' },
       { region: 'haryana',          ctx: ctx({ nextDaySankrantiRashi: 9, region: 'haryana' }),                       expectKey: 'lohri' },
       { region: 'himachal-pradesh', ctx: ctx({ sankrantiRashi: 5, region: 'himachal-pradesh' }),                     expectKey: 'sair' },
       { region: 'uttarakhand',      ctx: ctx({ sankrantiRashi: 3, region: 'uttarakhand' }),                          expectKey: 'harela' },

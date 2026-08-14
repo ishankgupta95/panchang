@@ -375,13 +375,25 @@ describe('Vasya Porutham', () => {
 });
 
 describe('Rajju Porutham (veto on same group)', () => {
+  // Canonical groups (AstroVed / ProKerala / Hindu-Blog): Pada = Ashwini,
+  // Ashlesha, Magha, Jyeshtha, Mula, Revati; Sira = Mrigashira, Chitra,
+  // Dhanishtha only. An earlier table ran the ladder upside-down (Ashwini
+  // at Sira) and these tests pinned that inversion.
+  it('canonical group spot-checks', () => {
+    expect(NAKSHATRA_RAJJU[0]).toBe('Pada');    // Ashwini — the feet
+    expect(NAKSHATRA_RAJJU[8]).toBe('Pada');    // Ashlesha
+    expect(NAKSHATRA_RAJJU[4]).toBe('Sira');    // Mrigashira — the peak
+    expect(NAKSHATRA_RAJJU[13]).toBe('Sira');   // Chitra
+    expect(NAKSHATRA_RAJJU[22]).toBe('Sira');   // Dhanishtha
+    expect(NAKSHATRA_RAJJU[5]).toBe('Kantha');  // Ardra
+    expect(NAKSHATRA_RAJJU[3]).toBe('Kantha');  // Rohini
+  });
+
   it('same rajju vetoes', () => {
-    // Both in Pada rajju: Mrigashira (4) and Ardra (5)
-    expect(NAKSHATRA_RAJJU[4]).toBe('Pada');
-    expect(NAKSHATRA_RAJJU[5]).toBe('Pada');
+    // Both Sira rajju: Mrigashira (4) and Chitra (13).
     const r = computePathuPorutham(
       { rashi: 1, nakshatra: 4 },
-      { rashi: 1, nakshatra: 5 },
+      { rashi: 6, nakshatra: 13 },
     );
     const k = findKoot(r, 'Rajju');
     expect(k.passes).toBe(false);
@@ -390,10 +402,11 @@ describe('Rajju Porutham (veto on same group)', () => {
   });
 
   it('different rajju passes', () => {
-    // Ashwini (Sira) + Bharani (Kantha)
+    // Mrigashira (Sira) + Ardra (Kantha) — the inverted table wrongly
+    // grouped these together and vetoed the match.
     const r = computePathuPorutham(
-      { rashi: 0, nakshatra: 0 },
-      { rashi: 0, nakshatra: 1 },
+      { rashi: 1, nakshatra: 4 },
+      { rashi: 2, nakshatra: 5 },
     );
     const k = findKoot(r, 'Rajju');
     expect(k.passes).toBe(true);
@@ -425,8 +438,16 @@ describe('Vedha Porutham (veto on pair)', () => {
     expect(k.veto).toBeUndefined();
   });
 
-  it('Dhanishtha (22) is unpaired in this enumeration', () => {
-    expect(vedhaOf(22)).toBe(null);
+  it('Chitra (13) is the one unpaired nakshatra in the canonical table', () => {
+    expect(vedhaOf(13)).toBe(null);
+  });
+
+  it('canonical non-symmetric pairs (the mirror-symmetric table got these wrong)', () => {
+    expect(vedhaOf(4)).toBe(22);   // Mrigashira ↔ Dhanishtha
+    expect(vedhaOf(5)).toBe(21);   // Ardra ↔ Shravana
+    expect(vedhaOf(8)).toBe(18);   // Ashlesha ↔ Mula
+    expect(vedhaOf(9)).toBe(26);   // Magha ↔ Revati
+    expect(vedhaOf(12)).toBe(23);  // Hasta ↔ Shatabhisha
   });
 });
 

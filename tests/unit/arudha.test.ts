@@ -82,19 +82,36 @@ function synthChart(spec: SynthSpec): BirthChart {
 // ── 1. Synthetic unit cases — standard rule ───────────
 
 describe('computeArudhas — standard rule (D ≠ 1, 7)', () => {
-  it('lagna in Aries, lord Mars in Cancer (4th) → AL = Cancer + 3 = Libra', () => {
-    // Bhava 1 = Aries (rashi 0), lord Mars in Cancer (rashi 3).
-    // D = ((3 − 0 + 12) % 12) + 1 = 3 + 1 = 4. Standard rule applies.
-    // arudhaRashi = (3 + 4 − 1) % 12 = 6 (Libra).
+  it('lagna in Aries, Mars in Cancer (D=4): pada computes to the 7th → exception → AL = Capricorn', () => {
+    // The canonical Jaimini worked example. Bhava 1 = Aries (0), lord Mars
+    // in Cancer (3). D = 4; the raw count lands the pada in Libra — the 7th
+    // from the bhava, which a pada may never occupy — so the 4th therefrom,
+    // Capricorn (the 10th from the bhava), is the Arudha Lagna. An earlier
+    // revision keyed the exception on D ∈ {1, 7} only and published Libra
+    // here; this test used to pin that forbidden value.
     const chart = synthChart({
       lagnaRashi: 0,
       rashis: { Mars: 3 },  // lord of Aries in Cancer
     });
     const arudhas = computeArudhas(chart);
     expect(arudhas[0]!.bhava).toBe(1);
-    expect(arudhas[0]!.arudhaRashi).toBe(6);
-    expect(arudhas[0]!.arudhaRashiName).toBe('Tula');
-    expect(arudhas[0]!.arudhaLord).toBe('Venus');  // Libra's lord
+    expect(arudhas[0]!.arudhaRashi).toBe(9);
+    expect(arudhas[0]!.arudhaRashiName).toBe('Makara');
+    expect(arudhas[0]!.arudhaLord).toBe('Saturn');  // Capricorn's lord
+  });
+
+  it('a pada never falls on its bhava or the 7th therefrom (all 12 bhavas, sweep)', () => {
+    // Hard Jaimini invariant, checked across lord placements that hit every
+    // D value: for each chart, every bhava's pada must avoid offsets 0 and 6.
+    for (let marsRashi = 0; marsRashi < 12; marsRashi++) {
+      const chart = synthChart({ lagnaRashi: 0, rashis: { Mars: marsRashi } });
+      for (const a of computeArudhas(chart)) {
+        const bhavaRashi = (0 + a.bhava - 1) % 12;
+        const offset = (a.arudhaRashi - bhavaRashi + 12) % 12;
+        expect(offset, `bhava ${a.bhava}, Mars in ${marsRashi}`).not.toBe(0);
+        expect(offset, `bhava ${a.bhava}, Mars in ${marsRashi}`).not.toBe(6);
+      }
+    }
   });
 
   it('Bhava 5 (Leo) lord Sun in Cap (6th from Leo) → arudha = Cap + 5 = Gem', () => {
@@ -232,14 +249,15 @@ describe('computeArudhas — locale resolution', () => {
   it("'en' returns transliterated rashi names", () => {
     const chart = synthChart({ lagnaRashi: 0, rashis: { Mars: 3 } });
     const en = computeArudhas(chart, 'en');
-    expect(en[0]!.arudhaRashiName).toBe('Tula');
+    // AL = Capricorn for this chart (7th-exception case; see the standard-rule suite).
+    expect(en[0]!.arudhaRashiName).toBe('Makara');
   });
 
   it("'hi' returns Devanagari rashi names", () => {
     const chart = synthChart({ lagnaRashi: 0, rashis: { Mars: 3 } });
     const hi = computeArudhas(chart, 'hi');
-    // Tula in Devanagari = तुला
-    expect(hi[0]!.arudhaRashiName).toBe('तुला');
+    // Makara in Devanagari = मकर
+    expect(hi[0]!.arudhaRashiName).toBe('मकर');
   });
 });
 

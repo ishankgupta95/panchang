@@ -247,11 +247,27 @@ export function findTransitionTime(
 
 /**
  * Find when the current element STARTED (search backwards).
+ *
+ * The probe at the window edge decides between two cases:
+ *
+ * - Edge index **equals** `currentIndex`: the element is older than the window;
+ *   saturate to the edge. No tithi, nakshatra, yoga or karana lasts anywhere
+ *   near the default 36 h, so for real elements this is a safety net, not a
+ *   path inputs actually take.
+ * - Edge index is **anything else**: the boundary into `currentIndex` lies
+ *   inside the window; solve for it. "Anything else" is deliberately not
+ *   "the previous element": a sunrise element that began recently puts the
+ *   −36 h probe *two or more* elements back (always, for a ~13 h karana), and
+ *   an earlier version that treated previous-or-bust as the bracket test
+ *   returned the raw window edge as the "start" on most days.
+ *
+ * Both the secant guard and the bisection therefore test `!== currentIndex`,
+ * which is monotone true→false across the window however many elements back
+ * the edge lands — the same shape as the backward search in `bhadra.ts`.
  */
 export function findStartTime(
   fromUtc: Date,
   currentIndex: number,
-  totalElements: number,
   getIndexAtTime: (date: Date) => number,
   maxSearchBackHours: number = 36,
   maxIterations: number = 15,
@@ -259,9 +275,8 @@ export function findStartTime(
   angle?: ElementAngle,
 ): Date {
   const searchStart = new Date(fromUtc.getTime() - maxSearchBackHours * 3600_000);
-  const previousIndex = (currentIndex - 1 + totalElements) % totalElements;
 
-  if (getIndexAtTime(new Date(searchStart.getTime())) !== previousIndex) {
+  if (getIndexAtTime(new Date(searchStart.getTime())) === currentIndex) {
     return searchStart;
   }
 
@@ -269,18 +284,18 @@ export function findStartTime(
   let hi = fromUtc.getTime();
 
   if (angle) {
-    // The boundary being sought is where `previousIndex` ends and
-    // `currentIndex` begins — i.e. the angle reaching currentIndex * span.
+    // The boundary being sought is where `currentIndex` begins — i.e. the
+    // angle reaching currentIndex * span.
     const target = (((currentIndex * angle.spanDeg) % 360) + 360) % 360;
     const solved = secantBoundary(lo, hi, target, angle,
-      (ms) => getIndexAtTime(new Date(ms)) === previousIndex);
+      (ms) => getIndexAtTime(new Date(ms)) !== currentIndex);
     if (solved !== null) return new Date(solved);
   }
 
   let iterations = 0;
   while (hi - lo > toleranceMs && iterations < maxIterations) {
     const mid = lo + (hi - lo) / 2;
-    if (getIndexAtTime(new Date(mid)) === previousIndex) {
+    if (getIndexAtTime(new Date(mid)) !== currentIndex) {
       lo = mid;
     } else {
       hi = mid;
@@ -306,7 +321,6 @@ export function findStartTime(
  * @param elementAtSunrise    Pre-computed element at sunrise
  * @param getIndexAtTime      Callback: returns element index at a UTC instant
  * @param computeElementAtTime Callback: computes full element at a UTC instant
- * @param totalElements       Cycle size (30 for Tithi, 27 for Nakshatra/Yoga, 60 for Karana)
  * @param searchWindowHours   Forward search window per element
  * @param precision           Tolerance / iteration budget for every search
  *                            performed here, including the backward search for
@@ -319,7 +333,6 @@ export function findDailyElements<T extends { index: number; endTime: Date | nul
   elementAtSunrise: T,
   getIndexAtTime: (date: Date) => number,
   computeElementAtTime: (date: Date) => T,
-  totalElements: number,
   searchWindowHours: number,
   precision: SearchPrecision,
   maxPerDay: number,
@@ -340,7 +353,7 @@ export function findDailyElements<T extends { index: number; endTime: Date | nul
 
     const startTime: Date = results.length === 0
       ? findStartTime(
-          sunriseUtc, element.index, totalElements, getIndexAtTime,
+          sunriseUtc, element.index, getIndexAtTime,
           36, precision.maxIterations, precision.toleranceMs, angle,
         )
       : cursor;

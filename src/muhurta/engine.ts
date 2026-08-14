@@ -166,10 +166,15 @@ export function scoreMuhurta(
   // Scoring reads only elements, vara, chandramasa, gandaMula, panchaka,
   // specialYogas, plus Bhadra ('lunarWindows') and the eclipse overlap. It
   // never returns the panchang, so festivals and moon times can be skipped.
+  // End times must stay ON: `computeSpecialYogasOverDay` needs the
+  // post-sunrise nakshatra windows to detect vara×nakshatra yogas that
+  // begin after sunrise (amrit_siddhi / sarvartha_siddhi / jwalamukhi), and
+  // `computeEndTimes: false` silently dropped them — scoreMuhurta disagreed
+  // with computeAuspiciousDatesInRange by their ±5/−10 deltas (MU-1,
+  // 2026-08-14 audit; repro: vivah, Delhi, 2027-05-04 → 50 vs 60).
   const panchang = getDailyPanchang(date, location, {
     ...options,
     sections: ['eclipse', 'lunarWindows'],
-    computeEndTimes: false,
   });
   if (panchang === null) {
     return {

@@ -39,7 +39,7 @@ import { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './inausp
 import {
   computeAbhijitMuhurta, computeBrahmaMuhurta,
   computeVijayaMuhurta, computeGodhuliMuhurta,
-  computeNishitaMuhurta, computeAmritKala,
+  computeNishitaMuhurta, computeAmritKalaWindows,
   computeMadhyahna, computePratahSandhya, computeSayahnaSandhya,
 } from './muhurta';
 import { getEclipseDuringDay } from '../astronomy/eclipse';
@@ -61,7 +61,7 @@ import { computeFestivals } from './festivals';
 import { computeDayFestivals } from './dayFestivals';
 import { resolveRegionAlias } from './regionAlias';
 import { computeBhadraKaal } from './bhadra';
-import { computeVarjyam } from './varjyam';
+import { computeVarjyamWindows } from './varjyam';
 import { computeGandaMula } from './gandaMula';
 import { computeAnandadiYoga } from './anandadiYoga';
 import { computeChandraBalam } from '../jyotish/chandraBalam';
@@ -691,17 +691,31 @@ export function getDailyPanchang(
     (idx) => t.gowriNames[idx]!,
     qualityNameFn,
   );
-  // Moonrise: first rise after local midnight (the moon may not rise on a given
-  // calendar day, in which case getMoonrise returns null).
+  // Moonrise: first rise after local midnight. The search itself looks up to
+  // two days ahead, so on the ~13 days a year when the moon does not rise on
+  // this local calendar day it finds the NEXT day's rise — an instant that
+  // belongs to a different calendar date. The published value is therefore
+  // clamped to the calendar day and reads `null` on no-rise days (which is
+  // what the `DailyMoon.rise` contract promises, and what almanacs print);
+  // before the clamp existed, the same rise instant appeared verbatim on two
+  // consecutive days' results.
   // Moonset: pair it with the same lunation as moonrise — search from moonrise
   // when one exists, falling back to local midnight only when there is no
   // moonrise on this day. Searching from local midnight unconditionally returns
   // the *previous* lunation's setting on days where the moon rises late and
   // sets the following morning.
   // Festivals key Karva Chauth / Sankashti off moonrise, so it is needed
-  // whenever either section is on; `moonset` is reported only for 'moonTimes'.
+  // whenever either section is on — and they get the UNclamped rise: their
+  // frame is the Hindu day (sunrise → next sunrise), where a rise shortly
+  // after the following midnight is still tonight's chandrodaya.
+  // `moonset` is reported only for 'moonTimes'.
   const needMoonrise = wantMoonTimes || wantFestivals;
-  const moonriseUtc = needMoonrise ? getMoonrise(localMidnightUtc, location) : null;
+  const moonriseSearchUtc = needMoonrise ? getMoonrise(localMidnightUtc, location) : null;
+  const moonriseUtc =
+    moonriseSearchUtc !== null &&
+    moonriseSearchUtc.getTime() < localMidnightUtc.getTime() + 86_400_000
+      ? moonriseSearchUtc
+      : null;
   const moonsetUtc = wantMoonTimes
     ? getMoonset(moonriseUtc ?? localMidnightUtc, location)
     : null;
@@ -720,7 +734,7 @@ export function getDailyPanchang(
     qualityNameFn,
   );
 
-  const durMuhurtaUtc = computeDurMuhurta(sunriseUtc, sunsetUtc, vara.index);
+  const durMuhurtaUtc = computeDurMuhurta(sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index);
 
   // Bhadra Kala window overlapping today's Hindu day. Computed whenever either
   // consumer needs it — the Raksha Bandhan exclusion below reads it, and it is
@@ -732,10 +746,12 @@ export function getDailyPanchang(
       )
     : null;
 
-  // Varjyam (Vishaghati) window for the nakshatra active at sunrise.
+  // Varjyam (Vishaghati) windows — one per nakshatra whose forbidden slice
+  // overlaps the Hindu day. Transition days can host two, matching drik's
+  // two-row Varjyam listings.
   const varjyamUtc = wantLunarWindows
-    ? computeVarjyam(nakshatraAtSunrise.index, sunriseUtc, nextSunriseUtc, getMoon)
-    : null;
+    ? computeVarjyamWindows(sunriseUtc, nextSunriseUtc, getMoon)
+    : [];
 
   // Ganda Mula — pure index test on the nakshatra active at sunrise.
   const gandaMula = computeGandaMula(nakshatraAtSunrise.index, lang);
@@ -758,7 +774,8 @@ export function getDailyPanchang(
         varaIndex: vara.index,
         chandramasa, masaSystem, lang, t,
         region: options.region,
-        moonriseUtc, bhadraUtc,
+        // Unclamped: the festival frame is the Hindu day, not the calendar day.
+        moonriseUtc: moonriseSearchUtc, bhadraUtc,
         getMoon, getSun, getBounds,
       })
     : [];
@@ -802,7 +819,7 @@ export function getDailyPanchang(
       // maxPerDay = 3: a short tithi fully contained in the sunrise→nextSunrise
       // window means 3 tithis legitimately touch the Hindu day (was 2, which
       // silently dropped the 3rd). Matches MAX_DAILY_TITHIS.
-      30, 36, STANDARD_PRECISION, 3, TITHI_ANGLE(getMoon, getSun),
+      36, STANDARD_PRECISION, 3, TITHI_ANGLE(getMoon, getSun),
     ) as DailyTithiInfo[];
     nakshatras = findDailyElements(
       sunriseUtc, nextSunriseUtc, nakshatraAtSunrise,
@@ -811,7 +828,7 @@ export function getDailyPanchang(
         const moon = getMoon(d);
         return computeNakshatraFromLongitude(moon, resolveNakshatraName(nakshatraOf(moon), lang));
       },
-      27, 36, STANDARD_PRECISION, 3, NAKSHATRA_ANGLE(getMoon),
+      36, STANDARD_PRECISION, 3, NAKSHATRA_ANGLE(getMoon),
     ) as DailyNakshatraInfo[];
     yogas = findDailyElements(
       sunriseUtc, nextSunriseUtc, yogaAtSunrise,
@@ -820,7 +837,7 @@ export function getDailyPanchang(
         const moon = getMoon(d), sun = getSun(d);
         return computeYogaFromLongitudes(moon, sun, resolveYogaName(getYogaIndex(moon, sun), lang));
       },
-      27, 36, STANDARD_PRECISION, 3, YOGA_ANGLE(getMoon, getSun),
+      36, STANDARD_PRECISION, 3, YOGA_ANGLE(getMoon, getSun),
     ) as DailyYogaInfo[];
     karanas = findDailyElements(
       sunriseUtc, nextSunriseUtc, karanaAtSunrise,
@@ -829,7 +846,7 @@ export function getDailyPanchang(
         const moon = getMoon(d), sun = getSun(d);
         return computeKaranaFromLongitudes(moon, sun, resolveKaranaName(getKaranaIndex(moon, sun), lang));
       },
-      60, 18, STANDARD_PRECISION, 5, KARANA_ANGLE(getMoon, getSun),
+      18, STANDARD_PRECISION, 5, KARANA_ANGLE(getMoon, getSun),
     ) as DailyKaranaInfo[];
   } else {
     const bare = { startTime: null, startTimeLocal: null, endTimeLocal: null, isActiveAtSunrise: true };
@@ -855,10 +872,7 @@ export function getDailyPanchang(
   const vijayaMuhurtaUtc = computeVijayaMuhurta(sunriseUtc, sunsetUtc);
   const godhuliMuhurtaUtc = computeGodhuliMuhurta(sunsetUtc);
   const nishitaMuhurtaUtc = computeNishitaMuhurta(sunsetUtc, nextSunriseUtc);
-  const amritKalaUtc = computeAmritKala(
-    sunriseUtc, nextSunriseUtc,
-    nakshatraOf(siderealMoonAtSunrise),
-  );
+  const amritKalaUtc = computeAmritKalaWindows(sunriseUtc, nextSunriseUtc, getMoon);
   const madhyahnaWindowUtc = computeMadhyahna(sunriseUtc, sunsetUtc);
   const pratahSandhyaUtc = computePratahSandhya(sunriseUtc, sunsetUtc, nextSunriseUtc);
   const sayahnaSandhyaUtc = computeSayahnaSandhya(sunsetUtc, nextSunriseUtc);
@@ -956,7 +970,7 @@ export function getDailyPanchang(
       vijaya: withLocal(vijayaMuhurtaUtc),
       godhuli: withLocal(godhuliMuhurtaUtc),
       nishita: withLocal(nishitaMuhurtaUtc),
-      amritKala: amritKalaUtc ? withLocal(amritKalaUtc) : null,
+      amritKala: amritKalaUtc.map(withLocal),
       madhyahna: withLocal(madhyahnaWindowUtc),
       pratahSandhya: withLocal(pratahSandhyaUtc),
       sayahnaSandhya: withLocal(sayahnaSandhyaUtc),
@@ -969,8 +983,8 @@ export function getDailyPanchang(
       rahuKalam: withLocal(rahuKalam),
       gulikaKalam: withLocal(gulikaKalam),
       yamaganda: withLocal(yamaganda),
-      durMuhurta: [withLocal(durMuhurtaUtc[0]), withLocal(durMuhurtaUtc[1])],
-      varjyam: varjyamUtc ? withLocal(varjyamUtc) : null,
+      durMuhurta: durMuhurtaUtc.map((w) => ({ ...withLocal(w), segment: w.segment })),
+      varjyam: varjyamUtc.map(withLocal),
       bhadra: bhadraUtc
         ? {
             start: bhadraUtc.start,
@@ -979,6 +993,11 @@ export function getDailyPanchang(
             endLocal: local(bhadraUtc.end),
             location: bhadraUtc.location,
             locationName: bhadraUtc.locationName,
+            vasa: bhadraUtc.vasa.map((s) => ({
+              ...s,
+              startLocal: local(s.start),
+              endLocal: local(s.end),
+            })),
             isActive: bhadraUtc.isActive,
           }
         : null,

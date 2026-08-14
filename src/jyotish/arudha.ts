@@ -80,16 +80,25 @@ export function computeArudhas(chart: BirthChart, lang: Language = 'en'): Arudha
     // Inclusive distance from bhava to lord (1..12).
     const D = ((lordRashi - bhavaRashi + 12) % 12) + 1;
 
-    let arudhaRashi: number;
-    if (D === 1) {
-      // Lord in own bhava → 10th from lord (lord-rashi + 9, mod 12).
-      arudhaRashi = (lordRashi + 9) % 12;
-    } else if (D === 7) {
-      // Lord in 7th from bhava → 4th from lord (lord-rashi + 3, mod 12).
-      arudhaRashi = (lordRashi + 3) % 12;
-    } else {
-      // Standard rule: count another D houses from lord.
-      arudhaRashi = (lordRashi + D - 1) % 12;
+    // Standard rule: count another D houses from lord. The computed pada
+    // sits at bhava + 2(D−1), so it lands ON the bhava when D ∈ {1, 7} and
+    // on the 7th FROM the bhava when D ∈ {4, 10}.
+    let arudhaRashi = (lordRashi + D - 1) % 12;
+
+    // Exceptions (Jaimini Upadesa Sutras 1.1.30-31, Rath commentary): the
+    // pada may occupy neither the bhava itself nor the 7th from it. When it
+    // falls on the bhava, the 10th therefrom is taken; when it falls on the
+    // 7th, the 4th therefrom — both land on the 10th FROM THE BHAVA (Rath's
+    // worked example: Aries lagna, Mars in Cancer → pada computes to Libra,
+    // the 7th → Arudha Lagna is Capricorn). An earlier revision keyed the
+    // exception on the lord's distance (D = 1 or 7) — which covers only the
+    // pada-on-bhava geometry — and let D ∈ {4, 10} charts keep a pada in
+    // the forbidden 7th.
+    const offsetFromBhava = (arudhaRashi - bhavaRashi + 12) % 12;
+    if (offsetFromBhava === 0) {
+      arudhaRashi = (arudhaRashi + 9) % 12; // 10th from the pada (= bhava)
+    } else if (offsetFromBhava === 6) {
+      arudhaRashi = (arudhaRashi + 3) % 12; // 4th from the pada (= 10th from bhava)
     }
 
     // Arudha's *own* rashi-lord — useful for analyzing the pada's

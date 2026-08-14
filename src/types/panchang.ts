@@ -4,7 +4,7 @@ import type {
   TithiInfo, NakshatraInfo, YogaInfo, KaranaInfo, VaraInfo, TimePeriod,
   ChandraMasaInfo, SamvatInfo, RashiInfo, NakshatraIndexInfo, ChoghadiyaInfo, HoraInfo,
   SpecialYogaInfo, FestivalInfo, GowriInfo, BhadraInfo, EclipseInfo,
-  GandaMulaInfo, PanchakaInfo, AnandadiYogaInfo, DoGhatiInfo,
+  GandaMulaInfo, PanchakaInfo, AnandadiYogaInfo, DoGhatiInfo, DurMuhurtaPeriod,
 } from './elements';
 import type { ChandraBalamInfo, TarabalaInfo } from './jyotish';
 
@@ -245,8 +245,18 @@ export interface MuhurtaWindows {
   godhuli: TimePeriod;
   /** Nishita Muhurta — the 15th night-muhurta, around solar midnight. */
   nishita: TimePeriod;
-  /** Amrit Kala — nakshatra-specific auspicious window; `null` when the day's nakshatra has none. */
-  amritKala: TimePeriod | null;
+  /**
+   * Amrit Kala (drik's "Amrit Kalam") windows of the Hindu day, in start
+   * order — nakshatra-anchored auspicious windows in the same architecture
+   * as Varjyam (offset + 4 ghatikas in the nakshatra-elastic frame,
+   * attributed to the day the window STARTS in). Most days carry one;
+   * transition days can carry two; a day none of whose nakshatras' windows
+   * start within it is empty.
+   *
+   * Breaking change in 5.2: previously `TimePeriod | null` from a
+   * sunrise-anchored model that did not match DrikPanchang.
+   */
+  amritKala: TimePeriod[];
   /** Madhyahna — solar noon as a ±24-min ritual window (one classical muhurta wide). */
   madhyahna: TimePeriod;
   /**
@@ -279,10 +289,23 @@ export interface InauspiciousWindows {
   rahuKalam: TimePeriod;
   gulikaKalam: TimePeriod;
   yamaganda: TimePeriod;
-  /** The two Dur Muhurta slots of the day. */
-  durMuhurta: [TimePeriod, TimePeriod];
-  /** Varjyam (Vishaghati / Nakshatra Thyajyam) window for the day, or `null` when none overlaps. */
-  varjyam: TimePeriod | null;
+  /**
+   * Dur Muhurta windows of the day, in start order — one or two per weekday
+   * per the classical Muhurta-Chintamani table (Sunday and Wednesday carry a
+   * single window; Tuesday's second window falls at night). Each window is
+   * tagged with the `day`/`night` segment its ordinal counts in.
+   *
+   * Breaking change in 5.2: previously exactly two day windows
+   * (`[TimePeriod, TimePeriod]`) from a table that did not match
+   * DrikPanchang on any weekday.
+   */
+  durMuhurta: DurMuhurtaPeriod[];
+  /**
+   * Varjyam (Vishaghati / Nakshatra Thyajyam) windows overlapping the Hindu
+   * day, in start order. Most days carry one; nakshatra-transition days can
+   * carry two (drik prints both rows). Empty when none overlaps.
+   */
+  varjyam: TimePeriod[];
   /** Bhadra Kala (Vishti karana) window overlapping this Hindu day, or `null`. */
   bhadra: BhadraInfo | null;
   /** Ganda Mula — Moon-in-root-nakshatra detection at sunrise. `active: false` for the 21 non-root nakshatras. */

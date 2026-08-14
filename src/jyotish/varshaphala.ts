@@ -407,7 +407,13 @@ function resolveOperand(
 
 /**
  * Compute one Saham's longitude given its formula. Honors the day/night
- * X/Y swap when `formula.swap` is true and `isDay` is false.
+ * X/Y swap when `formula.swap` is true and `isDay` is false, and applies
+ * the classical Tajika **completion rule** (Tajika Neelakanthi; PVR
+ * Narasimha Rao's formulation, also implemented by JHora): after
+ * `X − Y + Z`, walk the zodiac from Y toward X — if Z is not encountered
+ * on the way, one rashi (30°) is added. The check uses the *effective*
+ * X/Y, i.e. after any night swap. An earlier revision omitted the rule
+ * entirely, leaving roughly half of all published Sahams one sign short.
  */
 function evaluateSaham(
   formula: SahamFormula,
@@ -420,7 +426,8 @@ function evaluateSaham(
   const x = resolveOperand(xOp, varshaChart, priorSahams);
   const y = resolveOperand(yOp, varshaChart, priorSahams);
   const z = resolveOperand(formula.z, varshaChart, priorSahams);
-  return normalize360(x - y + z);
+  const zInArcYtoX = normalize360(z - y) <= normalize360(x - y);
+  return normalize360(x - y + z + (zInArcYtoX ? 0 : 30));
 }
 
 /**

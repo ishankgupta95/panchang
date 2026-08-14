@@ -408,9 +408,15 @@ const RAJA_YOGA_RULE: YogaRule = {
           reasons.push(`Kendra-lord ${k} conjunct trikona-lord ${t} in ${kp.rashi.name}`);
           continue;
         }
+        // Classical sambandha requires the aspect to be MUTUAL (BPHS Ch. 39;
+        // Rath, Crux Ch. 9) — a one-way special aspect (Mars/Jupiter/Saturn
+        // seeing a planet that does not see them back) is not a yoga-forming
+        // relationship. An earlier revision fired on either direction, which
+        // both over-reported the yoga and contradicted the reason string;
+        // the Dharma-Karmadhipati rule below always required both.
         const kAspectsT = ctx.aspects[k]?.includes(tp.house);
         const tAspectsK = ctx.aspects[t]?.includes(kp.house);
-        if (kAspectsT || tAspectsK) {
+        if (kAspectsT && tAspectsK) {
           reasons.push(`Kendra-lord ${k} and trikona-lord ${t} in mutual aspect`);
         }
       }
@@ -508,19 +514,33 @@ function lordsConjunctRule(
   };
 }
 
+/**
+ * Upachaya houses from lagna. Vasumati's frame — note 10, not 12: an earlier
+ * revision tested {3, 6, 11, 12}, but the 12th is a vyaya (loss) house and
+ * has never been an upachaya; the classical quartet is 3, 6, 10, 11
+ * (B.V. Raman, *300 Important Combinations* §21 — the catalog's cited
+ * source for this rule).
+ */
+const UPACHAYA_HOUSES: readonly number[] = [3, 6, 10, 11];
+
 const VASUMATI_YOGA_RULE: YogaRule = {
   name: 'Vasumati Yoga',
   type: 'dhana',
   evaluate: (ctx) => {
-    const required: readonly number[] = [3, 6, 11, 12];
-    const filled = new Set<number>();
-    for (const p of ctx.chart.planets) {
-      if (!NATURAL_BENEFICS.includes(p.planet)) continue;
-      if (required.includes(p.house)) filled.add(p.house);
+    // Raman's formulation: the yoga arises when the natural benefics occupy
+    // upachaya houses — every benefic in an upachaya, not every upachaya
+    // filled (four benefics covering four named houses is a near-impossible
+    // bijection, which is why the earlier fill-all version almost never
+    // fired). Reference is the lagna; Raman's from-Moon variant is not
+    // implemented, keeping the narrower reading.
+    const placed: string[] = [];
+    for (const g of NATURAL_BENEFICS) {
+      const p = ctx.planetByName[g];
+      if (!UPACHAYA_HOUSES.includes(p.house)) return null;
+      placed.push(`${g} (house ${p.house})`);
     }
-    if (filled.size !== required.length) return null;
     return {
-      reasons: ['Natural benefics occupy houses 3, 6, 11, and 12 from lagna'],
+      reasons: [`All natural benefics in upachayas from lagna: ${placed.join(', ')}`],
     };
   },
 };

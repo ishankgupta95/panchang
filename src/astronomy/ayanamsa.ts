@@ -71,8 +71,11 @@ const LAHIRI_J2000_DEG = 23.863801;
 
 /**
  * IAU general precession in longitude, arcsec, T in Julian centuries from
- * J2000. Shared by every system below except Raman, which carries its own
- * linear rate by tradition.
+ * J2000. Shared by every system below — including Raman, since 2026-08-13:
+ * the "own linear rate by tradition" it used to carry came from the same
+ * unsourced tradition as its old offset, and measuring Swiss Ephemeris's
+ * SIDM_RAMAN across 1900–2100 shows its smooth part follows this same
+ * polynomial to within 0.3″ per century (see the `raman` offset note).
  */
 function precessionArcsec(T: number): number {
   return 5029.0966 * T + 1.112 * T * T - 0.000006 * T * T * T;
@@ -97,8 +100,27 @@ const AYANAMSA_OFFSET_FROM_LAHIRI = {
   kp: -0.079605,
   /** Thirukanitham: Tamil Vakya tradition, Lahiri + 1′ 6.4″. */
   thirukanitham: +0.018456,
-  /** B. V. Raman: Lahiri − 1° 23′ 33.8″ at J2000 (own rate thereafter). */
-  raman: -1.392722,
+  /**
+   * B. V. Raman: Lahiri − 1° 27′ 10.9″ at J2000 — **measured**, not adopted.
+   *
+   * The Astrological eMagazine (the Raman family's own publication) computes
+   * its panchanga with Swiss Ephemeris `SE_SIDM_RAMAN`, which makes that
+   * definition authoritative for this system. On 2026-08-13 the exact
+   * module their site runs (`sweph-wasm@2.6.9`) was probed at ten epochs
+   * spanning 1900–2100: ayanamsa = tropical − sidereal Sun at each instant,
+   * minus the nutation in longitude (their frame carries nutation; every
+   * mean-frame model in this file deliberately does not — a ±17″ / ±31 s
+   * of-Moon-travel wobble accepted across the board). The nutation-free
+   * residual against `precessionArcsec` is constant to 0.6″ across the
+   * two centuries, anchoring Raman at **22.410791° at J2000.0** — i.e.
+   * Lahiri − 1.453010°.
+   *
+   * The previous value (−1.392722° = 1° 23′ 33.8″, from secondary
+   * literature) was 3.62′ too small, which pushed every raman-mode
+   * nakshatra end ~6.6 min late and every yoga end ~12 min late versus
+   * the eMagazine's published table.
+   */
+  raman: -1.453010,
 } as const;
 
 /**
@@ -124,8 +146,7 @@ function lahiriAyanamsa(T: number): number {
 }
 
 function ramanAyanamsa(T: number): number {
-  const annualRateDeg = 50.3304 / 3600;
-  return LAHIRI_J2000_DEG + AYANAMSA_OFFSET_FROM_LAHIRI.raman + annualRateDeg * T * 100;
+  return LAHIRI_J2000_DEG + AYANAMSA_OFFSET_FROM_LAHIRI.raman + precessionArcsec(T) / 3600;
 }
 
 function kpAyanamsa(T: number): number {

@@ -50,7 +50,7 @@ describe('options.sections', () => {
       expect(r.moon.rise, day).toBeNull();
       expect(r.moon.set, day).toBeNull();
       expect(r.inauspicious.bhadra, day).toBeNull();
-      expect(r.inauspicious.varjyam, day).toBeNull();
+      expect(r.inauspicious.varjyam, day).toEqual([]);
       expect(r.inauspicious.panchakaRahita, day).toEqual([]);
     }
   });

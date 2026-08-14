@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeBhadraKaal, isVishtiKarana } from '../../src/core/bhadra';
+import { computeBhadraKaal, isVishtiKarana, bhadraVasaForRashi } from '../../src/core/bhadra';
 import { LongitudeCache } from '../../src/astronomy/cache';
 import { computeSunrise, computeSunset } from '../../src/astronomy/sunrise';
 
@@ -67,5 +67,61 @@ describe('computeBhadraKaal', () => {
       const target = new Date('2024-08-19T08:02:00Z').getTime();
       expect(Math.abs(endMs - target)).toBeLessThan(30 * 60_000);
     }
+  });
+});
+
+describe('bhadraVasaForRashi (Muhurta Chintamani Moon-rashi rule)', () => {
+  it('partitions all 12 rashis into the three classical vasa groups', () => {
+    // Karka(3), Simha(4), Kumbha(10), Meena(11)          → earth (Prithvi)
+    // Mesha(0), Vrishabha(1), Mithuna(2), Vrischika(7)   → heaven (Swarga)
+    // Kanya(5), Tula(6), Dhanu(8), Makara(9)             → paatal (Patala)
+    const expected: Record<number, 'earth' | 'heaven' | 'paatal'> = {
+      0: 'heaven', 1: 'heaven', 2: 'heaven', 3: 'earth',
+      4: 'earth', 5: 'paatal', 6: 'paatal', 7: 'heaven',
+      8: 'paatal', 9: 'paatal', 10: 'earth', 11: 'earth',
+    };
+    for (let rashi = 0; rashi < 12; rashi++) {
+      expect(bhadraVasaForRashi(rashi), `rashi ${rashi}`).toBe(expected[rashi]);
+    }
+  });
+});
+
+describe('piecewise vasa segments (drik Ujjain 2026-08-19)', () => {
+  // Drik day-panchang Ujjain 2026-08-19: Bhadra begins 07:19 PM; Bhadravasa
+  // "Patala (Nadir) from 07:19 PM to 02:30 AM, Aug 20" then "Swarga (Heaven)"
+  // (02:30 AM = the Moon's Tula → Vrischika transition; drik's day page
+  // clamps the window display at next sunrise, but its Bhadra-dates page
+  // carries the true karana end 08:16 AM, Aug 20).
+  it('splits Patala → Swarga at the Moon Tula→Vrischika transition', () => {
+    const UJJAIN = { latitude: 23.1765, longitude: 75.7885 };
+    const cache = new LongitudeCache('lahiri');
+    const getMoon = (d: Date) => cache.getMoon(d);
+    const getSun = (d: Date) => cache.getSun(d);
+
+    const sunrise = computeSunrise(new Date('2026-08-19T00:00:00Z'), UJJAIN);
+    const sunset = computeSunset(sunrise, UJJAIN);
+    const nextSunrise = computeSunrise(sunset, UJJAIN);
+
+    const bhadra = computeBhadraKaal(sunrise, nextSunrise, getMoon, getSun);
+    expect(bhadra).not.toBeNull();
+    if (!bhadra) return;
+
+    const TOL_MS = 2 * 60_000;
+    // Window: 19:20 IST → 08:16 IST (+1) = 13:50 UTC → 02:46 UTC.
+    expect(Math.abs(bhadra.start.getTime() - Date.parse('2026-08-19T13:50:00Z'))).toBeLessThan(TOL_MS);
+    expect(Math.abs(bhadra.end.getTime() - Date.parse('2026-08-20T02:46:00Z'))).toBeLessThan(TOL_MS);
+
+    expect(bhadra.vasa).toHaveLength(2);
+    const [first, second] = bhadra.vasa;
+    expect(first!.location).toBe('paatal');
+    expect(second!.location).toBe('heaven');
+    // Transition at 02:30 IST Aug 20 = 21:00 UTC Aug 19.
+    expect(Math.abs(first!.end.getTime() - Date.parse('2026-08-19T21:00:00Z'))).toBeLessThan(TOL_MS);
+    // Segments tile the window exactly.
+    expect(first!.start.getTime()).toBe(bhadra.start.getTime());
+    expect(second!.start.getTime()).toBe(first!.end.getTime());
+    expect(second!.end.getTime()).toBe(bhadra.end.getTime());
+    // Top-level location = vasa at window start.
+    expect(bhadra.location).toBe('paatal');
   });
 });

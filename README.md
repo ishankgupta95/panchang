@@ -6,12 +6,12 @@
 Pure TypeScript Hindu Panchang (almanac), Jyotish, and Birth Chart calculations.
 Zero runtime dependencies. Works offline in React Native (Hermes), Node.js, and browsers.
 
-**Fast** (~0.25 ms trimmed, ~0.41 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,368 tests across 121 files**
+**Fast** (~0.25 ms trimmed, ~0.41 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,737 tests across 136 files**
 
 > 📖 **Full documentation: [dharmagya.app/docs/panchang-ts](https://dharmagya.app/docs/panchang-ts)**
-> This README covers install, quick start, and the 4.x → 5 migration in full, plus a per-feature
-> quick reference. The complete reference — every option, result field, table format, accuracy
-> bound and performance note — lives on the docs site.
+> This README covers install, quick start, and the 5.0 → 5.1 and 4.x → 5 migrations in full,
+> plus a per-feature quick reference. The complete reference — every option, result field,
+> table format, accuracy bound and performance note — lives on the docs site.
 
 ---
 
@@ -127,6 +127,142 @@ answer: `sun`, `moon`, `angas`, `calendar`, `inauspicious`. There is no
 at the given instant — it skips canonical-time refinements (madhyahna /
 pradosha / nishita / chandrodaya), transit-based Sankranti, and Smarta/Vaishnava
 Ekadashi split. For reliable festival dating, use `getDailyPanchang`.
+
+---
+
+## Upgrading from 5.1 (unreleased)
+
+Two deliberate type breaks, both correcting fields that did not match
+DrikPanchang (the project's parity oracle), in the same style as 5.1's
+`varjyam` break.
+
+### `inauspicious.durMuhurta` is now `DurMuhurtaPeriod[]`
+
+```diff
+- const [dm1, dm2] = r.inauspicious.durMuhurta;
++ r.inauspicious.durMuhurta.forEach((dm) => show(dm)); // 1–2 windows
++ // dm.segment is 'day' or 'night' (only Tuesday carries a night window)
+```
+
+The old table emitted two day windows every day and matched drik on none of
+the seven weekdays. The corrected classical Muhurta-Chintamani table gives
+one window on Sunday and Wednesday, two elsewhere — and Tuesday's second
+window falls at **night** (the 7th of the 15 sunset→sunrise muhurtas), so
+the exactly-two-day-windows tuple could not survive. Verified against 58
+consecutive drik day-pages across two cities; a full drik week is pinned.
+
+### `muhurtas.amritKala` is now `TimePeriod[]`
+
+```diff
+- if (r.muhurtas.amritKala) show(r.muhurtas.amritKala);
++ r.muhurtas.amritKala.forEach(show);   // [] when the day has none
+```
+
+Amrit Kala shares Varjyam's architecture (drik prints them from the same
+frame): each window anchors at its nakshatra's own start, offset by a
+per-nakshatra count of nakshatra-elastic ghatikas, spans exactly 4 such
+ghatikas, and belongs to the Hindu day its **start** falls in — 0–2 windows
+per day. The old sunrise-anchored single window disagreed with drik by up
+to ~16 h. `computeAmritKala` is replaced by
+`computeAmritKalaWindows(sunriseUtc, nextSunriseUtc, getMoon)`.
+
+### Ekadashi splits: Smarta first, Vaishnava second
+
+On the days drik prints an Ekadashi twice, the **earlier** day is the Smarta
+fast and the **later** one the Vaishnava fast — drik says so in prose on every
+Ekadashi date-time page. Two corrections bring the library in line:
+
+```diff
+  // Dashami-viddha day (e.g. Rama Ekadashi, 2027-10-25)
+- ['vaishnava_ekadashi', 'smarta_ekadashi' /* deferred */, 'ekadashi']
++ ['smarta_ekadashi', 'ekadashi']          // vaishnava_ekadashi is tomorrow
+
+  // First day of a vriddha Dwadashi (e.g. 2026-08-24)
+- []
++ ['vaishnava_ekadashi']
+```
+
+Both the Dashami-viddha and the vriddha-Dwadashi (Pakshavardhini) splits now
+match drik across every pair it publishes in 2024–2028. `getDailyPanchang`
+callers that keyed off `smarta_ekadashi` / `vaishnava_ekadashi` on split days
+will see the two swap places; `computeEkadashiDatesForYear` is unchanged.
+Custom locale packs need the renamed viddha description keys — see the
+CHANGELOG.
+
+### Regional solar new years land on their own days
+
+`vishu`, `baisakhi` and `pohela_boishakh` no longer share Puthandu's day.
+Each keys off the Mesha transit moment its own way, so in 2027 Vishu and
+Pohela Boishakh fall on April 15 while Puthandu falls on April 14, and in
+2028 Vaisakhi falls on April 13 while the rest fall on April 14.
+`getHinduNewYear(year, region, …)` follows the same per-region rules.
+
+Several other **value-level** corrections ride along without shape changes:
+dur muhurta ordinals, night choghadiya names, Bhadra vasa (now Moon-rashi
+keyed, with a piecewise `vasa` segment list on `BhadraInfo`), night-transit
+Sankranti dates (+ a new `moment` field on `SankrantiEvent`), kshaya-Dwadashi
+Ekadashi advance, Vijayadashami/Karva Chauth/Janmashtami kala rules, the
+Kali Yuga year boundary, `scoreMuhurta` special-yoga parity, eastern-
+longitude Gulika/Mandi, and the opt-in Ashtakavarga reductions. See the
+CHANGELOG for each rule and its drik evidence.
+
+---
+
+## Upgrading from 5.0
+
+One deliberate type break, two corrected dasha tables, and one opt-in flag.
+
+### `inauspicious.varjyam` is now `TimePeriod[]`
+
+```diff
+- if (r.inauspicious.varjyam) show(r.inauspicious.varjyam);
++ r.inauspicious.varjyam.forEach(show);   // [] when the day has none
+```
+
+5.0 evaluated only the nakshatra active at sunrise and dropped the second
+Varjyam window printed panchangs show on transition days. 5.1 publishes every
+window, in start order, under DrikPanchang's attribution rule: a window belongs
+to the Hindu day its **start** falls in (one that begins before sunrise and
+runs past it is yesterday's), and window instants are unclamped — an end can
+land after next sunrise. Validated window-for-window against a 61-day
+DrikPanchang sweep (Aug–Sep 2026, two full nakshatra cycles): 62/62 match.
+
+Two value-level corrections ride along: **Mula carries a second tyajya spell**
+(elapsed ghatikas 20 *and* 56 — DrikPanchang, ProKerala and B.V. Raman's
+*Muhurta* concur), so Mula days now emit the window 5.0 missed; and the
+standalone `computeVarjyam` primitive returns the *earliest* of a nakshatra's
+spells overlapping the day. New export: `computeVarjyamWindows(sunriseUtc,
+nextSunriseUtc, getMoon)`.
+
+### Yogini and Ashtottari starting lords were wrong — now classical
+
+- **Yogini** used `nakshatraIndex % 8`, off by three Yoginis for every birth.
+  Now the classical Devi-Bhagavata formula — (1-based janma nakshatra + 3) mod
+  8; remainder 1 = Mangala … 0 = Sankata — so Ashwini → Bhramari, Pushya →
+  Dhanya. Verified against published worked examples and PyJHora.
+- **Ashtottari** used a years-proportional split of the zodiac from a Krittika
+  anchor, matching no source. Now the classical Ardradi **group table**
+  (malefics rule four nakshatras each, benefics three; Sun = Ardra…Ashlesha,
+  Venus = Krittika…Mrigashira; exported as `ASHTOTTARI_NAKSHATRA_GROUPS`),
+  with the balance from the elapsed fraction of the group. Verified against
+  PyJHora and Maitreya 8, which agree on every output.
+
+Both functions keep their signatures; recorded outputs from 5.0 will differ
+and should be discarded.
+
+### Opt-in Gana-dosha cancellation in `computeAshtakoot`
+
+```typescript
+computeAshtakoot(boy, girl, { ganaCancellation: true });
+```
+
+Default output is byte-identical to 5.0 (DrikPanchang's published 36-guna
+table applies no Gana cancellation, and drik parity stays the default
+standard). With the flag raised, a doshic Gana score (≤ 1) is restored to the
+full 6 when the two Moons' sign lords are the same graha or mutual naisargika
+friends, recorded in `cancellations` — the condition set attested across
+independent pandit corpora; weaker ones are documented on `AshtakootOptions`
+and deliberately not encoded.
 
 ---
 
@@ -395,7 +531,8 @@ For `getInstantPanchang`: `tithi` / `nakshatra` / `yoga` / `karana` / `vara` →
 `| null` for `bhadra` / `varjyam` / `eclipse`, `?`-optional for `chandraBalam` /
 `tarabala`, and an empty array for `panchakaRahita` / `festivals`. v5 has one
 rule: **every field is always present**, a value that does not apply is `null`,
-and a collection that does not apply is `[]`.
+and a collection that does not apply is `[]`. (Since 5.1, `varjyam` is a
+collection and follows the `[]` arm — see [Upgrading from 5.0](#upgrading-from-50).)
 
 ```diff
 - if ('chandraBalam' in r) …        // 4.x: field absent without janmaRashi
@@ -637,6 +774,8 @@ import {
 
 computeAshtakoot({ rashi: 4, nakshatra: 9 }, { rashi: 0, nakshatra: 1 });
 // → { totalScore: 0..36, koots: KootScore[8], cancellations: string[] }
+// Opt-in Gana-dosha cancellation (default off — preserves drik 36-guna parity):
+computeAshtakoot(boy, girl, { ganaCancellation: true });
 
 computeMangalCompatibility(boyChart, girlChart);   // Manglik is a PAIRWISE verdict
 computeKaalSarp(d1);                               // 12 subtypes by Rahu's house
@@ -738,7 +877,7 @@ InteractionManager.runAfterInteractions(() => {
 
 📖 [Full accuracy notes →](https://dharmagya.app/docs/panchang-ts/accuracy)
 
-8,368 tests across 121 files, including fixtures cross-verified against reference
+8,737 tests across 136 files, including fixtures cross-verified against reference
 panchang calculations spanning 2025–2026 across 10 Indian cities plus New York,
 London, Sydney, Dubai, Singapore (diaspora fixtures cover DST on
 `America/New_York`).
@@ -755,6 +894,7 @@ London, Sydney, Dubai, Singapore (diaspora fixtures cover DST on
 | Lagna sidereal longitude | Cross-checked against Jagannath Hora reference charts |
 | D1 / D9 house placement | Exact match vs reference for 9-graha placement |
 | Ashtakoot total | ±1 point per pair across 30+ matched pairs |
+| Varjyam windows | count + position vs DrikPanchang over a 61-day / two-nakshatra-cycle sweep, ≤2 min (62/62 windows) |
 | Sade Sati arc start/end | ±1–2 days vs authoritative ephemerides |
 
 **Festival dating** uses tithi-at-sunrise; a few festivals have authorities on
@@ -764,8 +904,9 @@ madhyahna-vyapini for Ganesh Chaturthi edge years) where output can drift
 [documented](https://dharmagya.app/docs/panchang-ts/accuracy#festival-tradeoff).
 
 **Detection conventions:** Aadal / Vidaal follow the classical Moon-from-Sun
-nakshatra-distance rule, not the Tamil-Vakya weekday rule. Varjyam emits the
-sunrise-anchored nakshatra's window only. Do Ghati does not rotate by weekday.
+nakshatra-distance rule, not the Tamil-Vakya weekday rule. Varjyam lists every
+window whose start falls in the Hindu day (Drik's attribution; Mula carries two
+tyajya spells). Do Ghati does not rotate by weekday.
 
 ---
 

@@ -7,8 +7,8 @@
  *      breaks the test. The table is the algorithm's only chart-independent
  *      input.
  *   2. Verify per-receiver Bhinnashtaka totals (chart-invariant) match the
- *      canonical BPHS values: Sun=47, Moon=49, Mars=39, Mercury=54,
- *      Jupiter=56, Venus=52, Saturn=39 — and Sarvashtaka totals 336.
+ *      canonical BPHS values: Sun=48, Moon=49, Mars=39, Mercury=54,
+ *      Jupiter=56, Venus=52, Saturn=39 — and Sarvashtaka totals 337.
  *   3. Verify the cell-wise sum invariant: Sarvashtaka[i] = Σ_recv Bhinn[i].
  *   4. Hand-computed pins for Modi's Sun and Saturn Bhinnashtaka grids —
  *      derived bindu-by-bindu from the published rashi positions in
@@ -344,22 +344,25 @@ describe('Trikona Sodhana (BPHS Ch. 67)', () => {
     expect(out[8]).toBe(4);
   });
 
-  it('zeros every cell in the triad if any cell was already 0', () => {
+  it('a zero cell in the triad means NO reduction (PVR Rule 1 / Maitreya subtract-min)', () => {
+    // AV-1 (2026-08-14 audit): the pre-fix code zeroed the whole triad when
+    // any cell was 0; PVR/PyJHora Rule 1 and Maitreya 8's subtract-the-min
+    // both leave the triad untouched (min = 0).
     const grid = [0, 0, 0, 0, 5, 0, 0, 0, 7, 0, 0, 0];
     const out = trikonaSodhana(grid);
     expect(out[0]).toBe(0);
-    expect(out[4]).toBe(0);
-    expect(out[8]).toBe(0);
+    expect(out[4]).toBe(5);
+    expect(out[8]).toBe(7);
   });
 
   it('reduces all four triads independently', () => {
     // [Aries, Leo, Sag] = [3,5,7] → [0,2,4]
     // [Tau, Vir, Cap]   = [4,4,4] → [0,0,0]
     // [Gem, Lib, Aqu]   = [2,3,5] → [0,1,3]
-    // [Can, Sco, Pis]   = [0,5,7] → [0,0,0] (zero present)
+    // [Can, Sco, Pis]   = [0,5,7] → [0,5,7] (min 0 → no reduction)
     const grid = [3, 4, 2, 0, 5, 4, 3, 5, 7, 4, 5, 7];
     const out = trikonaSodhana(grid);
-    expect(out).toEqual([0, 0, 0, 0, 2, 0, 1, 0, 4, 0, 3, 0]);
+    expect(out).toEqual([0, 0, 0, 0, 2, 0, 1, 5, 4, 0, 3, 7]);
   });
 
   it('does not mutate input grid', () => {
@@ -406,7 +409,7 @@ describe('Ekadhipatya Sodhana (BPHS Ch. 67)', () => {
     expect(out[7]).toBe(4);
   });
 
-  it('one occupied, one vacant → vacant cell is zeroed', () => {
+  it('one occupied, vacant ≤ occupied → vacant cell is zeroed', () => {
     // Aries(0) occupied, Scorpio(7) vacant. Aries=5, Scorpio=4 → Scorpio becomes 0.
     const grid = [5, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0];
     const occupied = new Set<number>([0]);
@@ -415,12 +418,31 @@ describe('Ekadhipatya Sodhana (BPHS Ch. 67)', () => {
     expect(out[7]).toBe(0);
   });
 
-  it('both vacant, unequal → lower cell is zeroed', () => {
+  it('one occupied, vacant > occupied → vacant reduced TO the occupied value (PVR rule 3)', () => {
+    // AV-2 (2026-08-14 audit): the pre-fix code zeroed the vacant cell in
+    // every case; PVR/PyJHora reduce it to the occupied cell's value.
+    const grid = [5, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0];
+    const occupied = new Set<number>([0]);
+    const out = ekadhipatyaSodhana(grid, occupied);
+    expect(out[0]).toBe(5);
+    expect(out[7]).toBe(5);
+  });
+
+  it('either cell already 0 → the pair is skipped (PVR rule 1)', () => {
+    const grid = [0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0];
+    const occupied = new Set<number>([0]);
+    const out = ekadhipatyaSodhana(grid, occupied);
+    expect(out[7]).toBe(7);
+  });
+
+  it('both vacant, unequal → BOTH become the minimum (PVR rule 4)', () => {
+    // AV-2: the pre-fix code zeroed the lower cell; PVR/PyJHora equalise
+    // both at the minimum.
     const grid = [3, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0];
     const occupied = new Set<number>(); // neither occupied
     const out = ekadhipatyaSodhana(grid, occupied);
-    expect(out[0]).toBe(0);
-    expect(out[7]).toBe(7);
+    expect(out[0]).toBe(3);
+    expect(out[7]).toBe(3);
   });
 
   it('both vacant, equal → both cells zeroed', () => {
@@ -497,5 +519,49 @@ describe('Trikona triads and Ekadhipatya pairs — coverage', () => {
 
   it('EKADHIPATYA_PAIRS has 5 entries (Cancer + Leo excluded)', () => {
     expect(EKADHIPATYA_PAIRS).toHaveLength(5);
+  });
+});
+
+// ── PVR Chart 7 — published reference for the two Sodhanas ────────────────
+
+describe('Sodhana vs PVR Narasimha Rao Chart 7 (PyJHora reference)', () => {
+  // BAV rows from PyJHora's ashtakavarga.py __main__ (PVR's published book
+  // chart); occupancy: Aries {Saturn, Moon}, Libra {Jupiter}, Sagittarius
+  // {Mercury, Mars}, Capricorn {Sun}, Aquarius {Venus}. Expected rows are
+  // the reference algorithm's output (subtract-min Trikona, then the PVR
+  // 4-case Ekadhipatya) — reproduced by the audit's probe-sodhana.js and
+  // matching PVR's published pindas (e.g. Mercury's reduced row sums to 12,
+  // with the Taurus cell 3 — the pre-fix code gave 7 and 0).
+  const BAV: Record<string, number[]> = {
+    Sun:     [4, 2, 3, 4, 6, 5, 5, 3, 2, 6, 6, 2],
+    Moon:    [6, 3, 5, 3, 5, 5, 6, 3, 3, 4, 4, 2],
+    Mars:    [3, 2, 3, 4, 2, 5, 4, 3, 3, 4, 3, 3],
+    Mercury: [4, 6, 4, 3, 4, 7, 4, 5, 6, 3, 5, 3],
+    Jupiter: [4, 4, 3, 5, 6, 5, 6, 4, 6, 4, 3, 6],
+    Venus:   [3, 5, 5, 4, 6, 2, 3, 6, 5, 2, 7, 4],
+    Saturn:  [3, 2, 2, 3, 5, 6, 3, 4, 1, 3, 6, 1],
+  };
+  const OCCUPIED = new Set([0, 6, 8, 9, 10]);
+  const EXPECTED: Record<string, number[]> = {
+    Sun:     [2, 0, 0, 2, 4, 3, 2, 0, 0, 4, 3, 0],
+    Moon:    [3, 0, 1, 1, 2, 1, 2, 0, 0, 1, 0, 0],
+    Mars:    [1, 0, 0, 1, 0, 3, 1, 0, 1, 2, 0, 0],
+    Mercury: [0, 3, 0, 0, 0, 4, 0, 2, 2, 0, 1, 0],
+    Jupiter: [0, 0, 0, 1, 2, 1, 3, 0, 2, 0, 0, 0],
+    Venus:   [0, 3, 2, 0, 3, 0, 0, 2, 2, 0, 4, 0],
+    Saturn:  [2, 0, 0, 2, 4, 4, 1, 2, 0, 1, 4, 0],
+  };
+
+  for (const planet of Object.keys(BAV)) {
+    it(`${planet}: Trikona + Ekadhipatya reduce to the reference row`, () => {
+      const reduced = ekadhipatyaSodhana(trikonaSodhana(BAV[planet]!), OCCUPIED);
+      expect(reduced).toEqual(EXPECTED[planet]);
+    });
+  }
+
+  it('Mercury reduced row sums to 12 (audit repro; pre-fix gave 7)', () => {
+    const reduced = ekadhipatyaSodhana(trikonaSodhana(BAV.Mercury!), OCCUPIED);
+    expect(reduced.reduce((a, b) => a + b, 0)).toBe(12);
+    expect(reduced[1]).toBe(3); // Taurus cell — pre-fix zeroed it.
   });
 });

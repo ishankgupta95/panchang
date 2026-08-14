@@ -19,12 +19,12 @@
  *                                     end == sunrise) matches DrikPanchang
  *   - Sayahna Sandhya start + end   50/50 within ±2 min — same algorithm,
  *                                     start == sunset
- *   - Varjyam window (sunrise-active nakshatra) within ±2 min — elastic
- *                                     ghatikas of nakshatra duration. Library
- *                                     returns null on transition days where
- *                                     Drik picks the second nakshatra (the
- *                                     single-window contract is an explicit
- *                                     limitation, not a parity gap).
+ *   - Varjyam windows                 within ±2 min — elastic ghatikas of
+ *                                     nakshatra duration. Multi-window
+ *                                     contract: every window overlapping the
+ *                                     Hindu day is published, so the fixture's
+ *                                     Drik row must match SOME window on every
+ *                                     fixture that has one.
  *   - Anandadi Yoga name            50/50 exact
  *   - Ganda Mula active flag        50/50 exact
  *
@@ -244,23 +244,21 @@ describe('Phase 28 cross-validation against DrikPanchang (50 fixtures)', () => {
       }
 
       // ── STRICT (Varjyam — elastic ghatikas of nakshatra, ±2 min vs Drik) ──
-      // Library only emits the sunrise-active nakshatra's Varjyam (single-
-      // window contract). On transition days Drik may pick the second
-      // nakshatra; in those cases the library returns `null`. The cross-
-      // verify accepts that ONLY on multi-nakshatra days — a `null` on a
-      // single-nakshatra day where Drik shows a window is a real failure.
+      // The library publishes every Varjyam window overlapping the Hindu day
+      // (multi-window contract); the fixture recorded one Drik row, so the
+      // assertion is that SOME published window matches it. The old escape
+      // hatch ("null allowed on transition days") is gone — multi-window is
+      // exactly what closed that gap.
       if (f.expected.varjyamStartHHMM && f.expected.varjyamEndHHMM) {
-        it(`Varjyam matches Drik (or null only on transition days)`, () => {
-          if (result.inauspicious.varjyam) {
-            expect(diffMin(result.inauspicious.varjyam.startLocal, f.expected.varjyamStartHHMM!, f.date))
-              .toBeLessThanOrEqual(SANDHYA_TOL_MIN);
-            expect(diffMin(result.inauspicious.varjyam.endLocal, f.expected.varjyamEndHHMM!, f.date))
-              .toBeLessThanOrEqual(SANDHYA_TOL_MIN);
-          } else {
-            // Drik published a window but library returned null. Permitted
-            // only on transition days (multiple nakshatras span the Hindu day).
-            expect(result.angas.nakshatras.length).toBeGreaterThan(1);
-          }
+        it(`Varjyam: some window matches Drik's row`, () => {
+          const windows = result.inauspicious.varjyam;
+          expect(windows.length, 'Drik printed a Varjyam row; library emitted none')
+            .toBeGreaterThan(0);
+          const best = Math.min(...windows.map((w) => Math.max(
+            diffMin(w.startLocal, f.expected.varjyamStartHHMM!, f.date),
+            diffMin(w.endLocal, f.expected.varjyamEndHHMM!, f.date),
+          )));
+          expect(best).toBeLessThanOrEqual(SANDHYA_TOL_MIN);
         });
       }
 
@@ -338,28 +336,30 @@ describe('Phase 28 cross-validation — aggregate', () => {
     expect(sayahnaMaxDiff).toBeLessThanOrEqual(2);
   });
 
-  it('Varjyam (when emitted) agrees with Drik within ±2 min on every fixture', () => {
+  it('Varjyam agrees with Drik within ±2 min on every fixture that has one', () => {
     let maxDiff = 0;
     let emitted = 0;
+    let withExpected = 0;
     for (const f of TYPED) {
       if (!f.expected.varjyamStartHHMM || !f.expected.varjyamEndHHMM) continue;
+      withExpected++;
       const r = getDailyPanchang(noonUtc(f.date), f.location, {
         timezone: f.timezone,
         language: 'en',
       });
-      if (r === null || r.inauspicious.varjyam === null) continue;
+      if (r === null || r.inauspicious.varjyam.length === 0) continue;
       emitted++;
-      maxDiff = Math.max(
-        maxDiff,
-        diffMin(r.inauspicious.varjyam.startLocal, f.expected.varjyamStartHHMM, f.date),
-        diffMin(r.inauspicious.varjyam.endLocal, f.expected.varjyamEndHHMM, f.date),
-      );
+      const best = Math.min(...r.inauspicious.varjyam.map((w) => Math.max(
+        diffMin(w.startLocal, f.expected.varjyamStartHHMM!, f.date),
+        diffMin(w.endLocal, f.expected.varjyamEndHHMM!, f.date),
+      )));
+      maxDiff = Math.max(maxDiff, best);
     }
-    // We expect a meaningful share of fixtures to emit a Varjyam window;
-    // Drik publishes one for nearly all 50 dates. Anything below ~30 emitted
-    // suggests the single-window contract is dropping more days than the
-    // ~2 transition-days-per-month rate predicts.
-    expect(emitted).toBeGreaterThanOrEqual(30);
+    // Multi-window contract: every fixture where Drik printed a Varjyam row
+    // must yield at least one matching library window — the transition-day
+    // drop-outs of the old single-window contract are exactly what the
+    // multi-window walk closed.
+    expect(emitted).toBe(withExpected);
     expect(maxDiff).toBeLessThanOrEqual(2);
   });
 });

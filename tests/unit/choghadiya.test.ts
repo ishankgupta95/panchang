@@ -75,6 +75,41 @@ describe('computeChoghadiya', () => {
     }
   });
 
+  describe('sequences match DrikPanchang (14 nights, Bengaluru Feb-2027 + Ujjain Aug-2026)', () => {
+    // Day follows the U→C→L→A→K→S→R succession from the weekday lord; night
+    // follows its own U→S→A→C→R→K→L succession, starts advancing +2 (mod 7)
+    // per weekday. An earlier version reused the day succession at night
+    // (2 of 8 slots right); the 2026-08-13 capture then mis-transcribed the
+    // Kaal/Labh order and Tuesday's start. Rows below are drik's, verbatim.
+    const DAY_EXPECTED = [
+      ['Udveg', 'Char', 'Labh', 'Amrit', 'Kaal', 'Shubh', 'Rog', 'Udveg'],   // Sun
+      ['Amrit', 'Kaal', 'Shubh', 'Rog', 'Udveg', 'Char', 'Labh', 'Amrit'],   // Mon
+      ['Rog', 'Udveg', 'Char', 'Labh', 'Amrit', 'Kaal', 'Shubh', 'Rog'],     // Tue
+      ['Labh', 'Amrit', 'Kaal', 'Shubh', 'Rog', 'Udveg', 'Char', 'Labh'],    // Wed
+      ['Shubh', 'Rog', 'Udveg', 'Char', 'Labh', 'Amrit', 'Kaal', 'Shubh'],   // Thu
+      ['Char', 'Labh', 'Amrit', 'Kaal', 'Shubh', 'Rog', 'Udveg', 'Char'],    // Fri
+      ['Kaal', 'Shubh', 'Rog', 'Udveg', 'Char', 'Labh', 'Amrit', 'Kaal'],    // Sat
+    ];
+    const NIGHT_EXPECTED = [
+      ['Shubh', 'Amrit', 'Char', 'Rog', 'Kaal', 'Labh', 'Udveg', 'Shubh'],   // Sun
+      ['Char', 'Rog', 'Kaal', 'Labh', 'Udveg', 'Shubh', 'Amrit', 'Char'],    // Mon
+      ['Kaal', 'Labh', 'Udveg', 'Shubh', 'Amrit', 'Char', 'Rog', 'Kaal'],    // Tue
+      ['Udveg', 'Shubh', 'Amrit', 'Char', 'Rog', 'Kaal', 'Labh', 'Udveg'],   // Wed
+      ['Amrit', 'Char', 'Rog', 'Kaal', 'Labh', 'Udveg', 'Shubh', 'Amrit'],   // Thu
+      ['Rog', 'Kaal', 'Labh', 'Udveg', 'Shubh', 'Amrit', 'Char', 'Rog'],     // Fri
+      ['Labh', 'Udveg', 'Shubh', 'Amrit', 'Char', 'Rog', 'Kaal', 'Labh'],    // Sat
+    ];
+    const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    for (let vara = 0; vara < 7; vara++) {
+      it(`${WEEKDAYS[vara]}: day and night sequences match drik`, () => {
+        const r = computeChoghadiya(SUNRISE, SUNSET, NEXT_SUNRISE, vara, nameResolver, qualityNameResolver);
+        expect(r.day.map((s) => s.name)).toEqual(DAY_EXPECTED[vara]);
+        expect(r.night.map((s) => s.name)).toEqual(NIGHT_EXPECTED[vara]);
+      });
+    }
+  });
+
   describe('quality assignment', () => {
     const result = computeChoghadiya(SUNRISE, SUNSET, NEXT_SUNRISE, 0, nameResolver, qualityNameResolver);
     const allSlots = [...result.day, ...result.night];

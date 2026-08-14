@@ -6,7 +6,286 @@
   reconstructed from the festivals-table release.
 -->
 
-## 5.0.0 — 2026-08-08
+## Unreleased
+
+All fourteen findings of the 2026-08-14 correctness audit, fixed against the
+audit's own DrikPanchang evidence (58 day-pages Jaipur-Feb-2027 /
+Kolkata-Nov-2026, 14 choghadiya pages, plus targeted year-page sweeps).
+Carries two deliberate breaking type changes (`inauspicious.durMuhurta`,
+`muhurtas.amritKala`), following the varjyam `TimePeriod[]` precedent from
+5.1.
+
+### Breaking
+
+- **`inauspicious.durMuhurta` is now `DurMuhurtaPeriod[]`** (was
+  `[TimePeriod, TimePeriod]`) — 1–2 windows, each tagged `segment: 'day' |
+  'night'`. The old table was wrong on **all seven weekdays**; drik (58
+  days, 2 cities, zero exceptions) follows the classical Muhurta-Chintamani
+  ordinals — Sun [13] · Mon [8, 11] · Tue day[3] + **night[6]** · Wed [7] ·
+  Thu [5, 11] · Fri [3, 8] · Sat [0, 1] (0-based; day = sunrise→sunset /15,
+  night = sunset→nextSunrise /15). Sunday and Wednesday carry a single
+  window, and Tuesday's second window falls at night — neither fits the old
+  two-day-window tuple. `computeDurMuhurta` gained a `nextSunrise` parameter
+  and returns the tagged windows. Tier-1 pin: one full drik week (Jaipur,
+  Feb 1–7 2027, ±2 min).
+- **`muhurtas.amritKala` is now `TimePeriod[]`** (was `TimePeriod | null`).
+  The old model (sunrise-anchored, ahoratra-elastic ghatikas, one window,
+  dropped when crossing next sunrise) disagreed with drik by up to ~16 h.
+  Drik's Amrit Kalam is the **varjyam architecture**: anchored at the
+  nakshatra's own start, offset per nakshatra in nakshatra-elastic ghatikas
+  (span/60), width exactly 4 such ghatikas, attributed to the Hindu day the
+  window **starts** in, 0–2 windows/day. The 27-offset table was recovered
+  from 54 drik windows covering all 27 nakshatras (spread ≤0.1 ghati).
+  Corpus note: ProKerala's Telugu panchangam independently confirms the
+  architecture and most offsets (7 of 9 sampled windows ≤2 min) but implies
+  Mula ≈ 45 and U.Bhadrapada ≈ 47.5 where drik uses 44 / 48, and attributes
+  post-midnight windows to the calendar day; drik is the project's parity
+  bar, so its table and attribution ship. `computeAmritKala` is replaced by
+  `computeAmritKalaWindows(sunriseUtc, nextSunriseUtc, getMoon)`. Tier-1
+  pin: 16 days across both sweep cities, incl. drik's empty day (Jaipur
+  2027-02-03) and a post-midnight attribution day.
+
+### Fixed — daily panchang surfaces
+
+- **Night choghadiya (CH-1):** the 2026-08-13 capture transposed Kaal/Labh
+  in the night succession and misread Tuesday's start. Correct cycle
+  Udveg → Shubh → Amrit → Char → Rog → **Kaal → Labh**; starts Sun Shubh,
+  Mon Char, **Tue Kaal**, Wed Udveg, Thu Amrit, Fri Rog, Sat Labh (+2 mod 7).
+  Verified on 14 consecutive drik nights across Bengaluru-Feb-2027 and
+  Ujjain-Aug-2026, then re-fetched live. Names only; times unchanged.
+- **Bhadra vasa (BH-1):** vasa now follows the classical Moon-rashi rule
+  (Karka/Simha/Kumbha/Meena → Prithvi; Mesha/Vrishabha/Mithuna/Vrischika →
+  Swarga; Kanya/Tula/Dhanu/Makara → Patala) instead of the tithi-half table,
+  and `BhadraInfo` gained a piecewise `vasa` segment list for mid-window
+  Moon transitions (drik Ujjain 2026-08-19: "Patala upto 02:30 AM, then
+  Swarga" — reproduced to the minute). Top-level `location` = vasa at
+  window start; window detection and times untouched.
+
+### Fixed — calendar and festival dates
+
+- **Sankranti day rule (SK-1):** a transit during daylight keeps its civil
+  day; a transit between sunset and the next sunrise is observed on the
+  NEXT sunrise's day (was: the Hindu day containing the transit). Drik's
+  full 2027 table discriminates it — Makara Jan 14 21:14 IST → observed
+  Jan 15; Tula Oct 18 02:12 → Oct 18; Vrishchika Nov 17 02:02 → Nov 17 —
+  and is pinned (day + moment ≤2 min) as a tier-1 test. Night-transit rows
+  in 2025/2026 move accordingly (7 of 24); all daytime rows are unchanged.
+  `SankrantiEvent` now exposes the transit instant as `moment`. Applied to
+  `computeSankrantisForYear` and every festival emission keyed on the
+  transit (`sankranti`, `makar_sankranti`, `pongal`, regionals, Lohri /
+  Raja Parba neighbors).
+- **Kshaya-Dwadashi Ekadashi advance (EK-1):** when the Dwadashi after an
+  Ekadashi contains no sunrise there is no valid parana morning, and the
+  Smarta fast advances to the day the tithi begins (Trisprisha), with the
+  Vaishnava (Gauna) fast on the udaya day. Drik 2027: Pausha Putrada
+  Jan 18 + "Trisparsha Mahadwadashi / Gauna" Jan 19; drik 2025 (Devutthana
+  Nov 1 / Nov 2) shows the same split. The 2026 list is untouched (tier-1
+  re-run green); drik's full 25-date 2027 list is now pinned.
+- **Vijayadashami (FE-2):** now keyed on aparahna, not sunrise: the day
+  Dashami covers the ENTIRE aparahna kala (3/5→4/5 of daylight) wins; when
+  neither day does, the day the tithi ends wins (para-viddha). Recovered
+  from 11 drik years (2020–2030) and pinned — includes 2026 Oct 20 and
+  2027 Oct 9, both of which the sunrise rule mis-dated by one day.
+- **Karva Chauth (FE-3):** now keyed on the Chaturthi prevailing at
+  MOONRISE (unclamped Hindu-day moonrise), with a sunrise-prevalence
+  fallback when the tithi touches no moonrise on either day (drik 2025:
+  Chaturthi missed both moonrises, drik still printed Oct 10). Drik
+  2024–2027 pinned; 2027 moves Oct 19 → Oct 18. Sankashti Chaturthi gained
+  the same vriddha two-moonrise dedupe.
+- **Krishna Janmashtami (FE-1):** the Smarta ladder recovered from 7 drik
+  years (2024–2030): the udaya-Ashtami day wins whenever Ashtami OR Rohini
+  touches its nishita muhurta; otherwise the day Ashtami covers nishita
+  wins, Saptami-viddha or not (2025). Rohini alone never pulls the festival
+  onto a Navami day (2028). 2027 moves Aug 24 → Aug 25 (drik's main date);
+  2026 stays Sep 4.
+- **Kali Yuga year (CV-1):** now increments at Chaitra Shukla Pratipada
+  (same `chaitraNewMoon` anchor as `computeSamvat`, keeping Kali − Vikram =
+  3044 year-round) instead of the Feb-18 epoch anniversary, which
+  mislabeled every date in [Feb 18, Chaitra Pratipada). Drik pins:
+  2026-03-01 → 5126, 2026-03-20 → 5127.
+
+### Fixed — muhurta engine and jyotish
+
+- **`scoreMuhurta` ≠ range API (MU-1):** `scoreMuhurta` passed
+  `computeEndTimes: false`, so vara×nakshatra special yogas beginning after
+  sunrise (amrit_siddhi / sarvartha_siddhi +5, jwalamukhi −10) were scored
+  by `computeAuspiciousDatesInRange` and `buildMuhurtaTable` but not by
+  `scoreMuhurta`. End times stay on now; a 66-day sweep pins the two entry
+  points to identical scores, passes and factor multisets (repro: vivah,
+  Delhi, 2027-05-04 — 50 → 60, converged).
+- **Upagraha weekday (UP-1/UP-2):** Gulika/Mandi derived the weekday from
+  `getUTCDay()` of the sunrise instant, selecting the previous day's slot
+  wherever local sunrise falls before 00:00 UTC (lon ≳97.5 °E year-round;
+  the ~82–97 °E band in summer). The weekday now comes from the
+  longitude-shifted LMT date of that sunrise (Bangkok Friday-noon repro:
+  gulika 162.129° → 138.857°); a dead identical-branch ternary was
+  collapsed. India-winter charts unchanged (fixture sweep green).
+- **Ashtakavarga Sodhana (AV-1/AV-2/AV-3, opt-in `reductions` path):**
+  Trikona now subtracts the triad minimum with **no** reduction when a cell
+  is 0 (PVR Rule 1 ≡ Maitreya 8's subtract-min; the old code zeroed the
+  whole triad). Ekadhipatya now implements the PVR/PyJHora four-case form —
+  zero cell → skip; both occupied → skip; one occupied → vacant clamps to
+  the occupied value (0 if ≤); both vacant → both take the min, or 0 when
+  equal (the old code blanket-zeroed). PVR Chart 7 reproduces the published
+  pindas (Mercury reduced row sums 12, not 7). Unreduced BAV/SAV untouched;
+  a stale "sum = 336" doc example now reads 337.
+- `src/jyotish/aspects.ts` docstring no longer calls Jupiter a malefic.
+
+### Fixed — Smarta / Vaishnava Ekadashi split (VE-1, VE-2)
+
+Closes the divergence the audit tracked but did not fix. DrikPanchang states
+the orientation in prose on every Ekadashi date-time page: *"Smartha with
+family should observe fasting on first day only. The alternate Ekadashi
+fasting, which is the second one, is suggested for Sanyasis, widows and for
+those who want Moksha. When alternate Ekadashi fasting is suggested for
+Smartha it coincides with Vaishnava Ekadashi fasting day."* So in every split
+drik publishes, whatever its tithi geometry, **the earlier day is Smarta and
+the later day Vaishnava**.
+
+A sweep of all 109 Ekadashi tithi windows in 2024–2028 (Jaipur) against
+drik's year lists found exactly three geometries that make drik print two
+days. The library now agrees with all three — 151 emission-days compared,
+zero mismatches.
+
+- **Dashami-viddha split was emitted backwards (VE-1):** the library put the
+  Vaishnava fast on the viddha day and deferred the *Smarta* fast to
+  Dwadashi. It is the Vaishnava observance that rejects an arunodaya-viddha
+  Ekadashi; the Smarta fast keeps the udaya-vyapini day. Now: viddha day →
+  `smarta_ekadashi` + `ekadashi` (no `vaishnava_ekadashi`); next day →
+  `vaishnava_ekadashi`. Pinned on all five pairs drik publishes in 2024–2028
+  — Vijaya Mar 6/7 2024, Apara Jun 2/3 2024, Papamochani Mar 25/26 2025,
+  Rama Oct 25/26 2027, Aja Aug 16/17 2028. The 96-min (4-ghati) arunodaya
+  already in use separates them cleanly: those five tithis begin 15–79 min
+  before sunrise against a 132-min minimum across the 94 non-split days.
+  The kshaya/Gauna and Trisprisha branches already had this orientation, so
+  all three split mechanisms now agree.
+- **Vriddha-Dwadashi (Pakshavardhini) split was missing entirely (VE-2):**
+  when the Dwadashi following an ordinary Ekadashi prevails at two
+  consecutive sunrises, drik moves the alternate (Vaishnava) fast onto that
+  Dwadashi and prints a standalone "Vaishnava &lt;name&gt;" row. The library
+  emitted nothing on the second day and both fasts on the first. Now
+  detected from sunrise tithis alone on the Dwadashi day (no extra rise/set
+  search) and with one lookahead on the Ekadashi day. 4 occurrences in
+  2024–2028, no counterexamples: Nirjala Jun 6/7 2025, Shravana Putrada
+  Aug 23/24 2026, Vijaya Feb 20/21 2028, Devutthana Oct 28/29 2028.
+- **i18n:** the three viddha description templates are replaced, since the
+  party that defers changed. `desc_ekadashi_deferred_to_dwadashi`,
+  `desc_ekadashi_viddha_smarta_next` and `desc_ekadashi_viddha_smarta_today`
+  give way to `desc_ekadashi_viddha_vaishnava_next`,
+  `desc_ekadashi_viddha_vaishnava_today`,
+  `desc_ekadashi_vriddha_dwadashi_next` and
+  `desc_ekadashi_vriddha_dwadashi_vaishnava` (en + hi). Only relevant to
+  callers supplying a custom locale pack.
+- `computeEkadashiDatesForYear` is untouched — its sunrise-prevalence list
+  already returns drik's Smarta dates. The 2026 (24-date) and 2027 (25-date)
+  tier-1 lists, the kshaya pairs, the vriddha day and the Trisprisha pairs
+  are all unchanged.
+- **`FestivalInfo.deferralDate` is removed.** It was declared on the type and
+  documented as "the Smarta Ekadashi's Dwadashi fast date", but nothing in
+  the library ever assigned it — every read got `undefined`. Its premise is
+  also backwards now that the deferring party is the Vaishnava fast, and the
+  two-day split is already expressed by the emissions themselves.
+
+### Fixed — regional solar new years (SN-1)
+
+The SK-1 sankranti day rule was never carried into the Mesha-anchored
+regional new years: `baisakhi`, `vishu`, `pohela_boishakh`, `puthandu` and
+`bohag_bihu` all shared one day, and `getHinduNewYear`'s solar path used its
+own coarse "first day already in Mesha at 00:00 UTC" sampling. Three of the
+four traditions drik publishes key off the transit **moment** differently and
+land on different dates in the same year.
+
+Validated against drik's per-region date pages for 2025–2029, whose five
+Mesha transits (Apr 14 03:30 · Apr 14 09:39 · Apr 14 15:33 · **Apr 13
+21:47** · Apr 14 03:56 IST) cover pre-dawn, morning, afternoon and
+post-sunset — without all five the rules are indistinguishable:
+
+| region | rule | 2025 | 2026 | 2027 | 2028 | 2029 |
+|---|---|---|---|---|---|---|
+| Tamil Nadu (Puthandu) | Sankranti observance day (SK-1) | 14 | 14 | 14 | 14 | 14 |
+| Punjab (Vaisakhi) | civil day containing the transit | 14 | 14 | 14 | **13** | 14 |
+| Kerala (Vishu) | day of the first sunrise at/after the transit | 14 | **15** | **15** | 14 | 14 |
+| West Bengal (Pohela Boishakh) | day after the transit's civil day | **15** | **15** | **15** | 14 | **15** |
+
+- `getHinduNewYear(year, region, …)` now threads the region through and
+  computes the transit to the second instead of sampling at 00:00 UTC. Its
+  Chaitra Shukla Pratipada path is untouched.
+- The three moved keys emit from their own day flags rather than
+  `SANKRANTI_REGIONAL[0]`; `puthandu` stays on the transit day. Both
+  surfaces (`getHinduNewYear` and the day-panchang emission) now agree, and
+  each key fires on exactly one day — pinned as a new tier-1 test,
+  `tests/validation/regional-solar-newyear-drik.test.ts` (20 region-years).
+- The generic `sankranti`, `makar_sankranti` and `pongal` emissions are
+  unchanged, as are the 2027 12-row sankranti pin and the Reykjavik tier-2
+  margin test.
+
+### Known divergence (tracked, not fixed here)
+
+- **Bohag Bihu (Assam) is not pinned.** DrikPanchang publishes no Bohag /
+  Rongali Bihu date page, so the Assamese rule could not be established to
+  the project's ≥2-source bar and the key still rides the Sankranti
+  observance day (as Tamil Nadu). Assamese practice generally follows the
+  Bengali reckoning — new year on the day *after* the transit's civil day,
+  with the transit day itself as Goru Bihu — which would group it with
+  `pohela_boishakh` and change its date in 4 of the 5 years above. Left on
+  the transit day pending a citable reference rather than guessed at.
+
+## 5.1.0 — 2026-08-14
+
+> **Note:** this minor release deliberately carries one breaking type change
+> (`inauspicious.varjyam`), documented below with its migration. It ships as
+> 5.1.0 rather than 6.0.0 because v5 is days old; if you consume `varjyam`,
+> pin 5.0.x until you have applied the one-line migration.
+
+### Breaking
+
+- **`inauspicious.varjyam` is now `TimePeriod[]`** (was `TimePeriod | null`).
+  The old single-window contract evaluated only the nakshatra active at
+  sunrise and dropped drik's second Varjyam row on transition days. The field
+  now lists every window whose **start** falls in the Hindu day, in start
+  order (drik's attribution: a window beginning before sunrise belongs to the
+  previous day, even if it runs past sunrise). `[]` when none — the shape now
+  follows the v5 collection rule. New export `computeVarjyamWindows(sunriseUtc,
+  nextSunriseUtc, getMoon)`; the single-window `computeVarjyam` primitive is
+  unchanged in signature and now returns the earliest overlapping window.
+
+### Added
+
+- **Opt-in Gana-dosha cancellation** in `computeAshtakoot` via a new third
+  parameter `options: { ganaCancellation?: boolean }` (default `false` —
+  default output is byte-identical, preserving drik 36-guna parity). When
+  raised, a doshic Gana score (≤ 1) is restored to 6 if the two Moons' sign
+  lords are the same graha or mutual naisargika friends; the reason is
+  recorded in `cancellations`. Conditions sourced from ≥2 independent pandit
+  corpora (Truthstar/MysticGazer, AstroSight, JagannathHora); weaker or
+  interpretive conditions are documented on `AshtakootOptions` and not
+  encoded.
+
+### Fixed
+
+- **Yogini Dasha starting Yogini was off by three positions for every
+  birth.** The classical Devi-Bhagavata rule is (1-based janma nakshatra
+  + 3) mod 8 → remainder 1 = Mangala … 0 = Sankata (so Ashwini starts
+  Bhramari, Pushya starts Dhanya); the code used `nakIdx % 8` (Ashwini →
+  Mangala). Confirmed against published worked examples (Anuradha →
+  Bhramari) and PyJHora's per-Yogini star lists, which encode exactly the
+  classical formula.
+- **Ashtottari Dasha used an invented proportional nakshatra split.** The
+  starting lord came from dividing the zodiac in proportion to each lord's
+  years from a Krittika anchor (Sun's segment = 1.5 nakshatras), matching
+  no consulted source. Replaced with the classical Ardradi group table
+  (malefics rule 4 nakshatras each, benefics 3; Sun = Ardra…Ashlesha,
+  Venus = Krittika…Mrigashira; exported as `ASHTOTTARI_NAKSHATRA_GROUPS`),
+  with the balance taken as the elapsed fraction of the lord's group.
+  Verified against PyJHora (27-star form) and Maitreya 8 (28-star form with
+  Abhijit) — identical longitude spans, so both sources agree on every
+  lord-at-birth and balance this produces. Mula (alone of the 27 nakshatras) carries
+  two Varjyam spells, at elapsed ghatikas 20 and 56 of its duration. Only the
+  56-spell was tabulated, so days where drik prints Mula's 20-spell window
+  (e.g. 2026-08-22, and 2026-09-19 where BOTH land in one day) published
+  nothing. Validated against a 61-day drik scrape (Aug–Sep 2026, Ujjain: 62/62
+  windows match ≤2 min incl. display truncation), ProKerala's Telugu
+  panchangam, and B.V. Raman's *Muhurta* (Moola tyajya = 20).
 
 **Major release.** Held until the ephemeris port landed (Phase 36.2–36.5) so the
 whole break arrives once: performance, the table/compute API, the corrected

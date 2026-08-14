@@ -1,7 +1,8 @@
 import { solveElementBoundary, type ElementAngle } from '../utils/search';
 import { getKaranaIndexAtTime } from './karana';
 import { KARANA_SPAN } from '../utils/constants';
-import type { BhadraInfo } from '../types/elements';
+import { normalize360 } from '../utils/angle';
+import type { BhadraInfo, BhadraVasaSegment } from '../types/elements';
 
 /** Karana indices per lunation: 360° of elongation at 6° each. */
 const KARANA_CYCLE_LENGTH = 360 / KARANA_SPAN;
@@ -43,22 +44,38 @@ export function isVishtiKarana(karanaIndex: number): boolean {
 }
 
 /**
- * Classical Bhadra-vāsa (abode) mapping by half-tithi position.
+ * Classical Bhadra-vāsa (abode) mapping by the Moon's rashi during the
+ * window (Muhurta Chintamani; matches the DrikPanchang engine — verified
+ * against drik's printed vasa including a mid-window Moon transition on
+ * Ujjain 2026-08-19). An earlier revision keyed this on the half-tithi the
+ * Vishti karana falls in, which is not the classical basis and disagreed
+ * with drik.
+ *
  * - Earth (Bhū-loka): most inauspicious; all earthly rituals avoided.
  * - Paatal: less severe; affects only earth-level matters indirectly.
  * - Heaven (Svarga): benign for terrestrial observances.
- *
- * Common mapping used in printed panchangs:
- *   Earth:   Shukla Chaturthi, Shukla Ekadashi, Krishna Tritiya, Krishna Dashami
- *   Paatal:  Shukla Ashtami,   Shukla Purnima,  Krishna Saptami, Krishna Chaturdashi
  */
-function bhadraLocation(vishtiKaranaIndex: number): 'earth' | 'heaven' | 'paatal' {
-  const vishtiPositions = [7, 14, 21, 28, 35, 42, 49, 56];
-  const position = vishtiPositions.indexOf(vishtiKaranaIndex);
-  if (position < 0) return 'heaven';
-  const earthIndices = new Set([0, 2, 4, 6]);
-  return earthIndices.has(position) ? 'earth' : 'paatal';
+const VASA_BY_RASHI: readonly ('earth' | 'heaven' | 'paatal')[] = [
+  'heaven', // 0  Mesha
+  'heaven', // 1  Vrishabha
+  'heaven', // 2  Mithuna
+  'earth',  // 3  Karka
+  'earth',  // 4  Simha
+  'paatal', // 5  Kanya
+  'paatal', // 6  Tula
+  'heaven', // 7  Vrischika
+  'paatal', // 8  Dhanu
+  'paatal', // 9  Makara
+  'earth',  // 10 Kumbha
+  'earth',  // 11 Meena
+];
+
+/** Vasa for a sidereal Moon longitude. Exported for tests. */
+export function bhadraVasaForRashi(rashiIndex: number): 'earth' | 'heaven' | 'paatal' {
+  return VASA_BY_RASHI[((rashiIndex % 12) + 12) % 12]!;
 }
+
+const RASHI_SPAN = 30;
 
 /**
  * Locate the Vishti (Bhadra) karana window overlapping the Hindu day.
@@ -189,12 +206,60 @@ export function computeBhadraKaal(
     }
   }
 
-  const location = bhadraLocation(vishtiKaranaIndex);
+  // ── Piecewise vasa: one segment per Moon rashi the window spans ──
+  //
+  // Drik prints the vasa piecewise when the Moon changes rashi mid-window
+  // ("Patala upto 02:30 AM, then Swarga"). The Moon needs ≥ ~2 days per
+  // rashi and a Bhadra window spans ≤ ~17 h, so at most one boundary can
+  // fall inside the window; the walk below nevertheless handles any number.
+  const rashiAt = (d: Date): number =>
+    Math.floor(normalize360(getMoon(d)) / RASHI_SPAN) % 12;
+  const rashiAngle: ElementAngle = { angleAt: getMoon, spanDeg: RASHI_SPAN };
+
+  const vasa: BhadraVasaSegment[] = [];
+  let segStartMs = startTime.getTime();
+  let segRashi = rashiAt(startTime);
+  const endMs = endTime.getTime();
+  while (rashiAt(new Date(endMs)) !== segRashi) {
+    // First rashi boundary in (segStartMs, endMs]: the Moon's longitude is
+    // monotonic, so bisection on "still in the segment's rashi" brackets it.
+    let lo = segStartMs;
+    let hi = endMs;
+    for (let i = 0; i < MAX_BRACKET_ITERS && hi - lo > BRACKET_MS; i++) {
+      const mid = (lo + hi) / 2;
+      if (rashiAt(new Date(mid)) === segRashi) lo = mid;
+      else hi = mid;
+    }
+    const solved = solveElementBoundary(
+      lo, hi, rashiAngle, (ms) => rashiAt(new Date(ms)) === segRashi,
+    );
+    const crossMs = solved ?? hi;
+    const segLocation = bhadraVasaForRashi(segRashi);
+    vasa.push({
+      start: new Date(segStartMs),
+      end: new Date(crossMs),
+      location: segLocation,
+      locationName: locationNameFn(segLocation),
+    });
+    segStartMs = crossMs;
+    segRashi = (segRashi + 1) % 12;
+  }
+  const lastLocation = bhadraVasaForRashi(segRashi);
+  vasa.push({
+    start: new Date(segStartMs),
+    end: endTime,
+    location: lastLocation,
+    locationName: locationNameFn(lastLocation),
+  });
+
+  // Top-level location = vasa at the window's start, for compatibility.
+  const location = vasa[0]!.location;
   return {
     start: startTime,
     end: endTime,
     location,
     locationName: locationNameFn(location),
+    vasa,
     isActive: isVishtiKarana(sunriseKarana),
   };
 }

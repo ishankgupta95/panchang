@@ -44,9 +44,9 @@ export interface AspectsOptions {
 /**
  * Compute the set of houses aspected by every graha in a chart.
  *
- * Every graha aspects the 7th house from itself. The four malefics (Mars,
- * Jupiter, Saturn, plus optionally Rahu / Ketu) gain extra "special"
- * aspects:
+ * Every graha aspects the 7th house from itself. Mars, Jupiter and Saturn
+ * (plus optionally Rahu / Ketu) gain extra "special" aspects per BPHS
+ * Ch. 26:
  *
  *   - Mars: 4th and 8th from itself.
  *   - Jupiter: 5th and 9th from itself.

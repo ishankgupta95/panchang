@@ -34,7 +34,7 @@ const chaitraCache = new Map<number, number>();
  * immediately after it; for era-numbering purposes the new-moon instant is an
  * accurate (<1 day) boundary and is location-independent.
  */
-function chaitraNewMoon(gregYear: number): number {
+export function chaitraNewMoon(gregYear: number): number {
   const cached = chaitraCache.get(gregYear);
   if (cached !== undefined) return cached;
 

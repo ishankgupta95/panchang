@@ -4,7 +4,7 @@ import {
   computeVijayaMuhurta,
   computeGodhuliMuhurta,
   computeNishitaMuhurta,
-  computeAmritKala,
+  computeAmritKalaWindows,
   computeMadhyahna,
   computePratahSandhya,
   computeSayahnaSandhya,
@@ -184,69 +184,45 @@ describe('computeNishitaMuhurta', () => {
   });
 });
 
-describe('computeAmritKala', () => {
-  // Symmetric 24-hour ahoratra: ghatika = 24 min.
-  const ahoSunrise = new Date('2024-01-01T06:00:00Z');
-  const ahoNextSunrise = new Date('2024-01-02T06:00:00Z');
+describe('computeAmritKalaWindows', () => {
+  // Synthetic Moon: exactly one nakshatra per 24 h, boundaries at 00:00 UTC.
+  // getMoon returns a sidereal longitude advancing 360/27 degrees per day
+  // from Ashwini's start at the 2024-01-01T00:00Z epoch.
+  const NAK_SPAN = 360 / 27;
+  const epochMs = Date.parse('2024-01-01T00:00:00Z');
+  const dayMs = 24 * 3600_000;
+  const getMoon = (d: Date) => ((d.getTime() - epochMs) / dayMs) * NAK_SPAN;
 
-  it('returns a 4-ghatika (96 min) window when within the Hindu day', () => {
-    // Pushya (index 7): offset 20 ghatikas = 480 min = 8h. start = 14:00, end = 15:36.
-    const amrit = computeAmritKala(ahoSunrise, ahoNextSunrise, 7);
-    expect(amrit).not.toBeNull();
-    const width = amrit!.end.getTime() - amrit!.start.getTime();
-    expect(width).toBe(96 * 60_000);
-    expect(amrit!.start.getUTCHours()).toBe(14);
-    expect(amrit!.start.getUTCMinutes()).toBe(0);
+  const sunrise = new Date('2024-01-01T06:00:00Z');
+  const nextSunrise = new Date('2024-01-02T06:00:00Z');
+
+  it('anchors at the nakshatra start with the tabulated offset, width 4 elastic ghatikas', () => {
+    // Ashwini (0): offset 42, nakshatra 2024-01-01T00:00 → 01-02T00:00,
+    // ghatika = 24 min. Start = 00:00 + 42×24min = 16:48, end = 18:24.
+    // Starts within [sunrise, nextSunrise) → attributed to this day.
+    const windows = computeAmritKalaWindows(sunrise, nextSunrise, getMoon);
+    expect(windows.length).toBeGreaterThanOrEqual(1);
+    const w = windows[0]!;
+    expect(w.start.toISOString()).toBe('2024-01-01T16:48:00.000Z');
+    expect(w.end.getTime() - w.start.getTime()).toBe(4 * 24 * 60_000);
   });
 
-  it('offset differs per nakshatra (Anuradha at 10 ghatikas)', () => {
-    // Anuradha (16): offset 10 ghatikas = 240 min = 4h. start = 10:00.
-    const amrit = computeAmritKala(ahoSunrise, ahoNextSunrise, 16);
-    expect(amrit).not.toBeNull();
-    expect(amrit!.start.getUTCHours()).toBe(10);
-    expect(amrit!.start.getUTCMinutes()).toBe(0);
+  it('a window whose start falls before sunrise belongs to the previous day', () => {
+    // Bharani (1): offset 48 → starts 2024-01-02T19:12Z, inside this Hindu
+    // day? Bharani spans 01-02T00:00 → 01-03T00:00; 48×24min = 19.2h →
+    // 19:12, which is after this day's nextSunrise (01-02T06:00) → not
+    // attributed here; and Ashwini's 16:48 window IS. So exactly one.
+    const windows = computeAmritKalaWindows(sunrise, nextSunrise, getMoon);
+    expect(windows).toHaveLength(1);
   });
 
-  it('scales ghatika duration proportionally to ahoratra length', () => {
-    // A 12h ahoratra: each ghatika = 12 min. Pushya offset 20 ghatikas = 240 min = 4h.
-    const shortNext = new Date(ahoSunrise.getTime() + 12 * 3600_000);
-    const amrit = computeAmritKala(ahoSunrise, shortNext, 7);
-    expect(amrit).not.toBeNull();
-    expect(amrit!.start.getUTCHours()).toBe(10); // 06:00 + 4h = 10:00
-    // Window length = 4 ghatikas * 12 min = 48 min
-    expect(amrit!.end.getTime() - amrit!.start.getTime()).toBe(48 * 60_000);
-  });
-
-  it('throws RangeError for out-of-range nakshatra index', () => {
-    // Aligned with the new Phase 28 functions (Varjyam, GandaMula, Anandadi):
-    // out-of-range indices are programmer errors and throw, leaving `null`
-    // to mean only "no Amrit Kala window today".
-    expect(() => computeAmritKala(ahoSunrise, ahoNextSunrise, -1)).toThrow(RangeError);
-    expect(() => computeAmritKala(ahoSunrise, ahoNextSunrise, 27)).toThrow(RangeError);
-  });
-
-  // The three indices where AMRIT_KALA_OFFSET_GHATIKAS diverges from
-  // VARJYAM_OFFSET_GHATIKAS — pinning them here makes accidental cross-table
-  // copy-paste fail loudly instead of silently shipping wrong windows.
-  it('Rohini (3) → 26 ghatikas → start 06:00 + 10:24 = 16:24', () => {
-    const amrit = computeAmritKala(ahoSunrise, ahoNextSunrise, 3);
-    expect(amrit).not.toBeNull();
-    expect(amrit!.start.getUTCHours()).toBe(16);
-    expect(amrit!.start.getUTCMinutes()).toBe(24);
-  });
-
-  it('Mula (18) → 20 ghatikas → start 06:00 + 8:00 = 14:00', () => {
-    const amrit = computeAmritKala(ahoSunrise, ahoNextSunrise, 18);
-    expect(amrit).not.toBeNull();
-    expect(amrit!.start.getUTCHours()).toBe(14);
-    expect(amrit!.start.getUTCMinutes()).toBe(0);
-  });
-
-  it('Revati (26) → 20 ghatikas → start 06:00 + 8:00 = 14:00', () => {
-    const amrit = computeAmritKala(ahoSunrise, ahoNextSunrise, 26);
-    expect(amrit).not.toBeNull();
-    expect(amrit!.start.getUTCHours()).toBe(14);
-    expect(amrit!.start.getUTCMinutes()).toBe(0);
+  it('windows are attributed to the day their START falls in (post-midnight case)', () => {
+    // Day 2024-01-02: Bharani's window starts 01-02T19:12Z ∈ [06:00, +1d06:00) → attributed.
+    const windows = computeAmritKalaWindows(
+      new Date('2024-01-02T06:00:00Z'), new Date('2024-01-03T06:00:00Z'), getMoon,
+    );
+    expect(windows).toHaveLength(1);
+    expect(windows[0]!.start.toISOString()).toBe('2024-01-02T19:12:00.000Z');
   });
 });
 

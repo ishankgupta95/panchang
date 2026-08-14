@@ -1,8 +1,14 @@
 import { getNakshatraIndexAtTime } from './nakshatra';
 import { solveElementBoundary, type ElementAngle } from '../utils/search';
-import { VARJYAM_OFFSET_GHATIKAS } from '../utils/constants';
+import {
+  VARJYAM_OFFSET_GHATIKAS,
+  VARJYAM_SECOND_OFFSET_GHATIKAS,
+} from '../utils/constants';
 import { assertNakshatraIndex } from '../utils/validation';
 import type { UtcWindow } from '../types/elements';
+
+/** Safety cap on nakshatras walked per Hindu day (matches MAX daily nakshatras). */
+const MAX_VARJYAM_NAKSHATRAS = 3;
 
 /**
  * Lookback / lookforward window for the bisections that locate the
@@ -51,20 +57,30 @@ const MAX_BRACKET_ITERS = 30;
  * nakshatra's boundaries cannot be located within
  * {@link NAKSHATRA_LOOKBACK_HOURS} / {@link NAKSHATRA_LOOKFORWARD_HOURS}.
  *
- * Single-window contract
- * ----------------------
- * Only the nakshatra active at sunrise is consulted. Days on which a
- * nakshatra transition occurs may host two Varjyam windows (one per
- * nakshatra); printed panchangs show both. This API returns at most one.
- * A future revision may return an array.
+ * Dual-spell nakshatras
+ * ---------------------
+ * Mula carries TWO tyajya spells (elapsed ghatikas 20 and 56 — see
+ * {@link VARJYAM_SECOND_OFFSET_GHATIKAS} for sourcing); every other
+ * nakshatra has one. Where both of Mula's spells overlap the day this
+ * single-window primitive reports the EARLIEST; use
+ * {@link computeVarjyamWindows} for the full per-day list.
+ *
+ * Single-window primitive
+ * -----------------------
+ * This function evaluates ONE nakshatra — the one active at `sunriseUtc`.
+ * Days on which a nakshatra transition occurs may host a second Varjyam
+ * window from the incoming nakshatra; printed panchangs (drik included)
+ * show both. Use {@link computeVarjyamWindows} for the full per-day list —
+ * `getDailyPanchang` publishes that. This single-window form is kept as
+ * the stable primitive.
  *
  * @param currentNakshatraIndex  Nakshatra index (0..26) active at `sunriseUtc`.
  * @param sunriseUtc             UTC of local sunrise — start of the Hindu day.
  * @param nextSunriseUtc         UTC of the following day's local sunrise.
  * @param getMoon                Sidereal Moon longitude (degrees) at a UTC instant.
- * @returns                      The Varjyam `UtcWindow`, or `null` when the
- *                               computed window has no overlap with the Hindu day,
- *                               or when the nakshatra's boundaries cannot be located.
+ * @returns                      The earliest Varjyam `UtcWindow` overlapping the
+ *                               Hindu day, or `null` when none overlaps or the
+ *                               nakshatra's boundaries cannot be located.
  */
 export function computeVarjyam(
   currentNakshatraIndex: number,
@@ -73,30 +89,140 @@ export function computeVarjyam(
   getMoon: (d: Date) => number,
 ): UtcWindow | null {
   assertNakshatraIndex(currentNakshatraIndex, 'currentNakshatraIndex');
+  const overlapping = varjyamSpellsForNakshatra(currentNakshatraIndex, sunriseUtc, getMoon)
+    .filter((w) =>
+      w.end.getTime() > sunriseUtc.getTime() &&
+      w.start.getTime() < nextSunriseUtc.getTime());
+  return overlapping[0] ?? null;
+}
 
+/**
+ * All Varjyam windows of a Hindu day, in start order.
+ *
+ * Walks every nakshatra touching `[sunriseUtc, nextSunriseUtc)` — the one
+ * active at sunrise, then each successor as it begins — and evaluates the
+ * Varjyam slice of each. Most days yield one entry; days with a nakshatra
+ * transition often yield two (the incoming nakshatra's slice can begin
+ * before the following sunrise), matching the two-row Varjyam listings drik
+ * prints on such days. The pre-existing single-window API reported at most
+ * one and silently dropped the second.
+ *
+ * Attribution rule (drik parity, verified against 6 drik day-panchang pages
+ * Aug 2026 Ujjain): a window belongs to the Hindu day its START falls in —
+ * `sunriseUtc <= start < nextSunriseUtc`. A window that begins before
+ * today's sunrise and runs past it is yesterday's (drik prints it only on
+ * yesterday's page), so publishing on any-overlap would double-print every
+ * sunrise-straddling window on two consecutive days. Windows themselves are
+ * true instants — the end may exceed `nextSunriseUtc` and is not clamped.
+ *
+ * @param sunriseUtc      UTC of local sunrise — start of the Hindu day.
+ * @param nextSunriseUtc  UTC of the following day's local sunrise.
+ * @param getMoon         Sidereal Moon longitude (degrees) at a UTC instant.
+ */
+export function computeVarjyamWindows(
+  sunriseUtc: Date,
+  nextSunriseUtc: Date,
+  getMoon: (d: Date) => number,
+): UtcWindow[] {
+  return collectNakshatraOffsetWindows(sunriseUtc, nextSunriseUtc, getMoon, spellsFromBoundaries);
+}
+
+/**
+ * Walk every nakshatra touching `[sunriseUtc, nextSunriseUtc)` and collect
+ * the windows `spellsOf` derives from each one's located boundaries, keeping
+ * those whose START falls inside the Hindu day — the drik attribution rule
+ * shared by Varjyam and Amrit Kala (both are nakshatra-anchored offset
+ * windows in the nakshatra-elastic ghatika frame; only the offset tables and
+ * auspicious/inauspicious polarity differ).
+ */
+export function collectNakshatraOffsetWindows(
+  sunriseUtc: Date,
+  nextSunriseUtc: Date,
+  getMoon: (d: Date) => number,
+  spellsOf: (nakshatraIndex: number, nakshatraStartUtc: Date, nakshatraEndUtc: Date) => UtcWindow[],
+): UtcWindow[] {
   const getIndex = (d: Date) => getNakshatraIndexAtTime(d, getMoon);
   const angle: ElementAngle = { angleAt: getMoon, spanDeg: 360 / 27 };
 
-  const nakshatraStartUtc = findNakshatraStart(sunriseUtc, currentNakshatraIndex, getIndex, angle);
-  if (nakshatraStartUtc === null) return null;
+  const out: UtcWindow[] = [];
+  let referenceUtc = sunriseUtc;
+  // Boundaries are threaded through the walk: each nakshatra's end doubles
+  // as the next one's start, so the first nakshatra costs two boundary
+  // searches and each successor only one.
+  let knownStartUtc: Date | null = null;
+  for (let i = 0; i < MAX_VARJYAM_NAKSHATRAS; i++) {
+    const nakIdx = getIndex(referenceUtc);
+    const startUtc = knownStartUtc
+      ?? findNakshatraStart(referenceUtc, nakIdx, getIndex, angle);
+    const endUtc = findNakshatraEnd(referenceUtc, nakIdx, getIndex, angle);
+    if (startUtc === null || endUtc === null) break;
 
-  const nakshatraEndUtc = findNakshatraEnd(sunriseUtc, currentNakshatraIndex, getIndex, angle);
-  if (nakshatraEndUtc === null) return null;
+    for (const w of spellsOf(nakIdx, startUtc, endUtc)) {
+      if (
+        w.start.getTime() >= sunriseUtc.getTime() &&
+        w.start.getTime() < nextSunriseUtc.getTime()
+      ) {
+        out.push(w);
+      }
+    }
 
+    // Advance to the next nakshatra's opening moments; stop once it begins
+    // at or beyond the day's end.
+    const nextRef = new Date(endUtc.getTime() + 60_000);
+    if (nextRef.getTime() >= nextSunriseUtc.getTime()) break;
+    referenceUtc = nextRef;
+    knownStartUtc = endUtc;
+  }
+  out.sort((a, b) => a.start.getTime() - b.start.getTime());
+  return out;
+}
+
+/**
+ * Every Varjyam spell of the nakshatra active at `referenceUtc`, as true
+ * (unclamped) instants in start order — one window for most nakshatras, two
+ * for Mula. The reference instant anchors the boundary searches; callers
+ * apply their own day-window gate. Empty when the nakshatra's boundaries
+ * cannot be located (inconsistent upstream longitude data).
+ */
+function varjyamSpellsForNakshatra(
+  nakshatraIndex: number,
+  referenceUtc: Date,
+  getMoon: (d: Date) => number,
+): UtcWindow[] {
+  const getIndex = (d: Date) => getNakshatraIndexAtTime(d, getMoon);
+  const angle: ElementAngle = { angleAt: getMoon, spanDeg: 360 / 27 };
+
+  const nakshatraStartUtc = findNakshatraStart(referenceUtc, nakshatraIndex, getIndex, angle);
+  if (nakshatraStartUtc === null) return [];
+
+  const nakshatraEndUtc = findNakshatraEnd(referenceUtc, nakshatraIndex, getIndex, angle);
+  if (nakshatraEndUtc === null) return [];
+
+  return spellsFromBoundaries(nakshatraIndex, nakshatraStartUtc, nakshatraEndUtc);
+}
+
+/**
+ * The tyajya spell windows of a nakshatra given its located boundaries —
+ * pure arithmetic, no searches. One window for most nakshatras; two for
+ * Mula ({@link VARJYAM_SECOND_OFFSET_GHATIKAS}), in start order.
+ */
+function spellsFromBoundaries(
+  nakshatraIndex: number,
+  nakshatraStartUtc: Date,
+  nakshatraEndUtc: Date,
+): UtcWindow[] {
   const nakshatraDurationMs = nakshatraEndUtc.getTime() - nakshatraStartUtc.getTime();
   const ghatikaMs = nakshatraDurationMs / 60;
-  const offsetGhatikas = VARJYAM_OFFSET_GHATIKAS[currentNakshatraIndex]!;
-  const varjyamStart = new Date(nakshatraStartUtc.getTime() + offsetGhatikas * ghatikaMs);
-  const varjyamEnd = new Date(varjyamStart.getTime() + 4 * ghatikaMs);
 
-  if (
-    varjyamEnd.getTime() <= sunriseUtc.getTime() ||
-    varjyamStart.getTime() >= nextSunriseUtc.getTime()
-  ) {
-    return null;
-  }
+  const offsets = [VARJYAM_OFFSET_GHATIKAS[nakshatraIndex]!];
+  const second = VARJYAM_SECOND_OFFSET_GHATIKAS[nakshatraIndex];
+  if (second !== undefined) offsets.push(second);
+  offsets.sort((a, b) => a - b);
 
-  return { start: varjyamStart, end: varjyamEnd };
+  return offsets.map((offsetGhatikas) => {
+    const varjyamStart = new Date(nakshatraStartUtc.getTime() + offsetGhatikas * ghatikaMs);
+    return { start: varjyamStart, end: new Date(varjyamStart.getTime() + 4 * ghatikaMs) };
+  });
 }
 
 /**

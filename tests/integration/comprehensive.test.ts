@@ -224,7 +224,8 @@ describe('getDailyPanchang — comprehensive field validation', () => {
   });
 
   describe('durMuhurta', () => {
-    it('has exactly 2 periods', () => {
+    // 2025-04-12 is a Saturday → classical ordinals [0, 1], both day windows.
+    it('has exactly 2 periods on a Saturday', () => {
       expect(r.inauspicious.durMuhurta).toHaveLength(2);
     });
 
@@ -233,8 +234,9 @@ describe('getDailyPanchang — comprehensive field validation', () => {
       expect(r.inauspicious.durMuhurta[1]!.start.getTime()).toBeLessThan(r.inauspicious.durMuhurta[1]!.end.getTime());
     });
 
-    it('both periods are within daytime', () => {
+    it('day-segment periods are within daytime', () => {
       for (const dm of r.inauspicious.durMuhurta) {
+        expect(dm.segment).toBe('day');
         expect(dm.start.getTime()).toBeGreaterThanOrEqual(r.sun.rise.getTime());
         expect(dm.end.getTime()).toBeLessThanOrEqual(r.sun.set.getTime());
       }
