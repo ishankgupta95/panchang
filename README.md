@@ -6,7 +6,7 @@
 Pure TypeScript Hindu Panchang (almanac), Jyotish, and Birth Chart calculations.
 Zero runtime dependencies. Works offline in React Native (Hermes), Node.js, and browsers.
 
-**Fast** (~0.25 ms trimmed, ~0.41 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,737 tests across 136 files**
+**Fast** (~0.25 ms trimmed, ~0.41 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,772 tests across 137 files**
 
 > 📖 **Full documentation: [dharmagya.app/docs/panchang-ts](https://dharmagya.app/docs/panchang-ts)**
 > This README covers install, quick start, and the 5.0 → 5.1 and 4.x → 5 migrations in full,
@@ -130,10 +130,10 @@ Ekadashi split. For reliable festival dating, use `getDailyPanchang`.
 
 ---
 
-## Upgrading from 5.1 (unreleased)
+## Upgrading to 5.1 — part 2
 
 Two deliberate type breaks, both correcting fields that did not match
-DrikPanchang (the project's parity oracle), in the same style as 5.1's
+DrikPanchang (the project's parity oracle), in the same style as part 1's
 `varjyam` break.
 
 ### `inauspicious.durMuhurta` is now `DurMuhurtaPeriod[]`
@@ -208,7 +208,7 @@ CHANGELOG for each rule and its drik evidence.
 
 ---
 
-## Upgrading from 5.0
+## Upgrading to 5.1 — part 1 (from 5.0)
 
 One deliberate type break, two corrected dasha tables, and one opt-in flag.
 
@@ -877,7 +877,7 @@ InteractionManager.runAfterInteractions(() => {
 
 📖 [Full accuracy notes →](https://dharmagya.app/docs/panchang-ts/accuracy)
 
-8,737 tests across 136 files, including fixtures cross-verified against reference
+8,772 tests across 137 files, including fixtures cross-verified against reference
 panchang calculations spanning 2025–2026 across 10 Indian cities plus New York,
 London, Sydney, Dubai, Singapore (diaspora fixtures cover DST on
 `America/New_York`).

@@ -6,14 +6,19 @@
   reconstructed from the festivals-table release.
 -->
 
-## Unreleased
+## 5.1.1 — 2026-08-14 (part 2 of the release)
 
-All fourteen findings of the 2026-08-14 correctness audit, fixed against the
-audit's own DrikPanchang evidence (58 day-pages Jaipur-Feb-2027 /
-Kolkata-Nov-2026, 14 choghadiya pages, plus targeted year-page sweeps).
+All fourteen findings of the 2026-08-14 correctness audit, plus the two
+Ekadashi-split and regional-new-year fixes below, fixed against DrikPanchang
+evidence (58 day-pages Jaipur-Feb-2027 / Kolkata-Nov-2026, 14 choghadiya
+pages, the full 2024–2028 Ekadashi corpus, plus targeted year-page sweeps).
 Carries two deliberate breaking type changes (`inauspicious.durMuhurta`,
-`muhurtas.amritKala`), following the varjyam `TimePeriod[]` precedent from
-5.1.
+`muhurtas.amritKala`), following the varjyam `TimePeriod[]` precedent in
+part 1 below.
+
+This batch shipped inside the published **5.1.0** artifact together with the
+section that follows — the two were cut as one npm release, so a consumer
+moving from 5.0.x receives both at once.
 
 ### Breaking
 
@@ -230,7 +235,7 @@ post-sunset — without all five the rules are indistinguishable:
   `pohela_boishakh` and change its date in 4 of the 5 years above. Left on
   the transit day pending a citable reference rather than guessed at.
 
-## 5.1.0 — 2026-08-14
+## 5.1.0 — 2026-08-14 (part 1 of the release)
 
 > **Note:** this minor release deliberately carries one breaking type change
 > (`inauspicious.varjyam`), documented below with its migration. It ships as
