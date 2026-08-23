@@ -47,3 +47,7 @@ notes/bench-*.json
 # build of git HEAD (the pre-Phase-36 tree — see notes/vcompare/README.md)
 notes/vcompare/v4/
 notes/vcompare/head/
+
+# Local working plan for the Go port — not committed (per 2026-08-23 decision)
+PLAN.md
+go/parity/out/
