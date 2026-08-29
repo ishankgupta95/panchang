@@ -1,0 +1,6450 @@
+{
+  "_meta": {
+    "generator": "source/go/parity/goldens.src.ts (bash source/go/parity/goldens.sh)",
+    "source": "src/calendar/buildFestivalsTable.ts, buildEclipsesTable.ts, buildMoonPhasesTable.ts and the three readers",
+    "claim": "Go internal/calendar emits byte-identical table files and reads them back the same way, in both locales and both formats.",
+    "note": "The sha256 is over JSON.stringify(file, null, 2) + \"\\n\", the G4.6 byte-identical gate, and the same serialization generate/generate-*.ts uses. `languages: [\"hi\",\"en\"]` and the two single-locale builds are in the sweep because the emitted key order follows the caller's locale order, which a fixed-field Go struct would get wrong, and because pick()'s fallback arm is only reachable when a locale is absent.",
+    "v1Note": "No builder emits v1 any longer, so the D16 sniff's false arm is reachable only from a hand-built fixture. Without it the sniff would have one live branch and one dead one, and the dead one is the compatibility promise."
+  },
+  "cases": [
+    {
+      "key": "pune-2025",
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "tz": 330,
+      "startYear": 2025,
+      "endYear": 2025
+    },
+    {
+      "key": "pune-1912",
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "tz": 330,
+      "startYear": 1912,
+      "endYear": 1912
+    },
+    {
+      "key": "pune-2088",
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "tz": 330,
+      "startYear": 2088,
+      "endYear": 2088
+    },
+    {
+      "key": "newyork-2026",
+      "latitude": 40.7128,
+      "longitude": -74.006,
+      "tz": -300,
+      "startYear": 2026,
+      "endYear": 2026
+    },
+    {
+      "key": "chennai-2026-2027",
+      "latitude": 13.0827,
+      "longitude": 80.2707,
+      "tz": 330,
+      "startYear": 2026,
+      "endYear": 2027
+    },
+    {
+      "key": "pune-2025-hi-first",
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "tz": 330,
+      "startYear": 2025,
+      "endYear": 2025,
+      "languages": [
+        "hi",
+        "en"
+      ]
+    },
+    {
+      "key": "pune-2025-en-only",
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "tz": 330,
+      "startYear": 2025,
+      "endYear": 2025,
+      "languages": [
+        "en"
+      ]
+    },
+    {
+      "key": "pune-2025-hi-only",
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "tz": 330,
+      "startYear": 2025,
+      "endYear": 2025,
+      "languages": [
+        "hi"
+      ]
+    },
+    {
+      "key": "longyearbyen-2025-all",
+      "latitude": 78.2232,
+      "longitude": 15.6267,
+      "tz": 60,
+      "startYear": 2025,
+      "endYear": 2025,
+      "visibleOnly": false
+    },
+    {
+      "key": "alert-2027",
+      "latitude": 82.5018,
+      "longitude": -62.3481,
+      "tz": -300,
+      "startYear": 2027,
+      "endYear": 2027
+    },
+    {
+      "key": "alert-2027-all",
+      "latitude": 82.5018,
+      "longitude": -62.3481,
+      "tz": -300,
+      "startYear": 2027,
+      "endYear": 2027,
+      "visibleOnly": false
+    },
+    {
+      "key": "newyork-2031-2033",
+      "latitude": 40.7128,
+      "longitude": -74.006,
+      "tz": -300,
+      "startYear": 2031,
+      "endYear": 2033
+    }
+  ],
+  "digest": "37737a97adbcca444a86b301e690c055a20d55229e58a2f197b3858720187a88",
+  "tblHits": {
+    "festivalDays": 3130,
+    "festivalEntries": 5110,
+    "festivalWithDescription": 2546,
+    "eclipseDays": 44,
+    "eclipseEntries": 44,
+    "eclipseWithSutak": 32,
+    "eclipseWithoutSutak": 12,
+    "eclipsePenumbral": 12,
+    "eclipseInvisible": 4,
+    "phaseDays": 1184,
+    "phaseEntries": 1184,
+    "emptyEclipseYears": 2,
+    "pickFallback": 520,
+    "v1Read": 1
+  },
+  "tables": [
+    {
+      "key": "pune-2025",
+      "sha256": {
+        "festivals": "473712b132e55e98c24e741a803df5a4acf839f86b883f4ae6176a65bf3703e8",
+        "eclipses": "ea93f0c1b9abc693c7e303136a92b0c99d8d738b48853ffa8c5340a18c1bfc84",
+        "moonPhases": "328ca2f8e4460996a8967dad941b3b06fc981906edec8e93bd90214fecb16a4a"
+      },
+      "sha256Masked": {
+        "festivals": "473712b132e55e98c24e741a803df5a4acf839f86b883f4ae6176a65bf3703e8",
+        "eclipses": "755e2b0783fba6f0fb948cc5505eb029de215a7a6f9b22ad88771eeea188ba51",
+        "moonPhases": "328ca2f8e4460996a8967dad941b3b06fc981906edec8e93bd90214fecb16a4a"
+      },
+      "bytes": {
+        "festivals": 59504,
+        "eclipses": 1929,
+        "moonPhases": 9320
+      },
+      "metaKeys": {
+        "festivals": [
+          "format",
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "ayanamsa",
+          "masaSystem",
+          "region",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "eclipses": [
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "visibleOnly",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "moonPhases": [
+          "format",
+          "referenceLocation",
+          "timezoneOffsetMinutes",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ]
+      },
+      "entryKeys": {
+        "festivalDict": [
+          "key",
+          "type",
+          "name"
+        ],
+        "eclipseEntry": null,
+        "eclipseEntryWithSutak": [
+          "name",
+          "kind",
+          "subtype",
+          "start",
+          "peak",
+          "end",
+          "obscuration",
+          "magnitude",
+          "visibleFromLocation",
+          "visibleAtPeak",
+          "description",
+          "sutak"
+        ],
+        "phaseDict": [
+          "phase",
+          "name",
+          "description"
+        ]
+      },
+      "dictLengths": {
+        "festivals": 168,
+        "moonPhases": 4
+      },
+      "dayCounts": {
+        "festivals": {
+          "2025": 160
+        },
+        "eclipses": {
+          "2025": 1
+        },
+        "moonPhases": {
+          "2025": 49
+        }
+      },
+      "read": {
+        "festivals-en": [
+          {
+            "date": "2025-01-03",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "Vinayaka Chaturthi",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-09",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-10",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "Vaishnava Ekadashi",
+                "type": "vaishnava_ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "Smarta Ekadashi",
+                "type": "smarta_ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "ekadashi",
+                "name": "Ekadashi",
+                "type": "ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-11",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "Pradosha Vrata",
+                "type": "pradosha",
+                "description": "Shani Pradosha"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "Lohri",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "Makar Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "pongal",
+                "name": "Pongal",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "uttarayan",
+                "name": "Uttarayan",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "Magh Bihu",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "Ayyappa Makara Jyothi",
+                "type": "sankranti",
+                "description": "Makara"
+              }
+            ]
+          }
+        ],
+        "eclipses-en": [
+          {
+            "date": "2025-09-07",
+            "eclipses": [
+              {
+                "name": "Total Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2025-09-07T15:28:24.700Z",
+                "peak": "2025-09-07T18:11:48.389Z",
+                "end": "2025-09-07T20:55:07.573Z",
+                "obscuration": 1,
+                "magnitude": 1.3621799606665859,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2025-09-07T07:27:05.498Z",
+                  "end": "2025-09-07T19:56:33.726Z"
+                },
+                "description": "Total Lunar Eclipse: 100% obscuration."
+              }
+            ]
+          }
+        ],
+        "moonPhases-en": [
+          {
+            "date": "2025-01-07",
+            "phases": [
+              {
+                "name": "First Quarter",
+                "phase": "first_quarter",
+                "time": "2025-01-06T23:56:17.333Z",
+                "description": "First quarter: waxing half moon."
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "phases": [
+              {
+                "name": "Full Moon",
+                "phase": "full",
+                "time": "2025-01-13T22:26:54.450Z",
+                "description": "Full moon (Purnima)."
+              }
+            ]
+          },
+          {
+            "date": "2025-01-22",
+            "phases": [
+              {
+                "name": "Last Quarter",
+                "phase": "last_quarter",
+                "time": "2025-01-21T20:30:47.210Z",
+                "description": "Last quarter: waning half moon."
+              }
+            ]
+          },
+          {
+            "date": "2025-01-29",
+            "phases": [
+              {
+                "name": "New Moon",
+                "phase": "new",
+                "time": "2025-01-29T12:35:58.553Z",
+                "description": "New moon (Amavasya)."
+              }
+            ]
+          }
+        ],
+        "festivals-hi": [
+          {
+            "date": "2025-01-03",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "विनायक चतुर्थी",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-09",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-10",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "वैष्णव एकादशी",
+                "type": "vaishnava_ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "स्मार्त एकादशी",
+                "type": "smarta_ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "ekadashi",
+                "name": "एकादशी",
+                "type": "ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-11",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "प्रदोष व्रत",
+                "type": "pradosha",
+                "description": "शनि प्रदोष"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "लोहड़ी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "मकर संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "pongal",
+                "name": "पोंगल",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "uttarayan",
+                "name": "उत्तरायण",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "माघ बिहू",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "अय्यप्पा मकर ज्योति",
+                "type": "sankranti",
+                "description": "मकर"
+              }
+            ]
+          }
+        ],
+        "eclipses-hi": [
+          {
+            "date": "2025-09-07",
+            "eclipses": [
+              {
+                "name": "पूर्ण चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2025-09-07T15:28:24.700Z",
+                "peak": "2025-09-07T18:11:48.389Z",
+                "end": "2025-09-07T20:55:07.573Z",
+                "obscuration": 1,
+                "magnitude": 1.3621799606665859,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2025-09-07T07:27:05.498Z",
+                  "end": "2025-09-07T19:56:33.726Z"
+                },
+                "description": "पूर्ण चंद्र ग्रहण: 100% ग्रास।"
+              }
+            ]
+          }
+        ],
+        "moonPhases-hi": [
+          {
+            "date": "2025-01-07",
+            "phases": [
+              {
+                "name": "शुक्ल पक्ष अर्धचंद्र",
+                "phase": "first_quarter",
+                "time": "2025-01-06T23:56:17.333Z",
+                "description": "शुक्ल पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "phases": [
+              {
+                "name": "पूर्णिमा",
+                "phase": "full",
+                "time": "2025-01-13T22:26:54.450Z",
+                "description": "पूर्णिमा: पूर्ण चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-22",
+            "phases": [
+              {
+                "name": "कृष्ण पक्ष अर्धचंद्र",
+                "phase": "last_quarter",
+                "time": "2025-01-21T20:30:47.210Z",
+                "description": "कृष्ण पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-29",
+            "phases": [
+              {
+                "name": "अमावस्या",
+                "phase": "new",
+                "time": "2025-01-29T12:35:58.553Z",
+                "description": "अमावस्या: नया चंद्रमा।"
+              }
+            ]
+          }
+        ]
+      },
+      "byDate": {
+        "festivals": [],
+        "eclipses": [],
+        "moonPhases": [],
+        "festivalsOutOfRange": true,
+        "eclipsesOutOfRange": true,
+        "moonPhasesOutOfRange": true,
+        "ranges": {
+          "festivals": {
+            "start": 2025,
+            "end": 2025
+          },
+          "eclipses": {
+            "start": 2025,
+            "end": 2025
+          },
+          "moonPhases": {
+            "start": 2025,
+            "end": 2025
+          }
+        }
+      }
+    },
+    {
+      "key": "pune-1912",
+      "sha256": {
+        "festivals": "4c7cbdbcc485b5d2637e3174bfda1c26f04b4d351b81c869264cc1c947528cac",
+        "eclipses": "3b4f972af46f19003849d4d19e2af597153b30af81d0f2357238254fb90acb6a",
+        "moonPhases": "4aca676e7e07aec6ffd0686c22b6402c2d8f0c8f394736e9bb3a18bdd3be183c"
+      },
+      "sha256Masked": {
+        "festivals": "4c7cbdbcc485b5d2637e3174bfda1c26f04b4d351b81c869264cc1c947528cac",
+        "eclipses": "018db6a5da150896586063d8d988e00f72df8bda36a1285eecf69bb83d65b843",
+        "moonPhases": "4aca676e7e07aec6ffd0686c22b6402c2d8f0c8f394736e9bb3a18bdd3be183c"
+      },
+      "bytes": {
+        "festivals": 60424,
+        "eclipses": 2918,
+        "moonPhases": 9522
+      },
+      "metaKeys": {
+        "festivals": [
+          "format",
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "ayanamsa",
+          "masaSystem",
+          "region",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "eclipses": [
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "visibleOnly",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "moonPhases": [
+          "format",
+          "referenceLocation",
+          "timezoneOffsetMinutes",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ]
+      },
+      "entryKeys": {
+        "festivalDict": [
+          "key",
+          "type",
+          "name",
+          "description"
+        ],
+        "eclipseEntry": null,
+        "eclipseEntryWithSutak": [
+          "name",
+          "kind",
+          "subtype",
+          "start",
+          "peak",
+          "end",
+          "obscuration",
+          "magnitude",
+          "visibleFromLocation",
+          "visibleAtPeak",
+          "description",
+          "sutak"
+        ],
+        "phaseDict": [
+          "phase",
+          "name",
+          "description"
+        ]
+      },
+      "dictLengths": {
+        "festivals": 170,
+        "moonPhases": 4
+      },
+      "dayCounts": {
+        "festivals": {
+          "1912": 167
+        },
+        "eclipses": {
+          "1912": 2
+        },
+        "moonPhases": {
+          "1912": 50
+        }
+      },
+      "read": {
+        "festivals-en": [
+          {
+            "date": "1912-01-01",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "Vaishnava Ekadashi",
+                "type": "vaishnava_ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "1912-01-02",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "Pradosha Vrata",
+                "type": "pradosha",
+                "description": "Bhauma Pradosha"
+              }
+            ]
+          },
+          {
+            "date": "1912-01-07",
+            "festivals": [
+              {
+                "key": "sankashti_chaturthi",
+                "name": "Sankashti Chaturthi",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "1912-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "Lohri",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "1912-01-14",
+            "festivals": [
+              {
+                "key": "smarta_ekadashi",
+                "name": "Smarta Ekadashi",
+                "type": "smarta_ekadashi",
+                "description": "Saphala Ekadashi"
+              },
+              {
+                "key": "ekadashi",
+                "name": "Ekadashi",
+                "type": "ekadashi",
+                "description": "Vriddha Dwadashi: Smarta fast observed today; Vaishnava fast next day (Dwadashi)."
+              },
+              {
+                "key": "sankranti",
+                "name": "Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "Makar Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "pongal",
+                "name": "Pongal",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "uttarayan",
+                "name": "Uttarayan",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "Magh Bihu",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "Ayyappa Makara Jyothi",
+                "type": "sankranti",
+                "description": "Makara"
+              }
+            ]
+          },
+          {
+            "date": "1912-01-15",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "Vaishnava Ekadashi",
+                "type": "vaishnava_ekadashi",
+                "description": "Vriddha Dwadashi: Vaishnava fast observed today; the Smarta fast was yesterday."
+              }
+            ]
+          }
+        ],
+        "eclipses-en": [
+          {
+            "date": "1912-04-02",
+            "eclipses": [
+              {
+                "name": "Partial Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "partial",
+                "start": "1912-04-01T19:56:05.483Z",
+                "peak": "1912-04-01T22:14:01.540Z",
+                "end": "1912-04-02T00:31:54.601Z",
+                "obscuration": 0.10930542700759627,
+                "magnitude": 0.18234818656982194,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "1912-04-01T12:26:16.603Z",
+                  "end": "1912-04-01T23:01:35.454Z"
+                },
+                "description": "Partial Lunar Eclipse: 11% obscuration."
+              }
+            ]
+          },
+          {
+            "date": "1912-09-26",
+            "eclipses": [
+              {
+                "name": "Partial Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "partial",
+                "start": "1912-09-26T09:17:37.325Z",
+                "peak": "1912-09-26T11:44:34.535Z",
+                "end": "1912-09-26T14:11:34.262Z",
+                "obscuration": 0.0579247794373257,
+                "magnitude": 0.1186470925185786,
+                "visibleFromLocation": true,
+                "visibleAtPeak": false,
+                "sutak": {
+                  "start": "1912-09-26T02:03:43.800Z",
+                  "end": "1912-09-26T12:25:34.996Z"
+                },
+                "description": "Partial Lunar Eclipse: 6% obscuration."
+              }
+            ]
+          }
+        ],
+        "moonPhases-en": [
+          {
+            "date": "1912-01-04",
+            "phases": [
+              {
+                "name": "Full Moon",
+                "phase": "full",
+                "time": "1912-01-04T13:29:20.969Z",
+                "description": "Full moon (Purnima)."
+              }
+            ]
+          },
+          {
+            "date": "1912-01-11",
+            "phases": [
+              {
+                "name": "Last Quarter",
+                "phase": "last_quarter",
+                "time": "1912-01-11T07:42:34.545Z",
+                "description": "Last quarter: waning half moon."
+              }
+            ]
+          },
+          {
+            "date": "1912-01-19",
+            "phases": [
+              {
+                "name": "New Moon",
+                "phase": "new",
+                "time": "1912-01-19T11:09:33.505Z",
+                "description": "New moon (Amavasya)."
+              }
+            ]
+          },
+          {
+            "date": "1912-01-27",
+            "phases": [
+              {
+                "name": "First Quarter",
+                "phase": "first_quarter",
+                "time": "1912-01-27T08:50:53.110Z",
+                "description": "First quarter: waxing half moon."
+              }
+            ]
+          }
+        ],
+        "festivals-hi": [
+          {
+            "date": "1912-01-01",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "वैष्णव एकादशी",
+                "type": "vaishnava_ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "1912-01-02",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "प्रदोष व्रत",
+                "type": "pradosha",
+                "description": "भौम प्रदोष"
+              }
+            ]
+          },
+          {
+            "date": "1912-01-07",
+            "festivals": [
+              {
+                "key": "sankashti_chaturthi",
+                "name": "संकष्टी चतुर्थी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "1912-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "लोहड़ी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "1912-01-14",
+            "festivals": [
+              {
+                "key": "smarta_ekadashi",
+                "name": "स्मार्त एकादशी",
+                "type": "smarta_ekadashi",
+                "description": "सफला एकादशी"
+              },
+              {
+                "key": "ekadashi",
+                "name": "एकादशी",
+                "type": "ekadashi",
+                "description": "वृद्धा द्वादशी: स्मार्त व्रत आज; वैष्णव व्रत अगले दिन (द्वादशी)।"
+              },
+              {
+                "key": "sankranti",
+                "name": "संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "मकर संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "pongal",
+                "name": "पोंगल",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "uttarayan",
+                "name": "उत्तरायण",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "माघ बिहू",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "अय्यप्पा मकर ज्योति",
+                "type": "sankranti",
+                "description": "मकर"
+              }
+            ]
+          },
+          {
+            "date": "1912-01-15",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "वैष्णव एकादशी",
+                "type": "vaishnava_ekadashi",
+                "description": "वृद्धा द्वादशी: वैष्णव व्रत आज; स्मार्त व्रत कल था।"
+              }
+            ]
+          }
+        ],
+        "eclipses-hi": [
+          {
+            "date": "1912-04-02",
+            "eclipses": [
+              {
+                "name": "आंशिक चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "partial",
+                "start": "1912-04-01T19:56:05.483Z",
+                "peak": "1912-04-01T22:14:01.540Z",
+                "end": "1912-04-02T00:31:54.601Z",
+                "obscuration": 0.10930542700759627,
+                "magnitude": 0.18234818656982194,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "1912-04-01T12:26:16.603Z",
+                  "end": "1912-04-01T23:01:35.454Z"
+                },
+                "description": "आंशिक चंद्र ग्रहण: 11% ग्रास।"
+              }
+            ]
+          },
+          {
+            "date": "1912-09-26",
+            "eclipses": [
+              {
+                "name": "आंशिक चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "partial",
+                "start": "1912-09-26T09:17:37.325Z",
+                "peak": "1912-09-26T11:44:34.535Z",
+                "end": "1912-09-26T14:11:34.262Z",
+                "obscuration": 0.0579247794373257,
+                "magnitude": 0.1186470925185786,
+                "visibleFromLocation": true,
+                "visibleAtPeak": false,
+                "sutak": {
+                  "start": "1912-09-26T02:03:43.800Z",
+                  "end": "1912-09-26T12:25:34.996Z"
+                },
+                "description": "आंशिक चंद्र ग्रहण: 6% ग्रास।"
+              }
+            ]
+          }
+        ],
+        "moonPhases-hi": [
+          {
+            "date": "1912-01-04",
+            "phases": [
+              {
+                "name": "पूर्णिमा",
+                "phase": "full",
+                "time": "1912-01-04T13:29:20.969Z",
+                "description": "पूर्णिमा: पूर्ण चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "1912-01-11",
+            "phases": [
+              {
+                "name": "कृष्ण पक्ष अर्धचंद्र",
+                "phase": "last_quarter",
+                "time": "1912-01-11T07:42:34.545Z",
+                "description": "कृष्ण पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "1912-01-19",
+            "phases": [
+              {
+                "name": "अमावस्या",
+                "phase": "new",
+                "time": "1912-01-19T11:09:33.505Z",
+                "description": "अमावस्या: नया चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "1912-01-27",
+            "phases": [
+              {
+                "name": "शुक्ल पक्ष अर्धचंद्र",
+                "phase": "first_quarter",
+                "time": "1912-01-27T08:50:53.110Z",
+                "description": "शुक्ल पक्ष अर्धचंद्र।"
+              }
+            ]
+          }
+        ]
+      },
+      "byDate": {
+        "festivals": [
+          {
+            "key": "vaishnava_ekadashi",
+            "name": "Vaishnava Ekadashi",
+            "type": "vaishnava_ekadashi",
+            "description": "Vriddha Dwadashi: Vaishnava fast observed today; the Smarta fast was yesterday."
+          }
+        ],
+        "eclipses": [],
+        "moonPhases": [],
+        "festivalsOutOfRange": true,
+        "eclipsesOutOfRange": true,
+        "moonPhasesOutOfRange": true,
+        "ranges": {
+          "festivals": {
+            "start": 1912,
+            "end": 1912
+          },
+          "eclipses": {
+            "start": 1912,
+            "end": 1912
+          },
+          "moonPhases": {
+            "start": 1912,
+            "end": 1912
+          }
+        }
+      }
+    },
+    {
+      "key": "pune-2088",
+      "sha256": {
+        "festivals": "f35e94e76b0831edcf4eef153da050eba6677b3de465355e4afcf7f10021696f",
+        "eclipses": "1542cf8b274664ac279867bec6a2c57e9d84011ab16116a801aaf62aec5db071",
+        "moonPhases": "e73551d18546afa4a2e088dcef0c8d3f2f0ef2c4cf94c0582dbdc28287059588"
+      },
+      "sha256Masked": {
+        "festivals": "f35e94e76b0831edcf4eef153da050eba6677b3de465355e4afcf7f10021696f",
+        "eclipses": "f5b14cdcd5025248b4bb5dda9e5218a824fb77aa37640481b6bf4de3151a585c",
+        "moonPhases": "e73551d18546afa4a2e088dcef0c8d3f2f0ef2c4cf94c0582dbdc28287059588"
+      },
+      "bytes": {
+        "festivals": 60533,
+        "eclipses": 3887,
+        "moonPhases": 9472
+      },
+      "metaKeys": {
+        "festivals": [
+          "format",
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "ayanamsa",
+          "masaSystem",
+          "region",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "eclipses": [
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "visibleOnly",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "moonPhases": [
+          "format",
+          "referenceLocation",
+          "timezoneOffsetMinutes",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ]
+      },
+      "entryKeys": {
+        "festivalDict": [
+          "key",
+          "type",
+          "name",
+          "description"
+        ],
+        "eclipseEntry": null,
+        "eclipseEntryWithSutak": [
+          "name",
+          "kind",
+          "subtype",
+          "start",
+          "peak",
+          "end",
+          "obscuration",
+          "magnitude",
+          "visibleFromLocation",
+          "visibleAtPeak",
+          "description",
+          "sutak"
+        ],
+        "phaseDict": [
+          "phase",
+          "name",
+          "description"
+        ]
+      },
+      "dictLengths": {
+        "festivals": 169,
+        "moonPhases": 4
+      },
+      "dayCounts": {
+        "festivals": {
+          "2088": 169
+        },
+        "eclipses": {
+          "2088": 3
+        },
+        "moonPhases": {
+          "2088": 50
+        }
+      },
+      "read": {
+        "festivals-en": [
+          {
+            "date": "2088-01-04",
+            "festivals": [
+              {
+                "key": "smarta_ekadashi",
+                "name": "Smarta Ekadashi",
+                "type": "smarta_ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "ekadashi",
+                "name": "Ekadashi",
+                "type": "ekadashi",
+                "description": "Dashami-viddha: Smarta fast observed today; Vaishnava fast next day (Dwadashi)."
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2088-01-05",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "Vaishnava Ekadashi",
+                "type": "vaishnava_ekadashi",
+                "description": "Dashami-viddha Ekadashi: Vaishnava fast observed today (Dwadashi)."
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2088-01-06",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "Pradosha Vrata",
+                "type": "pradosha",
+                "description": "Bhauma Pradosha"
+              }
+            ]
+          },
+          {
+            "date": "2088-01-11",
+            "festivals": [
+              {
+                "key": "sankashti_chaturthi",
+                "name": "Sankashti Chaturthi",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2088-01-14",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "Lohri",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2088-01-15",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "Makar Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "pongal",
+                "name": "Pongal",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "uttarayan",
+                "name": "Uttarayan",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "Magh Bihu",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "Ayyappa Makara Jyothi",
+                "type": "sankranti",
+                "description": "Makara"
+              }
+            ]
+          }
+        ],
+        "eclipses-en": [
+          {
+            "date": "2088-04-21",
+            "eclipses": [
+              {
+                "name": "Partial Solar Eclipse",
+                "kind": "solar",
+                "subtype": "partial",
+                "start": "2088-04-21T11:26:44.151Z",
+                "peak": "2088-04-21T12:12:59.152Z",
+                "end": "2088-04-21T12:55:08.011Z",
+                "obscuration": 0.1715688555193346,
+                "magnitude": 0.2796412231893573,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2088-04-20T23:26:44.151Z",
+                  "end": "2088-04-21T12:55:08.011Z"
+                },
+                "description": "Partial Solar Eclipse: 17% obscuration."
+              }
+            ]
+          },
+          {
+            "date": "2088-05-05",
+            "eclipses": [
+              {
+                "name": "Partial Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "partial",
+                "start": "2088-05-05T13:44:59.940Z",
+                "peak": "2088-05-05T16:13:59.305Z",
+                "end": "2088-05-05T18:42:56.837Z",
+                "obscuration": 0.046506954416634154,
+                "magnitude": 0.10231578527255586,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2088-05-05T06:35:17.682Z",
+                  "end": "2088-05-05T16:52:34.036Z"
+                },
+                "description": "Partial Lunar Eclipse: 5% obscuration."
+              }
+            ]
+          },
+          {
+            "date": "2088-10-30",
+            "eclipses": [
+              {
+                "name": "Partial Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "partial",
+                "start": "2088-10-30T00:46:12.221Z",
+                "peak": "2088-10-30T03:00:27.715Z",
+                "end": "2088-10-30T05:14:45.941Z",
+                "obscuration": 0.11038771772026992,
+                "magnitude": 0.1835058880827334,
+                "visibleFromLocation": true,
+                "visibleAtPeak": false,
+                "sutak": {
+                  "start": "2088-10-29T17:13:39.828Z",
+                  "end": "2088-10-30T03:47:25.128Z"
+                },
+                "description": "Partial Lunar Eclipse: 11% obscuration."
+              }
+            ]
+          }
+        ],
+        "moonPhases-en": [
+          {
+            "date": "2088-01-01",
+            "phases": [
+              {
+                "name": "First Quarter",
+                "phase": "first_quarter",
+                "time": "2088-01-01T17:53:45.091Z",
+                "description": "First quarter: waxing half moon."
+              }
+            ]
+          },
+          {
+            "date": "2088-01-08",
+            "phases": [
+              {
+                "name": "Full Moon",
+                "phase": "full",
+                "time": "2088-01-08T09:37:24.820Z",
+                "description": "Full moon (Purnima)."
+              }
+            ]
+          },
+          {
+            "date": "2088-01-15",
+            "phases": [
+              {
+                "name": "Last Quarter",
+                "phase": "last_quarter",
+                "time": "2088-01-15T15:12:35.722Z",
+                "description": "Last quarter: waning half moon."
+              }
+            ]
+          },
+          {
+            "date": "2088-01-24",
+            "phases": [
+              {
+                "name": "New Moon",
+                "phase": "new",
+                "time": "2088-01-23T19:38:17.737Z",
+                "description": "New moon (Amavasya)."
+              }
+            ]
+          }
+        ],
+        "festivals-hi": [
+          {
+            "date": "2088-01-04",
+            "festivals": [
+              {
+                "key": "smarta_ekadashi",
+                "name": "स्मार्त एकादशी",
+                "type": "smarta_ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "ekadashi",
+                "name": "एकादशी",
+                "type": "ekadashi",
+                "description": "दशमी-विद्धा: स्मार्त व्रत आज; वैष्णव व्रत अगले दिन (द्वादशी)।"
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2088-01-05",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "वैष्णव एकादशी",
+                "type": "vaishnava_ekadashi",
+                "description": "दशमी-विद्धा एकादशी: वैष्णव व्रत आज (द्वादशी)।"
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2088-01-06",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "प्रदोष व्रत",
+                "type": "pradosha",
+                "description": "भौम प्रदोष"
+              }
+            ]
+          },
+          {
+            "date": "2088-01-11",
+            "festivals": [
+              {
+                "key": "sankashti_chaturthi",
+                "name": "संकष्टी चतुर्थी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2088-01-14",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "लोहड़ी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2088-01-15",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "मकर संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "pongal",
+                "name": "पोंगल",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "uttarayan",
+                "name": "उत्तरायण",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "माघ बिहू",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "अय्यप्पा मकर ज्योति",
+                "type": "sankranti",
+                "description": "मकर"
+              }
+            ]
+          }
+        ],
+        "eclipses-hi": [
+          {
+            "date": "2088-04-21",
+            "eclipses": [
+              {
+                "name": "आंशिक सूर्य ग्रहण",
+                "kind": "solar",
+                "subtype": "partial",
+                "start": "2088-04-21T11:26:44.151Z",
+                "peak": "2088-04-21T12:12:59.152Z",
+                "end": "2088-04-21T12:55:08.011Z",
+                "obscuration": 0.1715688555193346,
+                "magnitude": 0.2796412231893573,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2088-04-20T23:26:44.151Z",
+                  "end": "2088-04-21T12:55:08.011Z"
+                },
+                "description": "आंशिक सूर्य ग्रहण: 17% ग्रास।"
+              }
+            ]
+          },
+          {
+            "date": "2088-05-05",
+            "eclipses": [
+              {
+                "name": "आंशिक चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "partial",
+                "start": "2088-05-05T13:44:59.940Z",
+                "peak": "2088-05-05T16:13:59.305Z",
+                "end": "2088-05-05T18:42:56.837Z",
+                "obscuration": 0.046506954416634154,
+                "magnitude": 0.10231578527255586,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2088-05-05T06:35:17.682Z",
+                  "end": "2088-05-05T16:52:34.036Z"
+                },
+                "description": "आंशिक चंद्र ग्रहण: 5% ग्रास।"
+              }
+            ]
+          },
+          {
+            "date": "2088-10-30",
+            "eclipses": [
+              {
+                "name": "आंशिक चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "partial",
+                "start": "2088-10-30T00:46:12.221Z",
+                "peak": "2088-10-30T03:00:27.715Z",
+                "end": "2088-10-30T05:14:45.941Z",
+                "obscuration": 0.11038771772026992,
+                "magnitude": 0.1835058880827334,
+                "visibleFromLocation": true,
+                "visibleAtPeak": false,
+                "sutak": {
+                  "start": "2088-10-29T17:13:39.828Z",
+                  "end": "2088-10-30T03:47:25.128Z"
+                },
+                "description": "आंशिक चंद्र ग्रहण: 11% ग्रास।"
+              }
+            ]
+          }
+        ],
+        "moonPhases-hi": [
+          {
+            "date": "2088-01-01",
+            "phases": [
+              {
+                "name": "शुक्ल पक्ष अर्धचंद्र",
+                "phase": "first_quarter",
+                "time": "2088-01-01T17:53:45.091Z",
+                "description": "शुक्ल पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2088-01-08",
+            "phases": [
+              {
+                "name": "पूर्णिमा",
+                "phase": "full",
+                "time": "2088-01-08T09:37:24.820Z",
+                "description": "पूर्णिमा: पूर्ण चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2088-01-15",
+            "phases": [
+              {
+                "name": "कृष्ण पक्ष अर्धचंद्र",
+                "phase": "last_quarter",
+                "time": "2088-01-15T15:12:35.722Z",
+                "description": "कृष्ण पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2088-01-24",
+            "phases": [
+              {
+                "name": "अमावस्या",
+                "phase": "new",
+                "time": "2088-01-23T19:38:17.737Z",
+                "description": "अमावस्या: नया चंद्रमा।"
+              }
+            ]
+          }
+        ]
+      },
+      "byDate": {
+        "festivals": [
+          {
+            "key": "sankranti",
+            "name": "Sankranti",
+            "type": "sankranti",
+            "description": "Makara"
+          },
+          {
+            "key": "makar_sankranti",
+            "name": "Makar Sankranti",
+            "type": "sankranti",
+            "description": "Makara"
+          },
+          {
+            "key": "pongal",
+            "name": "Pongal",
+            "type": "sankranti",
+            "description": "Makara"
+          },
+          {
+            "key": "uttarayan",
+            "name": "Uttarayan",
+            "type": "sankranti",
+            "description": "Makara"
+          },
+          {
+            "key": "magh_bihu",
+            "name": "Magh Bihu",
+            "type": "sankranti",
+            "description": "Makara"
+          },
+          {
+            "key": "ayyappa_makara_jyothi",
+            "name": "Ayyappa Makara Jyothi",
+            "type": "sankranti",
+            "description": "Makara"
+          }
+        ],
+        "eclipses": [],
+        "moonPhases": [
+          {
+            "name": "Last Quarter",
+            "phase": "last_quarter",
+            "time": "2088-01-15T15:12:35.722Z",
+            "description": "Last quarter: waning half moon."
+          }
+        ],
+        "festivalsOutOfRange": true,
+        "eclipsesOutOfRange": true,
+        "moonPhasesOutOfRange": true,
+        "ranges": {
+          "festivals": {
+            "start": 2088,
+            "end": 2088
+          },
+          "eclipses": {
+            "start": 2088,
+            "end": 2088
+          },
+          "moonPhases": {
+            "start": 2088,
+            "end": 2088
+          }
+        }
+      }
+    },
+    {
+      "key": "newyork-2026",
+      "sha256": {
+        "festivals": "b20fba41772e6a01cdeb1c629b7fbbf48e7ca883f2adb92aaa630dacda549dbf",
+        "eclipses": "2bf93203c0a7207014f5f91cde938648f6bb0b443e35db73ad90727600ec3510",
+        "moonPhases": "1fa335271099e7a3a111dce767813817fcb4e103e0e58f4be27e3241c913dc6a"
+      },
+      "sha256Masked": {
+        "festivals": "b20fba41772e6a01cdeb1c629b7fbbf48e7ca883f2adb92aaa630dacda549dbf",
+        "eclipses": "e8e7d4ee83624321f9c8f483f61b7312efcd2814dce46454f40e284f308ddb73",
+        "moonPhases": "1fa335271099e7a3a111dce767813817fcb4e103e0e58f4be27e3241c913dc6a"
+      },
+      "bytes": {
+        "festivals": 57522,
+        "eclipses": 3868,
+        "moonPhases": 9476
+      },
+      "metaKeys": {
+        "festivals": [
+          "format",
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "ayanamsa",
+          "masaSystem",
+          "region",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "eclipses": [
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "visibleOnly",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "moonPhases": [
+          "format",
+          "referenceLocation",
+          "timezoneOffsetMinutes",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ]
+      },
+      "entryKeys": {
+        "festivalDict": [
+          "key",
+          "type",
+          "name"
+        ],
+        "eclipseEntry": null,
+        "eclipseEntryWithSutak": [
+          "name",
+          "kind",
+          "subtype",
+          "start",
+          "peak",
+          "end",
+          "obscuration",
+          "magnitude",
+          "visibleFromLocation",
+          "visibleAtPeak",
+          "description",
+          "sutak"
+        ],
+        "phaseDict": [
+          "phase",
+          "name",
+          "description"
+        ]
+      },
+      "dictLengths": {
+        "festivals": 165,
+        "moonPhases": 4
+      },
+      "dayCounts": {
+        "festivals": {
+          "2026": 152
+        },
+        "eclipses": {
+          "2026": 3
+        },
+        "moonPhases": {
+          "2026": 50
+        }
+      },
+      "read": {
+        "festivals-en": [
+          {
+            "date": "2025-12-31",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              },
+              {
+                "key": "pradosha",
+                "name": "Pradosha Vrata",
+                "type": "pradosha",
+                "description": "Saumya Pradosha"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-04",
+            "festivals": [
+              {
+                "key": "ravi_pushya",
+                "name": "Ravi Pushya",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "Lohri",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-14",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "Vaishnava Ekadashi",
+                "type": "vaishnava_ekadashi",
+                "description": "Saphala Ekadashi"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "Smarta Ekadashi",
+                "type": "smarta_ekadashi",
+                "description": "Saphala Ekadashi"
+              },
+              {
+                "key": "ekadashi",
+                "name": "Ekadashi",
+                "type": "ekadashi",
+                "description": "Saphala Ekadashi"
+              },
+              {
+                "key": "sankranti",
+                "name": "Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "Makar Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "pongal",
+                "name": "Pongal",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "uttarayan",
+                "name": "Uttarayan",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "Magh Bihu",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "Ayyappa Makara Jyothi",
+                "type": "sankranti",
+                "description": "Makara"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-15",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "Pradosha Vrata",
+                "type": "pradosha",
+                "description": "Guru Pradosha"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-16",
+            "festivals": [
+              {
+                "key": "masik_shivaratri",
+                "name": "Masik Shivaratri",
+                "type": "minor"
+              }
+            ]
+          }
+        ],
+        "eclipses-en": [
+          {
+            "date": "2026-03-03",
+            "eclipses": [
+              {
+                "name": "Total Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2026-03-03T08:44:24.924Z",
+                "peak": "2026-03-03T11:33:42.765Z",
+                "end": "2026-03-03T14:23:05.620Z",
+                "obscuration": 1,
+                "magnitude": 1.1511902344335134,
+                "visibleFromLocation": true,
+                "visibleAtPeak": false,
+                "sutak": {
+                  "start": "2026-03-03T00:50:03.607Z",
+                  "end": "2026-03-03T13:17:18.273Z"
+                },
+                "description": "Total Lunar Eclipse: 100% obscuration."
+              }
+            ]
+          },
+          {
+            "date": "2026-08-12",
+            "eclipses": [
+              {
+                "name": "Partial Solar Eclipse",
+                "kind": "solar",
+                "subtype": "partial",
+                "start": "2026-08-12T17:07:48.352Z",
+                "peak": "2026-08-12T17:54:13.605Z",
+                "end": "2026-08-12T18:38:51.957Z",
+                "obscuration": 0.09468813621767941,
+                "magnitude": 0.18596867889913007,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2026-08-12T05:07:48.352Z",
+                  "end": "2026-08-12T18:38:51.957Z"
+                },
+                "description": "Partial Solar Eclipse: 9% obscuration."
+              }
+            ]
+          },
+          {
+            "date": "2026-08-27",
+            "eclipses": [
+              {
+                "name": "Partial Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "partial",
+                "start": "2026-08-28T01:23:58.273Z",
+                "peak": "2026-08-28T04:12:54.577Z",
+                "end": "2026-08-28T07:01:47.253Z",
+                "obscuration": 0.9625365441883004,
+                "magnitude": 0.9303966993675451,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2026-08-27T17:33:50.687Z",
+                  "end": "2026-08-28T05:52:03.077Z"
+                },
+                "description": "Partial Lunar Eclipse: 96% obscuration."
+              }
+            ]
+          }
+        ],
+        "moonPhases-en": [
+          {
+            "date": "2026-01-03",
+            "phases": [
+              {
+                "name": "Full Moon",
+                "phase": "full",
+                "time": "2026-01-03T10:02:54.562Z",
+                "description": "Full moon (Purnima)."
+              }
+            ]
+          },
+          {
+            "date": "2026-01-10",
+            "phases": [
+              {
+                "name": "Last Quarter",
+                "phase": "last_quarter",
+                "time": "2026-01-10T15:48:23.312Z",
+                "description": "Last quarter: waning half moon."
+              }
+            ]
+          },
+          {
+            "date": "2026-01-18",
+            "phases": [
+              {
+                "name": "New Moon",
+                "phase": "new",
+                "time": "2026-01-18T19:51:58.542Z",
+                "description": "New moon (Amavasya)."
+              }
+            ]
+          },
+          {
+            "date": "2026-01-25",
+            "phases": [
+              {
+                "name": "First Quarter",
+                "phase": "first_quarter",
+                "time": "2026-01-26T04:47:23.269Z",
+                "description": "First quarter: waxing half moon."
+              }
+            ]
+          }
+        ],
+        "festivals-hi": [
+          {
+            "date": "2025-12-31",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              },
+              {
+                "key": "pradosha",
+                "name": "प्रदोष व्रत",
+                "type": "pradosha",
+                "description": "सौम्य प्रदोष"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-04",
+            "festivals": [
+              {
+                "key": "ravi_pushya",
+                "name": "रवि पुष्य",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "लोहड़ी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-14",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "वैष्णव एकादशी",
+                "type": "vaishnava_ekadashi",
+                "description": "सफला एकादशी"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "स्मार्त एकादशी",
+                "type": "smarta_ekadashi",
+                "description": "सफला एकादशी"
+              },
+              {
+                "key": "ekadashi",
+                "name": "एकादशी",
+                "type": "ekadashi",
+                "description": "सफला एकादशी"
+              },
+              {
+                "key": "sankranti",
+                "name": "संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "मकर संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "pongal",
+                "name": "पोंगल",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "uttarayan",
+                "name": "उत्तरायण",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "माघ बिहू",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "अय्यप्पा मकर ज्योति",
+                "type": "sankranti",
+                "description": "मकर"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-15",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "प्रदोष व्रत",
+                "type": "pradosha",
+                "description": "गुरु प्रदोष"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-16",
+            "festivals": [
+              {
+                "key": "masik_shivaratri",
+                "name": "मासिक शिवरात्रि",
+                "type": "minor"
+              }
+            ]
+          }
+        ],
+        "eclipses-hi": [
+          {
+            "date": "2026-03-03",
+            "eclipses": [
+              {
+                "name": "पूर्ण चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2026-03-03T08:44:24.924Z",
+                "peak": "2026-03-03T11:33:42.765Z",
+                "end": "2026-03-03T14:23:05.620Z",
+                "obscuration": 1,
+                "magnitude": 1.1511902344335134,
+                "visibleFromLocation": true,
+                "visibleAtPeak": false,
+                "sutak": {
+                  "start": "2026-03-03T00:50:03.607Z",
+                  "end": "2026-03-03T13:17:18.273Z"
+                },
+                "description": "पूर्ण चंद्र ग्रहण: 100% ग्रास।"
+              }
+            ]
+          },
+          {
+            "date": "2026-08-12",
+            "eclipses": [
+              {
+                "name": "आंशिक सूर्य ग्रहण",
+                "kind": "solar",
+                "subtype": "partial",
+                "start": "2026-08-12T17:07:48.352Z",
+                "peak": "2026-08-12T17:54:13.605Z",
+                "end": "2026-08-12T18:38:51.957Z",
+                "obscuration": 0.09468813621767941,
+                "magnitude": 0.18596867889913007,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2026-08-12T05:07:48.352Z",
+                  "end": "2026-08-12T18:38:51.957Z"
+                },
+                "description": "आंशिक सूर्य ग्रहण: 9% ग्रास।"
+              }
+            ]
+          },
+          {
+            "date": "2026-08-27",
+            "eclipses": [
+              {
+                "name": "आंशिक चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "partial",
+                "start": "2026-08-28T01:23:58.273Z",
+                "peak": "2026-08-28T04:12:54.577Z",
+                "end": "2026-08-28T07:01:47.253Z",
+                "obscuration": 0.9625365441883004,
+                "magnitude": 0.9303966993675451,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2026-08-27T17:33:50.687Z",
+                  "end": "2026-08-28T05:52:03.077Z"
+                },
+                "description": "आंशिक चंद्र ग्रहण: 96% ग्रास।"
+              }
+            ]
+          }
+        ],
+        "moonPhases-hi": [
+          {
+            "date": "2026-01-03",
+            "phases": [
+              {
+                "name": "पूर्णिमा",
+                "phase": "full",
+                "time": "2026-01-03T10:02:54.562Z",
+                "description": "पूर्णिमा: पूर्ण चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-10",
+            "phases": [
+              {
+                "name": "कृष्ण पक्ष अर्धचंद्र",
+                "phase": "last_quarter",
+                "time": "2026-01-10T15:48:23.312Z",
+                "description": "कृष्ण पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-18",
+            "phases": [
+              {
+                "name": "अमावस्या",
+                "phase": "new",
+                "time": "2026-01-18T19:51:58.542Z",
+                "description": "अमावस्या: नया चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-25",
+            "phases": [
+              {
+                "name": "शुक्ल पक्ष अर्धचंद्र",
+                "phase": "first_quarter",
+                "time": "2026-01-26T04:47:23.269Z",
+                "description": "शुक्ल पक्ष अर्धचंद्र।"
+              }
+            ]
+          }
+        ]
+      },
+      "byDate": {
+        "festivals": [
+          {
+            "key": "pradosha",
+            "name": "Pradosha Vrata",
+            "type": "pradosha",
+            "description": "Guru Pradosha"
+          }
+        ],
+        "eclipses": [],
+        "moonPhases": [],
+        "festivalsOutOfRange": true,
+        "eclipsesOutOfRange": true,
+        "moonPhasesOutOfRange": true,
+        "ranges": {
+          "festivals": {
+            "start": 2026,
+            "end": 2026
+          },
+          "eclipses": {
+            "start": 2026,
+            "end": 2026
+          },
+          "moonPhases": {
+            "start": 2026,
+            "end": 2026
+          }
+        }
+      }
+    },
+    {
+      "key": "chennai-2026-2027",
+      "sha256": {
+        "festivals": "ee96a22d3de4d02883cbe2eb80b8485f87ca5848bb61689bcc7b40eb4901bb85",
+        "eclipses": "f7677093acc8f124ab45d37723e4dd6e194d5dceeed63c6402155debe09e8b7b",
+        "moonPhases": "6ab3ec5379463c2a9e274a3437c4d70c230210870a4551b0711fe5005ebbaf76"
+      },
+      "sha256Masked": {
+        "festivals": "ee96a22d3de4d02883cbe2eb80b8485f87ca5848bb61689bcc7b40eb4901bb85",
+        "eclipses": "4e74ef1459f77d36c0a48a532730816e8559212227185b130c09839402855b2c",
+        "moonPhases": "6ab3ec5379463c2a9e274a3437c4d70c230210870a4551b0711fe5005ebbaf76"
+      },
+      "bytes": {
+        "festivals": 77841,
+        "eclipses": 4751,
+        "moonPhases": 16948
+      },
+      "metaKeys": {
+        "festivals": [
+          "format",
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "ayanamsa",
+          "masaSystem",
+          "region",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "eclipses": [
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "visibleOnly",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "moonPhases": [
+          "format",
+          "referenceLocation",
+          "timezoneOffsetMinutes",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ]
+      },
+      "entryKeys": {
+        "festivalDict": [
+          "key",
+          "type",
+          "name",
+          "description"
+        ],
+        "eclipseEntry": [
+          "name",
+          "kind",
+          "subtype",
+          "start",
+          "peak",
+          "end",
+          "obscuration",
+          "magnitude",
+          "visibleFromLocation",
+          "visibleAtPeak",
+          "description"
+        ],
+        "eclipseEntryWithSutak": [
+          "name",
+          "kind",
+          "subtype",
+          "start",
+          "peak",
+          "end",
+          "obscuration",
+          "magnitude",
+          "visibleFromLocation",
+          "visibleAtPeak",
+          "description",
+          "sutak"
+        ],
+        "phaseDict": [
+          "phase",
+          "name",
+          "description"
+        ]
+      },
+      "dictLengths": {
+        "festivals": 179,
+        "moonPhases": 4
+      },
+      "dayCounts": {
+        "festivals": {
+          "2026": 150,
+          "2027": 155
+        },
+        "eclipses": {
+          "2026": 1,
+          "2027": 3
+        },
+        "moonPhases": {
+          "2026": 50,
+          "2027": 49
+        }
+      },
+      "read": {
+        "festivals-en": [
+          {
+            "date": "2026-01-01",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "Pradosha Vrata",
+                "type": "pradosha",
+                "description": "Guru Pradosha"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-06",
+            "festivals": [
+              {
+                "key": "sankashti_chaturthi",
+                "name": "Sankashti Chaturthi",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "Lohri",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-14",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "Vaishnava Ekadashi",
+                "type": "vaishnava_ekadashi",
+                "description": "Saphala Ekadashi"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "Smarta Ekadashi",
+                "type": "smarta_ekadashi",
+                "description": "Saphala Ekadashi"
+              },
+              {
+                "key": "ekadashi",
+                "name": "Ekadashi",
+                "type": "ekadashi",
+                "description": "Saphala Ekadashi"
+              },
+              {
+                "key": "sankranti",
+                "name": "Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "Makar Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "pongal",
+                "name": "Pongal",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "uttarayan",
+                "name": "Uttarayan",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "Magh Bihu",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "Ayyappa Makara Jyothi",
+                "type": "sankranti",
+                "description": "Makara"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-16",
+            "festivals": [
+              {
+                "key": "masik_shivaratri",
+                "name": "Masik Shivaratri",
+                "type": "minor"
+              },
+              {
+                "key": "pradosha",
+                "name": "Pradosha Vrata",
+                "type": "pradosha",
+                "description": "Bhrigu Pradosha"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-22",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "Vinayaka Chaturthi",
+                "type": "minor"
+              }
+            ]
+          }
+        ],
+        "eclipses-en": [
+          {
+            "date": "2026-03-03",
+            "eclipses": [
+              {
+                "name": "Total Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2026-03-03T08:44:24.924Z",
+                "peak": "2026-03-03T11:33:42.765Z",
+                "end": "2026-03-03T14:23:05.620Z",
+                "obscuration": 1,
+                "magnitude": 1.1511902344335134,
+                "visibleFromLocation": true,
+                "visibleAtPeak": false,
+                "sutak": {
+                  "start": "2026-03-03T00:50:03.607Z",
+                  "end": "2026-03-03T13:17:18.273Z"
+                },
+                "description": "Total Lunar Eclipse: 100% obscuration."
+              }
+            ]
+          }
+        ],
+        "moonPhases-en": [
+          {
+            "date": "2026-01-03",
+            "phases": [
+              {
+                "name": "Full Moon",
+                "phase": "full",
+                "time": "2026-01-03T10:02:54.562Z",
+                "description": "Full moon (Purnima)."
+              }
+            ]
+          },
+          {
+            "date": "2026-01-10",
+            "phases": [
+              {
+                "name": "Last Quarter",
+                "phase": "last_quarter",
+                "time": "2026-01-10T15:48:23.312Z",
+                "description": "Last quarter: waning half moon."
+              }
+            ]
+          },
+          {
+            "date": "2026-01-19",
+            "phases": [
+              {
+                "name": "New Moon",
+                "phase": "new",
+                "time": "2026-01-18T19:51:58.542Z",
+                "description": "New moon (Amavasya)."
+              }
+            ]
+          },
+          {
+            "date": "2026-01-26",
+            "phases": [
+              {
+                "name": "First Quarter",
+                "phase": "first_quarter",
+                "time": "2026-01-26T04:47:23.269Z",
+                "description": "First quarter: waxing half moon."
+              }
+            ]
+          }
+        ],
+        "festivals-hi": [
+          {
+            "date": "2026-01-01",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "प्रदोष व्रत",
+                "type": "pradosha",
+                "description": "गुरु प्रदोष"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-06",
+            "festivals": [
+              {
+                "key": "sankashti_chaturthi",
+                "name": "संकष्टी चतुर्थी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "लोहड़ी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-14",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "वैष्णव एकादशी",
+                "type": "vaishnava_ekadashi",
+                "description": "सफला एकादशी"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "स्मार्त एकादशी",
+                "type": "smarta_ekadashi",
+                "description": "सफला एकादशी"
+              },
+              {
+                "key": "ekadashi",
+                "name": "एकादशी",
+                "type": "ekadashi",
+                "description": "सफला एकादशी"
+              },
+              {
+                "key": "sankranti",
+                "name": "संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "मकर संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "pongal",
+                "name": "पोंगल",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "uttarayan",
+                "name": "उत्तरायण",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "माघ बिहू",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "अय्यप्पा मकर ज्योति",
+                "type": "sankranti",
+                "description": "मकर"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-16",
+            "festivals": [
+              {
+                "key": "masik_shivaratri",
+                "name": "मासिक शिवरात्रि",
+                "type": "minor"
+              },
+              {
+                "key": "pradosha",
+                "name": "प्रदोष व्रत",
+                "type": "pradosha",
+                "description": "भृगु प्रदोष"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-22",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "विनायक चतुर्थी",
+                "type": "minor"
+              }
+            ]
+          }
+        ],
+        "eclipses-hi": [
+          {
+            "date": "2026-03-03",
+            "eclipses": [
+              {
+                "name": "पूर्ण चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2026-03-03T08:44:24.924Z",
+                "peak": "2026-03-03T11:33:42.765Z",
+                "end": "2026-03-03T14:23:05.620Z",
+                "obscuration": 1,
+                "magnitude": 1.1511902344335134,
+                "visibleFromLocation": true,
+                "visibleAtPeak": false,
+                "sutak": {
+                  "start": "2026-03-03T00:50:03.607Z",
+                  "end": "2026-03-03T13:17:18.273Z"
+                },
+                "description": "पूर्ण चंद्र ग्रहण: 100% ग्रास।"
+              }
+            ]
+          }
+        ],
+        "moonPhases-hi": [
+          {
+            "date": "2026-01-03",
+            "phases": [
+              {
+                "name": "पूर्णिमा",
+                "phase": "full",
+                "time": "2026-01-03T10:02:54.562Z",
+                "description": "पूर्णिमा: पूर्ण चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-10",
+            "phases": [
+              {
+                "name": "कृष्ण पक्ष अर्धचंद्र",
+                "phase": "last_quarter",
+                "time": "2026-01-10T15:48:23.312Z",
+                "description": "कृष्ण पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-19",
+            "phases": [
+              {
+                "name": "अमावस्या",
+                "phase": "new",
+                "time": "2026-01-18T19:51:58.542Z",
+                "description": "अमावस्या: नया चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-26",
+            "phases": [
+              {
+                "name": "शुक्ल पक्ष अर्धचंद्र",
+                "phase": "first_quarter",
+                "time": "2026-01-26T04:47:23.269Z",
+                "description": "शुक्ल पक्ष अर्धचंद्र।"
+              }
+            ]
+          }
+        ]
+      },
+      "byDate": {
+        "festivals": [],
+        "eclipses": [],
+        "moonPhases": [],
+        "festivalsOutOfRange": true,
+        "eclipsesOutOfRange": true,
+        "moonPhasesOutOfRange": true,
+        "ranges": {
+          "festivals": {
+            "start": 2026,
+            "end": 2027
+          },
+          "eclipses": {
+            "start": 2026,
+            "end": 2027
+          },
+          "moonPhases": {
+            "start": 2026,
+            "end": 2027
+          }
+        }
+      }
+    },
+    {
+      "key": "pune-2025-hi-first",
+      "sha256": {
+        "festivals": "692133da308be5204aa51ff060e464fe04ee8ad1bb5834d44a612f028bb0059c",
+        "eclipses": "74343f881881933bf4866a617f1f369b617ffa8f950c31aaf166ab4427ca1105",
+        "moonPhases": "a501b2a0901eece3a26779144ef75f33312f7449f886a8573aa6a4d8d507732b"
+      },
+      "sha256Masked": {
+        "festivals": "692133da308be5204aa51ff060e464fe04ee8ad1bb5834d44a612f028bb0059c",
+        "eclipses": "87b02832fb6853641e93ec1ec80ae9026d64e040ea8ed68fbf2862a1b5a8dad5",
+        "moonPhases": "a501b2a0901eece3a26779144ef75f33312f7449f886a8573aa6a4d8d507732b"
+      },
+      "bytes": {
+        "festivals": 59513,
+        "eclipses": 1938,
+        "moonPhases": 9329
+      },
+      "metaKeys": {
+        "festivals": [
+          "format",
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "ayanamsa",
+          "masaSystem",
+          "region",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "eclipses": [
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "visibleOnly",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "moonPhases": [
+          "format",
+          "referenceLocation",
+          "timezoneOffsetMinutes",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ]
+      },
+      "entryKeys": {
+        "festivalDict": [
+          "key",
+          "type",
+          "name"
+        ],
+        "eclipseEntry": null,
+        "eclipseEntryWithSutak": [
+          "name",
+          "kind",
+          "subtype",
+          "start",
+          "peak",
+          "end",
+          "obscuration",
+          "magnitude",
+          "visibleFromLocation",
+          "visibleAtPeak",
+          "description",
+          "sutak"
+        ],
+        "phaseDict": [
+          "phase",
+          "name",
+          "description"
+        ]
+      },
+      "dictLengths": {
+        "festivals": 168,
+        "moonPhases": 4
+      },
+      "dayCounts": {
+        "festivals": {
+          "2025": 160
+        },
+        "eclipses": {
+          "2025": 1
+        },
+        "moonPhases": {
+          "2025": 49
+        }
+      },
+      "read": {
+        "festivals-en": [
+          {
+            "date": "2025-01-03",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "Vinayaka Chaturthi",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-09",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-10",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "Vaishnava Ekadashi",
+                "type": "vaishnava_ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "Smarta Ekadashi",
+                "type": "smarta_ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "ekadashi",
+                "name": "Ekadashi",
+                "type": "ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-11",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "Pradosha Vrata",
+                "type": "pradosha",
+                "description": "Shani Pradosha"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "Lohri",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "Makar Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "pongal",
+                "name": "Pongal",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "uttarayan",
+                "name": "Uttarayan",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "Magh Bihu",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "Ayyappa Makara Jyothi",
+                "type": "sankranti",
+                "description": "Makara"
+              }
+            ]
+          }
+        ],
+        "eclipses-en": [
+          {
+            "date": "2025-09-07",
+            "eclipses": [
+              {
+                "name": "Total Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2025-09-07T15:28:24.700Z",
+                "peak": "2025-09-07T18:11:48.389Z",
+                "end": "2025-09-07T20:55:07.573Z",
+                "obscuration": 1,
+                "magnitude": 1.3621799606665859,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2025-09-07T07:27:05.498Z",
+                  "end": "2025-09-07T19:56:33.726Z"
+                },
+                "description": "Total Lunar Eclipse: 100% obscuration."
+              }
+            ]
+          }
+        ],
+        "moonPhases-en": [
+          {
+            "date": "2025-01-07",
+            "phases": [
+              {
+                "name": "First Quarter",
+                "phase": "first_quarter",
+                "time": "2025-01-06T23:56:17.333Z",
+                "description": "First quarter: waxing half moon."
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "phases": [
+              {
+                "name": "Full Moon",
+                "phase": "full",
+                "time": "2025-01-13T22:26:54.450Z",
+                "description": "Full moon (Purnima)."
+              }
+            ]
+          },
+          {
+            "date": "2025-01-22",
+            "phases": [
+              {
+                "name": "Last Quarter",
+                "phase": "last_quarter",
+                "time": "2025-01-21T20:30:47.210Z",
+                "description": "Last quarter: waning half moon."
+              }
+            ]
+          },
+          {
+            "date": "2025-01-29",
+            "phases": [
+              {
+                "name": "New Moon",
+                "phase": "new",
+                "time": "2025-01-29T12:35:58.553Z",
+                "description": "New moon (Amavasya)."
+              }
+            ]
+          }
+        ],
+        "festivals-hi": [
+          {
+            "date": "2025-01-03",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "विनायक चतुर्थी",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-09",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-10",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "वैष्णव एकादशी",
+                "type": "vaishnava_ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "स्मार्त एकादशी",
+                "type": "smarta_ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "ekadashi",
+                "name": "एकादशी",
+                "type": "ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-11",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "प्रदोष व्रत",
+                "type": "pradosha",
+                "description": "शनि प्रदोष"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "लोहड़ी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "मकर संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "pongal",
+                "name": "पोंगल",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "uttarayan",
+                "name": "उत्तरायण",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "माघ बिहू",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "अय्यप्पा मकर ज्योति",
+                "type": "sankranti",
+                "description": "मकर"
+              }
+            ]
+          }
+        ],
+        "eclipses-hi": [
+          {
+            "date": "2025-09-07",
+            "eclipses": [
+              {
+                "name": "पूर्ण चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2025-09-07T15:28:24.700Z",
+                "peak": "2025-09-07T18:11:48.389Z",
+                "end": "2025-09-07T20:55:07.573Z",
+                "obscuration": 1,
+                "magnitude": 1.3621799606665859,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2025-09-07T07:27:05.498Z",
+                  "end": "2025-09-07T19:56:33.726Z"
+                },
+                "description": "पूर्ण चंद्र ग्रहण: 100% ग्रास।"
+              }
+            ]
+          }
+        ],
+        "moonPhases-hi": [
+          {
+            "date": "2025-01-07",
+            "phases": [
+              {
+                "name": "शुक्ल पक्ष अर्धचंद्र",
+                "phase": "first_quarter",
+                "time": "2025-01-06T23:56:17.333Z",
+                "description": "शुक्ल पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "phases": [
+              {
+                "name": "पूर्णिमा",
+                "phase": "full",
+                "time": "2025-01-13T22:26:54.450Z",
+                "description": "पूर्णिमा: पूर्ण चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-22",
+            "phases": [
+              {
+                "name": "कृष्ण पक्ष अर्धचंद्र",
+                "phase": "last_quarter",
+                "time": "2025-01-21T20:30:47.210Z",
+                "description": "कृष्ण पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-29",
+            "phases": [
+              {
+                "name": "अमावस्या",
+                "phase": "new",
+                "time": "2025-01-29T12:35:58.553Z",
+                "description": "अमावस्या: नया चंद्रमा।"
+              }
+            ]
+          }
+        ]
+      },
+      "byDate": {
+        "festivals": [],
+        "eclipses": [],
+        "moonPhases": [],
+        "festivalsOutOfRange": true,
+        "eclipsesOutOfRange": true,
+        "moonPhasesOutOfRange": true,
+        "ranges": {
+          "festivals": {
+            "start": 2025,
+            "end": 2025
+          },
+          "eclipses": {
+            "start": 2025,
+            "end": 2025
+          },
+          "moonPhases": {
+            "start": 2025,
+            "end": 2025
+          }
+        }
+      }
+    },
+    {
+      "key": "pune-2025-en-only",
+      "sha256": {
+        "festivals": "e43f122a57d3fc4b38023383ecd8632e09876c64c7995356c72ccd608ec243bf",
+        "eclipses": "99e5c629962d46d6eb50b356b2f17b470d6e9fcab93efac64996ac2e451bdecc",
+        "moonPhases": "8b02946ced19fabe047427ed4a445d9e3e003e6cd55edac523cf4b48305098d7"
+      },
+      "sha256Masked": {
+        "festivals": "e43f122a57d3fc4b38023383ecd8632e09876c64c7995356c72ccd608ec243bf",
+        "eclipses": "229eae26f15358257e204a3d6a590b7a8b2152363ee4f7c8a7c795305656f91b",
+        "moonPhases": "8b02946ced19fabe047427ed4a445d9e3e003e6cd55edac523cf4b48305098d7"
+      },
+      "bytes": {
+        "festivals": 45073,
+        "eclipses": 1758,
+        "moonPhases": 8768
+      },
+      "metaKeys": {
+        "festivals": [
+          "format",
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "ayanamsa",
+          "masaSystem",
+          "region",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "eclipses": [
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "visibleOnly",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "moonPhases": [
+          "format",
+          "referenceLocation",
+          "timezoneOffsetMinutes",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ]
+      },
+      "entryKeys": {
+        "festivalDict": [
+          "key",
+          "type",
+          "name"
+        ],
+        "eclipseEntry": null,
+        "eclipseEntryWithSutak": [
+          "name",
+          "kind",
+          "subtype",
+          "start",
+          "peak",
+          "end",
+          "obscuration",
+          "magnitude",
+          "visibleFromLocation",
+          "visibleAtPeak",
+          "description",
+          "sutak"
+        ],
+        "phaseDict": [
+          "phase",
+          "name",
+          "description"
+        ]
+      },
+      "dictLengths": {
+        "festivals": 168,
+        "moonPhases": 4
+      },
+      "dayCounts": {
+        "festivals": {
+          "2025": 160
+        },
+        "eclipses": {
+          "2025": 1
+        },
+        "moonPhases": {
+          "2025": 49
+        }
+      },
+      "read": {
+        "festivals-en": [
+          {
+            "date": "2025-01-03",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "Vinayaka Chaturthi",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-09",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-10",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "Vaishnava Ekadashi",
+                "type": "vaishnava_ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "Smarta Ekadashi",
+                "type": "smarta_ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "ekadashi",
+                "name": "Ekadashi",
+                "type": "ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-11",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "Pradosha Vrata",
+                "type": "pradosha",
+                "description": "Shani Pradosha"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "Lohri",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "Makar Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "pongal",
+                "name": "Pongal",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "uttarayan",
+                "name": "Uttarayan",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "Magh Bihu",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "Ayyappa Makara Jyothi",
+                "type": "sankranti",
+                "description": "Makara"
+              }
+            ]
+          }
+        ],
+        "eclipses-en": [
+          {
+            "date": "2025-09-07",
+            "eclipses": [
+              {
+                "name": "Total Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2025-09-07T15:28:24.700Z",
+                "peak": "2025-09-07T18:11:48.389Z",
+                "end": "2025-09-07T20:55:07.573Z",
+                "obscuration": 1,
+                "magnitude": 1.3621799606665859,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2025-09-07T07:27:05.498Z",
+                  "end": "2025-09-07T19:56:33.726Z"
+                },
+                "description": "Total Lunar Eclipse: 100% obscuration."
+              }
+            ]
+          }
+        ],
+        "moonPhases-en": [
+          {
+            "date": "2025-01-07",
+            "phases": [
+              {
+                "name": "First Quarter",
+                "phase": "first_quarter",
+                "time": "2025-01-06T23:56:17.333Z",
+                "description": "First quarter: waxing half moon."
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "phases": [
+              {
+                "name": "Full Moon",
+                "phase": "full",
+                "time": "2025-01-13T22:26:54.450Z",
+                "description": "Full moon (Purnima)."
+              }
+            ]
+          },
+          {
+            "date": "2025-01-22",
+            "phases": [
+              {
+                "name": "Last Quarter",
+                "phase": "last_quarter",
+                "time": "2025-01-21T20:30:47.210Z",
+                "description": "Last quarter: waning half moon."
+              }
+            ]
+          },
+          {
+            "date": "2025-01-29",
+            "phases": [
+              {
+                "name": "New Moon",
+                "phase": "new",
+                "time": "2025-01-29T12:35:58.553Z",
+                "description": "New moon (Amavasya)."
+              }
+            ]
+          }
+        ],
+        "festivals-hi": [
+          {
+            "date": "2025-01-03",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "Vinayaka Chaturthi",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-09",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-10",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "Vaishnava Ekadashi",
+                "type": "vaishnava_ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "Smarta Ekadashi",
+                "type": "smarta_ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "ekadashi",
+                "name": "Ekadashi",
+                "type": "ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-11",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "Pradosha Vrata",
+                "type": "pradosha",
+                "description": "Shani Pradosha"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "Lohri",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "Makar Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "pongal",
+                "name": "Pongal",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "uttarayan",
+                "name": "Uttarayan",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "Magh Bihu",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "Ayyappa Makara Jyothi",
+                "type": "sankranti",
+                "description": "Makara"
+              }
+            ]
+          }
+        ],
+        "eclipses-hi": [
+          {
+            "date": "2025-09-07",
+            "eclipses": [
+              {
+                "name": "Total Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2025-09-07T15:28:24.700Z",
+                "peak": "2025-09-07T18:11:48.389Z",
+                "end": "2025-09-07T20:55:07.573Z",
+                "obscuration": 1,
+                "magnitude": 1.3621799606665859,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2025-09-07T07:27:05.498Z",
+                  "end": "2025-09-07T19:56:33.726Z"
+                },
+                "description": "Total Lunar Eclipse: 100% obscuration."
+              }
+            ]
+          }
+        ],
+        "moonPhases-hi": [
+          {
+            "date": "2025-01-07",
+            "phases": [
+              {
+                "name": "First Quarter",
+                "phase": "first_quarter",
+                "time": "2025-01-06T23:56:17.333Z",
+                "description": "First quarter: waxing half moon."
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "phases": [
+              {
+                "name": "Full Moon",
+                "phase": "full",
+                "time": "2025-01-13T22:26:54.450Z",
+                "description": "Full moon (Purnima)."
+              }
+            ]
+          },
+          {
+            "date": "2025-01-22",
+            "phases": [
+              {
+                "name": "Last Quarter",
+                "phase": "last_quarter",
+                "time": "2025-01-21T20:30:47.210Z",
+                "description": "Last quarter: waning half moon."
+              }
+            ]
+          },
+          {
+            "date": "2025-01-29",
+            "phases": [
+              {
+                "name": "New Moon",
+                "phase": "new",
+                "time": "2025-01-29T12:35:58.553Z",
+                "description": "New moon (Amavasya)."
+              }
+            ]
+          }
+        ]
+      },
+      "byDate": {
+        "festivals": [],
+        "eclipses": [],
+        "moonPhases": [],
+        "festivalsOutOfRange": true,
+        "eclipsesOutOfRange": true,
+        "moonPhasesOutOfRange": true,
+        "ranges": {
+          "festivals": {
+            "start": 2025,
+            "end": 2025
+          },
+          "eclipses": {
+            "start": 2025,
+            "end": 2025
+          },
+          "moonPhases": {
+            "start": 2025,
+            "end": 2025
+          }
+        }
+      }
+    },
+    {
+      "key": "pune-2025-hi-only",
+      "sha256": {
+        "festivals": "f90e54fe5005c337d2c6afd7ee10986718b9573bc0b76c93a5502c42a1ac0c00",
+        "eclipses": "b99bf88a234f9b550794344acbd8dec58e42943f82dee0c37fd15419c81db6cf",
+        "moonPhases": "ad47f5d7c5e7f6b931798bee51ceaae726a462f33f658546961e167a02a83b44"
+      },
+      "sha256Masked": {
+        "festivals": "f90e54fe5005c337d2c6afd7ee10986718b9573bc0b76c93a5502c42a1ac0c00",
+        "eclipses": "f37cd9b8edf908e6db0c1c8040e2817c1881ad011e82f1abefe4ea9fba547bfc",
+        "moonPhases": "ad47f5d7c5e7f6b931798bee51ceaae726a462f33f658546961e167a02a83b44"
+      },
+      "bytes": {
+        "festivals": 50381,
+        "eclipses": 1820,
+        "moonPhases": 9027
+      },
+      "metaKeys": {
+        "festivals": [
+          "format",
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "ayanamsa",
+          "masaSystem",
+          "region",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "eclipses": [
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "visibleOnly",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "moonPhases": [
+          "format",
+          "referenceLocation",
+          "timezoneOffsetMinutes",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ]
+      },
+      "entryKeys": {
+        "festivalDict": [
+          "key",
+          "type",
+          "name"
+        ],
+        "eclipseEntry": null,
+        "eclipseEntryWithSutak": [
+          "name",
+          "kind",
+          "subtype",
+          "start",
+          "peak",
+          "end",
+          "obscuration",
+          "magnitude",
+          "visibleFromLocation",
+          "visibleAtPeak",
+          "description",
+          "sutak"
+        ],
+        "phaseDict": [
+          "phase",
+          "name",
+          "description"
+        ]
+      },
+      "dictLengths": {
+        "festivals": 168,
+        "moonPhases": 4
+      },
+      "dayCounts": {
+        "festivals": {
+          "2025": 160
+        },
+        "eclipses": {
+          "2025": 1
+        },
+        "moonPhases": {
+          "2025": 49
+        }
+      },
+      "read": {
+        "festivals-en": [
+          {
+            "date": "2025-01-03",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "विनायक चतुर्थी",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-09",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-10",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "वैष्णव एकादशी",
+                "type": "vaishnava_ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "स्मार्त एकादशी",
+                "type": "smarta_ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "ekadashi",
+                "name": "एकादशी",
+                "type": "ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-11",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "प्रदोष व्रत",
+                "type": "pradosha",
+                "description": "शनि प्रदोष"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "लोहड़ी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "मकर संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "pongal",
+                "name": "पोंगल",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "uttarayan",
+                "name": "उत्तरायण",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "माघ बिहू",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "अय्यप्पा मकर ज्योति",
+                "type": "sankranti",
+                "description": "मकर"
+              }
+            ]
+          }
+        ],
+        "eclipses-en": [
+          {
+            "date": "2025-09-07",
+            "eclipses": [
+              {
+                "name": "पूर्ण चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2025-09-07T15:28:24.700Z",
+                "peak": "2025-09-07T18:11:48.389Z",
+                "end": "2025-09-07T20:55:07.573Z",
+                "obscuration": 1,
+                "magnitude": 1.3621799606665859,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2025-09-07T07:27:05.498Z",
+                  "end": "2025-09-07T19:56:33.726Z"
+                },
+                "description": "पूर्ण चंद्र ग्रहण: 100% ग्रास।"
+              }
+            ]
+          }
+        ],
+        "moonPhases-en": [
+          {
+            "date": "2025-01-07",
+            "phases": [
+              {
+                "name": "शुक्ल पक्ष अर्धचंद्र",
+                "phase": "first_quarter",
+                "time": "2025-01-06T23:56:17.333Z",
+                "description": "शुक्ल पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "phases": [
+              {
+                "name": "पूर्णिमा",
+                "phase": "full",
+                "time": "2025-01-13T22:26:54.450Z",
+                "description": "पूर्णिमा: पूर्ण चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-22",
+            "phases": [
+              {
+                "name": "कृष्ण पक्ष अर्धचंद्र",
+                "phase": "last_quarter",
+                "time": "2025-01-21T20:30:47.210Z",
+                "description": "कृष्ण पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-29",
+            "phases": [
+              {
+                "name": "अमावस्या",
+                "phase": "new",
+                "time": "2025-01-29T12:35:58.553Z",
+                "description": "अमावस्या: नया चंद्रमा।"
+              }
+            ]
+          }
+        ],
+        "festivals-hi": [
+          {
+            "date": "2025-01-03",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "विनायक चतुर्थी",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-09",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-10",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "वैष्णव एकादशी",
+                "type": "vaishnava_ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "स्मार्त एकादशी",
+                "type": "smarta_ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "ekadashi",
+                "name": "एकादशी",
+                "type": "ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-11",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "प्रदोष व्रत",
+                "type": "pradosha",
+                "description": "शनि प्रदोष"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "लोहड़ी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "मकर संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "pongal",
+                "name": "पोंगल",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "uttarayan",
+                "name": "उत्तरायण",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "माघ बिहू",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "अय्यप्पा मकर ज्योति",
+                "type": "sankranti",
+                "description": "मकर"
+              }
+            ]
+          }
+        ],
+        "eclipses-hi": [
+          {
+            "date": "2025-09-07",
+            "eclipses": [
+              {
+                "name": "पूर्ण चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2025-09-07T15:28:24.700Z",
+                "peak": "2025-09-07T18:11:48.389Z",
+                "end": "2025-09-07T20:55:07.573Z",
+                "obscuration": 1,
+                "magnitude": 1.3621799606665859,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2025-09-07T07:27:05.498Z",
+                  "end": "2025-09-07T19:56:33.726Z"
+                },
+                "description": "पूर्ण चंद्र ग्रहण: 100% ग्रास।"
+              }
+            ]
+          }
+        ],
+        "moonPhases-hi": [
+          {
+            "date": "2025-01-07",
+            "phases": [
+              {
+                "name": "शुक्ल पक्ष अर्धचंद्र",
+                "phase": "first_quarter",
+                "time": "2025-01-06T23:56:17.333Z",
+                "description": "शुक्ल पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-14",
+            "phases": [
+              {
+                "name": "पूर्णिमा",
+                "phase": "full",
+                "time": "2025-01-13T22:26:54.450Z",
+                "description": "पूर्णिमा: पूर्ण चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-22",
+            "phases": [
+              {
+                "name": "कृष्ण पक्ष अर्धचंद्र",
+                "phase": "last_quarter",
+                "time": "2025-01-21T20:30:47.210Z",
+                "description": "कृष्ण पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-29",
+            "phases": [
+              {
+                "name": "अमावस्या",
+                "phase": "new",
+                "time": "2025-01-29T12:35:58.553Z",
+                "description": "अमावस्या: नया चंद्रमा।"
+              }
+            ]
+          }
+        ]
+      },
+      "byDate": {
+        "festivals": [],
+        "eclipses": [],
+        "moonPhases": [],
+        "festivalsOutOfRange": true,
+        "eclipsesOutOfRange": true,
+        "moonPhasesOutOfRange": true,
+        "ranges": {
+          "festivals": {
+            "start": 2025,
+            "end": 2025
+          },
+          "eclipses": {
+            "start": 2025,
+            "end": 2025
+          },
+          "moonPhases": {
+            "start": 2025,
+            "end": 2025
+          }
+        }
+      }
+    },
+    {
+      "key": "longyearbyen-2025-all",
+      "sha256": {
+        "festivals": "0c97633c4663e93b146bc8a82e6e4c208d1be88b93f7a16e857ac42d3cbdbbf2",
+        "eclipses": "4548e0abe9538db0e250b8388dd10073cb2dfad418323bc18ea1abbdfa4fb396",
+        "moonPhases": "4a6b89c06372c9d7a4e38aee7d84deacd8229e34c70ffdf4ecd5902997bbd43f"
+      },
+      "sha256Masked": {
+        "festivals": "0c97633c4663e93b146bc8a82e6e4c208d1be88b93f7a16e857ac42d3cbdbbf2",
+        "eclipses": "f08c125bede337537d465f53e66f84eed59192288e5cf9d39a9c6e62a554d5b2",
+        "moonPhases": "4a6b89c06372c9d7a4e38aee7d84deacd8229e34c70ffdf4ecd5902997bbd43f"
+      },
+      "bytes": {
+        "festivals": 23819,
+        "eclipses": 3856,
+        "moonPhases": 9331
+      },
+      "metaKeys": {
+        "festivals": [
+          "format",
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "ayanamsa",
+          "masaSystem",
+          "region",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "eclipses": [
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "visibleOnly",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "moonPhases": [
+          "format",
+          "referenceLocation",
+          "timezoneOffsetMinutes",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ]
+      },
+      "entryKeys": {
+        "festivalDict": [
+          "key",
+          "type",
+          "name"
+        ],
+        "eclipseEntry": null,
+        "eclipseEntryWithSutak": [
+          "name",
+          "kind",
+          "subtype",
+          "start",
+          "peak",
+          "end",
+          "obscuration",
+          "magnitude",
+          "visibleFromLocation",
+          "visibleAtPeak",
+          "description",
+          "sutak"
+        ],
+        "phaseDict": [
+          "phase",
+          "name",
+          "description"
+        ]
+      },
+      "dictLengths": {
+        "festivals": 73,
+        "moonPhases": 4
+      },
+      "dayCounts": {
+        "festivals": {
+          "2025": 56
+        },
+        "eclipses": {
+          "2025": 3
+        },
+        "moonPhases": {
+          "2025": 49
+        }
+      },
+      "read": {
+        "festivals-en": [
+          {
+            "date": "2025-02-14",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
+                "type": "minor"
+              },
+              {
+                "key": "sankashti_chaturthi",
+                "name": "Sankashti Chaturthi",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2025-02-15",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
+                "type": "minor"
+              },
+              {
+                "key": "sankashti_chaturthi",
+                "name": "Sankashti Chaturthi",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2025-02-22",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-02-23",
+            "festivals": [
+              {
+                "key": "smarta_ekadashi",
+                "name": "Smarta Ekadashi",
+                "type": "smarta_ekadashi",
+                "description": "Shattila Ekadashi"
+              },
+              {
+                "key": "ekadashi",
+                "name": "Ekadashi",
+                "type": "ekadashi",
+                "description": "Shattila Ekadashi"
+              }
+            ]
+          },
+          {
+            "date": "2025-02-24",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "Vaishnava Ekadashi",
+                "type": "vaishnava_ekadashi",
+                "description": "Shattila Ekadashi"
+              }
+            ]
+          },
+          {
+            "date": "2025-02-25",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "Pradosha Vrata",
+                "type": "pradosha",
+                "description": "Bhauma Pradosha"
+              }
+            ]
+          }
+        ],
+        "eclipses-en": [
+          {
+            "date": "2025-03-14",
+            "eclipses": [
+              {
+                "name": "Total Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2025-03-14T03:57:28.018Z",
+                "peak": "2025-03-14T06:58:46.409Z",
+                "end": "2025-03-14T10:00:08.174Z",
+                "obscuration": 1,
+                "magnitude": 1.1787389234818788,
+                "visibleFromLocation": true,
+                "visibleAtPeak": false,
+                "sutak": {
+                  "start": "2025-03-13T20:09:35.698Z",
+                  "end": "2025-03-14T08:47:55.034Z"
+                },
+                "description": "Total Lunar Eclipse: 100% obscuration."
+              }
+            ]
+          },
+          {
+            "date": "2025-03-29",
+            "eclipses": [
+              {
+                "name": "Partial Solar Eclipse",
+                "kind": "solar",
+                "subtype": "partial",
+                "start": "2025-03-29T10:41:48.782Z",
+                "peak": "2025-03-29T11:36:53.760Z",
+                "end": "2025-03-29T12:31:52.400Z",
+                "obscuration": 0.5303418293320725,
+                "magnitude": 0.6160354981917282,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2025-03-28T22:41:48.782Z",
+                  "end": "2025-03-29T12:31:52.400Z"
+                },
+                "description": "Partial Solar Eclipse: 53% obscuration."
+              }
+            ]
+          },
+          {
+            "date": "2025-09-07",
+            "eclipses": [
+              {
+                "name": "Total Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2025-09-07T15:28:24.700Z",
+                "peak": "2025-09-07T18:11:48.389Z",
+                "end": "2025-09-07T20:55:07.573Z",
+                "obscuration": 1,
+                "magnitude": 1.3621799606665859,
+                "visibleFromLocation": true,
+                "visibleAtPeak": false,
+                "sutak": {
+                  "start": "2025-09-07T07:27:05.498Z",
+                  "end": "2025-09-07T19:56:33.726Z"
+                },
+                "description": "Total Lunar Eclipse: 100% obscuration."
+              }
+            ]
+          }
+        ],
+        "moonPhases-en": [
+          {
+            "date": "2025-01-07",
+            "phases": [
+              {
+                "name": "First Quarter",
+                "phase": "first_quarter",
+                "time": "2025-01-06T23:56:17.333Z",
+                "description": "First quarter: waxing half moon."
+              }
+            ]
+          },
+          {
+            "date": "2025-01-13",
+            "phases": [
+              {
+                "name": "Full Moon",
+                "phase": "full",
+                "time": "2025-01-13T22:26:54.450Z",
+                "description": "Full moon (Purnima)."
+              }
+            ]
+          },
+          {
+            "date": "2025-01-21",
+            "phases": [
+              {
+                "name": "Last Quarter",
+                "phase": "last_quarter",
+                "time": "2025-01-21T20:30:47.210Z",
+                "description": "Last quarter: waning half moon."
+              }
+            ]
+          },
+          {
+            "date": "2025-01-29",
+            "phases": [
+              {
+                "name": "New Moon",
+                "phase": "new",
+                "time": "2025-01-29T12:35:58.553Z",
+                "description": "New moon (Amavasya)."
+              }
+            ]
+          }
+        ],
+        "festivals-hi": [
+          {
+            "date": "2025-02-14",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
+                "type": "minor"
+              },
+              {
+                "key": "sankashti_chaturthi",
+                "name": "संकष्टी चतुर्थी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2025-02-15",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
+                "type": "minor"
+              },
+              {
+                "key": "sankashti_chaturthi",
+                "name": "संकष्टी चतुर्थी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2025-02-22",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2025-02-23",
+            "festivals": [
+              {
+                "key": "smarta_ekadashi",
+                "name": "स्मार्त एकादशी",
+                "type": "smarta_ekadashi",
+                "description": "षट्तिला एकादशी"
+              },
+              {
+                "key": "ekadashi",
+                "name": "एकादशी",
+                "type": "ekadashi",
+                "description": "षट्तिला एकादशी"
+              }
+            ]
+          },
+          {
+            "date": "2025-02-24",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "वैष्णव एकादशी",
+                "type": "vaishnava_ekadashi",
+                "description": "षट्तिला एकादशी"
+              }
+            ]
+          },
+          {
+            "date": "2025-02-25",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "प्रदोष व्रत",
+                "type": "pradosha",
+                "description": "भौम प्रदोष"
+              }
+            ]
+          }
+        ],
+        "eclipses-hi": [
+          {
+            "date": "2025-03-14",
+            "eclipses": [
+              {
+                "name": "पूर्ण चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2025-03-14T03:57:28.018Z",
+                "peak": "2025-03-14T06:58:46.409Z",
+                "end": "2025-03-14T10:00:08.174Z",
+                "obscuration": 1,
+                "magnitude": 1.1787389234818788,
+                "visibleFromLocation": true,
+                "visibleAtPeak": false,
+                "sutak": {
+                  "start": "2025-03-13T20:09:35.698Z",
+                  "end": "2025-03-14T08:47:55.034Z"
+                },
+                "description": "पूर्ण चंद्र ग्रहण: 100% ग्रास।"
+              }
+            ]
+          },
+          {
+            "date": "2025-03-29",
+            "eclipses": [
+              {
+                "name": "आंशिक सूर्य ग्रहण",
+                "kind": "solar",
+                "subtype": "partial",
+                "start": "2025-03-29T10:41:48.782Z",
+                "peak": "2025-03-29T11:36:53.760Z",
+                "end": "2025-03-29T12:31:52.400Z",
+                "obscuration": 0.5303418293320725,
+                "magnitude": 0.6160354981917282,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "sutak": {
+                  "start": "2025-03-28T22:41:48.782Z",
+                  "end": "2025-03-29T12:31:52.400Z"
+                },
+                "description": "आंशिक सूर्य ग्रहण: 53% ग्रास।"
+              }
+            ]
+          },
+          {
+            "date": "2025-09-07",
+            "eclipses": [
+              {
+                "name": "पूर्ण चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "total",
+                "start": "2025-09-07T15:28:24.700Z",
+                "peak": "2025-09-07T18:11:48.389Z",
+                "end": "2025-09-07T20:55:07.573Z",
+                "obscuration": 1,
+                "magnitude": 1.3621799606665859,
+                "visibleFromLocation": true,
+                "visibleAtPeak": false,
+                "sutak": {
+                  "start": "2025-09-07T07:27:05.498Z",
+                  "end": "2025-09-07T19:56:33.726Z"
+                },
+                "description": "पूर्ण चंद्र ग्रहण: 100% ग्रास।"
+              }
+            ]
+          }
+        ],
+        "moonPhases-hi": [
+          {
+            "date": "2025-01-07",
+            "phases": [
+              {
+                "name": "शुक्ल पक्ष अर्धचंद्र",
+                "phase": "first_quarter",
+                "time": "2025-01-06T23:56:17.333Z",
+                "description": "शुक्ल पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-13",
+            "phases": [
+              {
+                "name": "पूर्णिमा",
+                "phase": "full",
+                "time": "2025-01-13T22:26:54.450Z",
+                "description": "पूर्णिमा: पूर्ण चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-21",
+            "phases": [
+              {
+                "name": "कृष्ण पक्ष अर्धचंद्र",
+                "phase": "last_quarter",
+                "time": "2025-01-21T20:30:47.210Z",
+                "description": "कृष्ण पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2025-01-29",
+            "phases": [
+              {
+                "name": "अमावस्या",
+                "phase": "new",
+                "time": "2025-01-29T12:35:58.553Z",
+                "description": "अमावस्या: नया चंद्रमा।"
+              }
+            ]
+          }
+        ]
+      },
+      "byDate": {
+        "festivals": [],
+        "eclipses": [],
+        "moonPhases": [],
+        "festivalsOutOfRange": true,
+        "eclipsesOutOfRange": true,
+        "moonPhasesOutOfRange": true,
+        "ranges": {
+          "festivals": {
+            "start": 2025,
+            "end": 2025
+          },
+          "eclipses": {
+            "start": 2025,
+            "end": 2025
+          },
+          "moonPhases": {
+            "start": 2025,
+            "end": 2025
+          }
+        }
+      }
+    },
+    {
+      "key": "alert-2027",
+      "sha256": {
+        "festivals": "b4bd61065eb13829cbf86a2d142548ab6434a376a76180abb75a2aeb86462f39",
+        "eclipses": "4247649ff19f14b19ec96ec1fe159ebd50f327628fbe2bb86614c0da4652e2df",
+        "moonPhases": "eb78a373e113001ef160eaa9eb9560c7b6d5fa2fccf4f6482b52a247cf3d9afe"
+      },
+      "sha256Masked": {
+        "festivals": "b4bd61065eb13829cbf86a2d142548ab6434a376a76180abb75a2aeb86462f39",
+        "eclipses": "76e9db62970d3587921bdd86e9a7eee50352897e54fcc092b2b4b4482d938a1d",
+        "moonPhases": "eb78a373e113001ef160eaa9eb9560c7b6d5fa2fccf4f6482b52a247cf3d9afe"
+      },
+      "bytes": {
+        "festivals": 14514,
+        "eclipses": 1900,
+        "moonPhases": 9322
+      },
+      "metaKeys": {
+        "festivals": [
+          "format",
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "ayanamsa",
+          "masaSystem",
+          "region",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "eclipses": [
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "visibleOnly",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "moonPhases": [
+          "format",
+          "referenceLocation",
+          "timezoneOffsetMinutes",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ]
+      },
+      "entryKeys": {
+        "festivalDict": [
+          "key",
+          "type",
+          "name"
+        ],
+        "eclipseEntry": [
+          "name",
+          "kind",
+          "subtype",
+          "start",
+          "peak",
+          "end",
+          "obscuration",
+          "magnitude",
+          "visibleFromLocation",
+          "visibleAtPeak",
+          "description"
+        ],
+        "eclipseEntryWithSutak": null,
+        "phaseDict": [
+          "phase",
+          "name",
+          "description"
+        ]
+      },
+      "dictLengths": {
+        "festivals": 44,
+        "moonPhases": 4
+      },
+      "dayCounts": {
+        "festivals": {
+          "2027": 33
+        },
+        "eclipses": {
+          "2027": 1
+        },
+        "moonPhases": {
+          "2027": 49
+        }
+      },
+      "read": {
+        "festivals-en": [
+          {
+            "date": "2027-02-26",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-02-27",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-03",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "Vaishnava Ekadashi",
+                "type": "vaishnava_ekadashi",
+                "description": "Shattila Ekadashi"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "Smarta Ekadashi",
+                "type": "smarta_ekadashi",
+                "description": "Shattila Ekadashi"
+              },
+              {
+                "key": "ekadashi",
+                "name": "Ekadashi",
+                "type": "ekadashi",
+                "description": "Shattila Ekadashi"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-05",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "Pradosha Vrata",
+                "type": "pradosha",
+                "description": "Bhrigu Pradosha"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-06",
+            "festivals": [
+              {
+                "key": "maha_shivaratri",
+                "name": "Maha Shivaratri",
+                "type": "major"
+              },
+              {
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-11",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "Vinayaka Chaturthi",
+                "type": "minor"
+              }
+            ]
+          }
+        ],
+        "eclipses-en": [
+          {
+            "date": "2027-02-20",
+            "eclipses": [
+              {
+                "name": "Penumbral Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "penumbral",
+                "start": "2027-02-20T21:12:22.752Z",
+                "peak": "2027-02-20T23:12:55.672Z",
+                "end": "2027-02-21T01:13:24.471Z",
+                "obscuration": 0,
+                "magnitude": -0.056465571191024105,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "description": "Penumbral Lunar Eclipse: penumbral shadow only; no sutak."
+              }
+            ]
+          }
+        ],
+        "moonPhases-en": [
+          {
+            "date": "2027-01-07",
+            "phases": [
+              {
+                "name": "New Moon",
+                "phase": "new",
+                "time": "2027-01-07T20:24:22.979Z",
+                "description": "New moon (Amavasya)."
+              }
+            ]
+          },
+          {
+            "date": "2027-01-15",
+            "phases": [
+              {
+                "name": "First Quarter",
+                "phase": "first_quarter",
+                "time": "2027-01-15T20:34:30.708Z",
+                "description": "First quarter: waxing half moon."
+              }
+            ]
+          },
+          {
+            "date": "2027-01-22",
+            "phases": [
+              {
+                "name": "Full Moon",
+                "phase": "full",
+                "time": "2027-01-22T12:17:22.809Z",
+                "description": "Full moon (Purnima)."
+              }
+            ]
+          },
+          {
+            "date": "2027-01-29",
+            "phases": [
+              {
+                "name": "Last Quarter",
+                "phase": "last_quarter",
+                "time": "2027-01-29T10:55:27.706Z",
+                "description": "Last quarter: waning half moon."
+              }
+            ]
+          }
+        ],
+        "festivals-hi": [
+          {
+            "date": "2027-02-26",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-02-27",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-03",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "वैष्णव एकादशी",
+                "type": "vaishnava_ekadashi",
+                "description": "षट्तिला एकादशी"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "स्मार्त एकादशी",
+                "type": "smarta_ekadashi",
+                "description": "षट्तिला एकादशी"
+              },
+              {
+                "key": "ekadashi",
+                "name": "एकादशी",
+                "type": "ekadashi",
+                "description": "षट्तिला एकादशी"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-05",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "प्रदोष व्रत",
+                "type": "pradosha",
+                "description": "भृगु प्रदोष"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-06",
+            "festivals": [
+              {
+                "key": "maha_shivaratri",
+                "name": "महा शिवरात्रि",
+                "type": "major"
+              },
+              {
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-11",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "विनायक चतुर्थी",
+                "type": "minor"
+              }
+            ]
+          }
+        ],
+        "eclipses-hi": [
+          {
+            "date": "2027-02-20",
+            "eclipses": [
+              {
+                "name": "उपच्छाया चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "penumbral",
+                "start": "2027-02-20T21:12:22.752Z",
+                "peak": "2027-02-20T23:12:55.672Z",
+                "end": "2027-02-21T01:13:24.471Z",
+                "obscuration": 0,
+                "magnitude": -0.056465571191024105,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "description": "उपच्छाया चंद्र ग्रहण: केवल उपच्छाया छाया; सूतक नहीं।"
+              }
+            ]
+          }
+        ],
+        "moonPhases-hi": [
+          {
+            "date": "2027-01-07",
+            "phases": [
+              {
+                "name": "अमावस्या",
+                "phase": "new",
+                "time": "2027-01-07T20:24:22.979Z",
+                "description": "अमावस्या: नया चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2027-01-15",
+            "phases": [
+              {
+                "name": "शुक्ल पक्ष अर्धचंद्र",
+                "phase": "first_quarter",
+                "time": "2027-01-15T20:34:30.708Z",
+                "description": "शुक्ल पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2027-01-22",
+            "phases": [
+              {
+                "name": "पूर्णिमा",
+                "phase": "full",
+                "time": "2027-01-22T12:17:22.809Z",
+                "description": "पूर्णिमा: पूर्ण चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2027-01-29",
+            "phases": [
+              {
+                "name": "कृष्ण पक्ष अर्धचंद्र",
+                "phase": "last_quarter",
+                "time": "2027-01-29T10:55:27.706Z",
+                "description": "कृष्ण पक्ष अर्धचंद्र।"
+              }
+            ]
+          }
+        ]
+      },
+      "byDate": {
+        "festivals": [],
+        "eclipses": [],
+        "moonPhases": [
+          {
+            "name": "First Quarter",
+            "phase": "first_quarter",
+            "time": "2027-01-15T20:34:30.708Z",
+            "description": "First quarter: waxing half moon."
+          }
+        ],
+        "festivalsOutOfRange": true,
+        "eclipsesOutOfRange": true,
+        "moonPhasesOutOfRange": true,
+        "ranges": {
+          "festivals": {
+            "start": 2027,
+            "end": 2027
+          },
+          "eclipses": {
+            "start": 2027,
+            "end": 2027
+          },
+          "moonPhases": {
+            "start": 2027,
+            "end": 2027
+          }
+        }
+      }
+    },
+    {
+      "key": "alert-2027-all",
+      "sha256": {
+        "festivals": "0af3e8e78bf5ac6ca4aa2d5007d62e0c3be1d8fab579c517a09ca99c80def176",
+        "eclipses": "7566704312b17fea045c7a752aeccaa52b68cac2f5a570d641a5e018aa545fa6",
+        "moonPhases": "aee4ba55ab8d217d5fbe4c177ab3038259aa12f028cc2e552dcf88d3ef3edd07"
+      },
+      "sha256Masked": {
+        "festivals": "0af3e8e78bf5ac6ca4aa2d5007d62e0c3be1d8fab579c517a09ca99c80def176",
+        "eclipses": "ca7dbb3c8e3a09c39edad60a5eb20037d3663bc7c8ab4c1399055ddd0445dbd3",
+        "moonPhases": "aee4ba55ab8d217d5fbe4c177ab3038259aa12f028cc2e552dcf88d3ef3edd07"
+      },
+      "bytes": {
+        "festivals": 14518,
+        "eclipses": 3733,
+        "moonPhases": 9326
+      },
+      "metaKeys": {
+        "festivals": [
+          "format",
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "ayanamsa",
+          "masaSystem",
+          "region",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "eclipses": [
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "visibleOnly",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "moonPhases": [
+          "format",
+          "referenceLocation",
+          "timezoneOffsetMinutes",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ]
+      },
+      "entryKeys": {
+        "festivalDict": [
+          "key",
+          "type",
+          "name"
+        ],
+        "eclipseEntry": [
+          "name",
+          "kind",
+          "subtype",
+          "start",
+          "peak",
+          "end",
+          "obscuration",
+          "magnitude",
+          "visibleFromLocation",
+          "visibleAtPeak",
+          "description"
+        ],
+        "eclipseEntryWithSutak": null,
+        "phaseDict": [
+          "phase",
+          "name",
+          "description"
+        ]
+      },
+      "dictLengths": {
+        "festivals": 44,
+        "moonPhases": 4
+      },
+      "dayCounts": {
+        "festivals": {
+          "2027": 33
+        },
+        "eclipses": {
+          "2027": 3
+        },
+        "moonPhases": {
+          "2027": 49
+        }
+      },
+      "read": {
+        "festivals-en": [
+          {
+            "date": "2027-02-26",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-02-27",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-03",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "Vaishnava Ekadashi",
+                "type": "vaishnava_ekadashi",
+                "description": "Shattila Ekadashi"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "Smarta Ekadashi",
+                "type": "smarta_ekadashi",
+                "description": "Shattila Ekadashi"
+              },
+              {
+                "key": "ekadashi",
+                "name": "Ekadashi",
+                "type": "ekadashi",
+                "description": "Shattila Ekadashi"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-05",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "Pradosha Vrata",
+                "type": "pradosha",
+                "description": "Bhrigu Pradosha"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-06",
+            "festivals": [
+              {
+                "key": "maha_shivaratri",
+                "name": "Maha Shivaratri",
+                "type": "major"
+              },
+              {
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-11",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "Vinayaka Chaturthi",
+                "type": "minor"
+              }
+            ]
+          }
+        ],
+        "eclipses-en": [
+          {
+            "date": "2027-02-20",
+            "eclipses": [
+              {
+                "name": "Penumbral Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "penumbral",
+                "start": "2027-02-20T21:12:22.752Z",
+                "peak": "2027-02-20T23:12:55.672Z",
+                "end": "2027-02-21T01:13:24.471Z",
+                "obscuration": 0,
+                "magnitude": -0.056465571191024105,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "description": "Penumbral Lunar Eclipse: penumbral shadow only; no sutak."
+              }
+            ]
+          },
+          {
+            "date": "2027-07-18",
+            "eclipses": [
+              {
+                "name": "Penumbral Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "penumbral",
+                "start": "2027-07-18T15:57:35.352Z",
+                "peak": "2027-07-18T16:03:00.319Z",
+                "end": "2027-07-18T16:08:22.087Z",
+                "obscuration": 0,
+                "magnitude": -1.0676789559701867,
+                "visibleFromLocation": false,
+                "visibleAtPeak": false,
+                "description": "Penumbral Lunar Eclipse: penumbral shadow only; no sutak."
+              }
+            ]
+          },
+          {
+            "date": "2027-08-17",
+            "eclipses": [
+              {
+                "name": "Penumbral Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "penumbral",
+                "start": "2027-08-17T05:24:31.380Z",
+                "peak": "2027-08-17T07:13:47.651Z",
+                "end": "2027-08-17T09:03:07.662Z",
+                "obscuration": 0,
+                "magnitude": -0.5249244328641423,
+                "visibleFromLocation": false,
+                "visibleAtPeak": false,
+                "description": "Penumbral Lunar Eclipse: penumbral shadow only; no sutak."
+              }
+            ]
+          }
+        ],
+        "moonPhases-en": [
+          {
+            "date": "2027-01-07",
+            "phases": [
+              {
+                "name": "New Moon",
+                "phase": "new",
+                "time": "2027-01-07T20:24:22.979Z",
+                "description": "New moon (Amavasya)."
+              }
+            ]
+          },
+          {
+            "date": "2027-01-15",
+            "phases": [
+              {
+                "name": "First Quarter",
+                "phase": "first_quarter",
+                "time": "2027-01-15T20:34:30.708Z",
+                "description": "First quarter: waxing half moon."
+              }
+            ]
+          },
+          {
+            "date": "2027-01-22",
+            "phases": [
+              {
+                "name": "Full Moon",
+                "phase": "full",
+                "time": "2027-01-22T12:17:22.809Z",
+                "description": "Full moon (Purnima)."
+              }
+            ]
+          },
+          {
+            "date": "2027-01-29",
+            "phases": [
+              {
+                "name": "Last Quarter",
+                "phase": "last_quarter",
+                "time": "2027-01-29T10:55:27.706Z",
+                "description": "Last quarter: waning half moon."
+              }
+            ]
+          }
+        ],
+        "festivals-hi": [
+          {
+            "date": "2027-02-26",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-02-27",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-03",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "वैष्णव एकादशी",
+                "type": "vaishnava_ekadashi",
+                "description": "षट्तिला एकादशी"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "स्मार्त एकादशी",
+                "type": "smarta_ekadashi",
+                "description": "षट्तिला एकादशी"
+              },
+              {
+                "key": "ekadashi",
+                "name": "एकादशी",
+                "type": "ekadashi",
+                "description": "षट्तिला एकादशी"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-05",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "प्रदोष व्रत",
+                "type": "pradosha",
+                "description": "भृगु प्रदोष"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-06",
+            "festivals": [
+              {
+                "key": "maha_shivaratri",
+                "name": "महा शिवरात्रि",
+                "type": "major"
+              },
+              {
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-11",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "विनायक चतुर्थी",
+                "type": "minor"
+              }
+            ]
+          }
+        ],
+        "eclipses-hi": [
+          {
+            "date": "2027-02-20",
+            "eclipses": [
+              {
+                "name": "उपच्छाया चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "penumbral",
+                "start": "2027-02-20T21:12:22.752Z",
+                "peak": "2027-02-20T23:12:55.672Z",
+                "end": "2027-02-21T01:13:24.471Z",
+                "obscuration": 0,
+                "magnitude": -0.056465571191024105,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "description": "उपच्छाया चंद्र ग्रहण: केवल उपच्छाया छाया; सूतक नहीं।"
+              }
+            ]
+          },
+          {
+            "date": "2027-07-18",
+            "eclipses": [
+              {
+                "name": "उपच्छाया चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "penumbral",
+                "start": "2027-07-18T15:57:35.352Z",
+                "peak": "2027-07-18T16:03:00.319Z",
+                "end": "2027-07-18T16:08:22.087Z",
+                "obscuration": 0,
+                "magnitude": -1.0676789559701867,
+                "visibleFromLocation": false,
+                "visibleAtPeak": false,
+                "description": "उपच्छाया चंद्र ग्रहण: केवल उपच्छाया छाया; सूतक नहीं।"
+              }
+            ]
+          },
+          {
+            "date": "2027-08-17",
+            "eclipses": [
+              {
+                "name": "उपच्छाया चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "penumbral",
+                "start": "2027-08-17T05:24:31.380Z",
+                "peak": "2027-08-17T07:13:47.651Z",
+                "end": "2027-08-17T09:03:07.662Z",
+                "obscuration": 0,
+                "magnitude": -0.5249244328641423,
+                "visibleFromLocation": false,
+                "visibleAtPeak": false,
+                "description": "उपच्छाया चंद्र ग्रहण: केवल उपच्छाया छाया; सूतक नहीं।"
+              }
+            ]
+          }
+        ],
+        "moonPhases-hi": [
+          {
+            "date": "2027-01-07",
+            "phases": [
+              {
+                "name": "अमावस्या",
+                "phase": "new",
+                "time": "2027-01-07T20:24:22.979Z",
+                "description": "अमावस्या: नया चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2027-01-15",
+            "phases": [
+              {
+                "name": "शुक्ल पक्ष अर्धचंद्र",
+                "phase": "first_quarter",
+                "time": "2027-01-15T20:34:30.708Z",
+                "description": "शुक्ल पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2027-01-22",
+            "phases": [
+              {
+                "name": "पूर्णिमा",
+                "phase": "full",
+                "time": "2027-01-22T12:17:22.809Z",
+                "description": "पूर्णिमा: पूर्ण चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2027-01-29",
+            "phases": [
+              {
+                "name": "कृष्ण पक्ष अर्धचंद्र",
+                "phase": "last_quarter",
+                "time": "2027-01-29T10:55:27.706Z",
+                "description": "कृष्ण पक्ष अर्धचंद्र।"
+              }
+            ]
+          }
+        ]
+      },
+      "byDate": {
+        "festivals": [],
+        "eclipses": [],
+        "moonPhases": [
+          {
+            "name": "First Quarter",
+            "phase": "first_quarter",
+            "time": "2027-01-15T20:34:30.708Z",
+            "description": "First quarter: waxing half moon."
+          }
+        ],
+        "festivalsOutOfRange": true,
+        "eclipsesOutOfRange": true,
+        "moonPhasesOutOfRange": true,
+        "ranges": {
+          "festivals": {
+            "start": 2027,
+            "end": 2027
+          },
+          "eclipses": {
+            "start": 2027,
+            "end": 2027
+          },
+          "moonPhases": {
+            "start": 2027,
+            "end": 2027
+          }
+        }
+      }
+    },
+    {
+      "key": "newyork-2031-2033",
+      "sha256": {
+        "festivals": "0175907e9776c689b9ba557bc34a0006db13688617c2df5d7d65605f0ddd1573",
+        "eclipses": "6ff78f3e5bda46bb0091e34a14f28959e39d91025c139ea111001deb2acc6e17",
+        "moonPhases": "310697f1e3bc195ae2a98a92d35fd4aeafa86af6717eae8ecc27aed37efd693e"
+      },
+      "sha256Masked": {
+        "festivals": "0175907e9776c689b9ba557bc34a0006db13688617c2df5d7d65605f0ddd1573",
+        "eclipses": "cb18ad52d1dfeaf4305068cfab36b437e4f554e5a50c07ac032b90103d2e589c",
+        "moonPhases": "310697f1e3bc195ae2a98a92d35fd4aeafa86af6717eae8ecc27aed37efd693e"
+      },
+      "bytes": {
+        "festivals": 95055,
+        "eclipses": 4766,
+        "moonPhases": 24417
+      },
+      "metaKeys": {
+        "festivals": [
+          "format",
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "ayanamsa",
+          "masaSystem",
+          "region",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "eclipses": [
+          "referenceLocation",
+          "latitude",
+          "longitude",
+          "timezoneOffsetMinutes",
+          "visibleOnly",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ],
+        "moonPhases": [
+          "format",
+          "referenceLocation",
+          "timezoneOffsetMinutes",
+          "languages",
+          "startYear",
+          "endYear",
+          "generatedAt",
+          "note"
+        ]
+      },
+      "entryKeys": {
+        "festivalDict": [
+          "key",
+          "type",
+          "name",
+          "description"
+        ],
+        "eclipseEntry": [
+          "name",
+          "kind",
+          "subtype",
+          "start",
+          "peak",
+          "end",
+          "obscuration",
+          "magnitude",
+          "visibleFromLocation",
+          "visibleAtPeak",
+          "description"
+        ],
+        "eclipseEntryWithSutak": [
+          "name",
+          "kind",
+          "subtype",
+          "start",
+          "peak",
+          "end",
+          "obscuration",
+          "magnitude",
+          "visibleFromLocation",
+          "visibleAtPeak",
+          "description",
+          "sutak"
+        ],
+        "phaseDict": [
+          "phase",
+          "name",
+          "description"
+        ]
+      },
+      "dictLengths": {
+        "festivals": 181,
+        "moonPhases": 4
+      },
+      "dayCounts": {
+        "festivals": {
+          "2031": 165,
+          "2032": 148,
+          "2033": 158
+        },
+        "eclipses": {
+          "2031": 2,
+          "2032": 0,
+          "2033": 2
+        },
+        "moonPhases": {
+          "2031": 49,
+          "2032": 49,
+          "2033": 50
+        }
+      },
+      "read": {
+        "festivals-en": [
+          {
+            "date": "2031-01-03",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "Vaishnava Ekadashi",
+                "type": "vaishnava_ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "Smarta Ekadashi",
+                "type": "smarta_ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "ekadashi",
+                "name": "Ekadashi",
+                "type": "ekadashi",
+                "description": "Pausha Putrada Ekadashi"
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2031-01-04",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2031-01-05",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "Pradosha Vrata",
+                "type": "pradosha",
+                "description": "Ravi Pradosha"
+              }
+            ]
+          },
+          {
+            "date": "2031-01-11",
+            "festivals": [
+              {
+                "key": "sankashti_chaturthi",
+                "name": "Sankashti Chaturthi",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2031-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "Lohri",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2031-01-14",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "Makar Sankranti",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "pongal",
+                "name": "Pongal",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "uttarayan",
+                "name": "Uttarayan",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "Magh Bihu",
+                "type": "sankranti",
+                "description": "Makara"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "Ayyappa Makara Jyothi",
+                "type": "sankranti",
+                "description": "Makara"
+              }
+            ]
+          }
+        ],
+        "eclipses-en": [
+          {
+            "date": "2031-05-06",
+            "eclipses": [
+              {
+                "name": "Penumbral Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "penumbral",
+                "start": "2031-05-07T01:52:09.528Z",
+                "peak": "2031-05-07T03:50:48.505Z",
+                "end": "2031-05-07T05:49:32.490Z",
+                "obscuration": 0,
+                "magnitude": -0.09011871966975916,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "description": "Penumbral Lunar Eclipse: penumbral shadow only; no sutak."
+              }
+            ]
+          },
+          {
+            "date": "2031-10-30",
+            "eclipses": [
+              {
+                "name": "Penumbral Lunar Eclipse",
+                "kind": "lunar",
+                "subtype": "penumbral",
+                "start": "2031-10-30T05:49:33.300Z",
+                "peak": "2031-10-30T07:45:31.168Z",
+                "end": "2031-10-30T09:41:20.158Z",
+                "obscuration": 0,
+                "magnitude": -0.3200596854598724,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "description": "Penumbral Lunar Eclipse: penumbral shadow only; no sutak."
+              }
+            ]
+          }
+        ],
+        "moonPhases-en": [
+          {
+            "date": "2031-01-08",
+            "phases": [
+              {
+                "name": "Full Moon",
+                "phase": "full",
+                "time": "2031-01-08T18:25:47.871Z",
+                "description": "Full moon (Purnima)."
+              }
+            ]
+          },
+          {
+            "date": "2031-01-16",
+            "phases": [
+              {
+                "name": "Last Quarter",
+                "phase": "last_quarter",
+                "time": "2031-01-16T12:47:13.272Z",
+                "description": "Last quarter: waning half moon."
+              }
+            ]
+          },
+          {
+            "date": "2031-01-22",
+            "phases": [
+              {
+                "name": "New Moon",
+                "phase": "new",
+                "time": "2031-01-23T04:30:57.791Z",
+                "description": "New moon (Amavasya)."
+              }
+            ]
+          },
+          {
+            "date": "2031-01-30",
+            "phases": [
+              {
+                "name": "First Quarter",
+                "phase": "first_quarter",
+                "time": "2031-01-30T07:43:04.294Z",
+                "description": "First quarter: waxing half moon."
+              }
+            ]
+          }
+        ],
+        "festivals-hi": [
+          {
+            "date": "2031-01-03",
+            "festivals": [
+              {
+                "key": "vaishnava_ekadashi",
+                "name": "वैष्णव एकादशी",
+                "type": "vaishnava_ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "smarta_ekadashi",
+                "name": "स्मार्त एकादशी",
+                "type": "smarta_ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "ekadashi",
+                "name": "एकादशी",
+                "type": "ekadashi",
+                "description": "पौष पुत्रदा एकादशी"
+              },
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2031-01-04",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2031-01-05",
+            "festivals": [
+              {
+                "key": "pradosha",
+                "name": "प्रदोष व्रत",
+                "type": "pradosha",
+                "description": "रवि प्रदोष"
+              }
+            ]
+          },
+          {
+            "date": "2031-01-11",
+            "festivals": [
+              {
+                "key": "sankashti_chaturthi",
+                "name": "संकष्टी चतुर्थी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2031-01-13",
+            "festivals": [
+              {
+                "key": "lohri",
+                "name": "लोहड़ी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2031-01-14",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "makar_sankranti",
+                "name": "मकर संक्रांति",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "pongal",
+                "name": "पोंगल",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "uttarayan",
+                "name": "उत्तरायण",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "magh_bihu",
+                "name": "माघ बिहू",
+                "type": "sankranti",
+                "description": "मकर"
+              },
+              {
+                "key": "ayyappa_makara_jyothi",
+                "name": "अय्यप्पा मकर ज्योति",
+                "type": "sankranti",
+                "description": "मकर"
+              }
+            ]
+          }
+        ],
+        "eclipses-hi": [
+          {
+            "date": "2031-05-06",
+            "eclipses": [
+              {
+                "name": "उपच्छाया चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "penumbral",
+                "start": "2031-05-07T01:52:09.528Z",
+                "peak": "2031-05-07T03:50:48.505Z",
+                "end": "2031-05-07T05:49:32.490Z",
+                "obscuration": 0,
+                "magnitude": -0.09011871966975916,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "description": "उपच्छाया चंद्र ग्रहण: केवल उपच्छाया छाया; सूतक नहीं।"
+              }
+            ]
+          },
+          {
+            "date": "2031-10-30",
+            "eclipses": [
+              {
+                "name": "उपच्छाया चंद्र ग्रहण",
+                "kind": "lunar",
+                "subtype": "penumbral",
+                "start": "2031-10-30T05:49:33.300Z",
+                "peak": "2031-10-30T07:45:31.168Z",
+                "end": "2031-10-30T09:41:20.158Z",
+                "obscuration": 0,
+                "magnitude": -0.3200596854598724,
+                "visibleFromLocation": true,
+                "visibleAtPeak": true,
+                "description": "उपच्छाया चंद्र ग्रहण: केवल उपच्छाया छाया; सूतक नहीं।"
+              }
+            ]
+          }
+        ],
+        "moonPhases-hi": [
+          {
+            "date": "2031-01-08",
+            "phases": [
+              {
+                "name": "पूर्णिमा",
+                "phase": "full",
+                "time": "2031-01-08T18:25:47.871Z",
+                "description": "पूर्णिमा: पूर्ण चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2031-01-16",
+            "phases": [
+              {
+                "name": "कृष्ण पक्ष अर्धचंद्र",
+                "phase": "last_quarter",
+                "time": "2031-01-16T12:47:13.272Z",
+                "description": "कृष्ण पक्ष अर्धचंद्र।"
+              }
+            ]
+          },
+          {
+            "date": "2031-01-22",
+            "phases": [
+              {
+                "name": "अमावस्या",
+                "phase": "new",
+                "time": "2031-01-23T04:30:57.791Z",
+                "description": "अमावस्या: नया चंद्रमा।"
+              }
+            ]
+          },
+          {
+            "date": "2031-01-30",
+            "phases": [
+              {
+                "name": "शुक्ल पक्ष अर्धचंद्र",
+                "phase": "first_quarter",
+                "time": "2031-01-30T07:43:04.294Z",
+                "description": "शुक्ल पक्ष अर्धचंद्र।"
+              }
+            ]
+          }
+        ]
+      },
+      "byDate": {
+        "festivals": [],
+        "eclipses": [],
+        "moonPhases": [],
+        "festivalsOutOfRange": true,
+        "eclipsesOutOfRange": true,
+        "moonPhasesOutOfRange": true,
+        "ranges": {
+          "festivals": {
+            "start": 2031,
+            "end": 2033
+          },
+          "eclipses": {
+            "start": 2031,
+            "end": 2033
+          },
+          "moonPhases": {
+            "start": 2031,
+            "end": 2033
+          }
+        }
+      }
+    }
+  ],
+  "v1": {
+    "festivalsEn": [
+      {
+        "date": "2025-01-14",
+        "festivals": [
+          {
+            "key": "",
+            "name": "Makar Sankranti",
+            "type": "sankranti",
+            "description": "Sun enters Capricorn."
+          },
+          {
+            "key": "",
+            "name": "Pongal",
+            "type": "major"
+          }
+        ]
+      },
+      {
+        "date": "2025-03-14",
+        "festivals": [
+          {
+            "key": "",
+            "name": "होली",
+            "type": "major"
+          }
+        ]
+      }
+    ],
+    "festivalsHi": [
+      {
+        "date": "2025-01-14",
+        "festivals": [
+          {
+            "key": "",
+            "name": "मकर संक्रांति",
+            "type": "sankranti",
+            "description": "सूर्य मकर राशि में।"
+          },
+          {
+            "key": "",
+            "name": "Pongal",
+            "type": "major"
+          }
+        ]
+      },
+      {
+        "date": "2025-03-14",
+        "festivals": [
+          {
+            "key": "",
+            "name": "होली",
+            "type": "major"
+          }
+        ]
+      }
+    ],
+    "festivalsByDate": [
+      {
+        "key": "",
+        "name": "Makar Sankranti",
+        "type": "sankranti",
+        "description": "Sun enters Capricorn."
+      },
+      {
+        "key": "",
+        "name": "Pongal",
+        "type": "major"
+      }
+    ],
+    "festivalsOutOfRange": true,
+    "phasesEn": [
+      {
+        "date": "2025-01-13",
+        "phases": [
+          {
+            "name": "Full Moon",
+            "phase": "full",
+            "time": "2025-01-13T22:26:00.000Z",
+            "description": "Full moon (Purnima)."
+          }
+        ]
+      },
+      {
+        "date": "2025-01-29",
+        "phases": [
+          {
+            "name": "अमावस्या",
+            "phase": "new",
+            "time": "2025-01-29T12:36:00.000Z"
+          }
+        ]
+      }
+    ],
+    "phasesHi": [
+      {
+        "date": "2025-01-13",
+        "phases": [
+          {
+            "name": "पूर्णिमा",
+            "phase": "full",
+            "time": "2025-01-13T22:26:00.000Z",
+            "description": "पूर्णिमा, पूर्ण चंद्रमा।"
+          }
+        ]
+      },
+      {
+        "date": "2025-01-29",
+        "phases": [
+          {
+            "name": "अमावस्या",
+            "phase": "new",
+            "time": "2025-01-29T12:36:00.000Z"
+          }
+        ]
+      }
+    ],
+    "phasesByDate": [
+      {
+        "name": "अमावस्या",
+        "phase": "new",
+        "time": "2025-01-29T12:36:00.000Z"
+      }
+    ],
+    "range": {
+      "start": 2025,
+      "end": 2025
+    }
+  }
+}

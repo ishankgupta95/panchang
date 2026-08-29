@@ -1,0 +1,21 @@
+import { defineConfig } from 'tsup';
+
+export default defineConfig({
+  entry: [
+    'src/index.ts',
+    'src/calendar/festivalsTable.ts',
+    'src/calendar/eclipsesTable.ts',
+    'src/calendar/moonPhasesTable.ts',
+    'src/muhurta/muhurtaTable.ts',
+  ],
+  format: ['cjs', 'esm'],
+  dts: true,
+  splitting: false,
+  sourcemap: false,
+  clean: true,
+  target: 'es2020',
+  outDir: 'dist',
+  treeshake: true,
+  minify: false,
+  // No `noExternal`: the package has no runtime dependencies to bundle in.
+});

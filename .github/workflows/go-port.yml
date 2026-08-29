@@ -1,0 +1,93 @@
+name: Go port
+
+on:
+  push:
+    # `master`, not `main`: this repository has never had a `main` branch.
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: go-port-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '24'
+  GO_VERSION: '1.26.x'
+
+jobs:
+  tree:
+    name: tree correspondence
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        # cache: false throughout, there is no go.sum for setup-go to key on.
+        with: { go-version: '${{ env.GO_VERSION }}', cache: false }
+      - run: bash source/go/ci/tree.sh
+
+  go-build-min:
+    name: go build @ go.mod minimum
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.22', cache: false }
+      # Build and vet only: the goldens and bands.json were measured on 1.26.4
+      # and 1.22 has never been checked against them. Do not add a test run.
+      - run: cd source/go && go build ./... && go vet ./...
+
+  go-test:
+    name: go test -race
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: '${{ env.GO_VERSION }}', cache: false }
+      - name: gofmt
+        run: |
+          cd source/go
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then echo "gofmt -l:"; echo "$unformatted"; exit 1; fi
+      - run: cd source/go && go vet ./...
+      - run: cd source/go && go test ./... -race
+
+  goldens:
+    name: TS-produced goldens are unchanged
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: npm, cache-dependency-path: source/ts/package-lock.json }
+      - uses: actions/setup-go@v5
+        with: { go-version: '${{ env.GO_VERSION }}', cache: false }
+      - run: npm ci
+        working-directory: source/ts
+      - run: bash source/go/ci/goldens.sh
+      - run: cd source/go && go test ./...
+
+  parity:
+    name: parity gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: npm, cache-dependency-path: source/ts/package-lock.json }
+      - uses: actions/setup-go@v5
+        with: { go-version: '${{ env.GO_VERSION }}', cache: false }
+      - run: npm ci
+        working-directory: source/ts
+      - run: npx --prefix source/ts tsc -p source/go/parity/tsconfig.json
+      - run: node --test source/go/parity/gate.test.mjs
+      # A PIN failure without a BAND failure can be a host difference: leaf
+      # counts are pinned per host, and the gate prints a block to re-pin from.
+      - run: bash source/go/ci/parity.sh
+      - name: dump sizes on failure
+        if: failure()
+        run: ls -l source/go/parity/out/

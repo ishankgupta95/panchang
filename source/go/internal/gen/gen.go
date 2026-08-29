@@ -1,0 +1,441 @@
+package gen
+
+import (
+	"fmt"
+	"go/format"
+	"math"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+)
+
+// Ordering is load-bearing: stable sorts, catalogue body order, one probe sample.
+func Generate(sourceDir, outDir string) ([]string, error) {
+	if err := os.MkdirAll(outDir, 0o755); err != nil {
+		return nil, err
+	}
+	ts := probes(probeSeed)
+	var report []string
+
+	elpReport, err := generateElp(sourceDir, outDir, ts)
+	if err != nil {
+		return nil, err
+	}
+	report = append(report, elpReport...)
+
+	vsopReport, err := generateVsop(sourceDir, outDir, ts)
+	if err != nil {
+		return nil, err
+	}
+	report = append(report, vsopReport...)
+
+	nutReport, err := generateNutation(sourceDir, outDir, ts)
+	if err != nil {
+		return nil, err
+	}
+	report = append(report, nutReport...)
+
+	if err := writeRegistry(outDir, []string{"elp2000-82b.go", "vsop87d.go", "nutation-iau2000.go"}); err != nil {
+		return nil, err
+	}
+
+	return report, nil
+}
+
+func banner(source, extra string) string {
+	return fmt.Sprintf(`// GENERATED FILE: do not edit.
+//
+// %s.
+// Truncated under the budgets in %sinternal/gen/budgets.go%s; every number must
+// stay bit-identical to its counterpart in %ssource/ts/src/astronomy/series/%s.
+//
+%s
+package series
+`, source, "`", "`", "`", "`", extra)
+}
+
+const goDirective = "//go:generate go run ../../cmd/gen\n"
+
+func writeGo(path, body string) error {
+	src, err := format.Source([]byte(body))
+	if err != nil {
+		_ = os.WriteFile(path+".broken", []byte(body), 0o644)
+		return fmt.Errorf("format %s: %w (unformatted output left at %s.broken)", path, err, path)
+	}
+	return os.WriteFile(path, src, 0o644)
+}
+
+type elpCoord struct {
+	iv     int
+	name   string
+	budget float64
+	unit   string
+	extra  []struct {
+		suffix string
+		budget float64
+	}
+}
+
+func generateElp(sourceDir, outDir string, ts []float64) ([]string, error) {
+	tables, err := readElp2000(sourceDir)
+	if err != nil {
+		return nil, err
+	}
+	canonical := canonicalElp(tables)
+
+	coords := []elpCoord{
+		{iv: 1, name: "LONGITUDE", budget: budgetMoonLon, unit: "″"},
+		{iv: 2, name: "LATITUDE", budget: budgetMoonLat, unit: "″", extra: []struct {
+			suffix string
+			budget float64
+		}{{"COARSE", budgetMoonLatCoarse}}},
+		{iv: 3, name: "DISTANCE", budget: budgetMoonDist, unit: " km", extra: []struct {
+			suffix string
+			budget float64
+		}{{"TRACK", budgetMoonDistTrack}, {"COARSE", budgetMoonDistCoarse}}},
+	}
+
+	var parts, report []string
+
+	emitElp := func(prefix string, kept []elpCanonical, doc string) []string {
+		perTerm := quantizationBudget / math.Max(float64(len(kept)), 1)
+		var quarticValues, quarticTol []float64
+		for _, q := range kept {
+			if !q.main {
+				continue
+			}
+			quarticValues = append(quarticValues, q.a, q.phase[0], q.phase[1], q.phase[2], q.phase[3], q.phase[4])
+			amp := math.Max(math.Abs(q.a), 1e-12)
+			quarticTol = append(quarticTol,
+				perTerm, perTerm/amp, perTerm/(amp*tMax), perTerm/(amp*tMax*tMax),
+				perTerm/(amp*tMax*tMax*tMax), perTerm/(amp*tMax*tMax*tMax*tMax))
+		}
+		var linearValues, linearTol []float64
+		for _, q := range kept {
+			if q.main {
+				continue
+			}
+			linearValues = append(linearValues, q.a, q.phase[0], q.phase[1], float64(q.power))
+			amp := math.Max(math.Abs(q.a), 1e-12)
+			linearTol = append(linearTol, perTerm, perTerm/amp, perTerm/(amp*tMax), 0)
+		}
+		return []string{
+			fmt.Sprintf("// %s\nvar %s_QUARTIC = []float64{\n%s\n}", doc, prefix, floatArray(quarticValues, quarticTol)),
+			fmt.Sprintf("// Stride 4: amplitude, phase, phase rate, power of t.\nvar %s_LINEAR = []float64{\n%s\n}", prefix, floatArray(linearValues, linearTol)),
+		}
+	}
+
+	for _, c := range coords {
+		sorted := make([]elpCanonical, len(canonical[c.iv]))
+		copy(sorted, canonical[c.iv])
+		sort.SliceStable(sorted, func(i, j int) bool {
+			return math.Abs(sorted[i].a)*ipow(tMax, sorted[i].power) >
+				math.Abs(sorted[j].a)*ipow(tMax, sorted[j].power)
+		})
+		count, terr := truncate(sorted, evalElpTerm, c.budget, ts)
+		kept := sorted[:count]
+		parts = append(parts, emitElp(
+			"MOON_"+c.name, kept,
+			fmt.Sprintf("Stride 6: amplitude, then the five phase-polynomial coefficients."+
+				" Error ≤ %s%s over |t| ≤ %s.",
+				precision3(terr), c.unit, formatFloat(tMax)),
+		)...)
+		for _, ex := range c.extra {
+			exCount, exErr := truncate(kept, evalElpTerm, ex.budget, ts)
+			parts = append(parts, emitElp(
+				"MOON_"+c.name+"_"+ex.suffix, kept[:exCount],
+				fmt.Sprintf("%s: error ≤ %s%s. Not a prefix of the full table;"+
+					" the split by phase degree does not preserve amplitude order.",
+					ex.suffix, precision3(exErr), c.unit),
+			)...)
+			report = append(report, fmt.Sprintf("Moon %s %-6s %4d        err %s%s",
+				strings.ToLower(c.name), strings.ToLower(ex.suffix), exCount, precision3(exErr), c.unit))
+		}
+		report = append(report, fmt.Sprintf("Moon %-9s %5d / %d  err %s%s",
+			strings.ToLower(c.name), count, len(canonical[c.iv]), precision3(terr), c.unit))
+	}
+
+	head := banner(
+		"ELP2000-82B (Chapront-Touzé & Chapront; VizieR VI/79)",
+		"// Geocentric spherical coordinates in ELP's own frame: mean dynamical ecliptic\n"+
+			"// of date, longitude from the inertial J2000 origin. The rotation to the\n"+
+			"// equinox of date is in `../frame.go`, not folded in here.\n"+
+			"//\n"+
+			"// Each term is `a · t^power · sin(phase(t))`, t in Julian centuries TT from\n"+
+			"// J2000. Longitude and latitude are arcseconds, distance kilometres, with\n"+
+			"// `elp82b.f`'s a0/ath scaling already folded into the amplitudes.\n"+
+			"//",
+	)
+
+	body := goDirective + head +
+		fmt.Sprintf("\n// `elp82b.f`'s W1 polynomial, radians.\nvar MOON_MEAN_LONGITUDE = []float64{\n%s\n}\n\n",
+			floatArray(elpConst.w[1][1:6], []float64{1e-13, 1e-13, 1e-13, 1e-16, 1e-18})) +
+		strings.Join(parts, "\n\n") + "\n"
+
+	if err := writeGo(filepath.Join(outDir, "elp2000-82b.go"), body); err != nil {
+		return nil, err
+	}
+	return report, nil
+}
+
+type vsopVariable struct {
+	variable     int
+	label        string
+	budgetArcsec float64
+	isAngle      bool
+}
+
+func generateVsop(sourceDir, outDir string, ts []float64) ([]string, error) {
+	vsop, err := readVsop87d(sourceDir)
+	if err != nil {
+		return nil, err
+	}
+	var parts, report []string
+
+	type flatTerm struct {
+		A, B, C float64
+		power   int
+	}
+	evaluate := func(q flatTerm, t float64) float64 {
+		tau := t / 10
+		return q.A * math.Cos(q.B+q.C*tau) * ipow(tau, q.power)
+	}
+
+	for _, body := range vsopBodies {
+		series := vsop[body]
+		if series == nil {
+			return nil, fmt.Errorf("vsop87d.txt: missing body %q", body)
+		}
+		lonBudget, latBudget := budgetPlanetLon, budgetPlanetLat
+		if body == "ear" {
+			lonBudget, latBudget = budgetSunLon, budgetSunLat
+		}
+		radiusBudget := (budgetRadiusAngleArcsec / arcsecPerRad) * minGeocentricDistanceAU[body]
+
+		for _, v := range []vsopVariable{
+			{1, "L", lonBudget, true},
+			{2, "B", latBudget, true},
+			{3, "R", radiusBudget, false},
+		} {
+			var flat []flatTerm
+			powers := series[v.variable]
+			for power := 0; power < len(powers); power++ {
+				for _, term := range powers[power] {
+					flat = append(flat, flatTerm{A: term.A, B: term.B, C: term.C, power: power})
+				}
+			}
+			sort.SliceStable(flat, func(i, j int) bool {
+				return math.Abs(flat[i].A)*ipow(tMax, flat[i].power) >
+					math.Abs(flat[j].A)*ipow(tMax, flat[j].power)
+			})
+			budget := v.budgetArcsec
+			if v.isAngle {
+				budget = v.budgetArcsec / arcsecPerRad
+			}
+			count, terr := truncate(flat, evaluate, budget, ts)
+			kept := flat[:count]
+			scale := 1e6
+			if v.isAngle {
+				scale = arcsecPerRad
+			}
+			perTerm := (quantizationBudget / scale) / float64(count)
+			var values, tol []float64
+			for _, q := range kept {
+				values = append(values, q.A, q.B, q.C, float64(q.power))
+				amp := math.Max(math.Abs(q.A), 1e-14)
+				tol = append(tol, perTerm, perTerm/amp, perTerm/(amp*(tMax/10)), 0)
+			}
+			name := strings.ToUpper(body) + "_" + v.label
+			unit, shown := " AU", terr
+			if v.isAngle {
+				unit, shown = "″", terr*arcsecPerRad
+			}
+			parts = append(parts, fmt.Sprintf(
+				"// %d of %d terms; error ≤ %s%s.\nvar %s = []float64{\n%s\n}",
+				count, len(flat), precision3(shown), unit, name, floatArray(values, tol)))
+			report = append(report, fmt.Sprintf("VSOP %s %s      %5d / %d  err %s%s", body, v.label, count, len(flat), precision3(shown), unit))
+
+			// From `flat`, not `kept`: a longer prefix, not a subset of the shipped one.
+			if body == "ear" && (v.label == "L" || v.label == "B") {
+				tight := budgetPlanetEarthLat / arcsecPerRad
+				if v.label == "L" {
+					tight = budgetPlanetEarthLon / arcsecPerRad
+				}
+				pCount, pErr := truncate(flat, evaluate, tight, ts)
+				per := quantizationBudget / arcsecPerRad / float64(pCount)
+				var pv, pt []float64
+				for _, q := range flat[:pCount] {
+					pv = append(pv, q.A, q.B, q.C, float64(q.power))
+					amp := math.Max(math.Abs(q.A), 1e-14)
+					pt = append(pt, per, per/amp, per/(amp*(tMax/10)), 0)
+				}
+				parts = append(parts, fmt.Sprintf(
+					"// %d of %d terms; error ≤ %s″.\nvar %s_PRECISE = []float64{\n%s\n}",
+					pCount, len(flat), precision3(pErr*arcsecPerRad), name, floatArray(pv, pt)))
+				report = append(report, fmt.Sprintf("VSOP ear %s precise %5d / %d  err %s″", v.label, pCount, len(flat), precision3(pErr*arcsecPerRad)))
+			}
+
+			if body == "ear" && v.label == "R" {
+				cCount, cErr := truncate(kept, evaluate, budgetSunRadiusCoarse, ts)
+				per := budgetSunRadiusCoarse / 100 / float64(cCount)
+				var cv, ct []float64
+				for _, q := range kept[:cCount] {
+					cv = append(cv, q.A, q.B, q.C, float64(q.power))
+					amp := math.Max(math.Abs(q.A), 1e-14)
+					ct = append(ct, per, per/amp, per/(amp*(tMax/10)), 0)
+				}
+				parts = append(parts, fmt.Sprintf(
+					"// Coarse: error ≤ %s AU. Light-time only; see internal/gen/budgets.go.\nvar EAR_R_COARSE = []float64{\n%s\n}",
+					precision3(cErr), floatArray(cv, ct)))
+				report = append(report, fmt.Sprintf("VSOP ear R coarse  %5d         err %s AU", cCount, precision3(cErr)))
+			}
+		}
+	}
+
+	head := banner(
+		"VSOP87D (Bretagnon & Francou 1988; VizieR VI/81)",
+		"// Heliocentric spherical coordinates referred to the mean dynamical ecliptic\n"+
+			"// and equinox of date: longitude and latitude in radians, radius in AU.\n"+
+			"// Version D is already of-date, which is why the solar path applies no\n"+
+			"// precession.\n"+
+			"//\n"+
+			"// Each term is `A · τ^power · cos(B + C·τ)`, τ in Julian millennia (not\n"+
+			"// centuries) TT from J2000; the flat arrays are stride 4: A, B, C, power.\n"+
+			"//",
+	)
+	body := goDirective + head + "\n" + strings.Join(parts, "\n\n") + "\n"
+	if err := writeGo(filepath.Join(outDir, "vsop87d.go"), body); err != nil {
+		return nil, err
+	}
+	return report, nil
+}
+
+func generateNutation(sourceDir, outDir string, ts []float64) ([]string, error) {
+	psi, eps, err := readNutation(sourceDir)
+	if err != nil {
+		return nil, err
+	}
+	var parts, report []string
+
+	fundCache := make([][14]float64, len(ts))
+	for i, t := range ts {
+		fundCache[i] = fundAt(t)
+	}
+
+	evaluate := func(subset []nutationTerm, t float64, args [14]float64) float64 {
+		sum := 0.0
+		for _, q := range subset {
+			arg := 0.0
+			for k := 0; k < 14; k++ {
+				if q.mult[k] != 0 {
+					arg += q.mult[k] * args[k]
+				}
+			}
+			v := q.sinCoef*math.Sin(arg) + q.cosCoef*math.Cos(arg)
+			if q.power == 0 {
+				sum += v
+			} else {
+				sum += v * t
+			}
+		}
+		return sum / 1e6
+	}
+
+	maxMultiplier := 0.0
+
+	for _, series := range []struct {
+		label string
+		terms []nutationTerm
+	}{{"PSI", psi}, {"EPS", eps}} {
+		var kept []nutationTerm
+		for _, q := range series.terms {
+			if math.Hypot(q.sinCoef, q.cosCoef) >= budgetNutationCut*1e6 {
+				kept = append(kept, q)
+			}
+		}
+		sort.SliceStable(kept, func(i, j int) bool {
+			return math.Hypot(kept[j].sinCoef, kept[j].cosCoef) < math.Hypot(kept[i].sinCoef, kept[i].cosCoef)
+		})
+
+		terr := 0.0
+		for i, t := range ts {
+			full := evaluate(series.terms, t, fundCache[i])
+			if d := math.Abs(evaluate(kept, t, fundCache[i]) - full); d > terr {
+				terr = d
+			}
+		}
+
+		var coefficients, multipliers []float64
+		for _, q := range kept {
+			coefficients = append(coefficients, q.sinCoef/1e6, q.cosCoef/1e6, float64(q.power))
+			for k := 0; k < 14; k++ {
+				multipliers = append(multipliers, q.mult[k])
+				if m := math.Abs(q.mult[k]); m > maxMultiplier {
+					maxMultiplier = m
+				}
+			}
+		}
+		parts = append(parts,
+			fmt.Sprintf("// %d of %d terms; error ≤ %s″. Stride 3: sin, cos (arcsec), power of t.\nvar NUTATION_%s = []float64{\n%s\n}",
+				len(kept), len(series.terms), precision3(terr), series.label,
+				floatArray(coefficients, fill(len(coefficients), 1e-12))),
+			fmt.Sprintf("// Stride 14: multipliers of l, l', F, D, Ω, and the nine planetary arguments.\nvar NUTATION_%s_ARGS = []int8{\n%s\n}",
+				series.label, floatArray(multipliers, zeros(len(multipliers)))),
+		)
+		report = append(report, fmt.Sprintf("Nutation %-6s %5d / %d  err %s\"", series.label, len(kept), len(series.terms), precision3(terr)))
+	}
+
+	head := banner(
+		"The IAU 2000_R06 nutation series (IERS Conventions 2010, tables 5.3a/5.3b:\n// 2000A with the IAU 2006 adjustments)",
+		"// Its leading Δψ term is −17.20642418″, not the −17.2064161″ of the plain IAU\n"+
+			"// 2000A table, so checking this file against the wrong one of the two makes a\n"+
+			"// correct series look broken.\n"+
+			"//\n"+
+			fmt.Sprintf("// Terms are kept above a %s µas amplitude cut-off, not by the binary search\n", formatFloat(budgetNutationCut*1e6))+
+			"// the position series use: nutation's spectrum has no long tail worth\n"+
+			"// searching, and the cut lands in a clean gap rather than mid-cluster.\n"+
+			"//\n"+
+			fmt.Sprintf("// The quoted errors are the worst of %d probes over |t| ≤ 1.5 (1850-2150)\n", len(ts))+
+			"// and grow with the span: the same truncation measures ~0.0058″ / ~0.0033″\n"+
+			"// over 1900-2100 and ~0.0061″ / ~0.0038″ over 1800-2200.\n"+
+			"//",
+	)
+	body := goDirective + head + "\n" + strings.Join(parts, "\n\n") + "\n\n" +
+		"// NUTATION_MAX_MULTIPLIER is the largest |multiplier| in either ARGS table.\n" +
+		"// `frame.go` precomputes sin(k·aᵢ) and cos(k·aᵢ) for k up to it, so a term\n" +
+		"// exceeding it would read past the end of that table.\n" +
+		fmt.Sprintf("const NUTATION_MAX_MULTIPLIER = %s\n", formatFloat(maxMultiplier))
+	if err := writeGo(filepath.Join(outDir, "nutation-iau2000.go"), body); err != nil {
+		return nil, err
+	}
+	report = append(report, fmt.Sprintf("Nutation max |multiplier| %s", formatFloat(maxMultiplier)))
+	return report, nil
+}
+
+// Left-to-right association, deliberately.
+func ipow(x float64, n int) float64 {
+	switch n {
+	case 0:
+		return 1
+	case 1:
+		return x
+	case 2:
+		return x * x
+	case 3:
+		return x * x * x
+	case 4:
+		return x * x * x * x
+	case 5:
+		return x * x * x * x * x
+	}
+	r := 1.0
+	for i := 0; i < n; i++ {
+		r *= x
+	}
+	return r
+}
+
+func precision3(v float64) string {
+	return toPrecisionString(v, 3)
+}

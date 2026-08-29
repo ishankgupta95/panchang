@@ -1,0 +1,24 @@
+package astronomy
+
+import (
+	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
+)
+
+var lunar = RiseSetKind{Body: RiseSetMoon}
+
+func GetMoonrise(ctx *EphemerisCtx, searchFromMs int64, location types.GeoLocation, limitDays int) (int64, bool, error) {
+	if err := utils.ValidateLocation(location); err != nil {
+		return 0, false, err
+	}
+	ms, ok := ResolveEvent(ctx, lunar, +1, searchFromMs, location, limitDays)
+	return ms, ok, nil
+}
+
+func GetMoonset(ctx *EphemerisCtx, searchFromMs int64, location types.GeoLocation, limitDays int) (int64, bool, error) {
+	if err := utils.ValidateLocation(location); err != nil {
+		return 0, false, err
+	}
+	ms, ok := ResolveEvent(ctx, lunar, -1, searchFromMs, location, limitDays)
+	return ms, ok, nil
+}

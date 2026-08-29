@@ -1,9 +1,13 @@
 name: CI
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
+
+defaults:
+  run:
+    working-directory: source/ts
 
 jobs:
   lint-and-typecheck:
@@ -13,6 +17,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: npm
+          cache-dependency-path: source/ts/package-lock.json
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
@@ -27,6 +33,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: source/ts/package-lock.json
       - run: npm ci
       - run: npm run test:run
 
@@ -38,6 +46,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: npm
+          cache-dependency-path: source/ts/package-lock.json
       - run: npm ci
       - run: npm run test:coverage
 
@@ -49,6 +59,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: npm
+          cache-dependency-path: source/ts/package-lock.json
       - run: npm ci
       - run: npm run build
       - run: npm run test:hermes
@@ -61,6 +73,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: npm
+          cache-dependency-path: source/ts/package-lock.json
       - run: npm ci
       - run: npm run build
       - name: Verify dist contents

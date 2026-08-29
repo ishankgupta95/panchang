@@ -1,0 +1,20 @@
+# Source and config (not needed in published package)
+#
+# `scripts/` and `.github/` are gone from this list: the 2026-08-24 restructure
+# moved the generators to `generate/` and the workflows to the repo root, both
+# of which are now *outside* the package root and cannot be packed anyway.
+src/
+tests/
+tools/
+.changeset/
+.eslintrc.cjs
+tsconfig*.json
+tsup.config.ts
+vitest.config.ts
+
+# Dev artifacts
+coverage/
+*.tgz
+.DS_Store
+.vscode/
+.idea/

@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    // The base config pins `rootDir` to `src`; `tests/` sits outside it.
+    "rootDir": ".",
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false
+  },
+  // The inherited `exclude` lists `tests` and filters `include`, so without
+  // restating it here only `src` is checked and the run still reports success.
+  "exclude": ["node_modules", "dist"],
+  "include": ["src", "tests"]
+}

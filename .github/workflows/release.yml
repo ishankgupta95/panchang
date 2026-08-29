@@ -1,7 +1,11 @@
 name: Release
 on:
   push:
-    branches: [main]
+    branches: [master]
+
+defaults:
+  run:
+    working-directory: source/ts
 
 jobs:
   release:
@@ -15,6 +19,8 @@ jobs:
         with:
           node-version: 24
           registry-url: 'https://registry.npmjs.org'
+          cache: npm
+          cache-dependency-path: source/ts/package-lock.json
       - run: npm ci
       - run: npm run build
       - run: npm run test:run
@@ -22,6 +28,7 @@ jobs:
         uses: changesets/action@v1
         with:
           publish: npx changeset publish
+          cwd: source/ts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

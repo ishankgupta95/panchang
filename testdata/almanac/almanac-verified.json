@@ -1,0 +1,268 @@
+[
+  {
+    "_source": "Reference almanac, verified 2025-01-14, Delhi. Sunrise/sunset/tithi/nakshatra/yoga/karana match the reference almanac for Delhi.",
+    "date": "2025-01-14",
+    "city": "Delhi",
+    "location": {
+      "latitude": 28.6139,
+      "longitude": 77.209
+    },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Tuesday",
+      "vara": "Mangalawara",
+      "tithiAtSunrise": "Krishna Pratipada",
+      "nakshatraAtSunrise": "Punarvasu",
+      "yogaAtSunrise": "Vishkambha",
+      "karanaAtSunrise": "Balava",
+      "paksha": "Krishna",
+      "sunriseHHMM": "07:15",
+      "sunsetHHMM": "17:45",
+      "chandraRashi": "Karka",
+      "chandramasaName": "Magha",
+      "rahuKalamStartHHMM": "15:07",
+      "rahuKalamEndHHMM": "16:26",
+      "yamagandaStartHHMM": "09:52",
+      "yamagandaEndHHMM": "11:11",
+      "abhijitMuhurtaStartHHMM": "12:09",
+      "abhijitMuhurtaEndHHMM": "12:51",
+      "festivals": [],
+      "tithiEndHHMM": "03:21+1",
+      "nakshatraEndHHMM": "10:17",
+      "yogaEndHHMM": "02:58+1",
+      "karanaEndHHMM": "15:34"
+    }
+  },
+  {
+    "_source": "Reference almanac, verified 2025-01-01, Delhi. Wednesday → Abhijit Muhurta is null per the almanac / Smarta Buddha-vara convention.",
+    "date": "2025-01-01",
+    "city": "Delhi",
+    "location": {
+      "latitude": 28.6139,
+      "longitude": 77.209
+    },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Wednesday",
+      "vara": "Budhawara",
+      "tithiAtSunrise": "Shukla Dwitiya",
+      "nakshatraAtSunrise": "Uttara Ashadha",
+      "yogaAtSunrise": "Vyaghata",
+      "karanaAtSunrise": "Balava",
+      "paksha": "Shukla",
+      "sunriseHHMM": "07:13",
+      "sunsetHHMM": "17:35",
+      "chandraRashi": "Makara",
+      "chandramasaName": "Pausha",
+      "rahuKalamStartHHMM": "12:24",
+      "rahuKalamEndHHMM": "13:42",
+      "yamagandaStartHHMM": "08:31",
+      "yamagandaEndHHMM": "09:49",
+      "abhijitMuhurtaStartHHMM": null,
+      "abhijitMuhurtaEndHHMM": null,
+      "festivals": [],
+      "tithiEndHHMM": "02:24+1",
+      "nakshatraEndHHMM": "23:46",
+      "yogaEndHHMM": "17:07",
+      "karanaEndHHMM": "14:55"
+    }
+  },
+  {
+    "_source": "Reference almanac, verified 2025-03-26, Delhi. Wednesday → Abhijit Muhurta is null per the almanac / Smarta Buddha-vara convention.",
+    "date": "2025-03-26",
+    "city": "Delhi",
+    "location": {
+      "latitude": 28.6139,
+      "longitude": 77.209
+    },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Wednesday",
+      "vara": "Budhawara",
+      "tithiAtSunrise": "Krishna Dwadashi",
+      "nakshatraAtSunrise": "Dhanishtha",
+      "yogaAtSunrise": "Siddha",
+      "karanaAtSunrise": "Kaulava",
+      "paksha": "Krishna",
+      "sunriseHHMM": "06:18",
+      "sunsetHHMM": "18:35",
+      "chandraRashi": "Makara",
+      "chandramasaName": "Chaitra",
+      "rahuKalamStartHHMM": "12:27",
+      "rahuKalamEndHHMM": "13:59",
+      "yamagandaStartHHMM": "07:50",
+      "yamagandaEndHHMM": "09:22",
+      "abhijitMuhurtaStartHHMM": null,
+      "abhijitMuhurtaEndHHMM": null,
+      "festivals": [],
+      "tithiEndHHMM": "01:42+1",
+      "nakshatraEndHHMM": "02:30+1",
+      "yogaEndHHMM": "12:26",
+      "karanaEndHHMM": "14:49"
+    }
+  },
+  {
+    "_source": "Library baseline: 2025-04-12, Chennai. Tithi/Nakshatra/Yoga/Karana/Vara verified vs the reference almanac.",
+    "date": "2025-04-12",
+    "city": "Chennai",
+    "location": {
+      "latitude": 13.0827,
+      "longitude": 80.2707
+    },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Saturday",
+      "vara": "Shaniwara",
+      "tithiAtSunrise": "Purnima",
+      "nakshatraAtSunrise": "Hasta",
+      "yogaAtSunrise": "Vyaghata",
+      "karanaAtSunrise": "Vishti",
+      "paksha": "Shukla",
+      "sunriseHHMM": "05:58",
+      "sunsetHHMM": "18:21",
+      "chandraRashi": "Kanya",
+      "chandramasaName": "Chaitra",
+      "rahuKalamStartHHMM": "09:03",
+      "rahuKalamEndHHMM": "10:36",
+      "yamagandaStartHHMM": "13:42",
+      "yamagandaEndHHMM": "15:15",
+      "abhijitMuhurtaStartHHMM": "11:44",
+      "abhijitMuhurtaEndHHMM": "12:34",
+      "festivals": [
+        "Hanuman Jayanti"
+      ],
+      "tithiEndHHMM": "05:51+1",
+      "nakshatraEndHHMM": "18:08",
+      "yogaEndHHMM": "20:41",
+      "karanaEndHHMM": "16:35"
+    }
+  },
+  {
+    "_source": "Reference almanac, verified 2025-08-15, Delhi",
+    "date": "2025-08-15",
+    "city": "Delhi",
+    "location": {
+      "latitude": 28.6139,
+      "longitude": 77.209
+    },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Friday",
+      "vara": "Shukrawara",
+      "tithiAtSunrise": "Krishna Saptami",
+      "nakshatraAtSunrise": "Ashwini",
+      "yogaAtSunrise": "Ganda",
+      "karanaAtSunrise": "Vishti",
+      "paksha": "Krishna",
+      "sunriseHHMM": "05:50",
+      "sunsetHHMM": "19:00",
+      "chandraRashi": "Mesha",
+      "chandramasaName": "Bhadrapada",
+      "rahuKalamStartHHMM": "10:46",
+      "rahuKalamEndHHMM": "12:25",
+      "yamagandaStartHHMM": "15:42",
+      "yamagandaEndHHMM": "17:21",
+      "abhijitMuhurtaStartHHMM": "11:59",
+      "abhijitMuhurtaEndHHMM": "12:51",
+      "festivals": [],
+      "tithiEndHHMM": "23:49",
+      "nakshatraEndHHMM": "07:36",
+      "yogaEndHHMM": "10:17",
+      "karanaEndHHMM": "12:58"
+    }
+  },
+  {
+    "_source": "Reference almanac, verified 2025-10-20, Bangalore. Diwali-eve / Narak Chaturdashi.",
+    "date": "2025-10-20",
+    "city": "Bangalore",
+    "location": {
+      "latitude": 12.9716,
+      "longitude": 77.5946
+    },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Monday",
+      "vara": "Somawara",
+      "tithiAtSunrise": "Krishna Chaturdashi",
+      "nakshatraAtSunrise": "Hasta",
+      "yogaAtSunrise": "Vaidhriti",
+      "karanaAtSunrise": "Shakuni",
+      "paksha": "Krishna",
+      "sunriseHHMM": "06:10",
+      "sunsetHHMM": "17:58",
+      "chandraRashi": "Kanya",
+      "chandramasaName": "Kartika",
+      "rahuKalamStartHHMM": "07:39",
+      "rahuKalamEndHHMM": "09:07",
+      "yamagandaStartHHMM": "10:35",
+      "yamagandaEndHHMM": "12:04",
+      "abhijitMuhurtaStartHHMM": "11:40",
+      "abhijitMuhurtaEndHHMM": "12:27",
+      "festivals": [
+        "Narak Chaturdashi"
+      ]
+    }
+  },
+  {
+    "_source": "Reference almanac 2025 ekadashi list (Mumbai): Devutthana Ekadashi = Nov 1 (Smarta, Trisprisha advance: Dwadashi ends Nov 3 05:07 before sunrise); Nov 2 = Trisparsha Mahadwadashi / Vaishnava Devutthana Ekadashi. Was a library baseline captured under the pre-2026-08-14 sunrise-only rule, which mislabeled Nov 2 as the main Ekadashi day.",
+    "date": "2025-11-02",
+    "city": "Mumbai",
+    "location": {
+      "latitude": 19.076,
+      "longitude": 72.8777
+    },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Sunday",
+      "vara": "Raviwara",
+      "tithiAtSunrise": "Shukla Ekadashi",
+      "nakshatraAtSunrise": "Purva Bhadrapada",
+      "yogaAtSunrise": "Vyaghata",
+      "karanaAtSunrise": "Vishti",
+      "paksha": "Shukla",
+      "sunriseHHMM": "06:39",
+      "sunsetHHMM": "18:04",
+      "chandraRashi": "Kumbha",
+      "chandramasaName": "Kartika",
+      "rahuKalamStartHHMM": "16:38",
+      "rahuKalamEndHHMM": "18:04",
+      "yamagandaStartHHMM": "12:21",
+      "yamagandaEndHHMM": "13:47",
+      "abhijitMuhurtaStartHHMM": "11:59",
+      "abhijitMuhurtaEndHHMM": "12:44",
+      "festivals": [
+        "Vaishnava Ekadashi"
+      ]
+    }
+  },
+  {
+    "_source": "Library baseline: 2026-03-30, Pune",
+    "date": "2026-03-30",
+    "city": "Pune",
+    "location": {
+      "latitude": 18.5204,
+      "longitude": 73.8567
+    },
+    "timezone": 330,
+    "expected": {
+      "varaEnglish": "Monday",
+      "vara": "Somawara",
+      "tithiAtSunrise": "Shukla Dwadashi",
+      "nakshatraAtSunrise": "Magha",
+      "yogaAtSunrise": "Shula",
+      "karanaAtSunrise": "Balava",
+      "paksha": "Shukla",
+      "sunriseHHMM": "06:30",
+      "sunsetHHMM": "18:47",
+      "chandraRashi": "Simha",
+      "chandramasaName": "Chaitra",
+      "rahuKalamStartHHMM": "08:02",
+      "rahuKalamEndHHMM": "09:34",
+      "yamagandaStartHHMM": "11:07",
+      "yamagandaEndHHMM": "12:39",
+      "abhijitMuhurtaStartHHMM": "12:14",
+      "abhijitMuhurtaEndHHMM": "13:03",
+      "festivals": []
+    }
+  }
+]
