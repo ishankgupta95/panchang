@@ -101,7 +101,7 @@ const fullRunOn = (d: Date) => {
 };
 
 describe('Performance invariants: narrowing work must cost less', () => {
-  it('sections: [] + no end-times stays under its absolute ceiling', () => {
+  it.skipIf(process.env.COVERAGE)('sections: [] + no end-times stays under its absolute ceiling', () => {
     /**
      * 1.5x the worst observation under a loaded parallel suite (1.09 ms/day
      * against 0.26 single-process), so it catches only a gross regression:
@@ -122,7 +122,7 @@ describe('Performance invariants: narrowing work must cost less', () => {
     ).toBeLessThan(1.60);
   });
 
-  it('dropping the festivals section alone is measurably cheaper', () => {
+  it.skipIf(process.env.COVERAGE)('dropping the festivals section alone is measurably cheaper', () => {
     // Deliberately one repeated day, unlike the ratios above: cold, both sides
     // pay the same rise/set searches, which swamp the festival block and push
     // the ratio to 0.945. This is the narrowest margin in the file.
@@ -139,7 +139,7 @@ describe('Performance invariants: narrowing work must cost less', () => {
       .toBeLessThan(0.95);
   });
 
-  it('the eclipse check is negligible on a day that holds no syzygy', () => {
+  it.skipIf(process.env.COVERAGE)('the eclipse check is negligible on a day that holds no syzygy', () => {
     // 2025-07-04 is neither a new nor a full moon, so the syzygy guard should
     // reject before running any eclipse search.
     const sunrise = computeSunrise(new Date('2025-07-03T18:30:00Z'), PUNE);
@@ -154,7 +154,7 @@ describe('Performance invariants: narrowing work must cost less', () => {
     ).toBeLessThan(0.25);
   });
 
-  it('instant mode stays far cheaper than a daily panchang', () => {
+  it.skipIf(process.env.COVERAGE)('instant mode stays far cheaper than a daily panchang', () => {
     const ratio = ratioOverDays((d) => {
       getInstantPanchang(new Date(d.getTime() + 6 * 3600_000), PUNE);
     }, fullRunOn);
@@ -171,7 +171,7 @@ describe('Performance backstops: absolute ceilings', () => {
     ['NYC (negative longitude)', NYC, -240, '2025-07-04'],
     ['Delhi year-end', DELHI, 330, '2025-12-31'],
   ] as const) {
-    it(`${name} full run < ${CEILING_MS}ms/call`, () => {
+    it.skipIf(process.env.COVERAGE)(`${name} full run < ${CEILING_MS}ms/call`, () => {
       const ms = measureMs(() =>
         getDailyPanchang(new Date(date), loc, { timezone: tz, computeEndTimes: true }),
       );
@@ -179,7 +179,7 @@ describe('Performance backstops: absolute ceilings', () => {
     });
   }
 
-  it('instant mode < 5ms/call', () => {
+  it.skipIf(process.env.COVERAGE)('instant mode < 5ms/call', () => {
     const moment = new Date('2025-07-04T06:00:00Z');
     const ms = measureMs(() => {
       getInstantPanchang(moment, PUNE);
@@ -189,7 +189,7 @@ describe('Performance backstops: absolute ceilings', () => {
 });
 
 describe('LongitudeCache: real usage', () => {
-  it('the daily-panchang access pattern re-reads instants enough to benefit', () => {
+  it.skipIf(process.env.COVERAGE)('the daily-panchang access pattern re-reads instants enough to benefit', () => {
     const cache = new LongitudeCache('lahiri');
 
     const sunrise = computeSunrise(new Date('2025-07-03T18:30:00Z'), PUNE);

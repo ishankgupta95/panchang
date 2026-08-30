@@ -96,7 +96,7 @@
     "dev": "tsup --watch",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "COVERAGE=1 vitest run --coverage",
     "test:hermes": "bash tools/hermes-check.sh",
     "bench": "vitest bench",
     "lint": "eslint src",

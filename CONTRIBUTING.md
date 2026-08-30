@@ -43,16 +43,29 @@ writing, measured, and the misses recorded.
 run:
 
 ```bash
-bash source/go/ci/tree.sh
+bash ci/hygiene.sh
+bash ci/tree.sh
 cd source/go && gofmt -l . && go vet ./... && go test ./... && cd ..
-bash source/go/ci/goldens.sh
+bash ci/goldens.sh
 node --test source/go/parity/gate.test.mjs
-bash source/go/ci/parity.sh
+bash ci/parity.sh
 npm --prefix source/ts run typecheck
 npm --prefix source/ts run lint
 npm --prefix source/ts run test:run
 npx --prefix source/ts tsc -p source/go/parity/tsconfig.json
 ```
+
+Two more run in CI but not by default, because they take minutes and rewrite
+generated files:
+
+```bash
+cd source/go && GEN_FULL=1 go test ./internal/gen/ -run TestGeneratorReproducesCommittedSeries
+bash generate/notes/ephemeris-generate.sh && git diff --exit-code -- source/ts/src/astronomy/series/
+```
+
+Each language ships a truncated copy of the same coefficient tables, written by
+a generator. Editing a generated file without its generator is silent until
+somebody regenerates and the edit disappears.
 
 **Do not run the npm suite alongside anything else.**
 `source/ts/tests/perf/perf.test.ts` makes ratio assertions and fails under CPU

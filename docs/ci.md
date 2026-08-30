@@ -1,4 +1,9 @@
-# `go/ci`: the sync discipline
+# `ci/`: the sync discipline
+
+The scripts live in `ci/` at the repository root, not under either language,
+because not one of them is single-language: `tree.sh` compares the two trees,
+`goldens.sh` runs the TypeScript to write the Go module's fixtures, `parity.sh`
+runs both, and `hygiene.sh` and `release-check.sh` are repository-wide.
 
 This was meant to start the day stage G2 landed. G2 landed on 2026-08-23 and this
 landed on 2026-08-24, so it is overdue rather than new, and the gap is the point:
@@ -7,14 +12,25 @@ its Go counterpart and nothing would have said so.** That is not hypothetical:
 the `MasaSystem` / `GetBounds` drift was found by hand, because no gate could see
 it.
 
-Three pieces, in the order they should run and roughly in order of what they
+Five pieces, in the order they should run and roughly in order of what they
 cost:
 
 | | what it answers | where |
 |---|---|---|
+| **hygiene** | did a rule that regresses silently regress? em/en dashes, absolute developer paths, links to documents that do not ship, the vendor name. Runs as the first step of the tree job, since it needs no toolchain and takes a second | `hygiene.sh` |
 | **tree correspondence** | did a `source/ts/src/` file arrive without a Go counterpart, or a Go file without a justification? | `tree.sh` → `cmd/treecheck` → `internal/treecheck` |
 | **goldens** | did `source/ts/src/` behaviour move without the pinned answers moving with it? | `goldens.sh` → `parity/goldens.sh` |
+| **generators** | does each language's generated coefficient series still match the generator that writes it? | `GEN_FULL=1 go test ./internal/gen/` and `generate/notes/ephemeris-generate.sh` |
 | **parity** | do the two implementations still agree, leaf for leaf, inside the parity bands? | `parity.sh` → `parity/gate.mjs` + `parity/tables-gate.mjs` over `parity/bands.json` |
+
+**The generators piece is the one a two-language tree needs and a one-language
+tree does not.** Both languages ship a truncated copy of the same published
+coefficient tables, and each copy is written by a generator. Editing a generated
+file without editing its generator is silent until somebody regenerates, at
+which point the edit vanishes. Neither check runs in the ordinary suite: the Go
+one sits behind `GEN_FULL` because it takes three minutes, and the TypeScript
+side has no test at all, so CI runs both explicitly. Both drifted during the
+2026-08-29 cleanup and neither ordinary suite noticed.
 
 and, separately from CI, `release-check.sh` + [`docs/release.md`](release.md) for the
 third item, release lockstep.
@@ -23,8 +39,20 @@ third item, release lockstep.
 
 ## 1. The workflow, and where it lives
 
-**`.github/workflows/go-port.yml`**, installed 2026-08-24 on Ishank's approval.
-There is exactly one copy: the draft that used to sit at `source/go/ci/workflows/` was
+One workflow per concern, so a red check names its own cause:
+
+| workflow | what it gates |
+|---|---|
+| `typescript.yml` | the npm package: lint, both typechecks, the suite on Node 22 and 24, coverage, the Hermes syntax check, the build |
+| `go.yml` | the Go module: gofmt, vet, `go test -race`, and a build at go.mod's declared minimum |
+| `parity.yml` | the two implementations agreeing: hygiene, tree correspondence, goldens, the parity gate, generator reproduction |
+| `release.yml` | publishing, which runs the cross-language gates first |
+
+Splitting them this way keeps every job name unchanged, and required status
+checks match the job name rather than the workflow or the file, so the split
+moves nothing in branch protection.
+
+There is exactly one copy: the draft that used to sit at `ci/workflows/` was
 moved rather than copied, because two copies of a workflow are two things to keep
 in step and only one of them runs.
 
@@ -38,63 +66,35 @@ it. Not a live hazard (the triggers are `master` only, so nothing runs until
 `go_port` merges and `go/` arrives in the same merge), but the failure mode is
 confusing if it ever does happen.
 
-### Why it says `master`: the two workflows already there had never run
+### Why it says `master`
 
-`.github/workflows/ci.yml` and `.github/workflows/release.yml` both filter on
+`typescript.yml` and `release.yml` were written against `main`, which this repository has
+never had, so neither had ever run. Both were corrected to `master`. Check
+`git ls-remote --heads origin` before changing that line.
 
-```yaml
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-```
+`typescript.yml`'s `coverage`, `hermes` and `build-check` jobs had therefore never
+executed. All three were run by hand on 2026-08-29 before being trusted:
+`build-check` and `hermes` passed; `coverage` failed intermittently, because
+`tests/unit/sections.test.ts` holds two timing assertions and one of them
+exceeded vitest's 5 s default under v8 instrumentation. `npm run test:coverage`
+now sets `COVERAGE=1` and every timing test is `it.skipIf(process.env.COVERAGE)`,
+so the reading never measures the instrumentation. The ordinary `test:run` is
+unaffected and still runs all 8,778.
 
-**This repository has no `main` branch.** Checked against the live remote on
-2026-08-24:
+`release.yml` publishes the npm package. The Go module is tagged off the same
+commit, so it now runs the tree, goldens and parity gates before publishing:
+shipping one language against a tree where the other disagrees is the failure
+this repository exists to prevent.
 
-```
-$ git ls-remote --heads origin
-… refs/heads/birthChartandAdvancedAstro
-… refs/heads/go_port
-… refs/heads/master
-… refs/heads/performance_improvement
-… refs/heads/phase18onwards
-… refs/heads/phase28
-… refs/heads/rewritingFestivalsAlgo
-… refs/heads/wave4-advanced-jyotish-roadmap
-… refs/heads/wave5-almanac-parity
-```
-
-Nine heads, none of them `main`; `origin/HEAD` is `master` and
-`.changeset/config.json` sets `"baseBranch": "master"`. So neither trigger can
-match: `ci.yml`'s typecheck, lint, 8,773-test matrix, coverage, hermes and
-build-check have not run on a push or a PR, and `release.yml`'s changesets
-publish has not either, which fits, since 5.1.0 and 5.1.1 were both published
-untagged and by hand.
-
-**`ci.yml` was corrected to `master` in the same change** that installed
-`go-port.yml`, on Ishank's approval, so the repository's existing gates are live
-for the first time. Expect the first run to need a fix: `lint-and-typecheck` and
-`test` are known-green locally (137 files / 8,773 tests, both typechecks clean,
-measured 2026-08-24), but `coverage`, `hermes` and `build-check` have never
-executed in this configuration.
-
-**`release.yml` was deliberately left on `main`, and is therefore still dead.**
-Fixing it hands publishing to CI, which is a different decision from turning the
-gates on: `.changeset/` holds only `config.json` today, so the immediate
-behaviour would be "no release to make", but it needs `NPM_TOKEN` as a repo
-secret and it changes who publishes. Today that is Ishank, by hand, with
-`npm publish --access public`.
-
-**Nothing in `go-port.yml` writes.** No tag, no push, no publish, no release step;
-`permissions: contents: read` is set explicitly rather than inherited.
+**Nothing outside `release.yml` writes.** No tag, no push, no publish;
+`permissions: contents: read` is set explicitly in every workflow rather than
+inherited.
 
 ---
 
 ## 2. The three gates
 
-### 2.1 Tree correspondence: `bash source/go/ci/tree.sh`
+### 2.1 Tree correspondence: `bash ci/tree.sh`
 
 The highest-value piece here, and the cheapest: **50 ms**.
 
@@ -121,7 +121,7 @@ Exit codes: **0** clean, **1** drift, **2** the checker could not run. CI must
 not collapse 2 into 0; a `docs/porting.md` the parser cannot read would otherwise
 disable the gate in silence.
 
-### 2.2 Goldens: `bash source/go/ci/goldens.sh`
+### 2.2 Goldens: `bash ci/goldens.sh`
 
 `source/go/parity/goldens.sh` regenerates all **34** `testdata/goldens/**/*-golden.json` from
 the *TypeScript* tree. Rerunning it must be a no-op; this asserts that by
@@ -135,7 +135,7 @@ and no 250 MB documents.
 A golden that changes is a review event, never a re-pin: predict the delta and
 its cause first (`docs/validation-tiers.md`).
 
-### 2.3 Parity: `bash source/go/ci/parity.sh [stages…] [--allow-pin-drift]`
+### 2.3 Parity: `bash ci/parity.sh [stages…] [--allow-pin-drift]`
 
 TS dump, Go dump, band assertion, per stage; then the table byte gate. All three
 stages plus the tables: **44 s** end to end.
@@ -261,11 +261,11 @@ the measurement.
 ## 5. Running it all by hand
 
 ```bash
-bash source/go/ci/tree.sh                                   # 0.05 s
+bash ci/tree.sh                                   # 0.05 s
 cd source/go && gofmt -l . && go vet ./... && go test ./... -race && cd ..
-bash source/go/ci/goldens.sh                                # 149 s
+bash ci/goldens.sh                                # 149 s
 node --test source/go/parity/gate.test.mjs                  # 0.6 s
-bash source/go/ci/parity.sh                                 # 44 s
+bash ci/parity.sh                                 # 44 s
 npm run test:run                                     # 57 s, NOT while the Go race suite runs
 npm run typecheck
 npx --prefix source/ts tsc -p source/go/parity/tsconfig.json

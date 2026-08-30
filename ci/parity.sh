@@ -1,8 +1,8 @@
 #!/bin/bash
-#   bash source/go/ci/parity.sh [stage...] [--allow-pin-drift]
+#   bash ci/parity.sh [stage...] [--allow-pin-drift]
 # The gate holds both documents at once and peaks near 2.5 GB.
 set -euo pipefail
-REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
 
 BANDS="source/go/parity/bands.json"

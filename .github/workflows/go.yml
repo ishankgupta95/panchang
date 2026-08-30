@@ -1,0 +1,46 @@
+name: Go
+
+on:
+  push:
+    # `master`, not `main`: this repository has never had a `main` branch.
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: go-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GO_VERSION: '1.26.x'
+
+jobs:
+  go-build-min:
+    name: go build @ go.mod minimum
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.22', cache: false }
+      # Build and vet only: the goldens and bands.json were measured on 1.26.4
+      # and 1.22 has never been checked against them. Do not add a test run.
+      - run: cd source/go && go build ./... && go vet ./...
+
+  go-test:
+    name: go test -race
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: '${{ env.GO_VERSION }}', cache: false }
+      - name: gofmt
+        run: |
+          cd source/go
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then echo "gofmt -l:"; echo "$unformatted"; exit 1; fi
+      - run: cd source/go && go vet ./...
+      - run: cd source/go && go test ./... -race

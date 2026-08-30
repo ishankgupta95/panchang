@@ -1,0 +1,19 @@
+version: 2
+updates:
+  # The workflows pin actions by major tag, so this is what notices a v4 -> v5.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: npm
+    directory: /source/ts
+    schedule:
+      interval: monthly
+
+  # The Go module has no third-party dependencies and therefore no go.sum;
+  # this watches the toolchain directive in go.mod.
+  - package-ecosystem: gomod
+    directory: /source/go
+    schedule:
+      interval: monthly

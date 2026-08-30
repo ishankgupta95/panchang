@@ -1,4 +1,4 @@
-name: Go port
+name: Cross-language gates
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: go-port-${{ github.ref }}
+  group: parity-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -27,34 +27,8 @@ jobs:
       - uses: actions/setup-go@v5
         # cache: false throughout, there is no go.sum for setup-go to key on.
         with: { go-version: '${{ env.GO_VERSION }}', cache: false }
-      - run: bash source/go/ci/tree.sh
-
-  go-build-min:
-    name: go build @ go.mod minimum
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with: { go-version: '1.22', cache: false }
-      # Build and vet only: the goldens and bands.json were measured on 1.26.4
-      # and 1.22 has never been checked against them. Do not add a test run.
-      - run: cd source/go && go build ./... && go vet ./...
-
-  go-test:
-    name: go test -race
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with: { go-version: '${{ env.GO_VERSION }}', cache: false }
-      - name: gofmt
-        run: |
-          cd source/go
-          unformatted="$(gofmt -l .)"
-          if [ -n "$unformatted" ]; then echo "gofmt -l:"; echo "$unformatted"; exit 1; fi
-      - run: cd source/go && go vet ./...
-      - run: cd source/go && go test ./... -race
+      - run: bash ci/hygiene.sh
+      - run: bash ci/tree.sh
 
   goldens:
     name: TS-produced goldens are unchanged
@@ -68,7 +42,7 @@ jobs:
         with: { go-version: '${{ env.GO_VERSION }}', cache: false }
       - run: npm ci
         working-directory: source/ts
-      - run: bash source/go/ci/goldens.sh
+      - run: bash ci/goldens.sh
       - run: cd source/go && go test ./...
 
   parity:
@@ -87,7 +61,31 @@ jobs:
       - run: node --test source/go/parity/gate.test.mjs
       # A PIN failure without a BAND failure can be a host difference: leaf
       # counts are pinned per host, and the gate prints a block to re-pin from.
-      - run: bash source/go/ci/parity.sh
+      - run: bash ci/parity.sh
       - name: dump sizes on failure
         if: failure()
         run: ls -l source/go/parity/out/
+
+  generators:
+    name: generated series match their generators
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ env.NODE_VERSION }}', cache: npm, cache-dependency-path: source/ts/package-lock.json }
+      - uses: actions/setup-go@v5
+        with: { go-version: '${{ env.GO_VERSION }}', cache: false }
+      - run: npm ci
+        working-directory: source/ts
+      # Both languages ship a truncated copy of the same coefficient tables, and
+      # each is written by a generator. Editing a generated file without its
+      # generator is silent until someone regenerates and the edit vanishes.
+      # Neither check runs in the ordinary suite: the Go one is behind GEN_FULL
+      # because it takes three minutes, and the TypeScript side has no test at all.
+      - name: Go series
+        run: cd source/go && GEN_FULL=1 go test ./internal/gen/ -run TestGeneratorReproducesCommittedSeries -count=1
+      - name: TypeScript series
+        run: |
+          bash generate/notes/ephemeris-generate.sh
+          git diff --exit-code -- source/ts/src/astronomy/series/

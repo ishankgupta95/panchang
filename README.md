@@ -16,7 +16,7 @@ the TypeScript's *exact arithmetic*, and a parity harness compares the two
 leaf-for-leaf over a ~255 MB document on every change. What "exact" means, and
 the handful of places where two languages genuinely cannot produce the same
 double, is written down in [`docs/porting.md`](docs/porting.md) and
-enforced by [`source/go/ci/`](docs/ci.md).
+enforced by [`ci/`](docs/ci.md).
 
 ## Layout
 

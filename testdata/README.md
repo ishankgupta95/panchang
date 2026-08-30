@@ -155,7 +155,7 @@ Thirty-four files, one directory per Go package, holding the TypeScript's own
 answers to a fixed set of questions. Regenerate with
 
 ```bash
-bash source/go/ci/goldens.sh
+bash ci/goldens.sh
 ```
 
 Rerunning must be a no-op; the script asserts that by checksum. A golden that

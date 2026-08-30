@@ -5,7 +5,7 @@ The third sync-discipline item, in full:
 > **Release lockstep:** Go module versions with npm, cut from the same commit,
 > by Ishank.
 
-This document is the design. `source/go/ci/release-check.sh` is the enforceable part of
+This document is the design. `ci/release-check.sh` is the enforceable part of
 it: a read-only dry run that checks the preconditions and prints the commands.
 It never tags, never pushes and never publishes. Those are yours, every time.
 
@@ -122,9 +122,9 @@ is B, and it was going to be B anyway.
    this, and §3's rule 3 is why.
 2. Bump `package.json` **in the commit being released**, not after it.
 3. Run every gate on that commit. `release-check.sh` prints the list in order;
-   the two that are specific to this port are `bash source/go/ci/tree.sh` and
-   `bash source/go/ci/parity.sh`.
-4. `bash source/go/ci/release-check.sh` must print `preconditions OK`.
+   the two that are specific to this port are `bash ci/tree.sh` and
+   `bash ci/parity.sh`.
+4. `bash ci/release-check.sh` must print `preconditions OK`.
 5. Run the commands it printed. It prints them rather than running them so that
    the commands you run are the ones that were checked.
 6. `npm run build && npm publish --access public`.

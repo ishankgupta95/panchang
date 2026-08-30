@@ -3,6 +3,13 @@ on:
   push:
     branches: [master]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 defaults:
   run:
     working-directory: source/ts
@@ -15,6 +22,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.26.x', cache: false }
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -24,6 +33,14 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run test:run
+      # The npm package and the Go module are tagged off the same commit, so the
+      # cross-language gates have to be green before either is published.
+      - run: bash ci/tree.sh
+        working-directory: ${{ github.workspace }}
+      - run: bash ci/goldens.sh
+        working-directory: ${{ github.workspace }}
+      - run: bash ci/parity.sh
+        working-directory: ${{ github.workspace }}
       - name: Create Release PR or Publish
         uses: changesets/action@v1
         with:
@@ -32,3 +49,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # `id-token: write` above exists for this: npm records a signed link
+          # from the tarball back to the commit and workflow that built it.
+          NPM_CONFIG_PROVENANCE: true

@@ -8,7 +8,7 @@
  * the solar path applies no precession at all.
  *
  * Stride 4: A, B, C, power of τ, for a term `A · τ^power · cos(B + C·τ)`, with
- * τ in Julian millennia TT from J2000: VSOP87's own argument, not centuries.
+ * τ in Julian millennia TT from J2000, VSOP87's own argument, not centuries.
  */
 
 /** 118 of 1080 terms; error ≤ 0.380″. */

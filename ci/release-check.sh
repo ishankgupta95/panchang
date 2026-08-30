@@ -1,8 +1,8 @@
 #!/bin/bash
-#   bash source/go/ci/release-check.sh [version]
+#   bash ci/release-check.sh [version]
 # Read-only: it prints the tag and publish commands, never runs them.
 set -uo pipefail
-REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
 
 VERSION="${1:-$(node -p 'require("./source/ts/package.json").version')}"
@@ -68,11 +68,11 @@ cat <<'GATES'
       (cd source/ts && npm run test:run)    137 files / 8,773 tests
       (cd source/ts && npm run typecheck)
       npx --prefix source/ts tsc -p source/go/parity/tsconfig.json
-      bash source/go/ci/tree.sh                    source/ts/src <-> source/go correspondence
-      bash source/go/ci/goldens.sh                 34 goldens, must be a no-op
+      bash ci/tree.sh                    source/ts/src <-> source/go correspondence
+      bash ci/goldens.sh                 34 goldens, must be a no-op
       cd source/go && gofmt -l . && go vet ./... && go test ./... -race
       node --test source/go/parity/gate.test.mjs
-      bash source/go/ci/parity.sh                  g2 + g3 + full + the table gate
+      bash ci/parity.sh                  g2 + g3 + full + the table gate
     Do not run the npm suite and the Go race suite at the same time:
     tests/perf/perf.test.ts makes ratio assertions and fails under contention.
 GATES

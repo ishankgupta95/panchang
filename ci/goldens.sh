@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
 
 snapshot() { find testdata/goldens -name '*-golden.json' -print0 | sort -z | xargs -0 shasum -a 256; }

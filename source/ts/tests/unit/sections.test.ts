@@ -122,7 +122,9 @@ describe('options.sections', () => {
   // An absolute ceiling, not a narrowed/full ratio, which rises whenever the full
   // call gets faster. 1.60 is loose because the reading is dominated by machine
   // load (0.26 ms/day uncontended); check what else ran before calling a failure.
-  it('stays under its absolute ms/day ceiling when sections are dropped', () => {
+  // Timing, so it stands aside under coverage: instrumentation would make the
+  // reading measure the instrumentation.
+  it.skipIf(process.env.COVERAGE)('stays under its absolute ms/day ceiling when sections are dropped', () => {
     // A fresh stretch of days per measurement, so no call is served by a cached day.
     let cursor = 0;
     const nextDays = (n: number) =>
@@ -152,7 +154,7 @@ describe('options.sections', () => {
     ).toBeLessThan(1.60);
   });
 
-  it('never costs more to ask for less, even on a fully cached day', () => {
+  it.skipIf(process.env.COVERAGE)('never costs more to ask for less, even on a fully cached day', () => {
     // Little left to skip once the caches are warm, so only direction is asserted.
     const day = new Date('2025-07-04T06:30:00Z');
     const time = (sections?: readonly PanchangSection[]) => {
