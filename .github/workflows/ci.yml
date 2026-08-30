@@ -1,0 +1,127 @@
+name: CI
+
+# One file: concurrency groups and `needs:` are per workflow, so a split release job
+# re-ran the gates the same push was already running. See docs/ci.md.
+on:
+  push:
+    # `master`, not `main`: this repository has never had a `main` branch.
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # Never cancel a master run: it may be mid-publish.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NODE_VERSION: '24'
+  GO_VERSION: '1.26.x'
+
+jobs:
+  typescript:
+    name: typescript
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: source/ts
+    steps:
+      - uses: actions/checkout@v4
+      # First: needs no toolchain, fails in seconds.
+      - run: bash ci/hygiene.sh
+        working-directory: ${{ github.workspace }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: source/ts/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run test:run
+      # Builds internally, so this covers the compile too.
+      - run: npm run test:hermes
+      - name: dist is publishable
+        run: |
+          for f in dist/index.js dist/index.cjs dist/index.d.ts dist/index.d.cts; do
+            test -f "$f" || { echo "missing $f"; exit 1; }
+          done
+          npm pack --dry-run
+
+  go:
+    name: go
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: source/go
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        # cache: false throughout, there is no go.sum for setup-go to key on.
+        with: { go-version: '${{ env.GO_VERSION }}', cache: false }
+      - name: gofmt
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then echo "gofmt -l:"; echo "$unformatted"; exit 1; fi
+      # vet's stdversion analyzer is what asserts go.mod's declared minimum.
+      - run: go vet ./...
+      - run: go test ./...
+      # Only these three start goroutines; ci/hygiene.sh enforces that they stay the only ones.
+      - run: go test -race ./internal/store/... ./internal/core/... ./internal/astronomy/...
+
+  parity:
+    name: parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: source/ts/package-lock.json
+      - uses: actions/setup-go@v5
+        with: { go-version: '${{ env.GO_VERSION }}', cache: false }
+      - run: npm ci
+        working-directory: source/ts
+      - run: node --test source/go/parity/gate.test.mjs
+      # `full` only: it strictly contains g2 and g3.
+      - run: bash ci/parity.sh full
+
+  release:
+    needs: [typescript, go, parity]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      id-token: write
+    defaults:
+      run:
+        working-directory: source/ts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: 'https://registry.npmjs.org'
+          cache: npm
+          cache-dependency-path: source/ts/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      # No gates here: `needs:` above already held them green on this exact commit.
+      - name: Create Release PR or Publish
+        uses: changesets/action@v1
+        with:
+          publish: npx changeset publish
+          cwd: source/ts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # What `id-token: write` above is for.
+          NPM_CONFIG_PROVENANCE: true

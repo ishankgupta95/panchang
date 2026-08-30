@@ -18,6 +18,24 @@ const MOON_NODES = 10;
 const SUN_BLOCK_MS = 8 * DAY_MS;
 const SUN_NODES = 8;
 
+/** `cos(πk / (n-1))`, frozen to V8's values rather than computed: a platform cosine here
+ * disagrees by an ULP at k=2 of the Moon's grid, and this grid feeds every interpolated
+ * longitude, so the Go port could not match it off the host that pinned the goldens. */
+const CHEBYSHEV_ABSCISSAE: Record<number, readonly number[]> = {
+  [MOON_NODES]: [
+    1, 0.9396926207859084, 0.766044443118978, 0.5000000000000001, 0.17364817766693041,
+    -0.1736481776669303, -0.4999999999999998, -0.7660444431189779, -0.9396926207859083, -1,
+  ],
+  [SUN_NODES]: [
+    1, 0.9009688679024191, 0.6234898018587336, 0.22252093395631445, -0.22252093395631434,
+    -0.6234898018587335, -0.900968867902419, -1,
+  ],
+};
+
+function chebyshevAbscissa(k: number, nodes: number): number {
+  return CHEBYSHEV_ABSCISSAE[nodes]?.[k] ?? Math.cos((Math.PI * k) / (nodes - 1));
+}
+
 /** Nodes hold *tropical* longitude, unwrapped against their predecessor so the fit
  * stays continuous across the 360° seam; the ayanamsa is applied per read afterwards. */
 class ChebyshevLongitude {
@@ -36,7 +54,7 @@ class ChebyshevLongitude {
 
     let previous = 0;
     for (let k = 0; k < nodes; k++) {
-      const x = Math.cos((Math.PI * k) / (nodes - 1));
+      const x = chebyshevAbscissa(k, nodes);
       this.nodeX[k] = x;
 
       let y = tropicalAt(this.midMs + this.halfMs * x);

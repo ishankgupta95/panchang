@@ -12,7 +12,8 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// The Sun half is held bit-identical, the Moon only bounded: one of its ten abscissae differs from V8 by an ULP.
+// The Sun half is held bit-identical, the Moon only bounded: moon.ts reaches atan2, where
+// sun.ts does not. Not the abscissae, which cache.go freezes to V8's values.
 
 type cacheGolden struct {
 	Meta         map[string]any       `json:"_meta"`
@@ -196,17 +197,8 @@ func TestChebyshevAbscissae(t *testing.T) {
 					math.Abs(got[k]-tc.v8[k]))
 			}
 		}
-		switch tc.nodes {
-		case sunNodes:
-			if diffs != 0 {
-				t.Errorf("the Sun's %d abscissae must all match V8; %d differ", tc.nodes, diffs)
-			}
-		case moonNodes:
-			if diffs != 1 {
-				t.Errorf("the Moon's %d abscissae: expected exactly 1 to differ from V8 "+
-					"(cos(2π/9), one ULP); %d differ. The exact/bounded split in this file "+
-					"depends on this number", tc.nodes, diffs)
-			}
+		if diffs != 0 {
+			t.Errorf("%d abscissae must all match V8; %d differ", tc.nodes, diffs)
 		}
 		// The block-boundary argument needs x = ±1 to be exactly t1 and t0.
 		if got[0] != 1 || got[tc.nodes-1] != -1 {

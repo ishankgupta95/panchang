@@ -65,16 +65,13 @@ fi
 cat <<'GATES'
 
   gates that must be green on this commit (run them, this script does not):
-      (cd source/ts && npm run test:run)    137 files / 8,773 tests
-      (cd source/ts && npm run typecheck)
-      npx --prefix source/ts tsc -p source/go/parity/tsconfig.json
-      bash ci/tree.sh                    source/ts/src <-> source/go correspondence
-      bash ci/goldens.sh                 34 goldens, must be a no-op
-      cd source/go && gofmt -l . && go vet ./... && go test ./... -race
-      node --test source/go/parity/gate.test.mjs
-      bash ci/parity.sh                  g2 + g3 + full + the table gate
-    Do not run the npm suite and the Go race suite at the same time:
+      bash ci/prerelease.sh
+
+    That is all of them, sequential, and it must stay sequential: the npm suite
+    and the Go race suite cannot run at the same time, because
     tests/perf/perf.test.ts makes ratio assertions and fails under contention.
+    Run it on darwin/arm64: the goldens and the generated series are pinned
+    there and mean nothing on another architecture.
 GATES
 
 printf '\n  the commands, for you to run:\n\n'

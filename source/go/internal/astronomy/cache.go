@@ -24,6 +24,27 @@ const (
 	sunNodes    = 8
 )
 
+// cos(pi*k / (n-1)), frozen to V8's values rather than computed: math.Cos disagrees with
+// Math.cos by an ULP at k=2 of the Moon's grid on arm64 and at more nodes on amd64, and this
+// grid feeds every interpolated longitude. Mirrors the table in source/ts/src/astronomy/cache.ts.
+var chebyshevAbscissae = map[int][]float64{
+	moonNodes: {
+		1, 0.9396926207859084, 0.766044443118978, 0.5000000000000001, 0.17364817766693041,
+		-0.1736481776669303, -0.4999999999999998, -0.7660444431189779, -0.9396926207859083, -1,
+	},
+	sunNodes: {
+		1, 0.9009688679024191, 0.6234898018587336, 0.22252093395631445, -0.22252093395631434,
+		-0.6234898018587335, -0.900968867902419, -1,
+	},
+}
+
+func chebyshevAbscissa(k, nodes int) float64 {
+	if grid, ok := chebyshevAbscissae[nodes]; ok && k < len(grid) {
+		return grid[k]
+	}
+	return math.Cos((jsnum.PI * float64(k)) / float64(nodes-1))
+}
+
 type chebyshevLongitude struct {
 	nodeX  []float64
 	nodeY  []float64
@@ -44,8 +65,7 @@ func newChebyshevLongitude(tropicalAt func(tMs float64) float64, t0Ms, t1Ms floa
 
 	previous := 0.0
 	for k := 0; k < nodes; k++ {
-		// math.Cos, not this package's Cos: one ULP on one of the Moon's ten nodes.
-		x := math.Cos((jsnum.PI * float64(k)) / float64(nodes-1))
+		x := chebyshevAbscissa(k, nodes)
 		c.nodeX[k] = x
 
 		// FMA barrier: a sub-ULP shift becomes a whole millisecond once truncated.

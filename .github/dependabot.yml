@@ -11,9 +11,5 @@ updates:
     schedule:
       interval: monthly
 
-  # The Go module has no third-party dependencies and therefore no go.sum;
-  # this watches the toolchain directive in go.mod.
-  - package-ecosystem: gomod
-    directory: /source/go
-    schedule:
-      interval: monthly
+# No gomod entry: no third-party dependencies, so its only PR would move the `go` directive,
+# which is a deliberate decision about the floor promised to consumers.

@@ -32,6 +32,12 @@ check "no reference to a document that does not ship" \
 check "no vendor name" \
   $(grep -liE 'drik[ ._-]*panchang' "${tracked[@]}" 2>/dev/null)
 
+# CI races only these three packages, so a goroutine outside them would never be raced.
+check "goroutines only in the packages CI races" \
+  $(git ls-files 'source/go/**/*.go' \
+    | grep -vE '^source/go/internal/(store|core|astronomy)/' \
+    | xargs grep -lE '(^|[^[:alnum:]_])go func|sync\.' 2>/dev/null)
+
 if [ "$fails" -gt 0 ]; then
   printf '\nhygiene: %d rule(s) broken\n' "$fails"
   exit 1

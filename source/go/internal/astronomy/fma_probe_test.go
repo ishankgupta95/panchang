@@ -94,10 +94,14 @@ func TestFMABarriersAreLoadBearing(t *testing.T) {
 			diverged++
 		}
 	}
+	// Reported, not asserted: arm64 contracts multiply-add and amd64 below GOAMD64=v3 does
+	// not, so either assertion goes red on a correct build somewhere. A barrier actually
+	// removed from elp.go or vsop87.go still fails TestEphemerisBitIdenticalToTypeScript.
 	if diverged == 0 {
-		t.Errorf("no unbarriered evaluator diverged from the TypeScript: this build does not " +
-			"contract multiply-add, so the barriers in elp.go and vsop87.go cost without buying. " +
-			"Re-measure before removing them: the target, not the source, decides this.")
+		t.Logf("no unbarriered evaluator diverged: this build does not contract multiply-add, " +
+			"so the barriers in elp.go and vsop87.go buy nothing here. They are still load-bearing " +
+			"on a fusing target, so re-measure there before removing them.")
+		return
 	}
 	t.Logf("%d of %d unbarriered evaluators diverge from the TypeScript; the barriers are load-bearing here",
 		diverged, len(fusedProbes))

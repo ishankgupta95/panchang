@@ -121,9 +121,10 @@ is B, and it was going to be B anyway.
 1. Land everything. **The tree must be clean**: `release-check.sh` blocks on
    this, and §3's rule 3 is why.
 2. Bump `package.json` **in the commit being released**, not after it.
-3. Run every gate on that commit. `release-check.sh` prints the list in order;
-   the two that are specific to this port are `bash ci/tree.sh` and
-   `bash ci/parity.sh`.
+3. Run every gate on that commit: `bash ci/prerelease.sh`, on `darwin/arm64`.
+   It is a superset of CI, and the difference is what matters here: the goldens
+   and the two generator reproductions are pinned to that host and no runner can
+   check them.
 4. `bash ci/release-check.sh` must print `preconditions OK`.
 5. Run the commands it printed. It prints them rather than running them so that
    the commands you run are the ones that were checked.

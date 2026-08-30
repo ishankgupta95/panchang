@@ -281,16 +281,11 @@ func TestMeanNodeIsBitIdentical(t *testing.T) {
 			t.Errorf("%s: in the Go accessor map, not in the golden", name)
 			continue
 		}
-		exact := name != "rahuSidereal:true"
-		switch {
-		case exact && got != want:
+		// Only the exact arm is asserted: the true node reaches the platform's sin, so
+		// TestTrueNodeWithinSinBound holds it to a bound instead of to a digest.
+		if exact := name != "rahuSidereal:true"; exact && got != want {
 			t.Errorf("%s: digest %s, golden %s: this path has no transcendental and "+
 				"must be bit-identical over %d instants", name, got, want, samples)
-		case !exact && got == want:
-			t.Errorf("%s: digest matched the mean-node arm's expectation exactly. The "+
-				"true node adds -1.4979*sin(2D-2F) through the platform's sin, which "+
-				"cannot agree with V8's on every one of %d instants: a match here "+
-				"means the correction is not being applied", name, samples)
 		}
 	}
 	t.Logf("mean node bit-identical over %d instants; true node bounded separately", samples)
@@ -336,12 +331,6 @@ func TestTrueNodeWithinSinBound(t *testing.T) {
 	if worstTrue > chartNodeBound {
 		t.Errorf("true node worst |Δ| = %g deg at %s, bound %g", worstTrue,
 			types.Date(worstMs).ISOString(), chartNodeBound)
-	}
-	if differTrue == 0 {
-		t.Errorf("all %d true-node values were bit-identical. Either the sample is "+
-			"too small to reach a disagreeing argument of math.Sin, or the "+
-			"-1.4979*sin(2D-2F) correction is not being applied at all: the digest "+
-			"test distinguishes them", len(g.NodeCases)*2)
 	}
 	t.Logf("true node: %d of %d values differ, worst |Δ| = %g deg (predicted <= 1e-14, "+
 		"bound %g); mean node exact on all %d", differTrue, len(g.NodeCases)*2, worstTrue,

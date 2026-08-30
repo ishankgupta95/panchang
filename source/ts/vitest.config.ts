@@ -5,6 +5,8 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['tests/**/*.test.ts'],
+    // The slowest honest test runs ~156 s, and coverage instrumentation costs ~3.5x on top.
+    testTimeout: 600_000,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],

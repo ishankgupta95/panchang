@@ -39,33 +39,31 @@ writing, measured, and the misses recorded.
 
 ## Running the gates
 
-[`docs/ci.md`](docs/ci.md) is the long form. By hand, in the order they should
+[`docs/ci.md`](docs/ci.md) is the long form. Everything, in the order it should
 run:
 
 ```bash
-bash ci/hygiene.sh
-bash ci/tree.sh
-cd source/go && gofmt -l . && go vet ./... && go test ./... && cd ..
-bash ci/goldens.sh
-node --test source/go/parity/gate.test.mjs
-bash ci/parity.sh
-npm --prefix source/ts run typecheck
-npm --prefix source/ts run lint
-npm --prefix source/ts run test:run
-npx --prefix source/ts tsc -p source/go/parity/tsconfig.json
+bash ci/prerelease.sh
 ```
 
-Two more run in CI but not by default, because they take minutes and rewrite
-generated files:
+That is a superset of what CI runs, and the extra pieces are the point: the
+goldens and the two generator reproductions are pinned to `darwin/arm64` and
+cannot be checked on a runner at all, so this script is the only thing that ever
+sees them. Run it on that host before tagging.
+
+While iterating, the three gates CI actually blocks on:
 
 ```bash
-cd source/go && GEN_FULL=1 go test ./internal/gen/ -run TestGeneratorReproducesCommittedSeries
-bash generate/notes/ephemeris-generate.sh && git diff --exit-code -- source/ts/src/astronomy/series/
+bash ci/hygiene.sh && bash ci/tree.sh
+npm --prefix source/ts run typecheck && npm --prefix source/ts run lint && npm --prefix source/ts run test:run
+cd source/go && gofmt -l . && go vet ./... && go test ./... && cd ..
+bash ci/parity.sh full
 ```
 
 Each language ships a truncated copy of the same coefficient tables, written by
 a generator. Editing a generated file without its generator is silent until
-somebody regenerates and the edit disappears.
+somebody regenerates and the edit disappears, which is why `ci/prerelease.sh`
+regenerates both and diffs.
 
 **Do not run the npm suite alongside anything else.**
 `source/ts/tests/perf/perf.test.ts` makes ratio assertions and fails under CPU

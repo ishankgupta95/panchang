@@ -39,56 +39,54 @@ third item, release lockstep.
 
 ## 1. The workflow, and where it lives
 
-One workflow per concern, so a red check names its own cause:
+One file, `.github/workflows/ci.yml`, with three gate jobs and a release job:
 
-| workflow | what it gates |
-|---|---|
-| `typescript.yml` | the npm package: lint, both typechecks, the suite on Node 22 and 24, coverage, the Hermes syntax check, the build |
-| `go.yml` | the Go module: gofmt, vet, `go test -race`, and a build at go.mod's declared minimum |
-| `parity.yml` | the two implementations agreeing: hygiene, tree correspondence, goldens, the parity gate, generator reproduction |
-| `release.yml` | publishing, which runs the cross-language gates first |
+| job | what it gates | roughly |
+|---|---|---|
+| `typescript` | hygiene, then the npm package: typecheck, lint, the suite, the Hermes syntax check, and that `dist/` packs | 7 min |
+| `go` | the Go module: gofmt, vet, the full suite, and `-race` on the three packages that start goroutines | 6 min |
+| `parity` | the two implementations agreeing, leaf for leaf, inside the bands | 5 min |
+| `release` | publishing, `needs:` all three and only on a push to `master` | 2 min |
 
-Splitting them this way keeps every job name unchanged, and required status
-checks match the job name rather than the workflow or the file, so the split
-moves nothing in branch protection.
+The three gate jobs run concurrently, so a pull request settles in about seven
+minutes.
 
-There is exactly one copy: the draft that used to sit at `ci/workflows/` was
-moved rather than copied, because two copies of a workflow are two things to keep
-in step and only one of them runs.
+**Why one file and not four.** Concurrency groups and `needs:` are both scoped to
+a workflow. With the gates split across `typescript.yml`, `go.yml` and
+`parity.yml`, the release job in a fourth file had no way to depend on them, so a
+merge to `master` ran the three gate workflows *and* a release job that re-ran the
+suite, the tree check, the goldens and the parity gate on the same commit. That
+was about fifteen wasted minutes per merge, and it is the whole reason the release
+job now lives beside the gates it waits on.
 
-Every script it calls lives here and is runnable by hand, which is deliberate:
-the workflow is a thin shim over scripts that can be debugged locally, rather
-than logic that only exists inside a YAML file nobody can run.
+The split into four files was made on the reasoning that a red check should name
+its own cause. Three well-named jobs do that just as well, and the earlier
+arrangement also raised a question this one does not: which lane is this check in.
 
-**It needs `go/` to be tracked in git.** It was written while `go/` was still
-untracked, and every Go job would fail with "no such file" on a checkout without
-it. Not a live hazard (the triggers are `master` only, so nothing runs until
-`go_port` merges and `go/` arrives in the same merge), but the failure mode is
-confusing if it ever does happen.
+Every script the workflow calls lives in `ci/` and is runnable by hand, which is
+deliberate: the workflow is a thin shim over scripts that can be debugged locally,
+rather than logic that only exists inside a YAML file nobody can run.
+
+**Required status checks are the job names**, not the workflow or the file: they
+are now `typescript`, `go` and `parity`. Branch protection has to be updated by
+hand when these change, or every pull request waits forever on checks that no
+longer run.
 
 ### Why it says `master`
 
-`typescript.yml` and `release.yml` were written against `main`, which this repository has
-never had, so neither had ever run. Both were corrected to `master`. Check
-`git ls-remote --heads origin` before changing that line.
+The workflows were originally written against `main`, which this repository has
+never had, so several jobs had never executed at all and carried latent failures
+for months. Check `git ls-remote --heads origin` before changing that line.
 
-`typescript.yml`'s `coverage`, `hermes` and `build-check` jobs had therefore never
-executed. All three were run by hand on 2026-08-29 before being trusted:
-`build-check` and `hermes` passed; `coverage` failed intermittently, because
-`tests/unit/sections.test.ts` holds two timing assertions and one of them
-exceeded vitest's 5 s default under v8 instrumentation. `npm run test:coverage`
-now sets `COVERAGE=1` and every timing test is `it.skipIf(process.env.COVERAGE)`,
-so the reading never measures the instrumentation. The ordinary `test:run` is
-unaffected and still runs all 8,778.
+The first real run, on 2026-08-30, went red on five checks. Four of them were one
+cause: this repository pins bit-exact artifacts on `darwin/arm64` and the runners
+are `linux/amd64`. See §4. The fifth was a `console.warn` in `src/` that
+typechecked only because `@types/node` happened to arrive as an optional peer of
+vitest; it is now a declared devDependency.
 
-`release.yml` publishes the npm package. The Go module is tagged off the same
-commit, so it now runs the tree, goldens and parity gates before publishing:
-shipping one language against a tree where the other disagrees is the failure
-this repository exists to prevent.
-
-**Nothing outside `release.yml` writes.** No tag, no push, no publish;
-`permissions: contents: read` is set explicitly in every workflow rather than
-inherited.
+**Nothing outside the `release` job writes.** `permissions: contents: read` is set
+at the file level, and the release job raises it to `contents: write` and
+`id-token: write` for itself alone.
 
 ---
 
@@ -121,16 +119,28 @@ Exit codes: **0** clean, **1** drift, **2** the checker could not run. CI must
 not collapse 2 into 0; a `docs/porting.md` the parser cannot read would otherwise
 disable the gate in silence.
 
-### 2.2 Goldens: `bash ci/goldens.sh`
+### 2.2 Goldens: `bash ci/goldens.sh`, and why it is not in CI
 
 `source/go/parity/goldens.sh` regenerates all **34** `testdata/goldens/**/*-golden.json` from
 the *TypeScript* tree. Rerunning it must be a no-op; this asserts that by
 checksum, so it works on a tree where `go/` is not yet tracked by git.
 
-It is the cheapest gate that can see a `source/ts/src/` behaviour change at all, because
-the goldens are the TypeScript's own answers. Paired with `go test ./...`
-afterwards it says "the TypeScript moved and the Go did not" for **149 s + 18 s**
-and no 250 MB documents.
+**It runs in `ci/prerelease.sh` on the pinning host, not on a runner.** The first
+real CI run put four goldens on the diff (`jyotish/sadesati`, `shadbala`,
+`upagrahas`, `varshaphala`) while the same script on `darwin/arm64` reported all
+34 byte-identical. The goldens are the TypeScript's own answers, and `src/` calls
+V8's native `Math` in about 124 places outside the hand-rolled trig kernel, so
+they carry the host's last ULP with them. §4 already measured this: TS arm64
+against TS amd64 is 1 leaf and 14 changed values. Whichever host pins them, the
+other one goes red, and no rewrite of the script changes that.
+
+Dropping it from CI is safe by transitivity, because `parity` is still on the
+pull-request path: parity says the TypeScript equals the Go leaf for leaf inside
+the bands, and `go test ./...` says the Go equals all 34 committed goldens, so the
+TypeScript equals the goldens within band for everything the dump samples. And
+`dump.src.ts` does sample all four of the goldens that moved. The byte-exact
+snapshot was the weaker of two overlapping gates and the only one that cannot run
+off the host that pinned it.
 
 A golden that changes is a review event, never a re-pin: predict the delta and
 its cause first (`docs/validation-tiers.md`).
@@ -204,13 +214,29 @@ need for a reduced PR sample or a nightly-only job.
 `internal/calendar` 166.5 s, `internal/jyotish` 107.9 s, `internal/astronomy`
 54.3 s, `internal/core` 42.2 s, `internal/muhurta` 27.5 s.
 
+**So the race run is narrowed, and the narrowing is enforced.** Only
+`internal/store`, `internal/core` and `internal/astronomy` start a goroutine or
+touch `sync`; `internal/calendar` and `internal/jyotish`, the top two rows above,
+start none at all, so racing them instruments code that cannot have a data race.
+CI races the three that can and runs the rest plain. That would be a silent trap
+the first time a goroutine appeared in a fourth package, so `ci/hygiene.sh` has a
+rule that fails if one does.
+
+**CI runs `parity.sh full` only, not all three stages.** g2's document is contained
+in g3's and g3's in full's, full's numeric leaves cover both, and `tables-gate.mjs`
+only runs on `full` anyway, so one stage buys back two thirds of the dump work and
+two of the three 2.5 GB gate passes. `ci/prerelease.sh` still runs all three.
+
 ---
 
 ## 4. Which runner, and what the two hosts actually do
 
-**Both hosts are measured, and `bands.json` carries a pin block for each.** This
-was the open question at G5.2 and it is now closed by measurement rather than by
-argument.
+**The bands are host-independent, the pins are not.** That is why `pins` is keyed
+by `platform/arch`, and why a host with no block is not a failure: the gate
+asserts the bands, prints the block to paste, and says so.
+
+The two hosts were measured at G5.2 and the comparison below is kept because its
+*shape* is the finding, even though the numbers moved on 2026-08-30:
 
 | | darwin/arm64 | linux/x64 |
 |---|---|---|
@@ -222,9 +248,25 @@ argument.
 | worst leaf at g2 | `moon.siderealLongitude` | **`sun.siderealLongitude`** |
 | table gate | 9 identical, 10 lines, worst 6.203371150093062e-15 | **identical in every respect** |
 
-So: **the bands are host-independent, the pins are not.** That is why `pins`
-is keyed by `platform/arch`, and why a host with no block is not a failure: the
-gate asserts the bands, prints the block to paste, and says so.
+### The 2026-08-30 re-pin, and its cause
+
+Freezing the Chebyshev abscissae (below) moved the Go side and left the
+TypeScript side exactly where it was. Predicted before the change, from the fact
+that the Go Moon abscissa at k=2 sat one ULP *above* V8's and the freeze moves it
+onto V8's: the Go dump's Moon leaves shift, the TypeScript dump does not move at
+all, and the disagreement tightens rather than loosens. Measured after:
+
+| stage | Go bytes | changed values | worst \|Δ\| |
+|---|---|---|---|
+| g2 | 250723471 → 250723499 | 3014 → **2264** | 1.7053e-13 → **1.1369e-13** |
+| g3 | 251330044 → 251330072 | 3796 → **3046** | unchanged |
+| full | 255539442 → 255539455 | 3896 → **3141** | unchanged |
+
+TypeScript document bytes did not move at any stage, all 34 goldens stayed
+byte-identical, and **no band was breached at any stage**. g2's worst leaf stayed
+`moon.siderealLongitude`, which is the leaf the frozen Moon abscissa feeds, so the
+prediction and the measurement agree on the mechanism and not merely on the sign.
+The two implementations now agree on about 750 more values per stage than before.
 
 **The cause is the platform, not the toolchain.** Measured by running the
 TypeScript dump on linux under node **v24.4.1**, the exact version darwin uses:
@@ -249,30 +291,64 @@ obvious suspect (gc contracts `a + b*c` on arm64 and not on amd64 at
 one a naive reading of that predicts. Left as a follow-up rather than guessed at
 here.
 
-**The runner.** The blocking `parity` job runs on `ubuntu-latest`, which is the
-host the linux pins came from. One caveat, stated because it is the difference
-between a measurement and an assumption: those pins were taken under Docker with
-`--platform linux/amd64` on Apple silicon, i.e. **Rosetta-translated x86-64**.
-Translation preserves IEEE semantics, so native amd64 should agree, but no
-native run has been made. If the first real run fails on a PIN and not on a
-BAND, the gate prints the exact JSON to paste; re-pin from that run and record
-the measurement.
+**The runner.** The blocking `parity` job runs on `ubuntu-latest`. The `linux/x64`
+pin block above was taken under Docker with `--platform linux/amd64` on Apple
+silicon, that is, **Rosetta-translated x86-64**, and no native run was ever made.
+
+**Both of those blocks are now stale, and the `linux/x64` one has been deleted.**
+Two things moved underneath them on 2026-08-30. First, the Chebyshev abscissae in
+`cache.ts` and `cache.go` are now frozen to V8's literal values rather than
+computed through each platform's cosine (see below), which shifts the Go side's
+Moon leaves by an ULP on every host. Second, deleting a stale block is better than
+carrying it: `gate.mjs` reads `spec.pins[HOST] ?? null` and treats a missing host
+as bands-only, printing the exact JSON to paste, so a host with no block harvests
+its own replacement on a green run instead of failing on a pin nobody has
+re-measured.
+
+**The abscissae freeze closed the follow-up this section left open.** The lead
+above was right that the direction was surprising and that no site had been named.
+The site was not an FMA barrier at all: `ChebyshevLongitude`'s constructor built
+its interpolation grid with `Math.cos` on one side and `math.Cos` on the other,
+and those disagree by one ULP at k=2 of the Moon's ten-node grid on arm64, and at
+more nodes on amd64. That one grid feeds every interpolated longitude, which is
+why the whole cached path moved between architectures and why
+`sun.siderealLongitude` matched exactly on arm64 and differed on amd64. Both
+languages now read the same eighteen frozen constants. Measured after the freeze:
+`GOARCH=amd64` reproduces `TestLongitudeCacheBitIdenticalToTypeScript` with 4 of 8
+accessors bit-identical, the same count as arm64, where before it failed outright.
+The Moon half stays merely bounded for a structural reason that no freeze can fix:
+`moon.ts` reaches `atan2` and `sun.ts` does not.
 
 ## 5. Running it all by hand
 
+Everything, in the order it should run:
+
 ```bash
-bash ci/tree.sh                                   # 0.05 s
-cd source/go && gofmt -l . && go vet ./... && go test ./... -race && cd ..
-bash ci/goldens.sh                                # 149 s
-node --test source/go/parity/gate.test.mjs                  # 0.6 s
-bash ci/parity.sh                                 # 44 s
-npm run test:run                                     # 57 s, NOT while the Go race suite runs
-npm run typecheck
-npx --prefix source/ts tsc -p source/go/parity/tsconfig.json
+bash ci/prerelease.sh
 ```
 
-`source/ts/tests/perf/perf.test.ts` makes ratio assertions and its own docblock puts the
-contention failure rate at "half of all full-suite runs". Running the npm suite
-alongside the Go race suite cost the G4.6 session a false red and cost this one
-a second one before the rule was re-read; the draft workflow keeps them in
-separate jobs, which is the same rule expressed as scheduling.
+That is also the release gate, and it is strictly sequential on purpose.
+`source/ts/tests/perf/perf.test.ts` makes ratio assertions and its own docblock
+puts the contention failure rate at "half of all full-suite runs". Running the npm
+suite alongside the Go race suite cost the G4.6 session a false red and cost the
+2026-08-24 session a second one before the rule was re-read. In CI the same rule is
+expressed as scheduling, by keeping `typescript` and `go` in separate jobs.
+
+Three of the steps in that script are there because CI cannot run them: `goldens.sh`
+and the two generator reproductions are pinned to `darwin/arm64` (§2.2), and
+coverage re-runs the whole suite a third time on the same commit for a threshold
+that has never once caught a regression. Run `ci/prerelease.sh` on the pinning host
+or its answer means nothing; it prints a warning if you do not.
+
+The individual pieces, when a single one is what you want:
+
+```bash
+bash ci/hygiene.sh                                          # 1 s
+bash ci/tree.sh                                             # 0.05 s
+bash ci/goldens.sh                                          # 149 s, pinning host only
+node --test source/go/parity/gate.test.mjs                  # 0.6 s
+bash ci/parity.sh                                           # 44 s, all stages
+npm --prefix source/ts run typecheck                        # covers src, tests and the parity harness
+npm --prefix source/ts run test:run                         # 57 s, NOT while the Go race suite runs
+cd source/go && gofmt -l . && go vet ./... && go test ./... -race
+```
