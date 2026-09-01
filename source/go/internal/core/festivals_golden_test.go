@@ -10,8 +10,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// The sweep pins the DISPATCH: each grid varies only the two fields one matcher arm reads.
-
 type festivalGoldenCase struct {
 	Label     string `json:"label"`
 	Festivals []struct {
@@ -186,6 +184,76 @@ func ctxForLabel(t *testing.T, label string) *FestivalComputeContext {
 			t.Fatalf("label %q: unknown new-year flag %q", label, p[2])
 		}
 		return c
+	case "kl":
+		c := &FestivalComputeContext{
+			ChandraMasaIndex: 1, TithiIndex: 28, NakshatraIndex: 26, VaraIndex: 3, SolarMasaIndex: 11,
+		}
+		if p[1] != "x" {
+			c.TithiByRuleStart = map[FestivalDateRule]int{RuleAparahna: num(p[1])}
+		}
+		if p[2] != "x" {
+			c.TithiByRule = map[FestivalDateRule]int{RuleAparahna: num(p[2])}
+		}
+		if p[3] != "x" {
+			c.PriorDayTithiByRule = map[FestivalDateRule]int{RuleAparahna: num(p[3])}
+		}
+		if p[4] != "x" {
+			next := map[FestivalDateRule]int{RuleAparahna: num(p[4])}
+			c.NextDayTithiByRule = func() (map[FestivalDateRule]int, map[FestivalDateRule]int) {
+				return map[FestivalDateRule]int{}, next
+			}
+		}
+		return c
+	case "nku":
+		c := &FestivalComputeContext{
+			ChandraMasaIndex: num(p[1]), TithiIndex: num(p[2]), NakshatraIndex: num(p[3]),
+			VaraIndex: 3, SolarMasaIndex: 11,
+		}
+		if p[4] != "x" {
+			c.PriorDayNakshatraIndex, c.HasPriorDayNakshatraIndex = num(p[4]), true
+		}
+		switch p[5] {
+		case "x":
+		case "has":
+			c.RemainingPakshaSunriseNakshatras = func() map[int]bool { return map[int]bool{21: true, 0: true} }
+		case "no":
+			c.RemainingPakshaSunriseNakshatras = func() map[int]bool { return map[int]bool{0: true} }
+		default:
+			t.Fatalf("label %q: unknown paksha set %q", label, p[5])
+		}
+		return c
+	case "nkk":
+		c := &FestivalComputeContext{
+			ChandraMasaIndex: num(p[1]), TithiIndex: num(p[2]), NakshatraIndex: 26,
+			VaraIndex: 3, SolarMasaIndex: 11,
+		}
+		if p[3] != "x" {
+			c.NakshatraByRuleStart = map[FestivalDateRule]int{RuleAparahna: num(p[3])}
+		}
+		if p[4] != "x" {
+			c.NakshatraByRule = map[FestivalDateRule]int{RuleAparahna: num(p[4])}
+		}
+		if p[5] != "x" {
+			next := map[FestivalDateRule]int{RuleAparahna: num(p[5])}
+			c.NextDayNakshatraByRule = func() (map[FestivalDateRule]int, map[FestivalDateRule]int) {
+				return map[FestivalDateRule]int{}, next
+			}
+		}
+		return c
+	case "ks":
+		c := &FestivalComputeContext{
+			TithiIndex: 20, ChandraMasaIndex: num(p[1]), NakshatraIndex: 26, VaraIndex: 3,
+			SolarMasaIndex: 11, KshayaTithiIndices: map[int]bool{},
+		}
+		if p[2] != "x" {
+			for _, s := range strings.Split(p[2], "-") {
+				c.KshayaTithiIndices[num(s)] = true
+			}
+		}
+		if p[3] != "x" {
+			c.NextDayMasaIndex, c.NextDayIsAdhika, c.HasNextDayMasa = num(p[3]), p[4] == "A", true
+		}
+		return c
 	case "extra":
 		switch p[1] {
 		case "krittika-in-day":
@@ -307,7 +375,6 @@ func TestFestivalRegistryShape(t *testing.T) {
 		}
 	}
 
-	// Entry 0 carries masa 0 AND tithi 0: zero-as-absence would file it nowhere.
 	if festivalRegistry[0].Key != "ugadi" || festivalRegistry[0].Masa != 0 ||
 		festivalRegistry[0].Tithi != 0 || festivalRegistry[0].Kind != KindMasaTithi {
 		t.Errorf("registry[0] is %+v; D8's worked example is {ugadi, masa 0, tithi 0, KindMasaTithi}",

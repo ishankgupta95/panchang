@@ -6,7 +6,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
 )
 
-// The weekday × nakshatra cycle of Muhurta-chintamani Ch. 4.
 func ComputeAnandadiYoga(varaIndex, nakshatraIndex int, lang types.Language) (types.AnandadiYogaInfo, error) {
 	if err := utils.AssertVaraIndex(varaIndex, ""); err != nil {
 		return types.AnandadiYogaInfo{}, err

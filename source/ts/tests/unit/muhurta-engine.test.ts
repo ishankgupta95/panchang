@@ -34,7 +34,6 @@ describe('scoreMuhurta: basic shape', () => {
 
 describe('scoreMuhurta: hard exclusions', () => {
   it('excludeBhadra: returns score 0 on a Bhadra day', () => {
-    // Bhadra is Vishti karana, which recurs about every 3.6 days.
     const rule: MuhurtaRule = { occasion: 'test', excludeBhadra: true };
     let foundBhadra = false;
     for (let day = 1; day <= 14; day++) {
@@ -52,8 +51,6 @@ describe('scoreMuhurta: hard exclusions', () => {
     expect(foundBhadra).toBe(true);
   });
 
-  // Vishti sits at fixed positions in the tithi cycle, so a whole-day Bhadra veto
-  // removes seven tithis outright; `penalize` keeps such a day scorable.
   describe('bhadra mode', () => {
     const bhadraDay = (() => {
       for (let day = 1; day <= 20; day++) {
@@ -72,7 +69,6 @@ describe('scoreMuhurta: hard exclusions', () => {
 
     it("'penalize' subtracts 15 but leaves the day scorable", () => {
       const r = scoreMuhurta(bhadraDay, DELHI, { occasion: 't', bhadra: 'penalize' }, { timezone: TZ });
-      // 50 neutral − 15 bhadra + 5 sarvartha_siddhi.
       expect(r.score).toBe(40);
       expect(r.factors).toContainEqual({ code: 'bhadra', axis: 'karana', delta: -15 });
       expect(r.factors).toContainEqual(
@@ -99,15 +95,12 @@ describe('scoreMuhurta: hard exclusions', () => {
         { occasion: 't', excludeBhadra: true, bhadra: 'penalize' },
         { timezone: TZ },
       );
-      // 40 = 50 − 15 bhadra + 5 sarvartha_siddhi.
       expect(r.score).toBe(40);
       expect(r.passes).toBe(false);
       expect(r.factors).toContainEqual({ code: 'bhadra', axis: 'karana', delta: -15 });
     });
 
     it('the seven Bhadra-locked tithis are scorable again under the stock rules', () => {
-      // Shukla Chaturthi/Ekadashi/Chaturdashi and Krishna Tritiya/Shashthi/
-      // Dashami/Trayodashi always coincide with Bhadra; Vivah lists two of them.
       const days = findAuspiciousDates(
         vivahRule,
         new Date(Date.UTC(2025, 11, 31, 18, 30)),
@@ -165,15 +158,12 @@ describe('scoreMuhurta: soft scoring', () => {
     const rule: MuhurtaRule = {
       occasion: 'test',
       auspiciousVaras: [4], // Thursday only
-      // The Vara x Tithi layer is on by default and would add its own points.
       varaTithiYogas: false,
     };
-    // 2026-04-16 is a Thursday.
     const thursday = scoreMuhurta(new Date('2026-04-16'), DELHI, rule, { timezone: TZ });
     expect(thursday.score).toBeGreaterThan(50);
     expect(thursday.reasons.some((r) => r.includes('auspicious vara'))).toBe(true);
 
-    // 2026-04-15 is a Wednesday: not auspicious here, and not penalised either.
     const wednesday = scoreMuhurta(new Date('2026-04-15'), DELHI, rule, { timezone: TZ });
     expect(wednesday.score).toBe(50);
   });
@@ -183,7 +173,6 @@ describe('scoreMuhurta: soft scoring', () => {
       occasion: 'test',
       inauspiciousVaras: [2], // Tuesday only
     };
-    // 2026-04-14 is a Tuesday.
     const tuesday = scoreMuhurta(new Date('2026-04-14'), DELHI, rule, { timezone: TZ });
     expect(tuesday.score).toBeLessThan(50);
     expect(tuesday.reasons.some((r) => r.includes('inauspicious vara'))).toBe(true);
@@ -275,7 +264,6 @@ describe('findAuspiciousDates', () => {
 });
 
 describe('Vivah rule: scoring sanity', () => {
-  // Outside Adhik Jyeshtha (17 May to 15 Jun 2026), which Vivah excludes whole.
   const dates = findAuspiciousDates(
     vivahRule,
     new Date('2026-04-21'),
@@ -287,15 +275,12 @@ describe('Vivah rule: scoring sanity', () => {
   it('scoring 2026-04-21 through 2026-05-04 produces some passes and some fails', () => {
     const passes = dates.filter((d) => d.passes);
     const fails = dates.filter((d) => !d.passes);
-    // Any 14-day window holds a Bhadra and a Ganda-Mula day, both Vivah rejects.
     expect(passes.length).toBeGreaterThan(0);
     expect(fails.length).toBeGreaterThan(0);
   });
 });
 
 describe('scoreMuhurta ≡ computeAuspiciousDatesInRange: single-day agreement (MU-1)', () => {
-  // The ~6.4-day stride spreads the samples across seasons, so the vara ×
-  // nakshatra yogas that can split the two entry points are actually hit.
   it('66 spread days: identical score, passes and factor multiset', () => {
     const start = Date.UTC(2026, 3, 15, 12);
     const strideMs = Math.round(6.4 * 86_400_000);

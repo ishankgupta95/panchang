@@ -48,8 +48,6 @@ describe('Varjyam wiring: daily panchang', () => {
     }
   });
 
-  // The owning nakshatra is the one active at the window's midpoint, which on a
-  // transition day is not the sunrise nakshatra.
   it('every window spans exactly 4 ghatikas of its own nakshatra (elastic width)', () => {
     const cache = new LongitudeCache('lahiri');
     const getMoon = (d: Date) => cache.getMoon(d);
@@ -65,7 +63,6 @@ describe('Varjyam wiring: daily panchang', () => {
 
         const widthMs = v.end.getTime() - v.start.getTime();
         expect(Math.abs(widthMs - 4 * ghatikaMs)).toBeLessThan(5000);
-        // 4 ghatikas of a 21-27 h nakshatra is 84-108 min.
         expect(widthMs / 60_000).toBeGreaterThan(84);
         expect(widthMs / 60_000).toBeLessThan(110);
         checked++;
@@ -82,7 +79,6 @@ describe('Varjyam wiring: daily panchang', () => {
       for (let i = 1; i < ws.length; i++) {
         expect(ws[i]!.start.getTime()).toBeGreaterThanOrEqual(ws[i - 1]!.start.getTime());
       }
-      // Ends are unclamped and may run past next sunrise.
       const sunriseMs = r.sun.rise.getTime();
       const nextSunriseMs = r.sun.nextRise.getTime();
       for (const w of ws) {
@@ -110,8 +106,6 @@ describe('Varjyam wiring: daily panchang', () => {
         const second = VARJYAM_SECOND_OFFSET_GHATIKAS[nakIdx];
         if (second !== undefined) offsets.push(second);
 
-        // 30 s of nakshatra-start error plus ~1 s per elapsed ghatika, and the
-        // offsets run to 56.
         const bestErr = Math.min(...offsets.map(
           (off) => Math.abs(w.start.getTime() - (nak.start + off * ghatikaMs)),
         ));
@@ -132,7 +126,6 @@ describe('Varjyam wiring: daily panchang', () => {
       if (n >= 1) daysWithOne++;
       if (n >= 2) daysWithTwo++;
     }
-    // The reference almanac prints a window almost daily.
     expect(daysWithOne).toBeGreaterThan(45);
     expect(daysWithTwo).toBeGreaterThan(2);
   });

@@ -1,5 +1,3 @@
-// Panchaka runs over the last 5 nakshatras (Dhanishtha 3rd pada through
-// Revati), i.e. sidereal Moon longitude >= 300°.
 
 import { describe, it, expect } from 'vitest';
 import { computePanchaka } from '../../src/core/panchaka';

@@ -153,7 +153,6 @@ describe('computeLagna: known reference values (locked-in regression checks)', (
       { latitude: 23.78, longitude: 72.63 },
       'lahiri',
     );
-    // Published charts give Modi's lagna as Vrischika.
     expect(lagna.rashi.index).toBe(7);
   });
 

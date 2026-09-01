@@ -31,7 +31,6 @@ export function getTropicalSunLongitude(date: Date): number {
 
 export function getSunPosition(date: Date): SunPosition {
   const ttDays = ttDaysSinceJ2000(date);
-  // Coarse radius only decides *when* the light left; the full one is reported.
   const retarded = ttDays - (earthRadiusCoarse(ttDays) * AU_KM) / KM_PER_LIGHT_DAY;
   const lon = heliocentricLongitude('earth', retarded) * RAD_TO_DEG + 180;
   const lat = -heliocentricLatitude('earth', retarded) * RAD_TO_DEG;

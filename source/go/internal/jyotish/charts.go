@@ -110,7 +110,6 @@ func navamsaLongitude(siderealLon float64) float64 {
 	if navIdxInRashi > 8 {
 		navIdxInRashi = 8
 	}
-	// Movable (rashi%3 == 0) starts at its own sign, fixed (1) at the 9th, dual at the 5th.
 	startOffset := 4
 	switch rashi % 3 {
 	case 0:

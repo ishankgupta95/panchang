@@ -1,4 +1,3 @@
-// Package store holds the process-global caches; sharing is safe only because every value is a pure function of its key.
 package store
 
 import (
@@ -6,7 +5,6 @@ import (
 	"unsafe"
 )
 
-// Fixed, not GOMAXPROCS: a host-dependent shape gives host-dependent eviction.
 const DefaultStripes = 16
 
 const cacheLine = 64
@@ -119,7 +117,6 @@ func (s *Store[K, V]) Cap() int { return s.capacity }
 
 func (s *Store[K, V]) ShardCap() int { return s.shardCap }
 
-// splitmix64 finaliser.
 func HashInt64(k int64) uint64 {
 	x := uint64(k)
 	x ^= x >> 30
@@ -130,7 +127,6 @@ func HashInt64(k int64) uint64 {
 	return x
 }
 
-// FNV-1a.
 func HashString(s string) uint64 {
 	const (
 		offset64 = 14695981039346656037

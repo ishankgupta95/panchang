@@ -18,7 +18,6 @@ type Fixture = {
   };
 };
 
-// Use noon UTC so getDate() returns the intended calendar day in any system timezone
 function dateAtNoonUtc(dateStr: string): Date {
   const [y, m, d] = dateStr.split('-').map(Number) as [number, number, number];
   return new Date(Date.UTC(y, m - 1, d, 12, 0, 0, 0));
@@ -56,7 +55,6 @@ function runFixtureSuite(fixtures: Fixture[]) {
         expect(result.inauspicious.rahuKalam.start.getTime()).toBeLessThan(result.inauspicious.rahuKalam.end.getTime());
       });
 
-      // Reference-almanac convention: Abhijit is dropped on Wednesday (Buddha-vara).
       it('abhijitMuhurta is null on Wednesday, ordered otherwise', () => {
         if (expected.varaEnglish === 'Wednesday') {
           expect(result.muhurtas.abhijit).toBeNull();
@@ -75,8 +73,6 @@ function runFixtureSuite(fixtures: Fixture[]) {
         expect(result.periods.gowri.day).toHaveLength(8);
         expect(result.periods.gowri.night).toHaveLength(8);
       });
-
-
     });
   }
 }
@@ -107,7 +103,6 @@ describe('getDailyPanchang: regional Sankranti (Phase 24-1)', () => {
     const r = getDailyPanchang(makarDay, CHENNAI, { timezone: 330, region: 'tamil-nadu' })!;
     const names = r.festivals.map(f => f.name);
     expect(names).toContain('Pongal');
-    // Makar Sankranti is pan-Indian: it emits under every region.
     expect(names).toContain('Makar Sankranti');
     expect(names).not.toContain('Ayyappa Makara Jyothi');
     expect(names).not.toContain('Magh Bihu');

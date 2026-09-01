@@ -73,7 +73,6 @@ export function buildMuhurtaTable(opts: BuildMuhurtaTableOptions): MuhurtaFile {
   } = opts;
 
   validateLocation(location);
-  // Guards JavaScript callers, who would otherwise fault deep inside the scorer.
   if (rule === null || typeof rule !== 'object' || typeof rule.occasion !== 'string') {
     throw new TypeError(
       'buildMuhurtaTable: `rule` is required and must be a MuhurtaRule with an `occasion` string',

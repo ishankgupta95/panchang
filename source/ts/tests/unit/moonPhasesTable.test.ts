@@ -9,7 +9,6 @@ import { getMoonPhasesInRange } from '../../src/astronomy/moonPhase';
 
 const IST_OFFSET = 330;
 const PHASES = ['new', 'first_quarter', 'full', 'last_quarter'] as const;
-// The library ships no table, so the suite builds the one it reads.
 const START_YEAR = 2025;
 const END_YEAR = 2027;
 const SAMPLE_YEAR = START_YEAR;
@@ -49,7 +48,6 @@ describe('Moon-phases table reader', () => {
         const dates = days!.map(d => d.date);
         expect(dates).toEqual([...dates].sort());
         const flat = days!.flatMap(d => d.phases.map(p => ({ ...p, date: d.date })));
-        // ~12.37 lunations/year x 4 quarters is ~49.5 events.
         expect(flat.length).toBeGreaterThanOrEqual(48);
         expect(flat.length).toBeLessThanOrEqual(51);
         for (const p of flat) {
@@ -111,7 +109,6 @@ describe('Moon-phases table reader', () => {
 
 describe('buildMoonPhasesTable (other timezones)', () => {
   it('maps the same phase instant onto different local dates per timezone', () => {
-    // The new moon at 2026-01-18T19:52Z is 2026-01-18 in UTC but 2026-01-19 in IST.
     const utc = buildMoonPhasesTable({ timezoneOffsetMinutes: 0, startYear: 2026, endYear: 2026, languages: ['en'] });
     const ist = buildMoonPhasesTable({ timezoneOffsetMinutes: IST_OFFSET, startYear: 2026, endYear: 2026, languages: ['en'] });
 

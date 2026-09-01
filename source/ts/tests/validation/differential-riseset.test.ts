@@ -64,18 +64,15 @@ describe('differential: interpolated rise/set vs the direct solver', () => {
         countMismatches,
         'the interpolated scan found a different number of events than the exhaustive one',
       ).toBe(0);
-      // Measured worst below 65 degrees: Sun 1.717 ms, Moon 4.005 ms.
       expect(
         worstTemperateMs,
         `worst |Δt| below 65° was ${worstTemperateMs.toFixed(3)} ms`,
       ).toBeLessThan(10);
-      // Measured worst with the polar sites: Sun 3.319 ms, Moon 28.953 ms.
       expect(worstMs, `worst |Δt| ${worstMs.toFixed(3)} ms at ${worstAt}`).toBeLessThan(60);
     }, 300_000);
   }
 
   it('the track cache cannot change an answer, only the work to get one', () => {
-    // Sound only because a track is a pure function of (body, day).
     const location = LOCATIONS[1]!;
     const dayIndex = Math.floor(Date.UTC(2025, 3, 17) / DAY_MS);
 

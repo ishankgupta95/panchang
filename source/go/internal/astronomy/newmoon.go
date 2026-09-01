@@ -4,7 +4,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// The seed lands within 0.96 d of the true new moon over 1900-2100.
 const seedHalfWindowDays = 2.5
 
 type NewMoonBounds struct {
@@ -12,13 +11,11 @@ type NewMoonBounds struct {
 	NextMs int64
 }
 
-// Actual instants, not mean motion: mean motion flickers Adhika Jyeshtha / Ashadha near aphelion.
 func BoundingNewMoons(ctx *EphemerisCtx, refMs int64) (NewMoonBounds, error) {
 	elapsedFraction := MoonSunElongation(ctx, refMs) / 360
 	seedMs := float64(refMs) - float64(elapsedFraction*SynodicMonthDays*dayMS)
 
 	foundMs, foundOK := newMoonNear(ctx, seedMs)
-	// `found` can land 1-2 ms after `ref` when `ref` is itself a rounded new-moon instant.
 	prevMs, prevOK := foundMs, foundOK
 	if foundOK && foundMs > refMs && foundMs-refMs <= PhaseAgreementMS {
 		prevMs = refMs
@@ -69,7 +66,6 @@ func advanceToNextNewMoon(ctx *EphemerisCtx, afterMs int64) (int64, error) {
 	return event, nil
 }
 
-// Abstains within PhaseAgreementMS of an endpoint, where ±1 ms would decide a whole month.
 type NewMoonCache struct {
 	entries []NewMoonBounds
 

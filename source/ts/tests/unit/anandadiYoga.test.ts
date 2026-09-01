@@ -1,6 +1,3 @@
-// Muhurta-chintamani Ch. 4: yoga[Sunday][Ashwini] = Ananda, advancing +1 yoga
-// per nakshatra and +4 nakshatras per weekday; the 28-yoga cycle is reduced to
-// 27 nakshatras by eliding Abhijit.
 
 import { describe, it, expect } from 'vitest';
 import { computeAnandadiYoga } from '../../src/core/anandadiYoga';
@@ -12,8 +9,6 @@ import {
 } from '../../src/utils/constants';
 
 describe('computeAnandadiYoga: 28 fixtures (one per yoga)', () => {
-  // Musala (21) falls on Abhijit in the Sunday row and is unreachable there, so
-  // its fixture lives on Monday × Purva Bhadrapada.
   const fixtures: Array<{
     yoga: number;
     vara: number;
@@ -81,7 +76,6 @@ describe('computeAnandadiYoga: phasing per weekday', () => {
     expect(computeAnandadiYoga(5, 20).index).toBe(0);
   });
   it('Saturday → Ananda at Shatabhisha (23)', () => {
-    // 28-naks index 24 → 27-naks index 23 (skipping Abhijit at 28-naks 21).
     expect(computeAnandadiYoga(6, 23).index).toBe(0);
   });
 });
@@ -120,7 +114,6 @@ describe('computeAnandadiYoga: invariants', () => {
     for (const q of Object.values(qualityByYoga)) {
       counts[q as keyof typeof counts]++;
     }
-    // The reference almanac makes Matanga (23) and Charma (25) auspicious.
     expect(counts.auspicious).toBe(16);
     expect(counts.inauspicious).toBe(12);
     expect(counts.neutral).toBe(0);
@@ -150,7 +143,6 @@ describe('ANANDADI_TABLE / ANANDADI_QUALITY: structural invariants', () => {
   });
 
   it('matches reference-almanac anchor rows (regression for the build formula)', () => {
-    // The four anchor cells the reference almanac publishes.
     expect(ANANDADI_TABLE[0]![0]).toBe(0);
     expect(ANANDADI_TABLE[0]![26]).toBe(27);
     expect(ANANDADI_TABLE[1]![4]).toBe(0);

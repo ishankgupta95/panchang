@@ -11,7 +11,6 @@ var marsOwnRashis = [12]bool{0: true, 7: true}
 
 const marsExaltedRashi = 9
 
-// House numbers land in published strings: jsnum.FormatInt, never strconv.
 func ComputeMangalDosha(chart *types.BirthChart) types.MangalDoshaInfo {
 	mars := chart.ByPlanet.Mars
 	moon := chart.ByPlanet.Moon
@@ -77,7 +76,6 @@ func ComputeMangalDosha(chart *types.BirthChart) types.MangalDoshaInfo {
 			afflicted = false
 		}
 
-		// Jupiter's whole-sign aspects fall on the 5th, 7th and 9th rashis from it.
 		marsFromJupiter := ((marsRashi-jupiter.Rashi.Index+12)%12 + 1)
 		if marsFromJupiter == 5 || marsFromJupiter == 7 || marsFromJupiter == 9 {
 			cancellations = append(cancellations,
@@ -130,7 +128,6 @@ func ComputeMangalCompatibility(boyChart, girlChart *types.BirthChart) types.Man
 	}
 }
 
-// Partial (one graha outside the arc) is informational; the reference almanac lists no partial Kaal Sarpa.
 func ComputeKaalSarp(chart *types.BirthChart) types.KaalSarpDoshaInfo {
 	rahu := chart.ByPlanet.Rahu
 	ketu := chart.ByPlanet.Ketu
@@ -143,7 +140,6 @@ func ComputeKaalSarp(chart *types.BirthChart) types.KaalSarpDoshaInfo {
 		}
 		total++
 		d := jsnum.Mod(jsnum.Mod(p.Longitude-rahuLon, 360)+360, 360) // jsnum.Mod, not %; double mod deliberate
-		// 0 and 180 are conjunct a node, so in neither arc.
 		if d > 0 && d < 180 {
 			inForward++
 		} else if d > 180 && d < 360 {
@@ -169,7 +165,6 @@ func ComputeKaalSarp(chart *types.BirthChart) types.KaalSarpDoshaInfo {
 	}
 }
 
-// The reference almanac publishes no calculator; these four rules are the pandit-consensus subset.
 func ComputePitruDosha(chart *types.BirthChart) types.PitruDoshaInfo {
 	sun := chart.ByPlanet.Sun
 	rahu := chart.ByPlanet.Rahu

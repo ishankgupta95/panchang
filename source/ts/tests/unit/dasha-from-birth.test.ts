@@ -41,8 +41,6 @@ describe('computeVimshottariDashaFromBirth', () => {
   });
 
   it('returns exactly 9 mahadashas spanning between 100 and 120 years', () => {
-    // The first mahadasha is only the balance of the birth-moment dasha, so the
-    // total is 120y minus the elapsed part: 100y at worst (Venus almost spent).
     const r = computeVimshottariDashaFromBirth(birth);
     expect(r.mahaDashas).toHaveLength(9);
     const totalMs = r.mahaDashas[8]!.endDate.getTime() - r.mahaDashas[0]!.startDate.getTime();
@@ -59,7 +57,6 @@ describe('computeVimshottariDashaFromBirth', () => {
         (acc, ad) => acc + (ad.endDate.getTime() - ad.startDate.getTime()),
         0,
       );
-      // Floating-point accumulation across 9 year-scale intervals ⇒ up to a few ms.
       expect(Math.abs(adSum - mdMs)).toBeLessThan(10);
     }
   });

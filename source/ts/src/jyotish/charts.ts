@@ -93,7 +93,6 @@ function navamsaLongitude(siderealLon: number): number {
   const rashi = Math.floor(siderealLon / 30);
   const degInRashi = siderealLon - rashi * 30;
   const navIdxInRashi = Math.min(8, Math.floor(degInRashi / NAV_SPAN));
-  // Movable starts at its own sign, fixed at the 9th from it, dual at the 5th.
   const startOffset = rashi % 3 === 0 ? 0 : rashi % 3 === 1 ? 8 : 4;
   const navRashi = (rashi + startOffset + navIdxInRashi) % 12;
   const degInNavRashi = ((degInRashi % NAV_SPAN) * 30) / NAV_SPAN;

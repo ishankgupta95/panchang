@@ -5,8 +5,6 @@ import (
 	"fmt"
 )
 
-// The 27 Tajik Sahams: *Tajika Neelakanthi*; B.V. Raman, *Annual Horoscope* ch. 5.
-
 type SahamName int
 
 const (
@@ -89,7 +87,6 @@ func (n *SahamName) UnmarshalJSON(b []byte) error {
 type SahamOperand int
 
 const (
-	// same order as types.AllVisibleGrahas
 	OperandSun SahamOperand = iota
 	OperandMoon
 	OperandMars
@@ -123,7 +120,6 @@ type SahamFormula struct {
 	Swap    bool         // X and Y exchange for night birth; rows using Punya inherit its swap
 }
 
-// Order is load-bearing: Yasas, Mitra and Susha must follow Punya.
 var SahamFormulas = [SahamNameCount]SahamFormula{
 	{SahamPunya, OperandMoon, OperandSun, OperandAsc, true},              // merit
 	{SahamVidya, OperandSun, OperandMoon, OperandAsc, true},              // learning

@@ -29,7 +29,6 @@ export function computeChandraMasa(
   const amantaIndex = (solarMonthAtPrev + 1) % 12;
   const amantaName = nameFn(amantaIndex, isAdhika);
 
-  // An Adhika month has no Sankranti, so its Purnimanta name does NOT advance.
   const isKrishnaPaksha = elongation >= 180;
   const purnimantaIndex =
     isKrishnaPaksha && !isAdhika ? (amantaIndex + 1) % 12 : amantaIndex;

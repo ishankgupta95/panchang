@@ -116,7 +116,6 @@ func kpLoc(g kpGolden, name string) types.GeoLocation {
 			return types.GeoLocation{Latitude: l.Latitude, Longitude: l.Longitude}
 		}
 	}
-	// The KP chart block uses the shared chart-event locations, not this golden's.
 	switch name {
 	case "pune":
 		return types.GeoLocation{Latitude: 18.5204, Longitude: 73.8567}
@@ -599,7 +598,6 @@ func TestTithiPraveshaConstantsAreTwoStepped(t *testing.T) {
 	t.Logf("moonSunDiffDegPerDay %.20g, synodicMonthMs %.20g", moonSunDiffDegPerDay, synodicMonthMs)
 }
 
-// 360/29.5306 is a Newton slope, 29.530589 days a bracket shift.
 func TestSynodicConstantsDifferDeliberately(t *testing.T) {
 	if tithiPraveshaSynodicDays == synodicMonthDays {
 		t.Errorf("the two synodic constants are now equal (%v); `tithiPravesha.ts` "+

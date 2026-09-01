@@ -5,7 +5,6 @@ import (
 	"testing"
 )
 
-// Ties matter most: ECMA rounds half away from zero, strconv to even.
 func TestToPrecisionStringMatchesJS(t *testing.T) {
 	cases := []struct {
 		v    float64
@@ -22,7 +21,6 @@ func TestToPrecisionStringMatchesJS(t *testing.T) {
 		{1, 1, "1"}, {1, 17, "1.0000000000000000"},
 		{123456, 3, "1.23e+5"}, {0, 3, "0.00"}, {-0.38, 3, "-0.380"},
 		{1e21, 3, "1.00e+21"}, {1e-7, 3, "1.00e-7"}, {12345, 2, "1.2e+4"},
-		// 0.5 and 0.15 are not exact halves as doubles; 2.5, 1.5 and 0.25 are.
 		{0.5, 1, "0.5"}, {2.5, 1, "3"}, {1.5, 1, "2"}, {0.15, 1, "0.1"}, {0.25, 1, "0.3"},
 	}
 	for _, c := range cases {
@@ -38,7 +36,6 @@ func TestToPrecisionValueAgreesWithString(t *testing.T) {
 		s = s*1664525 + 1013904223
 		mant := float64(s)/4294967296*2 - 1
 		exp := float64(int(s)%40 - 20)
-		// anti-FMA barrier
 		v := float64(mant * math.Pow(10, exp))
 		if v == 0 || math.IsInf(v, 0) {
 			continue
@@ -106,7 +103,6 @@ func TestProbesAreTheTypeScriptSample(t *testing.T) {
 	}
 }
 
-// {3, 5, -5} is non-monotone: k = 1's dropped 5 and -5 cancel, while k = 2's error is 5.
 func TestTruncateIsATailSweep(t *testing.T) {
 	terms := []float64{3, 5, -5}
 	value := func(a float64, _ float64) float64 { return a }

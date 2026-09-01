@@ -105,7 +105,6 @@ export function buildMoonPhasesTable(
     throw new RangeError('languages must contain at least one locale');
   }
 
-  // Widened so a phase whose local date is in range but whose UTC instant is not still lands.
   const dayMs = 24 * 3600_000;
   const windowStart = new Date(Date.UTC(startYear, 0, 1) - 2 * dayMs);
   const windowEnd = new Date(Date.UTC(endYear, 11, 31, 23, 59, 59, 999) + 2 * dayMs);

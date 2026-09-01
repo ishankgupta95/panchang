@@ -4,11 +4,8 @@ import { computeDurMuhurta } from '../../src/core/durMuhurta';
 const sunrise = new Date('2024-01-01T06:00:00Z');
 const sunset = new Date('2024-01-01T18:00:00Z');
 const nextSunrise = new Date('2024-01-02T06:00:00Z');
-// Each half of the day carries 15 muhurtas.
 const MUHURTA_MS = (12 * 3600_000) / 15;
 
-// Classical Muhurta-Chintamani ordinals (0-based), verified against the
-// reference almanac over 58 days.
 const EXPECTED: readonly (readonly { ordinal: number; segment: 'day' | 'night' }[])[] = [
   [{ ordinal: 13, segment: 'day' }],
   [{ ordinal: 8, segment: 'day' }, { ordinal: 11, segment: 'day' }],

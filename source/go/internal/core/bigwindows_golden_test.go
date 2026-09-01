@@ -111,7 +111,6 @@ func bigWindowEphemeris(t *testing.T) (LongitudeAt, LongitudeAt) {
 	return moon, sun
 }
 
-// A published instant's tolerance; these should be equal, so the worst is logged.
 const bigWindowBandMs = 1
 
 func TestBhadraMatchesTypeScript(t *testing.T) {
@@ -228,7 +227,6 @@ func TestVishtiAndVasaTablesMatchTypeScript(t *testing.T) {
 			vishti = append(vishti, i)
 		}
 	}
-	// Listed here so a regenerated golden cannot redefine them.
 	wantVishti := []int{7, 14, 21, 28, 35, 42, 49, 56}
 	if len(vishti) != len(wantVishti) {
 		t.Fatalf("Vishti karanas: %v, want %v", vishti, wantVishti)
@@ -346,7 +344,6 @@ func TestVarjyamAndAmritKalaAreDifferentTables(t *testing.T) {
 	}
 	t.Logf("the two offset tables agree at %d of 27 indices", agree)
 
-	// amrit = varjyam + 24 ghatikas where there is room.
 	const windowGhatikas, fullGhatikas, offsetStep = 4, 60, 24
 	const maxOffset = fullGhatikas - windowGhatikas
 
@@ -610,7 +607,6 @@ func TestComputeVarjyamIsTheOlderSingleWindowForm(t *testing.T) {
 	if single == 0 {
 		t.Fatal("ComputeVarjyam never produced a window; the comparison is vacuous")
 	}
-	// The TypeScript's count over these days; drift means the sweep moved.
 	if single != 183 {
 		t.Errorf("days with a single-form window = %d, want 183", single)
 	}

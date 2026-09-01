@@ -67,7 +67,6 @@ describe('module-level memos are pure functions of their argument', () => {
   });
 
   it('earthRect: a hit copies out rather than aliasing the memo', () => {
-    // Every planet in a chart reads the Earth into one module-level scratch.
     const ttDays = 9131.25;
     const first = new Float64Array(3);
     const second = new Float64Array(3);
@@ -82,8 +81,6 @@ describe('module-level memos are pure functions of their argument', () => {
   });
 
   it('earthRect: the memo cannot change the answer the series gives', () => {
-    // `heliocentricRect('earth', ...)` is the coarse Earth `sun.ts` uses, so
-    // this is deliberately not an equality.
     const ttDays = 9131.25;
     const memoized = new Float64Array(3);
     const coarse = new Float64Array(3);
@@ -94,7 +91,6 @@ describe('module-level memos are pure functions of their argument', () => {
       (memoized[1] as number) - (coarse[1] as number),
       (memoized[2] as number) - (coarse[2] as number),
     );
-    // 1″ of direction at 1 AU is 4.8e-6 AU; different truncations, so not zero.
     expect(separation).toBeGreaterThan(0);
     expect(separation).toBeLessThan(5e-6);
   });

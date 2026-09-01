@@ -34,7 +34,6 @@ describe('computeBhadraKaal', () => {
     const sunset = computeSunset(sunrise, loc);
     const nextSunrise = computeSunrise(sunset, loc);
 
-    // This day may or may not carry Bhadra, so only a window or null is asserted.
     const bhadra = computeBhadraKaal(sunrise, nextSunrise, getMoon, getSun);
     if (bhadra !== null) {
       expect(bhadra.start.getTime()).toBeLessThan(bhadra.end.getTime());
@@ -43,7 +42,6 @@ describe('computeBhadraKaal', () => {
   });
 
   it('detects Bhadra on Raksha Bandhan 2024 (2024-08-19, Delhi)', () => {
-    // The almanac's Bhadra end on 19 Aug 2024 is 01:32 PM IST.
     const loc = { latitude: 28.6139, longitude: 77.2090 };
     const cache = new LongitudeCache('lahiri');
     const getMoon = (d: Date) => cache.getMoon(d);
@@ -80,9 +78,6 @@ describe('bhadraVasaForRashi (Muhurta Chintamani Moon-rashi rule)', () => {
 });
 
 describe('piecewise vasa segments (almanac Ujjain 2026-08-19)', () => {
-  // Almanac, Ujjain 2026-08-19: Bhadra begins 07:19 PM, Patala until 02:30 AM
-  // Aug 20 then Swarga. The day page clamps its display at next sunrise, so the
-  // true karana end, 08:16 AM Aug 20, comes from the Bhadra-dates page.
   it('splits Patala → Swarga at the Moon Tula→Vrischika transition', () => {
     const UJJAIN = { latitude: 23.1765, longitude: 75.7885 };
     const cache = new LongitudeCache('lahiri');

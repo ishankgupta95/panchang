@@ -9,7 +9,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/jsnum"
 )
 
-// Keyed on the exact instant, never a bucket: a staircase memo makes findTransitionTime bisect steps.
 type LongitudeCacheMode string
 
 const (
@@ -24,9 +23,6 @@ const (
 	sunNodes    = 8
 )
 
-// cos(pi*k / (n-1)), frozen to V8's values rather than computed: math.Cos disagrees with
-// Math.cos by an ULP at k=2 of the Moon's grid on arm64 and at more nodes on amd64, and this
-// grid feeds every interpolated longitude. Mirrors the table in source/ts/src/astronomy/cache.ts.
 var chebyshevAbscissae = map[int][]float64{
 	moonNodes: {
 		1, 0.9396926207859084, 0.766044443118978, 0.5000000000000001, 0.17364817766693041,
@@ -53,7 +49,6 @@ type chebyshevLongitude struct {
 	halfMs float64
 }
 
-// tropicalAt must truncate its float instant, not round it, as new Date(t) does.
 func newChebyshevLongitude(tropicalAt func(tMs float64) float64, t0Ms, t1Ms float64, nodes int) *chebyshevLongitude {
 	c := &chebyshevLongitude{
 		midMs:  (t0Ms + t1Ms) / 2,
@@ -68,7 +63,6 @@ func newChebyshevLongitude(tropicalAt func(tMs float64) float64, t0Ms, t1Ms floa
 		x := chebyshevAbscissa(k, nodes)
 		c.nodeX[k] = x
 
-		// FMA barrier: a sub-ULP shift becomes a whole millisecond once truncated.
 		y := tropicalAt(c.midMs + float64(c.halfMs*x))
 		if k > 0 {
 			for y-previous > 180 {
@@ -115,7 +109,6 @@ func (c *chebyshevLongitude) at(ms float64) float64 {
 	return numerator / denominator
 }
 
-// Package scope is safe: a block is a pure function of its index and holds tropical longitudes, ayanamsa applied per read.
 const maxBlocks = 1024
 
 var (
@@ -131,7 +124,6 @@ func blockFor(
 	tropicalAt func(tMs float64) float64,
 ) (*chebyshevLongitude, bool) {
 	return s.GetOrBuild(index, func() *chebyshevLongitude {
-		// Exact in int64: |index·span| ≤ 8.64e15 < 2⁵³ over the whole Date range.
 		return newChebyshevLongitude(tropicalAt, float64(index*spanMs), float64((index+1)*spanMs), nodes)
 	})
 }
@@ -144,15 +136,13 @@ func blockIndexFor(ms int64, spanMs int64) int64 {
 	return q
 }
 
-// Not safe for concurrent use: one per API call. The two block stores are.
 type LongitudeCache struct {
 	ctx          *EphemerisCtx
 	ayanamsaType types.AyanamsaType
 	mode         LongitudeCacheMode
 
-	moonCache map[int64]float64
-	sunCache  map[int64]float64
-	// Not re-derived from the sidereal maps: normalizing twice is not the identity.
+	moonCache         map[int64]float64
+	sunCache          map[int64]float64
 	moonTropicalCache map[int64]float64
 	sunTropicalCache  map[int64]float64
 

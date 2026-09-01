@@ -7,7 +7,6 @@ import (
 	"runtime"
 )
 
-// Compile-time path, not the working directory.
 var root = func() string {
 	_, file, _, ok := runtime.Caller(0)
 	if !ok {
@@ -18,14 +17,10 @@ var root = func() string {
 
 func Root() string { return root }
 
-// TestData resolves a path under the repository's shared testdata/ tree, which
-// the TypeScript tests read too. It sits above this module, so `go get` never
-// fetches it: these are repository tests, not module tests.
 func TestData(parts ...string) string {
 	return filepath.Join(append([]string{root, "testdata"}, parts...)...)
 }
 
-// ReadTestData is the one loader every test reads its data through.
 func ReadTestData(parts ...string) ([]byte, error) {
 	b, err := os.ReadFile(TestData(parts...))
 	if err != nil {

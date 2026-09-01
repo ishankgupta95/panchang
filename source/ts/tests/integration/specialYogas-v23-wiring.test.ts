@@ -8,7 +8,6 @@ import { describe, it, expect } from 'vitest';
 import { getDailyPanchang, getInstantPanchang } from '../../src/core/panchang';
 
 const DELHI = { latitude: 28.6139, longitude: 77.2090 };
-// 180 days: Dwipushkar, the tightest detector, hits about once per 53 days.
 const SWEEP_START = new Date(Date.UTC(2026, 0, 1, 6, 0, 0));
 const SWEEP_DAYS = 180;
 
@@ -56,7 +55,6 @@ describe('v2.3 yogas: 90-day Delhi sweep', () => {
     expect(counts.jwalamukhi).toBeGreaterThan(0);
   });
 
-  // Aadal/Vidaal each cover 8 of 28 distance slots, ~28% of days; /6 is 17%.
   it('Aadal fires on a substantial fraction of days', () => {
     expect(counts.aadal).toBeGreaterThan(SWEEP_DAYS / 6);
   });
@@ -65,16 +63,12 @@ describe('v2.3 yogas: 90-day Delhi sweep', () => {
     expect(counts.vidaal).toBeGreaterThan(SWEEP_DAYS / 6);
   });
 
-  // Ravi covers 6 of 27 distance slots, ~22%; /8 is 12%.
   it('Ravi fires on a substantial fraction of days', () => {
     expect(counts.ravi).toBeGreaterThan(SWEEP_DAYS / 8);
   });
 });
 
 describe('v2.3 yogas: self-consistency on emission days', () => {
-  // A qualifying nakshatra often opens after sunrise, so an emission is justified
-  // by *some* (tithi, nakshatra) pair co-occurring during the day; `nakshatras[0]`
-  // / `tithis[0]` would only ever see the sunrise pair.
   interface DayFacts {
     pairs: { tithiIdx: number; moonIdx: number }[];
     moonIdxs: number[];
@@ -171,7 +165,6 @@ describe('v2.3 yogas: Hindi localization', () => {
     return null;
   };
 
-  // Devanagari Unicode block: U+0900-U+097F.
   const isDevanagari = (s: string) => /[ऀ-ॿ]/.test(s);
 
   for (const type of ['dwipushkar', 'tripushkar', 'jwalamukhi', 'aadal', 'vidaal', 'ravi'] as const) {
@@ -197,8 +190,6 @@ describe('v2.3 yogas: instant panchang wiring', () => {
     expect(found).not.toBeNull();
     const ip = getInstantPanchang(found!, DELHI);
     expect(ip).not.toBeNull();
-    // Deliberately weak: instant-mode at noon may shift to a neighbouring
-    // distance if the Moon changes nakshatra during the day.
     expect(Array.isArray(ip!.specialYogas)).toBe(true);
   });
 

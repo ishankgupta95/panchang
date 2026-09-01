@@ -23,10 +23,8 @@ func ComputeAyanamsa(ms int64, typ types.AyanamsaType) (float64, error) {
 	}
 }
 
-// Solved from Drik, not the widely repeated 23.853211°; typed so the offset sums do not constant-fold.
 const lahiriJ2000Deg float64 = 23.863801
 
-// IAU general precession in longitude, arcsec; the casts are FMA barriers.
 func precessionArcsec(t float64) float64 {
 	return float64(5029.0966*t) + float64(1.112*t*t) - float64(0.000006*t*t*t)
 }
@@ -35,8 +33,7 @@ const (
 	offsetTrueChitra    float64 = -0.0006
 	offsetKP            float64 = -0.079605
 	offsetThirukanitham float64 = +0.018456
-	// Measured against SwissEph; the literature value −1.392722 is wrong.
-	offsetRaman float64 = -1.453010
+	offsetRaman         float64 = -1.453010
 )
 
 func trueChitraAyanamsa(t float64) float64 {
@@ -64,7 +61,6 @@ func julianCenturiesFromJ2000(ms int64) float64 {
 	return (jd - 2451545.0) / 36525.0
 }
 
-// UT, not TT: ΔT is 0.001″ of ayanamsa here.
 func DateToJulianDay(ms int64) float64 {
 	return float64(ms)/86_400_000 + 2440587.5
 }

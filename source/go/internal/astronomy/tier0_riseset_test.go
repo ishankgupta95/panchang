@@ -13,8 +13,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// USNO defines the convention riseset.go implements: disc-centre altitude plus semidiameter against 34′ of assumed refraction.
-
 type usnoFixture struct {
 	Source    string `json:"source"`
 	Retrieved string `json:"retrieved"`
@@ -193,7 +191,6 @@ func TestTier0USNORiseSet(t *testing.T) {
 		}
 		meanAbs := sumAbs / float64(n)
 		bias := sum / float64(n)
-		// 60 s, not 30: USNO's rounding is a ±30 s floor; a real error shows up as bias.
 		if math.Abs(worst.seconds) >= 60 {
 			t.Errorf("%s: worst %.1f s at %s; mean |Δ| %.1f s, bias %.1f s (bound 60 s)",
 				body, worst.seconds, worst.where, meanAbs, bias)

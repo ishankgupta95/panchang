@@ -77,7 +77,6 @@ export function scoreMuhurta(
 ): MuhurtaScore {
   validateDate(date);
   validateLocation(location);
-  // `lunarWindows` must stay: vara×nakshatra yogas can begin after sunrise.
   const panchang = getDailyPanchang(date, location, {
     ...options,
     sections: ['eclipse', 'lunarWindows'],
@@ -207,7 +206,6 @@ function scoreFromPanchang(p: DailyPanchangResult, rule: MuhurtaRule): MuhurtaSc
     factors.push({ code: 'inauspicious_yoga', axis: 'yoga', index: yogaAtSunrise, delta: -15 });
   }
 
-  // Auspicious and inauspicious yogas co-occur and net out; no source ranks them.
   if (rule.varaTithiYogas !== false) {
     for (const vty of computeVaraTithiYogas(varaIdx, tithiAtSunrise)) {
       const delta = vty.polarity === 'auspicious' ? 10 : -15;

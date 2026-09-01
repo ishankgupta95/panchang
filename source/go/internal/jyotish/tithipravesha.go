@@ -96,7 +96,6 @@ func ComputeTithiPravesha(
 	}, nil
 }
 
-// Local copy to keep core/tithi import-cycle-free.
 func computeNatalTithiIndex(sunLon, moonLon float64) int {
 	diff := utils.Normalize360(moonLon - sunLon)
 	return min(29, int(math.Floor(diff/12)))

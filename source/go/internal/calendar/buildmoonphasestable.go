@@ -9,7 +9,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// Phase instants are identical worldwide, hence no location.
 type BuildMoonPhasesTableOptions struct {
 	TimezoneOffsetMinutes int
 	StartYear             int
@@ -86,7 +85,6 @@ func BuildMoonPhasesTable(
 			"languages must contain at least one locale")
 	}
 
-	// An instant just outside the years can still bucket to an in-range local date.
 	windowStartMs := types.DateUTC(opts.StartYear, 0, 1).Ms() - 2*dayMs
 	windowEndMs := types.DateUTC(opts.EndYear, 11, 31).Ms() + dayMs - 1 + 2*dayMs
 
@@ -102,7 +100,6 @@ func BuildMoonPhasesTable(
 		dictIndex[phase] = i
 	}
 
-	// Pre-seed every in-range year so no-phase years still appear.
 	byYear := map[string]map[string][]PackedMoonPhaseEvent{}
 	yearOrder := []string{}
 	for year := opts.StartYear; year <= opts.EndYear; year++ {

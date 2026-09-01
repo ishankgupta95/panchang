@@ -48,7 +48,6 @@ type PackedMuhurtaTableDay struct {
 	F    []int  `json:"f"` // indices into [MuhurtaFile.Dict]
 }
 
-// Field order is wire order.
 type MuhurtaTableMeta struct {
 	Format                int     `json:"format"`
 	Occasion              string  `json:"occasion"`

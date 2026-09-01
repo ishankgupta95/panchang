@@ -36,7 +36,6 @@ export function computeTarabala(
   assertNakshatraIndex(janmaNakshatraIndex, 'janmaNakshatraIndex');
   assertNakshatraIndex(transitNakshatraIndex, 'transitNakshatraIndex');
 
-  // 27 % 9 == 0, so the +27 only lifts negative remainders before % 9.
   const taraIndex = (transitNakshatraIndex - janmaNakshatraIndex + TOTAL_NAKSHATRAS) % 9;
   const englishName = TARA_ENGLISH_NAMES[taraIndex]!;
   const quality: TarabalaInfo['quality'] = INAUSPICIOUS_TARAS.has(taraIndex) ? 'inauspicious' : 'auspicious';

@@ -123,9 +123,6 @@ describe('Performance invariants: narrowing work must cost less', () => {
   });
 
   it.skipIf(process.env.COVERAGE)('dropping the festivals section alone is measurably cheaper', () => {
-    // Deliberately one repeated day, unlike the ratios above: cold, both sides
-    // pay the same rise/set searches, which swamp the festival block and push
-    // the ratio to 0.945. This is the narrowest margin in the file.
     const ratio = ratioOf(
       () =>
         getDailyPanchang(new Date('2025-07-04'), PUNE, {
@@ -140,8 +137,6 @@ describe('Performance invariants: narrowing work must cost less', () => {
   });
 
   it.skipIf(process.env.COVERAGE)('the eclipse check is negligible on a day that holds no syzygy', () => {
-    // 2025-07-04 is neither a new nor a full moon, so the syzygy guard should
-    // reject before running any eclipse search.
     const sunrise = computeSunrise(new Date('2025-07-03T18:30:00Z'), PUNE);
     const nextSunrise = computeSunrise(computeSunset(sunrise, PUNE), PUNE);
     const ratio = ratioOf(() => {
@@ -215,7 +210,6 @@ describe('LongitudeCache: real usage', () => {
       hitRate,
       `hit rate ${(hitRate * 100).toFixed(1)}%: the memo is not paying off`,
     ).toBeGreaterThan(0.5);
-    // The memo keys on the exact instant: one miss per instant per body.
     expect(cache.misses).toBe(anchors.length * 2);
   });
 });

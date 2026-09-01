@@ -50,7 +50,7 @@ last="$(git tag -l 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -
 if [ -n "$last" ]; then
   ok "the newest existing npm tag is $last"
   if [ "$last" != "v$VERSION" ]; then
-    warn "versions between $last and v$VERSION have no tag; check CHANGELOG.md for any that were published untagged (as of 2026-08-24: 5.1.0 and 5.1.1 both were)"
+    warn "versions between $last and v$VERSION have no tag; some were published untagged (as of 2026-08-24: 5.1.0 and 5.1.1 both were)"
   fi
 fi
 

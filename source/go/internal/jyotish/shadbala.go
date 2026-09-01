@@ -9,7 +9,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
 )
 
-// BPHS Ch. 27, in Virupas; simplified, with no Kendradi Bala.
 func ComputeShadbala(
 	ctx *astronomy.EphemerisCtx,
 	birthMs int64,
@@ -74,7 +73,6 @@ func shadbalaForChart(chart *types.BirthChart, basis *NatalBasis) (types.Shadbal
 	return out, nil
 }
 
-// Exaltation longitudes from 0° Aries (BPHS Ch. 3).
 var uchchaDeg = [types.VisibleGrahaCount]float64{
 	types.VisibleSun:     10,
 	types.VisibleMoon:    33,
@@ -99,11 +97,9 @@ func sthanaBala(
 
 func uchchaBala(v types.VisibleGraha, siderealLon float64) float64 {
 	arc := math.Abs(jsnum.Mod(siderealLon-uchchaDeg[v]+540, 360) - 180)
-	// anti-FMA barrier
 	return float64(((180 - arc) / 180) * 60)
 }
 
-// BPHS Ch. 27 v17; ComputeDignity merges the great- tiers, so those take the lower bound.
 var saptVirupas = map[Dignity]float64{
 	DignityExalted:      45,
 	DignityMoolatrikona: 45,
@@ -114,7 +110,6 @@ var saptVirupas = map[Dignity]float64{
 	DignityDebilitated:  1.875,
 }
 
-// AllDivisionals would double-count the D1 summed alongside these.
 var saptVargas = [6]types.Divisional{
 	types.DivisionalD2, types.DivisionalD3, types.DivisionalD7,
 	types.DivisionalD9, types.DivisionalD12, types.DivisionalD30,
@@ -142,7 +137,6 @@ func vargaRashiOf(chart *types.DivisionalChart, v types.VisibleGraha) int {
 	panic("jyotish: divisional chart " + string(chart.Divisional) + " has no " + v.String())
 }
 
-// The zero Dignity is Exalted, which would score every varga exalted.
 func mustDignity(v types.VisibleGraha, rashi int) Dignity {
 	d, err := ComputeDignity(v.Graha(), rashi)
 	if err != nil {
@@ -151,7 +145,6 @@ func mustDignity(v types.VisibleGraha, rashi int) Dignity {
 	return d
 }
 
-// Ojha-Yugma groups, NOT the Drekkana gender triple (BPHS Ch. 27 v18-19).
 var (
 	ojhaOddGainers = [types.VisibleGrahaCount]bool{
 		types.VisibleSun: true, types.VisibleMars: true, types.VisibleJupiter: true,
@@ -170,7 +163,6 @@ func ojhaYugmaBala(
 	placement, _ := chart.ByPlanet.Get(v.Graha())
 	d1Rashi := placement.Rashi.Index
 	d9Rashi := vargaRashiOf(&divisionalCharts[3], v)
-	// Aries, the 1st sign, is odd, so even indices are odd signs.
 	d1Odd := d1Rashi%2 == 0
 	d9Odd := d9Rashi%2 == 0
 	total := 0.0
@@ -192,7 +184,6 @@ func ojhaYugmaBala(
 	return total
 }
 
-// BPHS Ch. 27 v20 gender groups: 0 = Male, 1 = Eunuch, 2 = Female.
 var drekkanaGroup = [types.VisibleGrahaCount]int{
 	types.VisibleSun: 0, types.VisibleMars: 0, types.VisibleJupiter: 0,
 	types.VisibleMercury: 1, types.VisibleSaturn: 1,
@@ -253,9 +244,7 @@ func nathonathaBala(v types.VisibleGraha, birthMs, sunriseUtc, sunsetUtc, nextSu
 	isDayBirth := birthMs >= sunriseUtc && birthMs < sunsetUtc
 	if isDayBirth {
 		dayLen := sunsetUtc - sunriseUtc
-		// Float division: integer division would collapse this to a 0-or-60 step.
 		phase := float64(birthMs-sunriseUtc) / float64(dayLen)
-		// anti-FMA barrier
 		factor := 1 - float64(math.Abs(phase-0.5)*2)
 		if dayStrong[v] {
 			return float64(factor * 60)
@@ -278,7 +267,6 @@ func nathonathaBala(v types.VisibleGraha, birthMs, sunriseUtc, sunsetUtc, nextSu
 	return 0
 }
 
-// The classical doubling of the Moon's own paksha is dropped, to hold the 60 V scale.
 func pakshaBala(v types.VisibleGraha, sunLon, moonLon float64) float64 {
 	sepFromSun := utils.Normalize360(moonLon - sunLon)
 	arc := sepFromSun
@@ -296,7 +284,6 @@ func pakshaBala(v types.VisibleGraha, sunLon, moonLon float64) float64 {
 	return 0
 }
 
-// The classical Sun and Moon formulas duplicate Ayana and Paksha, so both are flat.
 func chestaBala(v types.VisibleGraha, placement types.PlanetPlacement, sunLon float64) float64 {
 	if v == types.VisibleSun || v == types.VisibleMoon {
 		return 30
@@ -311,7 +298,6 @@ func chestaBala(v types.VisibleGraha, placement types.PlanetPlacement, sunLon fl
 	return 30
 }
 
-// BPHS natural strengths: 60·k/7 for k = 7…1, rounded to the published two decimals.
 var Naisargika = [types.GrahaCount]float64{
 	types.GrahaSun:     60.00,
 	types.GrahaMoon:    51.43,
@@ -361,13 +347,11 @@ func drikBala(v types.VisibleGraha, chart *types.BirthChart) float64 {
 		if benefics[aspector.Planet] {
 			sign = 1
 		}
-		// anti-FMA barrier
 		net += float64(sign * aspectWeights[offset] * 60)
 	}
 	return net
 }
 
-// Cardinal anchors (East, North, West, South at 0, 3, 6, 9) interpolated, per Rath's *Crux of Vedic Astrology* Ch. 6, not BPHS.
 var bhavaDikValues = [12]float64{
 	60,
 	40,

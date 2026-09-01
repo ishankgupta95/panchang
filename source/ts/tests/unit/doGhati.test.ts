@@ -107,7 +107,6 @@ describe('computeDoGhati: index and naming', () => {
   });
 
   it('Brahma appears at slot 8 (day) and slot 22 (night)', () => {
-    // The almanac's table repeats Brahma in both halves.
     expect(result.day[8]!.name).toBe('Brahma');
     expect(result.night[22 - 15]!.name).toBe('Brahma');
   });
@@ -157,7 +156,6 @@ describe('computeDoGhati: quality classification', () => {
 });
 
 describe('computeDoGhati: full quality vector pin (per-slot)', () => {
-  // Every slot's quality as printed in the reference almanac's Do Ghati table.
   const EXPECTED: ReadonlyArray<{ index: number; name: string; quality: 'auspicious' | 'inauspicious' }> = [
     { index:  0, name: 'Rudra',       quality: 'inauspicious' },
     { index:  1, name: 'Uraga',       quality: 'inauspicious' },
@@ -205,8 +203,6 @@ describe('computeDoGhati: full quality vector pin (per-slot)', () => {
 });
 
 describe('computeDoGhati: name sequence is fixed (no weekday rotation)', () => {
-  // Deliberately weak: with no varaIndex in the signature, all this pins is that
-  // repeated calls agree, not weekday independence itself.
   it('two computations with identical inputs produce identical name sequences', () => {
     const r1 = computeDoGhati(SUNRISE, SUNSET, NEXT_SUNRISE, nameResolver, qualityNameResolver);
     const r2 = computeDoGhati(SUNRISE, SUNSET, NEXT_SUNRISE, nameResolver, qualityNameResolver);

@@ -16,7 +16,6 @@ function noonUtc(dateStr: string): Date {
   return new Date(Date.UTC(y, m - 1, d, 12, 0, 0, 0));
 }
 
-// The local wall clock lives only in the offset-carrying `*Local` ISO string.
 function fmtHHMM(local: string): string {
   return local.slice(11, 16);
 }
@@ -35,7 +34,6 @@ function parseEndMinutes(s: string): number {
   return h * 60 + m + (dayOffset ? Number(dayOffset) * 1440 : 0);
 }
 
-// A roll past midnight must come from the ISO string's own date component.
 function endMinutesFromDate(endLocal: string, dateStr: string): number {
   const dayDelta = Math.round(
     (Date.parse(`${endLocal.slice(0, 10)}T00:00:00Z`) - Date.parse(`${dateStr}T00:00:00Z`))
@@ -156,7 +154,6 @@ describe('Reference-almanac cross-verification', () => {
         });
       }
 
-      // The almanac drops Abhijit on Wednesday (Buddha-vara).
       if (expected.abhijitMuhurtaStartHHMM === null) {
         it('abhijitMuhurta is null (Wednesday, almanac convention)', () => {
           expect(r.muhurtas.abhijit).toBeNull();
@@ -177,7 +174,6 @@ describe('Reference-almanac cross-verification', () => {
         });
       }
 
-      // ±3 min on end times: the observed max drift is 2.01 min.
       if (expected.tithiEndHHMM) {
         it(`tithi[0] endTime within ±3 min of ${expected.tithiEndHHMM}`, () => {
           const actual = endMinutesFromDate(r.angas.tithis[0]!.endTimeLocal!, date);

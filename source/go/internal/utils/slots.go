@@ -1,6 +1,5 @@
 package utils
 
-// The last end is anchored to reference + durationMs, not accumulated, so the slots tile with no gap; the float64(...) casts are FMA barriers.
 func BuildEqualSlots[T any](
 	referenceMs int64, durationMs float64, count int,
 	make func(ordinal int, startMs, endMs int64) T,
@@ -21,8 +20,6 @@ func BuildEqualSlots[T any](
 	return slots
 }
 
-// `make` is shadowed by the parameter.
 func make2[T any](n int) []T { return make([]T, 0, n) }
 
-// First daytime slot index by weekday (Sun=0): the weekday's lord, Chaldean order.
 var VaraChaldeanStart = [7]int{0, 3, 6, 2, 5, 1, 4}

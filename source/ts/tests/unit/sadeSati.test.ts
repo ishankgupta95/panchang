@@ -7,7 +7,6 @@ describe('computeSadeSati: basic shape', () => {
     const asOf = new Date('2026-05-04T00:00:00Z');
     const planets = computePlanetaryPositions(asOf, 'lahiri');
     const satRashi = planets.saturn.rashi.index;
-    // Saturn in the 12th from the natal Moon is phase 1.
     const result = computeSadeSati((satRashi + 1) % 12, asOf);
     expect(result.active).toBe(true);
     expect(result.phase).toBe(1);

@@ -6,7 +6,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// Float-typed: untyped `360 / 27` is integer division in Go.
 const (
 	TithiSpan         float64 = 12
 	NakshatraSpan     float64 = 360.0 / 27
@@ -24,7 +23,6 @@ func RashiOf(siderealLongitude float64) int {
 	return int(math.Floor(siderealLongitude / RashiSpan))
 }
 
-// Slot index from sunrise, keyed by weekday (0 = Sunday).
 var (
 	RahuKalamSlots = [7]int{7, 1, 6, 4, 5, 3, 2}
 	YamagandaSlots = [7]int{4, 3, 2, 1, 0, 6, 5}
@@ -56,8 +54,6 @@ const (
 	KaranaSearchHours    float64 = 18
 )
 
-// Varjyam window start, in ghatikas elastic to the nakshatra's own duration
-// (the reference almanac's Tyajya Ghati minus 1).
 var VarjyamOffsetGhatikas = [27]int{
 	50, // 0  Ashwini
 	24, // 1  Bharani
@@ -88,12 +84,10 @@ var VarjyamOffsetGhatikas = [27]int{
 	30, // 26 Revati
 }
 
-// Mula alone has a second tyajya spell (the reference almanac prints both 20 and 56).
 var VarjyamSecondOffsetGhatikas = map[int]int{
 	18: 20, // Mula
 }
 
-// Vara x Nakshatra 28-name cycle (Muhurta-chintamani Ch. 4); Abhijit's row is elided.
 var AnandadiTable = buildAnandadiTable()
 
 func buildAnandadiTable() [7][27]int {
@@ -110,7 +104,6 @@ func buildAnandadiTable() [7][27]int {
 	return rows
 }
 
-// Canonical name order; qualities per the reference almanac.
 var AnandadiQuality = [28]types.ChoghadiyaQuality{
 	types.QualityAuspicious,   //  0 Ananda
 	types.QualityInauspicious, //  1 Kaladanda

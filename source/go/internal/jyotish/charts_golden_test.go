@@ -16,10 +16,8 @@ import (
 )
 
 const (
-	// ~100× the predicted worst case.
 	chartAngleBound = 1e-10
-	// One math.Sin scaled by 1.4979°, so three orders tighter.
-	chartNodeBound = 1e-11
+	chartNodeBound  = 1e-11
 )
 
 type chartsGolden struct {
@@ -157,7 +155,6 @@ func chartDigest(count int, gen func(int, func(int64)), fn func(int64) float64) 
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-// Must match the generator's salts, or the two sides sample different instants.
 const (
 	chartSaltNode    = 0x0D0E
 	chartSaltLagna   = 0x1A61
@@ -205,7 +202,6 @@ func TestMeanObliquityHighOrderTermsArePresent(t *testing.T) {
 			t.Errorf("%s: MeanObliquity(%v) = %v, want %v", c.name, c.tt, got, c.want)
 		}
 	}
-	// Cancellation budget: extracting a 3.3e-7 term near 23.44 costs ~1 ULP.
 	const isolationTol = 1e-14
 	quad := MeanObliquity(1) + MeanObliquity(-1) - 2*base
 	if want := 2 * -0.000000164; math.Abs(quad-want) > isolationTol {
@@ -281,8 +277,6 @@ func TestMeanNodeIsBitIdentical(t *testing.T) {
 			t.Errorf("%s: in the Go accessor map, not in the golden", name)
 			continue
 		}
-		// Only the exact arm is asserted: the true node reaches the platform's sin, so
-		// TestTrueNodeWithinSinBound holds it to a bound instead of to a digest.
 		if exact := name != "rahuSidereal:true"; exact && got != want {
 			t.Errorf("%s: digest %s, golden %s: this path has no transcendental and "+
 				"must be bit-identical over %d instants", name, got, want, samples)

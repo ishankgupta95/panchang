@@ -22,8 +22,7 @@ type BuildMuhurtaTableOptions struct {
 	Language              types.Language
 	ReferenceLocation     string
 	GeneratedAt           string
-	// Nil selects [DefaultMuhurtaNote]; a pointer to "" is a deliberately empty note.
-	Note *string
+	Note                  *string
 }
 
 const DefaultMuhurtaNote = "Pre-computed muhurta table for one occasion at one location. Scores are " +
@@ -39,7 +38,6 @@ func newFactorDictionary() *factorDictionary {
 	return &factorDictionary{entries: []MuhurtaFactor{}, index: map[string]int{}}
 }
 
-// An absent Index and 0 must key differently: tithi/nakshatra/vara/yoga 0 are real.
 func (d *factorDictionary) intern(f MuhurtaFactor) int {
 	var b strings.Builder
 	b.WriteString(f.Code)

@@ -17,7 +17,6 @@ var choghadiyaQuality = [7]types.ChoghadiyaQuality{
 
 var choghadiyaDayStartIndex = utils.VaraChaldeanStart
 
-// Night is not the day cycle restarted.
 var choghadiyaNightSequence = [7]int{0, 5, 3, 1, 6, 4, 2}
 
 var choghadiyaNightStartPos = [7]int{1, 3, 5, 0, 2, 4, 6}

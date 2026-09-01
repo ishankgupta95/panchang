@@ -62,7 +62,6 @@ func TestNutationAtJ2000(t *testing.T) {
 	if dpsi != wantPsi || deps != wantEps {
 		t.Fatalf("Nutation(0) = (%v, %v), direct gives (%v, %v)", dpsi, deps, wantPsi, wantEps)
 	}
-	// The physical envelope is ±17.2″ and ±9.2″.
 	if math.Abs(dpsi) > 20 || math.Abs(deps) > 12 {
 		t.Errorf("nutation at J2000 = (%v, %v)″, outside the physical envelope", dpsi, deps)
 	}
@@ -103,7 +102,6 @@ func TestFundamentalArgumentsAreReduced(t *testing.T) {
 				t.Errorf("t=%v: Delaunay argument %d = %v rad, not reduced modulo a turn", tt, k, args[k])
 			}
 		}
-		// Arguments 5-13 are deliberately unreduced; the fastest reaches ~3900 rad, inside trig.go's Cody-Waite domain.
 		for k := 5; k < 14; k++ {
 			if math.Abs(args[k]) > 1e5 {
 				t.Errorf("t=%v: argument %d = %v rad, outside trig.go's stated domain", tt, k, args[k])
@@ -197,7 +195,6 @@ func TestElpPrecessionRemovesTheJ2000Origin(t *testing.T) {
 		v := ElpToEclipticOfDate(lon, MoonElpLatitudeCoarse(tt), 1, tt)
 		return wrap(math.Atan2(v[1], v[0]) - lon)
 	}
-	// 5028.796″/century (IAU 2006); the ecliptic's own tilt change costs a few arcsec, hence 5″.
 	perCentury := (offset(1) - offset(0)) / ArcsecToRad
 	if math.Abs(perCentury-5028.796) > 5 {
 		t.Errorf("frame rotation contributes %.3f″/century, expected ≈ 5028.8″ (general precession)", perCentury)
@@ -220,7 +217,6 @@ func TestFrameConstants(t *testing.T) {
 	if AuKm != 149_597_870.7 {
 		t.Errorf("AuKm = %v, IAU 2012 defines 149597870.7 km", AuKm)
 	}
-	// A literal: the natural spelling folds from the exact decimals and would assert the bug back in.
 	if KmPerLightDay != 25902068371.199997 {
 		t.Errorf("KmPerLightDay = %v, JavaScript computes 25902068371.199997", KmPerLightDay)
 	}
@@ -249,7 +245,6 @@ func TestAuDerivedConstantsRoundLikeJavaScript(t *testing.T) {
 	}
 }
 
-// Untyped, so the test above fails if the type on AuKm is ever dropped.
 const auKmUntyped = 149_597_870.7
 const sunRadiusAUFolded = 695700.0 / auKmUntyped
 

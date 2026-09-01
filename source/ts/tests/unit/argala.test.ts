@@ -78,7 +78,6 @@ describe('computeArgala: single-planet trigger houses', () => {
       },
     });
     const argala = computeArgala(chart);
-    // A planet in house 2 is the 2nd FROM bhava 1, hence argala[0].
     expect(argala[0]!.argala.find((p) => p.planet === 'Sun')).toBeDefined();
   });
 
@@ -326,10 +325,6 @@ describe('Fixture sweep: Argala invariants on R-tier charts', () => {
   });
 });
 
-// Planets in the 5th from a bhava are Trikonargala sources, those in the 9th
-// are virodhakas, and Ketu alone reverses the two roles (sutramritam,
-// anandamoyee, Sanjay Rath).
-
 describe('computeArgala: trikona option', () => {
   it('default (no options) does NOT populate trikona on any bhava', () => {
     const chart = synthChart({ lagnaRashi: 0, rashis: { Sun: 4, Moon: 8 } });
@@ -411,7 +406,6 @@ describe('computeArgala: Ketu reversal in Trikonargala', () => {
   });
 
   it('Rahu does NOT reverse: Rahu in 5th remains a Trikonargala source', () => {
-    // The three sources attest the reversal for Ketu only.
     const chart = synthChart({
       lagnaRashi: 0,
       rashis: {
@@ -427,8 +421,6 @@ describe('computeArgala: Ketu reversal in Trikonargala', () => {
 });
 
 describe('Trikonargala: 2-list-per-planet structural invariant', () => {
-  // A planet is at offset 4 from exactly one bhava and offset 8 from exactly one
-  // other; Ketu's reversal swaps which list it lands in, not the count.
   it.each(FIXTURE_NAMES)('%s: each graha contributes to exactly 2 trikona lists', (name) => {
     const f = FIXTURE_CHARTS.find((c) => c.name === name)!;
     const chart = computeRashiChart(
@@ -448,21 +440,17 @@ describe('Trikonargala: 2-list-per-planet structural invariant', () => {
 });
 
 describe('Trikonargala: fixture pin sweep (hand-derived)', () => {
-  // Hand-derived, never regenerated from implementation output.
   type Pin = { name: string; bhava: number; sources: GrahaName[]; virodhakas: GrahaName[] };
   const PINS: Pin[] = [
-    // Modi: Vrischika lagna, Ketu in house 11.
     { name: 'Narendra Modi', bhava:  1, sources: ['Rahu'],            virodhakas: [] },
     { name: 'Narendra Modi', bhava:  3, sources: ['Ketu'],            virodhakas: ['Sun', 'Mercury'] },
     { name: 'Narendra Modi', bhava:  5, sources: [],                  virodhakas: ['Moon', 'Mars'] },
     { name: 'Narendra Modi', bhava:  7, sources: ['Sun', 'Mercury'],  virodhakas: ['Ketu'] },
     { name: 'Narendra Modi', bhava:  9, sources: ['Moon', 'Mars'],    virodhakas: ['Rahu'] },
     { name: 'Narendra Modi', bhava: 12, sources: ['Jupiter'],         virodhakas: [] },
-    // Tendulkar: Simha lagna, Ketu in house 11.
     { name: 'Sachin Tendulkar', bhava: 1, sources: ['Moon', 'Rahu'],  virodhakas: ['Sun', 'Venus'] },
     { name: 'Sachin Tendulkar', bhava: 3, sources: ['Ketu'],          virodhakas: [] },
     { name: 'Sachin Tendulkar', bhava: 7, sources: [],                virodhakas: ['Ketu'] },
-    // Tata: Dhanus lagna, Ketu in house 6.
     { name: 'Ratan Tata',    bhava:  2, sources: [],                              virodhakas: ['Ketu'] },
     { name: 'Ratan Tata',    bhava:  5, sources: [],                              virodhakas: ['Sun', 'Mercury', 'Venus'] },
     { name: 'Ratan Tata',    bhava:  9, sources: ['Sun', 'Mercury', 'Venus'],     virodhakas: [] },

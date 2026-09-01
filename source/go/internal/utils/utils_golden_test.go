@@ -86,7 +86,6 @@ func loadUtilsGolden(t *testing.T) utilsGolden {
 	return g
 }
 
-// FMA barriers on every product.
 func syntheticAngleAt(epoch, ms int64) float64 {
 	t := float64(ms-epoch) / 3600_000
 	return 12.7 + float64(0.55*t) + float64(0.0004*t*t) - float64(0.0000009*t*t*t)

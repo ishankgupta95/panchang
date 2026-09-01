@@ -1,5 +1,3 @@
-// VARJYAM_OFFSET_GHATIKAS is taken from the reference almanac; the rule itself
-// is Muhurta-chintamani Ch. 4 / BPHS Ch. 71.
 
 import { describe, it, expect } from 'vitest';
 import { computeVarjyam, computeVarjyamWindows } from '../../src/core/varjyam';
@@ -13,8 +11,6 @@ import { computeSunrise, computeSunset } from '../../src/astronomy/sunrise';
 
 const DELHI = { latitude: 28.6139, longitude: 77.2090 };
 
-// The period defaults to 27 days, not the physical 27.32166, so a synthetic
-// nakshatra spans exactly 24 h and one elastic ghatika 24 min.
 function syntheticMoon(
   epochUtc: Date,
   startNakshatraIndex: number,
@@ -80,7 +76,6 @@ describe('computeVarjyam: synthetic Moon (deterministic offsets, 24-min ghatikas
       .toBeLessThan(60_000);
   });
 
-  // Mula is the dual-spell nakshatra: elapsed ghatikas 20 and 56.
   it('Mula starting at sunrise → dual spells 8:00-9:36 and 22:24-24:00 after sunrise', () => {
     const sunrise = new Date('2025-06-01T00:00:00Z');
     const nextSunrise = new Date(sunrise.getTime() + 24 * 3600_000);
@@ -152,7 +147,6 @@ describe('computeVarjyamWindows: synthetic Moon (multi-window walk)', () => {
   });
 
   it('recovers the successor window the single-window contract dropped', () => {
-    // Vishakha (offset 14 g) closed before the day; +8:00 is Anuradha's (10 g).
     const sunrise = new Date('2025-06-01T00:00:00Z');
     const nextSunrise = new Date(sunrise.getTime() + 24 * 3600_000);
     const moon = syntheticMoon(new Date(sunrise.getTime() - 20 * 3600_000), 15);
@@ -189,8 +183,6 @@ describe('VARJYAM_OFFSET_GHATIKAS table sanity', () => {
   });
 
   it("matches the reference almanac's published values for spot-check entries", () => {
-    // The almanac lists Tyajya Ghatis as "X to X+3"; the stored offset is the
-    // elapsed count X - 1, and the trailing values are the published ranges.
     expect(VARJYAM_OFFSET_GHATIKAS[0]).toBe(50);   // Ashwini  51-54
     expect(VARJYAM_OFFSET_GHATIKAS[3]).toBe(40);   // Rohini   41-44
     expect(VARJYAM_OFFSET_GHATIKAS[8]).toBe(32);   // Ashlesha 33-36
@@ -207,9 +199,6 @@ describe('VARJYAM_OFFSET_GHATIKAS vs AMRIT_KALA_OFFSET_GHATIKAS: cross-table pin
   });
 
   it('AMRIT_KALA_OFFSET_GHATIKAS matches the almanac-recovered table verbatim', () => {
-    // Recovered from 54 almanac windows across 2 cities and all 27 nakshatras.
-    // A Telugu panchangam implies Mula ≈ 45 and U.Bhadrapada ≈ 47.5; the almanac
-    // (44 / 48) is the parity bar and wins.
     expect([...AMRIT_KALA_OFFSET_GHATIKAS]).toEqual([
       42, 48, 54, 52, 38, 35, 54, 44, 56, 54, 44, 42, 45, 44,
       38, 38, 34, 38, 44, 48, 44, 34, 34, 42, 40, 48, 54,
@@ -223,7 +212,6 @@ describe('VARJYAM_OFFSET_GHATIKAS vs AMRIT_KALA_OFFSET_GHATIKAS: cross-table pin
 
 describe('computeVarjyam: elastic ghatikas (synthetic varying nakshatra duration)', () => {
   it('25-day synthetic period → window width ≈ 88.89 min (Anuradha, offset 10)', () => {
-    // A high-offset nakshatra would push the window past nextSunrise here.
     const sunrise = new Date('2025-06-01T00:00:00Z');
     const nextSunrise = new Date(sunrise.getTime() + 24 * 3600_000);
     const moon = syntheticMoon(sunrise, 16, 25);
@@ -276,7 +264,6 @@ describe('computeVarjyam: real ephemeris (smoke tests)', () => {
   });
 
   it('produces a non-null window for a meaningful share of days in a 30-day sweep', () => {
-    // A day's varjyam can fall wholly outside the day, so the floor is loose.
     const cache = new LongitudeCache('lahiri');
     const getMoon = (d: Date) => cache.getMoon(d);
     let nonNull = 0;

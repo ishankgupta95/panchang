@@ -222,7 +222,6 @@ export const hi: PanchangTranslations = {
     magha_shanivar: 'माघ शनिवार',
     surya_grahan: 'सूर्य ग्रहण',
     chandra_grahan: 'चंद्र ग्रहण',
-    // {name}/{masa}/{time} are substituted at use
     desc_ekadashi_viddha_vaishnava_next: 'दशमी-विद्धा: स्मार्त व्रत आज; वैष्णव व्रत अगले दिन (द्वादशी)।',
     desc_ekadashi_viddha_vaishnava_today: 'दशमी-विद्धा एकादशी: वैष्णव व्रत आज (द्वादशी)।',
     desc_ekadashi_vriddha_dwadashi_next: 'वृद्धा द्वादशी: स्मार्त व्रत आज; वैष्णव व्रत अगले दिन (द्वादशी)।',

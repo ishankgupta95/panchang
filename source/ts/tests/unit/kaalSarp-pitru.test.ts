@@ -190,7 +190,6 @@ describe('computePitruDosha: Sun + node conjunction', () => {
   });
 
   it('Sun + Saturn in 9th house → afflicted', () => {
-    // With lagna at 0 the 9th house is rashi 8, so 245 and 250 share it.
     const chart = makeChart({
       Sun: 245,
       Saturn: 250,

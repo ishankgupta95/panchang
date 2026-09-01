@@ -6,7 +6,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// Houses each graha aspects beyond the universal 7th (BPHS Ch. 26), 0-based.
 var specialOffsets = [types.GrahaCount][]int{
 	types.GrahaSun:     {},
 	types.GrahaMoon:    {},
@@ -19,7 +18,6 @@ var specialOffsets = [types.GrahaCount][]int{
 	types.GrahaKetu:    {},
 }
 
-// Rahu/Ketu 5th and 9th (BV Raman, KP; not BPHS).
 var node59Offsets = [2]int{4, 8}
 
 type NodeAspects string

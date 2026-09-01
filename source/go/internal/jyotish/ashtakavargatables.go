@@ -33,8 +33,6 @@ func (c AshtakavargaContributor) String() string {
 	return types.VisibleGraha(c).String()
 }
 
-// 1-based house offsets at which a contributor donates a bindu (BPHS Ch. 66 Santhanam).
-// The 9th in the Mars-Sun row is deliberate: it is what gives the canonical 337 total.
 var BeneficOffsets = [types.VisibleGrahaCount][ContributorCount][]int{
 	types.VisibleSun: {
 		ContributorSun:     {1, 2, 4, 7, 8, 9, 10, 11},
@@ -120,7 +118,6 @@ var BhinnashtakaTotal = [types.VisibleGrahaCount]int{
 
 const SarvashtakaTotal = 337
 
-// Cancer and Leo have single rulers, hence five pairs.
 var EkadhipatyaPairs = [5][2]int{
 	{0, 7},
 	{1, 6},

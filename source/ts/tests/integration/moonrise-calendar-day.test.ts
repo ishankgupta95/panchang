@@ -1,5 +1,3 @@
-// `getMoonrise` searches up to two days ahead, so on a day with no moonrise the
-// publishing layer must clamp to `null` or one instant is published twice.
 
 import { describe, it, expect } from 'vitest';
 import { getDailyPanchang } from '../../src/core/panchang';

@@ -1,4 +1,3 @@
-// Package jsnum implements JavaScript's numeric semantics where Go's differ.
 package jsnum
 
 import (
@@ -7,23 +6,19 @@ import (
 	"strings"
 )
 
-// Typed float64: untyped math.Pi rounds once where JS rounds twice.
 const PI = float64(math.Pi)
 
-// Round is Math.round: ties toward +∞, not math.Round; math.Floor(x+0.5) misrounds 0.49999999999999994.
 func Round(x float64) float64 {
 	if math.IsNaN(x) || math.IsInf(x, 0) || x == 0 {
 		return x
 	}
 	f := math.Floor(x)
-	// FMA barrier.
 	if float64(x-f) < 0.5 {
 		return f
 	}
 	return f + 1
 }
 
-// FormatFloat is ECMA-262 Number::toString(x, 10): 0.000028547284 where Go writes 2.8547284e-05.
 func FormatFloat(v float64) string {
 	switch {
 	case math.IsNaN(v):
@@ -33,7 +28,6 @@ func FormatFloat(v float64) string {
 	case math.IsInf(v, -1):
 		return "-Infinity"
 	case v == 0:
-		// String(-0) is "0".
 		return "0"
 	}
 	neg := math.Signbit(v)
@@ -90,7 +84,6 @@ func FormatInt(v int64) string {
 	return FormatFloat(float64(v))
 }
 
-// Math.hypot, not math.Hypot: the Kahan accumulation lands ~1 ULP away.
 func Hypot2(a, b float64) float64 {
 	max := math.Abs(a)
 	if v := math.Abs(b); v > max {
@@ -123,7 +116,6 @@ func Hypot3(a, b, c float64) float64 {
 	return math.Sqrt(sum) * max
 }
 
-// FMA barrier.
 func hypotAccumulate(n, sum, compensation float64) (float64, float64) {
 	summand := float64(n*n) - compensation
 	preliminary := sum + summand

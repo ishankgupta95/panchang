@@ -1,4 +1,3 @@
-// Package treecheck enforces source/ts/src/a/b/cName.ts ↔ source/go/internal/a/b/cname.go, 1:1.
 package treecheck
 
 import (
@@ -104,7 +103,6 @@ func (r *Report) Problems() []string {
 	return out
 }
 
-// Only the basename is lowercased: case-folding a directory would hide a real mismatch.
 func GoPathFor(ts string) (string, error) {
 	if !strings.HasPrefix(ts, tsRoot) {
 		return "", fmt.Errorf("treecheck: %q is not under %s", ts, tsRoot)
@@ -397,7 +395,6 @@ func normalisePattern(p, root string, policy rootPolicy) (string, error) {
 	return root + p, nil
 }
 
-// `testdata/` is deliberately absent, so a `.go` file dropped there is visible.
 var skipDirs = map[string]bool{
 	"source/go/parity/out": true,
 	"node_modules":         true,

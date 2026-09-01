@@ -65,8 +65,6 @@ function transformFor(divisional: Exclude<Divisional, 'D9'>): (lon: number) => n
   }
 }
 
-// Deliberately unclamped: within ~4e-15 of a sub-boundary the floor steps a sign
-// early while the longitude stays right, and no real ephemeris value is that close.
 function horaLongitude(siderealLon: number): number {
   const rashi = Math.floor(siderealLon / 30);
   const degInRashi = siderealLon - rashi * 30;
@@ -130,7 +128,6 @@ function dwadasamsaLongitude(siderealLon: number): number {
   return normalize360(targetRashi * 30 + degInTargetRashi);
 }
 
-// BPHS lord order Mars/Saturn/Jupiter/Mercury/Venus in odd signs, reversed in even.
 const TRIMSA_ODD_BOUNDARIES = [0, 5, 10, 18, 25, 30] as const;
 const TRIMSA_ODD_RASHIS = [
   0,  // 0-5°   → Mars     (Aries)

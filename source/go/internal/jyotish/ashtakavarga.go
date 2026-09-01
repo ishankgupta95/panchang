@@ -123,7 +123,6 @@ func applyTrikonaSodhana(grid types.BhinnashtakaGrid) types.BhinnashtakaGrid {
 	return out
 }
 
-// PVR Narasimha Rao / PyJHora: a vacant cell takes its partner's value, not zero (Maitreya differs).
 func applyEkadhipatyaSodhana(grid types.BhinnashtakaGrid, occupied [12]bool) types.BhinnashtakaGrid {
 	out := make(types.BhinnashtakaGrid, len(grid))
 	copy(out, grid)

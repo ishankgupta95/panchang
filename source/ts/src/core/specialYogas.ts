@@ -41,7 +41,6 @@ export function computeSpecialYogas(
     results.push({ name: nameResolver('sarvartha_siddhi'), type: 'sarvartha_siddhi' });
   }
 
-  // Pushya is nakshatra index 7.
   if (varaIndex === 0 && nakshatraIndex === 7) {
     results.push({ name: nameResolver('ravi_pushya'), type: 'ravi_pushya' });
   }
@@ -70,8 +69,6 @@ export function computeSpecialYogas(
     results.push({ name: nameResolver('jwalamukhi'), type: 'jwalamukhi' });
   }
 
-  // Aadal / Vidaal count the Moon-from-Sun distance in the 28-nakshatra scheme
-  // (Abhijit included); Ravi below counts it in the 27 without.
   const moonNak28 = to28(nakshatraIndex);
   const sunNak28 = to28(suryaNakshatraIndex);
   const distance28 = ((moonNak28 - sunNak28 + 28) % 28) + 1;

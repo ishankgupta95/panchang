@@ -61,7 +61,7 @@ func TestCoveredNamesExist(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	text := string(src)
+	text := regexp.MustCompile(`[ \t]+`).ReplaceAllString(string(src), " ")
 	for ts, goName := range covered {
 		var want string
 		switch {
@@ -69,6 +69,8 @@ func TestCoveredNamesExist(t *testing.T) {
 			want = "func (s *Session) " + strings.TrimPrefix(goName, "(*Session).") + "("
 		case strings.HasPrefix(goName, "type "):
 			want = strings.TrimPrefix(goName, "type ") + " = "
+		case strings.HasPrefix(goName, "const "):
+			want = strings.TrimPrefix(goName, "const ") + " = "
 		default:
 			want = "func " + goName + "("
 		}
@@ -115,11 +117,15 @@ var covered = map[string]string{
 	"ALL_SAHAM_NAMES":                  "AllSahamNames",
 	"ASHTOTTARI_ORDER":                 "AshtottariOrder",
 	"ASHTOTTARI_YEARS":                 "AshtottariYears",
+	"MODERN_REFERENCE":                 "ModernReference",
 	"CHARA_RASHI_YEARS":                "CharaRashiYears",
 	"GRAHA_ABBR":                       "GrahaAbbr",
+	"IST_OFFSET_MINUTES":               "const ISTOffsetMinutes",
+	"IST_TIMEZONE":                     "const ISTTimezone",
 	"PanchangError":                    "type Error",
 	"SAMA_PADA_RASHIS":                 "SamaPadaRashis",
 	"STOCK_MUHURTA_RULES":              "StockMuhurtaRules",
+	"TRADITIONAL_REFERENCE":            "TraditionalReference",
 	"VISHAMA_PADA_RASHIS":              "VishamaPadaRashis",
 	"YOGINI_ORDER":                     "YoginiOrder",
 	"YOGINI_PLANET":                    "YoginiPlanet",
@@ -232,6 +238,8 @@ var covered = map[string]string{
 	"karnavedhaRule":                   "KarnavedhaRule",
 	"mundanRule":                       "MundanRule",
 	"namakaranaRule":                   "NamakaranaRule",
+	"referenceLocation":                "ReferenceLocation",
+	"resolveLocation":                  "ResolveLocation",
 	"scoreMuhurta":                     "(*Session).ScoreMuhurta",
 	"seemanthamRule":                   "SeemanthamRule",
 	"shopOpeningRule":                  "ShopOpeningRule",

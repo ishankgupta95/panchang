@@ -165,7 +165,6 @@ describe('computeVimshottariDasha', () => {
   });
 
   describe('antardasha proportional correctness', () => {
-    // 3.33 = the 20-year Venus mahadasha times its own 20/120 share.
     it('Venus/Venus antardasha ≈ 3.33 years', () => {
       const result = computeVimshottariDasha(BIRTH_DATE, MOON_LON_ASHWINI_START);
       const venusMD = result.mahaDashas.find(md => md.lord === 'Venus');
@@ -271,7 +270,6 @@ describe('asOfDate', () => {
   });
 
   it('is not range-validated, unlike birthDate', () => {
-    // Selects a row in an already-computed table, so no ephemeris range applies.
     expect(() => computeVimshottariDasha(BIRTH, MOON, new Date('2500-01-01T00:00:00Z')))
       .not.toThrow();
   });

@@ -112,7 +112,6 @@ func placidusCusps(mcTropical, ayanamsa, lstDeg, latitudeDeg, epsRad float64) ([
 	thetaRad := utils.DegToRad(lstDeg)
 	phiRad := utils.DegToRad(latitudeDeg)
 
-	// Deliberately recomputed: the lagna spells the rad→deg conversion differently.
 	ascTropical := computeAscTropical(thetaRad, phiRad, epsRad)
 
 	cusp11Trop, err := solvePlacidus(11, thetaRad, phiRad, epsRad, utils.Normalize360(mcTropical+30))

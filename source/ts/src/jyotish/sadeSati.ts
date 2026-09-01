@@ -14,7 +14,6 @@ const MAX_FORWARD_SCAN_DAYS = 30 * 365;
 /** Active arcs are ≤ 7.5 y. */
 const MAX_BACKWARD_SCAN_DAYS = 12 * 365;
 
-// Must stay on the same apparent-position path as `computePlanetaryPositions`.
 function saturnSiderealLongitude(date: Date, ayanamsa: AyanamsaType): number {
   const tropical = getTropicalPlanetLongitude('saturn', date);
   return normalize360(tropical - computeAyanamsa(date, ayanamsa));
@@ -110,7 +109,6 @@ function refineBoundary(
   for (let i = 0; i < COARSE_STEP * 2; i++) {
     const next = new Date(date.getTime() + stepMs);
     if (!isInArc(saturnRashi(next, ayanamsa))) {
-      // `date` is the last inside day; `next` is the first outside day.
       return direction === 'forward' ? next : date;
     }
     date = next;

@@ -69,7 +69,6 @@ func TestLagnaDecompositionIsSelfConsistent(t *testing.T) {
 	}
 }
 
-// Angular pairs are exact; trisected ones come from independent calls, so only close.
 func TestSripatiCuspsAreOppositeBy180(t *testing.T) {
 	ctx := astronomy.NewEphemerisCtx()
 	base := types.DateUTC(2025, 0, 14).Ms()
@@ -195,7 +194,6 @@ func TestSripatiAtTheEquatorIsNotEqualHouse(t *testing.T) {
 		"= %g deg, NOT the equal-house chart", worstArc, predicted, worstEqual)
 }
 
-// All three share the Sun's sunrise longitude, so differencing two instants in one day cancels it.
 func TestSpecialLagnaRatesAreTheDocumentedOnes(t *testing.T) {
 	ctx := astronomy.NewEphemerisCtx()
 	t0 := types.DateUTC(2025, 0, 14).Ms() + 6*3600_000
@@ -251,7 +249,6 @@ func TestSpecialLagnaRatesAreTheDocumentedOnes(t *testing.T) {
 		rates["hora"], rates["ghati"], rates["bhava"])
 }
 
-// The > versus >= boundary at the sunrise instant, unreachable by sampling.
 func TestFindSunriseBeforeBracketsTheInstant(t *testing.T) {
 	ctx := astronomy.NewEphemerisCtx()
 	day := types.DateUTC(2025, 0, 14).Ms()
@@ -392,7 +389,6 @@ func TestLagnaRejectsInvalidInput(t *testing.T) {
 	}
 }
 
-// On the bytes, not len: len(nil) == 0 passes while the wire is wrong.
 func TestSripatiCuspsMarshalAsAnArray(t *testing.T) {
 	ctx := astronomy.NewEphemerisCtx()
 	c, err := ComputeSripatiLagnaWithCusps(ctx, types.DateUTC(2025, 0, 14).Ms(),

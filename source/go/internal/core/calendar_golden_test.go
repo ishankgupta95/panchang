@@ -397,7 +397,6 @@ func TestChaitraCacheIsRaceFreeAndOrderIndependent(t *testing.T) {
 	for g := 0; g < goroutines; g++ {
 		go func(g int) {
 			defer func() { done <- g }()
-			// A private ctx per goroutine: it is per-request state.
 			gctx := &astronomy.EphemerisCtx{}
 			out := make([]int64, len(years))
 			stride := 1 + 2*g // odd, hence coprime with len(years) == 64

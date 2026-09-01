@@ -77,8 +77,6 @@ describe('computePlanetaryPositions', () => {
     );
 
     it('Sun should be in Dhanus or Makara (Sagittarius/Capricorn transition)', () => {
-      // Makar Sankranti is the Sun entering Makara, so at this instant it can
-      // still be at the end of Dhanus (8) or already in Makara (9).
       expect([8, 9]).toContain(pp.sun.rashi.index);
     });
 
@@ -131,7 +129,6 @@ describe('computePlanetaryPositions', () => {
     const pp = computePlanetaryPositions(JUL_04_2025, 'lahiri');
 
     it('Mars, Jupiter, or Saturn can be retrograde', () => {
-      // Which of them is retrograde depends on the date, so only the flag is checked.
       expect(typeof pp.mars.isRetrograde).toBe('boolean');
       expect(typeof pp.jupiter.isRetrograde).toBe('boolean');
       expect(typeof pp.saturn.isRetrograde).toBe('boolean');

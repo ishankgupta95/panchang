@@ -1,5 +1,3 @@
-// Command dump emits the same JSON document the TypeScript dump.src.ts does.
-// The writer is hand-rolled because key order is the contract.
 package main
 
 import (
@@ -43,7 +41,6 @@ func fatal(err error) {
 	os.Exit(1)
 }
 
-// JavaScript does not escape <, > or &.
 func enc(v any) string {
 	var b []byte
 	buf := &jsonBuf{}
@@ -129,7 +126,6 @@ func blankInstantFestivals(v any) any {
 	return r
 }
 
-// ok=false with no error is the polar "no Hindu day" outcome.
 func safe[T any](v T, ok bool, err error) any {
 	if err != nil {
 		return leafFor(err)
@@ -220,7 +216,6 @@ var shapes = []shape{
 			},
 		}
 	}},
-	// 0 is Mesha / Ashwini, a real value, not "absent".
 	{"s5-janma0", func(tz types.Timezone) core.PanchangOptions {
 		return core.PanchangOptions{
 			Timezone: tz,
@@ -336,7 +331,6 @@ func isoDay(ms int64) string { return types.Date(ms).ISOString()[:10] }
 
 var natalResolvers = jyotish.CoreNatalResolvers()
 
-// One per result: sharing one document-wide escapes any single-entry comparison.
 func newCtx() *astronomy.EphemerisCtx { return &astronomy.EphemerisCtx{} }
 
 func writeMeta(doc *obj) {
@@ -462,7 +456,6 @@ func writeDaily(doc *obj) {
 	daily.end()
 }
 
-// Sub-second parts, where a float→int mismatch would show.
 func instantsFor(ep epoch) []int64 {
 	return []int64{
 		ep.StartMs + 17*60_000,
@@ -568,7 +561,6 @@ func writeCharts(doc *obj) {
 
 		chart, chartErr := jyotish.ComputeRashiChart(newCtx(), ms, loc, lahiriOpts)
 		navamsa, navErr := jyotish.ComputeNavamsa(newCtx(), ms, loc, lahiriOpts)
-		// Unguarded in the TypeScript, so a Go error is fatal, not a leaf.
 		if chartErr != nil {
 			fatal(fmt.Errorf("%s rashiChart: %w", ev.Name, chartErr))
 		}
@@ -653,7 +645,6 @@ func writeCharts(doc *obj) {
 		c.put("pitru", jyotish.ComputePitruDosha(&chart))
 		c.put("sadeSati", safe2(jyotish.ComputeSadeSati(newCtx(), chart.ByPlanet.Moon.Rashi.Index, pinMs, types.Lahiri)))
 
-		// Age 30 puts the 2088 event past validateDate's window; the leaf is intended.
 		c.put("varshaphalaAge30", safe2(jyotish.ComputeVarshaphala(newCtx(), ms, 30, loc, lahiriOpts)))
 		c.put("varshaphalaAge5", safe2(jyotish.ComputeVarshaphala(newCtx(), ms, 5, loc, lahiriOpts)))
 		c.put("tithiPraveshaAge30", safe2(jyotish.ComputeTithiPravesha(newCtx(), ms, 30, loc, lahiriOpts)))
@@ -774,7 +765,6 @@ func readFixturePairs() []fixturePair {
 	return out
 }
 
-// Reach the optional NatalMoon fields no fixture pair carries; 0 is a real value.
 var syntheticPairs = []fixturePair{
 	{
 		label: "synthetic-1-full-natal-moon",
@@ -874,7 +864,6 @@ type convertRoundTrip struct {
 func writeConvert(doc *obj) {
 	cv := doc.obj("convert")
 
-	// Opening roundTrip before gregorianToHindu closes would interleave them.
 	roundTrips := []convertRoundTrip{}
 	g2h := cv.obj("gregorianToHindu")
 	for _, l := range locations {
@@ -909,7 +898,6 @@ func writeConvert(doc *obj) {
 	}
 	rt.end()
 
-	// The solar anchor is location-dependent.
 	hny := cv.obj("hinduNewYear")
 	regions := make([]types.FestivalRegion, 0, len(canonicalRegions)+len(legacyRegions))
 	regions = append(regions, canonicalRegions...)
@@ -926,7 +914,6 @@ func writeConvert(doc *obj) {
 	}
 	hny.end()
 
-	// These dates straddle the Chaitra boundary, where both increment.
 	sv := cv.obj("samvat")
 	for _, ep := range epochs {
 		for _, md := range [][2]int{{0, 1}, {2, 15}, {2, 25}, {3, 5}, {11, 31}} {
@@ -971,7 +958,6 @@ func writeConstants(doc *obj) {
 	yp.end()
 
 	k.put("CHARA_RASHI_YEARS", jyotish.CharaRashiYears[:])
-	// Sets in the TypeScript, so JSON.stringify gives {}.
 	k.obj("VISHAMA_PADA_RASHIS").end()
 	k.obj("SAMA_PADA_RASHIS").end()
 	k.put("ALL_SAHAM_NAMES", jyotish.AllSahamNames[:])
@@ -1081,7 +1067,6 @@ func writeHelpers(doc *obj) {
 	}
 	vty.end()
 
-	// 0.37° is coprime with every sub-lord boundary: the sweep lands in all 249.
 	kp := h.arr("kpSubLord")
 	for x := 0.0; x < 360; x += 0.37 {
 		kp.push(jyotish.ComputeKpSubLord(x))
@@ -1198,7 +1183,6 @@ func writeTables(doc *obj) {
 			if err := os.WriteFile(path, raw, 0o644); err != nil {
 				fatal(err)
 			}
-			// obscuration and magnitude end in platform asin/sqrt, never bit-identical.
 			if strings.HasPrefix(f.name, "eclipses-") {
 				sum := sha256.Sum256(maskEclipseFloats(raw))
 				hashes.put(f.name+"|floats-masked", hex.EncodeToString(sum[:]))
@@ -1236,7 +1220,6 @@ func label() string {
 	return "go-" + string(stage)
 }
 
-// Number.prototype.toFixed(2): half away from zero, on the decimal expansion.
 func toFixed2(x float64) string { return strconv.FormatFloat(x, 'f', 2, 64) }
 
 func parseISOInstant(iso string) (int64, error) {

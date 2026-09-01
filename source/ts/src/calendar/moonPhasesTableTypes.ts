@@ -1,5 +1,3 @@
-// No runtime imports: the engine-free `panchang-ts/moon-phases` entry reads it,
-// hence the re-declared phase union.
 
 export type MoonPhasesTableLanguage = 'en' | 'hi';
 
@@ -57,8 +55,6 @@ export interface MoonPhasesFile {
   _dict: MoonPhaseDictEntry[];
   years: Record<string, PackedMoonPhaseTableDay[]>;
 }
-
-// v1, still readable: consumers cache these files.
 
 export interface MoonPhaseTableEntryRaw {
   name: LocalizedString;

@@ -8,7 +8,6 @@ import (
 
 const samvatDayMs = 86_400_000
 
-// The 60-year Jovian (Barhaspatya) cycle, spelled as the reference almanac transliterates it.
 var samvatsaraNames = [60]string{
 	"Prabhava", "Vibhava", "Shukla", "Pramoda", "Prajapati", "Angirasa",
 	"Shrimukha", "Bhava", "Yuva", "Dhata", "Ishvara", "Bahudhanya",
@@ -53,7 +52,6 @@ func ChaitraNewMoon(ctx *astronomy.EphemerisCtx, gregYear int) (int64, error) {
 	return result, nil
 }
 
-// Both eras turn at Chaitra Shukla Pratipada, a tithi floating between March 19 and April 14.
 func ComputeSamvat(ctx *astronomy.EphemerisCtx, dateMs int64) (types.SamvatInfo, error) {
 	gregYear := types.Date(dateMs).UTCFullYear()
 	chaitra, err := ChaitraNewMoon(ctx, gregYear)

@@ -44,7 +44,6 @@ func TestSolverMatchesExactBisection(t *testing.T) {
 				t.Fatalf("day %d: %v", d, err)
 			}
 
-			// A fresh cache, so the bisection is not reading the solver's memo.
 			bisectCtx := NewEphemerisCtx()
 			bisectCache, err := NewLongitudeCache(bisectCtx, types.Lahiri, ModeInterpolated)
 			if err != nil {
@@ -85,7 +84,6 @@ func TestSolverMatchesExactBisection(t *testing.T) {
 		"(bound %d ms, the solver's budget)", checked, worst, tolMs)
 }
 
-// An early root lets the cursor re-emit the tithi it just closed.
 func TestSolverIsNeverEarly(t *testing.T) {
 	ctx := NewEphemerisCtx()
 	cache, err := NewLongitudeCache(ctx, types.Lahiri, ModeInterpolated)

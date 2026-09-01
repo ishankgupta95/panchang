@@ -12,7 +12,6 @@ export type LongitudeCacheMode = 'exact' | 'interpolated';
 
 const DAY_MS = 86_400_000;
 
-// More nodes do not reduce the fit error: these sit at the theory's own resolution floor.
 const MOON_BLOCK_MS = 4 * DAY_MS;
 const MOON_NODES = 10;
 const SUN_BLOCK_MS = 8 * DAY_MS;
@@ -65,7 +64,6 @@ class ChebyshevLongitude {
       this.nodeY[k] = y;
       previous = y;
 
-      // Barycentric weights for Chebyshev points of the second kind.
       this.weight[k] = (k === 0 || k === nodes - 1 ? 0.5 : 1) * (k % 2 ? -1 : 1);
     }
   }
@@ -114,7 +112,6 @@ function blockFor(
   store.set(index, interpolant);
   return { interpolant, built: true };
 }
-
 
 export class LongitudeCache {
   private readonly ayanamsaType: AyanamsaType;

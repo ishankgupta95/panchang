@@ -71,7 +71,6 @@ func TestValidateLocationMessagesUseJSNumberFormatting(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected a rejection")
 	}
-	// JavaScript writes 1e21 without the `+` Go's 'g' emits.
 	if want := "Elevation must be >= -500 meters, got -1e+21"; err.Error() != want {
 		t.Errorf("message %q, want %q", err.Error(), want)
 	}

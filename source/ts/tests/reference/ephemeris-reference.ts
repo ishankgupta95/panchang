@@ -1,5 +1,3 @@
-// Frozen, untruncated reference: geocentric apparent, true ecliptic of date. It
-// duplicates `src/astronomy/`'s frame layer on purpose; sharing blinds the test.
 import {
   readVsop87d, readElp2000, readNutation,
   type VsopBody, type VsopSeries,
@@ -16,8 +14,6 @@ const TURN_ARCSEC = 1_296_000;
 const KM_PER_LIGHT_DAY = 299_792.458 * 86_400;
 const AU_KM = 149_597_870.7;
 
-// IAU 2006 (Capitaine, Wallace & Chapront 2003), arcseconds. Precession-only: the
-// ±2.650545″ of some tables is GCRS bias, and ELP's J2000 is the dynamical equinox.
 function precessionAngles(t: number): { zeta: number; z: number; theta: number } {
   return {
     zeta: (2306.083227 + (0.2988499 + (0.01801828 + (-0.000005971 + -0.0000003173 * t) * t) * t) * t) * t,
@@ -47,8 +43,6 @@ const rotZ = (v: Vec3, a: number): Vec3 => {
   return [c * v[0] - s * v[1], s * v[0] + c * v[1], v[2]];
 };
 
-// IERS Conventions 2003, radians; order matches the multiplier columns of
-// tables 5.3a/5.3b.
 export function fundamentalArguments(t: number): number[] {
   const poly = (c0: number, c1: number, c2: number, c3: number, c4: number): number =>
     ((c0 + (c1 + (c2 + (c3 + c4 * t) * t) * t) * t) % TURN_ARCSEC) * ARCSEC_TO_RAD;
@@ -89,8 +83,6 @@ export function nutationReference(t: number): { dpsi: number; deps: number } {
   return { dpsi: sum(psi), deps: sum(eps) };
 }
 
-// Reads `NUTATION_*` from `src/` on purpose: the arithmetic is under test, not
-// the coefficients, so both sides must start from identical numbers.
 export function truncatedNutationDirectReference(t: number): { dpsi: number; deps: number } {
   const args = fundamentalArguments(t);
   const sum = (coefficients: Float64Array, multipliers: Int8Array): number => {
@@ -113,7 +105,6 @@ export function truncatedNutationDirectReference(t: number): { dpsi: number; dep
   };
 }
 
-// Heliocentric spherical, mean dynamical ecliptic of date: radians, radians, AU.
 export function vsopReference(body: VsopBody, jdTt: number): [number, number, number] {
   const tau = (jdTt - 2451545.0) / 365250;
   const series: VsopSeries = readVsop87d().get(body)!;
@@ -133,15 +124,12 @@ export function vsopReference(body: VsopBody, jdTt: number): [number, number, nu
   return out as [number, number, number];
 }
 
-// The constants block of `elp82b.f`, verbatim: `w`, `eart`, `peri` the mean-longitude
-// polynomials, `p` the planetary mean longitudes, `delnu`…`delep` the DE200/LE200 fit.
 const ELP = (() => {
   const rad = 648000 / Math.PI, deg = Math.PI / 180, c1 = 60, c2 = 3600;
   const ath = 384747.9806743165, a0 = 384747.9806448954;
   const am = 0.074801329518, alfa = 0.002571881335;
   const dtasm = (2 * alfa) / (3 * am);
 
-  // Indices follow the FORTRAN: w[i][k], k = 1…5 are the polynomial powers.
   const w: number[][] = [[], [], [], []];
   const eart: number[] = [], peri: number[] = [];
   w[1]![1] = (218 + 18 / c1 + 59.95571 / c2) * deg;
@@ -194,12 +182,9 @@ const ELP = (() => {
   return { rad, deg, ath, a0, am, dtasm, w, p, del, zeta, delnu, dele, delg, delnp, delep };
 })();
 
-// `elp82b.f`'s closing precession matrix: ecliptic of date → ELP inertial J2000.
 const ELP_P = [0.10180391e-4, 0.47020439e-6, -0.5417367e-9, -0.2507948e-11, 0.463486e-14];
 const ELP_Q = [-0.113469002e-3, 0.12372674e-6, 0.1265417e-8, -0.1371808e-11, -0.320334e-14];
 
-// `elp82b.f` up to but not including its final rotation, `prec` fixed at zero:
-// radians and km, ecliptic of date, longitude from the inertial J2000 origin.
 export function elpSphericalReference(jdTt: number): { lon: number; lat: number; dist: number } {
   const tables = readElp2000();
   const t = [0, 1, 0, 0, 0, 0];
@@ -227,7 +212,6 @@ export function elpSphericalReference(jdTt: number): { lon: number; lat: number;
         r[iv] = r[iv]! + a * Math.sin(y % (2 * Math.PI));
       }
     } else if (file <= 9 || file >= 22) {
-      // Earth figure, tides, relativity, solar eccentricity.
       for (const { iz, ilu, pha, a } of tables.pert[file]!) {
         let x = a;
         if (file >= 7 && file <= 9) x *= t[2]!;
@@ -241,7 +225,6 @@ export function elpSphericalReference(jdTt: number): { lon: number; lat: number;
         r[iv] = r[iv]! + x * Math.sin(y % (2 * Math.PI));
       }
     } else {
-      // Tables 1 and 2 index their multipliers differently: `ific.ge.16`.
       for (const { ipla, pha, a } of tables.planet[file]!) {
         let x = a;
         if (file >= 13 && file <= 15) x *= t[2]!;
@@ -270,8 +253,6 @@ export function elpSphericalReference(jdTt: number): { lon: number; lat: number;
   };
 }
 
-// The p/q matrix carries the ecliptic plane back to J2000 but holds no rotation
-// about the pole, so IAU 2006 precession must follow to move the origin to date.
 function elpToEclipticOfDate(lon: number, lat: number, dist: number, t: number): Vec3 {
   const cl = dist * Math.cos(lat);
   const x1 = cl * Math.cos(lon), x2 = cl * Math.sin(lon), x3 = dist * Math.sin(lat);
@@ -285,7 +266,6 @@ function elpToEclipticOfDate(lon: number, lat: number, dist: number, t: number):
     pwqw * x1 + qw2 * x2 - qw * x3,
     -pw * x1 + qw * x2 + (pw2 + qw2 - 1) * x3,
   ];
-  // Ecliptic J2000 → equatorial J2000 → equatorial of date → ecliptic of date.
   const { zeta, z, theta } = precessionAngles(t);
   v = rotX(v, EPS0_ARCSEC * ARCSEC_TO_RAD);
   v = rotZ(v, zeta * ARCSEC_TO_RAD);
@@ -304,8 +284,6 @@ export interface ApparentPosition {
 
 const norm360 = (d: number): number => ((d % 360) + 360) % 360;
 
-// VSOP87D is already of date, so the corrections are light-time, nutation in
-// longitude, and the VSOP87 to FK5 offset of -0.09033″ (Bretagnon & Francou 1988).
 export function sunApparentReference(jdTt: number): ApparentPosition {
   const t = (jdTt - 2451545.0) / 36525;
   const [, , r0] = vsopReference('ear', jdTt);
@@ -321,13 +299,9 @@ export function sunApparentReference(jdTt: number): ApparentPosition {
   };
 }
 
-// No stellar-aberration term, deliberately: the observer's velocity is shared by
-// the Moon and cancels against the barycentric part of the light-time term.
 export function moonApparentReference(jdTt: number): ApparentPosition {
   const first = elpSphericalReference(jdTt);
   const tau = first.dist / KM_PER_LIGHT_DAY;
-  // Position at the retarded epoch, nutation at the observation epoch; the
-  // equinox mismatch that buys is worth 2 × 10⁻⁶″.
   const retarded = (jdTt - tau - 2451545.0) / 36525;
   const s = elpSphericalReference(jdTt - tau);
   const v = elpToEclipticOfDate(s.lon, s.lat, s.dist, retarded);
@@ -339,8 +313,6 @@ export function moonApparentReference(jdTt: number): ApparentPosition {
   };
 }
 
-// The Earth is read at the retarded epoch too: to first order, reading the
-// observer τ earlier is annual aberration.
 export function planetApparentReference(body: VsopBody, jdTt: number): ApparentPosition {
   const t = (jdTt - 2451545.0) / 36525;
   let tau = 0;

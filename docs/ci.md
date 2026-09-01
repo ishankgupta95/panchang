@@ -15,22 +15,27 @@ it.
 Five pieces, in the order they should run and roughly in order of what they
 cost:
 
-| | what it answers | where |
-|---|---|---|
-| **hygiene** | did a rule that regresses silently regress? em/en dashes, absolute developer paths, links to documents that do not ship, the vendor name. Runs as the first step of the tree job, since it needs no toolchain and takes a second | `hygiene.sh` |
-| **tree correspondence** | did a `source/ts/src/` file arrive without a Go counterpart, or a Go file without a justification? | `tree.sh` → `cmd/treecheck` → `internal/treecheck` |
-| **goldens** | did `source/ts/src/` behaviour move without the pinned answers moving with it? | `goldens.sh` → `parity/goldens.sh` |
-| **generators** | does each language's generated coefficient series still match the generator that writes it? | `GEN_FULL=1 go test ./internal/gen/` and `generate/notes/ephemeris-generate.sh` |
-| **parity** | do the two implementations still agree, leaf for leaf, inside the parity bands? | `parity.sh` → `parity/gate.mjs` + `parity/tables-gate.mjs` over `parity/bands.json` |
+| | what it answers | where | runs |
+|---|---|---|---|
+| **hygiene** | did a rule that regresses silently regress? em/en dashes, absolute developer paths, links to documents that do not ship, the vendor name. First step of the `typescript` job, since it needs no toolchain and takes a second | `hygiene.sh` | every PR |
+| **tree correspondence** | did a `source/ts/src/` file arrive without a Go counterpart, or a Go file without a justification? | `tree.sh` → `cmd/treecheck` → `internal/treecheck` | every PR, as `TestTreeCorrespondence` inside `go test` |
+| **parity** | do the two implementations still agree, leaf for leaf, inside the parity bands? | `parity.sh` → `parity/gate.mjs` + `parity/tables-gate.mjs` over `parity/bands.json` | every PR, stage `full` |
+| **goldens** | did `source/ts/src/` behaviour move without the pinned answers moving with it? | `goldens.sh` → `parity/goldens.sh` | **release only**, §2.2 |
+| **generators** | does each language's generated coefficient series still match the generator that writes it? | `GEN_FULL=1 go test ./internal/gen/` and `generate/notes/ephemeris-generate.sh` | **release only** |
 
-**The generators piece is the one a two-language tree needs and a one-language
-tree does not.** Both languages ship a truncated copy of the same published
-coefficient tables, and each copy is written by a generator. Editing a generated
-file without editing its generator is silent until somebody regenerates, at
-which point the edit vanishes. Neither check runs in the ordinary suite: the Go
-one sits behind `GEN_FULL` because it takes three minutes, and the TypeScript
-side has no test at all, so CI runs both explicitly. Both drifted during the
-2026-08-29 cleanup and neither ordinary suite noticed.
+The last two run in `ci/prerelease.sh` on `darwin/arm64` and **not** on any runner. Both compare
+bytes that V8's own `Math` produced on the pinning host, so a runner can only ever disagree with
+them; §2.2 has the measurement.
+
+**Know what that costs, because generators is the one gate with no substitute on the PR path.**
+Both languages ship a truncated copy of the same published coefficient tables, and each copy is
+written by a generator. Editing a generated file without editing its generator is silent until
+somebody regenerates, at which point the edit vanishes. Neither half runs in the ordinary suite
+either: the Go one self-skips without `GEN_FULL=1` because it takes three minutes, and the
+TypeScript side has no test at all. Both drifted during the 2026-08-29 cleanup and neither
+ordinary suite noticed. So between releases, a generated-file edit is caught by nobody. If that
+becomes a real problem rather than a theoretical one, the Go half can run on any host once the
+byte-exact comparison is relaxed to the truncation budgets.
 
 and, separately from CI, `release-check.sh` + [`docs/release.md`](release.md) for the
 third item, release lockstep.
@@ -39,29 +44,26 @@ third item, release lockstep.
 
 ## 1. The workflow, and where it lives
 
-One file, `.github/workflows/ci.yml`, with three gate jobs and a release job:
+One file, `.github/workflows/ci.yml`, with three gate jobs and nothing else:
 
 | job | what it gates | roughly |
 |---|---|---|
 | `typescript` | hygiene, then the npm package: typecheck, lint, the suite, the Hermes syntax check, and that `dist/` packs | 7 min |
 | `go` | the Go module: gofmt, vet, the full suite, and `-race` on the three packages that start goroutines | 6 min |
 | `parity` | the two implementations agreeing, leaf for leaf, inside the bands | 5 min |
-| `release` | publishing, `needs:` all three and only on a push to `master` | 2 min |
 
-The three gate jobs run concurrently, so a pull request settles in about seven
-minutes.
+They run concurrently, so a pull request settles in about seven minutes.
 
-**Why one file and not four.** Concurrency groups and `needs:` are both scoped to
-a workflow. With the gates split across `typescript.yml`, `go.yml` and
-`parity.yml`, the release job in a fourth file had no way to depend on them, so a
-merge to `master` ran the three gate workflows *and* a release job that re-ran the
-suite, the tree check, the goldens and the parity gate on the same commit. That
-was about fifteen wasted minutes per merge, and it is the whole reason the release
-job now lives beside the gates it waits on.
+**There is no release job, and that is deliberate.** [`docs/release.md`](release.md) documents a
+manual release: run `ci/prerelease.sh`, run `release-check.sh`, then tag and `npm publish` by
+hand. A `changesets/action` job did sit in `release.yml`, but it targeted a `main` branch this
+repository has never had, so it had never once run. Rather than wire up a publish path nobody
+uses, it is gone. Nothing in CI writes, publishes, tags or pushes.
 
-The split into four files was made on the reasoning that a red check should name
-its own cause. Three well-named jobs do that just as well, and the earlier
-arrangement also raised a question this one does not: which lane is this check in.
+**Why one file and not four.** Concurrency groups and `needs:` are both scoped to a workflow, so
+four files could not share either. The split was made on the reasoning that a red check should
+name its own cause; three well-named jobs do that just as well, and one file does not raise the
+question of which lane a check is in.
 
 Every script the workflow calls lives in `ci/` and is runnable by hand, which is
 deliberate: the workflow is a thin shim over scripts that can be debugged locally,
@@ -84,9 +86,8 @@ are `linux/amd64`. See §4. The fifth was a `console.warn` in `src/` that
 typechecked only because `@types/node` happened to arrive as an optional peer of
 vitest; it is now a declared devDependency.
 
-**Nothing outside the `release` job writes.** `permissions: contents: read` is set
-at the file level, and the release job raises it to `contents: write` and
-`id-token: write` for itself alone.
+**Nothing here writes.** `permissions: contents: read` is set at the file level and no job
+raises it, so the whole workflow can only read the repository.
 
 ---
 
@@ -221,6 +222,14 @@ start none at all, so racing them instruments code that cannot have a data race.
 CI races the three that can and runs the rest plain. That would be a silent trap
 the first time a goroutine appeared in a fourth package, so `ci/hygiene.sh` has a
 rule that fails if one does.
+
+**The 10 minute default is the right guard, and it is measured rather than assumed.** `go test`
+times out per test binary, not per run, and CI now races only store, core and astronomy. On the
+runner those measure 1.9 s, 147.0 s and 295.9 s raced, so the worst binary sits at about half the
+600 s default. The ordering also matters and is worth not breaking: go's timeout fires before the
+job's `timeout-minutes: 20` and prints a goroutine dump naming the hung test, where the job timeout
+kills the runner with no diagnostic. No explicit `-timeout` is set, because setting one to its own
+default would be noise; revisit if a single package passes roughly 400 s on the runner.
 
 **CI runs `parity.sh full` only, not all three stages.** g2's document is contained
 in g3's and g3's in full's, full's numeric leaves cover both, and `tables-gate.mjs`

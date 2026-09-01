@@ -66,7 +66,6 @@ export const SAHAM_FORMULAS: readonly SahamFormula[] = [
   { name: 'Vivaha',      x: 'Venus',       y: 'Saturn',  z: 'Asc',         swap: false },
   { name: 'Putra',       x: 'Jupiter',     y: 'Moon',    z: 'Asc',         swap: false },
   { name: 'Roga',        x: 'Saturn',      y: 'Moon',    z: 'Asc',         swap: true  },
-  // Deliberately same X/Y/Z as Roga; only the swap flag differs.
   { name: 'Marana',      x: 'Saturn',      y: 'Moon',    z: 'Asc',         swap: false },
   { name: 'Rajya',       x: 'Saturn',      y: 'Sun',     z: 'Asc',         swap: true  },
   { name: 'Raja',        x: 'Sun',         y: 'Mars',    z: 'Asc',         swap: false },
@@ -76,7 +75,6 @@ export const SAHAM_FORMULAS: readonly SahamFormula[] = [
   { name: 'Apamrityu',   x: 'Mars',        y: 'Saturn',  z: 'Asc',         swap: false },
   { name: 'Bhratri',     x: 'Jupiter',     y: 'Saturn',  z: 'Asc',         swap: false },
   { name: 'Matri',       x: 'Moon',        y: 'Venus',   z: 'Asc',         swap: true  },
-  // Deliberately same X/Y/Z as Rajya; both rows are canonical.
   { name: 'Pitri',       x: 'Saturn',      y: 'Sun',     z: 'Asc',         swap: true  },
   { name: 'Sama',        x: 'Sun',         y: 'Saturn',  z: 'Asc',         swap: false },
   { name: 'Bandhana',    x: 'Saturn',      y: 'Mars',    z: 'Mercury',     swap: false },

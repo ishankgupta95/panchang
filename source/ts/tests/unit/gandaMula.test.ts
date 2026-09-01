@@ -1,5 +1,3 @@
-// Muhurta-chintamani Ch. 4 and BPHS Ch. 71: of the 6 root nakshatras, Mula and
-// Jyeshtha (the Vrischika/Dhanus gaṇḍānta pair) are severe, the other four mild.
 
 import { describe, it, expect } from 'vitest';
 import { computeGandaMula } from '../../src/core/gandaMula';

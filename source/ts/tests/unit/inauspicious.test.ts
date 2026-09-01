@@ -6,7 +6,6 @@ import {
   computeYamaganda,
 } from '../../src/core/inauspicious';
 
-// The day is split into 8 equal slots.
 const sunrise = new Date('2024-01-01T06:00:00Z');
 const sunset = new Date('2024-01-01T18:00:00Z');
 const SLOT_MS = 90 * 60_000;

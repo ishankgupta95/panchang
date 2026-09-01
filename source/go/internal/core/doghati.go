@@ -57,7 +57,6 @@ func buildDoGhatiSlots(
 		})
 }
 
-// "Do ghati" is ~48 min, but day and night are each split into 15 EQUAL slots.
 func ComputeDoGhati(
 	sunriseMs, sunsetMs, nextSunriseMs int64,
 	nameFn func(index int) string,

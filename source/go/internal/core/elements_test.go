@@ -11,7 +11,6 @@ import (
 
 const invariantSeed = 0xE1E3
 
-// The exact span multiples and their neighbours, which uniform sampling never reaches.
 func normalizedLongitudes() []float64 {
 	var out []float64
 	for _, span := range []float64{
@@ -30,7 +29,6 @@ func normalizedLongitudes() []float64 {
 	return out
 }
 
-// Catches integer division: `360 / 27` is 13, and floor(359.9 / 13) is 27, off the table.
 func TestElementIndexDomains(t *testing.T) {
 	lons := normalizedLongitudes()
 	pairs, padaAnomalies := 0, 0
@@ -120,7 +118,6 @@ func TestElementIndexDomains(t *testing.T) {
 	}
 }
 
-// One ULP below 17 × NakshatraSpan the quotient rounds up to 17 while index*span is larger, so degreesInNakshatra goes negative.
 func TestPadaIsClampedAtBothEdges(t *testing.T) {
 	const moon = 226.66666666666666
 	got := ComputeNakshatraFromLongitude(moon, "Jyeshtha")
@@ -234,7 +231,6 @@ func TestIndexAccessorsAgreeWithTheStructs(t *testing.T) {
 	}
 }
 
-// Calls are COUNTED: one reaching for the ephemeris directly returns the same numbers here.
 func TestAtTimeAccessorsThreadTheInjectedLongitudes(t *testing.T) {
 	lons := normalizedLongitudes()
 	moonCalls, sunCalls := 0, 0
@@ -317,7 +313,6 @@ func TestElementsAdvanceMonotonicallyOverAYear(t *testing.T) {
 		}
 	}
 
-	// The bands reject "nothing moved"; they do not pin a rate.
 	for _, c := range []struct {
 		name     string
 		lo, hi   int

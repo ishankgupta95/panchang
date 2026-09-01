@@ -2,7 +2,6 @@ package utils
 
 import "github.com/ishankgupta95/panchang-ts/source/go/v5/internal/jsnum"
 
-// Both guards earn their place: -1e-15 gives r + 360 == 360, an out-of-range nakshatra 27, and -360 % 360 is -0.
 func Normalize360(degrees float64) float64 {
 	r := jsnum.Mod(degrees, 360)
 	if r < 0 {

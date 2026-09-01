@@ -7,7 +7,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
 )
 
-// Elongation instants 0° (Amavasya), 90°, 180° (Purnima), 270°; not the tithi windows.
 type MoonPhaseName string
 
 const (
@@ -75,7 +74,6 @@ func ComputeMoonPhasesForYear(ctx *EphemerisCtx, year int, options MoonPhasesFor
 	return ComputeMoonPhasesInRange(ctx, startUtc, endUtc)
 }
 
-// Deprecated: use [ComputeMoonPhasesInRange].
 func GetMoonPhasesInRange(ctx *EphemerisCtx, startMs, endMs int64) ([]MoonPhaseEvent, error) {
 	return ComputeMoonPhasesInRange(ctx, startMs, endMs)
 }

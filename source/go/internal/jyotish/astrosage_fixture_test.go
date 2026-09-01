@@ -13,14 +13,11 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// AstroSage's publishing resolution plus ayanamsa; a miss is a defect, never a re-pin.
-
 const (
 	lagnaDegreeTol  = 1.0
 	planetDegreeTol = 0.5
 )
 
-// The fixture spells index 8 "Dhanu", not i18n's "Dhanus".
 var astrosageRashi = [12]string{
 	"Mesha", "Vrishabha", "Mithuna", "Karka", "Simha", "Kanya",
 	"Tula", "Vrischika", "Dhanu", "Makara", "Kumbha", "Meena",

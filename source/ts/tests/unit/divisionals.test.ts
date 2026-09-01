@@ -235,7 +235,6 @@ describe('trimsamsaLongitude (D30)', () => {
   });
 
   it('every D30 result avoids Sun (Leo=4) and Moon (Cancer=3) signs', () => {
-    // The five trimsamsa lords exclude the two luminaries.
     for (let lon = 0; lon < 360; lon += 0.7) {
       const r = rashiOf(trimLon(lon));
       expect(r === 3 || r === 4).toBe(false);
@@ -290,8 +289,6 @@ describe('computeDivisionalChart: output structure', () => {
     });
 
     if (d !== 'D2' && d !== 'D30') {
-      // D2 and D30 collapse the zodiac onto 2 and 5 rashis, where the nodes
-      // routinely share one.
       it(`${d}: Rahu and Ketu remain 6 houses apart`, () => {
         const chart = computeDivisionalChart(SAMPLE, DELHI, d);
         const rahu = chart.planets.find((p) => p.planet === 'Rahu')!;
@@ -344,7 +341,6 @@ describe('computeDivisionalChart: output structure', () => {
   it('respects ayanamsa option', () => {
     const lahiri = computeDivisionalChart(SAMPLE, DELHI, 'D10', { ayanamsa: 'lahiri' });
     const raman  = computeDivisionalChart(SAMPLE, DELHI, 'D10', { ayanamsa: 'raman' });
-    // The shift may keep the Sun in the same rashi, moving only degreeInRashi.
     const sunLahiri = lahiri.planets[0]!;
     const sunRaman = raman.planets[0]!;
     const same = sunLahiri.rashi.index === sunRaman.rashi.index

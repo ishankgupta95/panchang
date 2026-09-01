@@ -376,7 +376,6 @@ func findNextEntryIntEndpoints(
 	return nil, nil
 }
 
-// The name is aspirational: this establishes that it does not.
 func TestSadeSatiBisectionNeedsFloatEndpoints(t *testing.T) {
 	g := loadSadeSatiGolden(t)
 	ctx := astronomy.NewEphemerisCtx()

@@ -19,7 +19,6 @@ func inHouses4(list [4]int, h int) bool {
 	return list[0] == h || list[1] == h || list[2] == h || list[3] == h
 }
 
-// Deliberately a second encoding of RashiLord, not an alias.
 var rashiLords = [12]types.VisibleGraha{
 	types.VisibleMars,
 	types.VisibleVenus,
@@ -35,14 +34,12 @@ var rashiLords = [12]types.VisibleGraha{
 	types.VisibleJupiter,
 }
 
-// Deliberately a third copy of dignity.go's exaltation table.
 var exaltationRashi = [types.VisibleGrahaCount]int{
 	types.VisibleSun: 0, types.VisibleMoon: 1, types.VisibleMars: 9,
 	types.VisibleMercury: 5, types.VisibleJupiter: 3, types.VisibleVenus: 11,
 	types.VisibleSaturn: 6,
 }
 
-// Lagnas where one planet lords both a kendra and a trikona (BPHS 34); the separate presence array is needed because VisibleSun is 0.
 var (
 	yogakarakaByLagna = [12]types.VisibleGraha{
 		1:  types.VisibleSaturn,
@@ -72,8 +69,7 @@ type YogaContext struct {
 
 type YogaMatch struct {
 	Reasons []string
-	// nil = no bhanga rule; Applies:false = evaluated, did not fire.
-	Bhanga *types.YogaBhanga
+	Bhanga  *types.YogaBhanga
 }
 
 type YogaRule struct {
@@ -140,7 +136,6 @@ func mahapurushaBhanga(ctx *YogaContext, planet types.Graha, planetRashi int, pl
 	return &types.YogaBhanga{Applies: len(reasons) > 0, Reasons: reasons}
 }
 
-// BPHS 10°, Phaladeepika 12°; matches shadbala.go's Chesta convention.
 const jupiterCombustionArcDeg = 10
 
 var gajakesariRule = YogaRule{
@@ -238,7 +233,6 @@ var kemadrumaRule = YogaRule{
 	Evaluate: func(ctx *YogaContext) *YogaMatch {
 		moon, _ := ctx.PlanetByName.Get(types.GrahaMoon)
 		moonRashi := moon.Rashi.Index
-		// Rahu and Ketu excluded per B.V. Raman.
 		for _, p := range ctx.Chart.Planets {
 			if p.Planet == types.GrahaMoon {
 				continue
@@ -270,12 +264,10 @@ var budhaAdityaRule = YogaRule{
 	},
 }
 
-// Sambandha requires mutuality: a one-way aspect is not yoga-forming (BPHS 39).
 var rajaYogaRule = YogaRule{
 	Name: types.YogaRajaYoga,
 	Type: types.YogaRaja,
 	Evaluate: func(ctx *YogaContext) *YogaMatch {
-		// Slice plus seen-array: a map would reorder the reasons.
 		kendraLords := dedupLords(ctx.LagnaRashi, kendraHouses[:])
 		trikonaLords := dedupLords(ctx.LagnaRashi, []int{1, 5, 9})
 
@@ -437,7 +429,6 @@ func lordsConjunctRule(name types.YogaName, typ types.YogaType, h1, h2 int) Yoga
 	}
 }
 
-// 10, not the vyaya 12 (Raman §21).
 var upachayaHouses = [4]int{3, 6, 10, 11}
 
 var vasumatiYogaRule = YogaRule{
@@ -525,7 +516,6 @@ var neechaBhangaRule = YogaRule{
 			}
 			p, _ := ctx.PlanetByName.Get(g)
 
-			// Phaladeepika 7.26.
 			dispositor := rashiLords[p.Rashi.Index]
 			if dispositor != v {
 				dpp, _ := ctx.PlanetByName.Get(dispositor.Graha())
@@ -543,7 +533,6 @@ var neechaBhangaRule = YogaRule{
 				}
 			}
 
-			// Phaladeepika 7.26.
 			exLord := rashiLords[exaltationRashi[v]]
 			if exLord != v {
 				exp, _ := ctx.PlanetByName.Get(exLord.Graha())
@@ -577,7 +566,6 @@ var neechaBhangaRule = YogaRule{
 				}
 			}
 
-			// Phaladeepika 7.28.
 			if dispositor != v && aspectsHouse(ctx, dispositor.Graha(), p.House) {
 				reasons = append(reasons, g.String()+" debilitated in "+p.Rashi.Name+
 					"; dispositor "+dispositor.String()+" aspects "+g.String())
@@ -614,7 +602,6 @@ var daridraYogaRule = YogaRule{
 	},
 }
 
-// In published-result order.
 var YogaCatalog = []YogaRule{
 	mahapurushaRule(types.YogaRuchaka, types.GrahaMars),
 	mahapurushaRule(types.YogaBhadra, types.GrahaMercury),

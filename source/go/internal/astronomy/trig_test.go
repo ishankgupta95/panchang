@@ -10,7 +10,6 @@ import (
 	"testing"
 )
 
-// Numerical Recipes' ranqd1, the generator the TS differential test uses.
 func uniform(seed uint32, count int, rng float64, yield func(float64)) {
 	s := seed
 	for i := 0; i < count; i++ {
@@ -25,7 +24,6 @@ type sweepRange struct {
 	samples int
 }
 
-// ELP's phases reach |x| ≈ 5e3 and VSOP's B + C·τ ≈ 1e5; 1e6 is headroom.
 var sweepRanges = []sweepRange{
 	{"pi", math.Pi, 2_000_000},
 	{"1e2", 100, 2_000_000},
@@ -126,7 +124,6 @@ func TestTrigGoldenCases(t *testing.T) {
 	}
 }
 
-// 3× the measured worst; the error is Taylor truncation, independent of |x|.
 const bound = 2e-11
 
 func TestDifferentialTrig(t *testing.T) {
@@ -169,11 +166,9 @@ func TestTrigIdentities(t *testing.T) {
 			worstOdd = v
 		}
 	})
-	// Two kernels at ~6e-12 each, so the sum carries twice that.
 	if worstPythagoras >= 1e-10 {
 		t.Errorf("sin² + cos² − 1 = %.3e, bound 1e-10", worstPythagoras)
 	}
-	// Looser than bound: x + π/2 rounds before the reduction sees it.
 	if worstShift >= 1e-9 {
 		t.Errorf("cos(x) − sin(x + π/2) = %.3e, bound 1e-9", worstShift)
 	}
@@ -241,7 +236,6 @@ func TestTrigStatedRange(t *testing.T) {
 	}
 }
 
-// ToInt32 wraps modulo 2³² and doubles past 2⁵² are even, so the two parities agree to 2⁵³.
 func TestReduceQuadrantParity(t *testing.T) {
 	for _, q := range []float64{
 		0, 1, -1, 2, -2, 3, -3,
@@ -283,7 +277,6 @@ func BenchmarkStdlibSin(b *testing.B) {
 	}
 }
 
-// Sin without the anti-FMA barriers.
 func sinFused(x float64) float64 {
 	r, odd := reduce(x)
 	r2 := r * r

@@ -58,7 +58,6 @@ func TestElpTruncationWithinBudget(t *testing.T) {
 		{"distance-track", 3, budgetMoonDistTrack, " km", astronomy.MoonElpDistanceTrack, 1},
 		{"distance-coarse", 3, budgetMoonDistCoarse, " km", astronomy.MoonElpDistanceCoarse, 1},
 	}
-	// Subtract the *emitted* W1, not elpConst's, or its rounding is charged to the budget.
 	cases[0].shipped = func(tt float64) float64 {
 		w := series.MOON_MEAN_LONGITUDE
 		mean := w[0] + tt*(w[1]+tt*(w[2]+tt*(w[3]+tt*w[4])))
@@ -91,7 +90,6 @@ func TestVsopTruncationWithinBudget(t *testing.T) {
 	}
 	ts := probesN(probeSeed, differentialProbeCount())
 
-	// τ = t/10: the probes are centuries, VSOP millennia.
 	reference := func(body string, variable int, tt float64) float64 {
 		tau := tt / 10
 		s := vsop[body]
@@ -182,7 +180,6 @@ func TestEarthCoarseRadiusWithinBudget(t *testing.T) {
 			worst = d
 		}
 	}
-	// The coarse budget is against the full series, itself within budget, so the bound is the sum.
 	bound := budgetSunRadiusCoarse + (budgetRadiusAngleArcsec/arcsecPerRad)*minGeocentricDistanceAU["ear"]
 	if worst > bound {
 		t.Errorf("EarthRadiusCoarse: worst |Δ| %.4g AU, bound %.4g AU", worst, bound)

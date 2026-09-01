@@ -301,7 +301,6 @@ func compareCountMaps(t *testing.T, what string, got, want map[string]int) {
 	}
 }
 
-// dayBeforeYesterday is structurally 0, pinned so a change to limitDays or to the offsets shows here.
 func TestDayFestivalsPolarCatchSitesAreReached(t *testing.T) {
 	g := loadDayFestivalsGolden(t)
 	if g.PolarHits["reached"] == 0 {

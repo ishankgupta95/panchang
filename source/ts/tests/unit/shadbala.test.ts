@@ -88,7 +88,6 @@ describe('computeShadbala: Naisargika (natural) Bala, fixed values', () => {
 
 describe('computeShadbala: Sthana (positional), Uchcha at exaltation/debilitation', () => {
   it('Sun Sthana is highest near 10° Aries (exaltation), lowest near 10° Libra', () => {
-    // The Sun is in Aries in April and in Libra in October.
     const aprilSun = computeShadbala(new Date('2000-04-15T06:00:00Z'), DELHI).Sun.sthana;
     const octSun = computeShadbala(new Date('2000-10-15T06:00:00Z'), DELHI).Sun.sthana;
     expect(aprilSun).toBeGreaterThan(octSun);
@@ -128,7 +127,6 @@ describe('computeShadbala: Dig (directional) Bala', () => {
 
 describe('computeShadbala: Paksha (lunar phase) component of Kala Bala', () => {
   it('Moon (benefic) Kala stronger near full moon than near new moon', () => {
-    // 2025-10-07 is Sharad Purnima (full), 2025-09-21 Mahalaya Amavasya (new).
     const full = computeShadbala(new Date('2025-10-07T15:00:00Z'), DELHI).Moon.kala;
     const newMoon = computeShadbala(new Date('2025-09-21T15:00:00Z'), DELHI).Moon.kala;
     expect(full).toBeGreaterThan(newMoon);
@@ -152,7 +150,6 @@ describe('computeShadbala: Chesta (motional) Bala', () => {
   });
 
   it('retrograde planets get 60 V Chesta', () => {
-    // Jupiter is retrograde from 2024-10-09 to 2025-02-04.
     const r = computeShadbala(new Date('2024-12-01T06:00:00Z'), DELHI);
     expect(r.Jupiter.chesta).toBe(60);
   });
@@ -164,26 +161,21 @@ describe('computeShadbala: Chesta (motional) Bala', () => {
   });
 
   it('combust planet (within 10° of Sun, direct) gets 15 V Chesta', () => {
-    // Jupiter is in superior conjunction here, ~0.02° from the Sun and direct.
     const r = computeShadbala(new Date('2024-05-18T18:00:00Z'), DELHI);
     expect(r.Jupiter.chesta).toBe(15);
   });
 
   it('superior-conjunction Mercury (within 1° of Sun) is combust', () => {
-    // Mercury is 0.30° from the Sun here, and direct.
     const r = computeShadbala(new Date('2024-09-30T12:00:00Z'), DELHI);
     expect(r.Mercury.chesta).toBe(15);
   });
 
   it('planet far from Sun and direct gets 30 V Chesta (not combust)', () => {
-    // Mars is 44° from the Sun here, and direct.
     const r = computeShadbala(new Date('2024-05-18T18:00:00Z'), DELHI);
     expect(r.Mars.chesta).toBe(30);
   });
 
   it('opposition-side planet that is direct is NOT combust (180° from Sun)', () => {
-    // Jupiter is 92° from the Sun and direct here; a direct planet at true
-    // opposition is rare, so this is the closest available check.
     const r = computeShadbala(new Date('2024-09-15T12:00:00Z'), DELHI);
     expect(r.Jupiter.chesta).toBe(30);
   });
@@ -210,7 +202,6 @@ describe('computeShadbala: Kala Bala bounds', () => {
   });
 
   it('Mercury always full Nathonatha (60 V) regardless of birth time', () => {
-    // Mercury's Kala has Nathonatha=60 always; only Paksha varies.
     const a = computeShadbala(new Date('2025-01-01T03:00:00Z'), DELHI).Mercury.kala;
     const b = computeShadbala(new Date('2025-01-01T15:00:00Z'), DELHI).Mercury.kala;
     expect(a).toBeGreaterThanOrEqual(60);
@@ -257,7 +248,6 @@ describe('computeShadbala: Sthana Bala sub-components', () => {
   });
 
   it('Every graha has Sthana ≥ Saptavargaja minimum (7 × 1.875 = 13.125 V)', () => {
-    // 1.875 V is the Saptavargaja floor per varga (debilitated everywhere).
     const r = computeShadbala(SAMPLE, DELHI);
     const grahas: ShadbalaGraha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
     for (const g of grahas) {
@@ -266,9 +256,6 @@ describe('computeShadbala: Sthana Bala sub-components', () => {
   });
 
   it('Ojha-Yugma grouping: Mercury and Saturn gain in ODD signs, only Moon and Venus in even', () => {
-    // BPHS Ch.27 v18-19 (Santhanam), B. V. Raman and Saravali all put the
-    // neuters Mercury and Saturn with the odd-sign gainers and Moon and Venus
-    // alone with even; some translations flip that, and with it 0 and 30 V.
     const chart = computeRashiChart(SAMPLE, DELHI);
     const d9 = computeNavamsa(SAMPLE, DELHI);
     const dc = { D9: d9 } as Record<Divisional, DivisionalChart>;

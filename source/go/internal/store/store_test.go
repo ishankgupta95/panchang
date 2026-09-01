@@ -178,7 +178,6 @@ func TestStripesAreUsed(t *testing.T) {
 	}
 }
 
-// Wants are the published FNV-1a 64-bit test vectors.
 func TestHashStringIsFNV1a(t *testing.T) {
 	for _, tc := range []struct {
 		in   string

@@ -44,7 +44,6 @@ export const vivahRule: MuhurtaRule = {
   auspiciousVaras: [1, 3, 4, 5],
   inauspiciousVaras: [0, 2, 6],
   bhadra: 'penalize',
-  // No excludeEkadashi: Ekadashi is one of the six preferred vivah tithis.
   excludeAdhikaMasa: true,
   excludeEclipse: true,
 };
@@ -216,7 +215,6 @@ export const travelStartRule: MuhurtaRule = {
     N.rohini, N.punarvasu, N.pushya, N.uttaraPhalguni, N.hasta, N.anuradha,
     N.uttaraAshadha, N.shravana, N.uttaraBhadrapada, N.revati,
   ],
-  // Mars' and Saturn's days are avoided for long journeys.
   inauspiciousVaras: [2, 6],
   bhadra: 'penalize',
   excludeEkadashi: true,

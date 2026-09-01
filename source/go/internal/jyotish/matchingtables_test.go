@@ -415,7 +415,6 @@ func assertFloatGrid(t *testing.T, got, want [][]float64, what string) {
 			continue
 		}
 		for j := range got[i] {
-			// exact: every value is an integer or 0.5
 			if got[i][j] != want[i][j] {
 				t.Errorf("%s[%d][%d] = %v, want %v", what, i, j, got[i][j], want[i][j])
 			}

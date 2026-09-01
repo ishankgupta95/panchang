@@ -9,7 +9,6 @@ import (
 
 const maxVarjyamNakshatras = 3
 
-// A nakshatra spans ~21-27 h, so 30 h either side is reliably a different nakshatra.
 const (
 	nakshatraLookbackHours    = 30
 	nakshatraLookforwardHours = 30
@@ -29,7 +28,6 @@ func ComputeVarjyamWindows(
 	return CollectNakshatraOffsetWindows(sunriseUtcMs, nextSunriseUtcMs, getMoon, varjyamSpellsFromBoundaries)
 }
 
-// Deliberately sees only the nakshatra active at sunrise, so it can miss a second window.
 func ComputeVarjyam(
 	currentNakshatraIndex int,
 	sunriseUtcMs, nextSunriseUtcMs int64,
@@ -61,7 +59,6 @@ func varjyamSpellsForNakshatra(nakshatraIndex int, referenceMs int64, getMoon Lo
 	return varjyamSpellsFromBoundaries(nakshatraIndex, startMs, endMs)
 }
 
-// Start-in-day, not any-overlap, which would double-print every sunrise-straddling window.
 func CollectNakshatraOffsetWindows(
 	sunriseUtcMs, nextSunriseUtcMs int64,
 	getMoon LongitudeAt,
@@ -70,7 +67,6 @@ func CollectNakshatraOffsetWindows(
 	getIndex := func(ms int64) int { return GetNakshatraIndexAtTime(ms, getMoon) }
 	angle := utils.ElementAngle{AngleAt: getMoon, SpanDeg: utils.NakshatraSpan}
 
-	// Non-nil so it marshals as [].
 	out := make([]types.UtcWindow, 0, 2)
 	referenceMs := sunriseUtcMs
 	var knownStartMs int64
@@ -115,7 +111,6 @@ func varjyamSpellsFromBoundaries(nakshatraIndex int, nakshatraStartMs, nakshatra
 
 	out := make([]types.UtcWindow, 0, len(offsets))
 	for _, offsetGhatikas := range offsets {
-		// FMA barrier; the end measures from the truncated start.
 		startMs := int64(float64(nakshatraStartMs) + float64(float64(offsetGhatikas)*ghatikaMs))
 		out = append(out, types.UtcWindow{
 			StartMs: startMs,

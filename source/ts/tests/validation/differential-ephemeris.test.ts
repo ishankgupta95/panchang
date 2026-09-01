@@ -58,7 +58,6 @@ describe('differential: shipped series vs the frozen untruncated reference', () 
       const d = Math.abs(deltaArcsec(getTropicalSunLongitude(date), sunApparentReference(jd).lonDeg));
       if (d > worst) { worst = d; worstAt = jd; }
     }
-    // 0.4″ budget for Earth's L, plus nutation and light-time; measured 0.34877″ over the full 100,000.
     report('Sun longitude', worst, worstAt, SUN_SAMPLE);
     expect(worst, `worst ${worst.toFixed(5)}″ at JD(TT) ${worstAt}`).toBeLessThan(0.5);
   }, TIMEOUT_MS);
@@ -71,7 +70,6 @@ describe('differential: shipped series vs the frozen untruncated reference', () 
       const d = Math.abs(deltaArcsec(getTropicalMoonLongitude(date), moonApparentReference(jd).lonDeg));
       if (d > worst) { worst = d; worstAt = jd; }
     }
-    // 0.4″ longitude budget plus ~0.005″ of coarse latitude and distance; measured 0.35166″ over the full 100,000.
     report('Moon longitude', worst, worstAt, MOON_SAMPLE);
     expect(worst, `worst ${worst.toFixed(5)}″ at JD(TT) ${worstAt}`).toBeLessThan(0.5);
   }, TIMEOUT_MS);
@@ -98,7 +96,6 @@ describe('differential: shipped series vs the frozen untruncated reference', () 
       worstLat = Math.max(worstLat, Math.abs(mine.latitude - truth.latDeg) * 3600);
       worstDist = Math.max(worstDist, Math.abs(mine.distance - truth.distance));
     }
-    // 0.4″ budget for Earth's B; measured 0.35119″, which is 0.023 s of sunrise through declination.
     expect(worstLat, `worst latitude ${worstLat.toFixed(5)}″`).toBeLessThan(0.45);
     expect(worstDist, `worst distance ${worstDist.toExponential(3)} AU`).toBeLessThan(3e-6);
   }, TIMEOUT_MS);

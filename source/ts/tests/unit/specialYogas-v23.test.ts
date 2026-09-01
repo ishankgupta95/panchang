@@ -1,5 +1,3 @@
-// vara 0 = Sun … 6 = Sat; tithi 0 = Shukla Pratipada … 14 = Purnima … 29 =
-// Amavasya; nakshatra, Moon and Sun alike, 0 = Ashwini … 26 = Revati.
 
 import { describe, it, expect } from 'vitest';
 import { computeSpecialYogas } from '../../src/core/specialYogas';
@@ -12,7 +10,6 @@ const activeYogas = (
 ) => computeSpecialYogas(vara, tithi, moonNak, sunNak, r).map((y) => y.type);
 
 describe('Dwipushkar Yoga', () => {
-  // Bhadra varas {0,2,6} x Bhadra tithis {2,7,12} x dwi-pada nakshatras {4,13,22}.
   it('detects Sunday + Dwitiya + Mrigashira', () => {
     expect(activeYogas(0, 1, 4, 4)).toContain('dwipushkar');
   });
@@ -65,7 +62,6 @@ describe('Tripushkar Yoga', () => {
 });
 
 describe('Jwalamukhi Yoga', () => {
-  // By tithi-number-in-paksha: {1:Mula, 5:Bharani, 8:Krittika, 9:Rohini, 10:Ashlesha}.
   it('detects Pratipada + Mula', () => {
     expect(activeYogas(0, 0, 18, 18)).toContain('jwalamukhi');
   });
@@ -85,20 +81,16 @@ describe('Jwalamukhi Yoga', () => {
   });
 
   it('does not fire on Trayodashi+Ardra (a regional variant not adopted)', () => {
-    // Some almanacs add this 6th row; the canonical Muhurta-chintamani table has 5.
     expect(activeYogas(0, 12, 5, 5)).not.toContain('jwalamukhi');
   });
 });
 
 describe('Aadal Yoga', () => {
-  // Distance-from-Sun in 28-scheme (with Abhijit). distance set: {2,7,9,14,16,21,23,28}.
   it('detects Sun-at-Ashwini + Moon-at-Bharani (distance 2)', () => {
     expect(activeYogas(3, 5, 1, 0)).toContain('aadal');
   });
 
   it('detects Abhijit-shifted distance: Sun-at-Ashwini + Moon-at-Shravana (28-pos 23)', () => {
-    // Abhijit sits between UAshadha (20) and Shravana (21), so Shravana's
-    // 28-position is 23.
     expect(activeYogas(3, 5, 21, 0)).toContain('aadal');
   });
 
@@ -116,7 +108,6 @@ describe('Aadal Yoga', () => {
 });
 
 describe('Vidaal Yoga', () => {
-  // Distance set: {3, 6, 10, 13, 17, 20, 24, 27} in 28-scheme.
   it('detects Sun-at-Ashwini + Moon-at-Krittika (distance 3)', () => {
     expect(activeYogas(3, 5, 2, 0)).toContain('vidaal');
   });
@@ -139,7 +130,6 @@ describe('Vidaal Yoga', () => {
 });
 
 describe('Ravi Yoga', () => {
-  // Distance set: {4, 6, 9, 10, 13, 20} in 27-scheme (Abhijit NOT counted).
   it('detects distance 4 (Sun-at-Ashwini + Moon-at-Rohini)', () => {
     expect(activeYogas(0, 5, 3, 0)).toContain('ravi');
   });
@@ -149,7 +139,6 @@ describe('Ravi Yoga', () => {
   });
 
   it('vara-independent: fires on a Tuesday too (distance set, not weekday)', () => {
-    // The reference almanac puts no Sunday filter on Ravi Yoga.
     expect(activeYogas(2, 5, 3, 0)).toContain('ravi');
   });
 

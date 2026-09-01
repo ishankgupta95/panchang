@@ -13,11 +13,9 @@ type SunPosition struct {
 	Distance  float64 `json:"distance"`
 }
 
-// No precession: VSOP87D is already of date; the light-time retardation stands in for aberration.
 func GetTropicalSunLongitude(ctx *EphemerisCtx, ms int64) float64 {
 	ttDays := TTDaysSinceJ2000(ms)
 	retarded := ttDays - (EarthRadiusCoarse(ttDays)*AuKm)/KmPerLightDay
-	// Anti-FMA barrier.
 	lon := float64(HeliocentricLongitude(Earth, retarded)*radToDeg) + 180
 	dpsi, _ := Nutation(ctx, ttDays/36525)
 	return utils.Normalize360(lon + (dpsi+VsopToFK5Arcsec)/3600)

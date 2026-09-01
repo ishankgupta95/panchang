@@ -364,8 +364,8 @@
     "odisha"
   ],
   "totalDays": 16385,
-  "emittingDays": 4978,
-  "digest": "fb13b854d2421229018c4e11a553667850034cf363b51863f5b32a9fa4102ab1",
+  "emittingDays": 4990,
+  "digest": "ec712eca57fdd8e4005cad880fe3fd5d79af89e8de19cb06086b3e5dcd940896",
   "anchorDigest": "51908a88e78204cedc3dc4c57a86f1c9f285b3a3706174563e1bc7e0d2569b29",
   "outcomeCounts": {
     "ok": 11780,
@@ -399,9 +399,9 @@
     "maha_shivaratri": 29,
     "holi": 34,
     "phagli": 34,
-    "ugadi": 80,
-    "gudi_padwa": 35,
-    "gangaur": 37,
+    "ugadi": 85,
+    "gudi_padwa": 40,
+    "gangaur": 42,
     "baisakhi": 68,
     "puthandu": 68,
     "bohag_bihu": 48,
@@ -412,10 +412,10 @@
     "karaga": 44,
     "akshaya_tritiya": 88,
     "parashurama_jayanti": 88,
-    "vat_savitri_purnima": 31,
     "vat_savitri_amavasya": 16,
+    "vat_savitri_purnima": 31,
     "bonalu": 66,
-    "jagannath_rath_yatra": 16,
+    "jagannath_rath_yatra": 17,
     "ravi_pushya": 83,
     "raja_pahili": 16,
     "dakshinayana": 16,
@@ -425,7 +425,7 @@
     "guru_purnima": 16,
     "shravan_somvar": 80,
     "mangala_gauri": 83,
-    "hariyali_teej": 14,
+    "hariyali_teej": 16,
     "nag_panchami": 16,
     "varamahalakshmi": 21,
     "singh_sankranti": 16,
@@ -435,25 +435,25 @@
     "rig_upakarma": 18,
     "kajari_teej": 19,
     "krishna_janmashtami": 25,
-    "sama_upakarma": 49,
-    "hartalika_teej": 28,
+    "sama_upakarma": 31,
+    "hartalika_teej": 31,
     "ganesh_chaturthi": 32,
-    "anant_chaturdashi": 33,
+    "anant_chaturdashi": 34,
     "sair": 34,
-    "mahalaya_amavasya": 34,
-    "bathukamma_start": 34,
-    "navaratri": 31,
-    "durga_ashtami": 33,
+    "mahalaya_amavasya": 35,
+    "bathukamma_start": 35,
+    "navaratri": 34,
+    "durga_ashtami": 34,
     "maha_navami": 32,
     "dussehra": 32,
     "bathukamma_saddula": 32,
-    "sharad_purnima": 28,
+    "sharad_purnima": 29,
     "kati_bihu": 28,
     "karva_chauth": 26,
     "dhanteras": 17,
     "narak_chaturdashi": 18,
     "diwali": 19,
-    "govardhan_puja": 17,
+    "govardhan_puja": 20,
     "bhai_dooj": 19,
     "kartik_somvar": 68,
     "chhath_nahay_khay": 18,
@@ -468,7 +468,7 @@
     "ekadashi": 791,
     "minor": 2176,
     "pradosha": 803,
-    "major": 1984,
+    "major": 1998,
     "sankranti": 922
   },
   "cases": [
@@ -1828,6 +1828,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Jaipur|2024-06-06|all",
+      "sunrise": 1717632146119,
+      "sunset": 1717681734453,
+      "nextSunrise": 1717718542784,
+      "anchors": [
+        1717656940286,
+        1717671816786,
+        1717685334453,
+        1717700138618,
+        1717626386119,
+        1717644543202,
+        1717661899119,
+        1717681734453,
+        1717692776952
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Jaipur|2024-06-10|all",
       "sunrise": 1717977740216,
       "sunset": 1718027431854,
@@ -1997,31 +2022,6 @@
         {
           "key": "masik_shivaratri",
           "type": "minor",
-          "description": null
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
-      "label": "Jaipur|2024-07-05|all",
-      "sunrise": 1720138090856,
-      "sunset": 1720187683828,
-      "nextSunrise": 1720224515874,
-      "anchors": [
-        1720162887342,
-        1720177765233,
-        1720191283828,
-        1720206099851,
-        1720132330856,
-        1720150489099,
-        1720167846639,
-        1720187683828,
-        1720198733441
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
           "description": null
         }
       ],
@@ -2927,6 +2927,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Jaipur|2024-09-05|all",
+      "sunrise": 1725496687344,
+      "sunset": 1725541942371,
+      "nextSunrise": 1725583113379,
+      "anchors": [
+        1725519314857,
+        1725532891365,
+        1725545542371,
+        1725562527875,
+        1725490927344,
+        1725508001100,
+        1725523840360,
+        1725541942371,
+        1725554293673
+      ],
+      "festivals": [
+        {
+          "key": "sama_upakarma",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Jaipur|2024-09-06|all",
       "sunrise": 1725583113379,
       "sunset": 1725628275838,
@@ -2943,11 +2968,6 @@
         1725640654885
       ],
       "festivals": [
-        {
-          "key": "sama_upakarma",
-          "type": "major",
-          "description": null
-        },
         {
           "key": "hartalika_teej",
           "type": "major",
@@ -4816,6 +4836,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Jaipur|2025-03-31|all",
+      "sunrise": 1743382128396,
+      "sunset": 1743426813371,
+      "nextSunrise": 1743468463094,
+      "anchors": [
+        1743404470883,
+        1743417876376,
+        1743430413371,
+        1743447638232,
+        1743376368396,
+        1743393299639,
+        1743408939381,
+        1743426813371,
+        1743439308287
+      ],
+      "festivals": [
+        {
+          "key": "gangaur",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Jaipur|2025-04-01|all",
       "sunrise": 1743468463094,
       "sunset": 1743513243142,
@@ -5321,6 +5366,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Jaipur|2025-05-26|all",
+      "sunrise": 1748217872082,
+      "sunset": 1748267009158,
+      "nextSunrise": 1748304254291,
+      "anchors": [
+        1748242440620,
+        1748257181742,
+        1748270609158,
+        1748285631724,
+        1748212112082,
+        1748230156351,
+        1748247354327,
+        1748267009158,
+        1748278182697
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "masik_karthigai",
+          "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Jaipur|2025-05-30|all",
       "sunrise": 1748563408689,
       "sunset": 1748612732217,
@@ -5541,31 +5616,6 @@
           "key": "pradosha",
           "type": "pradosha",
           "description": "Som Pradosha"
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
-      "label": "Jaipur|2025-06-25|all",
-      "sunrise": 1750809875982,
-      "sunset": 1750859665330,
-      "nextSunrise": 1750896293369,
-      "anchors": [
-        1750834770656,
-        1750849707460,
-        1750863265330,
-        1750877979349,
-        1750804115982,
-        1750822323319,
-        1750839749590,
-        1750859665330,
-        1750870653741
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
-          "description": null
         }
       ],
       "outcome": "ok"
@@ -6434,11 +6484,6 @@
       "festivals": [
         {
           "key": "ganesh_chaturthi",
-          "type": "major",
-          "description": null
-        },
-        {
-          "key": "sama_upakarma",
           "type": "major",
           "description": null
         }
@@ -8380,6 +8425,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Jaipur|2026-03-19|all",
+      "sunrise": 1773882134645,
+      "sunset": 1773925646441,
+      "nextSunrise": 1773968468999,
+      "anchors": [
+        1773903890543,
+        1773916944081,
+        1773929246441,
+        1773947057720,
+        1773876374645,
+        1773893012594,
+        1773908241722,
+        1773925646441,
+        1773938493208
+      ],
+      "festivals": [
+        {
+          "key": "ugadi",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "gudi_padwa",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Jaipur|2026-03-21|all",
       "sunrise": 1774054803228,
       "sunset": 1774098507443,
@@ -8850,6 +8925,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Jaipur|2026-05-16|all",
+      "sunrise": 1778890128569,
+      "sunset": 1778938673976,
+      "nextSunrise": 1778976497853,
+      "anchors": [
+        1778914401272,
+        1778928964894,
+        1778942273976,
+        1778957585914,
+        1778884368569,
+        1778902264920,
+        1778919255813,
+        1778938673976,
+        1778950021139
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "masik_karthigai",
+          "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Jaipur|2026-05-20|all",
       "sunrise": 1779235613053,
       "sunset": 1779284407816,
@@ -9249,31 +9354,6 @@
           "key": "pradosha",
           "type": "pradosha",
           "description": "Ravi Pradosha"
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
-      "label": "Jaipur|2026-07-14|all",
-      "sunrise": 1783987919829,
-      "sunset": 1784037195649,
-      "nextSunrise": 1784074348882,
-      "anchors": [
-        1784012557739,
-        1784027340485,
-        1784040795649,
-        1784055772265,
-        1783982159829,
-        1784000238784,
-        1784017485321,
-        1784037195649,
-        1784048341618
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
-          "description": null
         }
       ],
       "outcome": "ok"
@@ -10078,20 +10158,20 @@
       "outcome": "ok"
     },
     {
-      "label": "Jaipur|2026-09-13|all",
-      "sunrise": 1789260082425,
-      "sunset": 1789304636026,
-      "nextSunrise": 1789346508174,
+      "label": "Jaipur|2026-09-12|all",
+      "sunrise": 1789173656665,
+      "sunset": 1789218304141,
+      "nextSunrise": 1789260082425,
       "anchors": [
-        1789282359225,
-        1789295725305,
-        1789308236026,
-        1789325572100,
-        1789254322425,
-        1789271220825,
-        1789286814585,
-        1789304636026,
-        1789317197670
+        1789195980403,
+        1789209374645,
+        1789221904141,
+        1789239193283,
+        1789167896665,
+        1789184818534,
+        1789200445150,
+        1789218304141,
+        1789230837626
       ],
       "festivals": [
         {
@@ -10331,11 +10411,6 @@
       "festivals": [
         {
           "key": "mahalaya_amavasya",
-          "type": "major",
-          "description": null
-        },
-        {
-          "key": "sama_upakarma",
           "type": "major",
           "description": null
         },
@@ -12476,6 +12551,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Jaipur|2027-06-04|all",
+      "sunrise": 1812067362495,
+      "sunset": 1812116862503,
+      "nextSunrise": 1812153755713,
+      "anchors": [
+        1812092112499,
+        1812106962501,
+        1812120462503,
+        1812135309108,
+        1812061602495,
+        1812079737497,
+        1812097062499,
+        1812116862503,
+        1812127930466
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "masik_karthigai",
+          "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Jaipur|2027-06-08|all",
       "sunrise": 1812412942959,
       "sunset": 1812462567448,
@@ -12670,31 +12775,6 @@
         {
           "key": "masik_shivaratri",
           "type": "minor",
-          "description": null
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
-      "label": "Jaipur|2027-07-04|all",
-      "sunrise": 1814659649992,
-      "sunset": 1814709290226,
-      "nextSunrise": 1814746073945,
-      "anchors": [
-        1814684470109,
-        1814699362179,
-        1814712890226,
-        1814727682085,
-        1814653889992,
-        1814672060050,
-        1814689434132,
-        1814709290226,
-        1814720325341
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
           "description": null
         }
       ],
@@ -13090,6 +13170,31 @@
         {
           "key": "mangala_gauri",
           "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
+      "label": "Jaipur|2027-08-04|all",
+      "sunrise": 1817338956469,
+      "sunset": 1817386985185,
+      "nextSunrise": 1817425387509,
+      "anchors": [
+        1817362970827,
+        1817377379441,
+        1817390585185,
+        1817406186347,
+        1817333196469,
+        1817350963648,
+        1817367773698,
+        1817386985185,
+        1817398505882
+      ],
+      "festivals": [
+        {
+          "key": "hariyali_teej",
+          "type": "major",
           "description": null
         }
       ],
@@ -13813,12 +13918,12 @@
       ],
       "festivals": [
         {
-          "key": "mahalaya_amavasya",
+          "key": "navaratri",
           "type": "major",
           "description": null
         },
         {
-          "key": "sama_upakarma",
+          "key": "mahalaya_amavasya",
           "type": "major",
           "description": null
         },
@@ -16025,6 +16130,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Jaipur|2028-05-24|all",
+      "sunrise": 1842739507054,
+      "sunset": 1842788555390,
+      "nextSunrise": 1842825887026,
+      "anchors": [
+        1842764031222,
+        1842778745722,
+        1842792155390,
+        1842807221208,
+        1842733747054,
+        1842751769138,
+        1842768936055,
+        1842788555390,
+        1842799754880
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "masik_karthigai",
+          "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Jaipur|2028-05-27|all",
       "sunrise": 1842998650831,
       "sunset": 1843047850048,
@@ -16189,31 +16324,6 @@
         {
           "key": "masik_shivaratri",
           "type": "minor",
-          "description": null
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
-      "label": "Jaipur|2028-06-22|all",
-      "sunrise": 1845245033899,
-      "sunset": 1845294838763,
-      "nextSunrise": 1845331448717,
-      "anchors": [
-        1845269936331,
-        1845284877790,
-        1845298438763,
-        1845313143740,
-        1845239273899,
-        1845257485115,
-        1845274916817,
-        1845294838763,
-        1845305821749
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
           "description": null
         }
       ],
@@ -17030,6 +17140,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Jaipur|2028-08-22|all",
+      "sunrise": 1850517111858,
+      "sunset": 1850563624239,
+      "nextSunrise": 1850603539872,
+      "anchors": [
+        1850540368048,
+        1850554321762,
+        1850567224239,
+        1850583582055,
+        1850511351858,
+        1850528739953,
+        1850545019286,
+        1850563624239,
+        1850575598928
+      ],
+      "festivals": [
+        {
+          "key": "hartalika_teej",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Jaipur|2028-08-23|all",
       "sunrise": 1850603539872,
       "sunset": 1850649964852,
@@ -17594,6 +17729,31 @@
           "key": "kati_bihu",
           "type": "sankranti",
           "description": "Tula"
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
+      "label": "Jaipur|2028-10-18|all",
+      "sunrise": 1855443491705,
+      "sunset": 1855484720171,
+      "nextSunrise": 1855529925880,
+      "anchors": [
+        1855464105938,
+        1855476474477,
+        1855488320171,
+        1855507323025,
+        1855437731705,
+        1855453798821,
+        1855468228784,
+        1855484720171,
+        1855498281883
+      ],
+      "festivals": [
+        {
+          "key": "govardhan_puja",
+          "type": "major",
+          "description": null
         }
       ],
       "outcome": "ok"
@@ -19577,6 +19737,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Delhi|2024-06-06|all",
+      "sunrise": 1717631576611,
+      "sunset": 1717681622210,
+      "nextSunrise": 1717717972123,
+      "anchors": [
+        1717656599410,
+        1717671613090,
+        1717685222210,
+        1717699797166,
+        1717625816611,
+        1717644088010,
+        1717661603970,
+        1717681622210,
+        1717692527183
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Delhi|2024-06-10|all",
       "sunrise": 1717977166554,
       "sunset": 1718027323561,
@@ -19746,31 +19931,6 @@
         {
           "key": "masik_shivaratri",
           "type": "minor",
-          "description": null
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
-      "label": "Delhi|2024-07-05|all",
-      "sunrise": 1720137520273,
-      "sunset": 1720187571177,
-      "nextSunrise": 1720223946445,
-      "anchors": [
-        1720162545725,
-        1720177560996,
-        1720191171177,
-        1720205758811,
-        1720131760273,
-        1720150032999,
-        1720167550815,
-        1720187571177,
-        1720198483757
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
           "description": null
         }
       ],
@@ -20657,6 +20817,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Delhi|2024-09-05|all",
+      "sunrise": 1725496281032,
+      "sunset": 1725541664540,
+      "nextSunrise": 1725582710532,
+      "anchors": [
+        1725518972786,
+        1725532587838,
+        1725545264540,
+        1725562187536,
+        1725490521032,
+        1725507626909,
+        1725523511136,
+        1725541664540,
+        1725553978337
+      ],
+      "festivals": [
+        {
+          "key": "sama_upakarma",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Delhi|2024-09-06|all",
       "sunrise": 1725582710532,
       "sunset": 1725627994548,
@@ -20673,11 +20858,6 @@
         1725640338169
       ],
       "festivals": [
-        {
-          "key": "sama_upakarma",
-          "type": "major",
-          "description": null
-        },
         {
           "key": "hartalika_teej",
           "type": "major",
@@ -22546,6 +22726,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Delhi|2025-03-31|all",
+      "sunrise": 1743381745772,
+      "sunset": 1743426515611,
+      "nextSunrise": 1743468076917,
+      "anchors": [
+        1743404130691,
+        1743417561643,
+        1743430115611,
+        1743447296264,
+        1743375985772,
+        1743392938231,
+        1743408607675,
+        1743426515611,
+        1743438984002
+      ],
+      "festivals": [
+        {
+          "key": "gangaur",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Delhi|2025-04-01|all",
       "sunrise": 1743468076917,
       "sunset": 1743512948939,
@@ -23051,6 +23256,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Delhi|2025-05-26|all",
+      "sunrise": 1748217320416,
+      "sunset": 1748266879588,
+      "nextSunrise": 1748303700697,
+      "anchors": [
+        1748242100002,
+        1748256967753,
+        1748270479588,
+        1748285290142,
+        1748211560416,
+        1748229710209,
+        1748247055919,
+        1748266879588,
+        1748277925920
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "masik_karthigai",
+          "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Delhi|2025-05-30|all",
       "sunrise": 1748562849691,
       "sunset": 1748612609808,
@@ -23271,31 +23506,6 @@
           "key": "pradosha",
           "type": "pradosha",
           "description": "Som Pradosha"
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
-      "label": "Delhi|2025-06-25|all",
-      "sunrise": 1750809298032,
-      "sunset": 1750859560543,
-      "nextSunrise": 1750895715770,
-      "anchors": [
-        1750834429287,
-        1750849508040,
-        1750863160543,
-        1750877638156,
-        1750803538032,
-        1750821863659,
-        1750839455538,
-        1750859560543,
-        1750870407111
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
-          "description": null
         }
       ],
       "outcome": "ok"
@@ -24189,11 +24399,6 @@
       "festivals": [
         {
           "key": "ganesh_chaturthi",
-          "type": "major",
-          "description": null
-        },
-        {
-          "key": "sama_upakarma",
           "type": "major",
           "description": null
         }
@@ -26179,6 +26384,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Delhi|2026-03-19|all",
+      "sunrise": 1773881795840,
+      "sunset": 1773925304780,
+      "nextSunrise": 1773968126600,
+      "anchors": [
+        1773903550310,
+        1773916602992,
+        1773928904780,
+        1773946715690,
+        1773876035840,
+        1773892673075,
+        1773907901204,
+        1773925304780,
+        1773938151326
+      ],
+      "festivals": [
+        {
+          "key": "ugadi",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "gudi_padwa",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Delhi|2026-03-21|all",
       "sunrise": 1774054457233,
       "sunset": 1774098172989,
@@ -26649,6 +26884,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Delhi|2026-05-16|all",
+      "sunrise": 1778889599936,
+      "sunset": 1778938521740,
+      "nextSunrise": 1778975966727,
+      "anchors": [
+        1778914060838,
+        1778928737379,
+        1778942121740,
+        1778957244233,
+        1778883839936,
+        1778901830387,
+        1778918953018,
+        1778938521740,
+        1778949755236
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "masik_karthigai",
+          "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Delhi|2026-05-20|all",
       "sunrise": 1779235074749,
       "sunset": 1779284265120,
@@ -27073,31 +27338,6 @@
           "key": "pradosha",
           "type": "pradosha",
           "description": "Ravi Pradosha"
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
-      "label": "Delhi|2026-07-14|all",
-      "sunrise": 1783987361370,
-      "sunset": 1784037070529,
-      "nextSunrise": 1784073792171,
-      "anchors": [
-        1784012215949,
-        1784027128697,
-        1784040670529,
-        1784055431350,
-        1783981601370,
-        1783999788659,
-        1784017186865,
-        1784037070529,
-        1784048087021
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
-          "description": null
         }
       ],
       "outcome": "ok"
@@ -27898,25 +28138,6 @@
         1789218003612,
         1789230513235
       ],
-      "festivals": [],
-      "outcome": "ok"
-    },
-    {
-      "label": "Delhi|2026-09-13|all",
-      "sunrise": 1789259702356,
-      "sunset": 1789304331991,
-      "nextSunrise": 1789346131622,
-      "anchors": [
-        1789282017173,
-        1789295406064,
-        1789307931991,
-        1789325231806,
-        1789253942356,
-        1789270859764,
-        1789286480137,
-        1789304331991,
-        1789316871880
-      ],
       "festivals": [
         {
           "key": "sama_upakarma",
@@ -28155,11 +28376,6 @@
       "festivals": [
         {
           "key": "mahalaya_amavasya",
-          "type": "major",
-          "description": null
-        },
-        {
-          "key": "sama_upakarma",
           "type": "major",
           "description": null
         },
@@ -30281,6 +30497,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Delhi|2027-06-04|all",
+      "sunrise": 1812066796508,
+      "sunset": 1812116746872,
+      "nextSunrise": 1812153188373,
+      "anchors": [
+        1812091771690,
+        1812106756799,
+        1812120346872,
+        1812134967622,
+        1812061036508,
+        1812079284099,
+        1812096766726,
+        1812116746872,
+        1812127679322
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "masik_karthigai",
+          "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Delhi|2027-06-08|all",
       "sunrise": 1812412372002,
       "sunset": 1812462456589,
@@ -30475,31 +30721,6 @@
         {
           "key": "masik_shivaratri",
           "type": "minor",
-          "description": null
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
-      "label": "Delhi|2027-07-04|all",
-      "sunrise": 1814659077612,
-      "sunset": 1814709179448,
-      "nextSunrise": 1814745502591,
-      "anchors": [
-        1814684128530,
-        1814699159080,
-        1814712779448,
-        1814727341019,
-        1814653317612,
-        1814671603071,
-        1814689138713,
-        1814709179448,
-        1814720076390
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
           "description": null
         }
       ],
@@ -30895,6 +31116,31 @@
         {
           "key": "mangala_gauri",
           "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
+      "label": "Delhi|2027-08-04|all",
+      "sunrise": 1817338445650,
+      "sunset": 1817386811931,
+      "nextSunrise": 1817424879484,
+      "anchors": [
+        1817362628790,
+        1817377138674,
+        1817390411931,
+        1817405845707,
+        1817332685650,
+        1817350537220,
+        1817367465418,
+        1817386811931,
+        1817398232196
+      ],
+      "festivals": [
+        {
+          "key": "hariyali_teej",
+          "type": "major",
           "description": null
         }
       ],
@@ -31648,12 +31894,12 @@
       ],
       "festivals": [
         {
-          "key": "mahalaya_amavasya",
+          "key": "navaratri",
           "type": "major",
           "description": null
         },
         {
-          "key": "sama_upakarma",
+          "key": "mahalaya_amavasya",
           "type": "major",
           "description": null
         },
@@ -33953,6 +34199,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Delhi|2028-05-24|all",
+      "sunrise": 1842738958862,
+      "sunset": 1842788422414,
+      "nextSunrise": 1842825336802,
+      "anchors": [
+        1842763690638,
+        1842778529703,
+        1842792022414,
+        1842806879608,
+        1842733198862,
+        1842751324750,
+        1842768636993,
+        1842788422414,
+        1842799496730
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "masik_karthigai",
+          "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Delhi|2028-05-27|all",
       "sunrise": 1842998096725,
       "sunset": 1843047722865,
@@ -34117,31 +34393,6 @@
         {
           "key": "masik_shivaratri",
           "type": "minor",
-          "description": null
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
-      "label": "Delhi|2028-06-22|all",
-      "sunrise": 1845244455426,
-      "sunset": 1845294734640,
-      "nextSunrise": 1845330870375,
-      "anchors": [
-        1845269595033,
-        1845284678797,
-        1845298334640,
-        1845312802507,
-        1845238695426,
-        1845257025229,
-        1845274622954,
-        1845294734640,
-        1845305575360
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
           "description": null
         }
       ],
@@ -34977,6 +35228,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Delhi|2028-08-22|all",
+      "sunrise": 1850516658375,
+      "sunset": 1850563393541,
+      "nextSunrise": 1850603089677,
+      "anchors": [
+        1850540025958,
+        1850554046507,
+        1850566993541,
+        1850583241609,
+        1850510898375,
+        1850528342166,
+        1850544699474,
+        1850563393541,
+        1850575302381
+      ],
+      "festivals": [
+        {
+          "key": "hartalika_teej",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Delhi|2028-08-23|all",
       "sunrise": 1850603089677,
       "sunset": 1850649730868,
@@ -35522,6 +35798,31 @@
           "key": "kati_bihu",
           "type": "sankranti",
           "description": "Tula"
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
+      "label": "Delhi|2028-10-18|all",
+      "sunrise": 1855443236609,
+      "sunset": 1855484291404,
+      "nextSunrise": 1855529674206,
+      "anchors": [
+        1855463764006,
+        1855476080445,
+        1855487891404,
+        1855506982805,
+        1855437476609,
+        1855453500307,
+        1855467869486,
+        1855484291404,
+        1855497906244
+      ],
+      "festivals": [
+        {
+          "key": "govardhan_puja",
+          "type": "major",
+          "description": null
         }
       ],
       "outcome": "ok"
@@ -37485,6 +37786,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Delhi|2029-06-11|all",
+      "sunrise": 1875829966680,
+      "sunset": 1875880140708,
+      "nextSunrise": 1875916368445,
+      "anchors": [
+        1875855053694,
+        1875870105902,
+        1875883740708,
+        1875898254576,
+        1875824206680,
+        1875842510187,
+        1875860071096,
+        1875880140708,
+        1875891009029
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Delhi|2029-06-15|all",
       "sunrise": 1876175581275,
       "sunset": 1876225824982,
@@ -37665,31 +37991,6 @@
           "key": "pradosha",
           "type": "pradosha",
           "description": "Som Pradosha"
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
-      "label": "Delhi|2029-07-11|all",
-      "sunrise": 1878422479644,
-      "sunset": 1878472312663,
-      "nextSunrise": 1878508909176,
-      "anchors": [
-        1878447396153,
-        1878462346059,
-        1878475912663,
-        1878490610919,
-        1878416719644,
-        1878434937898,
-        1878452379455,
-        1878472312663,
-        1878483291616
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
-          "description": null
         }
       ],
       "outcome": "ok"
@@ -39090,6 +39391,31 @@
           "key": "diwali",
           "type": "major",
           "description": "Purnimanta: Kartika Krishna Paksha"
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
+      "label": "Delhi|2029-11-06|all",
+      "sunrise": 1888621608443,
+      "sunset": 1888660946791,
+      "nextSunrise": 1888708053623,
+      "anchors": [
+        1888641277617,
+        1888653079121,
+        1888664546791,
+        1888684500207,
+        1888615848443,
+        1888631443030,
+        1888645211451,
+        1888660946791,
+        1888675078840
+      ],
+      "festivals": [
+        {
+          "key": "govardhan_puja",
+          "type": "major",
+          "description": null
         }
       ],
       "outcome": "ok"
@@ -40904,6 +41230,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Delhi|2030-05-31|all",
+      "sunrise": 1906415640211,
+      "sunset": 1906465435772,
+      "nextSunrise": 1906502027024,
+      "anchors": [
+        1906440537991,
+        1906455476659,
+        1906469035772,
+        1906483731398,
+        1906409880211,
+        1906428089101,
+        1906445517547,
+        1906465435772,
+        1906476413147
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "masik_karthigai",
+          "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Delhi|2030-06-01|all",
       "sunrise": 1906502027024,
       "sunset": 1906551866613,
@@ -41147,31 +41503,6 @@
         {
           "key": "masik_shivaratri",
           "type": "minor",
-          "description": null
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
-      "label": "Delhi|2030-06-30|all",
-      "sunrise": 1909007793089,
-      "sunset": 1909057983495,
-      "nextSunrise": 1909094215143,
-      "anchors": [
-        1909032888292,
-        1909047945413,
-        1909061583495,
-        1909076099319,
-        1909002033089,
-        1909020340690,
-        1909037907332,
-        1909057983495,
-        1909068852989
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
           "description": null
         }
       ],
@@ -42055,6 +42386,11 @@
       ],
       "festivals": [
         {
+          "key": "sama_upakarma",
+          "type": "major",
+          "description": null
+        },
+        {
           "key": "hartalika_teej",
           "type": "major",
           "description": null
@@ -42081,11 +42417,6 @@
       "festivals": [
         {
           "key": "ganesh_chaturthi",
-          "type": "major",
-          "description": null
-        },
-        {
-          "key": "sama_upakarma",
           "type": "major",
           "description": null
         }
@@ -44050,6 +44381,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Pune|2025-03-31|all",
+      "sunrise": 1743382778433,
+      "sunset": 1743427081329,
+      "nextSunrise": 1743469129277,
+      "anchors": [
+        1743404929881,
+        1743418220749,
+        1743430681329,
+        1743448105303,
+        1743377018433,
+        1743393854157,
+        1743409360170,
+        1743427081329,
+        1743439695713
+      ],
+      "festivals": [
+        {
+          "key": "gangaur",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Pune|2025-04-01|all",
       "sunrise": 1743469129277,
       "sunset": 1743513494943,
@@ -44530,6 +44886,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Pune|2025-05-26|all",
+      "sunrise": 1748219282583,
+      "sunset": 1748266520174,
+      "nextSunrise": 1748305673328,
+      "anchors": [
+        1748242901378,
+        1748257072655,
+        1748270120174,
+        1748286096751,
+        1748213522583,
+        1748231091980,
+        1748247625137,
+        1748266520174,
+        1748278266120
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "masik_karthigai",
+          "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Pune|2025-05-30|all",
       "sunrise": 1748564851614,
       "sunset": 1748612211512,
@@ -44771,31 +45157,6 @@
         1750784280375
       ],
       "festivals": [],
-      "outcome": "ok"
-    },
-    {
-      "label": "Pune|2025-06-25|all",
-      "sunrise": 1750811402099,
-      "sunset": 1750859066975,
-      "nextSunrise": 1750897817915,
-      "anchors": [
-        1750835234537,
-        1750849533999,
-        1750862666975,
-        1750878442445,
-        1750805642099,
-        1750823318318,
-        1750840001024,
-        1750859066975,
-        1750870692257
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
-          "description": null
-        }
-      ],
       "outcome": "ok"
     },
     {
@@ -47622,6 +47983,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Pune|2026-03-19|all",
+      "sunrise": 1773882585323,
+      "sunset": 1773926114018,
+      "nextSunrise": 1773968936043,
+      "anchors": [
+        1773904349670,
+        1773917408279,
+        1773929714018,
+        1773947525030,
+        1773876825323,
+        1773893467496,
+        1773908702540,
+        1773926114018,
+        1773938960625
+      ],
+      "festivals": [
+        {
+          "key": "ugadi",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "gudi_padwa",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Pune|2026-03-21|all",
       "sunrise": 1774055286630,
       "sunset": 1774098942240,
@@ -48111,6 +48502,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Pune|2026-05-16|all",
+      "sunrise": 1778891436810,
+      "sunset": 1778938285763,
+      "nextSunrise": 1778977817185,
+      "anchors": [
+        1778914861286,
+        1778928915972,
+        1778941885763,
+        1778958051474,
+        1778885676810,
+        1778903149048,
+        1778919546181,
+        1778938285763,
+        1778950145189
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "masik_karthigai",
+          "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Pune|2026-05-20|all",
       "sunrise": 1779236964300,
       "sunset": 1779283977126,
@@ -48491,31 +48912,6 @@
           "key": "pradosha",
           "type": "pradosha",
           "description": "Ravi Pradosha"
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
-      "label": "Pune|2026-07-14|all",
-      "sunrise": 1783989359512,
-      "sunset": 1784036687442,
-      "nextSunrise": 1784075780808,
-      "anchors": [
-        1784013023477,
-        1784027221856,
-        1784040287442,
-        1784056234125,
-        1783983599512,
-        1784001191494,
-        1784017756270,
-        1784036687442,
-        1784048415451
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
-          "description": null
         }
       ],
       "outcome": "ok"
@@ -49301,20 +49697,20 @@
       "outcome": "ok"
     },
     {
-      "label": "Pune|2026-09-13|all",
-      "sunrise": 1789260719321,
-      "sunset": 1789304933944,
-      "nextSunrise": 1789347129089,
+      "label": "Pune|2026-09-12|all",
+      "sunrise": 1789174309517,
+      "sunset": 1789218586120,
+      "nextSunrise": 1789260719321,
       "anchors": [
-        1789282826632,
-        1789296091019,
-        1789308533944,
-        1789326031516,
-        1789254959321,
-        1789271772976,
-        1789287248094,
-        1789304933944,
-        1789317592487
+        1789196447818,
+        1789209730799,
+        1789222186120,
+        1789239652720,
+        1789168549517,
+        1789185378667,
+        1789200875478,
+        1789218586120,
+        1789231226080
       ],
       "festivals": [
         {
@@ -49554,11 +49950,6 @@
       "festivals": [
         {
           "key": "mahalaya_amavasya",
-          "type": "major",
-          "description": null
-        },
-        {
-          "key": "sama_upakarma",
           "type": "major",
           "description": null
         },
@@ -87492,6 +87883,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Sydney|2026-03-21|all",
+      "sunrise": 1774036723522,
+      "sunset": 1774080335531,
+      "nextSunrise": 1774123169463,
+      "anchors": [
+        1774058529526,
+        1774071613129,
+        1774083935531,
+        1774101752497,
+        1774030963522,
+        1774047626524,
+        1774062890727,
+        1774080335531,
+        1774093185710
+      ],
+      "festivals": [
+        {
+          "key": "gangaur",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Sydney|2026-03-22|all",
       "sunrise": 1774123169463,
       "sunset": 1774166654138,
@@ -87927,6 +88343,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Sydney|2026-05-16|all",
+      "sunrise": 1778877641654,
+      "sunset": 1778914921292,
+      "nextSunrise": 1778964085234,
+      "anchors": [
+        1778896281473,
+        1778907465364,
+        1778918521292,
+        1778939503263,
+        1778871881654,
+        1778886961563,
+        1778900009436,
+        1778914921292,
+        1778929670474
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "masik_karthigai",
+          "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Sydney|2026-05-20|all",
       "sunrise": 1779223414041,
       "sunset": 1779260369443,
@@ -88301,31 +88747,6 @@
         {
           "key": "masik_shivaratri",
           "type": "minor",
-          "description": null
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
-      "label": "Sydney|2026-07-14|all",
-      "sunrise": 1783976316401,
-      "sunset": 1784012618495,
-      "nextSunrise": 1784062693965,
-      "anchors": [
-        1783994467448,
-        1784005358076,
-        1784016218495,
-        1784037656230,
-        1783970556401,
-        1783985391924,
-        1783998097657,
-        1784012618495,
-        1784027641136
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
           "description": null
         }
       ],
@@ -89369,11 +89790,6 @@
       "festivals": [
         {
           "key": "mahalaya_amavasya",
-          "type": "major",
-          "description": null
-        },
-        {
-          "key": "sama_upakarma",
           "type": "major",
           "description": null
         },
@@ -91444,6 +91860,36 @@
       "outcome": "ok"
     },
     {
+      "label": "Reykjavik|2026-05-16|all",
+      "sunrise": 1778904597526,
+      "sunset": 1778971247760,
+      "nextSunrise": 1778990805524,
+      "anchors": [
+        1778937922643,
+        1778957917713,
+        1778974847760,
+        1778981026642,
+        1778898837526,
+        1778921260084,
+        1778944587666,
+        1778971247760,
+        1778977115089
+      ],
+      "festivals": [
+        {
+          "key": "vat_savitri_amavasya",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "masik_karthigai",
+          "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Reykjavik|2026-05-19|all",
       "sunrise": 1779163226204,
       "sunset": 1779231033238,
@@ -91848,31 +92294,6 @@
       "outcome": "ok"
     },
     {
-      "label": "Reykjavik|2026-07-14|all",
-      "sunrise": 1784000287174,
-      "sunset": 1784071614412,
-      "nextSunrise": 1784086864508,
-      "anchors": [
-        1784035950793,
-        1784057348964,
-        1784075214412,
-        1784079239460,
-        1783994527174,
-        1784018118983,
-        1784043083516,
-        1784071614412,
-        1784076189440
-      ],
-      "festivals": [
-        {
-          "key": "vat_savitri_amavasya",
-          "type": "major",
-          "description": null
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
       "label": "Reykjavik|2026-07-15|all",
       "sunrise": 1784086864508,
       "sunset": 1784157848062,
@@ -91889,6 +92310,11 @@
         1784162526895
       ],
       "festivals": [
+        {
+          "key": "jagannath_rath_yatra",
+          "type": "major",
+          "description": null
+        },
         {
           "key": "raja_pahili",
           "type": "major",
@@ -92713,7 +93139,13 @@
         1789243455177,
         1789254986691
       ],
-      "festivals": [],
+      "festivals": [
+        {
+          "key": "sama_upakarma",
+          "type": "major",
+          "description": null
+        }
+      ],
       "outcome": "ok"
     },
     {
@@ -92733,11 +93165,6 @@
         1789341288562
       ],
       "festivals": [
-        {
-          "key": "sama_upakarma",
-          "type": "major",
-          "description": null
-        },
         {
           "key": "hartalika_teej",
           "type": "major",
@@ -92965,11 +93392,6 @@
       "festivals": [
         {
           "key": "mahalaya_amavasya",
-          "type": "major",
-          "description": null
-        },
-        {
-          "key": "sama_upakarma",
           "type": "major",
           "description": null
         },
@@ -96374,11 +96796,6 @@
           "description": null
         },
         {
-          "key": "sama_upakarma",
-          "type": "major",
-          "description": null
-        },
-        {
           "key": "hartalika_teej",
           "type": "major",
           "description": null
@@ -96715,6 +97132,31 @@
         {
           "key": "vinayaka_chaturthi",
           "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
+      "label": "Longyearbyen|2024-10-10|all",
+      "sunrise": 1728542743794,
+      "sunset": 1728571211495,
+      "nextSunrise": 1728629646338,
+      "anchors": [
+        1728556977644,
+        1728565517954,
+        1728574811495,
+        1728600428916,
+        1728536983794,
+        1728549860719,
+        1728559824414,
+        1728571211495,
+        1728588741947
+      ],
+      "festivals": [
+        {
+          "key": "durga_ashtami",
+          "type": "major",
           "description": null
         }
       ],
@@ -98314,6 +98756,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Longyearbyen|2025-03-31|all",
+      "sunrise": 1743391259323,
+      "sunset": 1743446849382,
+      "nextSunrise": 1743477145168,
+      "anchors": [
+        1743419054352,
+        1743435731370,
+        1743450449382,
+        1743461997275,
+        1743385499323,
+        1743405156837,
+        1743424613358,
+        1743446849382,
+        1743455938117
+      ],
+      "festivals": [
+        {
+          "key": "gangaur",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Longyearbyen|2025-04-01|all",
       "sunrise": 1743477145168,
       "sunset": 1743533739118,
@@ -99740,31 +100207,6 @@
       "outcome": "ok"
     },
     {
-      "label": "Longyearbyen|2025-08-27|all",
-      "sunrise": 1756254659948,
-      "sunset": 1756329156790,
-      "nextSunrise": 1756342041654,
-      "anchors": [
-        1756291908369,
-        1756314257421,
-        1756332756790,
-        1756335599222,
-        1756248899948,
-        1756273284158,
-        1756299358053,
-        1756329156790,
-        1756333022249
-      ],
-      "festivals": [
-        {
-          "key": "sama_upakarma",
-          "type": "major",
-          "description": null
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
       "label": "Longyearbyen|2025-09-03|all",
       "sunrise": 1756864698083,
       "sunset": 1756928875129,
@@ -100140,6 +100582,31 @@
           "key": "ekadashi",
           "type": "ekadashi",
           "description": "Pashankusha Ekadashi"
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
+      "label": "Longyearbyen|2025-10-06|all",
+      "sunrise": 1759731117729,
+      "sunset": 1759763768332,
+      "nextSunrise": 1759817983258,
+      "anchors": [
+        1759747443030,
+        1759757238211,
+        1759767368332,
+        1759790875795,
+        1759725357729,
+        1759739280379,
+        1759750708090,
+        1759763768332,
+        1759780032809
+      ],
+      "festivals": [
+        {
+          "key": "sharad_purnima",
+          "type": "major",
+          "description": null
         }
       ],
       "outcome": "ok"
@@ -103426,6 +103893,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Longyearbyen|2026-09-12|all",
+      "sunrise": 1789182826962,
+      "sunset": 1789237719686,
+      "nextSunrise": 1789269692605,
+      "anchors": [
+        1789210273324,
+        1789226741141,
+        1789241319686,
+        1789253706145,
+        1789177066962,
+        1789196550143,
+        1789215762596,
+        1789237719686,
+        1789247311561
+      ],
+      "festivals": [
+        {
+          "key": "sama_upakarma",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Longyearbyen|2026-09-13|all",
       "sunrise": 1789269692605,
       "sunset": 1789323621040,
@@ -103442,11 +103934,6 @@
         1789333500279
       ],
       "festivals": [
-        {
-          "key": "sama_upakarma",
-          "type": "major",
-          "description": null
-        },
         {
           "key": "hartalika_teej",
           "type": "major",
@@ -103684,11 +104171,6 @@
       "festivals": [
         {
           "key": "mahalaya_amavasya",
-          "type": "major",
-          "description": null
-        },
-        {
-          "key": "sama_upakarma",
           "type": "major",
           "description": null
         },
@@ -106805,6 +107287,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Longyearbyen|2027-09-02|all",
+      "sunrise": 1819849391157,
+      "sunset": 1819915395765,
+      "nextSunrise": 1819936408153,
+      "anchors": [
+        1819882393461,
+        1819902194843,
+        1819918995765,
+        1819925901959,
+        1819843631157,
+        1819865892309,
+        1819888993921,
+        1819915395765,
+        1819921699481
+      ],
+      "festivals": [
+        {
+          "key": "sama_upakarma",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Longyearbyen|2027-09-03|all",
       "sunrise": 1819936408153,
       "sunset": 1820001169417,
@@ -106823,11 +107330,6 @@
       "festivals": [
         {
           "key": "ganesh_chaturthi",
-          "type": "major",
-          "description": null
-        },
-        {
-          "key": "sama_upakarma",
           "type": "major",
           "description": null
         },
@@ -107063,6 +107565,36 @@
         {
           "key": "masik_shivaratri",
           "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
+      "label": "Longyearbyen|2027-09-29|all",
+      "sunrise": 1822194982191,
+      "sunset": 1822234557887,
+      "nextSunrise": 1822281817019,
+      "anchors": [
+        1822214770039,
+        1822226642747,
+        1822238157887,
+        1822258187453,
+        1822189222191,
+        1822204876115,
+        1822218727608,
+        1822234557887,
+        1822248735626
+      ],
+      "festivals": [
+        {
+          "key": "mahalaya_amavasya",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "bathukamma_start",
+          "type": "major",
           "description": null
         }
       ],
@@ -113672,6 +114204,11 @@
           "key": "sama_upakarma",
           "type": "major",
           "description": null
+        },
+        {
+          "key": "hartalika_teej",
+          "type": "major",
+          "description": null
         }
       ],
       "outcome": "ok"
@@ -113915,11 +114452,6 @@
       "festivals": [
         {
           "key": "mahalaya_amavasya",
-          "type": "major",
-          "description": null
-        },
-        {
-          "key": "sama_upakarma",
           "type": "major",
           "description": null
         },
@@ -116943,6 +117475,11 @@
         1914443775867
       ],
       "festivals": [
+        {
+          "key": "sama_upakarma",
+          "type": "major",
+          "description": null
+        },
         {
           "key": "hartalika_teej",
           "type": "major",
@@ -120790,31 +121327,6 @@
       "outcome": "ok"
     },
     {
-      "label": "Longyearbyen|2031-10-15|all",
-      "sunrise": 1949815396841,
-      "sunset": 1949839242461,
-      "nextSunrise": 1949902363770,
-      "anchors": [
-        1949827319651,
-        1949834473337,
-        1949842842461,
-        1949870803115,
-        1949809636841,
-        1949821358246,
-        1949829704213,
-        1949839242461,
-        1949858178853
-      ],
-      "festivals": [
-        {
-          "key": "sama_upakarma",
-          "type": "major",
-          "description": null
-        }
-      ],
-      "outcome": "ok"
-    },
-    {
       "label": "Longyearbyen|2031-10-16|all",
       "sunrise": 1949902363770,
       "sunset": 1949925051882,
@@ -120831,6 +121343,11 @@
         1949944342030
       ],
       "festivals": [
+        {
+          "key": "navaratri",
+          "type": "major",
+          "description": null
+        },
         {
           "key": "mahalaya_amavasya",
           "type": "major",
@@ -122351,6 +122868,36 @@
         {
           "key": "masik_shivaratri",
           "type": "minor",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
+      "label": "Longyearbyen|2032-04-10|all",
+      "sunrise": 1965174171159,
+      "sunset": 1965241395639,
+      "nextSunrise": 1965259881564,
+      "anchors": [
+        1965207783399,
+        1965227950743,
+        1965244995639,
+        1965250638601,
+        1965168411159,
+        1965190977279,
+        1965214505847,
+        1965241395639,
+        1965246941416
+      ],
+      "festivals": [
+        {
+          "key": "ugadi",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "gudi_padwa",
+          "type": "major",
           "description": null
         }
       ],
@@ -124022,11 +124569,6 @@
       "festivals": [
         {
           "key": "mahalaya_amavasya",
-          "type": "major",
-          "description": null
-        },
-        {
-          "key": "sama_upakarma",
           "type": "major",
           "description": null
         },
@@ -131069,11 +131611,6 @@
           "description": null
         },
         {
-          "key": "sama_upakarma",
-          "type": "major",
-          "description": null
-        },
-        {
           "key": "bathukamma_start",
           "type": "major",
           "description": null
@@ -137689,6 +138226,11 @@
       ],
       "festivals": [
         {
+          "key": "anant_chaturdashi",
+          "type": "major",
+          "description": null
+        },
+        {
           "key": "sankranti",
           "type": "sankranti",
           "description": "Kanya"
@@ -137830,11 +138372,6 @@
       "festivals": [
         {
           "key": "mahalaya_amavasya",
-          "type": "major",
-          "description": null
-        },
-        {
-          "key": "sama_upakarma",
           "type": "major",
           "description": null
         },
@@ -139391,7 +139928,18 @@
         1743295540622,
         1743302956783
       ],
-      "festivals": [],
+      "festivals": [
+        {
+          "key": "ugadi",
+          "type": "major",
+          "description": null
+        },
+        {
+          "key": "gudi_padwa",
+          "type": "major",
+          "description": null
+        }
+      ],
       "outcome": "ok"
     },
     {
@@ -144365,6 +144913,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Alert|2026-09-12|all",
+      "sunrise": 1789197631679,
+      "sunset": 1789259982730,
+      "nextSunrise": 1789284926878,
+      "anchors": [
+        1789228807204,
+        1789247512519,
+        1789263582730,
+        1789272454804,
+        1789191871679,
+        1789213219441,
+        1789235042309,
+        1789259982730,
+        1789267465974
+      ],
+      "festivals": [
+        {
+          "key": "sama_upakarma",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Alert|2026-09-13|all",
       "sunrise": 1789284926878,
       "sunset": 1789345494539,
@@ -144381,11 +144954,6 @@
         1789353499730
       ],
       "festivals": [
-        {
-          "key": "sama_upakarma",
-          "type": "major",
-          "description": null
-        },
         {
           "key": "hartalika_teej",
           "type": "major",
@@ -144588,11 +145156,6 @@
       "festivals": [
         {
           "key": "mahalaya_amavasya",
-          "type": "major",
-          "description": null
-        },
-        {
-          "key": "sama_upakarma",
           "type": "major",
           "description": null
         },
@@ -154157,6 +154720,31 @@
       "outcome": "ok"
     },
     {
+      "label": "Alert|2029-09-09|all",
+      "sunrise": 1883630046478,
+      "sunset": 1883697865034,
+      "nextSunrise": 1883717542084,
+      "anchors": [
+        1883663955756,
+        1883684301322,
+        1883701465034,
+        1883707703559,
+        1883624286478,
+        1883647001117,
+        1883670737611,
+        1883697865034,
+        1883703768149
+      ],
+      "festivals": [
+        {
+          "key": "sama_upakarma",
+          "type": "major",
+          "description": null
+        }
+      ],
+      "outcome": "ok"
+    },
+    {
       "label": "Alert|2029-09-10|all",
       "sunrise": 1883717542084,
       "sunset": 1883783225995,
@@ -154173,11 +154761,6 @@
         1883789741531
       ],
       "festivals": [
-        {
-          "key": "sama_upakarma",
-          "type": "major",
-          "description": null
-        },
         {
           "key": "hartalika_teej",
           "type": "major",
@@ -154415,11 +154998,6 @@
       "festivals": [
         {
           "key": "mahalaya_amavasya",
-          "type": "major",
-          "description": null
-        },
-        {
-          "key": "sama_upakarma",
           "type": "major",
           "description": null
         },

@@ -11,13 +11,10 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// Expectations derived from the reference almanac's stated rules, with no library output consulted.
-
 const almanacSadeSatiAsOfISO = "2026-05-04T12:00:00Z"
 
 var almanacSadeSatiAsOfMs = types.DateUTC(2026, 4, 4).Ms() + 12*3_600_000
 
-// Barbara Pijan's Shani Gochara table; firstAlt is the pre-retrograde ingress, either date passes.
 var saturnEnters = map[string][]struct{ date, firstAlt string }{
 	"Tula":      {{date: "2012-08-03", firstAlt: "2011-11-14"}},
 	"Vrischika": {{date: "2014-11-02"}},
@@ -186,7 +183,6 @@ func TestAlmanacParityMangalAndKaalSarp(t *testing.T) {
 				}
 			}
 		} else if len(m.Cancellations) != 0 {
-			// The empty arm is an equality, not a superset.
 			t.Errorf("%s mangal.cancellations: want [], got [%s]",
 				c.Name, strings.Join(m.Cancellations, "; "))
 		}
@@ -217,7 +213,6 @@ func TestAlmanacParityMangalAndKaalSarp(t *testing.T) {
 		if k.KetuHouse != ek.KetuHouse {
 			t.Errorf("%s kaalSarp.ketuHouse: got %d, want %d", c.Name, k.KetuHouse, ek.KetuHouse)
 		}
-		// `partial` is not asserted: the reference almanac does not list partial Kaal Sarpa.
 		if k.Afflicted {
 			afflictedKaalSarp++
 		}
@@ -276,7 +271,6 @@ func TestAlmanacParitySadeSati(t *testing.T) {
 			}
 			if exp.ExpectedArcEndRashi != "" {
 				if _, known := saturnEnters[exp.ExpectedArcEndRashi]; !known {
-					// ~2030 Vrishabha: unpinned, so only non-nullness holds.
 					endsSkipped++
 					if s.CurrentArcEnd == nil {
 						t.Errorf("%s sadeSati.currentArcEnd is null while active", c.Name)

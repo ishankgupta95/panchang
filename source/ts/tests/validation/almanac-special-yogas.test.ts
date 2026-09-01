@@ -54,8 +54,6 @@ function compare(almanac: readonly (readonly [number, number])[], emitted: Set<n
   const sorted = [...almanac].sort((a, b) => (a[0] * 100 + a[1]) - (b[0] * 100 + b[1]));
   for (const [m, d] of sorted) {
     const same = m * 100 + d;
-    // Hardcoded 2026 supplies only month lengths: no fixture lists Mar 1, so a
-    // fixed non-leap February is safe for every dataset year.
     const prevDate = new Date(Date.UTC(2026, m - 1, d - 1));
     const prev = (prevDate.getUTCMonth() + 1) * 100 + prevDate.getUTCDate();
     if (remaining.has(prev)) remaining.delete(prev);

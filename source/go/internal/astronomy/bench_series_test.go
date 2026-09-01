@@ -1,7 +1,5 @@
 package astronomy
 
-// Mirrors `parity/bench.src.ts` call for call; the scattered arguments are deliberate: a near-constant stream runs 3× faster.
-
 import (
 	"testing"
 	"time"

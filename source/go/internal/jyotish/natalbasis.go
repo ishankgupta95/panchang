@@ -46,7 +46,6 @@ func ComputeNatalBasis(
 	if err != nil {
 		return NatalBasis{}, err
 	}
-	// rashi names share the twelve masa names
 	positions, err := ComputePlanetaryPositions(ctx, birthMs, ayanamsaType,
 		func(idx int) string { return i18n.ResolveNakshatraName(idx, lang) },
 		func(idx int) string { return i18n.ResolveMasaName(idx, lang) },

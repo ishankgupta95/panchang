@@ -48,7 +48,6 @@ func TestTier0SolarEclipsesGeocentric(t *testing.T) {
 	t.Logf("greatest eclipse (s TT): %s", peak.label())
 }
 
-// The canon rounds the greatest-eclipse point to the whole degree, up to 55 km, which can change a near-hybrid observer's type; hence the exclusions.
 func TestTier0SolarTypeAndMagnitudeAtGreatestPoint(t *testing.T) {
 	canon := loadEclipseCanon(t)
 	const nearCentralBand = 0.025
@@ -80,7 +79,6 @@ func TestTier0SolarTypeAndMagnitudeAtGreatestPoint(t *testing.T) {
 		view := SolarViewAt(ctx, eclipse.PeakMs, location)
 		r.altitude.add(eclipse.PeakAltitude-row.GreatestSunAltitude, row.Date)
 
-		// The canon's column is the diameter ratio when central, the covered fraction when partial.
 		ours := view.MoonSemidiameter / view.SunSemidiameter
 		if row.Kind == "P" {
 			ours = eclipse.Magnitude
@@ -238,7 +236,6 @@ func TestTier0SolarLocalCircumstances(t *testing.T) {
 			r.end.add(float64(eclipse.PartialEndMs-localToUtcMs(site, row.Date, row.Ends))/1000, where)
 		}
 
-		// Everything below is published at maximum, and a flagged one is sunrise/sunset.
 		if row.MaximumFlag != "" {
 			r.clipped++
 			return
@@ -281,7 +278,6 @@ func TestTier0SolarLocalCircumstances(t *testing.T) {
 		t.Errorf("only %d horizon-clipped times; the exclusion is not being exercised", clipped)
 	}
 
-	// Contact times print to the minute (±30 s baked in); the rest of the 80 s is the catalogs' ΔT.
 	for _, c := range []struct {
 		label string
 		w     *worst
@@ -290,7 +286,6 @@ func TestTier0SolarLocalCircumstances(t *testing.T) {
 		{"first contact (s)", &begin, 80},
 		{"maximum (s)", &maximum, 80},
 		{"last contact (s)", &end, 80},
-		// Printed to the whole degree; the Sun moves 0.25° in a minute.
 		{"sun altitude (deg)", &altitude, 0.8},
 		{"sun azimuth (deg)", &azimuth, 0.8},
 		{"magnitude", &magnitude, 0.004},
@@ -302,7 +297,6 @@ func TestTier0SolarLocalCircumstances(t *testing.T) {
 		t.Logf("%-20s %s", c.label, c.w.label())
 	}
 
-	// After 2003 Espenak's ΔT is a prediction and ours another, so only the historical bound judges.
 	if math.Abs(historical.bias()) >= 2 {
 		t.Errorf("1901-2002 bias (s): %s, bound 2", historical.label())
 	}
@@ -388,7 +382,6 @@ func TestTier0SolarPartialAndInvisible(t *testing.T) {
 	}
 
 	ctx := NewEphemerisCtx()
-	// 2028 Jul 22 is total over Australia and Sydney is close to the path.
 	var partialRow *localRow
 	for i := range sydney.Eclipses {
 		if sydney.Eclipses[i].Date == "2028-07-22" {

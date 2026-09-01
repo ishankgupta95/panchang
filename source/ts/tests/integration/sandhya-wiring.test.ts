@@ -28,7 +28,6 @@ describe('Madhyahna / Sandhya wiring: daily panchang', () => {
   it('madhyahna is centered on the sunrise→sunset midpoint', () => {
     const noonMs = (r.sun.rise.getTime() + r.sun.set.getTime()) / 2;
     const centerMs = (r.muhurtas.madhyahna.start.getTime() + r.muhurtas.madhyahna.end.getTime()) / 2;
-    // The true midpoint can land on a half-millisecond, which a Date cannot hold.
     expect(Math.abs(centerMs - noonMs)).toBeLessThanOrEqual(1);
   });
 
@@ -90,7 +89,6 @@ describe('Madhyahna / Sandhya wiring: multi-city sweep', () => {
 });
 
 describe('Sandhya cross-check (reference-almanac style, ±2 min tolerance)', () => {
-  // Sunrise times come from the reference almanac for 2025-01-14.
   const cases: Array<{
     city: string;
     loc: { latitude: number; longitude: number };

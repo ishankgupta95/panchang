@@ -19,7 +19,6 @@ const LUNAR = [
   '2042-09-29', '2088-05-05',
 ];
 
-// The type is the one seen from that site: a total eclipse is partial almost everywhere.
 const SOLAR: readonly { date: string; name: string; latitude: number; longitude: number }[] = [
   { date: '1912-04-17', name: 'Paris', latitude: 48.86, longitude: 2.35 },
   { date: '1927-06-29', name: 'London', latitude: 51.51, longitude: -0.13 },
@@ -75,7 +74,6 @@ describe('differential: the eclipse search against the direct one', () => {
         [mine.totalEnd, truth.totalEndMs],
       ];
       for (const [ours, theirs] of contacts) {
-        // Both sides decide presence the same way, so a lone null is a defect.
         expect(ours === null, `${date}: phase presence`).toBe(theirs === null);
         if (ours === null || theirs === null) continue;
         const delta = Math.abs(ours.getTime() - theirs);
@@ -90,7 +88,6 @@ describe('differential: the eclipse search against the direct one', () => {
     }
 
     expect(checked).toBe(LUNAR.length);
-    // Both sides converge to a millisecond; the worst case seen is 1 ms.
     expect(worstPeakMs, `worst greatest-eclipse Δ ${worstPeakMs} ms at ${worstPeakAt}`).toBeLessThan(50);
     expect(worstContactMs, `worst contact Δ ${worstContactMs} ms at ${worstContactAt}`).toBeLessThan(50);
     expect(worstMagnitude, `worst magnitude Δ ${worstMagnitude}`).toBeLessThan(1e-6);

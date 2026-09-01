@@ -21,7 +21,6 @@ describe('Special lagnas at sunrise: all collapse to the Sun at sunrise', () => 
     const gl = computeGhatiLagna(sunrise, DELHI).siderealLongitude;
     const bl = computeBhavaLagna(sunrise, DELHI).siderealLongitude;
 
-    // Absorbs a few arcseconds of drift from the sunrise search's precision.
     expect(Math.abs(hl - sunAtSunrise)).toBeLessThan(0.005);
     expect(Math.abs(gl - sunAtSunrise)).toBeLessThan(0.005);
     expect(Math.abs(bl - sunAtSunrise)).toBeLessThan(0.005);
@@ -95,7 +94,6 @@ describe('Special lagnas: periodicity', () => {
     const hlAfter = computeHoraLagna(after, DELHI).siderealLongitude;
     let delta = hlAfter - hlStart;
     delta = ((delta + 540) % 360) - 180;
-    // After 12h, sunrise has shifted by ~1 minute, so allow up to ~1° drift.
     expect(Math.abs(delta)).toBeLessThan(1.0);
   });
 
@@ -162,7 +160,6 @@ describe('Special lagnas: output structural shape', () => {
   it("respects 'hi' locale for rashi/nakshatra names", () => {
     const r = computeHoraLagna(date, DELHI, 'lahiri', 'hi');
     expect(r.rashi.name.length).toBeGreaterThan(0);
-    // Devanagari, so the first char is above ASCII.
     const firstChar = r.rashi.name.charCodeAt(0);
     expect(firstChar).toBeGreaterThan(127);
   });
@@ -216,10 +213,6 @@ describe('Special lagnas: 2-hour cross-check', () => {
   });
 });
 
-// Sripati Paddhati trisects each ASC to IC to DSC to MC quadrant into the 12
-// bhava-madhya cusps. No almanac publishes a Sripati cusp table, so the pins
-// below were hand-derived from the verified ASC + MC (Meeus eq. 13.6).
-
 function mod360(x: number): number { return ((x % 360) + 360) % 360; }
 function angularDelta(a: number, b: number): number {
   return mod360(a - b + 540) - 180;
@@ -259,7 +252,6 @@ describe('Sripati Lagna: includeCusps option', () => {
 });
 
 describe('Sripati cusps: antipodal + quadrant-sum invariants', () => {
-  // BPHS Ch.5: opposite cusps differ by exactly 180°.
   const CHARTS: Array<[string, Date, { latitude: number; longitude: number }]> = [
     ['Modi-natal',         new Date('1950-09-17T05:30:00Z'), { latitude:  23.78,  longitude:  72.63   }],
     ['Sachin-natal',       new Date('1973-04-24T08:55:00Z'), { latitude:  18.966, longitude:  72.833  }],
@@ -324,8 +316,6 @@ describe('Sripati cusps: angular cusps match computeBhava ASC / MC', () => {
 });
 
 describe('Sripati cusps: fixture pin sweep (hand-derived predictions)', () => {
-  // Hand-derived pins, never regenerated from implementation output. The 1e-4°
-  // tolerance absorbs float-equality wobble in the ASC/MC inputs.
   const TOL = 1e-4;
 
   type Pin = { name: string; utc: string; lat: number; lon: number; cusps: number[] };
@@ -397,9 +387,6 @@ describe('Sripati cusps: fixture pin sweep (hand-derived predictions)', () => {
 });
 
 describe('Sripati cusps: equator (φ=0) regression', () => {
-  // At φ=0 the ASC and MC are 90° apart in right ascension, but their ecliptic
-  // separation still varies with LST because the ecliptic is tilted ε ≈ 23.4°,
-  // so Sripati does NOT degenerate to Equal House at the equator.
   it('returns 12 well-formed cusps at the equator (no special-case path)', () => {
     const date = new Date('2025-03-21T12:00:00Z');
     const loc = { latitude: 0, longitude: 0 };

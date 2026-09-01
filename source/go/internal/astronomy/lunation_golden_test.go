@@ -11,8 +11,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
 )
 
-// The instants below are compared exactly even though `MoonSunElongation` is not bit-identical: probes land on whole milliseconds and the result is rounded.
-
 type lunationGolden struct {
 	Meta       map[string]any `json:"_meta"`
 	Seed       uint32         `json:"seed"`
@@ -85,7 +83,6 @@ func loadLunationGolden(t *testing.T) lunationGolden {
 	return g
 }
 
-// Predicted ≤1e-13 deg: one ULP of 360° on the Moon's longitude, the Sun's bit-identical.
 func TestMoonSunElongationWithinBound(t *testing.T) {
 	const bound = 1e-11
 	g := loadLunationGolden(t)
@@ -377,7 +374,6 @@ func TestMoonPhasesMatchTypeScript(t *testing.T) {
 		len(g.PhasesInRange), len(g.PhasesForYear))
 }
 
-// Intl renders whole minutes: Asia/Kolkata in 1900 was +5:21:10, and TS truncates to 321.
 func TestResolveUtcOffsetMatchesTypeScript(t *testing.T) {
 	g := loadLunationGolden(t)
 	subMinute := 0

@@ -224,7 +224,6 @@ func TestPositionsBitIdenticalToTypeScript(t *testing.T) {
 			t.Errorf("%s: in the Go accessor map, not in the golden", name)
 		}
 	}
-	// Twelve: the Sun's four, dateToJulianDay, the Moon's two distances, the five ayanamsas.
 	if exact != 12 {
 		t.Errorf("%d accessors were held to bit-identity; expected exactly 12", exact)
 	}
@@ -233,7 +232,6 @@ func TestPositionsBitIdenticalToTypeScript(t *testing.T) {
 }
 
 func TestPositionsWithinPlatformTrigBound(t *testing.T) {
-	// 1-2 ULP from math.Atan2 / math.Asin against V8's; the bounds sit two orders above.
 	const angleBoundDeg = 1e-11
 	const relativeBound = 1e-9
 	g := loadPositionsGolden(t)
@@ -311,7 +309,6 @@ func TestRefractionIsMonotonic(t *testing.T) {
 			t.Errorf("RefractionDegrees(%v) = %v, want 0 outside [-90, 90]", a, got)
 		}
 	}
-	// At *geometric* altitude 0 Saemundsson gives ≈0.4833°, not the 34′ of the *apparent* horizon.
 	if got := RefractionDegrees(0); math.Abs(got-0.4833) > 0.001 {
 		t.Errorf("Saemundsson at geometric 0° is %v°, expected ≈0.4833°", got)
 	}
@@ -344,7 +341,6 @@ func TestObserverVectorEllipsoid(t *testing.T) {
 func TestGastAdvancesOneSiderealDay(t *testing.T) {
 	ctx := NewEphemerisCtx()
 	start := utcMS(2025, 5, 15)
-	// A variable, so 86164090.5 does not truncate in a constant conversion.
 	siderealDaySec := 86164.0905
 	siderealDayMS := int64(siderealDaySec * 1000)
 	g0 := GreenwichApparentSiderealDegrees(ctx, start)
@@ -369,8 +365,6 @@ func TestGastAdvancesOneSiderealDay(t *testing.T) {
 	}
 }
 
-// The reference almanac publishes Lahiri to six decimals at 00:00 UT: the J2000
-// constant and the precession rate together.
 func TestAyanamsaMatchesAlmanac(t *testing.T) {
 	const arcsec = 1.0 / 3600
 	almanac := []struct {
@@ -401,7 +395,6 @@ func TestAyanamsaMatchesAlmanac(t *testing.T) {
 	t.Logf("worst drift from the almanac's published Lahiri across 1950-2050: %.5f″ (bound 0.01″)", worst)
 }
 
-// Lahiri from nine reference-almanac pages, Raman from Swiss Ephemeris SIDM_RAMAN.
 func TestAyanamsaAnchors(t *testing.T) {
 	j2000 := int64(946_728_000_000)
 	for _, c := range []struct {

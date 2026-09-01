@@ -25,8 +25,12 @@ const NOTE =
   'phase (eclipsed body above the horizon between first and last contact, so ' +
   'an eclipse in progress at moon/sunrise or moon/sunset is included). ' +
   'visibleAtPeak flags whether greatest eclipse itself is observable. Within ' +
-  'India visibility is essentially uniform; elsewhere it differs, so build a ' +
-  'location-specific table at runtime with buildEclipsesTable and cache it. ' +
+  'India the list is close to uniform but not identical: measured over the 30 ' +
+  'eclipses visible from Varanasi in 2024-2034, Delhi, Kolkata and Leh match ' +
+  'exactly, while Dwarka and Dibrugarh miss one, and Mumbai, Chennai and ' +
+  'Thiruvananthapuram differ on two or three, always at the horizon margin. ' +
+  'Elsewhere it differs far more, so build a location-specific table at ' +
+  'runtime with buildEclipsesTable and cache it. ' +
   'Solar eclipses carry the subtype seen from Varanasi (a globally-total ' +
   'eclipse may show as partial). Times are ISO UTC. Sutak: 4 prahara (12h) ' +
   'before first contact for solar, 3 prahara (9h) for umbral (partial/total) ' +

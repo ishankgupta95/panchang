@@ -467,7 +467,6 @@ func TestMatchingOverTheWholeDomain(t *testing.T) {
 			b, gl := pairAt(i)
 			acc := 0
 			for _, k := range must(ComputeAshtakoot(b, gl, AshtakootOptions{})).Koots {
-				// *2 makes Tara's halves integral before the fold
 				acc = (acc*17 + int(k.Score*2)) % digestMod
 			}
 			return float64(acc)

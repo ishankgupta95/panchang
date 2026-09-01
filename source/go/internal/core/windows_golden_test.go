@@ -102,7 +102,6 @@ func TestInauspiciousPeriodsMatchTypeScript(t *testing.T) {
 				t.Errorf("%s %s vara=%d: got %d..%d, want %d..%d", c.Day, arm.name, c.Vara,
 					arm.got.StartMs, arm.got.EndMs, arm.want.Start.Ms(), arm.want.End.Ms())
 			}
-			// Forward from the table, not back from the instant: a truncated start floors down.
 			ordinal := arm.table[c.Vara]
 			wantStart := int64(float64(c.Sunrise) + float64(float64(ordinal)*slotMs))
 			if arm.got.StartMs != wantStart {
@@ -218,7 +217,6 @@ func TestGandaMulaMatchesTypeScript(t *testing.T) {
 		t.Errorf("only %d of 2 severities reached", len(severities))
 	}
 
-	// Checked against the index list, not the regenerable golden.
 	want := map[int]types.GandaMulaSeverity{
 		0: types.GandaMulaMild, 8: types.GandaMulaMild, 9: types.GandaMulaMild,
 		17: types.GandaMulaSevere, 18: types.GandaMulaSevere, 26: types.GandaMulaMild,
@@ -292,7 +290,6 @@ func TestAnandadiYogaMatchesTypeScript(t *testing.T) {
 		t.Errorf("only %d qualities reached", len(qualities))
 	}
 
-	// Abhijit is elided from the 28, so each row covers 27 of the names.
 	for vara := 0; vara < 7; vara++ {
 		seen := map[int]bool{}
 		for n := 0; n < utils.TotalNakshatras; n++ {

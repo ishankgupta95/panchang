@@ -20,7 +20,6 @@ var AllPlanetBodies = []PlanetBody{
 	PlanetMercury, PlanetVenus, PlanetMars, PlanetJupiter, PlanetSaturn,
 }
 
-// Apparent geocentric, true ecliptic and equinox of date; degrees, and AU for Distance.
 type PlanetPosition struct {
 	Longitude float64 `json:"longitude"`
 	Latitude  float64 `json:"latitude"`
@@ -39,7 +38,6 @@ func GetPlanetPosition(ctx *EphemerisCtx, body PlanetBody, ms int64) PlanetPosit
 		dx := planet[0] - earth[0]
 		dy := planet[1] - earth[1]
 		dz := planet[2] - earth[2]
-		// Anti-FMA barrier.
 		lightDays = (math.Sqrt(float64(dx*dx)+float64(dy*dy)+float64(dz*dz)) * AuKm) / KmPerLightDay
 	}
 

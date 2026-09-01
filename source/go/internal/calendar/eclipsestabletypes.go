@@ -42,7 +42,6 @@ type EclipseTableEntryRaw struct {
 	Sutak               *EclipseSutak       `json:"sutak,omitempty"`
 }
 
-// Sutak before Description here, unlike the raw shape; both orders are pinned.
 type EclipseTableEntry struct {
 	Name                string              `json:"name"`
 	Kind                EclipseTableKind    `json:"kind"`

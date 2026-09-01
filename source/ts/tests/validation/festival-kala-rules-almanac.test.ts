@@ -46,8 +46,6 @@ describe('Vijayadashami vs the reference almanac (Delhi): aparahna-full ladder, 
 });
 
 describe('Krishna Janmashtami vs the reference almanac (Delhi): Smarta nishita ladder, 2024-2030', () => {
-  // The udaya-Ashtami day wins when Ashtami OR Rohini touches its nishita
-  // muhurta; otherwise the day Ashtami covers nishita, Saptami-viddha or not.
   const CASES: { year: number; month: number; scan: number[]; almanac: number }[] = [
     { year: 2024, month: 8, scan: [25, 26, 27], almanac: 26 },
     { year: 2025, month: 8, scan: [14, 15, 16, 17], almanac: 15 },

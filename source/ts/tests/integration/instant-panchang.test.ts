@@ -3,7 +3,6 @@ import { getInstantPanchang } from '../../src/core/panchang';
 
 const PUNE = { latitude: 18.5204, longitude: 73.8567 };
 
-// Mid-morning IST, well after sunrise.
 const KNOWN_MOMENT = new Date('2025-01-14T06:00:00Z');
 
 describe('getInstantPanchang: index range checks', () => {

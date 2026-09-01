@@ -6,8 +6,6 @@ export function computeNakshatraFromLongitude(
   name: string,
 ): NakshatraInfo {
   const index = nakshatraOf(siderealMoon);
-  // Clamped: one ULP below a boundary `nakshatraOf` rounds up, this difference
-  // goes negative and `pada` floors to 0, which downstream callers reject.
   const degreesInNakshatra = Math.max(siderealMoon - index * NAKSHATRA_SPAN, 0);
   const pada = Math.min(Math.floor(degreesInNakshatra / NAKSHATRA_PADA_SPAN) + 1, 4);
   const completionPercentage = (degreesInNakshatra / NAKSHATRA_SPAN) * 100;

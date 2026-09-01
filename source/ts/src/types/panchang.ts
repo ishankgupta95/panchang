@@ -21,9 +21,6 @@ export interface ResolvedTimezone {
   zone?: string;
 }
 
-/* Across every result type below: every field is always present, an inapplicable scalar or
- * object is `null`, an inapplicable collection is `[]`. Sidereal longitudes are degrees in `[0, 360)`. */
-
 export interface SunPosition {
   siderealLongitude: number;
   nakshatra: NakshatraIndexInfo;

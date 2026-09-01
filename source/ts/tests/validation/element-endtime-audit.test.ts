@@ -89,9 +89,6 @@ describe('Element end-time drift vs the reference almanac', () => {
   }
 
   it('drift no longer grows with ayanamsa exposure', () => {
-    // Drift scaling with how often the ayanamsa enters an element's formula is
-    // what a mistuned ayanamsa constant produces; with the constant right the
-    // ratio sits near 0.6.
     const drifts = { elongation: [] as number[], ayanamsa: [] as number[] };
 
     for (const f of withEndTimes) {
@@ -104,10 +101,8 @@ describe('Element end-time drift vs the reference almanac', () => {
           ));
         }
       };
-      // Ayanamsa cancels in Moon − Sun.
       push(drifts.elongation, r.angas.tithis[0]!.endTimeLocal, f.expected.tithiEndHHMM);
       push(drifts.elongation, r.angas.karanas[0]!.endTimeLocal, f.expected.karanaEndHHMM);
-      // Ayanamsa applies once (nakshatra) and twice (yoga).
       push(drifts.ayanamsa, r.angas.nakshatras[0]!.endTimeLocal, f.expected.nakshatraEndHHMM);
       push(drifts.ayanamsa, r.angas.yogas[0]!.endTimeLocal, f.expected.yogaEndHHMM);
     }

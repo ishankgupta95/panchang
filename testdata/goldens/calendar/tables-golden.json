@@ -116,10 +116,10 @@
       "endYear": 2033
     }
   ],
-  "digest": "37737a97adbcca444a86b301e690c055a20d55229e58a2f197b3858720187a88",
+  "digest": "f20baafd3312bc4cdcc9376b6d0ddfa925a21e4b8794a1c7b2d0bdda058c71bd",
   "tblHits": {
-    "festivalDays": 3130,
-    "festivalEntries": 5110,
+    "festivalDays": 3124,
+    "festivalEntries": 5116,
     "festivalWithDescription": 2546,
     "eclipseDays": 44,
     "eclipseEntries": 44,
@@ -130,24 +130,24 @@
     "phaseDays": 1184,
     "phaseEntries": 1184,
     "emptyEclipseYears": 2,
-    "pickFallback": 520,
+    "pickFallback": 522,
     "v1Read": 1
   },
   "tables": [
     {
       "key": "pune-2025",
       "sha256": {
-        "festivals": "473712b132e55e98c24e741a803df5a4acf839f86b883f4ae6176a65bf3703e8",
+        "festivals": "737c03a94a237c9285d84b3168a243158c5a5c6e1b86f5fa76d2faae5cf35acc",
         "eclipses": "ea93f0c1b9abc693c7e303136a92b0c99d8d738b48853ffa8c5340a18c1bfc84",
         "moonPhases": "328ca2f8e4460996a8967dad941b3b06fc981906edec8e93bd90214fecb16a4a"
       },
       "sha256Masked": {
-        "festivals": "473712b132e55e98c24e741a803df5a4acf839f86b883f4ae6176a65bf3703e8",
+        "festivals": "737c03a94a237c9285d84b3168a243158c5a5c6e1b86f5fa76d2faae5cf35acc",
         "eclipses": "755e2b0783fba6f0fb948cc5505eb029de215a7a6f9b22ad88771eeea188ba51",
         "moonPhases": "328ca2f8e4460996a8967dad941b3b06fc981906edec8e93bd90214fecb16a4a"
       },
       "bytes": {
-        "festivals": 59504,
+        "festivals": 59660,
         "eclipses": 1929,
         "moonPhases": 9320
       },
@@ -218,7 +218,7 @@
         ]
       },
       "dictLengths": {
-        "festivals": 168,
+        "festivals": 169,
         "moonPhases": 4
       },
       "dayCounts": {
@@ -624,17 +624,17 @@
     {
       "key": "pune-1912",
       "sha256": {
-        "festivals": "4c7cbdbcc485b5d2637e3174bfda1c26f04b4d351b81c869264cc1c947528cac",
+        "festivals": "031c51cb4ee4206fa7ad1379b7ac1a474dbc0c5ce9e9302e3cf498201743200b",
         "eclipses": "3b4f972af46f19003849d4d19e2af597153b30af81d0f2357238254fb90acb6a",
         "moonPhases": "4aca676e7e07aec6ffd0686c22b6402c2d8f0c8f394736e9bb3a18bdd3be183c"
       },
       "sha256Masked": {
-        "festivals": "4c7cbdbcc485b5d2637e3174bfda1c26f04b4d351b81c869264cc1c947528cac",
+        "festivals": "031c51cb4ee4206fa7ad1379b7ac1a474dbc0c5ce9e9302e3cf498201743200b",
         "eclipses": "018db6a5da150896586063d8d988e00f72df8bda36a1285eecf69bb83d65b843",
         "moonPhases": "4aca676e7e07aec6ffd0686c22b6402c2d8f0c8f394736e9bb3a18bdd3be183c"
       },
       "bytes": {
-        "festivals": 60424,
+        "festivals": 60409,
         "eclipses": 2918,
         "moonPhases": 9522
       },
@@ -1165,17 +1165,17 @@
     {
       "key": "pune-2088",
       "sha256": {
-        "festivals": "f35e94e76b0831edcf4eef153da050eba6677b3de465355e4afcf7f10021696f",
+        "festivals": "6948954922488f27cb295347197b9f32c83c52d0812b020c1c4aefa87ac9c599",
         "eclipses": "1542cf8b274664ac279867bec6a2c57e9d84011ab16116a801aaf62aec5db071",
         "moonPhases": "e73551d18546afa4a2e088dcef0c8d3f2f0ef2c4cf94c0582dbdc28287059588"
       },
       "sha256Masked": {
-        "festivals": "f35e94e76b0831edcf4eef153da050eba6677b3de465355e4afcf7f10021696f",
+        "festivals": "6948954922488f27cb295347197b9f32c83c52d0812b020c1c4aefa87ac9c599",
         "eclipses": "f5b14cdcd5025248b4bb5dda9e5218a824fb77aa37640481b6bf4de3151a585c",
         "moonPhases": "e73551d18546afa4a2e088dcef0c8d3f2f0ef2c4cf94c0582dbdc28287059588"
       },
       "bytes": {
-        "festivals": 60533,
+        "festivals": 60439,
         "eclipses": 3887,
         "moonPhases": 9472
       },
@@ -1252,7 +1252,7 @@
       },
       "dayCounts": {
         "festivals": {
-          "2088": 169
+          "2088": 168
         },
         "eclipses": {
           "2088": 3
@@ -1785,17 +1785,17 @@
     {
       "key": "newyork-2026",
       "sha256": {
-        "festivals": "b20fba41772e6a01cdeb1c629b7fbbf48e7ca883f2adb92aaa630dacda549dbf",
+        "festivals": "938ec6250fd365b04e6e35e14c9db5dbd0eb351a91a218cd6e0800b7a7716e7b",
         "eclipses": "2bf93203c0a7207014f5f91cde938648f6bb0b443e35db73ad90727600ec3510",
         "moonPhases": "1fa335271099e7a3a111dce767813817fcb4e103e0e58f4be27e3241c913dc6a"
       },
       "sha256Masked": {
-        "festivals": "b20fba41772e6a01cdeb1c629b7fbbf48e7ca883f2adb92aaa630dacda549dbf",
+        "festivals": "938ec6250fd365b04e6e35e14c9db5dbd0eb351a91a218cd6e0800b7a7716e7b",
         "eclipses": "e8e7d4ee83624321f9c8f483f61b7312efcd2814dce46454f40e284f308ddb73",
         "moonPhases": "1fa335271099e7a3a111dce767813817fcb4e103e0e58f4be27e3241c913dc6a"
       },
       "bytes": {
-        "festivals": 57522,
+        "festivals": 57428,
         "eclipses": 3868,
         "moonPhases": 9476
       },
@@ -1871,7 +1871,7 @@
       },
       "dayCounts": {
         "festivals": {
-          "2026": 152
+          "2026": 151
         },
         "eclipses": {
           "2026": 3
@@ -2379,17 +2379,17 @@
     {
       "key": "chennai-2026-2027",
       "sha256": {
-        "festivals": "ee96a22d3de4d02883cbe2eb80b8485f87ca5848bb61689bcc7b40eb4901bb85",
+        "festivals": "f370192a0de2865b640b485f18e837d62eac61e38435646f4e34b7e99c3c4a70",
         "eclipses": "f7677093acc8f124ab45d37723e4dd6e194d5dceeed63c6402155debe09e8b7b",
         "moonPhases": "6ab3ec5379463c2a9e274a3437c4d70c230210870a4551b0711fe5005ebbaf76"
       },
       "sha256Masked": {
-        "festivals": "ee96a22d3de4d02883cbe2eb80b8485f87ca5848bb61689bcc7b40eb4901bb85",
+        "festivals": "f370192a0de2865b640b485f18e837d62eac61e38435646f4e34b7e99c3c4a70",
         "eclipses": "4e74ef1459f77d36c0a48a532730816e8559212227185b130c09839402855b2c",
         "moonPhases": "6ab3ec5379463c2a9e274a3437c4d70c230210870a4551b0711fe5005ebbaf76"
       },
       "bytes": {
-        "festivals": 77841,
+        "festivals": 77876,
         "eclipses": 4751,
         "moonPhases": 16948
       },
@@ -2894,17 +2894,17 @@
     {
       "key": "pune-2025-hi-first",
       "sha256": {
-        "festivals": "692133da308be5204aa51ff060e464fe04ee8ad1bb5834d44a612f028bb0059c",
+        "festivals": "d7c262a01e6b9ebc22ea68111c2168886ffafb0306514812f06ba1bf702261aa",
         "eclipses": "74343f881881933bf4866a617f1f369b617ffa8f950c31aaf166ab4427ca1105",
         "moonPhases": "a501b2a0901eece3a26779144ef75f33312f7449f886a8573aa6a4d8d507732b"
       },
       "sha256Masked": {
-        "festivals": "692133da308be5204aa51ff060e464fe04ee8ad1bb5834d44a612f028bb0059c",
+        "festivals": "d7c262a01e6b9ebc22ea68111c2168886ffafb0306514812f06ba1bf702261aa",
         "eclipses": "87b02832fb6853641e93ec1ec80ae9026d64e040ea8ed68fbf2862a1b5a8dad5",
         "moonPhases": "a501b2a0901eece3a26779144ef75f33312f7449f886a8573aa6a4d8d507732b"
       },
       "bytes": {
-        "festivals": 59513,
+        "festivals": 59669,
         "eclipses": 1938,
         "moonPhases": 9329
       },
@@ -2975,7 +2975,7 @@
         ]
       },
       "dictLengths": {
-        "festivals": 168,
+        "festivals": 169,
         "moonPhases": 4
       },
       "dayCounts": {
@@ -3381,17 +3381,17 @@
     {
       "key": "pune-2025-en-only",
       "sha256": {
-        "festivals": "e43f122a57d3fc4b38023383ecd8632e09876c64c7995356c72ccd608ec243bf",
+        "festivals": "7e8ed6717a9e093d68956b43ab0ec9f14ac0eff6d7ac076780f3de0f1f899563",
         "eclipses": "99e5c629962d46d6eb50b356b2f17b470d6e9fcab93efac64996ac2e451bdecc",
         "moonPhases": "8b02946ced19fabe047427ed4a445d9e3e003e6cd55edac523cf4b48305098d7"
       },
       "sha256Masked": {
-        "festivals": "e43f122a57d3fc4b38023383ecd8632e09876c64c7995356c72ccd608ec243bf",
+        "festivals": "7e8ed6717a9e093d68956b43ab0ec9f14ac0eff6d7ac076780f3de0f1f899563",
         "eclipses": "229eae26f15358257e204a3d6a590b7a8b2152363ee4f7c8a7c795305656f91b",
         "moonPhases": "8b02946ced19fabe047427ed4a445d9e3e003e6cd55edac523cf4b48305098d7"
       },
       "bytes": {
-        "festivals": 45073,
+        "festivals": 45196,
         "eclipses": 1758,
         "moonPhases": 8768
       },
@@ -3462,7 +3462,7 @@
         ]
       },
       "dictLengths": {
-        "festivals": 168,
+        "festivals": 169,
         "moonPhases": 4
       },
       "dayCounts": {
@@ -3868,17 +3868,17 @@
     {
       "key": "pune-2025-hi-only",
       "sha256": {
-        "festivals": "f90e54fe5005c337d2c6afd7ee10986718b9573bc0b76c93a5502c42a1ac0c00",
+        "festivals": "f72fbfa682b48c751d588ae92469e73cff16c53ea1c64a6a02c0d0e410db8a62",
         "eclipses": "b99bf88a234f9b550794344acbd8dec58e42943f82dee0c37fd15419c81db6cf",
         "moonPhases": "ad47f5d7c5e7f6b931798bee51ceaae726a462f33f658546961e167a02a83b44"
       },
       "sha256Masked": {
-        "festivals": "f90e54fe5005c337d2c6afd7ee10986718b9573bc0b76c93a5502c42a1ac0c00",
+        "festivals": "f72fbfa682b48c751d588ae92469e73cff16c53ea1c64a6a02c0d0e410db8a62",
         "eclipses": "f37cd9b8edf908e6db0c1c8040e2817c1881ad011e82f1abefe4ea9fba547bfc",
         "moonPhases": "ad47f5d7c5e7f6b931798bee51ceaae726a462f33f658546961e167a02a83b44"
       },
       "bytes": {
-        "festivals": 50381,
+        "festivals": 50512,
         "eclipses": 1820,
         "moonPhases": 9027
       },
@@ -3949,7 +3949,7 @@
         ]
       },
       "dictLengths": {
-        "festivals": 168,
+        "festivals": 169,
         "moonPhases": 4
       },
       "dayCounts": {
@@ -4355,17 +4355,17 @@
     {
       "key": "longyearbyen-2025-all",
       "sha256": {
-        "festivals": "0c97633c4663e93b146bc8a82e6e4c208d1be88b93f7a16e857ac42d3cbdbbf2",
+        "festivals": "2149dacc2f88edb84e0cb366779a8196460beff2b15cb3602bc3a02d7227560e",
         "eclipses": "4548e0abe9538db0e250b8388dd10073cb2dfad418323bc18ea1abbdfa4fb396",
         "moonPhases": "4a6b89c06372c9d7a4e38aee7d84deacd8229e34c70ffdf4ecd5902997bbd43f"
       },
       "sha256Masked": {
-        "festivals": "0c97633c4663e93b146bc8a82e6e4c208d1be88b93f7a16e857ac42d3cbdbbf2",
+        "festivals": "2149dacc2f88edb84e0cb366779a8196460beff2b15cb3602bc3a02d7227560e",
         "eclipses": "f08c125bede337537d465f53e66f84eed59192288e5cf9d39a9c6e62a554d5b2",
         "moonPhases": "4a6b89c06372c9d7a4e38aee7d84deacd8229e34c70ffdf4ecd5902997bbd43f"
       },
       "bytes": {
-        "festivals": 23819,
+        "festivals": 24227,
         "eclipses": 3856,
         "moonPhases": 9331
       },
@@ -4436,12 +4436,12 @@
         ]
       },
       "dictLengths": {
-        "festivals": 73,
+        "festivals": 75,
         "moonPhases": 4
       },
       "dayCounts": {
         "festivals": {
-          "2025": 56
+          "2025": 57
         },
         "eclipses": {
           "2025": 3
@@ -5786,17 +5786,17 @@
     {
       "key": "newyork-2031-2033",
       "sha256": {
-        "festivals": "0175907e9776c689b9ba557bc34a0006db13688617c2df5d7d65605f0ddd1573",
+        "festivals": "ec893e1994e684ae12a550abc28c668fafedca5c8710f9512f823ac57d23cc8b",
         "eclipses": "6ff78f3e5bda46bb0091e34a14f28959e39d91025c139ea111001deb2acc6e17",
         "moonPhases": "310697f1e3bc195ae2a98a92d35fd4aeafa86af6717eae8ecc27aed37efd693e"
       },
       "sha256Masked": {
-        "festivals": "0175907e9776c689b9ba557bc34a0006db13688617c2df5d7d65605f0ddd1573",
+        "festivals": "ec893e1994e684ae12a550abc28c668fafedca5c8710f9512f823ac57d23cc8b",
         "eclipses": "cb18ad52d1dfeaf4305068cfab36b437e4f554e5a50c07ac032b90103d2e589c",
         "moonPhases": "310697f1e3bc195ae2a98a92d35fd4aeafa86af6717eae8ecc27aed37efd693e"
       },
       "bytes": {
-        "festivals": 95055,
+        "festivals": 95192,
         "eclipses": 4766,
         "moonPhases": 24417
       },
@@ -5885,9 +5885,9 @@
       },
       "dayCounts": {
         "festivals": {
-          "2031": 165,
+          "2031": 163,
           "2032": 148,
-          "2033": 158
+          "2033": 161
         },
         "eclipses": {
           "2031": 2,

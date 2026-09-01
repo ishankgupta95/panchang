@@ -16,13 +16,10 @@ const MASA_NAMES = [
 const nameResolver = (idx: number, isAdhika: boolean) =>
   (isAdhika ? 'Adhika ' : '') + MASA_NAMES[idx]!;
 
-// Only has to be in ephemeris range; the stubs decide the bounding new moons.
 const REF = new Date('2026-01-15T12:00:00Z');
 
 const sunStub = (lon: number) => () => lon;
 
-// computeChandraMasa queries the prev Amavasya first, so this lands the two
-// one rashi apart.
 const sunStubNormal = (lon: number) => {
   let call = 0;
   return () => lon + (call++ === 0 ? 0 : 30);
@@ -81,8 +78,6 @@ describe('computeChandraMasa', () => {
     });
 
     it('in an Adhika Krishna Paksha, purnimanta does NOT advance and carries the Adhika prefix', () => {
-      // Adhika months have no Sankranti, so the Purnimanta name neither advances
-      // across the Adhika Purnima nor drops the Adhika flag.
       const sunLon = 15;
       const moonLon = (sunLon + 200) % 360;
       const purnimanta = computeChandraMasa(sunLon, moonLon, nameResolver, 'purnimanta', REF, sunStub(sunLon));

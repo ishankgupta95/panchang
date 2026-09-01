@@ -80,7 +80,6 @@ describe('computeAyanamsa', () => {
       ['true-chitra', -0.0006],
       ['krishnamurti', -0.079605],
       ['thirukanitham', +0.018456],
-      // Measured against SwissEph SIDM_RAMAN, not a traditional offset.
       ['raman', -1.453010],
     ];
     for (const [system, offset] of OFFSETS) {

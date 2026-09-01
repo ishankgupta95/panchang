@@ -213,7 +213,6 @@ describe('computeFestivals', () => {
     });
 
     it('on viddha day: Smarta today, Vaishnava deferred to Dwadashi', () => {
-      // The almanac prints the unqualified (Smarta) name on the viddha day.
       const r = computeFestivals(
         ctx({ tithiIndex: 10, ekadashiDashamiViddha: true }),
         enDescResolver,
@@ -503,7 +502,6 @@ describe('computeFestivals', () => {
       const names = r.map(f => f.name);
       expect(names).toContain('puthandu');
       expect(names).toContain('bohag_bihu');
-      // The other three key off the transit MOMENT, not the observance day.
       expect(names).not.toContain('baisakhi');
       expect(names).not.toContain('vishu');
       expect(names).not.toContain('pohela_boishakh');
@@ -526,15 +524,12 @@ describe('computeFestivals', () => {
       const r = computeFestivals(ctx({ sankrantiRashi: 9, region: 'tamil-nadu' }), resolver, rashiResolver);
       const names = r.map(f => f.name);
       expect(names).toContain('pongal');
-      // makar_sankranti is pan-Indian.
       expect(names).toContain('makar_sankranti');
       expect(names).not.toContain('magh_bihu');
       expect(names).not.toContain('ayyappa_makara_jyothi');
     });
 
     it('region=kerala picks Vishu on Mesha and Ayyappa on Makara', () => {
-      // Vishu keys off the first sunrise at or after the transit, so it can fall
-      // the day after the Sankranti day.
       const mesha = computeFestivals(ctx({ vishuToday: true, region: 'kerala' }), resolver, rashiResolver);
       expect(mesha.some(f => f.name === 'vishu')).toBe(true);
       expect(mesha.some(f => f.name === 'baisakhi')).toBe(false);
@@ -546,7 +541,6 @@ describe('computeFestivals', () => {
 
     it('region=all (default) emits every regional variant', () => {
       const r = computeFestivals(ctx({ sankrantiRashi: 9 }), resolver, rashiResolver);
-      // Makara: sankranti + makar_sankranti + pongal + uttarayan + magh_bihu + ayyappa = 6
       expect(r.filter(f => f.type === 'sankranti').length).toBeGreaterThanOrEqual(6);
     });
   });
@@ -592,26 +586,94 @@ describe('computeFestivals', () => {
       );
       expect(r.some(f => f.name === 'rig_upakarma')).toBe(false);
     });
-    it('Sama Upakarma: Hasta nakshatra (12) in Bhadrapada masa (5)', () => {
+    it('Rig Upakarma does not fire on the second sunrise of a vriddha Shravana', () => {
       const r = computeFestivals(
-        ctx({ chandraMasaIndex: 5, nakshatraIndex: 12, tithiIndex: 0 }),
+        ctx({ chandraMasaIndex: 4, nakshatraIndex: 21, tithiIndex: 0, priorDayNakshatraIndex: 21 }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'rig_upakarma')).toBe(false);
+    });
+    it('Rig Upakarma does not fire in Krishna paksha', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 4, nakshatraIndex: 21, tithiIndex: 15 }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'rig_upakarma')).toBe(false);
+    });
+    it('Rig Upakarma falls back to Hasta only when Shravana is absent from the paksha', () => {
+      const shravanaStillToCome = computeFestivals(
+        ctx({
+          chandraMasaIndex: 4, nakshatraIndex: 12, tithiIndex: 4,
+          remainingPakshaSunriseNakshatras: () => new Set([12, 21]),
+        }),
+        resolver,
+      );
+      expect(shravanaStillToCome.some(f => f.name === 'rig_upakarma')).toBe(false);
+
+      const shravanaAbsent = computeFestivals(
+        ctx({
+          chandraMasaIndex: 4, nakshatraIndex: 12, tithiIndex: 4,
+          remainingPakshaSunriseNakshatras: () => new Set([12]),
+        }),
+        resolver,
+      );
+      expect(shravanaAbsent.some(f => f.name === 'rig_upakarma')).toBe(true);
+    });
+    it('Sama Upakarma: Hasta (12) pervading aparahna in Bhadrapada Shukla', () => {
+      const r = computeFestivals(
+        ctx({
+          chandraMasaIndex: 5, nakshatraIndex: 26, tithiIndex: 1,
+          nakshatraByRule: { aparahna: 12 },
+        }),
         resolver,
       );
       expect(r.some(f => f.name === 'sama_upakarma')).toBe(true);
     });
+    it('Sama Upakarma ignores a Hasta that only holds the sunrise', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 5, nakshatraIndex: 12, tithiIndex: 1 }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'sama_upakarma')).toBe(false);
+    });
+    it('Sama Upakarma yields to the next day when Hasta reaches aparahna twice', () => {
+      const r = computeFestivals(
+        ctx({
+          chandraMasaIndex: 5, nakshatraIndex: 26, tithiIndex: 1,
+          nakshatraByRule: { aparahna: 12 },
+          nextDayNakshatraByRule: () => ({ start: {}, end: { aparahna: 12 } }),
+        }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'sama_upakarma')).toBe(false);
+    });
+    it('Sama Upakarma does not fire in Krishna paksha', () => {
+      const r = computeFestivals(
+        ctx({
+          chandraMasaIndex: 5, nakshatraIndex: 26, tithiIndex: 16,
+          nakshatraByRule: { aparahna: 12 },
+        }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'sama_upakarma')).toBe(false);
+    });
   });
 
   describe('Phase 24-5: Vat Savitri', () => {
-    it('Amavasya variant: Jyeshtha (2) Amavasya (29)', () => {
-      const r = computeFestivals(ctx({ tithiIndex: 29, chandraMasaIndex: 2 }), resolver);
+    it('Amavasya variant: amanta Vaishakha (1) Amavasya (29)', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 29, chandraMasaIndex: 1 }), resolver);
       expect(r.some(f => f.name === 'vat_savitri_amavasya')).toBe(true);
     });
-    it('Purnima variant: Jyeshtha (2) Purnima (14)', () => {
+    it('Purnima variant: amanta Jyeshtha (2) Purnima (14)', () => {
       const r = computeFestivals(ctx({ tithiIndex: 14, chandraMasaIndex: 2 }), resolver);
       expect(r.some(f => f.name === 'vat_savitri_purnima')).toBe(true);
     });
     it('does not fire in other months', () => {
       const r = computeFestivals(ctx({ tithiIndex: 29, chandraMasaIndex: 3 }), resolver);
+      expect(r.some(f => f.name === 'vat_savitri_amavasya')).toBe(false);
+    });
+    it('does not fire on the amavasya that ends amanta Jyeshtha (2)', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 29, chandraMasaIndex: 2 }), resolver);
       expect(r.some(f => f.name === 'vat_savitri_amavasya')).toBe(false);
     });
   });
@@ -920,8 +982,6 @@ describe('computeFestivals', () => {
   });
 
   describe('v2.1: orphan-region sweep', () => {
-    // Each region pins a region-scoped key: `r.length > 0` would pass on the
-    // pan-Indian emissions even with the region scope dead.
     const SCENARIOS: Array<{
       region: Exclude<FestivalRegion, 'all'>;
       ctx: FestivalComputeContext;
@@ -1109,6 +1169,80 @@ describe('computeFestivals', () => {
     it('does NOT cross-fire: Lohri transit (Makara=9) does not emit Raja', () => {
       const r = computeFestivals(ctx({ nextDaySankrantiRashi: 9, region: 'odisha' }), resolver, rashiResolver);
       expect(r.some(f => f.name === 'raja_pahili')).toBe(false);
+    });
+  });
+
+  describe('kshaya anchors (tithi wholly inside one Hindu day)', () => {
+    it('Hariyali Teej fires on the day that contains a kshaya Shravana Shukla Tritiya', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 20, chandraMasaIndex: 4, kshayaTithiIndices: new Set([2]) }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'hariyali_teej')).toBe(true);
+    });
+
+    it('does not fire when the anchor is not the kshaya tithi', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 20, chandraMasaIndex: 4, kshayaTithiIndices: new Set([5]) }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'hariyali_teej')).toBe(false);
+    });
+
+    it('does not fire on a vriddha day, where the set is empty', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 20, chandraMasaIndex: 4, kshayaTithiIndices: new Set() }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'hariyali_teej')).toBe(false);
+    });
+
+    it('does not fire when more than one tithi is skipped, which only a polar day produces', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 20, chandraMasaIndex: 4, kshayaTithiIndices: new Set([2, 3]) }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'hariyali_teej')).toBe(false);
+    });
+
+    it("kshayaRule 'exclude' opts Holi out, because it is pradosha-anchored", () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 20, chandraMasaIndex: 11, kshayaTithiIndices: new Set([14]) }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'holi')).toBe(false);
+      expect(r.some(f => f.name === 'phagli')).toBe(false);
+    });
+
+    it('Ugadi reads tomorrow\'s masa for a kshaya Shukla Pratipada', () => {
+      const withNext = computeFestivals(
+        ctx({
+          tithiIndex: 20, chandraMasaIndex: 11, kshayaTithiIndices: new Set([0]),
+          nextDayMasaIndex: 0, nextDayIsAdhika: false,
+        }),
+        resolver,
+      );
+      expect(withNext.some(f => f.name === 'ugadi')).toBe(true);
+    });
+
+    it('degrades to the sunrise masa when tomorrow\'s is absent, as at the location-free call site', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 20, chandraMasaIndex: 11, kshayaTithiIndices: new Set([0]) }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'ugadi')).toBe(false);
+    });
+
+    it('does not fire when the month the anchor opens into is adhika', () => {
+      const r = computeFestivals(
+        ctx({
+          tithiIndex: 20, chandraMasaIndex: 11, kshayaTithiIndices: new Set([0]),
+          nextDayMasaIndex: 0, nextDayIsAdhika: true,
+        }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'ugadi')).toBe(false);
+      expect(r.some(f => f.name === 'gudi_padwa')).toBe(false);
     });
   });
 

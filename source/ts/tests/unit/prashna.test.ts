@@ -15,7 +15,6 @@ describe('computePrashnaChart: parity with computeRashiChart', () => {
   });
 
   it('with explicit houseSystem + ayanamsa matches computeRashiChart exactly', () => {
-    // Prashna defaults to Krishnamurti, so the ayanamsa is set explicitly here.
     const prashna = computePrashnaChart(QUESTION_MOMENT, MUMBAI, {
       houseSystem: 'whole-sign',
       ayanamsa: 'lahiri',
@@ -40,8 +39,6 @@ describe('computePrashnaChart: default house system + ayanamsa', () => {
   it('defaults to placidus-kp houses + krishnamurti ayanamsa (KP horary anchors)', () => {
     const prashna = computePrashnaChart(QUESTION_MOMENT, MUMBAI);
     expect(prashna.bhava.system).toBe('placidus-kp');
-    // Krishnamurti and Lahiri differ by ~0.08° at J2000-era dates; the bounds
-    // below pin that the default is not lahiri.
     const lahiri = computeRashiChart(QUESTION_MOMENT, MUMBAI, {
       houseSystem: 'placidus-kp',
       ayanamsa: 'lahiri',

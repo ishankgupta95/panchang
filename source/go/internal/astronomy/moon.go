@@ -7,7 +7,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
 )
 
-// Apparent geocentric, true ecliptic and equinox of date; degrees, Distance in km. No stellar aberration: for a geocentric body it cancels with light-time.
 type MoonPosition struct {
 	Longitude float64 `json:"longitude"`
 	Latitude  float64 `json:"latitude"`
@@ -31,7 +30,6 @@ func GetMoonPosition(ctx *EphemerisCtx, ms int64) MoonPosition {
 	return moonPositionWith(ctx, ms, MoonElpLatitude, MoonElpDistance)
 }
 
-// Full latitude, reduced distance: latitude drives declination at the horizon, distance only parallax.
 func GetMoonPositionForTrack(ctx *EphemerisCtx, ms int64) MoonPosition {
 	return moonPositionWith(ctx, ms, MoonElpLatitude, MoonElpDistanceTrack)
 }

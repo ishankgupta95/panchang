@@ -96,7 +96,6 @@ func parseNumberList(t *testing.T, file, name, body string) []float64 {
 	return out
 }
 
-// Bit equality, not a tolerance: both sides truncate the same tables.
 func TestCoefficientIdentity(t *testing.T) {
 	ts := readTsSeries(t)
 
@@ -182,7 +181,6 @@ func TestSeriesShape(t *testing.T) {
 				stride = 4 // A, B, C, power
 			}
 		}
-		// MOON_DISTANCE_COARSE_LINEAR is empty by design: all its terms are main-problem.
 		if len(values)%stride != 0 {
 			t.Errorf("%s: %d values is not a multiple of stride %d", name, len(values), stride)
 		}
@@ -192,7 +190,6 @@ func TestSeriesShape(t *testing.T) {
 			t.Errorf("%s: %d values is not a multiple of stride 14", name, len(values))
 		}
 	}
-	// frame.go indexes a sin/cos table by |multiplier|, so the bound must really bound them.
 	maxMult, ok := series.Scalars["NUTATION_MAX_MULTIPLIER"]
 	if !ok {
 		t.Fatal("NUTATION_MAX_MULTIPLIER missing")
@@ -206,7 +203,6 @@ func TestSeriesShape(t *testing.T) {
 	}
 }
 
-// Untruncated: L and B in radians, R in AU; τ is Julian millennia TDB.
 func vsopReference(s *vsopSeries, jdTt float64) (l, b, r float64) {
 	tau := (jdTt - 2451545.0) / 365250
 	var out [4]float64
@@ -260,7 +256,6 @@ func TestVsopParserAgainstCheckFile(t *testing.T) {
 	if checked < 60 {
 		t.Errorf("checked only %d rows, expected ≥ 60", checked)
 	}
-	// The bound is the check file's own printed precision.
 	if worst >= 1e-9 {
 		t.Errorf("worst |Δ| vs vsop87.chk was %.3e, bound 1e-9", worst)
 	}

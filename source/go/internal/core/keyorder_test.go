@@ -10,7 +10,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// TS emits keys in INSERTION order: an interface extending another dumps its own keys in the middle.
 type keyOrderGolden struct {
 	Unlocalized map[string][]string `json:"unlocalized"`
 	Published   map[string][]string `json:"published"`
@@ -18,7 +17,6 @@ type keyOrderGolden struct {
 
 var notYetPorted = map[string]string{}
 
-// Declared in internal/jyotish, which this in-package test cannot import; checked there against the same golden.
 var ownedByJyotish = map[string]string{
 	"AshtakootResult":       "matching.ts declares it",
 	"KootScore":             "matching.ts declares it",
@@ -64,8 +62,7 @@ func keyOrderRegistry() map[string]any {
 		"UtcWindow":                   types.UtcWindow{},
 		"UnlocalizedDurMuhurtaPeriod": types.UnlocalizedDurMuhurtaPeriod{},
 		"AnandadiYogaInfo":            types.AnandadiYogaInfo{},
-		// Unions: a zero value would exercise the inactive arm alone.
-		"GandaMulaInfoInactive": types.GandaMulaInfo{},
+		"GandaMulaInfoInactive":       types.GandaMulaInfo{},
 		"GandaMulaInfoActive": types.GandaMulaInfo{
 			Active: true, NakshatraName: "Mula", Severity: types.GandaMulaSevere,
 		},
@@ -112,10 +109,8 @@ func keyOrderRegistry() map[string]any {
 		"GrahaPosition":      types.GrahaPosition{},
 		"LagnaInfo":          types.LagnaInfo{},
 		"LagnaNakshatra":     types.LagnaNakshatra{},
-		// Non-nil Cusps: a zero value writes `"cusps": null` where the TS writes an array.
-		"SripatiLagnaInfo": types.SripatiLagnaInfo{Cusps: make([]float64, 12)},
+		"SripatiLagnaInfo":   types.SripatiLagnaInfo{Cusps: make([]float64, 12)},
 
-		// Non-nil slices for the same reason.
 		"BhavaChart":      types.BhavaChart{Houses: make([]types.HouseInfo, 12)},
 		"HouseInfo":       types.HouseInfo{},
 		"BirthChart":      types.BirthChart{Planets: make([]types.PlanetPlacement, 9)},
@@ -190,7 +185,6 @@ func loadKeyOrderGolden(t *testing.T) keyOrderGolden {
 	return g
 }
 
-// A map would sort the keys and pass on any permutation, so the tokens are walked.
 func marshalledKeys(t *testing.T, v any) []string {
 	t.Helper()
 	b, err := json.Marshal(v)

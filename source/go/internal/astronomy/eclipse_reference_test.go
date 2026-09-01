@@ -6,7 +6,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/jsnum"
 )
 
-// Written out rather than reused: sharing code with the code under test would be circular.
 func referenceToEquatorial(ctx *EphemerisCtx, lonDeg, latDeg, distance, t float64) [3]float64 {
 	_, deps := Nutation(ctx, t)
 	eps := (MeanObliquityArcsec(t) + deps) * ArcsecToRad
@@ -38,7 +37,6 @@ func scanMinimum(f func(ms float64) float64, fromMs, toMs, stepMs float64) float
 	return sweep(second-1000, second+1000, 1, second)
 }
 
-// Perpendicular distance from Earth's centre to the shadow axis, in Earth radii, signed against north.
 func shadowAxisGamma(ctx *EphemerisCtx, ms float64) float64 {
 	msi := int64(ms)
 	t := TTDaysSinceJ2000(msi) / 36525
@@ -65,7 +63,6 @@ func shadowAxisGamma(ctx *EphemerisCtx, ms float64) float64 {
 	return (jsSign(signed) * distanceAu * AuKm) / EarthEquatorialRadiusKm
 }
 
-// Math.sign; Signbit alone would turn zero into −1.
 func jsSign(x float64) float64 {
 	if math.IsNaN(x) {
 		return math.NaN()

@@ -197,7 +197,6 @@ func TestTablesAreByteIdenticalToTypeScript(t *testing.T) {
 	}
 }
 
-// obscuration and magnitude end in asin/sqrt, so they sit outside bit-identity.
 func maskEclipseFloats(raw []byte) []byte {
 	return magnitudePattern.ReplaceAll(
 		obscurationPattern.ReplaceAll(raw, []byte("${1}<float>")),
@@ -247,7 +246,6 @@ func TestEclipseTableFloatsAreWithinTheNumericBand(t *testing.T) {
 	if entries == 0 {
 		t.Fatal("no eclipse entries in the sweep")
 	}
-	// The most the float divergence can move obscuration * 100.
 	const maxPerturbationPercentagePoints = 1.5e-12
 	if closestTie <= maxPerturbationPercentagePoints {
 		t.Errorf("an obscuration came within %g of a Math.round tie, which is "+
@@ -543,7 +541,6 @@ func containsLang(xs []string, want string) bool {
 	return false
 }
 
-// Consumers cache v1 files, so the reader must keep parsing them.
 func TestV1TablesStillRead(t *testing.T) {
 	const v1FestivalsJSON = `{
 	  "_meta": {"referenceLocation":"v1","latitude":18.5204,"longitude":73.8567,

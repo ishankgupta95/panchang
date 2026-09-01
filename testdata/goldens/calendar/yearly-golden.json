@@ -96,7 +96,7 @@
     "bengal",
     "north-india"
   ],
-  "digest": "de1a55201184f0b9e37637973a81c3afb6d531333d65863317f6952dd5042b74",
+  "digest": "55f3ca31926bce15afa735fc016f737bd72802bb3d47a8c8b6a8fe35b0d99aaa",
   "convertDigest": "e2ea5d1ceaf4aa7ecb64a6c4511276edd9ffdb3e2a479c5acc77fa4fcb32756d",
   "eraDigest": "d85b2575843fb8fe609983734720682b06bdd9ae31ba23f72576d5293662bed5",
   "newYearDigest": "9ee41dc03ed0c84c4dd30d9a0c20b2d0491618645d3ca6e3593808abe9893645",
@@ -246,7 +246,7 @@
           "sutakEnd": -1807097665004
         }
       ],
-      "festivalCount": 270,
+      "festivalCount": 269,
       "festivalFirst": "-1830403800000|vaishnava_ekadashi",
       "festivalLast": "-1799299800000|guru_pushya"
     },
@@ -379,7 +379,7 @@
           "sutakEnd": 1757274993726
         }
       ],
-      "festivalCount": 262,
+      "festivalCount": 263,
       "festivalFirst": "1735842600000|vinayaka_chaturthi",
       "festivalLast": "1767119400000|masik_karthigai"
     },
@@ -511,7 +511,7 @@
           "sutakEnd": 1787896323077
         }
       ],
-      "festivalCount": 258,
+      "festivalCount": 259,
       "festivalFirst": "1767205800000|pradosha",
       "festivalLast": "1798223400000|sankashti_chaturthi"
     },
@@ -668,7 +668,7 @@
           "sutakEnd": null
         }
       ],
-      "festivalCount": 268,
+      "festivalCount": 269,
       "festivalFirst": "1798914600000|vaishnava_ekadashi",
       "festivalLast": "1830191400000|vinayaka_chaturthi"
     },
@@ -813,7 +813,7 @@
           "sutakEnd": 3749946445128
         }
       ],
-      "festivalCount": 280,
+      "festivalCount": 279,
       "festivalFirst": "3723993000000|smarta_ekadashi",
       "festivalLast": "3755183400000|guru_pushya"
     },
@@ -945,7 +945,7 @@
           "sutakEnd": 1787896323077
         }
       ],
-      "festivalCount": 259,
+      "festivalCount": 260,
       "festivalFirst": "1767205800000|pradosha",
       "festivalLast": "1798223400000|sankashti_chaturthi"
     },
@@ -1102,7 +1102,7 @@
           "sutakEnd": 1861900592763
         }
       ],
-      "festivalCount": 261,
+      "festivalCount": 263,
       "festivalFirst": "1830882600000|vaishnava_ekadashi",
       "festivalLast": "1861813800000|chandra_grahan"
     },
@@ -1247,7 +1247,7 @@
           "sutakEnd": 1757274993726
         }
       ],
-      "festivalCount": 253,
+      "festivalCount": 255,
       "festivalFirst": "1735963200000|vinayaka_chaturthi",
       "festivalLast": "1767153600000|masik_karthigai"
     },
@@ -1391,7 +1391,7 @@
           "sutakEnd": 1787896323077
         }
       ],
-      "festivalCount": 259,
+      "festivalCount": 258,
       "festivalFirst": "1767240000000|masik_karthigai",
       "festivalLast": "1798344000000|sankashti_chaturthi"
     },
@@ -1651,7 +1651,7 @@
           "sutakEnd": 1757274993726
         }
       ],
-      "festivalCount": 100,
+      "festivalCount": 101,
       "festivalFirst": "1739487600000|magha_shanivar",
       "festivalLast": "1761346800000|vinayaka_chaturthi"
     },
@@ -1779,7 +1779,7 @@
           "sutakEnd": 1787896323077
         }
       ],
-      "festivalCount": 100,
+      "festivalCount": 99,
       "festivalFirst": "1771023600000|maha_shivaratri",
       "festivalLast": "1792882800000|sharad_purnima"
     },
@@ -1905,7 +1905,7 @@
           "sutakEnd": 1787896323077
         }
       ],
-      "festivalCount": 59,
+      "festivalCount": 58,
       "festivalFirst": "1772082000000|vaishnava_ekadashi",
       "festivalLast": "1791694800000|navaratri"
     },

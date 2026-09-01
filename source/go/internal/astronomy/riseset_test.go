@@ -11,7 +11,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// Alert is the hard case: the Moon grazes the horizon with altitude and derivative near zero.
 var riseSetLocations = []struct {
 	name string
 	loc  types.GeoLocation
@@ -106,7 +105,6 @@ func TestInterpolatedRiseSetTracksTheDirectSolver(t *testing.T) {
 			}
 			results := make([]result, len(units))
 
-			// Parallel so `-race` sees the real shared-store access pattern.
 			var wg sync.WaitGroup
 			sem := make(chan struct{}, runtime.GOMAXPROCS(0))
 			for ui := range units {
@@ -172,7 +170,6 @@ func TestInterpolatedRiseSetTracksTheDirectSolver(t *testing.T) {
 			if worstTemperate >= 10 {
 				t.Errorf("worst |Δt| below 65° was %.3f ms, bound 10 ms", worstTemperate)
 			}
-			// Polar sites divide by an altitude rate near zero.
 			if worstMs >= 60 {
 				t.Errorf("worst |Δt| %.3f ms at %s, bound 60 ms", worstMs, worstAt)
 			}
@@ -270,7 +267,6 @@ func TestDayEventsInvariants(t *testing.T) {
 									site.name, body, direction, dayIndex, i)
 							}
 						}
-						// At most two same-kind events a day, and only near the poles.
 						if len(events) > 2 {
 							t.Errorf("%s %s dir=%d day=%d: %d events in one UTC day",
 								site.name, body, direction, dayIndex, len(events))
@@ -286,7 +282,6 @@ func TestDayEventsInvariants(t *testing.T) {
 	t.Logf("%d day/direction pairs checked, %d with events", checked, withEvents)
 }
 
-// Temperate only; at Alert the ordering is false for weeks.
 func TestSunriseSunsetOrdering(t *testing.T) {
 	ctx := NewEphemerisCtx()
 	ClearRiseSetTracks()
@@ -364,7 +359,6 @@ func isPanchangCode(err error, code types.ErrorCode) bool {
 	return ok && pe.Code == code
 }
 
-// The track store is shared: a Moon request on day N can be served a block built for the Sun on N+3.
 func TestConcurrentRiseSetIsDeterministic(t *testing.T) {
 	const goroutines = 8
 	days := 20
@@ -495,8 +489,6 @@ func BenchmarkAltitudeExcess(b *testing.B) {
 	}
 	_ = sink
 }
-
-// The reset stays inside the timed region: StopTimer/StartTimer around it under-reports a cold day.
 
 func BenchmarkSunriseSunsetColdDay(b *testing.B) {
 	loc := riseSetLocations[1].loc

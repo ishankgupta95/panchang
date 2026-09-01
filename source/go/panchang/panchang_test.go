@@ -45,7 +45,6 @@ func TestFacadeIsAFaithfulPassThrough(t *testing.T) {
 	}
 }
 
-// A memo bug shows up as order dependence, which no single-call test can see.
 func TestSessionReuseDoesNotChangeAnswers(t *testing.T) {
 	s := New()
 	first, _, err := s.GetDailyPanchang(when, pune, ist())

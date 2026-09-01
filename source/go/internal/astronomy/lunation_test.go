@@ -42,7 +42,6 @@ func TestPhasesPerYearIsAboutFortyNine(t *testing.T) {
 	}
 }
 
-// Convergence is to a millisecond and elongation moves 1.41e-7 deg/ms, hence the 1e-6 bound.
 func TestSearchMoonPhaseLandsOnItsTarget(t *testing.T) {
 	ctx := NewEphemerisCtx()
 	worst, worstAt := 0.0, int64(0)
@@ -97,7 +96,6 @@ func TestConsecutiveNewMoonsSpanOneCycle(t *testing.T) {
 				t.Errorf("elongation at new moon %d is %v deg, not 0", ms, e)
 			}
 		}
-		// One synodic month, within the anomalistic ±13%.
 		span := float64(b.NextMs-b.PrevMs) / dayMS
 		if span < 29.18 || span > 29.93 {
 			t.Errorf("lunation from %d to %d spans %.4f days", b.PrevMs, b.NextMs, span)

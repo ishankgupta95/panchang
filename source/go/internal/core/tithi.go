@@ -8,14 +8,12 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
 )
 
-// Indices 0-14 are Shukla Paksha, 15-29 Krishna.
 func ComputeTithiFromLongitudes(
 	siderealMoon, siderealSun float64,
 	name, paksha string,
 ) types.TithiInfo {
 	angle := utils.Normalize360(siderealMoon - siderealSun)
 	index := int(math.Floor(angle / utils.TithiSpan))
-	// anti-FMA barrier
 	elapsed := angle - float64(float64(index)*utils.TithiSpan)
 	completionPercentage := (elapsed / utils.TithiSpan) * 100
 	number := index - 14

@@ -1,5 +1,3 @@
-// Adhik Jyeshtha 2026 runs 17 May to 15 June (reference almanac, pandit consensus);
-// the Mithuna Sankranti falls after the closing Amavasya, so 15 Jun is still Adhika.
 
 import { describe, it, expect } from 'vitest';
 import { getDailyPanchang } from '../../src/core/panchang';
@@ -53,7 +51,6 @@ describe('Adhika Masa: Adhik Jyeshtha 2026 (Ujjain, IST)', () => {
     expect(r!.calendar.chandramasa.isAdhika).toBe(true);
   });
 
-  // An Adhika month has no Sankranti, so the purnimanta name does not advance across its Purnima.
   it.each([
     ['2026-05-20', 'Shukla'],
     ['2026-05-31', 'Shukla'],

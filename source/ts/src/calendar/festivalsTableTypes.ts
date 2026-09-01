@@ -1,5 +1,3 @@
-// No runtime imports: a value import here would pull the engine into the
-// engine-free `panchang-ts/festivals` entry that reads these types.
 
 export type FestivalsTableLanguage = 'en' | 'hi';
 
@@ -64,8 +62,6 @@ export interface FestivalsFile {
   _dict: FestivalDictEntry[];
   years: Record<string, PackedFestivalTableDay[]>;
 }
-
-// v1, still readable: consumers cache these files; `key` flattens to `''`.
 
 export interface FestivalTableEntryRaw {
   name: LocalizedString;

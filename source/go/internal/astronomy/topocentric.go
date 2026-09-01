@@ -8,7 +8,6 @@ import (
 
 const EarthEquatorialRadiusKm = 6378.1366
 
-// Polar / equatorial radius ratio, not the flattening f.
 const earthFlattening float64 = 0.996647180302104
 
 const EarthFlatteningSquared = earthFlattening * earthFlattening
@@ -17,11 +16,9 @@ const SunRadiusAU = 695700.0 / AuKm
 
 const MoonRadiusKm = 1738.1
 
-// The almanac definition of rise and set, not a measurement.
 const RefractionNearHorizonDeg = 34.0 / 60
 
 func GastDegrees(ctx *EphemerisCtx, ttDays, utDays float64) float64 {
-	// ERA (IAU 2000), split integer + fraction: unsplit, the 2100 product is ~1e5 turns.
 	theta := float64(360 * jsnum.Mod(jsnum.Mod(0.7790572732640+float64(0.00273781191135448*utDays), 1)+jsnum.Mod(utDays, 1), 1))
 
 	t := ttDays / 36525
@@ -42,7 +39,6 @@ func ObserverVector(latitudeDeg, longitudeDeg, elevationM, gastDeg float64) [3]f
 	phi := latitudeDeg * degToRad
 	sinPhi := math.Sin(phi)
 	cosPhi := math.Cos(phi)
-	// jsnum.Hypot2, not math.Hypot: different last bits.
 	c := 1 / jsnum.Hypot2(cosPhi, earthFlattening*sinPhi)
 	s := EarthFlatteningSquared * c
 	heightKm := elevationM / 1000
@@ -93,7 +89,6 @@ func GreenwichApparentSiderealDegrees(ctx *EphemerisCtx, ms int64) float64 {
 	return GastDegrees(ctx, TTDaysSinceJ2000(ms), float64(ms-j2000NoonMS)/86_400_000)
 }
 
-// Saemundsson, Meeus ch. 16.
 func RefractionDegrees(geometricAltitudeDeg float64) float64 {
 	if geometricAltitudeDeg < -90 || geometricAltitudeDeg > 90 {
 		return 0

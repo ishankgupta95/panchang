@@ -16,7 +16,6 @@ describe("computePlanetaryPositions: nodeType 'true' vs 'mean'", () => {
     let diff = mean.rahu.siderealLongitude - truu.rahu.siderealLongitude;
     if (diff > 180) diff -= 360;
     if (diff < -180) diff += 360;
-    // The single dominant correction term has amplitude ~1.5°.
     expect(Math.abs(diff)).toBeLessThan(2.0);
   });
 
@@ -42,7 +41,6 @@ describe("computePlanetaryPositions: nodeType 'true' vs 'mean'", () => {
       if (diff < -180) diff += 360;
       maxAbs = Math.max(maxAbs, Math.abs(diff));
     }
-    // The dominant correction term has 1.4979° amplitude.
     expect(maxAbs).toBeGreaterThan(0.5);
     expect(maxAbs).toBeLessThan(2.0);
   });

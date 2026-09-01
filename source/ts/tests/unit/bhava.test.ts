@@ -123,8 +123,6 @@ describe('computeBhava: placidus-kp system', () => {
   });
 
   it('Quito (≈equator): Placidus reduces to equal-RA cusps (RA differences = 30°)', () => {
-    // At φ = 0 the 30° steps are exact in RA, not in ecliptic longitude
-    // (obliquity), so only the axial pairing is asserted here.
     const chart = computeBhava(SAMPLE_DATE, QUITO, { houseSystem: 'placidus-kp' });
     expect(chart.houses).toHaveLength(12);
     for (let i = 0; i < 6; i++) {
@@ -157,7 +155,6 @@ describe('computeBhava: output shape', () => {
       expect(c.mcLongitude).toBeGreaterThanOrEqual(0);
       expect(c.mcLongitude).toBeLessThan(360);
     }
-    // The MC is intrinsic to the (date, location) pair, so it is the same across systems.
     expect(ws.mcLongitude).toBeCloseTo(eq.mcLongitude, 9);
     expect(ws.mcLongitude).toBeCloseTo(pl.mcLongitude, 9);
   });

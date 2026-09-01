@@ -74,7 +74,6 @@ func upagrahaLoc(g upagrahaGolden, name string) types.GeoLocation {
 	panic("unknown location " + name)
 }
 
-// 1000× the observed error and eight orders below the 30° a rashi index turns on.
 const upagrahaLonBound = 1e-9
 
 func compareUpagrahas(t *testing.T, where string, got, want types.Upagrahas) float64 {
@@ -94,7 +93,6 @@ func compareUpagrahas(t *testing.T, where string, got, want types.Upagrahas) flo
 	}
 	for _, p := range pairs {
 		d := math.Abs(p.got.Longitude - p.want.Longitude)
-		// No modular distance: a one-sided 360 wrap must read as ~360, not fold to ~0.
 		if d > worst {
 			worst = d
 		}

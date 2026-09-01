@@ -132,7 +132,6 @@ func TestSutakAnchoring(t *testing.T) {
 	site := types.GeoLocation{Latitude: 25.3176, Longitude: 82.9739}
 	penumbralSeen, umbralSeen, solarSeen := 0, 0, 0
 
-	// A local solar eclipse is far rarer than the ~2.4 lunar eclipses a year.
 	const lunarWindowDays = 2000
 	const solarWindowDays = 4000
 	cursor := utcMS(2000, 0, 1)
@@ -154,7 +153,6 @@ func TestSutakAnchoring(t *testing.T) {
 			t.Errorf("umbral eclipse at %d carries no sutak", info.PeakMs.Ms())
 			continue
 		}
-		// Sutak runs from U1, which follows P1, so it spans more than its 9 h lead-in.
 		if info.SutakEndMs.Ms()-info.SutakStartMs.Ms() <= lunarSutakHours*3600_000 {
 			t.Errorf("lunar sutak at %d is shorter than its 9 h lead-in", info.PeakMs.Ms())
 		}
@@ -224,7 +222,6 @@ func TestSyzygyGuardRejectsMostDays(t *testing.T) {
 	if len(missedEclipse) != 0 {
 		t.Errorf("the guard rejected %d days that carry an eclipse: %v", len(missedEclipse), missedEclipse)
 	}
-	// Above the ~50% a guard that had lost one of its two branches would give.
 	if rejected < days*8/10 {
 		t.Errorf("the guard rejected only %d of %d days; the geometry implies ~86.5%%",
 			rejected, days)

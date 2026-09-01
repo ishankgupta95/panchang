@@ -9,7 +9,6 @@ import (
 
 const karanaCycleLength = 60
 
-// Vishti (Bhadra) is the 7th movable karana within indices 1-56.
 func IsVishtiKarana(karanaIndex int) bool {
 	if karanaIndex <= 0 || karanaIndex >= 57 {
 		return false
@@ -17,7 +16,6 @@ func IsVishtiKarana(karanaIndex int) bool {
 	return (karanaIndex-1)%7 == 6
 }
 
-// Bhadra-vasa by the Moon's rashi (Muhurta Chintamani); keying on the half-tithi disagrees with the reference almanac.
 var vasaByRashi = [12]types.BhadraLocation{
 	types.BhadraHeaven, // 0  Mesha
 	types.BhadraHeaven, // 1  Vrishabha
@@ -78,7 +76,6 @@ func ComputeBhadraKaal(
 	} else {
 		const sampleCount = 24
 		for i := 1; i <= sampleCount; i++ {
-			// Product first, so truncation happens once.
 			t := int64(float64(sunriseUtcMs) + dayLengthMs*float64(i)/sampleCount)
 			k := karanaAt(t)
 			if IsVishtiKarana(k) {

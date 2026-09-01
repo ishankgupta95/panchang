@@ -1,5 +1,3 @@
-// Panchaka (Muhurta-chintamani) is Dhanishtha 3rd pada through Revati, sidereal
-// Moon in [300°, 360°); Panchaka Rahita is its complement within the Hindu day.
 
 import { describe, it, expect } from 'vitest';
 import { computePanchakaRahita } from '../../src/core/panchakaRahita';

@@ -16,7 +16,6 @@ func ComputePanchakaRahita(
 
 	if startInP == endInP {
 		if startInP {
-			// Non-nil so it marshals as [].
 			return []types.UtcWindow{}
 		}
 		return []types.UtcWindow{{StartMs: sunriseUtcMs, EndMs: nextSunriseUtcMs}}
@@ -59,7 +58,6 @@ func bisectPanchakaBoundary(
 	return hi
 }
 
-// Floor, not truncate: a pre-1970 bracket sums negative.
 func floorDiv2(n int64) int64 {
 	q := n / 2
 	if n%2 != 0 && n < 0 {

@@ -8,7 +8,6 @@ import {
   REFRACTION_NEAR_HORIZON_DEG, SUN_RADIUS_AU, MOON_RADIUS_KM,
   EARTH_EQUATORIAL_RADIUS_KM, EARTH_FLATTENING_SQUARED,
 } from './topocentric';
-// Cyclic with `riseSetCache.ts`; safe only as a hoisted function declaration.
 import { clearRiseSetEventCache } from './riseSetCache';
 import type { GeoLocation } from '../types/location';
 
@@ -127,7 +126,6 @@ class DayFrame {
     const theta = 360 * (((0.7790572732640 + 0.00273781191135448 * utDays) % 1 + (utDays % 1)) % 1);
     const frac = (ms - this.dayStartMs) / DAY_MS;
     const eqeq = this.eqeq0 + (this.eqeq1 - this.eqeq0) * frac;
-    // The accumulated-precession polynomial takes TT, never UT.
     const t = (utDays + this.deltaTDays) / 36525;
     const precession = 0.014506
       + (4612.156534 + (1.3915817 + (-0.00000044 + (-0.000029956 + -0.0000000368 * t) * t) * t) * t) * t;
@@ -205,14 +203,12 @@ function altitudeExcess(
 ): number {
   track.position(ms, BODY_VEC);
   const local = (frame.gast(ms) + geometry.longitude) * DEG_TO_RAD;
-  // `trig.ts`, not `Math.cos`: innermost expression in the module.
   const cosLocal = cos(local);
   const sinLocal = sin(local);
 
   const x = (BODY_VEC[0] as number) - geometry.equatorialAu * cosLocal;
   const y = (BODY_VEC[1] as number) - geometry.equatorialAu * sinLocal;
   const z = (BODY_VEC[2] as number) - geometry.polarAu;
-  // Not `Math.hypot`: V8 will not inline it, and nothing here can overflow.
   const distance = Math.sqrt(x * x + y * y + z * z);
 
   const dot = (x * geometry.cosPhi * cosLocal
@@ -281,7 +277,6 @@ function scanDay(body: RiseSetBody, location: GeoLocation, dayIndex: number): Da
     if (capped >= dayEnd) break;
   }
 
-  // A root refined at the edge can land a hair outside the UTC day it belongs to.
   const inside = (list: number[]): number[] =>
     list.filter((e) => e >= dayStart && e < dayEnd).sort((a, b) => a - b);
   return { rise: inside(rise), set: inside(set) };

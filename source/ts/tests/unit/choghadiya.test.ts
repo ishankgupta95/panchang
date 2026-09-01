@@ -67,9 +67,6 @@ describe('computeChoghadiya', () => {
   });
 
   describe('sequences match the reference almanac (14 nights, Bengaluru Feb-2027 + Ujjain Aug-2026)', () => {
-    // Day follows the U→C→L→A→K→S→R succession from the weekday lord. Night has
-    // its own U→S→A→C→R→K→L succession whose start advances +2 (mod 7) per
-    // weekday, not the day one. Rows below are the almanac's, verbatim.
     const DAY_EXPECTED = [
       ['Udveg', 'Char', 'Labh', 'Amrit', 'Kaal', 'Shubh', 'Rog', 'Udveg'],   // Sun
       ['Amrit', 'Kaal', 'Shubh', 'Rog', 'Udveg', 'Char', 'Labh', 'Amrit'],   // Mon

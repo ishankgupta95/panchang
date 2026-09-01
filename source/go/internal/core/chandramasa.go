@@ -18,10 +18,8 @@ func ComputeChandraMasa(
 	getSiderealSun LongitudeAt,
 	getBounds BoundsAt,
 ) (types.ChandraMasaInfo, error) {
-	// Not utils.Normalize360: no −0 collapse, no [0, 360) clamp.
 	elongation := jsnum.Mod((siderealMoon-siderealSun)+360, 360)
 
-	// True bounding new moons: mean motion overshoots the Sankranti boundary near aphelion.
 	bounds, err := getBounds(refDateMs)
 	if err != nil {
 		return types.ChandraMasaInfo{}, err
@@ -36,7 +34,6 @@ func ComputeChandraMasa(
 	amantaIndex := (solarMonthAtPrev + 1) % 12
 	amantaName := nameFn(amantaIndex, isAdhika)
 
-	// An Adhika month has no Sankranti, so it skips the usual Krishna-paksha +1.
 	isKrishnaPaksha := elongation >= 180
 	purnimantaIndex := amantaIndex
 	if isKrishnaPaksha && !isAdhika {

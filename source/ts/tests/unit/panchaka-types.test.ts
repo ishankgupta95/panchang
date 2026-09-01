@@ -110,12 +110,9 @@ describe('daily panchang: panchakaInfo', () => {
       }
       previous = { type: pk.type, date: today };
     }
-    // The Moon re-enters the span roughly every 27.3 days.
     expect(spellsSeen).toBeGreaterThanOrEqual(12);
   });
 
-  // Resolving the onset weekday from the sunrise that follows an evening onset
-  // rolls it back a day and makes Mrityu (Saturday onset) unreachable.
   it('produces every Panchaka type across a year, Mrityu included', () => {
     const seen = new Set(
       days.filter((p) => p.inauspicious.panchakaInfo.active)
@@ -136,8 +133,6 @@ describe('daily panchang: panchakaInfo', () => {
   });
 });
 
-// Aug 2, 4 and 20 qualify on a nakshatra that opens after sunrise: visible only
-// to an evaluation that scans the day's segments, not its sunrise snapshot.
 describe('Sarvartha Siddhi: reference-almanac parity, August 2026 Mumbai', () => {
   const MUMBAI = { latitude: 19.0760, longitude: 72.8777 };
   /** The reference almanac's Sarvartha Siddhi Yoga date-time listing. */

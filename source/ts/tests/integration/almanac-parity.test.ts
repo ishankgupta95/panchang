@@ -38,8 +38,6 @@ const SATURN_ENTERS: Record<string, Array<{ date: string; firstAlt?: string }>> 
   Kumbha:     [{ date: '2023-01-17', firstAlt: '2022-04-28' }],
   Meena:      [{ date: '2025-03-29' }],
   Mesha:      [{ date: '2028-02-23', firstAlt: '2027-06-02' }],
-  // The table stops here: no published reference pins Saturn's later ingresses
-  // to ±2 days, and computing them would self-seed the fixture.
 };
 
 function withinIngress(boundary: Date, rashiName: string, tolDays = 2): boolean {
@@ -277,7 +275,6 @@ describe('Ashtakoot Guna Milan parity (perfect-36 regression net)', () => {
         });
       }
 
-      // A perfect-36 pair carries no Gana dosha, so there is nothing to cancel.
       it('ganaCancellation flag leaves this almanac-parity pair byte-identical', () => {
         const flagged = computeAshtakoot(pair.boy, pair.girl, { ganaCancellation: true });
         expect(JSON.stringify(flagged)).toBe(JSON.stringify(r));

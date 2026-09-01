@@ -49,8 +49,6 @@ export function computeBhadraKaal(
 
   const sunriseKarana = karanaAt(sunriseUtc);
 
-  // The karana index advances monotonically with elongation, so a Vishti karana
-  // can overlap the day only if it lies between the two sunrise indices.
   if (!isVishtiKarana(sunriseKarana)) {
     const nextSunriseKarana = karanaAt(nextSunriseUtc);
     let traversesVishti = false;
@@ -84,8 +82,6 @@ export function computeBhadraKaal(
 
   if (vishtiSampleTime === null || vishtiKaranaIndex < 0) return null;
 
-  // Do not tighten this into a substitute for the secant: a returned bisection
-  // bracket quantises every published window to that tolerance.
   const BRACKET_MS = 120_000;
   const MAX_BRACKET_ITERS = 30;
   const angle: ElementAngle = {

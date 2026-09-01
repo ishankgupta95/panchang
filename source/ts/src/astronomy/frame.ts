@@ -154,7 +154,6 @@ export function elpToEclipticOfDate(
   const y0 = cl * Math.sin(lon);
   const z0 = dist * Math.sin(lat);
 
-  // p/q: the moving ecliptic plane, back to J2000; no component about the pole.
   let pw = (ELP_P0 + (ELP_P1 + (ELP_P2 + (ELP_P3 + ELP_P4 * t) * t) * t) * t) * t;
   let qw = (ELP_Q0 + (ELP_Q1 + (ELP_Q2 + (ELP_Q3 + ELP_Q4 * t) * t) * t) * t) * t;
   const ra = 2 * Math.sqrt(1 - pw * pw - qw * qw);
@@ -172,8 +171,6 @@ export function elpToEclipticOfDate(
   z = s * y + c * z;
   y = ty;
 
-  // IAU 2006 precession only: the GCRS frame-bias constants do not belong here,
-  // ELP's J2000 being the dynamical mean equinox and not the ICRS pole.
   const zeta = (2306.083227 + (0.2988499 + (0.01801828 + (-0.000005971 + -0.0000003173 * t) * t) * t) * t) * t;
   const zA = (2306.077181 + (1.0927348 + (0.01826837 + (-0.000028596 + -0.0000002904 * t) * t) * t) * t) * t;
   const theta = (2004.191903 + (-0.4294934 + (-0.04182264 + (-0.000007089 + -0.0000001274 * t) * t) * t) * t) * t;

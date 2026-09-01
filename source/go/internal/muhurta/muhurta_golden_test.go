@@ -131,7 +131,6 @@ func loadMuhurtaGolden(t *testing.T) muhurtaGolden {
 	return g
 }
 
-// Inputs declared here, not read from the golden, which would make the test agree with itself.
 func synthetic() []struct {
 	id   string
 	rule mu.MuhurtaRule
@@ -778,7 +777,6 @@ func TestMuhurtaBuildAndReadMatchTypeScript(t *testing.T) {
 	}
 }
 
-// The generator and cmd/dump must carry this same literal.
 const muPinnedGeneratedAt = "2026-08-23T00:00:00.000Z"
 
 func metaKeyOrder(t *testing.T, raw []byte) []string {

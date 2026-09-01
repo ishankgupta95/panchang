@@ -55,8 +55,6 @@ const BASELINE_MAX_ARCSEC: Record<string, number> = {
   Mercury: 6.504, Venus: 19.586, Mars: 11.103, Jupiter: 9.662, Saturn: 11.147,
 };
 
-// Measured shipped maxima, plus headroom for cross-platform floating point:
-// Mercury 0.296″, Venus 0.862″, Mars 1.293″, Jupiter 0.835″, Saturn 0.862″.
 const OWN_MAX_ARCSEC: Record<string, number> = {
   Mercury: 0.7, Venus: 1.5, Mars: 2.0, Jupiter: 1.2, Saturn: 1.2,
 };
@@ -90,7 +88,6 @@ describe('Tier 0: own planetary longitudes vs JPL Horizons (DE441)', () => {
         `${name} shipped: max ${shipped.max.toFixed(4)}″ (worst ~${shipped.worstYear}), mean ${shipped.mean.toFixed(4)}″, bias ${shipped.bias.toFixed(4)}″`,
       ).toBeLessThanOrEqual(OWN_MAX_ARCSEC[name]!);
 
-      // Kept separate so loosening the bounds above cannot weaken the gate.
       expect(shipped.max).toBeLessThan(BASELINE_MAX_ARCSEC[name]!);
     });
   }
@@ -111,7 +108,6 @@ describe('Tier 0: own planetary longitudes vs JPL Horizons (DE441)', () => {
   });
 
   it('retrograde motion is detected at the same instants the longitude implies', () => {
-    // Retrograde comes off the derivative: a discontinuous series fails only here.
     for (const { own } of BODIES) {
       let reversals = 0;
       let previous = getTropicalPlanetLongitude(own, new Date(Date.UTC(2025, 0, 1)));
@@ -126,7 +122,6 @@ describe('Tier 0: own planetary longitudes vs JPL Horizons (DE441)', () => {
         previousDirection = direction;
         previous = now;
       }
-      // Over two years Mercury turns ~8 times, Saturn ~4; a noisy series dozens.
       expect(reversals).toBeGreaterThan(0);
       expect(reversals).toBeLessThan(20);
     }

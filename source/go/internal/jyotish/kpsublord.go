@@ -26,7 +26,6 @@ type KpCuspalSubLords struct {
 	Cusps []KpSubLordInfo `json:"cusps"`
 }
 
-// Struct, not a map, so the nine keys emit in ALL_GRAHAS order.
 type KpByPlanet struct {
 	Sun     []int `json:"Sun"`
 	Moon    []int `json:"Moon"`
@@ -80,7 +79,6 @@ func (b *KpByPlanet) Set(g types.Graha, houses []int) bool {
 	return true
 }
 
-// Struct, not a map: numeric map keys would sort as strings.
 type KpByHouse struct {
 	H1  []types.Graha `json:"1"`
 	H2  []types.Graha `json:"2"`
@@ -140,7 +138,6 @@ type KpSignificators struct {
 }
 
 func subWidth(lord types.DashaLord) float64 {
-	// FMA barrier.
 	return float64((DashaYears[lord] / 120) * utils.NakshatraSpan)
 }
 
@@ -157,12 +154,10 @@ func subLordAtOffset(degInNak float64, starLord types.DashaLord) types.DashaLord
 	return DashaOrder[(starLordIdx+8)%9]
 }
 
-// Krishnamurti Paddhati Vol. I Ch. 6.
 func ComputeKpSubLord(siderealLongitude float64) KpSubLordInfo {
 	lon := utils.Normalize360(siderealLongitude)
 	rashi := int(math.Floor(lon / 30))
 	nakIdx := utils.NakshatraOf(lon)
-	// anti-FMA barrier
 	degInNak := lon - float64(float64(nakIdx)*utils.NakshatraSpan)
 
 	starLord := NakshatraLord[nakIdx]
@@ -272,7 +267,6 @@ func ComputeKpSignificators(chart *types.BirthChart) KpSignificators {
 
 	var byHouse KpByHouse
 	for h := 1; h <= 12; h++ {
-		// Non-nil: an empty house must marshal [].
 		*byHouse.field(h) = []types.Graha{}
 	}
 	for _, planet := range kpAllGrahas {
@@ -289,7 +283,6 @@ func ComputeKpSignificators(chart *types.BirthChart) KpSignificators {
 	return KpSignificators{ByPlanet: byPlanet, ByHouse: byHouse}
 }
 
-// The same running sum in the same order as the search; a tidier route diverges.
 var SubCumulativeWidthsForTest = func() [9]float64 {
 	var out [9]float64
 	cum := 0.0

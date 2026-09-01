@@ -124,8 +124,6 @@ describe('computeBhavaBala: structural invariants', () => {
 
 describe('Bhava Dik Bala: pinned BPHS Ch. 27 table', () => {
   it('matches the 12 cardinal-anchored values exactly', () => {
-    // BPHS cardinal anchors: bhava 1 = 60 (East), 4 = 0 (North), 7 = 15
-    // (West), 10 = 30 (South); the rest interpolate.
     expect([..._BHAVA_DIK_VALUES_FOR_TEST]).toEqual([
       60, 40, 20, 0, 5, 10, 15, 20, 25, 30, 40, 50,
     ]);
@@ -187,8 +185,6 @@ describe('Bhava Drik Bala: clamp and sign rules', () => {
   });
 
   it('positive net benefic aspect contributes the un-clamped value', () => {
-    // The other six are parked in house 11 to isolate Jupiter's 5th/9th
-    // specials: from there the benefics and malefics cancel exactly.
     const chart = synthChart({
       lagnaRashi: 0,
       rashis: {
@@ -246,10 +242,6 @@ describe('Bhavasthana Bala: benefic/malefic sign rule', () => {
     expect(computeSyntheticSthanaBala(chart, 1)).toBe(0);
   });
 });
-
-// `computeBhavaBala` only accepts birth inputs, so the drik and sthana sums
-// are duplicated here for a hand-built chart. They MUST stay in lockstep with
-// `shadbala.ts`.
 
 const NAISARGIKA: Record<GrahaName, number> = {
   Sun: 60.00, Moon: 51.43, Venus: 42.86, Jupiter: 34.29,

@@ -76,7 +76,6 @@ func ComputeEkadashiDatesForYear(
 	if err := utils.ValidateLocation(location); err != nil {
 		return nil, err
 	}
-	// [] on the wire, never null.
 	out := []types.JSDate{}
 	start := types.DateUTC(year, 0, 1).Ms()
 	end := types.DateUTC(year, 11, 31).Ms()
@@ -86,7 +85,6 @@ func ComputeEkadashiDatesForYear(
 		return nil, err
 	}
 
-	// The rise/set triplet stays whole: sunrise alone emits extra polar days.
 	days := make([]ekadashiDay, 0, 368)
 	for t := start; t <= end+dayMs; t += dayMs {
 		sunriseUtcMs, err := astronomy.ComputeSunrise(ctx,
@@ -108,7 +106,6 @@ func ComputeEkadashiDatesForYear(
 			return nil, err
 		}
 
-		// Moon before Sun: a swap changes the shared memo's fill order.
 		siderealMoon, err := astronomy.GetSiderealMoonLongitude(ctx, sunriseUtcMs, ayanamsa)
 		if err != nil {
 			return nil, err
@@ -130,9 +127,7 @@ func ComputeEkadashiDatesForYear(
 			next, hasNext = days[i+1].tithi, true
 		}
 		isEkadashi := tithi == 10 || tithi == 25
-		// Vriddha: skip the first of two consecutive Ekadashi sunrises.
 		if isEkadashi && !(hasNext && next == tithi) {
-			// Kshaya Dwadashi (Trisprisha): no parana morning, so the fast moves back a day.
 			if hasNext && (next == 12 || next == 27) && i > 0 {
 				if d-days[i-1].dMs == dayMs {
 					out = append(out, types.Date(days[i-1].dMs))
@@ -142,7 +137,6 @@ func ComputeEkadashiDatesForYear(
 			out = append(out, types.Date(d))
 			continue
 		}
-		// Kshaya EKADASHI: it touches neither sunrise, so the fast is on its begin day.
 		if hasNext && ((tithi == 9 && next == 11) || (tithi == 24 && next == 26)) {
 			out = append(out, types.Date(d))
 		}
@@ -169,7 +163,6 @@ func ComputeSankrantisForYear(
 	if err != nil {
 		return nil, err
 	}
-	// %12 folds an exact 360 to rashi 0.
 	rashiAt := func(ms int64) (int, error) {
 		lon, err := astronomy.GetSiderealSunLongitude(ctx, ms, ayanamsa)
 		if err != nil {
@@ -200,7 +193,6 @@ func ComputeSankrantisForYear(
 
 		lo, hi := prevMs, t
 		for hi-lo > 1000 {
-			// >>1, not /2: rounds toward −∞, not toward zero.
 			mid := (lo + hi) >> 1
 			r, err := rashiAt(mid)
 			if err != nil {
@@ -292,7 +284,6 @@ func ComputeFestivalsInRange(
 			types.Date(startMs).ISOString(), types.Date(endMs).ISOString())
 	}
 	out := []FestivalDay{}
-	// The eclipse section stays on: eclipses surface as festival entries.
 	opts := options.panchangOptions()
 	opts.Sections = core.Sections(core.SectionFestivals, core.SectionEclipse)
 	opts.SectionsGiven = true
@@ -384,7 +375,6 @@ func ComputeEclipsesInRange(
 			types.Date(startMs).ISOString(), types.Date(endMs).ISOString())
 	}
 
-	// Float division, not integer: integer division falls a step short.
 	spanDays := int(math.Ceil(float64(endMs-startMs)/float64(24*3600_000))) + 1
 	maxSteps := int(math.Ceil(float64(spanDays)/20)) + 50
 
@@ -412,7 +402,6 @@ func ComputeEclipsesInRange(
 	all := make([]astronomy.EclipseInfo, 0, len(solar)+len(lunar))
 	all = append(all, solar...)
 	all = append(all, lunar...)
-	// Stable: eclipses sharing a peak ms must not reorder.
 	sort.SliceStable(all, func(i, j int) bool { return all[i].PeakMs.Ms() < all[j].PeakMs.Ms() })
 	return all, nil
 }

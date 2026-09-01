@@ -14,7 +14,6 @@ type SearchPrecision struct {
 
 var StandardPrecision = SearchPrecision{ToleranceMs: 30_000, MaxIterations: 15}
 
-// Moon - Sun for tithi and karana, Moon for nakshatra, Moon + Sun for yoga.
 type ElementAngle struct {
 	AngleAt func(ms int64) float64
 	SpanDeg float64
@@ -28,12 +27,10 @@ func wrapSignedDeg(x float64) float64 {
 	return m
 }
 
-// The trailing forward walk keeps the root never-early, which [FindDailyElements] needs.
 func secantBoundary(
 	loMs, hiMs float64, targetDeg float64, angle ElementAngle, stillBefore func(ms int64) bool,
 ) (int64, bool) {
 	f := func(t float64) float64 {
-		// Truncation toward zero, not rounding.
 		return wrapSignedDeg(angle.AngleAt(int64(t)) - targetDeg)
 	}
 	t0, t1 := loMs, hiMs
@@ -46,7 +43,6 @@ func secantBoundary(
 		if f1 == f0 {
 			break
 		}
-		// jsnum.Round, not math.Round: a negative tie breaks toward +Inf in JS.
 		next := jsnum.Round(t1 - (f1*(t1-t0))/(f1-f0))
 		if math.IsNaN(next) || math.IsInf(next, 0) || next < loMs || next > hiMs {
 			return 0, false
@@ -123,7 +119,6 @@ func FindTransitionTime(
 		}
 	}
 
-	// Bisect in floats: rounding the midpoint moves the result by up to a ms.
 	iterations := 0
 	for hi-lo > toleranceMs && iterations < maxIterations {
 		mid := lo + (hi-lo)/2
@@ -138,7 +133,6 @@ func FindTransitionTime(
 	return int64(hi), nil
 }
 
-// `!= currentIndex`, not "the previous element": only `!=` stays monotone across a window holding several elements.
 func FindStartTime(
 	fromMs int64,
 	currentIndex int,

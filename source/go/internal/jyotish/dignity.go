@@ -21,7 +21,6 @@ var AllDignities = []Dignity{
 
 const noRashi = -1 // a zero would read as Mesha
 
-// BPHS ch. 3.
 var exaltation = [types.GrahaCount]int{
 	types.GrahaSun:     0,
 	types.GrahaMoon:    1,
@@ -70,7 +69,6 @@ var ownRashis = [types.GrahaCount][]int{
 	types.GrahaKetu:    {},
 }
 
-// Friend / neutral / enemy come from the rashi lord's Naisargika Maitri (BPHS ch. 4).
 func ComputeDignity(graha types.Graha, rashi int) (Dignity, error) {
 	if rashi < 0 || rashi >= 12 {
 		return "", types.NewPanchangError(

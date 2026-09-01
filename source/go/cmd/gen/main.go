@@ -1,4 +1,3 @@
-// Command gen regenerates internal/astronomy/series from the ephemeris tables.
 package main
 
 import (

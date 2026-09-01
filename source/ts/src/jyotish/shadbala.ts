@@ -28,7 +28,6 @@ export function computeShadbala(
 
 function shadbalaForChart(chart: BirthChart, basis: NatalBasis): ShadbalaResult {
   const { birthDate, location } = basis;
-  // Nathonatha needs the LAST sunrise at or before birth; `computeSunrise` returns the NEXT.
   const sunriseUtc = findSunriseBefore(birthDate, location);
   const sunsetUtc = computeSunset(sunriseUtc, location);
   const nextSunriseUtc = computeSunrise(sunsetUtc, location);
@@ -139,7 +138,6 @@ function ojhaYugmaBala(
 ): number {
   const d1Rashi = chart.byPlanet[graha].rashi.index;
   const d9Rashi = divisionalCharts.D9.planets.find((p) => p.planet === graha)!.rashi.index;
-  // Index 0 is Aries, the 1st and therefore ODD sign: even indices are odd signs.
   const d1Odd = (d1Rashi % 2) === 0;
   const d9Odd = (d9Rashi % 2) === 0;
   let total = 0;

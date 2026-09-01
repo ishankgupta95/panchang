@@ -3,8 +3,7 @@ package jyotish
 import "github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 
 type ComputeYogasOptions struct {
-	Types []types.YogaType
-	// nil silently skips the Vargottama rule rather than failing.
+	Types       []types.YogaType
 	Navamsa     *types.DivisionalChart
 	NodeAspects NodeAspects
 }
@@ -40,7 +39,6 @@ func ComputeYogas(chart *types.BirthChart, options ComputeYogasOptions) ([]types
 		return false
 	}
 
-	// Non-nil empty slice when nothing matches.
 	out := make([]types.Yoga, 0, len(YogaCatalog))
 	for i := range YogaCatalog {
 		rule := &YogaCatalog[i]

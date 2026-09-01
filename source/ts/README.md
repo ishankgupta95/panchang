@@ -6,12 +6,16 @@
 Pure TypeScript Hindu Panchang (almanac), Jyotish, and Birth Chart calculations.
 Zero runtime dependencies. Works offline in React Native (Hermes), Node.js, and browsers.
 
-**Fast** (~0.25 ms trimmed, ~0.41 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,772 tests across 137 files**
+**Fast** (~0.25 ms trimmed, ~0.41 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,805 tests across 138 files**
 
 > 📖 **Full documentation: [dharmagya.app/docs/panchang-ts](https://dharmagya.app/docs/panchang-ts)**
-> This README covers install, quick start, and the 5.0 → 5.1 and 4.x → 5 migrations in full,
-> plus a per-feature quick reference. The complete reference (every option, result field,
+> This README covers install, quick start, and the 5.1 → 5.2, 5.0 → 5.1 and 4.x → 5 migrations
+> in full, plus a per-feature quick reference. The complete reference (every option, result field,
 > table format, accuracy bound and performance note) lives on the docs site.
+
+A Go port of the same engine ships from the same repository, held to this package's
+exact arithmetic by a parity harness. See
+[the repository](https://github.com/ishankgupta95/panchang-ts) if you need it.
 
 ---
 
@@ -128,6 +132,121 @@ at the given instant: it skips canonical-time refinements (madhyahna /
 pradosha / nishita / chandrodaya), transit-based Sankranti, and Smarta/Vaishnava
 Ekadashi split. For reliable festival dating, use `getDailyPanchang`.
 
+### If you have no location
+
+`location` is required and stays required. Nothing here silently guesses where you are, because a
+panchang computed for the wrong place does not look wrong: it returns a complete, plausible result
+with some dates off by one.
+
+There are three reference frames, and a result is always in one of them:
+
+| frame | point | when |
+|---|---|---|
+| `practical` | the location you passed | you have real coordinates. The only frame correct for a real user |
+| `traditional` | **Ujjain** 23.1765N, 75.7885E | the classical madhya rekha of the Surya Siddhanta. The default |
+| `modern` | **Central Station** 23.1833N, 82.5E | the 1955 Calendar Reform Committee reference for the Rashtriya Panchang |
+
+Why the frame matters at all: a tithi, nakshatra, yoga or karana **ends at one instant worldwide**.
+Only the civil day it gets labelled with depends on your sunrise, along with everything else
+rise/set derived (rahu kalam, choghadiya, pradosha, nishita, moonrise anchors).
+
+```typescript
+import { getDailyPanchang, resolveLocation, IST_OFFSET_MINUTES } from 'panchang-ts';
+
+// maybeLocation may be undefined; traditional (Ujjain) is the default frame
+const { location, reference } = resolveLocation(maybeLocation);
+const day = getDailyPanchang(date, location, { timezone: IST_OFFSET_MINUTES });
+
+if (reference !== 'practical') {
+  // say so, the way a printed panchang names the city it was computed for
+  console.info(`Computed for the ${reference} reference, not your location.`);
+}
+```
+
+Pass `'modern'` as the second argument to fall back to the Central Station instead, or use
+`referenceLocation('traditional' | 'modern')` if you only want the point. `'practical'` is
+reported, never selected: passing a location is what makes a result practical.
+
+**Price the fallbacks before you rely on them.** Measured over 730 days against 48 Indian cities,
+the tithi at the reference's sunrise differs from the city's own on up to **5.9% of days** for
+Ujjain and **4.0%** for the Central Station. Ujjain is the better of the two for most users
+(population-weighted 1.18% against 1.80%, since India's metros lie west of the IST meridian) and
+the worse in the tail. Outside India both degrade without limit.
+
+`IST_OFFSET_MINUTES` (330) is exact for the Central Station, whose longitude is the IST meridian.
+For Ujjain it is the civil clock rather than its local mean time, which is 303.2 minutes; the
+26.8-minute gap is what the classical deshantara correction exists to close.
+
+A half-filled location throws rather than being completed from a reference point, and
+`{ latitude: 0, longitude: 0 }` is treated as the real place it is, not as missing.
+
+Note that the shipped static tables (`panchang-ts/festivals`, `/eclipses`, `/muhurta`) are
+pre-computed for Varanasi, which is a fourth point again.
+
+---
+
+## Upgrading to 5.2
+
+No type breaks and no removed exports. What changes is output: a set of dates that
+were wrong, or missing entirely, are now right. If you cache festival dates, diff
+them against a rebuild before you ship, and key on `festivals[].key` rather than on
+the label, because 27 user-visible strings changed punctuation in both `en` and `hi`.
+
+### Festivals that used to vanish for a whole year now appear
+
+A tithi that begins and ends between two consecutive sunrises is current at no
+sunrise. A rule keyed on the sunrise tithi matched it on no day of the year, so the
+festival disappeared from that year entirely. Ugadi and Gudi Padwa were absent from
+2026 at every location; Navaratri 2027, Gangaur 2025, both Teejes, Govardhan Puja,
+Bhai Dooj, Anant Chaturdashi and Kartika Purnima were missing at some cities and
+present at others. The Hindu day that wholly contains the tithi now claims it, which
+is what the reference almanac publishes.
+
+Measured over eight Indian cities across 2020 to 2030: **87 dates added, and no
+existing date moves.** Every addition belongs to a city and year where the festival
+previously had no date at all, so nothing is rescheduled.
+
+Four festivals are deliberately left out, because the reference does not put them on
+the containing day: Narak Chaturdashi and Chhath Usha Arghya, which it publishes on
+the day the tithi ends, and Holi and Phagli, which are anchored to pradosha.
+
+### Three festivals move to a different date
+
+These are the ones to diff for. They are corrections, not additions.
+
+| festival | was | now |
+|---|---|---|
+| Vat Savitri Amavasya | roughly 30 days late, every year | 7 of 7 checked years match the reference |
+| Rig Upakarma | 9 of 13 checked years right | 13 of 13 |
+| Sama Upakarma | 4 of 13 checked years right | 13 of 13 |
+
+Vat Savitri Amavasya was filed under the wrong lunar month. The vrat falls on
+purnimanta Jyeshtha Amavasya, and an amavasya ends its amanta month, so the two
+namings sit a month apart; the rule had been selecting the following new moon since
+the festival was added. It is now also anchored to aparahna rather than sunrise, with
+the later day taking a span that reaches aparahna twice. `vat_savitri_purnima` is
+unaffected and still correct, because a purnima sits inside the amanta month it names.
+
+Both Upakarma rules matched on the nakshatra at sunrise and nothing else. Sama
+Upakarma fired a **second** time in six of thirteen years, on the Bhadrapada Krishna
+Amavasya that carries Hasta again, and was a day late in five more. Rig Upakarma
+emitted two dates when its nakshatra spanned two sunrises, and nothing at all in the
+years it fell outside Shukla paksha. Both now emit exactly one date in all 88
+city-years of the eight-city sweep. Sama Upakarma is anchored to aparahna and is
+therefore longitude sensitive: in 2026 it is the 13th of September at Kolkata and the
+12th elsewhere, which is what the reference publishes.
+
+### Numbers that changed
+
+`getUpcomingSolarEclipse` did not check that an eclipse ended after the instant it
+was asked to search from, so range walkers could return the same eclipse repeatedly
+and drop others. `computeEclipsesInRange(2000 to 2011, Varanasi)` returned 277
+entries of which 249 were one 2007 partial; it now returns 32 distinct entries.
+Shadbala Kala Bala is now anchored to the preceding sunrise rather than the following
+one, moving 1009 of 2016 sampled births. Narayan dasha durations exclude adjacent
+signs from rasi drishti. Gulika and Mandi use a day/night test that matches their own
+definition.
+
 ---
 
 ## Upgrading to 5.1, part 2
@@ -186,8 +305,7 @@ Both the Dashami-viddha and the vriddha-Dwadashi (Pakshavardhini) splits now
 match the almanac across every pair it publishes in 2024-2028. `getDailyPanchang`
 callers that keyed off `smarta_ekadashi` / `vaishnava_ekadashi` on split days
 will see the two swap places; `computeEkadashiDatesForYear` is unchanged.
-Custom locale packs need the renamed viddha description keys. See the
-CHANGELOG.
+Custom locale packs need the renamed viddha description keys.
 
 ### Regional solar new years land on their own days
 
@@ -203,8 +321,7 @@ keyed, with a piecewise `vasa` segment list on `BhadraInfo`), night-transit
 Sankranti dates (+ a new `moment` field on `SankrantiEvent`), kshaya-Dwadashi
 Ekadashi advance, Vijayadashami/Karva Chauth/Janmashtami kala rules, the
 Kali Yuga year boundary, `scoreMuhurta` special-yoga parity, eastern-
-longitude Gulika/Mandi, and the opt-in Ashtakavarga reductions. See the
-CHANGELOG for each rule and its reference-almanac evidence.
+longitude Gulika/Mandi, and the opt-in Ashtakavarga reductions.
 
 ---
 
@@ -877,7 +994,7 @@ InteractionManager.runAfterInteractions(() => {
 
 📖 [Full accuracy notes →](https://dharmagya.app/docs/panchang-ts/accuracy)
 
-8,772 tests across 137 files, including fixtures cross-verified against reference
+8,805 tests across 138 files, including fixtures cross-verified against reference
 panchang calculations spanning 2025-2026 across 10 Indian cities plus New York,
 London, Sydney, Dubai, Singapore (diaspora fixtures cover DST on
 `America/New_York`).

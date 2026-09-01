@@ -40,7 +40,6 @@ export function findPanchakaOnset(
   if (!computePanchaka(getMoon(referenceUtc))) return null;
 
   const hiMs = referenceUtc.getTime();
-  // 7 days back is comfortably before onset even at the Moon's slowest.
   const loMs = hiMs - 7 * 86_400_000;
   if (computePanchaka(getMoon(new Date(loMs)))) return null;
 

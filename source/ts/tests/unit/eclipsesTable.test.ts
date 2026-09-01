@@ -11,7 +11,6 @@ import { isEclipseVisibleAnyPhase } from '../../src/astronomy/eclipse';
 const VARANASI = { latitude: 25.3176, longitude: 82.9739 };
 const IST_OFFSET = 330;
 
-// The library ships no table, so the suite builds the one it reads.
 const START_YEAR = 2025;
 const END_YEAR = 2027;
 
@@ -73,7 +72,6 @@ describe('eclipse table reader', () => {
       );
       expect(totalLunar, 'expected a total lunar eclipse in the window').toBeDefined();
       expect(totalLunar!.eclipse.name).toBe('Total Lunar Eclipse');
-      // A total eclipse saturates obscuration at 1 while magnitude runs past it.
       expect(totalLunar!.eclipse.obscuration).toBeGreaterThan(0.9);
       expect(totalLunar!.eclipse.magnitude).toBeGreaterThan(1);
     });
@@ -101,7 +99,6 @@ describe('eclipse table reader', () => {
         expect(typeof eclipse.magnitude, `magnitude on ${eclipse.peak}`).toBe('number');
         expect(eclipse.obscuration).toBeGreaterThanOrEqual(0);
         expect(eclipse.obscuration).toBeLessThanOrEqual(1);
-        // No umbral contact: zero area covered, negative magnitude by convention.
         if (eclipse.kind === 'lunar' && eclipse.subtype === 'penumbral') {
           expect(eclipse.obscuration).toBe(0);
           expect(eclipse.magnitude).toBeLessThan(0);
@@ -119,8 +116,6 @@ describe('eclipse table reader', () => {
           expect(eclipse.sutak, `penumbral on ${eclipse.peak}`).toBeUndefined();
         } else {
           expect(eclipse.sutak, `${eclipse.kind}/${eclipse.subtype} on ${eclipse.peak}`).toBeDefined();
-          // Sutak ends at moksha, the umbral last contact, at or before the
-          // penumbral end.
           expect(new Date(eclipse.sutak!.end).getTime())
             .toBeLessThanOrEqual(new Date(eclipse.end).getTime());
           expect(new Date(eclipse.sutak!.start).getTime())
@@ -149,7 +144,6 @@ describe('eclipse table reader', () => {
     });
 
     it('accepts Date objects and converts via the table timezone (IST)', () => {
-      // Noon IST on the eclipse's local date.
       const noonIst = new Date(`${sample.date}T06:30:00Z`);
       const got = getEclipsesForDate(table, noonIst);
       expect(got.some(e => e.peak === sample.eclipse.peak)).toBe(true);
@@ -162,7 +156,6 @@ describe('eclipse table reader', () => {
 
     it('returns [] for dates with no eclipse and out-of-range dates', () => {
       expect(getEclipsesForDate(table, `${START_YEAR - 5}-01-01`)).toEqual([]);
-      // Eclipses never fall on consecutive days, so the next day has none.
       const dayAfter = new Date(`${sample.date}T00:00:00Z`);
       dayAfter.setUTCDate(dayAfter.getUTCDate() + 1);
       const key = dayAfter.toISOString().slice(0, 10);
@@ -192,7 +185,6 @@ describe('eclipse table reader', () => {
     });
 
     it('includes the 2026-03-03 total lunar via the any-phase rule (peak below horizon)', () => {
-      // At Varanasi the Moon rises already eclipsed: only closing phases show.
       const e2026 = getEclipsesForYear(table, 2026)!
         .flatMap(d => d.eclipses)
         .find(e => e.peak.slice(0, 10) === '2026-03-03');

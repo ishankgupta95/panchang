@@ -31,7 +31,6 @@ export interface EclipseInfo {
   description: string;
 }
 
-// Classical Smarta convention: 4 prahara (of 3 hours) for solar, 3 for lunar.
 const SOLAR_SUTAK_HOURS = 12;
 const LUNAR_SUTAK_HOURS = 9;
 
@@ -102,7 +101,6 @@ export function getUpcomingLunarEclipse(
     fromUtc, 180, windowEndMs + DAY_MS, (opposition) => {
       const found = findLunarEclipse(opposition);
       if (found === null) return null;
-      // Symmetry about opposition should make the solar arm's repeat-forever fixpoint unreachable here.
       if (found.penumbralEnd.getTime() <= fromUtc.getTime()) return null;
       return found;
     },
@@ -111,7 +109,6 @@ export function getUpcomingLunarEclipse(
   if (eclipse.penumbralBegin.getTime() > windowEndMs) return null;
 
   const subtype: EclipseSubtype = eclipse.kind;
-  // Sutak is anchored to the umbral phase, so a penumbral eclipse carries none.
   const umbralBegin = eclipse.partialBegin;
   const umbralEnd = eclipse.partialEnd;
   const hasUmbra = umbralBegin !== null && umbralEnd !== null;
@@ -153,10 +150,6 @@ export function getUpcomingSolarEclipse(
   const eclipse = searchFromSyzygies(fromUtc, 0, windowEndMs + DAY_MS, (conjunction) => {
     const local = findLocalSolarEclipse(conjunction, location);
     if (local === null) return null;
-    // Local contacts can fall entirely BEFORE the geocentric conjunction for an
-    // observer east of the shadow axis; without this a caller stepping past an
-    // eclipse would get that same eclipse forever. Rejected here, not outside,
-    // so the walk advances to the next syzygy.
     if (local.partialEnd.getTime() <= fromUtc.getTime()) return null;
     return local.beginAltitude > 0 || local.endAltitude > 0 ? local : null;
   });

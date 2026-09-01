@@ -78,7 +78,6 @@ func loadElementsGolden(t *testing.T) elementsGolden {
 	return g
 }
 
-// Numerical Recipes' ranqd1, duplicated rather than shared so the digest checks it too.
 func uniform(seed uint32, count int, rng float64, yield func(float64)) {
 	s := seed
 	for i := 0; i < count; i++ {
@@ -98,7 +97,6 @@ func elementPairs(seed uint32, count int, yield func(moon, sun float64)) {
 	})
 }
 
-// Leaf order is part of the claim: pushing the same values differently changes the digest.
 func elementLeaves(moon, sun float64) [15]float64 {
 	tt := ComputeTithiFromLongitudes(moon, sun, "", "")
 	nk := ComputeNakshatraFromLongitude(moon, "")
@@ -264,7 +262,6 @@ func TestElementSweepIsNotVacuous(t *testing.T) {
 	}
 }
 
-// `360 / 27` between untyped integer constants is 13 in Go, moving every boundary 0.33°.
 func TestSpansMatchTypeScript(t *testing.T) {
 	g := loadElementsGolden(t)
 	for _, c := range []struct {
@@ -337,7 +334,6 @@ func TestResolversMatchTypeScript(t *testing.T) {
 	}
 }
 
-// TS's `Math.floor(-5e-324 / 13.333…)` is −0 where Go has none; normalize360 makes it unreachable.
 func TestSignedZeroDivergenceIsExactlyOneMechanism(t *testing.T) {
 	g := loadElementsGolden(t)
 	if len(g.SignedZeroPairs) == 0 {
@@ -426,7 +422,6 @@ func TestNoNegativeZeroFromNormalizedLongitudes(t *testing.T) {
 	lons = append(lons, 0, math.Nextafter(360, 0))
 	uniform(0x1CE, 4000, 180, func(v float64) { lons = append(lons, v+180) })
 
-	// Coprime strides walk the list against itself without the full cross product.
 	checked, sunZero := 0, 0
 	for _, stride := range []int{0, 1, 7, 337, 1723} {
 		for i, moon := range lons {

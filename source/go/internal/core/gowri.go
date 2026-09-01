@@ -16,7 +16,6 @@ var gowriQuality = [8]types.ChoghadiyaQuality{
 	types.QualityInauspicious, // 7 Chal   (Soram: Bad)
 }
 
-// Verbatim from the reference almanac's Pambu Panchangam, not a rotating cycle.
 var gowriDayGrid = [7][8]int{
 	{0, 1, 2, 3, 6, 4, 7, 5}, // Sun
 	{1, 5, 2, 3, 6, 4, 7, 0}, // Mon

@@ -10,7 +10,6 @@ import (
 
 func ComputeNakshatraFromLongitude(siderealMoon float64, name string) types.NakshatraInfo {
 	index := utils.NakshatraOf(siderealMoon)
-	// FMA barrier protecting an index; the clamp catches a longitude one ULP below a boundary.
 	degreesInNakshatra := math.Max(siderealMoon-float64(float64(index)*utils.NakshatraSpan), 0)
 	pada := int(math.Floor(degreesInNakshatra/utils.NakshatraPadaSpan)) + 1
 	if pada > 4 {

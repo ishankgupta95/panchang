@@ -11,16 +11,13 @@ import (
 
 var dayGulikaSlot = utils.GulikaSlots
 
-// At night the rotation restarts five weekdays on (Phaladeepika Ch. 5).
 var nightGulikaSlot = [7]int{2, 1, 0, 6, 5, 4, 3}
 
-// Tajik / BPHS.
 const (
 	dhumaOffsetDeg   float64 = 133 + 20.0/60
 	upaketuOffsetDeg float64 = 16 + 40.0/60
 )
 
-// Houses are whole-sign from the natal lagna regardless of options.HouseSystem.
 func ComputeUpagrahas(
 	ctx *astronomy.EphemerisCtx,
 	birthMs int64,
@@ -84,7 +81,6 @@ func makeUpagrahaPos(longitude float64, natalLagnaRashi int, lang types.Language
 	return types.UpagrahaPosition{
 		Longitude: lon,
 		Rashi:     rashi,
-		// The twelve solar masa names are the twelve rashi names.
 		RashiName: i18n.ResolveMasaName(rashi, lang),
 		House:     ((rashi-natalLagnaRashi+12)%12 + 1),
 	}
@@ -104,11 +100,9 @@ func locateGulikaSegment(
 	if err != nil {
 		return GulikaSegment{}, err
 	}
-	// Local date at that sunrise: the LMT shift, no timezone. FMA barrier.
 	varaIndex := types.Date(int64(float64(baseSunrise) +
 		float64((location.Longitude/15)*3600_000))).UTCDay()
 
-	// The same sunset that divides the segments; a horizon test disagrees just after sunrise.
 	baseSunset, err := astronomy.ComputeSunset(ctx, baseSunrise, location, astronomy.DefaultRiseSetLimitDays)
 	if err != nil {
 		return GulikaSegment{}, err
@@ -121,7 +115,6 @@ func locateGulikaSegment(
 		sunrise := baseSunrise
 		sunset := baseSunset
 		dayMs := sunset - sunrise
-		// float64: an int64 length floors, and the slot index multiplies the error.
 		segLen := float64(dayMs) / 8
 		slot := dayGulikaSlot[varaIndex]
 		segStart = int64(float64(sunrise) + float64(float64(slot)*segLen))
@@ -141,7 +134,6 @@ func locateGulikaSegment(
 		segEnd = int64(float64(segStart) + segLen)
 	}
 
-	// Truncating division matches JS on both sides of the epoch.
 	midpoint := (segStart + segEnd) / 2
 	return GulikaSegment{Start: segStart, Midpoint: midpoint}, nil
 }
@@ -154,7 +146,6 @@ func LocateGulikaSegmentForTest(
 	return locateGulikaSegment(ctx, birthMs, location)
 }
 
-// Deliberate duplicate of lagna.go's findSunriseBefore; fix both or neither.
 func findSunriseBeforeBirth(ctx *astronomy.EphemerisCtx, ms int64, location types.GeoLocation) (int64, error) {
 	back30h := ms - 30*3600_000
 	candidate, err := astronomy.ComputeSunrise(ctx, back30h, location, astronomy.DefaultRiseSetLimitDays)

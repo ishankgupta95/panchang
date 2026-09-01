@@ -8,7 +8,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// Whole minutes: a sub-minute historical offset truncates (Kolkata +05:53:20).
 func ResolveUtcOffset(timezone types.Timezone, referenceMs int64) (int, error) {
 	if !timezone.IsSet() {
 		return 0, types.NewPanchangError(
@@ -35,7 +34,6 @@ func ResolveUtcOffset(timezone types.Timezone, referenceMs int64) (int, error) {
 
 func GetLocalMidnightUtc(ms int64, offsetMinutes int) int64 {
 	localDisplay := time.UnixMilli(ms + int64(offsetMinutes)*60_000).UTC()
-	// ECMA-262 MakeFullYear: Date.UTC maps 0 <= y <= 99 to 1900+y.
 	year := localDisplay.Year()
 	if year >= 0 && year <= 99 {
 		year += 1900
@@ -59,7 +57,6 @@ func FormatInZone(ms int64, offsetMinutes int) string {
 
 	var b strings.Builder
 	b.Grow(29)
-	// JS padStart(4, '0'), sign included; unreachable in 1900-2100.
 	if year < 1000 {
 		s := strconv.Itoa(year)
 		for i := len(s); i < 4; i++ {
@@ -92,7 +89,6 @@ func FormatInZone(ms int64, offsetMinutes int) string {
 	return b.String()
 }
 
-// 61 entries: a UTC offset's minute part and a leap second both reach 60.
 var twoDigits, threeDigits = func() ([61]string, [1000]string) {
 	var two [61]string
 	var three [1000]string

@@ -32,7 +32,6 @@ const DefaultEclipsesNote = "Pre-computed eclipse table. Includes every eclipse 
 	"lunar eclipses carry no sutak and are not religiously observed " +
 	"(reference almanac / pandit consensus). Times are ISO UTC."
 
-// The Hindi adjective precedes the noun as in English, so adj + noun reads in both.
 var kindNoun = map[FestivalsTableLanguage]map[EclipseTableKind]string{
 	TableLangEn: {EclipseSolar: "Solar Eclipse", EclipseLunar: "Lunar Eclipse"},
 	TableLangHi: {EclipseSolar: "सूर्य ग्रहण", EclipseLunar: "चंद्र ग्रहण"},
@@ -66,7 +65,6 @@ func localizedEclipseDescription(
 		}
 		return name + ": penumbral shadow only; no sutak."
 	}
-	// jsnum.Round ties to +∞; math.Round would tie away from zero.
 	pct := int(jsnum.Round(obscuration * 100))
 	if lang == TableLangHi {
 		return name + ": " + strconv.Itoa(pct) + "% ग्रास।"
@@ -141,7 +139,6 @@ func BuildEclipsesTable(
 			"languages must contain at least one locale")
 	}
 
-	// A peak just outside the years can still bucket to an in-range local date.
 	windowStartMs := types.DateUTC(opts.StartYear, 0, 1).Ms() - 2*dayMs
 	windowEndMs := types.DateUTC(opts.EndYear, 11, 31).Ms() + dayMs - 1 + 2*dayMs
 
@@ -161,7 +158,6 @@ func BuildEclipsesTable(
 		}
 	}
 
-	// Pre-seed in-range years so empty ones appear as [].
 	byYear := map[string]map[string][]EclipseTableEntryRaw{}
 	yearOrder := []string{}
 	for year := opts.StartYear; year <= opts.EndYear; year++ {
@@ -187,7 +183,6 @@ func BuildEclipsesTable(
 	for _, yearKey := range yearOrder {
 		dates := make([]string, len(dateOrder[yearKey]))
 		copy(dates, dateOrder[yearKey])
-		// Equal-width YYYY-MM-DD keys, so byte order is the TS sort.
 		sort.Slice(dates, func(i, j int) bool { return strings.Compare(dates[i], dates[j]) < 0 })
 		days := make([]RawEclipseTableDay, 0, len(dates))
 		for _, date := range dates {

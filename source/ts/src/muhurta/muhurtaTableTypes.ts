@@ -1,5 +1,3 @@
-// No runtime imports on purpose: the engine-free reader `muhurtaTable.ts` consumes
-// this too, so `MuhurtaFactor` lives here rather than in `engine.ts`.
 
 export type MuhurtaTableLanguage = 'en' | 'hi';
 

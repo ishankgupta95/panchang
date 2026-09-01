@@ -126,7 +126,6 @@ describe('computeNavamsa (D9): classical rule per rashi type', () => {
   });
 
   it('Boundary at Aries 3°20\' is inclusive of the next nav (Taurus)', () => {
-    // Classically the boundary degree belongs to the next navamsa.
     const eps = 1e-6;
     expect(Math.floor(navLon(30 / 9) / 30)).toBe(1);
     expect(Math.floor(navLon(30 / 9 - eps) / 30)).toBe(0);

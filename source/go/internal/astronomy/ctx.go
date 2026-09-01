@@ -1,6 +1,5 @@
 package astronomy
 
-// One per API call, never shared across goroutines.
 type EphemerisCtx struct {
 	nutMemoT    [nutationMemoSize]float64
 	nutMemoPsi  [nutationMemoSize]float64

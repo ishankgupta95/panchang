@@ -33,25 +33,20 @@ type EclipseInfo struct {
 	PeakMs              types.JSDate   `json:"peak"`
 	EndMs               types.JSDate   `json:"end"`
 	VisibleFromLocation bool           `json:"visibleFromLocation"`
-	// Disc area fraction, umbral for lunar, so penumbral reads 0.
-	Obscuration float64 `json:"obscuration"`
-	// Diameter fraction: >1 when total, negative for penumbral lunar; never clamp.
-	Magnitude    float64       `json:"magnitude"`
-	SutakStartMs *types.JSDate `json:"sutakStart"`
-	SutakEndMs   *types.JSDate `json:"sutakEnd"`
-	Description  string        `json:"description"`
+	Obscuration         float64        `json:"obscuration"`
+	Magnitude           float64        `json:"magnitude"`
+	SutakStartMs        *types.JSDate  `json:"sutakStart"`
+	SutakEndMs          *types.JSDate  `json:"sutakEnd"`
+	Description         string         `json:"description"`
 }
 
-// Smarta: 4 and 3 prahara of 3 h.
 const (
 	solarSutakHours = 12
 	lunarSutakHours = 9
 )
 
-// Largest eclipsing latitude is ~1.58° solar, ~1.50° lunar.
 const eclipseLatitudeLimitDeg = 1.8
 
-// Same-kind syzygies are never closer than ~29.2 days.
 const syzygyAdvanceDays = 10
 
 func IsBodyAboveHorizon(ctx *EphemerisCtx, ms int64, location types.GeoLocation, body HorizonBody) bool {
@@ -67,7 +62,6 @@ func IsEclipseVisibleAnyPhase(ctx *EphemerisCtx, eclipse EclipseInfo, location t
 	endMs := eclipse.EndMs
 	const samples = 12
 	for i := 0; i <= samples; i++ {
-		// Truncated, not rounded: the TS Date constructor truncates.
 		t := int64(float64(startMs) + float64(endMs-startMs)*float64(i)/samples)
 		if IsBodyAboveHorizon(ctx, t, location, body) {
 			return true
@@ -160,7 +154,6 @@ func GetUpcomingSolarEclipse(
 			if !ok {
 				return LocalSolarEclipse{}, false
 			}
-			// Both local contacts can precede the conjunction; without this the walk sticks.
 			if local.PartialEndMs <= fromMs {
 				return LocalSolarEclipse{}, false
 			}
@@ -213,7 +206,6 @@ func elongationAt(ms int64, lon SyzygyLongitudes) float64 {
 	return utils.Normalize360(lon.TropicalMoon(ms) - lon.TropicalSun(ms))
 }
 
-// Elongation advances monotonically; a syzygy is a wrap past zero.
 func syzygyBetween(fromMs, toMs int64, targetDeg float64, lon SyzygyLongitudes) bool {
 	relFrom := utils.Normalize360(elongationAt(fromMs, lon) - targetDeg)
 	relTo := utils.Normalize360(elongationAt(toMs, lon) - targetDeg)
@@ -277,11 +269,9 @@ func describeEclipse(
 	if visible {
 		visibility = e.Visibility.Visible
 	}
-	// n=1, not ReplaceAll: JS replace hits the first match only.
 	s := e.Template
 	s = strings.Replace(s, "{subtype}", subtypeName, 1)
 	s = strings.Replace(s, "{kind}", kindName, 1)
-	// jsnum.Round, not math.Round: JS ties go up, not away from zero.
 	s = strings.Replace(s, "{percent}", strconv.Itoa(int(jsnum.Round(obscuration*100))), 1)
 	s = strings.Replace(s, "{visibility}", visibility, 1)
 	return s

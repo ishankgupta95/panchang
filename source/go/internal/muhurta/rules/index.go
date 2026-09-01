@@ -1,4 +1,3 @@
-// Package rules holds the stock muhurta rules. Sources: Muhurta-chintamani Chs. 4, 9, 16; Muhurta-darpana; BPHS Ch. 28; Charak, *Predictive Astrology* Ch. 23.
 package rules
 
 import "github.com/ishankgupta95/panchang-ts/source/go/v5/internal/muhurta"
@@ -20,7 +19,6 @@ func bothPakshas(numbers ...int) []int {
 	return out
 }
 
-// Order preserved: these lists reach the wire as built.
 func concat(lists ...[]int) []int {
 	n := 0
 	for _, l := range lists {
@@ -73,7 +71,6 @@ const (
 
 var penalize = func() *muhurta.BhadraMode { m := muhurta.BhadraPenalize; return &m }()
 
-// No ExcludeGandaMula: Magha, Mula and Revati are Ganda Mula yet classical vivah nakshatras.
 var VivahRule = muhurta.MuhurtaRule{
 	Occasion:           "vivah",
 	Name:               "Vivah (wedding)",
@@ -87,12 +84,10 @@ var VivahRule = muhurta.MuhurtaRule{
 	AuspiciousVaras:        []int{1, 3, 4, 5},
 	InauspiciousVaras:      []int{0, 2, 6},
 	Bhadra:                 penalize,
-	// No ExcludeEkadashi: Ekadashi is one of the six preferred vivah tithis.
-	ExcludeAdhikaMasa: true,
-	ExcludeEclipse:    true,
+	ExcludeAdhikaMasa:      true,
+	ExcludeEclipse:         true,
 }
 
-// No ExcludeEkadashi: Dashami and Ekadashi are staple griha-pravesh tithis.
 var GrihaPraveshRule = muhurta.MuhurtaRule{
 	Occasion:           "grihaPravesh",
 	Name:               "Griha Pravesh (housewarming)",
@@ -164,7 +159,6 @@ var AnnaprashanRule = muhurta.MuhurtaRule{
 	Bhadra:          penalize,
 }
 
-// No ExcludeGandaMula: several classical Chudakarana nakshatras are Ganda Mula.
 var MundanRule = muhurta.MuhurtaRule{
 	Occasion:           "mundan",
 	Name:               "Mundan (first hair-cutting)",
@@ -291,7 +285,6 @@ func Order() []string {
 	return out
 }
 
-// Slice fields share backing arrays; treat the result read-only.
 func Get(occasion string) (muhurta.MuhurtaRule, bool) {
 	r, ok := stock[occasion]
 	return r, ok

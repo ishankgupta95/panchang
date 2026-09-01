@@ -109,8 +109,8 @@
           "worstNumericAbs": 3.410605131648481e-13,
           "worstNumericPath": "charts.e1-1912-pune.divisionals.D12.planets.2.longitude",
           "bytes": {
-            "ts": 255539350,
-            "go": 255539455
+            "ts": 255536691,
+            "go": 255536796
           }
         }
       }

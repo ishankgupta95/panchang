@@ -10,22 +10,17 @@ import (
 
 const turnArcsec = 1_296_000
 
-// float64() barrier: folding the exact decimal moves every retardation by an ULP.
 const KmPerLightDay = float64(299_792.458) * 86_400
 
-// IAU 2012. Typed: untyped, constants derived from it fold at arbitrary precision.
 const AuKm float64 = 149_597_870.7
 
-// IAU 2006; must equal MeanObliquityArcsec's constant term or the frame gains a tilt.
 const eps0Arcsec = 84381.406
 
-// IAU 2006 (Hilton et al.); t in Julian centuries of TT from J2000.0.
 func MeanObliquityArcsec(t float64) float64 {
 	return eps0Arcsec +
 		float64((-46.836769+float64((-0.0001831+float64((0.00200340+float64((-0.000000576+float64(-0.0000000434*t))*t))*t))*t))*t)
 }
 
-// IERS Conventions 2003; unreduced, the Delaunay polynomials lose nine digits.
 func fundamentalArguments(t float64) [14]float64 {
 	var out [14]float64
 	out[0] = jsnum.Mod(485868.249036+
@@ -111,7 +106,6 @@ func sumNutation(coefficients []float64, multipliers []int8, t float64,
 	return total
 }
 
-// Truncated IAU 2000A, arcseconds.
 func Nutation(ctx *EphemerisCtx, t float64) (dpsi, deps float64) {
 	for i := 0; i < ctx.nutMemoLive; i++ {
 		if ctx.nutMemoT[i] == t {
@@ -133,7 +127,6 @@ func Nutation(ctx *EphemerisCtx, t float64) (dpsi, deps float64) {
 	return dpsi, deps
 }
 
-// `elp82b.f`'s closing precession matrix, verbatim.
 const (
 	elpP0 = 0.10180391e-4
 	elpP1 = 0.47020439e-6
@@ -148,7 +141,6 @@ const (
 	elpQ4 = -0.320334e-14
 )
 
-// math.Sin / math.Cos deliberately, not the package's Sin / Cos.
 func ElpToEclipticOfDate(lon, lat, dist, t float64) [3]float64 {
 	cl := dist * math.Cos(lat)
 	x0 := cl * math.Cos(lon)
@@ -173,7 +165,6 @@ func ElpToEclipticOfDate(lon, lat, dist, t float64) [3]float64 {
 	z = float64(s*y) + float64(c*z)
 	y = ty
 
-	// IAU 2006 precession only: no frame bias, ELP's J2000 being the dynamical mean equinox.
 	zeta := float64(2306.083227+float64((0.2988499+float64((0.01801828+float64((-0.000005971+float64(-0.0000003173*t))*t))*t))*t)) * t
 	zA := float64(2306.077181+float64((1.0927348+float64((0.01826837+float64((-0.000028596+float64(-0.0000002904*t))*t))*t))*t)) * t
 	theta := float64(2004.191903+float64((-0.4294934+float64((-0.04182264+float64((-0.000007089+float64(-0.0000001274*t))*t))*t))*t)) * t
@@ -201,8 +192,6 @@ func ElpToEclipticOfDate(lon, lat, dist, t float64) [3]float64 {
 	return [3]float64{x, ty, z}
 }
 
-// VSOP87 → FK5 longitude offset: Meeus 2nd ed. ch. 32.
 const VsopToFK5Arcsec float64 = -0.09033
 
-// The latitude half; typed like AuKm to stop exact folding.
 const VsopToFK5LatArcsec float64 = 0.03916

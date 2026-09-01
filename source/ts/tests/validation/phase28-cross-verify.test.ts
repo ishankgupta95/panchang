@@ -64,7 +64,6 @@ function almanacYogaToLibType(s: string): string | null {
   return null;
 }
 
-// Almanac panels transcribed noisy or partial, per the fixture `_note`.
 const SOFT_YOGA_SKIP = new Set<string>([
   'Hyderabad|2026-11-05',
   'Jaipur|2026-04-15',

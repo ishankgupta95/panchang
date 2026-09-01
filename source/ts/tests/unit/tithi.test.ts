@@ -12,7 +12,6 @@ describe('computeTithiFromLongitudes', () => {
   });
 
   it('Purnima at exactly 180° → index 15 (Krishna Pratipada boundary)', () => {
-    // Purnima owns angles 168° to 180°; at exactly 180° it flips to the next index.
     const t = computeTithiFromLongitudes(180, 0, 'Purnima', 'Krishna');
     expect(t.index).toBe(15);
     expect(t.paksha).toBe('Krishna');

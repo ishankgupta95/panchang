@@ -134,5 +134,4 @@ function findTithiPravesha(
 /** @internal */
 export const _computeNatalTithiIndexForTest = computeNatalTithiIndex;
 
-// Reserved for a future window-size guard.
 void SIDEREAL_YEAR_DAYS;

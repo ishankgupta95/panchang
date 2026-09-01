@@ -235,7 +235,6 @@ func TestVargaTransformsAreBitIdentical(t *testing.T) {
 
 func TestVargaTransformsAreTotalAndOnTarget(t *testing.T) {
 	g := loadVargasGolden(t)
-	// D2 reaches Cancer, Leo and, at four engineered longitudes, Virgo; D30 skips the luminaries.
 	wantSigns := map[string]int{"D2": 3, "D3": 12, "D7": 12, "D9": 12, "D10": 12, "D12": 12, "D30": 10}
 	for name, fn := range goVargaTransforms() {
 		seen := map[int]bool{}
@@ -273,7 +272,6 @@ func TestVargaTransformsAreTotalAndOnTarget(t *testing.T) {
 	}
 }
 
-// One ULP below a 15° sub-boundary the scaled remainder rounds up; the TypeScript does the same.
 func TestD2CanOverflowIntoVirgo(t *testing.T) {
 	g := loadVargasGolden(t)
 	overflow, onGrid := 0, 0

@@ -1,4 +1,3 @@
-// No runtime imports: the engine-free `panchang-ts/eclipses` entry uses these.
 
 export type EclipsesTableLanguage = 'en' | 'hi';
 

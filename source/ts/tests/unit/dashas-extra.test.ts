@@ -39,10 +39,6 @@ describe('Ashtottari Dasha: cycle constants', () => {
 });
 
 describe('Ashtottari Dasha: starting lord by Moon nakshatra (classical group table)', () => {
-  // Ardradi group allocation (PyJHora ashtottari.py): Sun = Ardra..Ashlesha,
-  // Moon = Magha..U.Phalguni, Mars = Hasta..Vishakha, Mercury = Anuradha..Mula,
-  // Saturn = P.Ashadha..Shravana, Jupiter = Dhanishta..P.Bhadra,
-  // Rahu = U.Bhadra..Bharani, Venus = Krittika..Mrigashira.
   it('Moon at start of Ardra → Sun starting lord with full 6-year balance', () => {
     const moonLon = 5 * NAKSHATRA_SPAN;
     const r = computeAshtottariDasha(SAMPLE, moonLon);
@@ -70,7 +66,6 @@ describe('Ashtottari Dasha: starting lord by Moon nakshatra (classical group tab
   });
 
   it('Moon at start of Ashwini → Rahu starting lord, half the group elapsed', () => {
-    // Ashwini is 3rd of Rahu's wrapping group U.Bhadra..Bharani, so half elapsed.
     const moonLon = 0;
     const r = computeAshtottariDasha(SAMPLE, moonLon);
     expect(r.mahaDashas[0]!.lord).toBe('Rahu');
@@ -108,7 +103,6 @@ describe('Ashtottari Dasha: antardashas', () => {
 
   it('antardashas of a non-partial mahadasha sum to ~mahadasha duration', () => {
     const r = computeAshtottariDasha(SAMPLE, 2 * NAKSHATRA_SPAN);
-    // The first mahadasha is only the balance, so use the second.
     const md = r.mahaDashas[1]!;
     const adSum = md.antarDashas.reduce(
       (acc, a) => acc + (a.endDate.getTime() - a.startDate.getTime()),
@@ -166,9 +160,6 @@ describe('Yogini Dasha: cycle constants', () => {
 });
 
 describe('Yogini Dasha: starting Yogini by nakshatra (Devi-Bhagavata formula)', () => {
-  // Classical rule: (1-based janma nakshatra + 3) mod 8, remainder 1 = Mangala
-  // through 0 = Sankata. The Anuradha and Pushya cases below are worked
-  // examples from the published primers.
   it('Moon at Ashwini (0) → starts at Bhramari (Mars)', () => {
     const r = computeYoginiDasha(SAMPLE, 0);
     expect(r.mahaDashas[0]!.yogini).toBe('Bhramari');
@@ -273,7 +264,6 @@ describe('Chara Dasha: output structure', () => {
 
   it('starts at lagna rashi', () => {
     const r = computeCharaDasha(SAMPLE, DELHI);
-    // The lagna rashi itself is not pinned here.
     expect(r.mahaDashas[0]!.rashi).toBeGreaterThanOrEqual(0);
     expect(r.mahaDashas[0]!.rashi).toBeLessThan(12);
   });

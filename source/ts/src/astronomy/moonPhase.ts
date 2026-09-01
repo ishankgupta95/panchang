@@ -28,7 +28,6 @@ export function computeMoonPhasesInRange(start: Date, end: Date): MoonPhaseEvent
   const endMs = end.getTime();
   const out: MoonPhaseEvent[] = [];
 
-  // `searchMoonQuarter` is strictly-after: unless we back up a month, a quarter landing exactly on `start` is skipped.
   let mq = searchMoonQuarter(new Date(start.getTime() - 31 * 24 * 3600_000));
   const maxSteps = Math.ceil((endMs - start.getTime()) / (24 * 3600_000) / 6) + 60;
   for (let step = 0; step < maxSteps; step++) {

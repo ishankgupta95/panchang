@@ -22,7 +22,6 @@ func flattenDict(entry FestivalDictEntry, lang FestivalsTableLanguage) FestivalT
 	return out
 }
 
-// v1 tables predate the stable key.
 func flattenV1(raw FestivalTableEntryRaw, lang FestivalsTableLanguage) FestivalTableEntry {
 	out := FestivalTableEntry{Key: "", Name: raw.Name.Pick(lang), Type: raw.Type}
 	if raw.Description != nil {
@@ -37,7 +36,6 @@ func festivalDaysFor(
 ) ([]FestivalTableDay, bool) {
 	if source.IsPacked {
 		days, ok := source.Packed[yearKey]
-		// null under a present key means a missing year.
 		if !ok || days == nil {
 			return nil, false
 		}

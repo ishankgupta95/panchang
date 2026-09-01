@@ -1,4 +1,3 @@
-// BPHS Ch. 26 drishti: the universal 7th, plus Mars 4/8, Jupiter 5/9, Saturn 3/10.
 
 import { describe, it, expect } from 'vitest';
 import { computeAspects } from '../../src/jyotish/aspects';

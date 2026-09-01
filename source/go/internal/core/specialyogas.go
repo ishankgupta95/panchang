@@ -22,7 +22,6 @@ func ComputeSpecialYogas(
 		return nil, err
 	}
 
-	// Non-nil so it marshals as [].
 	results := make([]types.SpecialYogaInfo, 0, 2)
 	add := func(t types.SpecialYogaType) {
 		results = append(results, types.SpecialYogaInfo{Name: nameResolver(t), Type: t})

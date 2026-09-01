@@ -8,8 +8,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// Compared bit-exactly: these three leaves have no floating-point path.
-
 type foundationsGolden struct {
 	Meta struct {
 		Claim  string `json:"claim"`

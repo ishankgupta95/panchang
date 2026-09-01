@@ -18,7 +18,6 @@ import { computePlanetaryPositions } from '../../src/jyotish/planets';
 
 type Ingress = { date: string; firstAlt?: string };
 const SATURN_ENTERS: Record<string, Ingress[]> = {
-  // `date` is the permanent re-entry, `firstAlt` the first crossing.
   Tula:       [{ date: '2012-08-03', firstAlt: '2011-11-14' }],
   Vrischika:  [{ date: '2014-11-02' }],
   Dhanu:      [{ date: '2017-10-26', firstAlt: '2017-01-26' }],
@@ -48,9 +47,6 @@ function withinIngress(boundary: Date, rashiName: string, tolDays = 2): boolean 
   }
   return false;
 }
-
-// Phase 1 = Saturn in M-1, 2 = M, 3 = M+1; the arc runs from Saturn entering
-// M-1 to it entering M+2.
 
 type SadeSatiFixture = {
   label: string;

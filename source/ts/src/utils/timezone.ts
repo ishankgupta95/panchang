@@ -39,7 +39,6 @@ export function utcToLocalDisplay(utcDate: Date, offsetMinutes: number): Date {
   return new Date(utcDate.getTime() + offsetMinutes * 60_000);
 }
 
-
 /**
  * Render an instant as an offset-carrying ISO 8601 string, `"2025-01-14T07:09:44.172+05:30"`.
  * @param offsetMinutes Minutes east of UTC to render in.
@@ -59,8 +58,6 @@ export function formatInZone(date: Date, offsetMinutes: number): string {
   );
 }
 
-// Precomputed to keep `padStart` off the hot format path. The 61 is exact: a UTC
-// offset's minute part and a leap second both reach 60.
 const TWO_DIGITS: string[] = [];
 const THREE_DIGITS: string[] = [];
 for (let i = 0; i < 1000; i++) {

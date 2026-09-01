@@ -27,7 +27,6 @@ export function validateDate(date: Date): void {
   if (!(date instanceof Date) || isNaN(date.getTime())) {
     throw new PanchangError(`Invalid Date: ${String(date)}`, 'INVALID_DATE');
   }
-  // UTC year, so the accepted range does not depend on the host timezone.
   const year = date.getUTCFullYear();
   if (year < 1900 || year > 2100) {
     throw new PanchangError(
@@ -36,8 +35,6 @@ export function validateDate(date: Date): void {
     );
   }
 }
-
-// `RangeError`, not `PanchangError`: these guard programmer errors, not user input.
 
 function assertCyclicIndex(value: number, modulus: number, name: string): void {
   if (!Number.isInteger(value) || value < 0 || value >= modulus) {

@@ -1,5 +1,3 @@
-// The PVR pravesha preserves the natal tithi and puts the sidereal Sun back in
-// the natal rashi, so it can land a synodic month either side of the solar anniversary.
 
 import { describe, it, expect } from 'vitest';
 import {

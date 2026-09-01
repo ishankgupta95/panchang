@@ -17,14 +17,12 @@ export const REFRACTION_NEAR_HORIZON_DEG = 34 / 60;
 
 /** `utDays` drives rotation (UT1), `ttDays` precession (TT). */
 export function gastDegrees(ttDays: number, utDays: number): number {
-  // Split into whole + fractional turns so the whole ones do not eat precision.
   const theta = 360 * (((0.7790572732640 + 0.00273781191135448 * utDays) % 1 + (utDays % 1)) % 1);
 
   const t = ttDays / 36525;
   const { dpsi } = nutation(t);
   const trueObliquity = (meanObliquityArcsec(t) + nutation(t).deps) * ARCSEC_TO_RAD;
   const eqeq = dpsi * Math.cos(trueObliquity);
-  // IAU 2006 accumulated precession in right ascension, arcseconds.
   const precession = 0.014506
     + (4612.156534 + (1.3915817 + (-0.00000044 + (-0.000029956 + -0.0000000368 * t) * t) * t) * t) * t;
 
@@ -90,7 +88,6 @@ export function greenwichApparentSiderealDegrees(date: Date): number {
     (date.getTime() - Date.UTC(2000, 0, 1, 12)) / 86_400_000,
   );
 }
-
 
 /** Saemundsson refraction, degrees (Meeus ch. 16). The −1° clamp guards a pole near
  * −5.11°; the fade below it keeps refraction monotonic, as the rise/set search needs. */

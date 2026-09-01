@@ -39,7 +39,6 @@ export function computeLagna(
   const rashiIndex = Math.floor(siderealLongitude / 30);
   const degreeInRashi = siderealLongitude - rashiIndex * 30;
   const nakIdx = nakshatraOf(siderealLongitude);
-  // Clamped at 0: a sub-ULP negative would floor pada to 0.
   const degreesInNakshatra = Math.max(siderealLongitude - nakIdx * NAKSHATRA_SPAN, 0);
   const pada = Math.min(4, Math.floor(degreesInNakshatra / NAKSHATRA_PADA_SPAN) + 1);
 
@@ -55,7 +54,6 @@ export function computeLagna(
 export function findSunriseBefore(date: Date, location: GeoLocation): Date {
   const back30h = new Date(date.getTime() - 30 * 3600_000);
   let candidate = computeSunrise(back30h, location);
-  // 22 h hops never overshoot a solar day; the bound guards polar inputs.
   for (let i = 0; i < 4; i++) {
     const lookAhead = new Date(candidate.getTime() + 22 * 3600_000);
     const next = computeSunrise(lookAhead, location);
@@ -73,7 +71,6 @@ function buildLagnaInfo(siderealLongitude: number, lang: Language): LagnaInfo {
   const rashiIndex = Math.floor(sid / 30);
   const degreeInRashi = sid - rashiIndex * 30;
   const nakIdx = nakshatraOf(sid);
-  // Clamped at 0: a sub-ULP negative would floor pada to 0.
   const degreesInNakshatra = Math.max(sid - nakIdx * NAKSHATRA_SPAN, 0);
   const pada = Math.min(4, Math.floor(degreesInNakshatra / NAKSHATRA_PADA_SPAN) + 1);
   return {
@@ -95,7 +92,6 @@ export function computeHoraLagna(
   validateDate(birthDate);
   validateLocation(location);
   const sunrise = findSunriseBefore(birthDate, location);
-  // BPHS Ch. 4: the base point is the Sun at sunrise, not the ascendant.
   const sunSidAtSunrise = getSiderealSunLongitude(sunrise, ayanamsaType);
   const hoursSinceSunrise = (birthDate.getTime() - sunrise.getTime()) / 3600_000;
   const horaLon = sunSidAtSunrise + hoursSinceSunrise * 30;
@@ -168,8 +164,6 @@ export function computeSripatiLagna(
   const lagna = computeLagna(birthDate, location, ayanamsaType, lang);
   if (!options?.includeCusps) return lagna;
 
-  // Sidereal MC, Meeus' tropical-MC formula; inlined rather than importing
-  // computeBhava, which would create a bhava.ts -> lagna.ts cycle.
   const lstDeg = normalize360(greenwichApparentSiderealDegrees(birthDate) + location.longitude);
   const θ = degToRad(lstDeg);
   const T = (dateToJulianDay(birthDate) - 2451545.0) / 36525.0;

@@ -75,8 +75,6 @@ export function computeVimshottariDasha(
     let antarDashas: AntarDasha[];
 
     if (i === 0) {
-      // The balance lord began before birth: its antardashas run at FULL duration
-      // from that virtual start, not scaled into the balance.
       endDate = new Date(cursor.getTime() + balanceMs);
       const virtualStart = new Date(birthDate.getTime() - (fullDurationMs - balanceMs));
       antarDashas = buildAntarDashas(lord, virtualStart, fullDurationMs, startDate.getTime());
@@ -313,7 +311,6 @@ export function computeYoginiDasha(
   const degInNak = moonSiderealLon - nakIdx * NAKSHATRA_SPAN;
   const elapsedFraction = degInNak / NAKSHATRA_SPAN;
 
-  // Devi-Bhagavata formula: Ashwini starts at Bhramari, not Mangala.
   const startYoginiIdx = (nakIdx + 3) % 8;
   const startYogini = YOGINI_ORDER[startYoginiIdx]!;
   const startYears = YOGINI_YEARS[startYogini];
@@ -563,7 +560,6 @@ const RASHI_MODALITY: readonly number[] = [
 /** Rasi Drishti (Sanjay Rath, *Narayana Dasa* Table 4): each sign aspects exactly 3 others. */
 function rasiDrishti(aspectingRashi: number, targetRashi: number): boolean {
   if (aspectingRashi === targetRashi) return false;
-  // Without this adjacency exclusion, eight of the twelve signs would aspect four others.
   if ((aspectingRashi + 1) % 12 === targetRashi
     || (targetRashi + 1) % 12 === aspectingRashi) return false;
   const aMod = RASHI_MODALITY[aspectingRashi]!;
@@ -626,7 +622,6 @@ function buildVariableDurationFn(
   for (const p of chart.planets) planetRashi.set(p.planet, p.rashi.index);
 
   function durationFor(rashi: number): number {
-    // Rule 4: the two dual-lord rashis, Scorpio and Aquarius.
     if (rashi === 7 || rashi === 10) {
       const [lordA, lordB]: [GrahaName, GrahaName] = rashi === 7
         ? ['Mars', 'Ketu']
@@ -642,7 +637,6 @@ function buildVariableDurationFn(
       const cmp = compareRashiStrength(ra, rb, planetRashi);
       if (cmp > 0)  return baseAndAdjust(rashi, lordA, ra);
       if (cmp < 0)  return baseAndAdjust(rashi, lordB, rb);
-      // Tiebreak: the natural Manteswara lord, which is lordA.
       return baseAndAdjust(rashi, lordA, ra);
     }
 

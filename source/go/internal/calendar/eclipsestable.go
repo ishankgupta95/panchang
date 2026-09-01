@@ -32,7 +32,6 @@ func ReadEclipsesForYear(
 	source EclipsesFile, year int, lang FestivalsTableLanguage,
 ) ([]EclipseTableDay, bool) {
 	days, ok := source.Years[itoa(year)]
-	// null under a present key means out-of-range.
 	if !ok || days == nil {
 		return nil, false
 	}

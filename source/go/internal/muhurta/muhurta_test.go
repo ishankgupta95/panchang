@@ -276,7 +276,6 @@ func TestFactorIndexDistinguishesZeroFromAbsent(t *testing.T) {
 	}
 }
 
-// if/else-if, not two independent ifs, which would score +10 and −15 both.
 func TestAuspiciousWinsWhenAnIndexIsInBothLists(t *testing.T) {
 	ctx := &astronomy.EphemerisCtx{}
 	no := false

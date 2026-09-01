@@ -39,7 +39,6 @@ func moonPhaseDaysFor(
 ) ([]MoonPhaseTableDay, bool) {
 	if source.IsPacked {
 		days, ok := source.Packed[yearKey]
-		// null under a present key means a missing year.
 		if !ok || days == nil {
 			return nil, false
 		}

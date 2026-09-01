@@ -140,7 +140,6 @@ func (g eclipseGolden) siteByName(t *testing.T, name string) types.GeoLocation {
 	return types.GeoLocation{}
 }
 
-// Platform trig sets the angle bound; DiscObscuration takes exact literals, so it is tighter.
 func TestEclipseGeometryWithinBound(t *testing.T) {
 	const angleBound = 1e-11
 	const obscurationBound = 1e-14

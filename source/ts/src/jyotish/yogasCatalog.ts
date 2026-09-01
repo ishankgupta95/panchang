@@ -204,7 +204,6 @@ const KEMADRUMA_RULE: YogaRule = {
   evaluate: (ctx) => {
     const moon = ctx.planetByName.Moon;
     const moonRashi = moon.rashi.index;
-    // Rahu/Ketu excluded per B.V. Raman.
     for (const p of ctx.chart.planets) {
       if (p.planet === 'Moon' || p.planet === 'Rahu' || p.planet === 'Ketu') continue;
       const off = rashiOffsetFromTo(moonRashi, p.rashi.index);
@@ -291,7 +290,6 @@ const RAJA_YOGA_RULE: YogaRule = {
           reasons.push(`Kendra-lord ${k} conjunct trikona-lord ${t} in ${kp.rashi.name}`);
           continue;
         }
-        // Sambandha requires a MUTUAL aspect; a one-way special aspect does not form the yoga.
         const kAspectsT = ctx.aspects[k]?.includes(tp.house);
         const tAspectsK = ctx.aspects[t]?.includes(kp.house);
         if (kAspectsT && tAspectsK) {
@@ -397,7 +395,6 @@ const VASUMATI_YOGA_RULE: YogaRule = {
   name: 'Vasumati Yoga',
   type: 'dhana',
   evaluate: (ctx) => {
-    // Raman: every benefic in an upachaya (not every upachaya filled), from the lagna, not the Moon.
     const placed: string[] = [];
     for (const g of NATURAL_BENEFICS) {
       const p = ctx.planetByName[g];
@@ -459,7 +456,6 @@ const NEECHA_BHANGA_RULE: YogaRule = {
       if (ctx.dignity[g] !== 'debilitated') continue;
       const p = ctx.planetByName[g];
 
-      // Rule A: dispositor in a kendra from Lagna OR from Moon (Phaladeepika 7.26).
       const dispositor = RASHI_LORDS[p.rashi.index]!;
       if (dispositor !== g) {
         const dpp = ctx.planetByName[dispositor];
@@ -477,7 +473,6 @@ const NEECHA_BHANGA_RULE: YogaRule = {
         }
       }
 
-      // Rule B: exaltation-rashi lord in a kendra from Lagna OR Moon (Phaladeepika 7.26).
       const exRashi = EXALTATION_RASHI[g];
       if (exRashi !== null) {
         const exLord = RASHI_LORDS[exRashi]!;
@@ -498,7 +493,6 @@ const NEECHA_BHANGA_RULE: YogaRule = {
         }
       }
 
-      // Rule C: an exalted graha in a kendra from the debilitated planet (offset 1 = conjunct).
       for (const other of VISIBLE_GRAHAS) {
         if (other === g) continue;
         if (ctx.dignity[other] !== 'exalted') continue;
@@ -511,7 +505,6 @@ const NEECHA_BHANGA_RULE: YogaRule = {
         }
       }
 
-      // Rule D: dispositor aspects the debilitated planet's house (Phaladeepika 7.28).
       if (dispositor !== g) {
         const aspectedHouses = ctx.aspects[dispositor];
         if (aspectedHouses && aspectedHouses.includes(p.house)) {

@@ -28,7 +28,6 @@ func computeArgala(chart *types.BirthChart, includeTrikona bool) []types.ArgalaP
 
 	out := make([]types.ArgalaPerBhava, 0, 12)
 	for bhava := 1; bhava <= 12; bhava++ {
-		// Deliberately non-nil: must marshal as [], not null.
 		argala := make([]types.PlanetPlacement, 0, len(planets))
 		virodhargala := make([]types.PlanetPlacement, 0, len(planets))
 		trikonaSources := make([]types.PlanetPlacement, 0, len(planets))
@@ -46,7 +45,6 @@ func computeArgala(chart *types.BirthChart, includeTrikona bool) []types.ArgalaP
 				isFifth := offset == trikonaSourceOffset
 				isNinth := offset == trikonaVirodhakaOffset
 				if isFifth || isNinth {
-					// Ketu reverses: its 9th is the source, its 5th the virodhaka.
 					isKetu := p.Planet == types.GrahaKetu
 					if (isFifth && !isKetu) || (isNinth && isKetu) {
 						trikonaSources = append(trikonaSources, p)

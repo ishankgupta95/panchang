@@ -300,7 +300,6 @@ export function shadowAxisGamma(ms: number): number {
   const along = m[0] * ux + m[1] * uy + m[2] * uz;
   const px = m[0] - along * ux, py = m[1] - along * uy, pz = m[2] - along * uz;
 
-  // North in the fundamental plane: the pole with its axial component removed.
   const nz = 1 - uz * uz;
   const nx = -uz * ux, ny = -uz * uy;
   const nLength = Math.hypot(nx, ny, nz);

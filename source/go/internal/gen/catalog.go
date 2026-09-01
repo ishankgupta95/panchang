@@ -1,4 +1,3 @@
-// Package gen truncates the published coefficient tables into the shipped series.
 package gen
 
 import (
@@ -49,7 +48,6 @@ func number(s string) float64 {
 
 var bundleHeader = regexp.MustCompile(`^===== (\S+) =====$`)
 
-// Not a map: ELP is walked 1..36 and the VSOP bodies in catalogue order.
 type bundleSection struct {
 	name  string
 	lines []string
@@ -85,10 +83,8 @@ func readBundle(sourceDir, file string) ([]bundleSection, error) {
 	return out, nil
 }
 
-// Bretagnon & Francou 1988, VizieR VI/81: A·cos(B + C·τ), τ in Julian millennia TDB.
 type vsopTerm struct{ A, B, C float64 }
 
-// series[variable][power]: variable 1 = L, 2 = B, 3 = R, power is τ's exponent.
 type vsopSeries [4][][]vsopTerm
 
 var vsopBodies = []string{"ear", "mer", "ven", "mar", "jup", "sat"}
@@ -166,7 +162,6 @@ func readVsop87Check(sourceDir string) ([]vsopCheck, error) {
 	return out, nil
 }
 
-// ELP2000-82B (Chapront-Touzé & Chapront, VizieR VI/79); ilu are Delaunay multipliers.
 type elpMainTerm struct {
 	ilu  [4]float64
 	coef [8]float64
@@ -189,8 +184,6 @@ type elpTables struct {
 	planet map[int][]elpPlanetTerm
 }
 
-// `elp82b.f` FORMAT statements: 1001 (4i3,2x,f13.5,6(2x,f10.2)) for files 1-3, 1002
-// (5i3,1x,f9.5,1x,f9.5,1x,f9.3) for 4-9 and 22-36, 1003 (11i3,…) for 10-21.
 func readElp2000(sourceDir string) (*elpTables, error) {
 	sections, err := readBundle(sourceDir, "elp2000-82b.txt")
 	if err != nil {
@@ -216,7 +209,6 @@ func readElp2000(sourceDir string) (*elpTables, error) {
 					number(slice(l, 0, 3)), number(slice(l, 3, 6)),
 					number(slice(l, 6, 9)), number(slice(l, 9, 12)),
 				}
-				// coef[0] is unused: the FORTRAN is 1-based.
 				t.coef[1] = number(slice(l, 14, 27))
 				for k := 0; k < 6; k++ {
 					t.coef[2+k] = number(slice(l, 29+k*12, 39+k*12))
@@ -255,8 +247,6 @@ func readElp2000(sourceDir string) (*elpTables, error) {
 	return tables, nil
 }
 
-// IERS Conventions 2010, 5.3a / 5.3b: coefficients in microarcseconds, mult the 14
-// fundamental-argument multipliers in column order (l, l', F, D, Ω, the 8 planets, p_A).
 type nutationTerm struct {
 	sinCoef, cosCoef float64
 	mult             [14]float64

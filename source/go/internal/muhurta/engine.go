@@ -29,7 +29,6 @@ const (
 	PakshaKrishna Paksha = "krishna"
 )
 
-// Indices: tithi 0..29 (0 = Shukla Pratipada, 29 = Amavasya), nakshatra 0..26 (Ashwini = 0), vara 0..6 (Sunday = 0), yoga 0..26.
 type MuhurtaRule struct {
 	Occasion string
 	Name     string
@@ -43,18 +42,15 @@ type MuhurtaRule struct {
 	AuspiciousYogas        []int
 	InauspiciousYogas      []int
 
-	// Bhadra is a window, not a whole-day veto: excluding drops seven fixed tithis, some preferred.
-	Bhadra *BhadraMode
-	// Deprecated: use [MuhurtaRule.Bhadra], which wins when both are set.
+	Bhadra            *BhadraMode
 	ExcludeBhadra     bool
 	ExcludeEkadashi   bool
 	RequirePaksha     Paksha
 	ExcludeAdhikaMasa bool
 	ExcludeEclipse    bool
 	ExcludeGandaMula  bool
-	// Only a spell carrying a dosha; one begun Wed or Thu does not.
-	ExcludePanchaka bool
-	VaraTithiYogas  *bool
+	ExcludePanchaka   bool
+	VaraTithiYogas    *bool
 }
 
 func (r MuhurtaRule) resolvedBhadra() BhadraMode {
@@ -72,10 +68,9 @@ func (r MuhurtaRule) scoresVaraTithiYogas() bool {
 }
 
 type MuhurtaScore struct {
-	Date   types.JSDate `json:"date"`
-	Score  int          `json:"score"`
-	Passes bool         `json:"passes"`
-	// Diagnostic English, not a stable format; branch on Factors instead.
+	Date    types.JSDate    `json:"date"`
+	Score   int             `json:"score"`
+	Passes  bool            `json:"passes"`
 	Reasons []string        `json:"reasons"`
 	Factors []MuhurtaFactor `json:"factors"`
 }
@@ -117,7 +112,6 @@ func ScoreMuhurta(
 	if err := utils.ValidateLocation(location); err != nil {
 		return MuhurtaScore{}, err
 	}
-	// The special-yoga pass needs post-sunrise nakshatra windows.
 	opts := options.panchangOptions()
 	opts.Sections = core.Sections(core.SectionEclipse, core.SectionLunarWindows)
 	opts.SectionsGiven = true
@@ -184,7 +178,6 @@ func ComputeAuspiciousDatesInRange(
 }
 
 func scoreFromPanchang(p types.DailyPanchangResult, rule MuhurtaRule) (MuhurtaScore, error) {
-	// Both must be [] on the wire, never nil.
 	reasons := []string{}
 	factors := []MuhurtaFactor{}
 	score := 50
@@ -267,7 +260,6 @@ func scoreFromPanchang(p types.DailyPanchangResult, rule MuhurtaRule) (MuhurtaSc
 		}
 	}
 
-	// Auspicious and inauspicious yogas co-occur and net out: no source ranks them.
 	if rule.scoresVaraTithiYogas() {
 		yogas, err := ComputeVaraTithiYogas(varaIdx, tithiAtSunrise)
 		if err != nil {
@@ -354,7 +346,6 @@ func ComputeAuspiciousDatesForYear(
 	return ComputeAuspiciousDatesInRange(ctx, rule, startMs, endMs, location, options)
 }
 
-// Deprecated: use [ComputeAuspiciousDatesInRange].
 func FindAuspiciousDates(
 	ctx *astronomy.EphemerisCtx,
 	rule MuhurtaRule,

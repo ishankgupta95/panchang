@@ -87,7 +87,6 @@ function sumGrids(grids: readonly BhinnashtakaGrid[]): BhinnashtakaGrid {
   return out;
 }
 
-// Trikona first, then Ekadhipatya. Commentaries are unanimous on the order.
 function applyReductions(
   grid: BhinnashtakaGrid,
   occupied: ReadonlySet<number>,
@@ -96,8 +95,6 @@ function applyReductions(
   return applyEkadhipatyaSodhana(stage1, occupied);
 }
 
-// Subtracting each triad's minimum means a zero cell reduces nothing, which is
-// PVR's Rule 1; zeroing the whole triad instead is what no reference does.
 function applyTrikonaSodhana(grid: BhinnashtakaGrid): BhinnashtakaGrid {
   const out = grid.slice();
   for (const triad of TRIKONA_TRIADS) {
@@ -109,8 +106,6 @@ function applyTrikonaSodhana(grid: BhinnashtakaGrid): BhinnashtakaGrid {
   return out;
 }
 
-// PVR Narasimha Rao / PyJHora form: the one-occupied case REPLACES the vacant
-// cell with the occupied value when it is greater rather than zeroing it.
 function applyEkadhipatyaSodhana(
   grid: BhinnashtakaGrid,
   occupied: ReadonlySet<number>,

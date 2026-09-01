@@ -2,7 +2,6 @@ package types
 
 import "fmt"
 
-// Branch on the code, not the message: only the code is stable across releases.
 type ErrorCode string
 
 const (

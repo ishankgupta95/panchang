@@ -160,7 +160,6 @@ describe('getDailyPanchang: comprehensive field validation', () => {
   });
 
   describe('muhurta periods', () => {
-    // 2025-04-12 is a Saturday, so Abhijit is non-null.
     it('abhijitMuhurta is within daytime', () => {
       expect(r.muhurtas.abhijit).not.toBeNull();
       expect(r.muhurtas.abhijit!.start.getTime()).toBeGreaterThan(r.sun.rise.getTime());
@@ -211,7 +210,6 @@ describe('getDailyPanchang: comprehensive field validation', () => {
   });
 
   describe('durMuhurta', () => {
-    // Saturday takes classical durMuhurta ordinals [0, 1], both day windows.
     it('has exactly 2 periods on a Saturday', () => {
       expect(r.inauspicious.durMuhurta).toHaveLength(2);
     });

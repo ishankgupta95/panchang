@@ -9,7 +9,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
 )
 
-// BPHS Ch. 6; each varga is whole-sign from its own divisional lagna.
 func ComputeDivisionalChart(
 	ctx *astronomy.EphemerisCtx,
 	birthMs int64,
@@ -81,7 +80,6 @@ func transformFor(divisional types.Divisional) (func(float64) float64, error) {
 		"unknown divisional %q; expected one of D2, D3, D7, D9, D10, D12, D30", string(divisional))
 }
 
-// Deliberately unclamped: within ~4e-15 of the 15° boundary this floors into Virgo.
 func horaLongitude(siderealLon float64) float64 {
 	rashi := int(math.Floor(siderealLon / 30))
 	degInRashi := siderealLon - float64(float64(rashi)*30)

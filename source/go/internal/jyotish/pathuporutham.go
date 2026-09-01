@@ -129,7 +129,6 @@ func scoreMahendra(boy, girl NatalMoon) PoruthamScore {
 	}
 }
 
-// Threshold is > 13 per the Tamil reference-almanac consensus, not the minority > 15.
 func scoreSthreeDeergha(boy, girl NatalMoon) PoruthamScore {
 	distance := ((boy.Nakshatra-girl.Nakshatra+27)%27 + 1)
 	passes := distance > 13
@@ -180,7 +179,6 @@ func scoreRashyathipathi(boy, girl NatalMoon) PoruthamScore {
 	boyLord := RashiLord[boy.Rashi]
 	girlLord := RashiLord[girl.Rashi]
 	if boyLord == girlLord {
-		// the published string reads "graha index 2", not the lord's name
 		return PoruthamScore{
 			Name: PoruthamRashyathipathi, Passes: true,
 			Description: "Same rashi-lord (graha index " +
@@ -200,7 +198,6 @@ func scoreVasya(boy, girl NatalMoon) PoruthamScore {
 	boyVashya := RashiVashya[boy.Rashi]
 	girlVashya := RashiVashya[girl.Rashi]
 	score := VashyaScore[VashyaIndex(boyVashya)][VashyaIndex(girlVashya)]
-	// jsnum.FormatFloat, not strconv: 2 must render "2", not "2.0"
 	return PoruthamScore{
 		Name: PoruthamVasya, Passes: score > 0,
 		Description: string(boyVashya) + " ↔ " + string(girlVashya) +

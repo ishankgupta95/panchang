@@ -5,7 +5,6 @@ import (
 	"fmt"
 )
 
-// Literal tables across the tree are keyed by this order; do not renumber.
 type Graha int
 
 const (
@@ -69,7 +68,6 @@ func (g Graha) Visible() (VisibleGraha, bool) {
 
 func (g Graha) IsNode() bool { return g == GrahaRahu || g == GrahaKetu }
 
-// VisibleGraha values equal the [Graha] ones numerically, so [7]T and [9]T share an index.
 type VisibleGraha int
 
 const (
@@ -118,7 +116,6 @@ type GrahaPosition struct {
 	IsRetrograde      bool          `json:"isRetrograde"`
 }
 
-// The lower-case JSON keys are deliberate; do not normalise.
 type PlanetaryPositions struct {
 	Sun     GrahaPosition `json:"sun"`
 	Moon    GrahaPosition `json:"moon"`
@@ -181,7 +178,6 @@ func (p *PlanetaryPositions) Get(g Graha) (*GrahaPosition, bool) {
 	return nil, false
 }
 
-// DashaLord is in Vimshottari cycle order, not [Graha]'s: never convert with int().
 type DashaLord int
 
 const (
@@ -276,10 +272,9 @@ type PratyantarDasha struct {
 }
 
 type MahaDasha struct {
-	Lord      DashaLord `json:"lord"`
-	StartDate JSDate    `json:"startDate"`
-	EndDate   JSDate    `json:"endDate"`
-	// Years is the lord's full cycle duration, not this period's length.
+	Lord        DashaLord    `json:"lord"`
+	StartDate   JSDate       `json:"startDate"`
+	EndDate     JSDate       `json:"endDate"`
 	Years       float64      `json:"years"`
 	AntarDashas []AntarDasha `json:"antarDashas"`
 }
@@ -300,7 +295,6 @@ const (
 var AllChandraBalamQualities = []ChandraBalamQuality{ChandraBalamStrong, ChandraBalamWeak}
 
 type ChandraBalamInfo struct {
-	// House is 1 = janma rashi ... 12 = the one before it.
 	House       int                 `json:"house"`
 	Quality     ChandraBalamQuality `json:"quality"`
 	EnglishName string              `json:"englishName"`
@@ -320,7 +314,6 @@ type LagnaNakshatra struct {
 	Name  string `json:"name"`
 }
 
-// Cusps[i] is bhava i+1's madhya: [0] = ascendant, [3] = IC, [6] = descendant, [9] = MC.
 type SripatiLagnaInfo struct {
 	LagnaInfo
 	Cusps []float64 `json:"cusps"`
@@ -346,12 +339,10 @@ type HouseInfo struct {
 }
 
 type BhavaChart struct {
-	System HouseSystem `json:"system"`
-	Houses []HouseInfo `json:"houses"`
-	// Equals Houses[0].CuspLongitude under "equal" only; whole-sign cusp 1 is the sign start.
-	AscendantLongitude float64 `json:"ascendantLongitude"`
-	// Always the true MC; the literal 10th cusp only under "placidus-kp".
-	MCLongitude float64 `json:"mcLongitude"`
+	System             HouseSystem `json:"system"`
+	Houses             []HouseInfo `json:"houses"`
+	AscendantLongitude float64     `json:"ascendantLongitude"`
+	MCLongitude        float64     `json:"mcLongitude"`
 }
 
 type PlanetPlacement struct {
@@ -433,7 +424,6 @@ type BirthChart struct {
 	ByPlanet   PlanetsByGraha    `json:"byPlanet"`
 }
 
-// "D1" is deliberately not a member: a D1 chart carries bhava cusps and a varga does not.
 type Divisional string
 
 const (
@@ -466,7 +456,6 @@ type DivisionalChart struct {
 	Planets    []PlanetPlacement `json:"planets"`
 }
 
-// How many of Lagna, Moon and Venus flag Mars: anshik = 1 or 2, purna = 3, before cancellations.
 type MangalDoshaSeverity string
 
 const (
@@ -483,7 +472,6 @@ type MangalReference struct {
 }
 
 type MangalDoshaInfo struct {
-	// Afflicted is the final status after cancellations.
 	Afflicted     bool                `json:"afflicted"`
 	Severity      MangalDoshaSeverity `json:"severity"`
 	FromLagna     MangalReference     `json:"fromLagna"`
@@ -492,7 +480,6 @@ type MangalDoshaInfo struct {
 	Cancellations []string            `json:"cancellations"`
 }
 
-// Two afflicted natives neutralise (dosha samyoga), so Afflicted is true only when exactly one is.
 type MangalCompatibility struct {
 	Boy           MangalDoshaInfo `json:"boy"`
 	Girl          MangalDoshaInfo `json:"girl"`
@@ -501,15 +488,12 @@ type MangalCompatibility struct {
 	Description   string          `json:"description"`
 }
 
-// Phase 1 = 12th from the natal Moon, 2 = the Moon's own rashi, 3 = 2nd.
 type SadeSatiInfo struct {
-	Active bool `json:"active"`
-	Phase  *int `json:"phase"`
-	// nil when inactive, and when the scan hit its lookahead limit without a boundary.
+	Active          bool    `json:"active"`
+	Phase           *int    `json:"phase"`
 	CurrentArcStart *JSDate `json:"currentArcStart"`
 	CurrentArcEnd   *JSDate `json:"currentArcEnd"`
-	// NextArcStart is set only when Active is false.
-	NextArcStart *JSDate `json:"nextArcStart"`
+	NextArcStart    *JSDate `json:"nextArcStart"`
 }
 
 type TarabalaQuality string
@@ -522,14 +506,12 @@ const (
 var AllTarabalaQualities = []TarabalaQuality{TarabalaAuspicious, TarabalaInauspicious}
 
 type TarabalaInfo struct {
-	// TaraIndex is 0..8, counted from the janma nakshatra.
 	TaraIndex   int             `json:"taraIndex"`
 	EnglishName string          `json:"englishName"`
 	Name        string          `json:"name"`
 	Quality     TarabalaQuality `json:"quality"`
 }
 
-// Houses each graha aspects, counted from the graha's own house, not from the lagna.
 type AspectMap struct {
 	Sun     []int `json:"Sun"`
 	Moon    []int `json:"Moon"`
@@ -592,16 +574,14 @@ func (m AspectMap) ForGraha(g Graha) ([]int, bool) {
 	return nil, false
 }
 
-// PlanetShadbala is in Virupas: 60 V = 1 Rupa.
 type PlanetShadbala struct {
 	Sthana     float64 `json:"sthana"`
 	Dig        float64 `json:"dig"`
 	Kala       float64 `json:"kala"`
 	Chesta     float64 `json:"chesta"`
 	Naisargika float64 `json:"naisargika"`
-	// Drik is unclamped and can be negative; Total uses max(0, drik).
-	Drik  float64 `json:"drik"`
-	Total float64 `json:"total"`
+	Drik       float64 `json:"drik"`
+	Total      float64 `json:"total"`
 }
 
 type ShadbalaResult struct {
@@ -673,7 +653,6 @@ const (
 	KaalSarpSheshnag    KaalSarpSubtype = "sheshnag"
 )
 
-// Declaration order is Rahu-house order: AllKaalSarpSubtypes[house-1] is the lookup.
 var AllKaalSarpSubtypes = [12]KaalSarpSubtype{
 	KaalSarpAnant, KaalSarpKulik, KaalSarpVasuki, KaalSarpShankhpal,
 	KaalSarpPadma, KaalSarpMahapadma, KaalSarpTakshak, KaalSarpKarkotak,
@@ -683,10 +662,9 @@ var AllKaalSarpSubtypes = [12]KaalSarpSubtype{
 type KaalSarpDoshaInfo struct {
 	Afflicted bool             `json:"afflicted"`
 	Subtype   *KaalSarpSubtype `json:"subtype"`
-	// Partial is paritha, exactly one planet outside the axis: informational only.
-	Partial   bool `json:"partial"`
-	RahuHouse int  `json:"rahuHouse"`
-	KetuHouse int  `json:"ketuHouse"`
+	Partial   bool             `json:"partial"`
+	RahuHouse int              `json:"rahuHouse"`
+	KetuHouse int              `json:"ketuHouse"`
 }
 
 type PitruDoshaInfo struct {
@@ -694,7 +672,6 @@ type PitruDoshaInfo struct {
 	Reasons   []string `json:"reasons"`
 }
 
-// BhinnashtakaGrid is 12 cells, one per rashi (0 = Mesha), each a 0..8 bindu count from the 7 visible grahas plus Lagna. Never nil.
 type BhinnashtakaGrid []int
 
 type BhinnashtakaByGraha struct {
@@ -749,13 +726,11 @@ func (b *BhinnashtakaByGraha) Get(v VisibleGraha) (BhinnashtakaGrid, bool) {
 	return nil, false
 }
 
-// Trikona- and Ekadhipatya-Sodhana-reduced grids (BPHS Ch. 67).
 type AshtakavargaReduced struct {
 	Sarvashtaka  BhinnashtakaGrid    `json:"sarvashtaka"`
 	Bhinnashtaka BhinnashtakaByGraha `json:"bhinnashtaka"`
 }
 
-// BPHS Ch. 66. Rahu and Ketu have no Ashtakavarga, hence the [VisibleGraha] keying.
 type AshtakavargaResult struct {
 	Sarvashtaka  BhinnashtakaGrid     `json:"sarvashtaka"`
 	Bhinnashtaka BhinnashtakaByGraha  `json:"bhinnashtaka"`
@@ -780,10 +755,8 @@ var AllYogaTypes = []YogaType{
 	YogaDhana, YogaSpecial, YogaCancellation, YogaNegative,
 }
 
-// Not locale-resolved: these transliterated proper nouns read the same in en and hi.
 type YogaName string
 
-// Declaration order is evaluation order, and therefore result order.
 const (
 	YogaRuchaka            YogaName = "Ruchaka"
 	YogaBhadra             YogaName = "Bhadra"
@@ -821,18 +794,16 @@ var AllYogaNames = []YogaName{
 	YogaVargottama, YogaYogakaraka, YogaNeechaBhanga, YogaDaridra,
 }
 
-// Applies false with empty Reasons means "did not fire"; an absent field means no bhanga rule.
 type YogaBhanga struct {
 	Applies bool     `json:"applies"`
 	Reasons []string `json:"reasons"`
 }
 
 type Yoga struct {
-	Name    YogaName `json:"name"`
-	Type    YogaType `json:"type"`
-	Reasons []string `json:"reasons"`
-	// Present only on the five Mahapurusha yogas and Gajakesari.
-	Bhanga *YogaBhanga `json:"bhanga,omitempty"`
+	Name    YogaName    `json:"name"`
+	Type    YogaType    `json:"type"`
+	Reasons []string    `json:"reasons"`
+	Bhanga  *YogaBhanga `json:"bhanga,omitempty"`
 }
 
 type KarakaName string
@@ -908,14 +879,12 @@ type Karaka8Name string
 
 const Pitrukaraka Karaka8Name = "Pitrukaraka"
 
-// Pitrukaraka sits at index 4, not at the end: appending it would shift the last three ranks.
 var AllKaraka8Names = [8]Karaka8Name{
 	Karaka8Name(Atmakaraka), Karaka8Name(Amatyakaraka), Karaka8Name(Bhratrukaraka),
 	Karaka8Name(Matrukaraka), Pitrukaraka, Karaka8Name(Putrakaraka),
 	Karaka8Name(Gnatikaraka), Karaka8Name(Darakaraka),
 }
 
-// The 7 visible grahas plus Rahu, ranked by descending effective degree.
 type Jaimini8Karakas struct {
 	Atmakaraka    Graha `json:"Atmakaraka"`
 	Amatyakaraka  Graha `json:"Amatyakaraka"`
@@ -976,11 +945,9 @@ func (k Jaimini8Karakas) Get(role Karaka8Name) (Graha, bool) {
 type BhavaBalaPerHouse struct {
 	Bhavadhipati float64 `json:"bhavadhipati"`
 	Dik          float64 `json:"dik"`
-	// Drik is clamped to >= 0 here, unlike [PlanetShadbala.Drik].
-	Drik float64 `json:"drik"`
-	// Sthana is signed (+ benefic, − malefic), the one leaf here that can be < 0.
-	Sthana float64 `json:"sthana"`
-	Total  float64 `json:"total"`
+	Drik         float64 `json:"drik"`
+	Sthana       float64 `json:"sthana"`
+	Total        float64 `json:"total"`
 }
 
 type BhavaBalaResult struct {
@@ -988,8 +955,7 @@ type BhavaBalaResult struct {
 }
 
 type Arudha struct {
-	Bhava int `json:"bhava"`
-	// ArudhaRashi is 0..11, unlike the 1..12 house numbers.
+	Bhava           int          `json:"bhava"`
 	ArudhaRashi     int          `json:"arudhaRashi"`
 	ArudhaRashiName string       `json:"arudhaRashiName"`
 	ArudhaLord      VisibleGraha `json:"arudhaLord"`
@@ -999,8 +965,7 @@ type UpagrahaPosition struct {
 	Longitude float64 `json:"longitude"`
 	Rashi     int     `json:"rashi"`
 	RashiName string  `json:"rashiName"`
-	// House is always whole-sign, whatever house system the caller asked for.
-	House int `json:"house"`
+	House     int     `json:"house"`
 }
 
 type Upagrahas struct {
@@ -1013,17 +978,14 @@ type Upagrahas struct {
 	Upaketu    UpagrahaPosition `json:"upaketu"`
 }
 
-// The 5/9 trine variant: sources in the 5th, virodhakas in the 9th; Ketu reverses the roles.
 type ArgalaTrikona struct {
 	Sources    []PlanetPlacement `json:"sources"`
 	Virodhakas []PlanetPlacement `json:"virodhakas"`
 }
 
 type ArgalaPerBhava struct {
-	Bhava int `json:"bhava"`
-	// Argala holds occupants of the 2nd, 4th and 11th from the bhava.
-	Argala []PlanetPlacement `json:"argala"`
-	// Virodhargala holds the counter-intervention planets: 3rd, 10th, 12th.
+	Bhava        int               `json:"bhava"`
+	Argala       []PlanetPlacement `json:"argala"`
 	Virodhargala []PlanetPlacement `json:"virodhargala"`
 	Trikona      *ArgalaTrikona    `json:"trikona,omitempty"`
 }

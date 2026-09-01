@@ -51,8 +51,6 @@ describe('options.sections', () => {
     }
   });
 
-  // Exact equality: `LongitudeCache` memoizes on the exact instant, and a
-  // one-bucket (60 s) tolerance hid a real 63 s drift.
   it('is exactly output-neutral for element arrays', () => {
     const LOCATIONS = [
       { name: 'Pune', loc: PUNE, tz: 330 },
@@ -60,7 +58,6 @@ describe('options.sections', () => {
       { name: 'London', loc: { latitude: 51.5074, longitude: -0.1278 }, tz: 0 },
       { name: 'Sydney', loc: { latitude: -33.8688, longitude: 151.2093 }, tz: 600 },
     ];
-    // 2025-01-06 at NYC is the day a bucketed memo disagreed on element count.
     const SWEEP = [
       '2025-01-06', '2025-01-24', '2025-02-15', '2025-07-04', '2025-09-07',
       '2025-10-04', '2025-12-20', '2026-01-14', '2026-03-03', '2026-08-26',
@@ -110,7 +107,6 @@ describe('options.sections', () => {
   });
 
   it('keeps Bhadra-dependent festival descriptions correct without lunarWindows', () => {
-    // Raksha Bandhan's "after Bhadra ends" note reads the window even unreported.
     const day = '2026-08-28'; // Shravana Purnima 2026
     const withWindows = panchangFor(day, ['festivals', 'lunarWindows']);
     const withoutWindows = panchangFor(day, ['festivals']);
@@ -119,13 +115,7 @@ describe('options.sections', () => {
     expect(withoutWindows.inauspicious.bhadra).toBeNull();
   });
 
-  // An absolute ceiling, not a narrowed/full ratio, which rises whenever the full
-  // call gets faster. 1.60 is loose because the reading is dominated by machine
-  // load (0.26 ms/day uncontended); check what else ran before calling a failure.
-  // Timing, so it stands aside under coverage: instrumentation would make the
-  // reading measure the instrumentation.
   it.skipIf(process.env.COVERAGE)('stays under its absolute ms/day ceiling when sections are dropped', () => {
-    // A fresh stretch of days per measurement, so no call is served by a cached day.
     let cursor = 0;
     const nextDays = (n: number) =>
       Array.from(
@@ -145,7 +135,6 @@ describe('options.sections', () => {
       for (const d of days) getDailyPanchang(d, PUNE, opts);
       return (performance.now() - t0) / days.length;
     };
-    // Contention only inflates a timing, so the smallest sample is the estimator.
     let msPerDay = Infinity;
     for (let i = 0; i < 12; i++) msPerDay = Math.min(msPerDay, time([]));
     expect(
@@ -155,7 +144,6 @@ describe('options.sections', () => {
   });
 
   it.skipIf(process.env.COVERAGE)('never costs more to ask for less, even on a fully cached day', () => {
-    // Little left to skip once the caches are warm, so only direction is asserted.
     const day = new Date('2025-07-04T06:30:00Z');
     const time = (sections?: readonly PanchangSection[]) => {
       const opts = {

@@ -20,7 +20,6 @@ var (
 func TestBisectionMidpointIsFloorDivision(t *testing.T) {
 	const seed uint32 = 0x5eed_1912
 	state := seed
-	// Low bits are weak: without the shift every sum is even and the test vacuous.
 	next := func() int64 {
 		state = state*1664525 + 1013904223
 		high := int64(int32(state))
@@ -299,7 +298,6 @@ func TestEclipsesInRangeIsSortedAndStable(t *testing.T) {
 		}
 	}
 
-	// Solar is concatenated ahead of lunar, so a shared peak keeps it first.
 	type tagged struct {
 		peak int64
 		tag  string
@@ -326,7 +324,6 @@ func TestRashiAtModuloGuardIsUnreachableButFaithful(t *testing.T) {
 			t.Errorf("lon %v: floor(lon/30) = %d, outside 0..11", lon, raw)
 		}
 	}
-	// The one input that would make it fire, which normalize360 excludes.
 	if got := int(math.Floor(360.0/30)) % 12; got != 0 {
 		t.Errorf("the guard does not fold an exact 360 to rashi 0: got %d", got)
 	}
@@ -465,7 +462,6 @@ func TestMeshaDayRuleForCoversEveryRegion(t *testing.T) {
 			t.Errorf("no region maps to the %q rule", rule)
 		}
 	}
-	// Assam rides Tamil Nadu's rule; the reference almanac has no Bohag Bihu page to pin it against.
 	if got := meshaDayRuleFor(types.RegionAssam); got != meshaSankrantiDay {
 		t.Errorf("Assam maps to %q, want %q (the unpinned Tamil Nadu rule)",
 			got, meshaSankrantiDay)

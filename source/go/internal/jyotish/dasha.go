@@ -6,7 +6,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
 )
 
-// float64, not int: as ints, (years / 120) * ms is 0 for all nine.
 var DashaYears = [types.DashaLordCount]float64{
 	types.DashaKetu:    7,
 	types.DashaVenus:   20,
@@ -37,7 +36,6 @@ func ComputeVimshottariDasha(birthMs int64, moonSiderealLon float64, asOfMs int6
 		return types.VimshottariDashaResult{}, err
 	}
 	nakIdx := utils.NakshatraOf(moonSiderealLon)
-	// anti-FMA barrier
 	degInNak := moonSiderealLon - float64(float64(nakIdx)*utils.NakshatraSpan)
 	elapsedFraction := degInNak / utils.NakshatraSpan
 
@@ -48,7 +46,6 @@ func ComputeVimshottariDasha(birthMs int64, moonSiderealLon float64, asOfMs int6
 	balanceMs := float64((1 - elapsedFraction) * startLordYears * msPerYear)
 
 	mahaDashas := make([]types.MahaDasha, 0, 9)
-	// Truncating int64 cursor; buildAntarDashas deliberately uses a float one.
 	cursor := birthMs
 
 	for i := 0; i < 9; i++ {
@@ -148,7 +145,6 @@ func buildAntarDashas(mahaLord types.DashaLord, mahaVirtualStart int64, mahaFull
 	return antarDashas
 }
 
-// Satya Acharya's eight-lord sequence.
 var AshtottariOrder = [8]types.DashaLord{
 	types.DashaSun, types.DashaMoon, types.DashaMars, types.DashaMercury,
 	types.DashaSaturn, types.DashaJupiter, types.DashaRahu, types.DashaVenus,
@@ -281,11 +277,10 @@ var YoginiPlanet = [8]types.DashaLord{
 const yoginiTotalYears float64 = 36
 
 type YoginiMahaDasha struct {
-	Yogini    YoginiName      `json:"yogini"`
-	Lord      types.DashaLord `json:"lord"`
-	StartDate types.JSDate    `json:"startDate"`
-	EndDate   types.JSDate    `json:"endDate"`
-	// Full Yogini duration, not this period's; the first is partial.
+	Yogini      YoginiName         `json:"yogini"`
+	Lord        types.DashaLord    `json:"lord"`
+	StartDate   types.JSDate       `json:"startDate"`
+	EndDate     types.JSDate       `json:"endDate"`
 	Years       float64            `json:"years"`
 	AntarDashas []YoginiAntarDasha `json:"antarDashas"`
 }
@@ -303,7 +298,6 @@ type YoginiDashaResult struct {
 	MahaDashas    []YoginiMahaDasha `json:"mahaDashas"`
 }
 
-// The cycle start is per Devi-Bhagavata.
 func ComputeYoginiDasha(birthMs int64, moonSiderealLon float64, asOfMs int64) (YoginiDashaResult, error) {
 	if err := utils.ValidateDate(birthMs); err != nil {
 		return YoginiDashaResult{}, err
@@ -367,7 +361,6 @@ func buildYoginiAntarDashas(mahaYogini YoginiName, mahaStart int64, mahaDuration
 	return out
 }
 
-// The 9-8-7 variant (Jaimini): movable 9, fixed 8, dual 7.
 var CharaRashiYears = [12]float64{
 	9,
 	8,
@@ -491,7 +484,6 @@ func ComputeNarayanDasha(
 	return narayanDasha(ctx, birthMs, location, ayanamsa, asOfMs, false)
 }
 
-// Rath's variable durations.
 func ComputeNarayanDashaVariable(
 	ctx *astronomy.EphemerisCtx,
 	birthMs int64,
@@ -562,7 +554,6 @@ func narayanDasha(
 	}, nil
 }
 
-// Manteswara nodes, deliberately unlike dignity.go's.
 var narayanExaltationRashi = [types.GrahaCount]int{
 	types.GrahaSun: 0, types.GrahaMoon: 1, types.GrahaMars: 9, types.GrahaMercury: 5,
 	types.GrahaJupiter: 3, types.GrahaVenus: 11, types.GrahaSaturn: 6,
@@ -581,14 +572,12 @@ var rashiPrimaryLord = [12]types.Graha{
 	types.GrahaJupiter, types.GrahaSaturn, types.GrahaSaturn, types.GrahaJupiter,
 }
 
-// 0 = movable, 1 = fixed, 2 = dual.
 var rashiModality = [12]int{0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2}
 
 func rasiDrishti(aspectingRashi, targetRashi int) bool {
 	if aspectingRashi == targetRashi {
 		return false
 	}
-	// Dropping either direction of this test over-aspects eight signs.
 	if (aspectingRashi+1)%12 == targetRashi || (targetRashi+1)%12 == aspectingRashi {
 		return false
 	}
@@ -622,7 +611,6 @@ func planetsInRashi(planetRashi *[types.GrahaCount]int, rashi int) int {
 	return n
 }
 
-// Two factors may coincide (Mercury as own dispositor) and still count separately.
 func countMJLAspectFactors(rashi int, planetRashi *[types.GrahaCount]int) int {
 	factors := 0
 	if rasiDrishti(planetRashi[types.GrahaMercury], rashi) {
@@ -700,7 +688,6 @@ func buildVariableDurationFn(
 	}
 
 	return func(rashi int) float64 {
-		// Scorpio and Aquarius, the two dual-lord rashis.
 		if rashi == 7 || rashi == 10 {
 			lordA, lordB := types.GrahaMars, types.GrahaKetu
 			if rashi == 10 {

@@ -1,6 +1,5 @@
 package i18n
 
-// The JSON encoder must not \u-escape this Devanagari: SetEscapeHTML(false).
 var hi = PanchangTranslations{
 	TithiNames: [14]string{
 		"प्रतिपदा", "द्वितीया", "तृतीया", "चतुर्थी", "पंचमी",

@@ -21,7 +21,6 @@ interface ChartOpts {
   ketuRashi?: number;
 }
 
-// The bhava table is populated because the Pitru 9th-lord rule reads it.
 function makeChart(opts: ChartOpts): BirthChart {
   const { lagnaRashi, moonRashi, marsRashi } = opts;
   const planetRashi = (p: GrahaName): number => {
@@ -81,7 +80,6 @@ function makeChart(opts: ChartOpts): BirthChart {
   };
 }
 
-// A Jupiter aspect on Mars would silently cancel the dosha under test.
 function safeJupiterRashi(marsRashi: number, avoid: number[]): number {
   const aspectedBy = (j: number) => {
     const h = ((marsRashi - j + 12) % 12) + 1;

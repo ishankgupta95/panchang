@@ -11,10 +11,8 @@ const elongationRateDegPerDay = 360 / SynodicMonthDays
 
 const phaseToleranceMS = 1
 
-// Two seeds can reach the same syzygy 1-2 ms apart, so "at an event" needs this, not ==.
 const PhaseAgreementMS = 2 * phaseToleranceMS
 
-// 0° new, 90° first quarter, 180° full; tropical, so the ayanamsa cancels.
 func MoonSunElongation(ctx *EphemerisCtx, ms int64) float64 {
 	d := GetTropicalMoonLongitude(ctx, ms) - GetTropicalSunLongitude(ctx, ms)
 	return jsnum.Mod(jsnum.Mod(d, 360)+360, 360)
@@ -31,7 +29,6 @@ func signedDelta(a, b float64) float64 {
 	return d
 }
 
-// jsnum.Round, not math.Round, on the result.
 func SearchMoonPhase(ctx *EphemerisCtx, targetDegrees float64, startMs int64, limitDays float64) (int64, bool) {
 	startF := float64(startMs)
 	limitMs := startF + float64(limitDays*dayMS)
@@ -98,7 +95,6 @@ func SearchMoonQuarter(ctx *EphemerisCtx, startMs int64) (MoonQuarter, error) {
 	return MoonQuarter{Quarter: quarter, TimeMs: timeMs}, nil
 }
 
-// Quarters are never closer than ~6.5 days, so +6 skips none.
 func NextMoonQuarter(ctx *EphemerisCtx, previous MoonQuarter) (MoonQuarter, error) {
 	return SearchMoonQuarter(ctx, previous.TimeMs+6*dayMS)
 }

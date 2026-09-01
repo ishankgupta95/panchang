@@ -9,7 +9,6 @@ import (
 
 var solar = RiseSetKind{Body: RiseSetSun}
 
-// 2 covers polar cases where the next sunrise is more than a day off.
 const DefaultRiseSetLimitDays = 2
 
 func ComputeSunrise(ctx *EphemerisCtx, searchFromMs int64, location types.GeoLocation, limitDays int) (int64, error) {

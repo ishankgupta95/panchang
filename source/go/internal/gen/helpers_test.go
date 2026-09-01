@@ -5,7 +5,6 @@ import (
 	"strconv"
 )
 
-// Not fmt.Sscan: it accepts forms Go source does not.
 func fmtSscan(s string, out *float64) (int, error) {
 	v, err := strconv.ParseFloat(s, 64)
 	if err != nil {

@@ -1,7 +1,6 @@
 name: CI
 
-# One file: concurrency groups and `needs:` are per workflow, so a split release job
-# re-ran the gates the same push was already running. See docs/ci.md.
+# Gates only. Releasing is manual, by docs/release.md, so nothing here publishes or writes.
 on:
   push:
     # `master`, not `main`: this repository has never had a `main` branch.
@@ -14,7 +13,7 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  # Never cancel a master run: it may be mid-publish.
+  # Superseded PR runs are cancelled; master runs are the branch's recorded state, so they finish.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
@@ -92,36 +91,3 @@ jobs:
       - run: node --test source/go/parity/gate.test.mjs
       # `full` only: it strictly contains g2 and g3.
       - run: bash ci/parity.sh full
-
-  release:
-    needs: [typescript, go, parity]
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    permissions:
-      contents: write
-      id-token: write
-    defaults:
-      run:
-        working-directory: source/ts
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          registry-url: 'https://registry.npmjs.org'
-          cache: npm
-          cache-dependency-path: source/ts/package-lock.json
-      - run: npm ci
-      - run: npm run build
-      # No gates here: `needs:` above already held them green on this exact commit.
-      - name: Create Release PR or Publish
-        uses: changesets/action@v1
-        with:
-          publish: npx changeset publish
-          cwd: source/ts
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          # What `id-token: write` above is for.
-          NPM_CONFIG_PROVENANCE: true

@@ -9,7 +9,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/jsnum"
 )
 
-// ranqd1 (Numerical Recipes) onto [−tMax, +tMax]; every term count depends on this sample.
 func probes(seed uint32) []float64 { return probesN(seed, probeCount) }
 
 func probesN(seed uint32, n int) []float64 {
@@ -22,7 +21,6 @@ func probesN(seed uint32, n int) []float64 {
 	return out
 }
 
-// A tail sweep, not a binary search: prefix error is not monotone in k, dropped terms cancel.
 func truncate[T any](terms []T, termValue func(term T, t float64) float64, budget float64, ts []float64) (count int, err float64) {
 	n := len(terms)
 	maxTail := make([]float64, n+1)
@@ -66,7 +64,6 @@ func pow10Rat(k int) *big.Rat {
 	return r
 }
 
-// log10 is only a starting guess: near a power of ten it lands on the wrong side.
 func decExp(abs *big.Rat) int {
 	f, _ := abs.Float64()
 	e := int(math.Floor(math.Log10(f)))
@@ -81,7 +78,6 @@ func decExp(abs *big.Rat) int {
 
 var ratHalf = big.NewRat(1, 2)
 
-// Exact rationals, not strconv: ECMA rounds half away from zero, strconv half to even.
 func toPrecisionParts(x float64, p int) (neg bool, digits string, e int) {
 	if x == 0 {
 		return false, strings.Repeat("0", p), 0
@@ -167,7 +163,6 @@ func shortest(value, tol float64) string {
 	return formatFloat(value)
 }
 
-// JavaScript's `String(v)`: 0.000028547284, not 2.8547284e-05.
 func formatFloat(v float64) string {
 	return jsnum.FormatFloat(v)
 }

@@ -6,13 +6,11 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/jsnum"
 )
 
-// IAU 2000A: the first five are Delaunay arguments, the rest planetary longitudes and precession.
 const (
 	as2r = jsnum.PI / 648000
 	turn = 1_296_000
 )
 
-// Reduces modulo a turn *before* converting, keeping the sine meaningful at |t| = 1.5.
 func fundPoly(c0, c1, c2, c3, c4 float64) func(t float64) float64 {
 	return func(t float64) float64 {
 		return math.Mod(c0+(c1+(c2+(c3+c4*t)*t)*t)*t, turn) * as2r

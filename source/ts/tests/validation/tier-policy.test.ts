@@ -36,7 +36,6 @@ describe('test tier policy', () => {
   });
 
   it('the Tier 0 files are the ones that claim independent authority', () => {
-    // Tier 0 means an authority outside this project, so the list is pinned by hand.
     const tier0 = validationFiles().filter((f) => {
       const src = readFileSync(join(HERE, f), 'utf8');
       return /@tier\s+0\b/.test(src.slice(0, src.indexOf('*/') + 2));

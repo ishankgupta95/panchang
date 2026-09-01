@@ -4,7 +4,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// Abhijit is held inauspicious on Wednesday.
 func ComputeAbhijitMuhurta(sunriseMs, sunsetMs int64, varaIndex *int) (types.UtcWindow, bool) {
 	if varaIndex != nil && *varaIndex == 3 {
 		return types.UtcWindow{}, false
@@ -13,7 +12,6 @@ func ComputeAbhijitMuhurta(sunriseMs, sunsetMs int64, varaIndex *int) (types.Utc
 	dayDurationMs := float64(sunsetMs - sunriseMs)
 	muhurtaDurationMs := dayDurationMs / 15
 
-	// FMA barrier; the end measures from the truncated start.
 	startMs := int64(float64(sunriseMs) + float64(7*muhurtaDurationMs))
 	return types.UtcWindow{
 		StartMs: startMs,
@@ -64,7 +62,6 @@ func ComputeAmritKalaWindows(
 	return CollectNakshatraOffsetWindows(sunriseUtcMs, nextSunriseUtcMs, getMoon,
 		func(nakshatraIndex int, nakshatraStartMs, nakshatraEndMs int64) []types.UtcWindow {
 			ghatikaMs := float64(nakshatraEndMs-nakshatraStartMs) / 60
-			// The start stays a float here; the end measures from it before truncating.
 			startMs := float64(nakshatraStartMs) +
 				float64(float64(AmritKalaOffsetGhatikas[nakshatraIndex])*ghatikaMs)
 			return []types.UtcWindow{{
@@ -74,7 +71,6 @@ func ComputeAmritKalaWindows(
 		})
 }
 
-// noonMs stays a float: the mean is fractional on an odd sum.
 func ComputeMadhyahna(sunriseMs, sunsetMs int64) types.UtcWindow {
 	const halfMs = 24 * 60_000
 	noonMs := float64(sunriseMs+sunsetMs) / 2
@@ -84,7 +80,6 @@ func ComputeMadhyahna(sunriseMs, sunsetMs int64) types.UtcWindow {
 	}
 }
 
-// Three NIGHTTIME ghatikas ending at sunrise; the asymmetry is the reference almanac's convention.
 func ComputePratahSandhya(sunriseMs, sunsetMs, nextSunriseMs int64) types.UtcWindow {
 	widthMs := float64(nextSunriseMs-sunsetMs) / 10
 	return types.UtcWindow{
@@ -101,7 +96,6 @@ func ComputeSayahnaSandhya(sunsetMs, nextSunriseMs int64) types.UtcWindow {
 	}
 }
 
-// Elapsed ghatikas from the nakshatra's start to its Amrit Kala window, recovered from the reference almanac.
 var AmritKalaOffsetGhatikas = [27]int{
 	42, // 0  Ashwini
 	48, // 1  Bharani

@@ -82,8 +82,6 @@ describe('Gulika & Mandi: Saturn-segment timing', () => {
     const u = computeUpagrahas(date, DELHI);
     let diff = u.mandi.longitude - u.gulika.longitude;
     diff = ((diff % 360) + 360) % 360;
-    // The midpoint advance shrinks off the equinox, so only a sign and a
-    // one-rashi bound are asserted.
     expect(diff).toBeGreaterThan(0);
     expect(diff).toBeLessThan(30);
   });
@@ -154,7 +152,6 @@ describe('computeUpagrahas: output structural shape', () => {
   it('respects ayanamsa option', () => {
     const lah = computeUpagrahas(date, DELHI, { ayanamsa: 'lahiri' });
     const ram = computeUpagrahas(date, DELHI, { ayanamsa: 'raman' });
-    // The two ayanamsas differ by ~1°, which is what sets these bounds.
     expect(Math.abs(lah.dhuma.longitude - ram.dhuma.longitude)).toBeGreaterThan(0.1);
     expect(Math.abs(lah.dhuma.longitude - ram.dhuma.longitude)).toBeLessThan(2.5);
   });
@@ -217,23 +214,17 @@ describe('Upagrahas: sanity vs Sun longitude', () => {
   });
 });
 
-// Referenced to silence the unused-import lint.
 void computeSunset;
 void computeLagna;
 
 describe('Upagrahas: LMT weekday (eastern-longitude births)', () => {
   it('Bangkok Friday-noon birth uses the FRIDAY day slot (gulika ≈ 138.857°)', () => {
-    // Bangkok sunrise here falls on Thursday in UTC, so a `getUTCDay()` weekday
-    // would take the Thursday slot and give 162.129°; 138.857° is the Friday
-    // slot-1 segment-start ascendant.
     const BANGKOK = { latitude: 13.7563, longitude: 100.5018 };
     const u = computeUpagrahas(new Date('2026-08-14T05:00:00Z'), BANGKOK);
     expect(u.gulika.longitude).toBeCloseTo(138.857, 1);
   });
 
   it('segment weekday agrees with getDailyPanchang\'s vara at Delhi, Bangkok and Tokyo', () => {
-    // Bangkok and Tokyo are the cases that bite, their local sunrise falling
-    // before 00:00 UTC.
     const DAY_SLOTS = [6, 5, 4, 3, 2, 1, 0]; // GULIKA_SLOTS (Sun..Sat)
     const cases = [
       { name: 'Delhi', loc: { latitude: 28.6139, longitude: 77.209 }, tz: 330 },

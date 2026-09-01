@@ -138,7 +138,6 @@ func loadYearlyGolden(t *testing.T) yearlyGolden {
 	return g
 }
 
-// Code only, never the message, so a Go error and a TypeScript throw compare equal.
 func errTag(err error) string {
 	var pe *types.PanchangError
 	if errors.As(err, &pe) {
@@ -561,7 +560,6 @@ func TestConvertMatchesTypeScript(t *testing.T) {
 	}
 }
 
-// A published double's band, not one fitted to the observed Δ.
 const eclipseFloatBand = 1e-9
 
 func TestConvertRoundTripsExplicitly(t *testing.T) {
@@ -657,7 +655,6 @@ func TestConvertRoundTripsExplicitly(t *testing.T) {
 			}
 		}
 	}
-	// A kshaya tithi has no sunrise, so this is a pinned rate, not an invariant.
 	t.Logf("round trip returned the original date on %d of %d cases", contains, checked)
 	if checked == 0 {
 		t.Fatal("no round trips were checked: the golden carries no roundTripContains flags")

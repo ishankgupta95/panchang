@@ -1,5 +1,3 @@
-// Engine-free reader for the `panchang-ts/moon-phases` entry. No table is
-// bundled: dating a phase instant needs a timezone, so pass in a built one.
 
 import type {
   AnyMoonPhasesFile,

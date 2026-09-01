@@ -1,4 +1,3 @@
-// Package tablejson serializes byte-identically to JSON.stringify(v, null, 2) + "\n".
 package tablejson
 
 import (

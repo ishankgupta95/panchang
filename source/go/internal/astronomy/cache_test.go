@@ -163,7 +163,6 @@ func TestBlockIndexMatchesJSFloorDivision(t *testing.T) {
 
 	spans := []int64{moonBlockMS, sunBlockMS}
 	for _, span := range spans {
-		// The only places a rounded quotient could change the floor.
 		for _, k := range []int64{0, 1, -1, 2, -2, 100, -100,
 			maxDateMS / span, -(maxDateMS / span), maxDateMS/span - 1} {
 			for _, off := range []int64{-2, -1, 0, 1, 2} {
@@ -202,7 +201,6 @@ func differentialSamples() int {
 	return 5_000
 }
 
-// 0.1 s sits between the largest four-day curvature (~1e-3 s) and the 1 s jump.
 func blockHasDeltaTStep(ms, span int64) bool {
 	i := blockIndexFor(ms, span)
 	a := DeltaTSeconds(i * span)
@@ -211,7 +209,6 @@ func blockHasDeltaTStep(ms, span int64) bool {
 	return math.Abs(mid-(a+b)/2) > 0.1
 }
 
-// Seeded sampling, never a grid, which aliases against the periods the fit misses; partitioned because ΔT's step inside a block dominates.
 func TestInterpolatedTracksExact(t *testing.T) {
 	const moonSmoothBoundDeg = 1e-6
 	const sunSmoothBoundDeg = 2e-7
@@ -295,7 +292,6 @@ func TestInterpolatedTracksExact(t *testing.T) {
 	t.Logf("%d instants over %d distinct Moon blocks", n, len(blocks))
 }
 
-// The last leap second before the ΔT handoff, mid-year, so its block is clean.
 func TestInterpolationAcrossALeapSecond(t *testing.T) {
 	const leapMS = int64(1435708800000) // After the inserted 23:59:60.
 	const moonDegPerSecond = 1.5250e-4
@@ -363,7 +359,6 @@ func TestInterpolationGapMatchesTypeScript(t *testing.T) {
 		"tropicalSun":  {interp.GetTropicalSun, exact.GetTropicalSun},
 	}
 
-	// 1e-11 is ~50× the platform-trig floor, doubled since both terms carry it.
 	const bound = 1e-11
 	worst, worstAt, worstMs := 0.0, "", int64(0)
 	maxGap := 0.0
@@ -395,7 +390,6 @@ func TestInterpolationGapMatchesTypeScript(t *testing.T) {
 		"(the gap itself reaches %.4e deg)", worst, len(g.CaseInstants), maxGap)
 }
 
-// The pre-1970 anchors are the point: blockIndexFor's truncate-versus-floor trap.
 func TestBlockBoundaryContinuity(t *testing.T) {
 	ClearBlockStores()
 	c := newInterpolatedCache(t)
@@ -408,7 +402,6 @@ func TestBlockBoundaryContinuity(t *testing.T) {
 		0,
 		-1262304000000,
 	}
-	// 1e-6 deg is ~6.5 ms of lunar motion, against the ~50° a wrong block produces.
 	const bound = 1e-6
 
 	worst, worstAt := 0.0, int64(0)
@@ -500,7 +493,6 @@ func TestConcurrentReadsAreDeterministic(t *testing.T) {
 	ms := make([]int64, instants)
 	base := int64(1736856000000)
 	for i := range ms {
-		// ~18 Moon and ~9 Sun blocks, so the goroutines collide.
 		ms[i] = base + int64(i)*7*3600*1000
 	}
 

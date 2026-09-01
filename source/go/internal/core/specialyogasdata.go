@@ -2,7 +2,6 @@ package core
 
 import "github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
 
-// Amrit Siddhi's one qualifying Moon-nakshatra per vara (Kalamrita / Muhurta Parijata).
 var amritSiddhiTable = [7]int{
 	12,
 	4,
@@ -13,7 +12,6 @@ var amritSiddhiTable = [7]int{
 	3,
 }
 
-// Sunday's Ashwini is disputed (other almanacs say Ashlesha) and deliberately kept.
 var sarvarthaSiddhiTable = nakshatraSets([7][]int{
 	0: {0, 7, 11, 12, 18, 20, 25},
 	1: {3, 4, 7, 16, 21},
@@ -32,7 +30,6 @@ var dwipushkarNakshatras = indexSet(27, 4, 13, 22)
 
 var tripushkarNakshatras = indexSet(27, 2, 6, 11, 15, 20, 24)
 
-// Jwalamukhi keys off the within-paksha tithi number, so either paksha matches.
 var jwalamukhiTable = nakshatraSetsByTithi(map[int][]int{
 	1:  {18},
 	5:  {1},
@@ -41,14 +38,12 @@ var jwalamukhiTable = nakshatraSetsByTithi(map[int][]int{
 	10: {8},
 })
 
-// 1-based Moon-from-Sun distance; Aadal and Vidaal count in the 28-nakshatra scheme, Ravi in the 27.
 var (
 	aadalDistances  = indexSet(29, 2, 7, 9, 14, 16, 21, 23, 28)
 	vidaalDistances = indexSet(29, 3, 6, 10, 13, 17, 20, 24, 27)
 	raviDistances   = indexSet(29, 4, 6, 9, 10, 13, 20)
 )
 
-// Abhijit sits between UAshadha (20) and Shravana (21).
 func to28(nak27 int) int {
 	if nak27 < 21 {
 		return nak27 + 1

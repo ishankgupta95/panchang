@@ -1,4 +1,3 @@
-// Tables are per-location: visibility, and so sutak, depends on the observer.
 
 import { computeEclipsesInRange } from './yearly';
 import { isEclipseVisibleAnyPhase } from '../astronomy/eclipse';
@@ -39,7 +38,6 @@ const DEFAULT_NOTE =
   'lunar eclipses carry no sutak and are not religiously observed ' +
   '(reference almanac / pandit consensus). Times are ISO UTC.';
 
-// Hindi puts the adjective first as English does, so one template serves both.
 const KIND_NOUN: Record<EclipsesTableLanguage, Record<EclipseTableKind, string>> = {
   en: { solar: 'Solar Eclipse', lunar: 'Lunar Eclipse' },
   hi: { solar: 'सूर्य ग्रहण', lunar: 'चंद्र ग्रहण' },
@@ -64,7 +62,6 @@ function localizedDescription(
   lang: EclipsesTableLanguage,
 ): string {
   const name = localizedName(kind, subtype, lang);
-  // Umbral obscuration is 0 for a penumbral eclipse; "0%" would mislead.
   if (subtype === 'penumbral') {
     return lang === 'hi'
       ? `${name}: केवल उपच्छाया छाया; सूतक नहीं।`
@@ -144,7 +141,6 @@ export function buildEclipsesTable(
     throw new RangeError('languages must contain at least one locale');
   }
 
-  // Widened so an eclipse whose local date is in range but whose UTC peak is not still lands.
   const dayMs = 24 * 3600_000;
   const windowStart = new Date(Date.UTC(startYear, 0, 1) - 2 * dayMs);
   const windowEnd = new Date(Date.UTC(endYear, 11, 31, 23, 59, 59, 999) + 2 * dayMs);
@@ -153,7 +149,6 @@ export function buildEclipsesTable(
     .map(e => ({ e, anyPhase: isEclipseVisibleAnyPhase(e, location) }))
     .filter(({ anyPhase }) => !visibleOnly || anyPhase);
 
-  // Pre-seeded so `[]` (in range, none) stays distinguishable from `null` (out of range).
   const byYear = new Map<string, Map<string, EclipseTableEntryRaw[]>>();
   for (let year = startYear; year <= endYear; year++) {
     byYear.set(String(year), new Map());

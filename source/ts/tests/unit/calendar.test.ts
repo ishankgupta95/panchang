@@ -69,7 +69,6 @@ describe('convertHinduToGregorian round-trip', () => {
       { timezone: TZ },
     );
     expect(back.length).toBeGreaterThan(0);
-    // A day of tolerance: sunrise can land on either side of the UTC boundary.
     const sameDay = back.some((d) => {
       return d.getUTCFullYear() === original.getUTCFullYear()
         && d.getUTCMonth() === original.getUTCMonth()
@@ -79,8 +78,6 @@ describe('convertHinduToGregorian round-trip', () => {
   }, 60_000);
 
   it('purnimanta Chaitra Krishna round-trips (the fortnight that wraps the VS year)', () => {
-    // Under purnimanta, Chaitra Krishna carries the OLD VS year, so the date
-    // lies ~12 months past that year's Chaitra Shukla anchor.
     const original = new Date(Date.UTC(2026, 2, 15, 12));
     const fwd = convertGregorianToHindu(original, DELHI, { timezone: TZ });
     expect(fwd.masaIndex).toBe(0);
@@ -112,8 +109,6 @@ describe('convertHinduToGregorian round-trip', () => {
 });
 
 describe('getKaliYugaYear (increments at Chaitra Shukla Pratipada)', () => {
-  // The reference almanac increments Kali at the luni-solar new year, not on
-  // the Feb-18 epoch anniversary, keeping Kali − Vikram = 3044 year-round.
   it('CE 2000-01-01 = Kali Yuga 5100', () => {
     expect(getKaliYugaYear(new Date('2000-01-01'))).toBe(5100);
   });
@@ -148,8 +143,6 @@ describe('getHinduNewYear', () => {
   }, 30_000);
 
   it('Adhika-Chaitra year (2029): returns the NIJA pratipada, not null', () => {
-    // 2029 inserts Adhika Chaitra, so masa index 0 reads twice; the reference
-    // almanac places Ugadi 2029 on the nija pratipada, not the adhika one.
     const d = getHinduNewYear(2029, 'all', DELHI, { timezone: TZ });
     expect(d).not.toBeNull();
     expect(d!.toISOString().slice(0, 10)).toBe('2029-04-14');
@@ -181,7 +174,6 @@ describe('getEkadashiDatesForYear', () => {
   it('all returned dates are in the requested year (or Dec 31 prior)', () => {
     for (const d of dates) {
       const y = d.getUTCFullYear();
-      // Sunrise on the calendar day can fall on the previous UTC day.
       expect(y === 2026 || y === 2025).toBe(true);
     }
   });
@@ -191,14 +183,12 @@ describe('getSankrantisForYear', () => {
   const sankrantis = getSankrantisForYear(2026, DELHI, { timezone: TZ });
 
   it('returns ~12 sankrantis in a year', () => {
-    // A Gregorian-year sweep can catch only 11: January's transit may precede it.
     expect(sankrantis.length).toBeGreaterThanOrEqual(10);
     expect(sankrantis.length).toBeLessThanOrEqual(13);
   });
 
   it('Makar Sankranti (Capricorn entry) falls mid-January', () => {
     const makar = sankrantis.find((s) => s.rashi === 9);
-    // The Sun may already be in Capricorn on Jan 1, so the sweep can miss it.
     if (makar) {
       expect(makar.date.getUTCMonth()).toBe(0);
       const day = makar.date.getUTCDate();

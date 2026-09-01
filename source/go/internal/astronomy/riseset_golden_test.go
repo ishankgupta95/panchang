@@ -11,8 +11,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// `altitudeExcess` cannot be bit-identical (math.Asin over platform trig), but only its sign is read downstream.
-
 type riseSetGolden struct {
 	Meta      map[string]any `json:"_meta"`
 	Locations []struct {
@@ -174,7 +172,6 @@ func TestCanonicalDayEventsMatchTypeScript(t *testing.T) {
 	t.Logf("%d canonical-day cases bit-identical", len(g.CanonicalCases))
 }
 
-// A coordinate spelled `2.8547284e-05` where JS writes `0.000028547284` splits a cache instead of failing.
 func TestRiseSetCacheKeysMatchTypeScript(t *testing.T) {
 	g := loadRiseSetGolden(t)
 	if len(g.KeyCases) == 0 {
@@ -298,9 +295,7 @@ func TestRiseSetWrappersMatchTypeScript(t *testing.T) {
 		len(g.WrapperCases), found, nulls, errs)
 }
 
-// `positionTrack` samples at `int64(midMs + halfMs·x)`, so one ULP of x moves a node a whole millisecond.
 func TestTrackAbscissae(t *testing.T) {
-	// V8's Math.cos(π·k/10).
 	v8 := []float64{
 		1, 0.9510565162951535, 0.8090169943749475, 0.5877852522924731,
 		0.30901699437494745, 6.123233995736766e-17, -0.30901699437494734,
@@ -322,7 +317,6 @@ func TestTrackAbscissae(t *testing.T) {
 	if tr.nodeX[0] != 1 || tr.nodeX[trackNodes-1] != -1 {
 		t.Errorf("endpoints are %v and %v, want exactly 1 and -1", tr.nodeX[0], tr.nodeX[trackNodes-1])
 	}
-	// A literal 0 would put a node at the block midpoint, where `position`'s divide-by-zero guard changes branch.
 	if mid := tr.nodeX[trackNodes/2]; mid == 0 || math.Abs(mid) > 1e-16 {
 		t.Errorf("middle abscissa is %v, want cos(π/2) ≈ 6.1e-17 and non-zero", mid)
 	}

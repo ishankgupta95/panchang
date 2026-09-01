@@ -104,7 +104,6 @@ describe('Regional solar new years: reference almanac 2025-2029', () => {
   }, 30_000);
 
   it('reproduces the almanac’s printed Mesha Sankranti moments', () => {
-    // The almanac's own "Sankranti Moment" line, IST.
     const ALMANAC_MOMENTS: Record<number, string> = {
       2025: '2025-04-14 03:30',
       2026: '2026-04-14 09:39',
@@ -118,7 +117,6 @@ describe('Regional solar new years: reference almanac 2025-2029', () => {
       expect(mesha, `${year} Mesha transit`).toBeDefined();
       const ist = new Date(mesha!.moment.getTime() + 330 * 60_000)
         .toISOString().slice(0, 16).replace('T', ' ');
-      // The almanac truncates to the minute.
       const deltaMin = Math.abs(
         (new Date(`${ist}:00Z`).getTime() - new Date(`${ALMANAC_MOMENTS[year]}:00Z`).getTime()),
       ) / 60_000;

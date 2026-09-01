@@ -5,7 +5,6 @@ import { getSiderealMoonLongitude } from '../../src/astronomy/moon';
 import { getSiderealSunLongitude } from '../../src/astronomy/sun';
 import { PanchangError } from '../../src/types/errors';
 
-// Noon UTC keeps getDate() unambiguous in any system timezone.
 function noonUtc(year: number, month: number, day: number): Date {
   return new Date(Date.UTC(year, month - 1, day, 12, 0, 0, 0));
 }
@@ -47,10 +46,8 @@ describe('edge cases', () => {
   });
 
   it('getInstantPanchang before sunrise returns previous calendar day vara', () => {
-    // Pune sunrise on 2025-01-14 is ~01:39 UTC, so 00:30 UTC is well before it.
     const beforeSunrise = new Date('2025-01-14T00:30:00Z');
     const result = getInstantPanchang(beforeSunrise, PUNE)!;
-    // 2025-01-14 is a Tuesday.
     expect(result.angas.vara.englishName).toBe('Monday');
   });
 
@@ -67,15 +64,9 @@ describe('edge cases', () => {
   });
 });
 
-// At London the Hindu day beginning 2027-10-05 genuinely holds three yogas, the
-// last under six seconds. The example is astronomical: it moves with the
-// sidereal frame and ΔT, and has to be re-derived rather than nudged.
 describe('element slivers at the day boundary', () => {
   const LONDON = { latitude: 51.5074, longitude: -0.1278 };
   const SLIVER_DAY = noonUtc(2027, 10, 5);
-  // Re-derived by the third test below through independent bisection. Yoga
-  // carries Moon + Sun at 0.590 degrees/hr, so a combined δ arcsec shifts this
-  // by δ × 1.69 s; predict the shift from that before re-pinning.
   const TRUE_TRANSITION_UTC = Date.UTC(2027, 9, 6, 6, 8, 52, 186);
 
   it('resolves the ~6s third yoga', () => {

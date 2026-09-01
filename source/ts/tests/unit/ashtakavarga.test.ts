@@ -214,9 +214,6 @@ describe('computeAshtakavarga: structural invariants', () => {
   });
 });
 
-// Derived bindu-by-bindu from the published AstroSage rashi positions and the
-// BENEFIC_OFFSETS table, so they are independent of the algorithm under test.
-
 describe('Bhinnashtaka: hand-validated pins (Modi)', () => {
   const chart = chartFor('Narendra Modi');
   const av = computeAshtakavarga(chart);
@@ -229,9 +226,6 @@ describe('Bhinnashtaka: hand-validated pins (Modi)', () => {
     expect(av.bhinnashtaka.Saturn).toEqual([5, 1, 5, 4, 3, 4, 3, 1, 3, 6, 2, 2]);
   });
 });
-
-// Trap: these rows are output of the algorithm under test, not ground truth.
-// They only detect regression.
 
 describe('Sarvashtaka: golden-master pins', () => {
   it('Modi (Lagna=7, Sun=5, Moon=7, Mars=7, Mercury=5, Jup=10, Ven=4, Sat=4)', () => {
@@ -454,8 +448,6 @@ describe('Trikona triads and Ekadhipatya pairs: coverage', () => {
 });
 
 describe('Sodhana vs PVR Narasimha Rao Chart 7 (PyJHora reference)', () => {
-  // BAV rows from PyJHora's ashtakavarga.py __main__, PVR's published book
-  // chart; EXPECTED is that reference's own output and matches PVR's pindas.
   const BAV: Record<string, number[]> = {
     Sun:     [4, 2, 3, 4, 6, 5, 5, 3, 2, 6, 6, 2],
     Moon:    [6, 3, 5, 3, 5, 5, 6, 3, 3, 4, 4, 2],

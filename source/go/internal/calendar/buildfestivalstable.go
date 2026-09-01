@@ -29,7 +29,6 @@ type BuildFestivalsTableOptions struct {
 const DefaultFestivalsNote = "Pre-computed festival table. Eclipses are excluded because visibility " +
 	"is location-dependent; use getUpcomingEclipses for those."
 
-// Dedup on the whole entry, not the name: Raksha Bandhan's note varies with Bhadra.
 type festivalDictionary struct {
 	entries []FestivalDictEntry
 	index   map[string]int
@@ -39,7 +38,6 @@ func newFestivalDictionary() *festivalDictionary {
 	return &festivalDictionary{entries: []FestivalDictEntry{}, index: map[string]int{}}
 }
 
-// JSON, not fmt: %v would collapse an absent description with an empty one.
 func (d *festivalDictionary) intern(entry FestivalDictEntry) int {
 	tuple := []any{entry.Key, entry.Type, entry.Name, entry.Description}
 	raw, err := json.Marshal(tuple)
@@ -139,7 +137,6 @@ func buildFestivalYear(
 	startMs := types.DateUTC(year, 0, 1).Ms()
 	endMs := types.DateUTC(year, 11, 31).Ms()
 
-	// Selection is locale-independent, so the runs zip by index.
 	runs := make([][]FestivalDay, len(languages))
 	for i, language := range languages {
 		run, err := ComputeFestivalsInRange(ctx, startMs, endMs, location, YearlyListingOptions{
@@ -165,7 +162,6 @@ func buildFestivalYear(
 		}
 	}
 
-	// Equal-width YYYY-MM-DD keys, so the sort below is byte order either way.
 	byDate := map[string][]int{}
 	order := []string{}
 	for i := 0; i < length; i++ {

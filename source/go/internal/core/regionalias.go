@@ -6,7 +6,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// north-india maps to all: Makar Sankranti is pan-Indian.
 var legacyRegionAliases = map[types.FestivalRegion]types.FestivalRegion{
 	types.LegacyRegionTamil:      types.RegionTamilNadu,
 	types.LegacyRegionBengal:     types.RegionWestBengal,

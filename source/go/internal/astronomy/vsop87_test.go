@@ -141,7 +141,6 @@ func TestHeliocentricRectAgreesWithSpherical(t *testing.T) {
 	}
 }
 
-// The generator emits an empty series when a tier's kept terms all land in the other half.
 func TestEvaluateVsopEmpty(t *testing.T) {
 	if got := EvaluateVsop(nil, 0.5); got != 0 {
 		t.Errorf("EvaluateVsop(nil) = %v, want 0", got)

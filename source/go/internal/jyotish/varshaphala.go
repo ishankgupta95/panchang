@@ -23,7 +23,6 @@ type MunthaInfo struct {
 	House int                `json:"house"`
 }
 
-// Named fields, not a map: the wire key order is fixed.
 type Sahams struct {
 	Punya       SahamPosition `json:"Punya"`
 	Vidya       SahamPosition `json:"Vidya"`
@@ -142,12 +141,10 @@ type VarshaphalaChart struct {
 	Bhava              types.BhavaChart        `json:"bhava"`
 }
 
-// Typed deliberately: untyped, it changes sunDegPerDay's last bits.
 const siderealYearDays float64 = 365.25636
 
 const sunDegPerDay = 360 / siderealYearDays
 
-// Sahams are the 27-Saham core set per *Tajika Neelakanthi*.
 func ComputeVarshaphala(
 	ctx *astronomy.EphemerisCtx,
 	natalBirthMs int64,
@@ -219,7 +216,6 @@ func FindSolarReturn(
 	natalSun float64,
 	ayanamsaType types.AyanamsaType,
 ) (int64, error) {
-	// t stays a float; only the lookups truncate. FMA barrier.
 	t := float64(natalBirthMs) + float64(float64(yearAge)*siderealYearDays*86400_000)
 
 	const tolDeg = 0.0001
@@ -236,11 +232,9 @@ func FindSolarReturn(
 		t -= float64((delta / sunDegPerDay) * 86400_000)
 	}
 
-	// Half-up, not math.Round: pre-1970 solar returns are negative.
 	return int64(jsnum.Round(t)), nil
 }
 
-// The Sun's apparent centre above the horizon, not sunrise/sunset's refracted limb.
 func varshaphalaIsDayBirth(ctx *astronomy.EphemerisCtx, ms int64, location types.GeoLocation) bool {
 	return astronomy.IsSunAboveHorizon(ctx, ms, location)
 }
@@ -253,7 +247,6 @@ func buildMuntha(natalLagnaRashi, yearAge, varshaLagnaRashi int, lang types.Lang
 	return MunthaInfo{Rashi: munthaRashi, Lord: lord, House: house}
 }
 
-// Tajik elemental triplicity rulers by `rashi % 4` (0 Fire, 1 Earth, 2 Air, 3 Water), per B.V. Raman, *Annual Horoscope* Ch. 2.
 var (
 	triraashiPatiDay = [4]types.VisibleGraha{
 		types.VisibleSun, types.VisibleVenus, types.VisibleSaturn, types.VisibleVenus,
@@ -332,7 +325,6 @@ func resolveOperand(
 	switch op {
 	case OperandSun, OperandMoon, OperandMars, OperandMercury,
 		OperandJupiter, OperandVenus, OperandSaturn:
-		// The graha operands share the visible-graha ordinal.
 		p, ok := varshaChart.ByPlanet.Get(types.VisibleGraha(op).Graha())
 		if !ok {
 			return 0, types.Codef(types.ErrInvalidInput,
@@ -362,7 +354,6 @@ func resolveOperand(
 	return 0, types.Codef(types.ErrInvalidInput, "unknown Saham operand %v", op)
 }
 
-// Tajika completion rule (Neelakanthi).
 func evaluateSaham(
 	formula SahamFormula,
 	isDay bool,
@@ -398,7 +389,6 @@ func computeSahams(varshaChart *types.BirthChart, isDay bool, lang types.Languag
 	var longitudes [SahamNameCount]float64
 	var computed [SahamNameCount]bool
 
-	// Punya must precede Yasas, Mitra and Susha.
 	for _, formula := range SahamFormulas {
 		lon, err := evaluateSaham(formula, isDay, varshaChart, &longitudes, &computed)
 		if err != nil {

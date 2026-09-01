@@ -65,6 +65,36 @@ one diff run still notices a regression, and `cmp` says where it is.
 A band moves only after a written prediction of the delta and its cause
 (`docs/validation-tiers.md` discipline), never by observing an excess and accepting it.
 
+The `full` document byte pins have moved four times, every one of them the festival registry
+and none of them the arithmetic. No numeric pin moved, the 105 byte TS-to-Go gap survived all
+four, and none touched the `g2` or `g3` pins, which exclude the festival block. In order:
+
+| delta | TS | cause |
+|---|---|---|
+| +3295 | 255539350 to 255542645 | the containing-day fallback for a kshaya anchor |
+| -4116 | 255542645 to 255538529 | `vat_savitri_amavasya` from `masa: 2` to `masa: 1` |
+| -1847 | 255538529 to 255536682 | the two Upakarma rules re-anchored |
+| +9    | 255536682 to 255536691 | `vat_savitri_amavasya` from a sunrise anchor to aparahna |
+
+A festival that is current at no sunrise used to be emitted on no day of the year; the Hindu day
+that wholly contains it now claims it, in both languages on the same day.
+
+`vat_savitri_amavasya` was filed under the wrong month. The vrat is purnimanta Jyeshtha Amavasya,
+and an amavasya ENDS its amanta month, so the amanta index is Vaishakha. The document shrank
+rather than grew because a vriddha Amavasya in 2021 used to emit on two consecutive days. Moving
+it again to an aparahna anchor, with the later day taking a span that reaches aparahna twice,
+settled the one year the month alone did not: 2025, where the amavasya begins after midday on the
+26th and reaches sunrise only on the 27th, and the reference publishes the 26th. Seven reference
+years now agree, where the month correction alone managed six.
+
+The Upakarma rules had matched on the nakshatra at sunrise with nothing else: no paksha, so Sama
+Upakarma fired again on the Bhadrapada Krishna Amavasya that carries Hasta a second time, and no
+kala, so it took the day the nakshatra reached sunrise rather than aparahna. Sama lost more than
+Rig gained, which is why that document shrank. Both now emit exactly one date in all 88 city-years
+of the 8 city sweep, where Sama managed 45. Checked against the reference for 13 years each,
+including the longitude split it publishes for Sama in 2026: the 13th at Kolkata, the 12th
+everywhere else.
+
 ## Determinism
 
 Nothing in a dump may read the wall clock, or the two sides can never agree.

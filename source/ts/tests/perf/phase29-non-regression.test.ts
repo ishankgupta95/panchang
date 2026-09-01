@@ -1,5 +1,3 @@
-// These helpers are additive exports; the budgets catch one leaking into the
-// `getDailyPanchang` path.
 
 import { describe, it, expect } from 'vitest';
 import {

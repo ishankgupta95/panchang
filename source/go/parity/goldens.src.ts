@@ -290,9 +290,6 @@ function cases(): { x: number; sin: number; cos: number }[] {
   return out;
 }
 
-// Go's gc may contract `a + t*b` into a fused multiply-add (it does on arm64),
-// which would make every series accumulation a different arithmetic from the TS.
-
 const EPHEMERIS_SEED = 0x31415926;
 const T_MAX_CENTURIES = 1.5;
 
@@ -464,9 +461,6 @@ function writeDeltaTGolden(): void {
     measuredInstants.push(Math.floor(measuredLo + u * (measuredHi - measuredLo)));
   }
 
-  // A bound, not an equality: Go's `math.Pow` disagrees with V8's fdlibm-derived
-  // one on `t**3` for about a quarter of arguments. `x**2` is exempt, both
-  // lowering it to `x*x`.
   const BOUND_SAMPLES = 2_000;
   const boundYears = years.slice(0, BOUND_SAMPLES);
   const boundInstants = instants.slice(0, BOUND_SAMPLES);
@@ -533,9 +527,6 @@ function writeDeltaTGolden(): void {
     `wrote deltat-golden.json (${Object.keys(file.digests).length} equality digests, ${BOUND_SAMPLES} bound samples)\n`,
   );
 }
-
-// Anything ending in `Math.atan2` or `Math.asin` inherits the
-// platform-transcendental difference; the Go test sorts them by measuring.
 
 const POSITION_SEED = 0x5A7E111E >>> 0;
 const POSITION_SAMPLES = 20_000;
@@ -660,11 +651,6 @@ function writePositionGolden(): void {
   process.stderr.write(`wrote positions-golden.json (${names.length} accessors)\n`);
 }
 
-
-// The block index must agree exactly: Go's integer division truncates toward
-// zero where `Math.floor` does not, which puts every 1912 instant one block
-// late, ~50 deg of lunar longitude.
-
 const CACHE_SEED = 0xC0FFEE11 >>> 0;
 const CACHE_SAMPLES = 20_000;
 const CACHE_SAMPLES_SHORT = 2_000;
@@ -755,11 +741,6 @@ function writeCacheGolden(): void {
     `wrote cache-golden.json (${names.length} accessors, ${cases.length} cases)\n`,
   );
 }
-
-
-// Rise/set instants are pinned as an EQUALITY even though `altitudeExcess` is
-// not bit-identical: the scan, subdivision proof and bisection consume only
-// `sign(f)`, and its ~1e-13 deg spread is 2.4e-11 s against a 0.864 ms stop.
 
 const RISESET_LOCATIONS = [
   { name: 'Quito', latitude: -0.18, longitude: -78.47, elevation: 0 },
@@ -948,11 +929,6 @@ function writeRiseSetGolden(): void {
   );
 }
 
-
-// `resolveUtcOffset` is the one place two different mechanisms have to agree.
-// `Intl` renders whole minutes while Go's `time.LoadLocation` returns seconds,
-// and sub-minute offsets exist (Asia/Kolkata was +05:53:20 until 1906).
-
 const LUNATION_SEED = 0x11FA5E01 >>> 0;
 const LUNATION_SAMPLES = 400;
 const LUNATION_MS_LO = Date.UTC(1900, 0, 1), LUNATION_MS_HI = Date.UTC(2100, 0, 1);
@@ -962,9 +938,6 @@ function lunationInstants(count: number): number[] {
   for (const u of unit01(LUNATION_SEED, count)) {
     out.push(Math.floor(LUNATION_MS_LO + u * (LUNATION_MS_HI - LUNATION_MS_LO)));
   }
-  // Instants that are themselves syzygies, plus their neighbours: an exact `<=`
-  // in newMoon.ts's `PHASE_AGREEMENT_MS` branch puts an instant sitting on a new
-  // moon a month out.
   for (const anchor of [Date.UTC(2025, 0, 29, 12, 36), Date.UTC(1912, 5, 15), Date.UTC(2088, 10, 3)]) {
     const nm = searchMoonPhase(0, new Date(anchor - 40 * 86_400_000), 45);
     if (nm) for (const d of [-2, -1, 0, 1, 2]) out.push(nm.getTime() + d);
@@ -1112,10 +1085,6 @@ function writeLunationGolden(): void {
     `${formatted.length} formatted strings)\n`,
   );
 }
-
-
-// The eclipse solvers interpolate on the VALUE of a non-bit-identical
-// separation, so agreement is within a millisecond or two rather than exact.
 
 const ECLIPSE_LUNAR_SEEDS = [
   Date.UTC(1901, 4, 3), Date.UTC(1913, 2, 22), Date.UTC(1950, 8, 26),
@@ -1316,10 +1285,6 @@ function serializeEclipseInfo(info: ReturnType<typeof getUpcomingLunarEclipse>):
   };
 }
 
-
-// A synthetic polynomial angle rather than the real ephemeris, so anything
-// that differs here is the solver.
-
 const SOLVER_EPOCH = Date.UTC(2025, 0, 14);
 
 function syntheticAngleAt(date: Date): number {
@@ -1381,8 +1346,6 @@ function writeUtilsGolden(): void {
       element: solveElementBoundary(lo.getTime(), hi.getTime(), SYNTHETIC_ANGLE, stillBefore),
     });
   }
-  // Targets must sit inside the angle's actual range, or nothing is ever
-  // bracketed and a run of nulls looks exactly like a run of passes.
   const crossings: unknown[] = [];
   for (const target of [20, 30, 40, 50, 200]) {
     for (let h = 0; h < 40; h += 7) {
@@ -1478,12 +1441,6 @@ function writeUtilsGolden(): void {
     `${daily.length} daily, ${slots.length} slot sets)\n`,
   );
 }
-
-// Three traps: `angle - index * span` is an FMA site in Go, and in
-// `nakshatra.ts` it feeds `pada`, a published integer; `Math.round(x * 100) / 100`
-// is `jsnum.Round`, not `math.Round`, and they disagree on every negative tie;
-// and `normalize360`'s guards must give 0 and not 360 for a tiny negative
-// elongation, or the tithi index is 30 and the nakshatra index 27.
 
 const ELEMENT_SEED = 0x5ADFACE;
 const ELEMENT_SAMPLES = 200_000;
@@ -1614,8 +1571,6 @@ function resolverTable(): Record<string, Record<string, string[]>> {
       chandraMasaAdhika: range(12).map((i) => resolveChandraMasaName(i, lang, true)),
     };
   }
-  // `getTranslations` falls back to English for an unknown language, a
-  // deliberate divergence from computeAyanamsa's rejection.
   out['unknown-language-falls-back'] = {
     tithi: range(30).map((i) => resolveTithiName(i, 'xx' as Language)),
   };
@@ -1678,12 +1633,6 @@ function writeElementsGolden(): void {
     `${signedZero.length} signed-zero pairs)\n`,
   );
 }
-
-// `types.JSDate`'s oracle is JavaScript itself. Four behaviours a port gets
-// subtly wrong: the expanded `±YYYYYY` year form outside [0, 9999];
-// `getUTCFullYear` / `getUTCDay` for NEGATIVE epoch milliseconds; `Date.UTC`,
-// whose month is 0-based and which maps a year in [0, 99] to 1900+year; and
-// `JSON.stringify(new Date(ms))`.
 
 /** Built through `setUTCFullYear`: `Date.UTC` maps a year in [0, 99] to 1900+year. */
 function yearMs(year: number, month: number, day: number): number {
@@ -1760,10 +1709,6 @@ function writeJsDateGolden(): void {
   );
 }
 
-// `computeChandraMasa` and `computeSamvat` reach the real ephemeris yet are
-// still pinned as exact: both publish only indices, booleans and names gated
-// on a threshold, with a margin of ~1e-8 s against the nearest boundary.
-
 const CAL_LANGS: Language[] = ['en', 'hi'];
 const CAL_SYSTEMS: MasaSystem[] = ['purnimanta', 'amanta'];
 const siderealSunAt = (d: Date): number => getSiderealSunLongitude(d, 'lahiri');
@@ -1777,7 +1722,6 @@ function varaCases(): { dateMs: number; sunriseMs: number }[] {
   ];
   for (const day of days) {
     const sunrise = day + 6 * 3600_000 + 17 * 60_000 + 42_000;
-    // Before sunrise the weekday must roll back.
     for (const t of [day, day + 3 * 3600_000, sunrise - 1, sunrise, sunrise + 1, day + 20 * 3600_000]) {
       out.push({ dateMs: t, sunriseMs: sunrise });
     }
@@ -1787,7 +1731,6 @@ function varaCases(): { dateMs: number; sunriseMs: number }[] {
 
 function chandraMasaInstants(): number[] {
   const out: number[] = [];
-  // 2026 contains Adhika Jyeshtha, so both arms of `isAdhika` are reached.
   for (let d = 0; d < 366; d += 5) out.push(Date.UTC(2026, 0, 1) + d * 86_400_000);
   for (let d = 0; d < 60; d += 10) out.push(Date.UTC(1912, 5, 1) + d * 86_400_000);
   for (let d = 0; d < 60; d += 10) out.push(Date.UTC(2088, 5, 1) + d * 86_400_000);
@@ -1811,9 +1754,6 @@ function writeCalendarGolden(): void {
     ),
   }));
 
-  // Without normalize360 the nudge below a boundary is -2.2e-16, on which the
-  // TypeScript returns `{index: -1, name: undefined}` and pins a shape no caller
-  // can reach.
   const longitudes: number[] = [];
   for (const span of [30, NAKSHATRA_SPAN]) {
     for (let k = 0; k * span < 360; k++) {
@@ -1888,11 +1828,6 @@ function writeCalendarGolden(): void {
     `${chandraMasa.length} chandramasa, ${samvat.length} samvat)\n`,
   );
 }
-
-// The day/night triples are chosen so the division is awkward: a millisecond
-// count not divisible by 8, 12 or 15 is where the "anchor the last slot's end
-// to reference+duration" rule earns its place, and where a contracted
-// `refMs + i*slotMs` would move a boundary by a whole millisecond.
 
 function slotDayCases(): { name: string; sunrise: number; sunset: number; nextSunrise: number }[] {
   const d = (y: number, m: number, day: number, h: number, mi: number, s: number, ms: number): number =>
@@ -1997,8 +1932,6 @@ function writeFestivalDispatchGolden(): void {
       for (let tithi = 0; tithi < 30; tithi++) {
         add(`${a}|mt|${masa}|${tithi}`, base({
           chandraMasaIndex: masa, tithiIndex: tithi, isAdhika,
-          // The other two discriminators are parked on values no registry rule uses
-          // (nakshatra 26 Revati, vara 3), so this grid cannot satisfy another arm.
           nakshatraIndex: 26, varaIndex: 3, solarMasaIndex: 11,
         }));
       }
@@ -2029,8 +1962,6 @@ function writeFestivalDispatchGolden(): void {
     }
   }
 
-  // Varamahalakshmi's tithiRange gate: the grids above park tithi inside the
-  // window, so without a sweep across its edges a dropped gate would pass.
   for (let tithi = 0; tithi < 30; tithi++) {
     cases.push({
       label: `range|${tithi}`,
@@ -2060,12 +1991,8 @@ function writeFestivalDispatchGolden(): void {
     }
   }
 
-  // Vijayadashami's aparahna-full ladder needs yesterday's START too, which no
-  // other rule reads.
   for (const s0 of [9, 10]) for (const e0 of [9, 10]) for (const s1 of [9, 10]) for (const e1 of [9, 10]) {
     cases.push({
-      // The separators are load-bearing: `9` and `10` concatenate ambiguously, and
-      // `91099` reads as both (9,10,9,9) and (9,1,0,9,9).
       label: `af|${s0}-${e0}-${s1}-${e1}`,
       festivals: run(base({
         chandraMasaIndex: 6, tithiIndex: 9, nakshatraIndex: 26, varaIndex: 3, solarMasaIndex: 11,
@@ -2151,8 +2078,6 @@ function writeFestivalDispatchGolden(): void {
     }
   }
 
-  // Masik Karthigai's any-time-in-day set, the Purnimanta description and the
-  // Bhadra notice are the three context fields nothing above touches.
   cases.push({
     label: 'extra|krittika-in-day',
     festivals: run(base({
@@ -2177,6 +2102,105 @@ function writeFestivalDispatchGolden(): void {
     })),
   });
 
+  const NK_MASAS = [4, 5];
+  const NK_TITHIS = [9, 24];          // Shukla Navami and Krishna Navami: the paksha flip
+  const NK_NAKS = [21, 12, 0];        // Shravana, Hasta, and one that anchors nothing
+  const PAKSHA_SETS: readonly [string, ReadonlySet<number> | undefined][] = [
+    ['x', undefined],                 // no walk available, as at the location-free call site
+    ['has', new Set([21, 0])],        // the anchor still to come, so the fallback stays shut
+    ['no', new Set([0])],             // the anchor absent, so the fallback opens
+  ];
+  for (const masa of NK_MASAS) {
+    for (const tithi of NK_TITHIS) {
+      for (const nak of NK_NAKS) {
+        for (const prior of ['x', '21', '12'] as const) {
+          for (const [pLabel, pSet] of PAKSHA_SETS) {
+            cases.push({
+              label: `nku|${masa}|${tithi}|${nak}|${prior}|${pLabel}`,
+              festivals: run(base({
+                chandraMasaIndex: masa, tithiIndex: tithi, nakshatraIndex: nak,
+                varaIndex: 3, solarMasaIndex: 11,
+                ...(prior === 'x' ? {} : { priorDayNakshatraIndex: Number(prior) }),
+                ...(pSet === undefined ? {} : { remainingPakshaSunriseNakshatras: () => pSet }),
+              })),
+            });
+          }
+        }
+      }
+    }
+  }
+  for (const masa of NK_MASAS) {
+    for (const tithi of NK_TITHIS) {
+      for (const apaStart of ['x', '12', '21'] as const) {
+        for (const apaEnd of ['x', '12', '21'] as const) {
+          for (const nextApa of ['x', '12', '21'] as const) {
+            cases.push({
+              label: `nkk|${masa}|${tithi}|${apaStart}|${apaEnd}|${nextApa}`,
+              festivals: run(base({
+                chandraMasaIndex: masa, tithiIndex: tithi, nakshatraIndex: 26,
+                varaIndex: 3, solarMasaIndex: 11,
+                ...(apaStart === 'x' ? {} : { nakshatraByRuleStart: { aparahna: Number(apaStart) } }),
+                ...(apaEnd === 'x' ? {} : { nakshatraByRule: { aparahna: Number(apaEnd) } }),
+                ...(nextApa === 'x'
+                  ? {}
+                  : { nextDayNakshatraByRule: () => ({ start: {}, end: { aparahna: Number(nextApa) } }) }),
+              })),
+            });
+          }
+        }
+      }
+    }
+  }
+
+  for (const apaStart of ['x', '28', '29'] as const) {
+    for (const apaEnd of ['x', '28', '29'] as const) {
+      for (const prior of ['x', '29'] as const) {
+        for (const next of ['x', '29'] as const) {
+          cases.push({
+            label: `kl|${apaStart}|${apaEnd}|${prior}|${next}`,
+            festivals: run(base({
+              chandraMasaIndex: 1, tithiIndex: 28, nakshatraIndex: 26, varaIndex: 3,
+              solarMasaIndex: 11,
+              ...(apaStart === 'x' ? {} : { tithiByRuleStart: { aparahna: Number(apaStart) } }),
+              ...(apaEnd === 'x' ? {} : { tithiByRule: { aparahna: Number(apaEnd) } }),
+              ...(prior === 'x' ? {} : { priorDayTithiByRule: { aparahna: Number(prior) } }),
+              ...(next === 'x'
+                ? {}
+                : { nextDayTithiByRule: () => ({ start: {}, end: { aparahna: Number(next) } }) }),
+            })),
+          });
+        }
+      }
+    }
+  }
+
+  const KS_MASAS = [0, 2, 4, 5, 6, 7, 11];
+  const KS_SETS = ['0', '1', '2', '4', '6', '13', '14', '28', '29', '0-1', '13-14', 'x'];
+  for (const masa of KS_MASAS) {
+    for (const set of KS_SETS) {
+      const kshayaTithiIndices =
+        set === 'x' ? new Set<number>() : new Set(set.split('-').map(Number));
+      const nextStates: readonly [string, string, number | undefined, boolean][] = [
+        ['x', 'N', undefined, false],
+        [String(masa), 'N', masa, false],
+        [String((masa + 1) % 12), 'N', (masa + 1) % 12, false],
+        [String((masa + 1) % 12), 'A', (masa + 1) % 12, true],
+      ];
+      for (const [nextLabel, adhikaLabel, nextIndex, nextAdhika] of nextStates) {
+        cases.push({
+          label: `ks|${masa}|${set}|${nextLabel}|${adhikaLabel}`,
+          festivals: run(base({
+            tithiIndex: 20, chandraMasaIndex: masa, nakshatraIndex: 26, varaIndex: 3,
+            solarMasaIndex: 11, kshayaTithiIndices,
+            ...(nextIndex === undefined
+              ? {}
+              : { nextDayMasaIndex: nextIndex, nextDayIsAdhika: nextAdhika }),
+          })),
+        });
+      }
+    }
+  }
+
   const emitted = new Set<string>();
   for (const c of cases as { festivals: { key: string }[] }[]) {
     for (const f of c.festivals) emitted.add(f.key);
@@ -2189,10 +2213,12 @@ function writeFestivalDispatchGolden(): void {
         generator: 'source/go/parity/goldens.src.ts (bash source/go/parity/goldens.sh)',
         source: 'src/core/festivals.ts',
         claim:
-          'computeFestivals emits the same festivals for the same context. The four ' +
-          'grids vary exactly the fields one matcher arm reads, so a rule filed under ' +
-          'the wrong D8 Kind fires under the wrong grid or not at all. FESTIVAL_REGISTRY ' +
-          'is module-private and cannot be pinned directly; this pins the dispatch over it.',
+          'computeFestivals emits the same festivals for the same context. Each grid ' +
+          'varies exactly the fields one matcher arm reads, so a rule filed under the ' +
+          'wrong D8 Kind fires under the wrong grid or not at all. ks pins the kshaya ' +
+          'containing-day fallback, kl the last-day kala tie-break, nku and nkk the ' +
+          'nakshatra arm. FESTIVAL_REGISTRY is module-private and cannot be pinned ' +
+          'directly; this pins the dispatch over it.',
         cases: cases.length,
         distinctKeysEmitted: emitted.size,
       },
@@ -2243,7 +2269,6 @@ function writeKeyOrderGolden(): void {
       computeDurMuhurta(new Date(sunrise), new Date(sunset), new Date(nextSunrise), 2)[0]!,
     ),
     AnandadiYogaInfo: Object.keys(computeAnandadiYoga(0, 0, 'en')),
-    // Both arms: the inactive one carries only `active`.
     GandaMulaInfoInactive: Object.keys(computeGandaMula(1, 'en')),
     GandaMulaInfoActive: Object.keys(computeGandaMula(18, 'en')),
   };
@@ -2262,7 +2287,6 @@ function writeKeyOrderGolden(): void {
   if (daily === null) throw new Error('key-order golden: daily panchang was null');
   const bareDaily = getDailyPanchang(when, pune, { timezone: 330, computeEndTimes: false });
   if (bareDaily === null) throw new Error('key-order golden: bare daily panchang was null');
-  // `zone` is absent for a numeric offset, so a named zone is needed to reach it.
   const namedTzDaily = getDailyPanchang(when, { latitude: 40.7128, longitude: -74.006 },
     { timezone: 'America/New_York' });
   if (namedTzDaily === null) throw new Error('key-order golden: named-tz panchang was null');
@@ -2347,7 +2371,6 @@ function writeKeyOrderGolden(): void {
   published['KaalSarpDoshaInfo'] = Object.keys(computeKaalSarp(chartD1));
   published['PitruDoshaInfo'] = Object.keys(computePitruDosha(chartD1));
 
-  // Both arms: `veto` is ABSENT on a passing koot rather than false.
   const koMoonA = { rashi: 0, nakshatra: 0 };
   const koMoonB = { rashi: 7, nakshatra: 17 };   // vedha partners: reaches a veto
   const koAsht = computeAshtakoot(koMoonA, koMoonB);
@@ -2358,7 +2381,6 @@ function writeKeyOrderGolden(): void {
   published['PoruthamScoreWithVeto'] = Object.keys(koPathu.poruthams.find((p) => p.veto === true)!);
   published['PoruthamScore'] = Object.keys(koPathu.poruthams.find((p) => p.veto === undefined)!);
 
-  // `bhanga` is ABSENT on most yogas, which is two key sequences.
   const koShadbala = computeShadbala(chartWhen, chartLoc);
   const koYogas = computeYogas(chartD1, { navamsa: chartD9 });
   const koBhangaWhen = new Date(2823780783177);
@@ -2385,20 +2407,14 @@ function writeKeyOrderGolden(): void {
       'YogaWithBhanga unpinned',
     );
   }
-  // The `argala` default arm has NO `trikona` key at all, a different shape from
-  // one whose `trikona` is null.
   published['ArgalaPerBhavaWithoutTrikona'] = Object.keys(computeArgala(chartD1)[0]!);
   published['AshtakavargaResultWithoutReduced'] = Object.keys(computeAshtakavarga(chartD1));
 
-  // `AntarDasha` and `PratyantarDasha` carry the same three keys but are
-  // distinct types, so both are recorded.
   const koDashaWhen = new Date(Date.UTC(1990, 5, 15, 10, 30));
   const koDashaLoc = { latitude: 18.5204, longitude: 73.8567 };
   const koVim = computeVimshottariDashaFromBirth(koDashaWhen);
   published['VimshottariDashaResult'] = Object.keys(koVim);
   published['MahaDasha'] = Object.keys(koVim.mahaDashas[0]!);
-  // The SECOND mahadasha: the first is the clipped balance, whose antardasha
-  // list can be as short as one entry.
   published['AntarDasha'] = Object.keys(koVim.mahaDashas[1]!.antarDashas[0]!);
   published['PratyantarDasha'] = Object.keys(
     computeVimshottariPratyantar(koVim.mahaDashas[1]!.antarDashas[0]!)[0]!,
@@ -2414,7 +2430,6 @@ function writeKeyOrderGolden(): void {
   published['NarayanDashaResult'] = Object.keys(koNarayan);
   published['NarayanMahaDasha'] = Object.keys(koNarayan.mahaDashas[0]!);
 
-  // `computeSadeSati` returns from TWO object literals, one per arm.
   const koSadeActive = computeSadeSati(0, new Date(Date.UTC(1943, 6, 1)));
   const koSadeInactive = computeSadeSati(6, new Date(Date.UTC(1943, 6, 1)));
   if (!koSadeActive.active || koSadeInactive.active) {
@@ -2426,20 +2441,16 @@ function writeKeyOrderGolden(): void {
   published['SadeSatiInfo'] = Object.keys(koSadeActive);
   published['SadeSatiInfoInactive'] = Object.keys(koSadeInactive);
 
-  // `makeUpagrahaPos` builds every position, so one sample answers for all.
   const koUpa = computeUpagrahas(new Date(Date.UTC(1995, 7, 15, 5, 30)), CHART_LOCS[0]!);
   published['Upagrahas'] = Object.keys(koUpa);
   published['UpagrahaPosition'] = Object.keys(koUpa.gulika);
 
-  // `sahams` key order is `ALL_SAHAM_NAMES`, not the type declaration's.
   const koVarsha = computeVarshaphala(new Date(Date.UTC(1995, 7, 15, 5, 30)), 30, CHART_LOCS[0]!);
   published['VarshaphalaChart'] = Object.keys(koVarsha);
   published['MunthaInfo'] = Object.keys(koVarsha.muntha);
   published['Sahams'] = Object.keys(koVarsha.sahams);
   published['SahamPosition'] = Object.keys(koVarsha.sahams.Punya);
 
-  // `KpByHouse`'s keys are NUMBERS: JavaScript lists integer-like keys in
-  // ascending numeric order while Go's `encoding/json` sorts map keys as strings.
   const koKpChart = computeRashiChart(new Date(CHART_EVENTS[0]!.ms), CHART_EVENTS[0]!.loc);
   const koKpCuspal = computeKpCuspalSubLords(new Date(CHART_EVENTS[0]!.ms), CHART_EVENTS[0]!.loc);
   const koKpSig = computeKpSignificators(koKpChart);
@@ -2451,8 +2462,6 @@ function writeKeyOrderGolden(): void {
   published['TithiPraveshaChart'] = Object.keys(
     computeTithiPravesha(new Date(Date.UTC(1995, 7, 15, 5, 30)), 30, CHART_LOCS[0]!));
 
-  // The `computeEndTimes: false` arm must emit the same key order as the
-  // end-times path, checkable only on this side.
   for (const field of ['tithis', 'nakshatras', 'yogas', 'karanas'] as const) {
     const on = Object.keys(daily.angas[field][0]!).join(',');
     const off = Object.keys(bareDaily.angas[field][0]!).join(',');
@@ -2488,9 +2497,6 @@ function writeKeyOrderGolden(): void {
     `${Object.keys(published).length} published shapes)\n`,
   );
 }
-
-// The Dur Muhurta rows are ragged (Tuesday alone has a night window) and the
-// Panchaka type table has two weekdays deliberately unnamed.
 
 function writeWindowsGolden(): void {
   const inauspicious = slotDayCases().flatMap((c) =>
@@ -2569,9 +2575,6 @@ function writeWindowsGolden(): void {
   );
 }
 
-// These solve for published instants over the real Moon, so they get the 1 ms
-// band. Bhadra is the most demanding: four solves plus a 24-point scan.
-
 function writeBigWindowsGolden(): void {
   const moonAt = (d: Date): number => getSiderealMoonLongitude(d, 'lahiri');
   const sunAt = (d: Date): number => getSiderealSunLongitude(d, 'lahiri');
@@ -2579,9 +2582,6 @@ function writeBigWindowsGolden(): void {
   const locName = (k: 'earth' | 'heaven' | 'paatal'): string =>
     getTranslations('en').bhadraLocationNames[k];
 
-  // The span must be this long to reach a multi-segment vasa: the piecewise walk
-  // needs the Moon to change rashi inside a window of 17 h or less, and a
-  // four-month sample produces zero of them.
   const days: unknown[] = [];
   for (let i = 0; i < 400; i++) {
     const sunrise = new Date(BASE + i * 86_400_000);
@@ -2604,9 +2604,6 @@ function writeBigWindowsGolden(): void {
       },
       varjyam: computeVarjyamWindows(sunrise, nextSunrise, moonAt)
         .map((w) => ({ start: w.start.getTime(), end: w.end.getTime() })),
-      // `computeVarjyam` is the older single-window primitive: it reads only the
-      // sunrise nakshatra, and it gates on overlap rather than on the start falling
-      // inside the day.
       nakshatraIndex: getNakshatraIndexAtTime(sunrise, moonAt),
       varjyamSingle: ((w) => (w === null ? null : { start: w.start.getTime(), end: w.end.getTime() }))(
         computeVarjyam(getNakshatraIndexAtTime(sunrise, moonAt), sunrise, nextSunrise, moonAt),
@@ -2616,7 +2613,6 @@ function writeBigWindowsGolden(): void {
     });
   }
 
-  // Awkward day shapes, so the divisions by 15 and 30 do not divide evenly.
   const win = (w: { start: Date; end: Date } | null): unknown =>
     w === null ? null : { start: w.start.getTime(), end: w.end.getTime() };
   const muhurtas = slotDayCases().flatMap((c) =>
@@ -2635,8 +2631,6 @@ function writeBigWindowsGolden(): void {
     })),
   );
 
-  // Storing every firing would be a 15 MB golden, so a digest plus per-type
-  // counts and a few samples stands in.
   const yogaHash = createHash('sha256');
   const perType = new Map<string, number>();
   const samples: unknown[] = [];
@@ -2784,7 +2778,6 @@ function writeJyotishFoundationsGolden(): void {
       });
     }
   }
-  // Pins the `?? '7-only'` fallback, not only the explicit spelling.
   const aspectsDefault = computeAspects(
     {
       planets: GRAHAS.map((planet, i) => ({
@@ -2856,9 +2849,6 @@ function writeJyotishFoundationsGolden(): void {
     `wrote foundations-golden.json (${dignity.length} dignity, ${aspects.length} aspect charts)\n`,
   );
 }
-
-// `retrogradeDeltas` is carried explicitly so the Go side can state the margin
-// by which the sign is safe rather than merely observe that it agrees.
 
 const CHART_SEED = 0xC4A27500 >>> 0;
 const CHART_MS_LO = Date.UTC(1900, 0, 1), CHART_MS_HI = Date.UTC(2100, 0, 1);
@@ -2977,8 +2967,6 @@ function writeChartsFoundationGolden(): void {
     }));
   }
 
-  // Reykjavik is excluded: at 64.1 deg N `findSunriseBefore` can hit a polar day
-  // inside the span and throw, and a golden of thrown errors pins the wrong thing.
   const specialInstants = chartInstants(0x5EC1, SPECIAL_SAMPLES);
   const specialLocs = CHART_LOCS.filter((l) => Math.abs(l.latitude) < 60);
   const special: Record<string, unknown[]> = {};
@@ -3004,9 +2992,6 @@ function writeChartsFoundationGolden(): void {
     true: computePlanetaryPositions(new Date(ms), 'lahiri', undefined, undefined, 'true'),
   }));
 
-  // Enough explicit node values to measure the true node's divergence. With far
-  // fewer the two sines agree on every one and the bound test reports a worst
-  // case of zero, which is not a measurement.
   const nodeCaseInstants = nodeInstants.slice(0, 400);
   const nodeCases = nodeCaseInstants.map((ms) => {
     const mean = computePlanetaryPositions(new Date(ms), 'lahiri', undefined, undefined, 'mean');
@@ -3097,11 +3082,6 @@ function writeChartsFoundationGolden(): void {
     `${CHART_LOCS.length} lagna locations, ${positions.length} position sets)\n`,
   );
 }
-
-// `NAV_SPAN = 30/9`, `SAPTAMSA_SPAN = 30/7` and `DWADASAMSA_SPAN = 30/12` are
-// all integer division in Go, and all three become plausible-looking wrong
-// charts rather than errors. Placidus can fail two ways: CIRCUMPOLAR, a
-// property of the latitude, and PLACIDUS_DIVERGED, a property of the solver.
 
 const VARGA_SEED = 0xD1D9A250 >>> 0;
 const VARGA_MS_LO = Date.UTC(1900, 0, 1), VARGA_MS_HI = Date.UTC(2100, 0, 1);
@@ -3214,7 +3194,6 @@ function writeVargasGolden(): void {
     navamsa: computeNavamsa(new Date(e.ms), e.loc),
   }));
 
-  // Invariants, so this digest is over integers and must match exactly.
   const houseDigest = digestOver(chartInstantsList, (ms) => {
     const c = computeRashiChart(new Date(ms), { latitude: 18.5204, longitude: 73.8567 });
     let acc = 0;
@@ -3293,9 +3272,6 @@ function writeVargasGolden(): void {
   );
 }
 
-// The one float path is Kaal Sarp's arc test, and that is a comparison, so it
-// is an invariant rather than a bound.
-
 const RULES_SEED = 0xA5474A1A >>> 0;
 const RULES_MS_LO = Date.UTC(1900, 0, 1), RULES_MS_HI = Date.UTC(2100, 0, 1);
 const RULES_CHART_SAMPLES = 200;
@@ -3359,7 +3335,6 @@ function writeChartRulesGolden(): void {
     };
   });
 
-  // Matches the parity dump's `chartPairs`, so the two agree on inputs.
   const pairs = events.map((a, i) => {
     const b = events[(i + 1) % events.length]!;
     return {
@@ -3476,11 +3451,6 @@ function writeChartRulesGolden(): void {
   );
 }
 
-// `matching.ts` interpolates a NUMERIC graha index into one of the published
-// descriptions ("Same rashi-lord (graha 2)"), so a Go port that rendered the
-// name instead would be an improvement and a parity break; every description
-// string is compared exactly.
-
 const MATCH_SEED = 0x36C05EED >>> 0;
 
 function allNatalMoons(): { rashi: number; nakshatra: number }[] {
@@ -3505,15 +3475,11 @@ function matchPairs(): { label: string; boy: MatchNatalMoon; girl: MatchNatalMoo
   ];
   for (const [label, boy, girl] of named) out.push({ label, boy, girl });
 
-  // The optional NatalMoon fields, which only fire when BOTH natives carry them.
   out.push({
     label: 'opt-same-lagna-lord',
     boy: { rashi: 0, nakshatra: 3, lagnaRashi: 0, navamsaRashi: 3, nakshatraPada: 1 },
     girl: { rashi: 5, nakshatra: 20, lagnaRashi: 7, navamsaRashi: 9, nakshatraPada: 4 },
   });
-  // Cancer (3) and Leo (4) as lagnas is the ONLY shape that reaches this branch:
-  // their lords are Moon and Sun, so the same-lagna-lord rule above does not
-  // fire, while the 7th from each is co-ruled by Saturn.
   out.push({
     label: 'opt-same-seventh-lord',
     boy: { rashi: 0, nakshatra: 3, lagnaRashi: 3, navamsaRashi: 2 },
@@ -3567,8 +3533,6 @@ function writeMatchingGolden(): void {
     pathuPorutham: computePathuPorutham(p.boy, p.girl),
   }));
 
-  // Folded modulo a small prime at every step so no intermediate leaves the
-  // exact-integer range.
   const DIGEST_MOD = 1_000_003;
   const moons = allNatalMoons();
   const domainIndices: number[] = [];
@@ -3642,11 +3606,6 @@ function writeMatchingGolden(): void {
   );
 }
 
-// `naisargika`, `drekkana`, `ojhaYugma` and `saptavargaja` are table lookups
-// and floors over rashi indices, so they are exact where the rest is bounded.
-// A disagreement in the exact half is a defect and not rounding, so the Go
-// test asserts equality there rather than hiding it under `total`.
-
 const SHADBALA_SEED = 0x5AD8A1A0 >>> 0;
 const SHADBALA_MS_LO = Date.UTC(1900, 0, 1), SHADBALA_MS_HI = Date.UTC(2100, 0, 1);
 const SHADBALA_SAMPLES = 60;
@@ -3654,9 +3613,6 @@ const SHADBALA_SAMPLES = 60;
 function writeShadbalaGolden(): void {
   const events = CHART_EVENTS.map((e) => ({ name: e.name, ms: e.ms, loc: e.loc }));
 
-  // Reykjavik at 64.15N can hit a polar day inside the span, where
-  // `computeShadbala` throws from `computeSunrise` (Nathonatha needs a sunrise),
-  // so the events are wrapped and the sweep below is at Pune.
   const perEvent = events.map((e) => {
     try {
       return {
@@ -3680,7 +3636,6 @@ function writeShadbalaGolden(): void {
     bhavaBala: computeBhavaBala(new Date(ms), pune),
   }));
 
-  // Every graha in every rashi, so every ojha/yugma combination is hit.
   const ojha: { rashi: number; values: Record<string, number> }[] = [];
   for (let rashi = 0; rashi < 12; rashi++) {
     const values: Record<string, number> = {};
@@ -3743,10 +3698,6 @@ function writeShadbalaGolden(): void {
   );
 }
 
-// The risk in the yoga catalog is a rule that never runs and is therefore
-// compared to nothing, so the Go side asserts that EVERY catalog entry fired
-// at least once.
-
 const YOGA_SEED = 0x40A5CA7E >>> 0;
 const YOGA_MS_LO = Date.UTC(1900, 0, 1), YOGA_MS_HI = Date.UTC(2100, 0, 1);
 const YOGA_SAMPLES = 400;
@@ -3769,7 +3720,6 @@ function writeYogasGolden(): void {
     instants.push(Math.floor(YOGA_MS_LO + u * (YOGA_MS_HI - YOGA_MS_LO)));
   }
 
-  // Carried explicitly, so every published reason string is compared.
   const sweep = instants.map((ms, i) => {
     const loc = locs[i % locs.length]!;
     const chart = computeRashiChart(new Date(ms), loc);
@@ -3788,7 +3738,6 @@ function writeYogasGolden(): void {
   const filterNavamsa = computeNavamsa(new Date(filterAt), filterLoc);
   const byType = Object.fromEntries(ALL_YOGA_TYPES.map((t) => [t,
     computeYogas(filterChart, { types: [t], navamsa: filterNavamsa })]));
-  // An empty filter means "no filter at all" rather than "match nothing".
   const twoTypes = computeYogas(filterChart, { types: ['raja', 'dhana'], navamsa: filterNavamsa });
   const emptyFilter = computeYogas(filterChart, { types: [], navamsa: filterNavamsa });
 
@@ -3838,13 +3787,6 @@ function writeYogasGolden(): void {
     `${fired.size} distinct yogas fired)\n`,
   );
 }
-
-// Every dasha result below is taken as of a fixed `asOfDate`, so Go must pass
-// the same instant as its `asOfMs`. Period boundaries are
-// `new Date(cursor + durationMs)` over a float `durationMs`, which differs
-// between languages by at most an ULP (~5e-4 ms at 4e12 ms) before `new Date()`
-// truncates, so truncation absorbs it UNLESS the float lands within an ULP of
-// an exact integer.
 
 const DASHA_SEED = 0xDA54A000 >>> 0;
 const DASHA_MS_LO = Date.UTC(1900, 0, 1), DASHA_MS_HI = Date.UTC(2100, 0, 1);
@@ -4018,7 +3960,6 @@ function writeDashaGolden(): void {
     const narFP = pinCurrent('computeNarayanDasha(fixed)', narF, ms);
     const narVP = pinCurrent('computeNarayanDasha(variable)', narV, ms);
 
-    // The SECOND mahadasha's first antardasha: the first mahadasha's is clipped.
     const ad = vim.mahaDashas[1]!.antarDashas[0]!;
     return {
       ms,
@@ -4052,7 +3993,6 @@ function writeDashaGolden(): void {
       moonLon: lon,
       nakIdx: nakshatraOf(lon),
       vimshottari: vim,
-      // Says whether the balance method was ported or the proportional one.
       firstMahaAntarCount: vim.mahaDashas[0]!.antarDashas.length,
       ashtottari: ash,
       yogini: yog,
@@ -4060,9 +4000,6 @@ function writeDashaGolden(): void {
   });
 
   const pratBirth = new Date(boundaryBirthMs);
-  // The Go side must feed `computeVimshottariDasha` THIS longitude, not its own,
-  // or an ULP-level ephemeris difference shows up here as a dasha defect. The
-  // ephemeris-fed path is pinned separately by `fromBirth`.
   const boundaryBirthMoonLon = getSiderealMoonLongitude(pratBirth, 'lahiri');
   const pratVim = computeVimshottariDasha(pratBirth, boundaryBirthMoonLon, DASHA_AS_OF);
   const pratyantarAll = [0, 1].flatMap((m) =>
@@ -4093,7 +4030,6 @@ function writeDashaGolden(): void {
       { duration: 'variable', asOfDate: DASHA_AS_OF }),
   }));
 
-  // The three instants that decide `>= start` and `< end`.
   const bp = sweep[0]!.vimshottari['mahaDashas'] as unknown as { startDate: Date; endDate: Date }[];
   const halfOpenPins: { pinMs: number; index: number }[] = [];
   for (const k of [0, 1, 8]) {
@@ -4130,8 +4066,6 @@ function writeDashaGolden(): void {
     samples: DASHA_SAMPLES,
     msLo: DASHA_MS_LO,
     msHi: DASHA_MS_HI,
-    // Every location the sweep names, so the Go side resolves a name to
-    // coordinates from the golden rather than from a second hand-typed copy.
     locations: [
       ...locs,
       ...CHART_EVENTS.map((e) => e.loc).filter((l) => !locs.some((x) => x.name === l.name)),
@@ -4176,18 +4110,10 @@ function writeDashaGolden(): void {
   );
 }
 
-// Two traps in `sadeSati.ts`. Its iteration bounds are non-integral: `10950 / 7`
-// is 1564.2857 and `i < maxIters` runs 1565 iterations, where a Go port using
-// int constants divides to 1564 and loses the last step. And `findNextEntry`
-// assigns a FRACTIONAL midpoint back into `lo` or `hi`, where int64 endpoints
-// would floor at every step and converge somewhere else.
-
 const SADESATI_MS_LO = Date.UTC(1930, 0, 1), SADESATI_MS_HI = Date.UTC(2070, 0, 1);
 const SADESATI_SAMPLES = 24;
 
 function writeSadeSatiGolden(): void {
-  // A regular grid, not a seeded one: against Saturn's 29.5-year cycle an even
-  // spread reaches every phase for every natal rashi, where a draw could clump.
   const instants: number[] = [];
   for (let i = 0; i < SADESATI_SAMPLES; i++) {
     instants.push(Math.floor(
@@ -4201,7 +4127,6 @@ function writeSadeSatiGolden(): void {
     }
   }
 
-  // The boundary is FOUND rather than hardcoded: `active` must flip exactly once.
   const walkRashi = 0;
   let anchor: number | null = null;
   for (const ms of instants) {
@@ -4217,7 +4142,6 @@ function writeSadeSatiGolden(): void {
     walk.push({ ms, result: computeSadeSati(walkRashi, new Date(ms)) });
   }
 
-  // A different ayanamsa moves the arcs: ~1.5 deg is ~18 days of Saturn.
   const ayanamsaAt = instants[Math.floor(SADESATI_SAMPLES / 2)]!;
   const byAyanamsa = (['lahiri', 'raman', 'krishnamurti', 'true-chitra', 'thirukanitham'] as const)
     .map((a) => ({ ayanamsa: a, result: computeSadeSati(3, new Date(ayanamsaAt), a) }));
@@ -4277,13 +4201,6 @@ function writeSadeSatiGolden(): void {
   );
 }
 
-// Three integer-division traps in `upagrahas.ts`. `DHUMA_OFFSET_DEG` and
-// `UPAKETU_OFFSET_DEG` fold to 133 and 16 in a Go int transcription, deleting
-// the arcminute term outright while staying plausible. `segLen = dayMs / 8` is
-// a float that truncates once, later, where an int64 segment length floors
-// first. And `(location.longitude / 15) * 3600_000` divides AND feeds an
-// addition.
-
 const UPAGRAHA_SEED = 0x0BA9AA11 >>> 0;
 const UPAGRAHA_MS_LO = Date.UTC(1900, 0, 1), UPAGRAHA_MS_HI = Date.UTC(2100, 0, 1);
 const UPAGRAHA_SAMPLES = 60;
@@ -4297,15 +4214,9 @@ function writeUpagrahaGolden(): void {
     { name: 'newyork', latitude: 40.7128, longitude: -74.006 },
     { name: 'sydney', latitude: -33.8688, longitude: 151.2093 },
     { name: 'reykjavik', latitude: 64.1466, longitude: -21.9426 },
-    // Longyearbyen is the only location here above the Arctic Circle, so the only
-    // one that makes `computeSunrise` / `computeSunset` throw. Reykjavik is 2.4
-    // deg short of it and never loses a sunrise.
     { name: 'longyearbyen', latitude: 78.2232, longitude: 15.6267 },
   ];
 
-  // Tokyo and Pune sit east of ~82 E, where local sunrise can fall before 00:00
-  // UTC and `getUTCDay()` on the raw sunrise names yesterday. Drop the LMT shift
-  // and they take the wrong Gulika slot, ~15-25 deg of ascendant.
   const walkStart = Date.UTC(2024, 2, 1);
   const cases: { ms: number; loc: string }[] = [];
   for (const loc of locs) {
@@ -4315,7 +4226,6 @@ function writeUpagrahaGolden(): void {
       }
     }
   }
-  // Midsummer and midwinter, where the Sun neither rises nor sets.
   for (const d0 of [Date.UTC(2024, 5, 15), Date.UTC(2024, 11, 15)]) {
     for (let d = 0; d < 6; d++) {
       cases.push({ ms: d0 + d * 86400_000 + 12 * 3600_000, loc: 'longyearbyen' });
@@ -4328,21 +4238,15 @@ function writeUpagrahaGolden(): void {
     });
   }
 
-  // Both the failure AND its code are pinned: a Go port returning a zero-valued
-  // result would otherwise look identical to a case that was simply skipped.
   const sweep = cases.map((c) => {
     const loc = locs.find((l) => l.name === c.loc)!;
     try {
       const seg = _locateGulikaSegmentForTest(new Date(c.ms), loc);
-      // The EFFECTIVE day/night boundary, from `lagna.ts`'s `findSunriseBefore`,
-      // character-identical to `upagrahas.ts`'s own copy.
       const baseSunrise = findSunriseBefore(new Date(c.ms), loc);
       const baseSunset = computeSunset(baseSunrise, loc);
       return {
         ms: c.ms, loc: c.loc, ok: true,
         day: c.ms < baseSunset.getTime(),
-        // The other horizon convention, the Sun's apparent CENTRE, kept so the two can
-        // be compared over the 65-404 s window where they disagree.
         apparentCentreUp: isSunAboveHorizon(new Date(c.ms), loc),
         segmentStart: seg.start,
         segmentMidpoint: seg.midpoint,
@@ -4363,7 +4267,6 @@ function writeUpagrahaGolden(): void {
       ayanamsa, result: computeUpagrahas(new Date(optAt), optLoc, { ayanamsa }),
     }));
   const defaults = computeUpagrahas(new Date(optAt), optLoc);
-  // `houseSystem` is documented as ignored; pinned so that is checkable.
   const withPlacidus = computeUpagrahas(new Date(optAt), optLoc, { houseSystem: 'placidus-kp' });
 
   const file = {
@@ -4416,14 +4319,6 @@ function writeUpagrahaGolden(): void {
     `conventions disagree)\n`,
   );
 }
-
-// Three traps in `varshaphala.ts`. `SUN_DEG_PER_DAY = 360 / 365.25636` folds to
-// `0.98560912122105137634` as an untyped Go constant and
-// `0.98560912122105148736` in JavaScript, one ULP apart; the golden carries the
-// JavaScript value so the Go side asserts it rather than deriving it.
-// `findSolarReturn` keeps `t` as a float across every iteration. And
-// `evaluateSaham` adds 30 deg when Z does not fall in the arc from Y to X,
-// which omitted leaves half of all published Sahams one sign short.
 
 const VARSHA_SEED = 0x7A11C000 >>> 0;
 const VARSHA_MS_LO = Date.UTC(1930, 0, 1), VARSHA_MS_HI = Date.UTC(2010, 0, 1);
@@ -4481,7 +4376,6 @@ function writeVarshaphalaGolden(): void {
     });
   }
 
-  // Punya is supplied to the rows that reference it.
   const sahamAt = births[0]!;
   const sahamLoc = locs[0]!;
   const sahamChart = computeRashiChart(
@@ -4528,8 +4422,6 @@ function writeVarshaphalaGolden(): void {
     ages: VARSHA_AGES,
     locations: locs,
     siderealYearDays: 365.25636,
-    // The JavaScript value of `360 / SIDEREAL_YEAR_DAYS`, NOT the
-    // arbitrary-precision fold of the decimals.
     sunDegPerDay: 360 / 365.25636,
     sahamNames: ALL_SAHAM_NAMES,
     sahamFormulas: SAHAM_FORMULAS.map((f) => ({
@@ -4558,17 +4450,9 @@ function writeVarshaphalaGolden(): void {
   );
 }
 
-
 const VISIBLE_INDEX: Record<string, number> = {
   Sun: 0, Moon: 1, Mars: 2, Mercury: 3, Jupiter: 4, Venus: 5, Saturn: 6,
 };
-
-// The natal-sign correction shifts `tithiPravesha` by a synodic month when the
-// first answer lands in the wrong sign, so the inner search is pinned apart
-// from the wrapper. `kpSubLord.ts` publishes `byHouse` keyed by a NUMBER, which
-// JavaScript emits in ascending numeric order and Go's `encoding/json` would
-// emit as strings. `prashna.ts` is pinned against the same call with explicit
-// options: the only way to tell a default from a force.
 
 const KP_SWEEP_STEP = 0.001;
 const KP_BOUNDARY_EPS = 1e-9;
@@ -4607,10 +4491,6 @@ function writeKpAndPraveshaGolden(): void {
     subLord: digestOver(sub, (v) => v),
   };
 
-  // Every sub-boundary, probed a nanodegree either side. The offsets are PER
-  // NAKSHATRA: nakshatra k's sub-divisions start from `NAKSHATRA_LORD[k]`, so
-  // they coincide with `_SUB_CUMULATIVE_WIDTHS_FOR_TEST` only when `k % 9 === 0`,
-  // and the shared table would yield probes that straddle nothing.
   const subCumFor = (k: number): number[] => {
     const startIdx = DASHA_ORDER.indexOf(NAKSHATRA_LORD[k]!);
     const out: number[] = [];
@@ -4651,8 +4531,6 @@ function writeKpAndPraveshaGolden(): void {
         code: (err as { code?: string }).code ?? null };
     }
   });
-  // `houseSystem` is forced and `ayanamsa` is a default, and that difference is
-  // the whole content of the options handling.
   const kpOptionArms = {
     bare: computeKpCuspalSubLords(new Date(CHART_EVENTS[0]!.ms), CHART_EVENTS[0]!.loc),
     wholeSignRequested: computeKpCuspalSubLords(
@@ -4695,7 +4573,6 @@ function writeKpAndPraveshaGolden(): void {
     }
   });
 
-  // A bare call must differ from an explicit one, or the wrapper does nothing.
   const prashnaAt = Date.UTC(2026, 4, 9, 14, 30);
   const prashnaLoc = { name: 'mumbai', latitude: 19.076, longitude: 72.8777 };
   const prashna = {
@@ -4761,12 +4638,6 @@ function writeKpAndPraveshaGolden(): void {
   );
 }
 
-
-// Every flag here is DERIVED from consecutive sunrise tithis and rise/set
-// searches, so the spans below are real, each chosen for a branch it reaches:
-// shortening one silently stops testing that branch, and the counts are what
-// make that loud. The anchors are digested separately, one of the nine being
-// `new Date(sunset + night*0.3)`, the one FMA site in the file.
 interface DfLocation {
   readonly name: string;
   readonly latitude: number;
@@ -4800,14 +4671,10 @@ const DF_LOCATIONS: readonly DfLocation[] = [
   { name: 'Amritsar', latitude: 31.634, longitude: 74.8723, timezone: 'Asia/Kolkata', from: [2027, 3, 1], days: 30 },
   { name: 'Amritsar', latitude: 31.634, longitude: 74.8723, timezone: 'Asia/Kolkata', from: [2028, 3, 1], days: 30 },
   { name: 'Amritsar', latitude: 31.634, longitude: 74.8723, timezone: 'Asia/Kolkata', from: [2029, 3, 1], days: 30 },
-  // Lohri and Pahili/Basi Raja are day-before / day-after markers.
   { name: 'Amritsar', latitude: 31.634, longitude: 74.8723, timezone: 'Asia/Kolkata', from: [2026, 0, 1], days: 31 },
   { name: 'Bhubaneswar', latitude: 20.2961, longitude: 85.8245, timezone: 'Asia/Kolkata', from: [2026, 5, 1], days: 30 },
   { name: 'Sydney', latitude: -33.8688, longitude: 151.2093, timezone: 'Australia/Sydney', from: [2026, 0, 1], days: 365 },
   { name: 'Reykjavik', latitude: 64.1466, longitude: -21.9426, timezone: 'Atlantic/Reykjavik', from: [2026, 0, 1], days: 365 },
-  // Long spans, because the polar catch sites are reached only in the
-  // two-or-three-day windows where polar night or midnight sun begins, and only
-  // when the day's own triple still resolves. `polarHits` keeps that honest.
   { name: 'Longyearbyen', latitude: 78.2232, longitude: 15.6267, timezone: 'Arctic/Longyearbyen', from: [2024, 0, 1], days: 4383 },
   { name: 'Alert', latitude: 82.5018, longitude: -62.3481, timezone: 'America/Toronto', from: [2024, 0, 1], days: 2192 },
 ] as const;
@@ -4855,8 +4722,6 @@ function writeDayFestivalsGolden(): void {
   const polarHits: Record<string, number> = {
     tomorrowSunset: 0, dayAfterSunrise: 0, dayBeforeYesterday: 0, reached: 0,
   };
-  // These fire nearly daily, so excluding them keeps the explicit-case list a
-  // bisection aid rather than a copy of the sweep.
   const ROUTINE = new Set(['masik_karthigai', 'pradosha', 'sankranti']);
 
   let totalDays = 0;
@@ -4865,8 +4730,6 @@ function writeDayFestivalsGolden(): void {
   for (const loc of DF_LOCATIONS) {
     const geo = { latitude: loc.latitude, longitude: loc.longitude };
     const base = Date.UTC(loc.from[0], loc.from[1], loc.from[2], 6, 0, 0, 0);
-    // The narrow regions ride the April and January/June windows, where every
-    // regionally-gated rule lives.
     const regions: readonly string[] = loc.days <= 40 ? DF_REGIONS : ['all'];
     for (let i = 0; i < loc.days; i++) {
       const ms = base + i * 86_400_000;
@@ -4887,8 +4750,6 @@ function writeDayFestivalsGolden(): void {
               anchors: null, festivals: null, outcome: 'null',
             };
           } else {
-            // The same triple `getDailyPanchang` derived internally, redone here so the
-            // anchors can be pinned.
             const sunrise = computeSunrise(
               getLocalMidnightUtc(date, resolveUtcOffset(loc.timezone, date)), geo);
             const sunset = computeSunset(sunrise, geo);
@@ -4999,8 +4860,6 @@ function dfProbePolar(
       hits['dayAfterSunrise'] = (hits['dayAfterSunrise'] ?? 0) + 1;
     }
   }
-  // The D-2 site sits behind an unguarded `computeSunrise`, so it cannot be
-  // probed separately. What is probed is the pair the catch actually wraps.
   try {
     const yesterdaySunrise = computeSunrise(
       new Date(sunrise.getTime() - 24 * 3600_000 - 2 * 3600_000), geo);
@@ -5015,7 +4874,6 @@ function dfProbePolar(
 function dfIsoDay(ms: number): string {
   return new Date(ms).toISOString().slice(0, 10);
 }
-
 
 /**
  * The Mesha catch needs a station whose midnight sun has begun by April 14:
@@ -5141,9 +4999,6 @@ function writeYearlyGolden(): void {
       if (typeof c.eclipses === 'string') h.update(`X:${c.eclipses} `);
       else {
         for (const e of c.eclipses) {
-          // `obscuration` and `magnitude` are deliberately NOT in the digest: both end in
-          // the platform's asin/sqrt. They ride in `cases` and are checked against the
-          // numeric band instead.
           h.update(`${e.kind}/${e.subtype}/${e.start}/${e.peak}/${e.end}/` +
             `${e.visible ? 1 : 0}/${e.sutakStart ?? 'n'}/${e.sutakEnd ?? 'n'};`);
         }
@@ -5152,13 +5007,10 @@ function writeYearlyGolden(): void {
     }
   }
 
-  // A date that fails to come back is a masa-anchor or samvat bug.
   for (const loc of CAL_LOCATIONS) {
     const geo = { latitude: loc.latitude, longitude: loc.longitude };
     const opts = { timezone: loc.timezone };
     for (const year of loc.years) {
-      // A stride coprime with the ~29.53-day lunation, so the sweep walks the tithi
-      // cycle rather than landing on the same phase every time.
       for (let day = 1; day <= 365; day += 29) {
         const ms = Date.UTC(year, 0, 1) + (day - 1) * 86_400_000;
         const key = `${loc.name}|${calIsoDay(ms)}`;
@@ -5205,8 +5057,6 @@ function writeYearlyGolden(): void {
     }
   }
 
-  // Wide enough that the four Mesha day-rules and the Chaitra sweep each see
-  // transit moments from pre-dawn through post-sunset.
   const newYears: unknown[] = [];
   for (const loc of [CAL_LOCATIONS[0]!, CAL_LOCATIONS[1]!, CAL_LOCATIONS[5]!]) {
     const geo = { latitude: loc.latitude, longitude: loc.longitude };
@@ -5222,7 +5072,6 @@ function writeYearlyGolden(): void {
     }
   }
 
-  // A count-bounded loop rather than a range-bounded one, so pinned apart.
   const upcoming: unknown[] = [];
   for (const loc of [CAL_LOCATIONS[0]!, CAL_LOCATIONS[3]!, CAL_LOCATIONS[4]!]) {
     const geo = { latitude: loc.latitude, longitude: loc.longitude };
@@ -5327,8 +5176,6 @@ function calCountGuards(
     }
   }
 
-  // Only the two sunrise-relative Mesha rules reach this; `civil-day` and
-  // `civil-day-plus-1` return before the try block.
   hits['meshaSolarAnchorCalls']!++;
   const aprMs = Date.UTC(year, 3, 14, 6, 0, 0, 0);
   try {
@@ -5346,7 +5193,6 @@ function calCountGuards(
     }
   }
 }
-
 
 /**
  * MUST stay the same literal as `dump.src.ts`'s `PINNED_GENERATED_AT`, or two
@@ -5366,7 +5212,6 @@ const MU_STOCK_IDS: readonly string[] = [
  * count, so an arm that stops being reached moves a number.
  */
 const MU_SYNTHETIC: readonly { id: string; rule: MuhurtaRule }[] = [
-  // The yoga axis, which no stock rule touches, on ranges that fire daily.
   { id: 'syn-yoga', rule: {
     occasion: 'syn-yoga',
     auspiciousYogas: [0, 1, 2, 3, 4, 5, 6, 7],
@@ -5374,17 +5219,12 @@ const MU_SYNTHETIC: readonly { id: string; rule: MuhurtaRule }[] = [
   } },
   { id: 'syn-shukla', rule: { occasion: 'syn-shukla', requirePaksha: 'shukla' } },
   { id: 'syn-krishna', rule: { occasion: 'syn-krishna', requirePaksha: 'krishna' } },
-  // The deprecated boolean with no `bhadra` key is the only way to reach the
-  // `?? (rule.excludeBhadra ? ...)` fallback's true arm.
   { id: 'syn-bhadra-exclude', rule: { occasion: 'syn-bhadra-exclude', bhadra: 'exclude' } },
   { id: 'syn-bhadra-ignore', rule: { occasion: 'syn-bhadra-ignore', bhadra: 'ignore' } },
   { id: 'syn-bhadra-legacy', rule: { occasion: 'syn-bhadra-legacy', excludeBhadra: true } },
-  // Both fields set at once: `bhadra` must win. The one place they interact.
   { id: 'syn-bhadra-both', rule: {
     occasion: 'syn-bhadra-both', bhadra: 'penalize', excludeBhadra: true,
   } },
-  // `varaTithiYogas` defaults to true, so a Go zero value makes every rule
-  // behave like `syn-novty`.
   { id: 'syn-novty', rule: {
     occasion: 'syn-novty', varaTithiYogas: false,
     auspiciousTithis: [0, 5, 10, 15, 20, 25],
@@ -5398,7 +5238,6 @@ const MU_SYNTHETIC: readonly { id: string; rule: MuhurtaRule }[] = [
   { id: 'syn-eclipse', rule: { occasion: 'syn-eclipse', excludeEclipse: true } },
   { id: 'syn-adhika', rule: { occasion: 'syn-adhika', excludeAdhikaMasa: true } },
   { id: 'syn-ekadashi', rule: { occasion: 'syn-ekadashi', excludeEkadashi: true } },
-  // Both overshoot, the only way to reach the scorer's two clamping lines.
   { id: 'syn-clamp-high', rule: {
     occasion: 'syn-clamp-high',
     auspiciousTithis: Array.from({ length: 30 }, (_, i) => i),
@@ -5414,8 +5253,6 @@ const MU_SYNTHETIC: readonly { id: string; rule: MuhurtaRule }[] = [
     inauspiciousYogas: Array.from({ length: 27 }, (_, i) => i),
     bhadra: 'penalize',
   } },
-  // No name, so `meta.occasionName` is absent rather than empty: the one
-  // conditionally-present key in the muhurta table.
   { id: 'syn-unnamed', rule: { occasion: 'syn-unnamed' } },
 ];
 
@@ -5425,11 +5262,9 @@ const MU_SPANS: readonly {
 }[] = [
   { name: 'Pune', latitude: 18.5204, longitude: 73.8567, timezone: 330, from: [2025, 0, 1], days: 60 },
   { name: 'Delhi', latitude: 28.6139, longitude: 77.2090, timezone: 330, from: [2026, 6, 1], days: 60 },
-  // Adhika Chaitra, the only way to reach `excludeAdhikaMasa`.
   { name: 'Delhi', latitude: 28.6139, longitude: 77.2090, timezone: 330, from: [2029, 2, 1], days: 75 },
   { name: 'Chennai', latitude: 13.0827, longitude: 80.2707, timezone: 330, from: [2027, 7, 1], days: 30 },
   { name: 'Sydney', latitude: -33.8688, longitude: 151.2093, timezone: 600, from: [2026, 3, 1], days: 30 },
-  // Polar night, for `no_sunrise`: the only arm that skips scoreFromPanchang.
   { name: 'Longyearbyen', latitude: 78.2232, longitude: 15.6267, timezone: 60, from: [2025, 11, 1], days: 20 },
 ];
 
@@ -5467,7 +5302,6 @@ function writeMuhurtaGolden(): void {
     const r = STOCK_MUHURTA_RULES[id];
     if (!r) throw new Error(`goldens: STOCK_MUHURTA_RULES is missing "${id}"`);
     ruleTable.push({ id, rule: r });
-    // `undefined` is a tag, so an absent field and a falsy one cannot collide.
     rh.update(`${id}|${r.occasion}|${r.name ?? '<none>'}|`);
     for (const k of [
       'auspiciousTithis', 'inauspiciousTithis', 'auspiciousNakshatras',
@@ -5538,8 +5372,6 @@ function writeMuhurtaGolden(): void {
         rule, new Date(Date.UTC(2025, 0, 1)), new Date(Date.UTC(2025, 1, 28)), pune,
         { timezone: 330, includeFailures },
       );
-      // `panchang` is pinned leaf for leaf elsewhere; what is new here is the
-      // selection and the ORDER.
       const flat = days.map(d => `${d.date.getTime()}/${d.score}/${d.passes ? 1 : 0}`);
       rangeCases.push({ key: `${id}|${includeFailures}`, days: flat });
       bh.update(`range ${id}|${includeFailures} ${flat.join(' ')}\n`);
@@ -5657,12 +5489,10 @@ function muCountArms(
     else bump(f.code);
   }
   if (rule.varaTithiYogas === false) bump('vty_suppressed');
-  // The unclamped total: what the scorer added up before `Math.max`/`Math.min`.
   const raw = 50 + r.factors.reduce((a, f) => a + f.delta, 0);
   if (raw < 0) bump('clamp_low');
   if (raw > 100) bump('clamp_high');
 }
-
 
 /**
  * `buildFestivalsTable.ts` writes `name[languages[l]]` in the CALLER's order, so
@@ -5684,9 +5514,6 @@ const TBL_CASES: readonly {
   { key: 'pune-2025-en-only', latitude: 18.5204, longitude: 73.8567, tz: 330, startYear: 2025, endYear: 2025, languages: ['en'] },
   { key: 'pune-2025-hi-only', latitude: 18.5204, longitude: 73.8567, tz: 330, startYear: 2025, endYear: 2025, languages: ['hi'] },
   { key: 'longyearbyen-2025-all', latitude: 78.2232, longitude: 15.6267, tz: 60, startYear: 2025, endYear: 2025, visibleOnly: false },
-  // Eclipse arms an ordinary sweep does not reach: penumbral with no sutak,
-  // invisible, and an EMPTY year, built inside a range so the pre-seeding
-  // guarantee is observable.
   { key: 'alert-2027', latitude: 82.5018, longitude: -62.3481, tz: -300, startYear: 2027, endYear: 2027 },
   { key: 'alert-2027-all', latitude: 82.5018, longitude: -62.3481, tz: -300, startYear: 2027, endYear: 2027, visibleOnly: false },
   { key: 'newyork-2031-2033', latitude: 40.7128, longitude: -74.0060, tz: -300, startYear: 2031, endYear: 2033 },
@@ -5742,15 +5569,10 @@ function writeTablesGolden(): void {
       const json = JSON.stringify(file, null, 2) + '\n';
       shas[name] = createHash('sha256').update(json, 'utf8').digest('hex');
       bytes[name] = Buffer.byteLength(json, 'utf8');
-      // `obscuration` and `magnitude` are the only numbers in these formats that come
-      // out of the ephemeris, and both end in the platform's asin/sqrt, so masking
-      // them turns "byte-identical" into the claim that IS testable.
       masked[name] = createHash('sha256').update(maskEclipseFloats(json), 'utf8').digest('hex');
       h.update(`${c.key}|${name} ${shas[name]} ${bytes[name]} ${masked[name]}\n`);
     }
 
-    // EVERY in-range year: the eclipse-free year is the middle year of a build, so
-    // a first-year-only reader never sees it.
     const y = c.startYear;
     const readOut: Record<string, unknown> = {};
     for (const lang of ['en', 'hi'] as const) {
@@ -5836,9 +5658,6 @@ function writeTablesGolden(): void {
     });
   }
 
-  // No builder emits v1 any more, so the only way to reach `isPacked === false`
-  // is a hand-built v1 file; without it the sniff's dead branch is the
-  // compatibility promise.
   const v1Festivals: FestivalsFileV1 = {
     _meta: {
       referenceLocation: 'v1', latitude: 18.5204, longitude: 73.8567,

@@ -84,8 +84,6 @@ describe('computeGowriPanchangam', () => {
   });
 
   describe('full weekday grid matches the almanac-published Pambu table', () => {
-    // Transcribed from the reference almanac's Gowri Panchangam (Chennai). Tamil:
-    // Uthi→Udyog, Amirdha→Amrit, Rogam→Roga, Laabam→Laabh, Sugam→Shubh, Visham→Kaal, Dhanam→Dhan, Soram→Chal.
     const DAY_GRID = [
       ['Udyog', 'Amrit', 'Roga', 'Laabh', 'Dhan', 'Shubh', 'Chal', 'Kaal'],   // Sun
       ['Amrit', 'Kaal', 'Roga', 'Laabh', 'Dhan', 'Shubh', 'Chal', 'Udyog'],   // Mon
@@ -102,7 +100,6 @@ describe('computeGowriPanchangam', () => {
       ['Udyog', 'Amrit', 'Roga', 'Laabh', 'Dhan', 'Shubh', 'Chal', 'Kaal'],   // Wed
       ['Amrit', 'Kaal', 'Roga', 'Laabh', 'Dhan', 'Shubh', 'Chal', 'Udyog'],   // Thu
       ['Roga', 'Laabh', 'Dhan', 'Shubh', 'Chal', 'Udyog', 'Kaal', 'Amrit'],   // Fri
-      // Saturday night carries Chal twice and no Roga, so no rotation model fits.
       ['Laabh', 'Dhan', 'Shubh', 'Chal', 'Udyog', 'Kaal', 'Amrit', 'Chal'],   // Sat
     ];
     const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

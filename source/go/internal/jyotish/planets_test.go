@@ -167,7 +167,6 @@ func TestRetrogradeFlagsAreFixedWhereTheyShouldBe(t *testing.T) {
 	}
 }
 
-// The ±25° window holds Mars's widest drift and still catches an inversion.
 func TestRetrogradeEpisodesContainAConjunctionOrOpposition(t *testing.T) {
 	ctx := astronomy.NewEphemerisCtx()
 	const (

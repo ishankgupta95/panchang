@@ -120,7 +120,6 @@ describe('findSolarReturn: internal Newton search', () => {
     const tirSun = getSiderealSunLongitude(natal, 'thirukanitham');
     const tLah = findSolarReturn(natal, 5, lahiriSun, 'lahiri');
     const tTir = findSolarReturn(natal, 5, tirSun, 'thirukanitham');
-    // Ayanamsa drift over the year is what the 2 min allows for.
     const diffMin = Math.abs(tLah.getTime() - tTir.getTime()) / 60_000;
     expect(diffMin).toBeLessThan(2.0);
   });
@@ -152,7 +151,6 @@ describe('Muntha: rashi advance', () => {
     const v = computeVarshaphala(utc, 12, loc);
     const natalLagna = computeLagna(utc, loc, 'lahiri');
     expect(v.muntha.rashi).toBe(natalLagna.rashi.index);
-    // Sachin's natal lagna is Simha (rashi 4), whose lord is the Sun.
     expect(v.muntha.lord).toBe('Sun');
   });
 
@@ -238,8 +236,6 @@ describe('SAHAM_FORMULAS: structural integrity', () => {
   });
 
   it('every (x, y, z, swap) tuple is unique except documented classical aliases', () => {
-    // The Encyclopedia gives Pitri the same form as Rajya; the two are
-    // interpreted distinctly.
     const tuples = SAHAM_FORMULAS.map((f) => `${f.x}|${f.y}|${f.z}|${f.swap}`);
     const knownAliases = 1;
     expect(new Set(tuples).size).toBe(tuples.length - knownAliases);
@@ -253,8 +249,6 @@ describe('SAHAM_FORMULAS: structural integrity', () => {
   });
 
   it('Sahams with day/night swap match the Tag-to-Adawal Encyclopedia pin', () => {
-    // Source: Tag-to-Adawal Encyclopedia of Vedic Astrology, Tajika Shastra
-    // Ch. V Pt. 2.
     const expectedSwapped = new Set<SahamName>([
       'Punya', 'Vidya', 'Yasas', 'Mitra', 'Karma', 'Roga',
       'Rajya', 'Bandhu', 'Gnati', 'Matri', 'Pitri', 'Susha',
@@ -406,7 +400,6 @@ describe('Saham evaluation: Punya / Vidya hand-checks', () => {
 
 describe('isDayBirth: geometric Sun-above-horizon', () => {
   it('noon at equator on equinox → day', () => {
-    // 2025-03-20 is the vernal equinox.
     const noon = new Date('2025-03-20T12:00:00Z');
     expect(_isDayBirthForTest(noon, { latitude: 0, longitude: 0 })).toBe(true);
   });
@@ -442,16 +435,12 @@ describe('Fixture sweep: structural invariants on 5 R-tier charts', () => {
   });
 
   it.each(FIXTURE_NAMES)('%s: yearLord is Shadbala-defensible (one of the 4 candidates)', (name) => {
-    // Deliberately weak: the four candidates cannot be reconstructed without
-    // re-running internals.
     const { utc, loc } = fixture(name);
     const v = computeVarshaphala(utc, 25, loc);
     expect(VISIBLE_GRAHAS).toContain(v.yearLord);
   });
 
   it('Punya & Vidya are reciprocal: lon(Punya) + lon(Vidya) ≡ 2·Asc + 30 (mod 360°)', () => {
-    // The uncorrected sum is 2·Asc, and the Asc lies in exactly one of the two
-    // complementary walks, so the completion rule adds 30° to one of the pair.
     for (const name of FIXTURE_NAMES) {
       const { utc, loc } = fixture(name);
       const v = computeVarshaphala(utc, 30, loc);
@@ -538,6 +527,5 @@ describe('Smoke: every Saham resolves on a real fixture', () => {
   });
 });
 
-// Referenced only to keep the type-only imports from tripping the unused-import lint.
 void (SAHAM_FORMULAS as readonly SahamFormula[]);
 void (ALL_SAHAM_NAMES as readonly SahamName[]);

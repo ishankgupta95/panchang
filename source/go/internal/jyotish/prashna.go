@@ -5,7 +5,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// Defaults to the KP conventions of *Prasna Marga* / KP Reader VI.
 func ComputePrashnaChart(
 	ctx *astronomy.EphemerisCtx,
 	questionMomentMs int64,

@@ -88,7 +88,6 @@ function validateNatalMoon(m: NatalMoon, label: string): void {
 }
 
 function scoreDina(boy: NatalMoon, girl: NatalMoon): PoruthamScore {
-  // Remainder 1 (Janma) is Mixed in the 9-Tara scheme but fails in this binary one.
   const distance = ((boy.nakshatra - girl.nakshatra + 27) % 27) + 1;
   const remainder = distance % 9;
   const passes = DINA_AUSPICIOUS_REMAINDERS.includes(remainder);
@@ -102,7 +101,6 @@ function scoreDina(boy: NatalMoon, girl: NatalMoon): PoruthamScore {
 function scoreGana(boy: NatalMoon, girl: NatalMoon): PoruthamScore {
   const boyGana = NAKSHATRA_GANA[boy.nakshatra]!;
   const girlGana = NAKSHATRA_GANA[girl.nakshatra]!;
-  // Only Manushya-Rakshasa fails; Deva-Rakshasa counts as a pass per AstroVed.
   const fails =
     (boyGana === 'manushya' && girlGana === 'rakshasa') ||
     (boyGana === 'rakshasa' && girlGana === 'manushya');
@@ -114,7 +112,6 @@ function scoreGana(boy: NatalMoon, girl: NatalMoon): PoruthamScore {
 }
 
 function scoreMahendra(boy: NatalMoon, girl: NatalMoon): PoruthamScore {
-  // The Mahendra set is closed under N → 29-N, so the verdict is direction-independent.
   const distance = ((boy.nakshatra - girl.nakshatra + 27) % 27) + 1;
   const passes = MAHENDRA_AUSPICIOUS_DISTANCES.includes(distance);
   return {
@@ -125,8 +122,6 @@ function scoreMahendra(boy: NatalMoon, girl: NatalMoon): PoruthamScore {
 }
 
 function scoreSthreeDeergha(boy: NatalMoon, girl: NatalMoon): PoruthamScore {
-  // Threshold locked at > 13 ("Uthamam"), the dominant Tamil consensus and the
-  // one the reference almanac follows.
   const distance = ((boy.nakshatra - girl.nakshatra + 27) % 27) + 1;
   const passes = distance > 13;
   return {
@@ -140,7 +135,6 @@ function scoreYoni(boy: NatalMoon, girl: NatalMoon): PoruthamScore {
   const boyYoni = NAKSHATRA_YONI[boy.nakshatra]!;
   const girlYoni = NAKSHATRA_YONI[girl.nakshatra]!;
   const score = YONI_SCORE[yoniIndex(boyYoni)]![yoniIndex(girlYoni)]!;
-  // 0 = enemy yoni → veto; 1 (unfriendly) fails but does not veto.
   const passes = score >= 2;
   const veto = score === 0;
   const out: PoruthamScore = {

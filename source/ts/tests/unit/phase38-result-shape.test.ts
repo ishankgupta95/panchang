@@ -67,7 +67,6 @@ describe('the alias pairs really are aliases', () => {
     const spanMinutes = Math.round(
       (r.sun.nextRise.getTime() - r.sun.rise.getTime()) / 60_000,
     );
-    // Each half is rounded independently, so allow the 1-minute rounding gap.
     expect(Math.abs(r.sun.dayDurationMinutes + r.sun.nightDurationMinutes - spanMinutes))
       .toBeLessThanOrEqual(1);
   });
@@ -95,7 +94,6 @@ describe('the resolved timezone is echoed back', () => {
   });
 
   it('resolves DST from the requested day, not from "now"', () => {
-    // 2025-06-21 is EDT (-240); 2025-01-14 is EST (-300). Same zone string.
     const summer = getDailyPanchang(new Date('2025-06-21'), NYC, { timezone: 'America/New_York' });
     const winter = getDailyPanchang(new Date('2025-01-14'), NYC, { timezone: 'America/New_York' });
     expect(summer!.timezone.offsetMinutes).toBe(-240);
@@ -111,7 +109,6 @@ describe('the resolved timezone is echoed back', () => {
 });
 
 describe('published Dates are real instants', () => {
-  // Guards against a published `Date` being `trueInstant + offsetMinutes`.
   it('result.sunrise/sunset/nextSunrise equal the primitives that produced them', () => {
     for (const [tz, loc] of [[330, DELHI], [-300, NYC], [0, DELHI]] as const) {
       const r = getDailyPanchang(DAY, loc, { timezone: tz })!;

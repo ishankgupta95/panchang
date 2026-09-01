@@ -1,5 +1,3 @@
-// A too-narrow seed window does not fail loudly, it silently takes the wide
-// 45-day fallback scan, so the last test asserts the fast path is still live.
 
 import { describe, it, expect } from 'vitest';
 import { boundingNewMoons, NewMoonCache } from '../../src/astronomy/newMoon';
@@ -35,11 +33,8 @@ describe('boundingNewMoons', () => {
   });
 
   it('matches the wide-scan reference across a 30-year span', () => {
-    // The two paths root-find from different brackets, so they agree to tens of
-    // milliseconds, not bit-identically.
     const TOLERANCE_MS = 1000;
     let worstDriftMs = 0;
-    // 11-day stride, so the sampling drifts through the synodic cycle.
     for (let i = 0; i < 1000; i++) {
       const ref = new Date(Date.UTC(2000, 0, 1) + i * 11 * DAY_MS);
       const seeded = boundingNewMoons(ref);
@@ -51,7 +46,6 @@ describe('boundingNewMoons', () => {
       expect(nextDrift, `next diverged at ${stamp}`).toBeLessThan(TOLERANCE_MS);
       worstDriftMs = Math.max(worstDriftMs, prevDrift, nextDrift);
     }
-    // Pins the observed magnitude so a wrong-lunation regression cannot hide.
     expect(worstDriftMs).toBeLessThan(500);
   });
 
@@ -82,7 +76,6 @@ describe('NewMoonCache', () => {
     const cache = new NewMoonCache();
     const base = Date.UTC(2026, 2, 1);
     const first = cache.bounding(new Date(base));
-    // A day later is virtually always the same lunation.
     const second = cache.bounding(new Date(base + DAY_MS));
     expect(second).toBe(first);
     expect(cache.hits).toBe(1);
@@ -97,7 +90,6 @@ describe('NewMoonCache', () => {
       expect(prev.getTime()).toBeLessThanOrEqual(ref.getTime());
       expect(next.getTime()).toBeGreaterThan(ref.getTime());
     }
-    // 90 days spans ~3 lunations, so most lookups must hit.
     expect(cache.misses).toBeLessThanOrEqual(5);
     expect(cache.hits).toBeGreaterThan(80);
   });

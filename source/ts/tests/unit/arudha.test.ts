@@ -1,4 +1,3 @@
-// Synthetic-chart cases hand-verified against Sanjay Rath's worked examples.
 
 import { describe, it, expect } from 'vitest';
 import { computeArudhas } from '../../src/jyotish/arudha';
@@ -65,7 +64,6 @@ function synthChart(spec: SynthSpec): BirthChart {
 
 describe('computeArudhas: standard rule (D ≠ 1, 7)', () => {
   it('lagna in Aries, Mars in Cancer (D=4): pada computes to the 7th → exception → AL = Capricorn', () => {
-    // A pada may never occupy the 7th from its bhava, so the 4th therefrom wins.
     const chart = synthChart({
       lagnaRashi: 0,
       rashis: { Mars: 3 },
@@ -267,4 +265,3 @@ describe('Fixture sweep: Arudha rashi pins', () => {
     },
   );
 });
-

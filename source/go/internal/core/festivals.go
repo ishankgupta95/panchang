@@ -5,10 +5,11 @@ import (
 	"strings"
 
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
 )
 
-// madhyahna = mid-day, aparahna = 4th of 5 day-parts, pradosha = early evening,
-// nishita = local midnight, chandrodaya = moonrise.
+func intp(v int) *int { return &v }
+
 type FestivalDateRule string
 
 const (
@@ -30,7 +31,6 @@ const (
 	AdhikaObserveInBoth AdhikaBehaviour = "observe-in-both"
 )
 
-// Cosmetic: registry matching stays Amanta-indexed.
 type NamingSystem string
 
 const (
@@ -38,7 +38,6 @@ const (
 	NamingPurnimanta NamingSystem = "purnimanta"
 )
 
-// Absence cannot be spelled as 0: all five match fields have 0 as a valid value.
 type FestivalRuleKind uint8
 
 const (
@@ -59,15 +58,40 @@ type FestivalRule struct {
 	Nakshatra int
 	Vara      int
 
-	DateRule        FestivalDateRule
-	BhadraExclude   bool
-	AdhikaBehaviour AdhikaBehaviour
-	NamingSystem    NamingSystem
-	// nil = pan-Indian; empty non-nil matches nothing, so this is tested against nil, not len.
-	Regions []types.FestivalRegion
-	// Pointer: {0, 0} is a real range.
-	TithiRange *[2]int
+	DateRule          FestivalDateRule
+	BhadraExclude     bool
+	AdhikaBehaviour   AdhikaBehaviour
+	NamingSystem      NamingSystem
+	Regions           []types.FestivalRegion
+	TithiRange        *[2]int
+	KshayaRule        KshayaRule
+	Paksha            Paksha
+	KalaPrefers       KalaPreference
+	NakshatraDateRule FestivalDateRule
+	FallbackNakshatra *int
 }
+
+type KalaPreference string
+
+const (
+	KalaFirst KalaPreference = ""
+	KalaLast  KalaPreference = "last"
+)
+
+type Paksha string
+
+const (
+	PakshaAny     Paksha = ""
+	PakshaShukla  Paksha = "shukla"
+	PakshaKrishna Paksha = "krishna"
+)
+
+type KshayaRule string
+
+const (
+	KshayaContain KshayaRule = ""
+	KshayaExclude KshayaRule = "exclude"
+)
 
 type sankrantiRegionalRule struct {
 	Key     string
@@ -133,8 +157,6 @@ var pradoshaNames = [7]string{
 var lohriRegions = []types.FestivalRegion{"punjab", "haryana", "himachal-pradesh"}
 var rajaRegions = []types.FestivalRegion{"odisha"}
 
-// Amanta masa 0=Chaitra … 11=Phalguna; tithi 0=Shukla Pratipada … 14=Purnima …
-// 29=Amavasya; nakshatra 0=Ashwini … 26=Revati; solar masa 0=Mesha … 11=Meena.
 var festivalRegistry = []FestivalRule{
 	{Key: "ugadi", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 0, Tithi: 0},
 	{Key: "rama_navami", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 0, Tithi: 8, DateRule: RuleMadhyahna, AdhikaBehaviour: AdhikaShiftToNija},
@@ -154,18 +176,19 @@ var festivalRegistry = []FestivalRule{
 	{Key: "sharad_purnima", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 6, Tithi: 14},
 	{Key: "karva_chauth", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 6, Tithi: 18, DateRule: RuleChandrodaya, NamingSystem: NamingPurnimanta},
 	{Key: "dhanteras", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 6, Tithi: 27, DateRule: RulePradosha, NamingSystem: NamingPurnimanta},
-	{Key: "narak_chaturdashi", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 6, Tithi: 28, NamingSystem: NamingPurnimanta},
+	{Key: "narak_chaturdashi", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 6, Tithi: 28, NamingSystem: NamingPurnimanta, KshayaRule: KshayaExclude},
 	{Key: "diwali", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 6, Tithi: 29, DateRule: RulePradosha, NamingSystem: NamingPurnimanta},
 	{Key: "kartika_purnima", Kind: KindMasaTithi, Type: types.FestivalMinor, Masa: 7, Tithi: 14},
 	{Key: "vasant_panchami", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 10, Tithi: 4, DateRule: RuleMadhyahna},
 	{Key: "maha_shivaratri", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 10, Tithi: 28, DateRule: RuleNishita},
-	{Key: "holi", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 11, Tithi: 14},
+	{Key: "holi", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 11, Tithi: 14, KshayaRule: KshayaExclude},
 	{Key: "mahalaya_amavasya", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 5, Tithi: 29},
 	{Key: "chhath_nahay_khay", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 7, Tithi: 3},
 	{Key: "chhath_kharna", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 7, Tithi: 4},
 	{Key: "chhath_sandhya_arghya", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 7, Tithi: 5, DateRule: RulePradosha},
-	{Key: "chhath_usha_arghya", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 7, Tithi: 6},
-	{Key: "vat_savitri_amavasya", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 2, Tithi: 29},
+	{Key: "chhath_usha_arghya", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 7, Tithi: 6, KshayaRule: KshayaExclude},
+	{Key: "vat_savitri_amavasya", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 1, Tithi: 29,
+		DateRule: RuleAparahna, KalaPrefers: KalaLast},
 	{Key: "vat_savitri_purnima", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 2, Tithi: 14},
 	{Key: "yajur_upakarma", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 4, Tithi: 14},
 	{Key: "shravan_somvar", Kind: KindMasaVara, Type: types.FestivalMinor, Masa: 4, Vara: 1, AdhikaBehaviour: AdhikaObserveInBoth},
@@ -173,8 +196,10 @@ var festivalRegistry = []FestivalRule{
 	{Key: "kartik_somvar", Kind: KindMasaVara, Type: types.FestivalMinor, Masa: 7, Vara: 1, AdhikaBehaviour: AdhikaObserveInBoth},
 	{Key: "magha_shanivar", Kind: KindMasaVara, Type: types.FestivalMinor, Masa: 10, Vara: 6, AdhikaBehaviour: AdhikaObserveInBoth},
 	{Key: "onam", Kind: KindSolarNakshatra, Type: types.FestivalMajor, SolarMasa: 4, Nakshatra: 21},
-	{Key: "rig_upakarma", Kind: KindMasaNakshatra, Type: types.FestivalMajor, Masa: 4, Nakshatra: 21},
-	{Key: "sama_upakarma", Kind: KindMasaNakshatra, Type: types.FestivalMajor, Masa: 5, Nakshatra: 12},
+	{Key: "rig_upakarma", Kind: KindMasaNakshatra, Type: types.FestivalMajor, Masa: 4, Nakshatra: 21,
+		Paksha: PakshaShukla, FallbackNakshatra: intp(12)},
+	{Key: "sama_upakarma", Kind: KindMasaNakshatra, Type: types.FestivalMajor, Masa: 5, Nakshatra: 12,
+		Paksha: PakshaShukla, NakshatraDateRule: RuleAparahna},
 	{Key: "gudi_padwa", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 0, Tithi: 0, Regions: []types.FestivalRegion{"maharashtra", "goa"}},
 	{Key: "gangaur", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 0, Tithi: 2, Regions: []types.FestivalRegion{"rajasthan"}},
 	{Key: "karaga", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 0, Tithi: 14, Regions: []types.FestivalRegion{"karnataka"}},
@@ -184,7 +209,7 @@ var festivalRegistry = []FestivalRule{
 	{Key: "hartalika_teej", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 5, Tithi: 2, Regions: []types.FestivalRegion{"rajasthan", "uttar-pradesh", "bihar", "maharashtra", "madhya-pradesh"}},
 	{Key: "govardhan_puja", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 7, Tithi: 0, Regions: []types.FestivalRegion{"uttar-pradesh", "bihar", "haryana", "rajasthan", "gujarat", "madhya-pradesh", "punjab", "jharkhand"}},
 	{Key: "bhai_dooj", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 7, Tithi: 1, Regions: []types.FestivalRegion{"uttar-pradesh", "bihar", "haryana", "maharashtra", "gujarat", "rajasthan", "madhya-pradesh", "west-bengal", "jharkhand", "nepal"}},
-	{Key: "phagli", Kind: KindMasaTithi, Type: types.FestivalMinor, Masa: 11, Tithi: 14, Regions: []types.FestivalRegion{"himachal-pradesh"}},
+	{Key: "phagli", Kind: KindMasaTithi, Type: types.FestivalMinor, Masa: 11, Tithi: 14, Regions: []types.FestivalRegion{"himachal-pradesh"}, KshayaRule: KshayaExclude},
 	{Key: "jagannath_rath_yatra", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 3, Tithi: 1},
 	{Key: "varamahalakshmi", Kind: KindMasaVara, Type: types.FestivalMajor, Masa: 4, Vara: 5, Regions: []types.FestivalRegion{"karnataka", "andhra-pradesh", "telangana", "tamil-nadu"}, TithiRange: &[2]int{7, 13}},
 	{Key: "bathukamma_start", Kind: KindMasaTithi, Type: types.FestivalMajor, Masa: 5, Tithi: 29, Regions: []types.FestivalRegion{"telangana"}},
@@ -192,15 +217,26 @@ var festivalRegistry = []FestivalRule{
 }
 
 type FestivalComputeContext struct {
-	TithiIndex            int
-	NakshatraIndex        int
-	NakshatraIndicesInDay map[int]bool
-	ChandraMasaIndex      int
-	AmantaMasaName        string
-	PurnimantaMasaName    string
-	IsAdhika              bool
-	VaraIndex             int
-	SolarMasaIndex        int
+	TithiIndex                       int
+	NakshatraIndex                   int
+	NakshatraIndicesInDay            map[int]bool
+	NakshatraByRule                  map[FestivalDateRule]int
+	NakshatraByRuleStart             map[FestivalDateRule]int
+	PriorDayNakshatraIndex           int
+	HasPriorDayNakshatraIndex        bool
+	RemainingPakshaSunriseNakshatras func() map[int]bool
+	NextDayNakshatraByRule           func() (start, end map[FestivalDateRule]int)
+	NextDayTithiByRule               func() (start, end map[FestivalDateRule]int)
+	KshayaTithiIndices               map[int]bool
+	NextDayMasaIndex                 int
+	NextDayIsAdhika                  bool
+	HasNextDayMasa                   bool
+	ChandraMasaIndex                 int
+	AmantaMasaName                   string
+	PurnimantaMasaName               string
+	IsAdhika                         bool
+	VaraIndex                        int
+	SolarMasaIndex                   int
 
 	TithiByRule              map[FestivalDateRule]int
 	TithiByRuleStart         map[FestivalDateRule]int
@@ -213,7 +249,6 @@ type FestivalComputeContext struct {
 	NextDaySankrantiRashi *int
 	PrevDaySankrantiRashi *int
 
-	// Mesha new years that do not fall on the generic transit day.
 	VaisakhiToday       bool
 	VishuToday          bool
 	PohelaBoishakhToday bool
@@ -258,6 +293,33 @@ func ekadashiNameKey(masaIndex, paksha int, isAdhika bool) string {
 
 type festivalCtxView struct{ ctx *FestivalComputeContext }
 
+func (v festivalCtxView) nakshatraPrevails(rule *FestivalRule, nakshatra int) bool {
+	dateRule := rule.NakshatraDateRule
+	if dateRule == "" {
+		dateRule = RuleSunrise
+	}
+	if dateRule == RuleSunrise {
+		if v.ctx.NakshatraIndex != nakshatra {
+			return false
+		}
+		return !(v.ctx.HasPriorDayNakshatraIndex && v.ctx.PriorDayNakshatraIndex == nakshatra)
+	}
+	start, okStart := v.ctx.NakshatraByRuleStart[dateRule]
+	end, okEnd := v.ctx.NakshatraByRule[dateRule]
+	if !(okStart && start == nakshatra) && !(okEnd && end == nakshatra) {
+		return false
+	}
+	if v.ctx.NextDayNakshatraByRule == nil {
+		return true
+	}
+	nextStart, nextEnd := v.ctx.NextDayNakshatraByRule()
+	if ns, ok := nextStart[dateRule]; ok && ns == nakshatra {
+		return false
+	}
+	ne, ok := nextEnd[dateRule]
+	return !(ok && ne == nakshatra)
+}
+
 func (v festivalCtxView) tithiForRule(rule FestivalDateRule) int {
 	if rule == RuleSunrise {
 		return v.ctx.TithiIndex
@@ -276,7 +338,6 @@ func (v festivalCtxView) tithiForRuleStart(rule FestivalDateRule) (int, bool) {
 	return t, ok
 }
 
-// Sunrise deliberately returns not-ok: no dedupe against yesterday.
 func (v festivalCtxView) priorDayTithiForRule(rule FestivalDateRule) (int, bool) {
 	if rule == RuleSunrise {
 		return 0, false
@@ -285,14 +346,13 @@ func (v festivalCtxView) priorDayTithiForRule(rule FestivalDateRule) (int, bool)
 	return t, ok
 }
 
-// Vyapini test: a match at either end of the kala counts, as a tithi may only brush it.
-func (v festivalCtxView) prevailsInKala(targetTithi int, dateRule FestivalDateRule) bool {
+func (v festivalCtxView) prevailsInKala(targetTithi int, dateRule FestivalDateRule, prefersLast bool) bool {
 	ctx := v.ctx
 
 	if dateRule == RuleJanmashtamiNishita {
 		jn := ctx.JanmashtamiNishita
 		if jn == nil {
-			return v.prevailsInKala(targetTithi, RuleNishita)
+			return v.prevailsInKala(targetTithi, RuleNishita, false)
 		}
 		if ctx.TithiIndex == targetTithi {
 			return (jn.AshtamiAtNishita || jn.RohiniAtNishita) && !jn.PrevDayClaimed
@@ -301,7 +361,6 @@ func (v festivalCtxView) prevailsInKala(targetTithi int, dateRule FestivalDateRu
 	}
 
 	if dateRule == RuleAparahnaFull {
-		// Para-viddha: both aparahnas full → the first day; neither → the day the tithi ends.
 		startTithi, hasStart := ctx.TithiByRuleStart[RuleAparahna]
 		endTithi, hasEnd := ctx.TithiByRule[RuleAparahna]
 		priorStart, hasPriorStart := ctx.PriorDayTithiByRuleStart[RuleAparahna]
@@ -327,11 +386,20 @@ func (v festivalCtxView) prevailsInKala(targetTithi int, dateRule FestivalDateRu
 	priorEndTithi, hasPriorEnd := v.priorDayTithiForRule(dateRule)
 
 	if dateRule == RuleChandrodaya {
-		// Moonrise is an instant: the span dedupes below never fire.
 		if endTithi == targetTithi {
 			return !(hasPriorEnd && priorEndTithi == targetTithi)
 		}
 		return ctx.TithiIndex == targetTithi && !(hasPriorEnd && priorEndTithi == targetTithi)
+	}
+
+	if prefersLast && dateRule != RuleSunrise && ctx.NextDayTithiByRule != nil {
+		nextStart, nextEnd := ctx.NextDayTithiByRule()
+		if ns, ok := nextStart[dateRule]; ok && ns == targetTithi {
+			return false
+		}
+		if ne, ok := nextEnd[dateRule]; ok && ne == targetTithi {
+			return false
+		}
 	}
 
 	matchedByEnd := endTithi == targetTithi
@@ -341,12 +409,12 @@ func (v festivalCtxView) prevailsInKala(targetTithi int, dateRule FestivalDateRu
 		return false
 	}
 
-	if dateRule != RuleSunrise && hasStart && startTithi != targetTithi &&
+	if !prefersLast && dateRule != RuleSunrise && hasStart && startTithi != targetTithi &&
 		hasPriorEnd && priorEndTithi == targetTithi {
 		return false
 	}
 
-	if matchedByStart && hasPriorEnd && priorEndTithi == targetTithi {
+	if !prefersLast && matchedByStart && hasPriorEnd && priorEndTithi == targetTithi {
 		return false
 	}
 
@@ -370,7 +438,6 @@ func ComputeFestivals(
 	nameResolver func(key string) string,
 	rashiNameResolver func(index int) string,
 ) []types.FestivalInfo {
-	// Non-nil: an empty result must marshal as [] not null.
 	results := make([]types.FestivalInfo, 0, 8)
 	v := festivalCtxView{ctx: ctx}
 
@@ -405,17 +472,33 @@ func ComputeFestivals(
 			dateRule = RuleSunrise
 		}
 
-		masaMatches := rule.Masa == ctx.ChandraMasaIndex &&
-			(adhikaBehaviour != AdhikaShiftToNija || !ctx.IsAdhika)
+		kshayaTithi := len(ctx.KshayaTithiIndices) == 1 && ctx.KshayaTithiIndices[rule.Tithi]
+		kshaya := rule.Kind == KindMasaTithi && dateRule == RuleSunrise &&
+			rule.KshayaRule != KshayaExclude && kshayaTithi
+		masaIndex, isAdhika := ctx.ChandraMasaIndex, ctx.IsAdhika
+		if kshaya && rule.Tithi == 0 && ctx.HasNextDayMasa {
+			masaIndex, isAdhika = ctx.NextDayMasaIndex, ctx.NextDayIsAdhika
+		}
+		masaMatches := rule.Masa == masaIndex &&
+			(adhikaBehaviour != AdhikaShiftToNija || !isAdhika) &&
+			(adhikaBehaviour != AdhikaSkip || !isAdhika)
 
 		match := false
 		switch rule.Kind {
 		case KindSolarNakshatra:
 			match = rule.SolarMasa == ctx.SolarMasaIndex && rule.Nakshatra == ctx.NakshatraIndex
 		case KindMasaNakshatra:
-			match = masaMatches && rule.Nakshatra == ctx.NakshatraIndex
+			pakshaMatches := rule.Paksha == PakshaAny ||
+				(rule.Paksha == PakshaShukla) == (ctx.TithiIndex < utils.TotalTithis/2)
+			if masaMatches && pakshaMatches {
+				match = v.nakshatraPrevails(rule, rule.Nakshatra)
+				if !match && rule.FallbackNakshatra != nil && v.nakshatraPrevails(rule, *rule.FallbackNakshatra) {
+					if ctx.RemainingPakshaSunriseNakshatras != nil {
+						match = !ctx.RemainingPakshaSunriseNakshatras()[rule.Nakshatra]
+					}
+				}
+			}
 		case KindMasaVara:
-			// Varamahalakshmi is the last Friday of Shravana Shukla before Purnima.
 			inTithiRange := true
 			if rule.TithiRange != nil {
 				tithi := v.tithiForRule(dateRule)
@@ -424,7 +507,7 @@ func ComputeFestivals(
 			match = masaMatches && rule.Vara == ctx.VaraIndex && inTithiRange
 		case KindMasaTithi:
 			if masaMatches {
-				match = v.prevailsInKala(rule.Tithi, dateRule)
+				match = kshaya || v.prevailsInKala(rule.Tithi, dateRule, rule.KalaPrefers == KalaLast)
 			}
 		}
 
@@ -469,7 +552,6 @@ func ComputeFestivals(
 
 	switch {
 	case isEkadashiAtSunrise && ctx.EkadashiVriddhaFirstDay:
-		// Vriddha first day: the Mahadwadashi fast is tomorrow, so nothing emits today.
 
 	case isEkadashiAtSunrise && ctx.EkadashiTrisprishaYesterday:
 		push("vaishnava_ekadashi", types.FestivalVaishnavaEkadashi,
@@ -492,7 +574,6 @@ func ComputeFestivals(
 		push("ekadashi", types.FestivalEkadashi, ekadashiDesc)
 
 	case ctx.EkadashiTrisprishaToday:
-		// Trisprisha has no parana morning: Smarta advances to today, Vaishnava to tomorrow.
 		triPaksha := 1
 		if ctx.TithiIndex == 9 {
 			triPaksha = 0
@@ -523,7 +604,6 @@ func ComputeFestivals(
 			nameResolver("desc_ekadashi_viddha_vaishnava_today"))
 
 	case ctx.EkadashiVriddhaDwadashiToday:
-		// Pakshavardhini Dwadashi: Smarta was yesterday.
 		push("vaishnava_ekadashi", types.FestivalVaishnavaEkadashi,
 			nameResolver("desc_ekadashi_vriddha_dwadashi_vaishnava"))
 	}
@@ -534,12 +614,12 @@ func ComputeFestivals(
 	}
 
 	if isMahaShivaratriMonth := !ctx.IsAdhika && ctx.ChandraMasaIndex == 10; !isMahaShivaratriMonth &&
-		v.prevailsInKala(28, RuleNishita) {
+		v.prevailsInKala(28, RuleNishita, false) {
 		push("masik_shivaratri", types.FestivalMinor, "")
 	}
 
 	if isGaneshChaturthiMonth := !ctx.IsAdhika && ctx.ChandraMasaIndex == 5; !isGaneshChaturthiMonth &&
-		v.prevailsInKala(3, RuleMadhyahna) {
+		v.prevailsInKala(3, RuleMadhyahna, false) {
 		push("vinayaka_chaturthi", types.FestivalMinor, "")
 	}
 
@@ -575,7 +655,6 @@ func ComputeFestivals(
 		}
 	}
 
-	// Deliberately not regionAllows, which has an "all" escape.
 	for _, r := range []struct {
 		flag    bool
 		key     string

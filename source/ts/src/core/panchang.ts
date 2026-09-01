@@ -119,8 +119,6 @@ function varaIndexAtInstant(
 ): number {
   const local = utcToLocalDisplay(utc, offsetMinutes);
   try {
-    // Walk to the sunrise that OPENS the Hindu day. A 12 h lookback lands past
-    // that morning's sunrise for evening instants and returns tomorrow's.
     let sunrise = computeSunrise(new Date(utc.getTime() - 26 * 3600_000), location);
     for (;;) {
       const next = computeSunrise(new Date(sunrise.getTime() + 3600_000), location);
@@ -215,7 +213,6 @@ export function getInstantPanchang(
   const t = getTranslations(lang);
   const doEndTimes = options?.computeEndTimes !== false;
 
-  // Always interpolated. See INTERPOLATE_ALWAYS.
   const cache = new LongitudeCache(ayanamsaType, 'interpolated');
   const getMoon = (d: Date) => cache.getMoon(d);
   const getSun = (d: Date) => cache.getSun(d);
@@ -243,12 +240,9 @@ export function getInstantPanchang(
     resolveKaranaName(getKaranaIndex(siderealMoon, siderealSun), lang),
   );
 
-  // No timezone here, so a longitude-based LMT offset (4 min per degree of
-  // longitude) stands in for the local day.
   const lmtOffsetMinutes = Math.round(location.longitude * 4);
   let sunriseUtc: Date;
   try {
-    // 26 h back guarantees a sunrise strictly before `date`.
     sunriseUtc = computeSunrise(new Date(date.getTime() - 26 * 3600_000), location);
     for (;;) {
       const next = computeSunrise(new Date(sunriseUtc.getTime() + 3600_000), location);
@@ -326,7 +320,6 @@ export function getInstantPanchang(
     (idx) => resolveMasaName(idx, lang),
   );
 
-  // Always present, `null` when the option was absent; the shape never varies.
   const chandraBalam = options?.janmaRashi !== undefined
     ? computeChandraBalam(options.janmaRashi, chandraRashi.index, lang)
     : null;
@@ -393,11 +386,8 @@ export function getDailyPanchang(
   const wantEclipse = wants('eclipse');
   const wantMoonTimes = wants('moonTimes');
   const wantLunarWindows = wants('lunarWindows');
-  // Raksha Bandhan's Bhadra exclusion reads the window, so festivals need it
-  // computed even unasked; it is still only reported under 'lunarWindows'.
   const needBhadra = wantLunarWindows || wantFestivals;
 
-  // Always interpolated. See INTERPOLATE_ALWAYS.
   const cache = new LongitudeCache(ayanamsaType, 'interpolated');
   const getMoon = (d: Date) => cache.getMoon(d);
   const getSun = (d: Date) => cache.getSun(d);
@@ -441,8 +431,6 @@ export function getDailyPanchang(
     siderealMoonAtSunrise, siderealSunAtSunrise,
     resolveKaranaName(getKaranaIndex(siderealMoonAtSunrise, siderealSunAtSunrise), lang),
   );
-  // Vara is the weekday at LOCAL sunrise: sunrises whose UTC instant falls on
-  // the previous calendar day (most of Asia year-round) otherwise misreport it.
   const sunriseLocal = utcToLocalDisplay(sunriseUtc, offsetMinutes);
   const vara = computeVara(sunriseLocal, sunriseLocal, t.varaNames);
   const masa = computeMasa(siderealSunAtSunrise, (idx) => resolveMasaName(idx, lang));
@@ -478,9 +466,6 @@ export function getDailyPanchang(
     (idx) => t.gowriNames[idx]!,
     qualityNameFn,
   );
-  // The moonrise search looks two days ahead, so on a no-rise day it returns the
-  // NEXT day's rise; the published value is clamped to the calendar day and reads
-  // `null`. Moonset must be paired to the same lunation.
   const needMoonrise = wantMoonTimes || wantFestivals;
   const moonriseSearchUtc = needMoonrise ? getMoonrise(localMidnightUtc, location) : null;
   const moonriseUtc =
@@ -530,15 +515,23 @@ export function getDailyPanchang(
         tithiIndexAtSunrise: tithiAtSunrise.index,
         siderealMoonAtSunrise, siderealSunAtSunrise,
         varaIndex: vara.index,
-        chandramasa, lang, t,
+        chandramasa,
+        nextDayMasa: () => {
+          const next = computeChandraMasa(
+            getSun(nextSunriseUtc), getMoon(nextSunriseUtc),
+            (idx, isAdhika) => resolveChandraMasaName(idx, lang, isAdhika),
+            masaSystem,
+            nextSunriseUtc, getSun, getBounds,
+          );
+          return { index: next.amantaIndex, isAdhika: next.isAdhika };
+        },
+        lang, t,
         region: options.region,
-        // Unclamped: the festival frame is the Hindu day, not the calendar day.
         moonriseUtc: moonriseSearchUtc, bhadraUtc,
         getMoon, getSun,
       })
     : [];
 
-  // Published twice: as the top-level `eclipse` field and as a festival entry.
   const eclipseUtc = wantEclipse
     ? getEclipseDuringDay(sunriseUtc, nextSunriseUtc, location, lang, {
         tropicalMoon: (d) => cache.getTropicalMoon(d),
@@ -571,7 +564,6 @@ export function getDailyPanchang(
         const idx = getTithiIndexFromLons(moon, sun);
         return computeTithiFromLongitudes(moon, sun, resolveTithiName(idx, lang), resolvePakshaName(idx, lang));
       },
-      // maxPerDay = 3: a short tithi fully inside the day makes three legitimately touch it.
       36, STANDARD_PRECISION, 3, TITHI_ANGLE(getMoon, getSun),
     ) as DailyTithiInfo[];
     nakshatras = findDailyElements(
@@ -602,8 +594,6 @@ export function getDailyPanchang(
       18, STANDARD_PRECISION, 5, KARANA_ANGLE(getMoon, getSun),
     ) as DailyKaranaInfo[];
   } else {
-    // Key order must match the tail the end-times path appends: narrowing
-    // promises to be output-neutral, and key order is part of the shape.
     const bare = { startTime: null, isActiveAtSunrise: true, startTimeLocal: null, endTimeLocal: null };
     tithis = [{ ...tithiAtSunrise, ...bare }];
     nakshatras = [{ ...nakshatraAtSunrise, ...bare }];
@@ -628,8 +618,6 @@ export function getDailyPanchang(
   const pratahSandhyaUtc = computePratahSandhya(sunriseUtc, sunsetUtc, nextSunriseUtc);
   const sayahnaSandhyaUtc = computeSayahnaSandhya(sunsetUtc, nextSunriseUtc);
 
-  // Published `Date`s are never shifted by `offsetMinutes`; the `*Local` string
-  // carries the presentation.
   const local = (d: Date) => formatInZone(d, offsetMinutes);
   const localOrNull = (d: Date | null) => (d ? local(d) : null);
   const withLocal = (tp: UtcWindow): TimePeriod => ({
@@ -638,7 +626,6 @@ export function getDailyPanchang(
     startLocal: local(tp.start),
     endLocal: local(tp.end),
   });
-  // The spread is load-bearing: `withLocal` returns only the window fields.
   const localizeSlots = <T extends TimePeriod>(
     slots: readonly Unlocalized<T>[],
   ): T[] => slots.map(s => ({ ...s, ...withLocal(s) }) as T);

@@ -146,7 +146,6 @@ function buildMuntha(
   const lordIdx = RASHI_LORD[munthaRashi]!;
   const lord = VISIBLE_GRAHAS_BY_INDEX[lordIdx]!;
   const house = ((munthaRashi - varshaLagnaRashi + 12) % 12) + 1;
-  // Reserved for a future Muntha-rashi name field.
   void lang;
   return { rashi: munthaRashi, lord, house };
 }
@@ -176,7 +175,6 @@ function pickYearLord(
 
   const triraashi = triraashiPati(lagnaRashi, isDay);
 
-  // De-dupe in priority order so ties resolve to the earlier candidate.
   const candidates: VisibleGraha[] = [];
   for (const c of [lagnaLord, munthaLord, sunRashiLord, triraashi]) {
     if (!candidates.includes(c)) candidates.push(c);
@@ -260,7 +258,6 @@ function computeSahams(
 ): Record<SahamName, SahamPosition> {
   const longitudes: Partial<Record<SahamName, number>> = {};
 
-  // Iteration order matters: Punya must precede its dependents.
   for (const formula of SAHAM_FORMULAS) {
     longitudes[formula.name] = evaluateSaham(formula, isDay, varshaChart, longitudes);
   }

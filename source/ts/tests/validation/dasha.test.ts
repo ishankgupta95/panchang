@@ -9,7 +9,6 @@ const NAKSHATRA_SPAN = 360 / 27;
 const MS_PER_YEAR = 365.25 * 24 * 3600 * 1000;
 
 describe('NAKSHATRA_LORD table: classical 27-entry cycle', () => {
-  // Source: BPHS 46.5-7; Raman, Manual of Hindu Astrology, Ch. XIII, Table 1.
   const EXPECTED_LORDS = [
     'Ketu', 'Venus', 'Sun', 'Moon', 'Mars', 'Rahu', 'Jupiter', 'Saturn', 'Mercury',
     'Ketu', 'Venus', 'Sun', 'Moon', 'Mars', 'Rahu', 'Jupiter', 'Saturn', 'Mercury',
@@ -28,7 +27,6 @@ describe('NAKSHATRA_LORD table: classical 27-entry cycle', () => {
 });
 
 describe('DASHA_YEARS: classical Vimshottari durations', () => {
-  // Source: BPHS 46.12; Raman, Manual of Hindu Astrology, Ch. XIII p. 186.
   it('Ketu = 7y',     () => expect(DASHA_YEARS.Ketu).toBe(7));
   it('Venus = 20y',   () => expect(DASHA_YEARS.Venus).toBe(20));
   it('Sun = 6y',      () => expect(DASHA_YEARS.Sun).toBe(6));
@@ -46,7 +44,6 @@ describe('DASHA_YEARS: classical Vimshottari durations', () => {
 });
 
 describe('DASHA_ORDER: Ketu → Venus → … → Mercury', () => {
-  // BPHS 46.12 starts the closed cycle at Sun; rotated to Ketu, Ashwini's lord.
   const EXPECTED = ['Ketu', 'Venus', 'Sun', 'Moon', 'Mars', 'Rahu', 'Jupiter', 'Saturn', 'Mercury'];
   it('has 9 lords in classical order', () => {
     expect(DASHA_ORDER).toEqual(EXPECTED);
@@ -172,8 +169,6 @@ describe('sequence invariants (held for all valid Moon longitudes)', () => {
       });
 
       it('antardasha proportions follow lordYears/120 × parentDuration (full mahadashas)', () => {
-        // Loop starts at 1: the partial first mahadasha runs full-length
-        // antardashas inside a shorter window.
         for (let m = 1; m < r.mahaDashas.length; m++) {
           const md = r.mahaDashas[m]!;
           const mdMs = md.endDate.getTime() - md.startDate.getTime();
@@ -189,8 +184,6 @@ describe('sequence invariants (held for all valid Moon longitudes)', () => {
 });
 
 describe('end-to-end real chart: Moon per the reference almanac 2025-01-14 18:13:36 UTC / Delhi', () => {
-  // Moon sidereal 100.78° comes from testdata/almanac/almanac-planets.json;
-  // 8.388 y is the Saturn (Pushya) balance derived from it by hand.
   const birthDate = new Date('2025-01-14T18:13:36Z');
   const moonSid = 100.78;
   const r = computeVimshottariDasha(birthDate, moonSid);

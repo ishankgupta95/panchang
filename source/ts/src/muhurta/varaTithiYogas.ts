@@ -20,8 +20,6 @@ type VaraTable = readonly [
   readonly number[], readonly number[], readonly number[],
 ];
 
-// Siddha and Amrita name their rows by tithi *group*: Nanda (1/6/11), Bhadra (2/7/12),
-// Jaya (3/8/13), Rikta (4/9/14), Purna (5/10/15). Hence whole groups per cell.
 const AUSPICIOUS: Readonly<Record<'siddha' | 'amrita', VaraTable>> = {
   siddha: [[], [], [3, 8, 13], [2, 7, 12], [5, 10, 15], [1, 6, 11], [4, 9, 14]],
   amrita: [[1, 6, 11], [2, 7, 12], [1, 6, 11], [3, 8, 13], [4, 9, 14], [2, 7, 12], [5, 10, 15]],
@@ -30,7 +28,6 @@ const AUSPICIOUS: Readonly<Record<'siddha' | 'amrita', VaraTable>> = {
 const INAUSPICIOUS: Readonly<Record<
   'dagdha' | 'visha' | 'hutasana' | 'krakacha' | 'samvartaka', VaraTable
 >> = {
-  // Mercury's Dagdha cell is given as "the 2nd or 3rd", so both are carried.
   dagdha: [[12], [11], [5], [2, 3], [6], [8], [9]],
   visha: [[4], [6], [7], [2], [8], [9], [7]],
   hutasana: [[12], [6], [7], [8], [9], [10], [11]],

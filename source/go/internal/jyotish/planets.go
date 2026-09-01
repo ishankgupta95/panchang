@@ -22,7 +22,6 @@ var GrahaAbbr = [types.GrahaCount]string{
 	types.GrahaKetu:    "Ke",
 }
 
-// IAU mean obliquity, t in Julian centuries from J2000; FMA-barriered.
 func MeanObliquity(t float64) float64 {
 	return 23.439291111 -
 		float64(0.013004167*t) -
@@ -58,7 +57,6 @@ func retrogradeDelta(ctx *astronomy.EphemerisCtx, body astronomy.PlanetBody, ms 
 	return delta
 }
 
-// Meeus eq. 47.7.
 func getMeanRahuLongitudeTropical(ms int64) float64 {
 	t := (astronomy.DateToJulianDay(ms) - 2451545.0) / 36525.0
 	return utils.Normalize360(
@@ -70,7 +68,6 @@ func getMeanRahuLongitudeTropical(ms int64) float64 {
 	)
 }
 
-// Meeus ch. 47, dominant term only.
 func getTrueRahuLongitudeTropical(ms int64) float64 {
 	t := (astronomy.DateToJulianDay(ms) - 2451545.0) / 36525.0
 	meanOmega := 125.0445479 -

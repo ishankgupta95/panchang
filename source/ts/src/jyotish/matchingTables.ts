@@ -108,7 +108,6 @@ export const YONI_SCORE: readonly (readonly number[])[] = (() => {
     t[Y_INDEX[a]]![Y_INDEX[b]] = 0;
     t[Y_INDEX[b]]![Y_INDEX[a]] = 0;
   }
-  // Varahamihira's secondary list.
   const unfriendlyPairs: [YoniAnimal, YoniAnimal][] = [
     ['horse', 'cow'],
     ['elephant', 'tiger'],
@@ -141,7 +140,6 @@ export const RASHI_LORD: readonly number[] = [
 /** Naisargika Maitri per BPHS ch. 4: 1 = Mitra, 0 = Sama, -1 = Shatru. The
  *  diagonal is unused: a shared rashi-lord scores full marks by convention. */
 export const NAISARGIKA_MAITRI: readonly (readonly number[])[] = [
-  //         Sun  Moon Mars Merc Jup  Ven  Sat
   [ 0,  1,   1,   0,   1,  -1,  -1 ],
   [ 1,  0,   0,   1,   0,   0,   0 ],
   [ 1,  1,   0,  -1,   1,   0,   0 ],
@@ -152,7 +150,6 @@ export const NAISARGIKA_MAITRI: readonly (readonly number[])[] = [
 ];
 
 export const GRAHA_MAITRI_SCORE: readonly (readonly number[])[] = [
-  // Rows: boy's view of the girl's lord; columns: girl's view of the boy's lord.
   [ 0,     1,       0.5 ],
   [ 1,     3,       4   ],
   [ 0.5,   4,       5   ],

@@ -1,4 +1,3 @@
-// Package panchang is the public API of the Go port.
 package panchang
 
 import (
@@ -107,16 +106,33 @@ type (
 	YoginiName = jyotish.YoginiName
 	SahamName  = jyotish.SahamName
 
-	Error = types.PanchangError
-	// ErrorCode identifies a failure without matching on message text.
+	Error     = types.PanchangError
 	ErrorCode = types.ErrorCode
 
-	// The zero value is valid but for Timezone, which is required.
 	Options        = core.PanchangOptions
 	InstantOptions = core.InstantPanchangOptions
 	DailyResult    = types.DailyPanchangResult
 	InstantResult  = types.InstantPanchangResult
 )
+
+const (
+	ErrInvalidLatitude          = types.ErrInvalidLatitude
+	ErrInvalidLongitude         = types.ErrInvalidLongitude
+	ErrInvalidElevation         = types.ErrInvalidElevation
+	ErrInvalidDate              = types.ErrInvalidDate
+	ErrInvalidTimezone          = types.ErrInvalidTimezone
+	ErrInvalidAyanamsa          = types.ErrInvalidAyanamsa
+	ErrInvalidInput             = types.ErrInvalidInput
+	ErrTimezoneResolutionFailed = types.ErrTimezoneResolutionFailed
+	ErrNoSunrise                = types.ErrNoSunrise
+	ErrNoSunset                 = types.ErrNoSunset
+	ErrSearchDiverged           = types.ErrSearchDiverged
+	ErrCircumpolar              = types.ErrCircumpolar
+	ErrPlacidusDiverged         = types.ErrPlacidusDiverged
+	ErrSahamDependencyError     = types.ErrSahamDependencyError
+)
+
+func AllErrorCodes() []ErrorCode { return append([]ErrorCode(nil), types.AllErrorCodes...) }
 
 const (
 	Lahiri        = types.Lahiri
@@ -182,7 +198,6 @@ const (
 	RegionUttarakhand   = types.RegionUttarakhand
 )
 
-// A function, not a var, so no caller can mutate the shared table; likewise below.
 func AllAyanamsaTypes() []AyanamsaType {
 	return append([]AyanamsaType(nil), types.AllAyanamsaTypes...)
 }
@@ -191,7 +206,29 @@ func OffsetMinutes(m int) Timezone { return types.TimezoneOffset(m) }
 
 func Zone(name string) Timezone { return types.TimezoneName(name) }
 
-// Session holds one request's ephemeris memos; not safe for concurrent use.
+type Reference = core.Reference
+
+const (
+	ReferenceTraditional = core.ReferenceTraditional
+	ReferenceModern      = core.ReferenceModern
+	ReferencePractical   = core.ReferencePractical
+)
+
+func TraditionalReference() GeoLocation { return core.TraditionalReference() }
+
+func ModernReference() GeoLocation { return core.ModernReference() }
+
+const (
+	ISTTimezone      = core.ISTTimezone
+	ISTOffsetMinutes = core.ISTOffsetMinutes
+)
+
+func ReferenceLocation(mode Reference) (GeoLocation, error) { return core.ReferenceLocation(mode) }
+
+func ResolveLocation(loc *GeoLocation, mode Reference) (GeoLocation, Reference, error) {
+	return core.ResolveLocation(loc, mode)
+}
+
 type Session struct {
 	ctx   *astronomy.EphemerisCtx
 	natal core.NatalResolvers
@@ -638,7 +675,6 @@ func AshtottariYears() [types.DashaLordCount]float64 { return jyotish.Ashtottari
 
 func YoginiOrder() [8]YoginiName { return jyotish.YoginiOrder }
 
-// Indexed like [YoginiOrder]; so is [YoginiPlanet].
 func YoginiYears() [8]float64 { return jyotish.YoginiYears }
 
 func YoginiPlanet() [8]DashaLord { return jyotish.YoginiPlanet }
@@ -651,7 +687,6 @@ func SamaPadaRashis() [12]bool { return jyotish.SamaPadaRashis }
 
 func AllSahamNames() [jyotish.SahamNameCount]SahamName { return jyotish.AllSahamNames }
 
-// A value copy from `rules.Get` still shares its slices.
 func deepRule(r MuhurtaRule) MuhurtaRule {
 	cp := func(s []int) []int {
 		if s == nil {
@@ -678,7 +713,6 @@ func deepRule(r MuhurtaRule) MuhurtaRule {
 	return r
 }
 
-// A slice, not a map: it keeps the TypeScript's key order.
 func StockMuhurtaRules() []MuhurtaRule {
 	all := rules.All()
 	for i := range all {

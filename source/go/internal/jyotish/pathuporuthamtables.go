@@ -1,7 +1,5 @@
 package jyotish
 
-// Pathu Porutham tables: *Jathaka Tatva*, AstroVed's 10-Porutham reference, ProKerala.
-
 type Rajju string
 
 const (
@@ -44,7 +42,6 @@ var NakshatraRajju = [27]Rajju{
 	RajjuPada,   // 26 Revati
 }
 
-// 13 pairs per Jataka Parijata, Chitra (13) unpaired; deliberately not a sum rule.
 var VedhaPairs = [13][2]int{
 	{0, 17},  // Ashwini ↔ Jyeshtha
 	{1, 16},  // Bharani ↔ Anuradha
@@ -75,10 +72,8 @@ func VedhaOf(nakIdx int) (int, bool) {
 
 var MahendraAuspiciousDistances = [8]int{4, 7, 10, 13, 16, 19, 22, 25}
 
-// Auspicious taras: 2 Sampat, 4 Kshema, 6 Sadhana, 8 Mitra, 0 Param Mitra.
 var DinaAuspiciousRemainders = [5]int{0, 2, 4, 6, 8}
 
-// Shashtashtaka; pairs are (boy→girl, girl→boy), 1-indexed.
 var RashiDoshicDistances = [4][2]int{
 	{2, 12}, {12, 2},
 	{6, 8}, {8, 6},

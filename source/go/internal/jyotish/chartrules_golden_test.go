@@ -598,7 +598,6 @@ func TestChartRuleDigests(t *testing.T) {
 		return c
 	}
 
-	// Reduce at every step: an unreduced 12-cell fold overflows 2^53.
 	const digestMod = 1_000_003
 	fold := func(values []int, radix int) float64 {
 		acc := 0

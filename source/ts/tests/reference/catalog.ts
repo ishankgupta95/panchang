@@ -27,8 +27,6 @@ const number = (s: string): number => {
   return v;
 };
 
-// VSOP87D: Bretagnon & Francou 1988, VizieR VI/81.
-
 /** `A·cos(B + C·τ)`, τ in Julian millennia TDB. */
 export interface VsopTerm { A: number; B: number; C: number }
 
@@ -49,13 +47,11 @@ export function readVsop87d(): Map<VsopBody, VsopSeries> {
     let power = 0;
     for (const line of lines) {
       if (line.includes('VSOP87 VERSION')) {
-        // " VSOP87 VERSION D4    EARTH     VARIABLE 1 (LBR)       *T**0    559 TERMS …"
         variable = Number(line.slice(41, 42)) as 1 | 2 | 3;
         power = Number(line.slice(59, 60));
         series[variable][power] = [];
         continue;
       }
-      // Columns 80-131, skipping the S/K pair (vsop87.f, `4x,3f18.11,f14.11,f20.11`).
       series[variable][power]!.push({
         A: number(line.slice(79, 97)),
         B: number(line.slice(97, 111)),
@@ -81,8 +77,6 @@ export function readVsop87Check(): VsopCheck[] {
   }
   return out;
 }
-
-// ELP2000-82B: Chapront-Touzé & Chapront, VizieR VI/79.
 
 /** `ilu` are the Delaunay multipliers. */
 export interface ElpMainTerm { ilu: [number, number, number, number]; coef: number[] }
@@ -137,8 +131,6 @@ export function readElp2000(): ElpTables {
   return tables;
 }
 
-// IAU 2000A nutation: IERS Conventions (2010) ch. 5, tables 5.3a / 5.3b.
-
 /** Microarcseconds; `mult` is the table's column order: l, l', F, D, Ω, the eight planets, p_A. */
 export interface NutationTerm { sinCoef: number; cosCoef: number; mult: number[]; power: 0 | 1 }
 
@@ -158,8 +150,6 @@ export function readNutation(): { psi: NutationTerm[]; eps: NutationTerm[] } {
       const a = Number(f[1]), b = Number(f[2]);
       const mult = f.slice(3).map(Number);
       if (!Number.isFinite(a) || !Number.isFinite(b) || mult.some((m) => !Number.isFinite(m))) continue;
-      // 5.3a heads its columns "A_i  A''_i" and 5.3b "B''_i  B_i", but in both
-      // column 2 multiplies sin(ARG) and column 3 cos(ARG).
       out.push({ sinCoef: a, cosCoef: b, mult, power });
     }
     return out;

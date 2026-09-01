@@ -27,9 +27,6 @@ export function computeArudhas(chart: BirthChart, lang: Language = 'en'): Arudha
 
     let arudhaRashi = (lordRashi + D - 1) % 12;
 
-    // Jaimini 1.1.30-31: the pada may occupy neither the bhava itself nor the
-    // 7th from it. Keyed on the pada's own offset, not on D: keying on D
-    // covers only the pada-on-bhava case and leaves D ∈ {4, 10} in the 7th.
     const offsetFromBhava = (arudhaRashi - bhavaRashi + 12) % 12;
     if (offsetFromBhava === 0) {
       arudhaRashi = (arudhaRashi + 9) % 12;

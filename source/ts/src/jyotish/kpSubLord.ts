@@ -62,7 +62,6 @@ function subLordAtOffset(degInNak: number, starLord: DashaLord): DashaLord {
     cum += subWidth(lord);
     if (degInNak < cum) return lord;
   }
-  // Unreachable: the sub-widths sum to NAKSHATRA_SPAN exactly.
   return DASHA_ORDER[(starLordIdx + 8) % 9]!;
 }
 

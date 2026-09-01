@@ -14,8 +14,6 @@ export function boundingNewMoons(ref: Date): NewMoonBounds {
   const seedMs = ref.getTime() - elapsedFraction * SYNODIC_MONTH_DAYS * DAY_MS;
 
   const found = newMoonNear(seedMs);
-  // `found` can land a millisecond past `ref` when `ref` is itself a new-moon
-  // instant rounded the other way; an exact `<=` costs a whole lunation.
   const prev = found !== null && found.getTime() > ref.getTime()
     && found.getTime() - ref.getTime() <= PHASE_AGREEMENT_MS
     ? new Date(ref.getTime())
@@ -81,7 +79,6 @@ export class NewMoonCache {
       const prevMs = e.prev.getTime();
       const nextMs = e.next.getTime();
       if (prevMs > t || t >= nextMs) continue;
-      // Entries are disjoint: answer or abstain, the scan is over either way.
       if (t - prevMs <= PHASE_AGREEMENT_MS || nextMs - t <= PHASE_AGREEMENT_MS) break;
       this.hits++;
       return e;

@@ -53,7 +53,7 @@ This is the cheapest by a wide margin and it is what the default already says.
 
 `go/` is importable, tagged `go/v0.x.y` or `go/v1.x.y`, and its version tracks
 *the port's* maturity rather than npm's. The npm version it corresponds to is
-recorded in the tag message, the release notes and `CHANGELOG.md`.
+recorded in the tag message and the release notes.
 
 - one commit still produces both;
 - `go.mod` stays `.../panchang-ts/go` with no suffix, because v0 and v1 need
@@ -96,23 +96,33 @@ Three rules, and the first two are the ones that surprise people:
    is the reason the working tree must be clean before tagging rather than
    after: there is no amending a Go release.
 
-**One thing to verify with a throwaway tag before the first real Go release.**
-Under option A specifically, the exact tag string for a subdirectory module that
-*also* carries a `/vN` path suffix is the part of this worth testing rather than
-trusting: whether `source/go/v5.1.1` is right, or whether the proxy wants a
-`source/go/v5/` directory. It costs one scratch repository and ten minutes:
+**Verified on 2026-08-30, so this is no longer an open question.** The doubt was whether a
+subdirectory module that *also* carries a `/vN` path suffix wants `source/go/v5.1.1` or a
+`source/go/v5/` directory of its own. It wants `source/go/v5.1.1`, and the `/v5` needs no
+directory: the suffix lives only in the module path.
 
-```bash
-# in a scratch repo, not this one
-mkdir -p go && printf 'module github.com/<you>/scratch/go/v5\n\ngo 1.22\n' > go/go.mod
-printf 'package scratch\n\nconst V = "5.1.1"\n' > go/scratch.go
-git add -A && git commit -m init && git tag go/v5.1.1 && git push origin main --tags
-# then, from an unrelated module:
-GOFLAGS=-mod=mod go get github.com/<you>/scratch/go/v5@v5.1.1
+Tested twice against a local bare repository standing in for GitHub, reached through a
+`url.insteadOf` rewrite so `go get` used its real GitHub repo-root rule rather than a vanity
+lookup. First with a two-file scratch module, then with this repository's actual `source/go`
+tree. Both resolved, and the real one compiled and ran:
+
+```
+go: downloading github.com/ishankgupta95/panchang-ts/source/go/v5 v5.1.1
+go: added github.com/ishankgupta95/panchang-ts/source/go/v5 v5.1.1
+ok: true | tithi: Shukla Navami | nakshatra: Chitra
 ```
 
-If that resolves, option A's mechanics are confirmed. If it does not, the answer
-is B, and it was going to be B anyway.
+which is the same answer `getDailyPanchang` gives for that instant and location.
+
+Two things that came out of doing it, both now fixed in the tree:
+
+- **The module needs its own `LICENSE`.** The module root is `source/go/`, so the repository's
+  root `LICENSE` is not in the module zip and `pkg.go.dev` would have reported no license.
+  `source/go/LICENSE` is a copy, and it must stay in step with the root one.
+- **`source/go/parity/go.mod` exists to be excluded.** A directory holding a `go.mod` is left
+  out of its parent module's zip. Without it every Go consumer downloaded the parity harness,
+  including a 263 KB TypeScript dump generator. There are no `.go` files under `parity/`, so
+  the stub costs nothing and the zip carries only `LICENSE`, `go.mod` and Go source.
 
 ---
 

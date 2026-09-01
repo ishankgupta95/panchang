@@ -23,14 +23,13 @@ func TestTreeCorrespondence(t *testing.T) {
 		len(r.Pairs), len(r.AllowedGo), len(r.AllowedTS))
 }
 
-// Vacuity guard: every failure condition is a list, so a partial walk would pass.
 func TestTreeCensusIsPinned(t *testing.T) {
 	const (
-		wantTS        = 118
+		wantTS        = 119
 		wantDTS       = 1
-		wantGo        = 143
-		wantGoTests   = 79
-		wantPairs     = 116
+		wantGo        = 144
+		wantGoTests   = 80
+		wantPairs     = 117
 		wantAllowedTS = 2
 		wantAllowedGo = 27
 	)

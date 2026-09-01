@@ -67,7 +67,6 @@ describe('242-day structural regression (Pune, Sep 2025 to Apr 2026)', () => {
         expect(r.inauspicious.yamaganda.start.getTime()).toBeLessThan(r.inauspicious.yamaganda.end.getTime());
       });
 
-      // Almanac convention: Abhijit is null on Wednesday (Buddha-vara).
       it('abhijitMuhurta is null on Wednesday, within daytime otherwise', () => {
         if (expected.varaEnglish === 'Wednesday') {
           expect(r.muhurtas.abhijit).toBeNull();

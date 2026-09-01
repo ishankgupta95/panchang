@@ -1,5 +1,3 @@
-// The 56/57 and 78/79 offsets both apply: which one depends on whether the
-// date falls before or after the Hindu new year.
 
 import { describe, it, expect } from 'vitest';
 import { computeSamvat } from '../../src/core/samvat';

@@ -1,5 +1,3 @@
-// The tables are transcribed from Ernst Wilhelm's *Muhurta Yogas*, verified
-// cell-for-cell against blog.cosmicinsights.net.
 
 import { describe, it, expect } from 'vitest';
 import { computeVaraTithiYogas, scoreMuhurta, vivahRule } from '../../src/index';
@@ -8,7 +6,6 @@ import type { VaraTithiYogaType } from '../../src/index';
 const DELHI = { latitude: 28.6139, longitude: 77.2090 };
 const TZ = 330;
 
-// Classical tithi groups, by number within the paksha.
 const GROUPS: Record<string, number[]> = {
   nanda: [1, 6, 11], bhadra: [2, 7, 12], jaya: [3, 8, 13],
   rikta: [4, 9, 14], purna: [5, 10, 15],
@@ -37,7 +34,6 @@ describe('computeVaraTithiYogas: table structure', () => {
     }
   });
 
-  // The malefic rows below run Sunday to Saturday.
   it.each([
     ['dagdha', [[12], [11], [5], [2, 3], [6], [8], [9]]],
     ['visha', [[4], [6], [7], [2], [8], [9], [7]]],
@@ -68,14 +64,12 @@ describe('computeVaraTithiYogas: paksha symmetry', () => {
   });
 
   it('Purnima and Amavasya both count as the 15th tithi', () => {
-    // Thursday + Purna group = Siddha.
     expect(computeVaraTithiYogas(4, 14).some((y) => y.type === 'siddha')).toBe(true);
     expect(computeVaraTithiYogas(4, 29).some((y) => y.type === 'siddha')).toBe(true);
   });
 });
 
 describe('computeVaraTithiYogas: documented ambiguities', () => {
-  // Wilhelm asterisks exactly these cells as forming both polarities.
   it.each([
     [3, 2, 'Wednesday + 2nd'],
     [3, 3, 'Wednesday + 3rd'],
@@ -109,8 +103,6 @@ describe('computeVaraTithiYogas: validation', () => {
 });
 
 describe('muhurta engine: Vara x Tithi integration', () => {
-  // 2026-01-17: a Saturday on Krishna Chaturdashi (28), a Rikta tithi, so
-  // Siddha forms and partly redeems it.
   const riktaSaturday = new Date(Date.UTC(2026, 0, 17));
 
   it('nets an auspicious yoga against an inauspicious tithi', () => {

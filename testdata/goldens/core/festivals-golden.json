@@ -2,8 +2,8 @@
  "_meta": {
   "generator": "source/go/parity/goldens.src.ts (bash source/go/parity/goldens.sh)",
   "source": "src/core/festivals.ts",
-  "claim": "computeFestivals emits the same festivals for the same context. The four grids vary exactly the fields one matcher arm reads, so a rule filed under the wrong D8 Kind fires under the wrong grid or not at all. FESTIVAL_REGISTRY is module-private and cannot be pinned directly; this pins the dispatch over it.",
-  "cases": 3489,
+  "claim": "computeFestivals emits the same festivals for the same context. Each grid varies exactly the fields one matcher arm reads, so a rule filed under the wrong D8 Kind fires under the wrong grid or not at all. ks pins the kshaya containing-day fallback, kl the last-day kala tie-break, nku and nkk the nakshatra arm. FESTIVAL_REGISTRY is module-private and cannot be pinned directly; this pins the dispatch over it.",
+  "cases": 4077,
   "distinctKeysEmitted": 81
  },
  "cases": [
@@ -414,7 +414,13 @@
   },
   {
    "label": "N|mt|1|29",
-   "festivals": []
+   "festivals": [
+    {
+     "key": "vat_savitri_amavasya",
+     "type": "major",
+     "description": null
+    }
+   ]
   },
   {
    "label": "N|mt|2|0",
@@ -602,13 +608,7 @@
   },
   {
    "label": "N|mt|2|29",
-   "festivals": [
-    {
-     "key": "vat_savitri_amavasya",
-     "type": "major",
-     "description": null
-    }
-   ]
+   "festivals": []
   },
   {
    "label": "N|mt|3|0",
@@ -3478,13 +3478,7 @@
   },
   {
    "label": "N|mn|5|12",
-   "festivals": [
-    {
-     "key": "sama_upakarma",
-     "type": "major",
-     "description": null
-    }
-   ]
+   "festivals": []
   },
   {
    "label": "N|mn|5|13",
@@ -23301,6 +23295,3173 @@
      "description": null
     }
    ]
+  },
+  {
+   "label": "nku|4|9|21|x|x",
+   "festivals": [
+    {
+     "key": "rig_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nku|4|9|21|x|has",
+   "festivals": [
+    {
+     "key": "rig_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nku|4|9|21|x|no",
+   "festivals": [
+    {
+     "key": "rig_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nku|4|9|21|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|21|21|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|21|21|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|21|12|x",
+   "festivals": [
+    {
+     "key": "rig_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nku|4|9|21|12|has",
+   "festivals": [
+    {
+     "key": "rig_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nku|4|9|21|12|no",
+   "festivals": [
+    {
+     "key": "rig_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nku|4|9|12|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|12|x|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|12|x|no",
+   "festivals": [
+    {
+     "key": "rig_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nku|4|9|12|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|12|21|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|12|21|no",
+   "festivals": [
+    {
+     "key": "rig_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nku|4|9|12|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|12|12|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|12|12|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|0|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|0|x|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|0|x|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|0|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|0|21|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|0|21|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|0|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|0|12|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|9|0|12|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|21|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|21|x|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|21|x|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|21|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|21|21|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|21|21|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|21|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|21|12|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|21|12|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|12|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|12|x|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|12|x|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|12|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|12|21|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|12|21|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|12|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|12|12|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|12|12|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|0|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|0|x|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|0|x|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|0|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|0|21|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|0|21|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|0|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|0|12|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|4|24|0|12|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|21|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|21|x|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|21|x|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|21|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|21|21|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|21|21|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|21|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|21|12|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|21|12|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|12|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|12|x|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|12|x|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|12|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|12|21|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|12|21|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|12|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|12|12|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|12|12|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|0|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|0|x|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|0|x|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|0|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|0|21|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|0|21|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|0|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|0|12|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|9|0|12|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|21|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|21|x|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|21|x|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|21|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|21|21|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|21|21|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|21|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|21|12|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|21|12|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|12|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|12|x|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|12|x|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|12|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|12|21|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|12|21|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|12|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|12|12|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|12|12|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|0|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|0|x|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|0|x|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|0|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|0|21|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|0|21|no",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|0|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|0|12|has",
+   "festivals": []
+  },
+  {
+   "label": "nku|5|24|0|12|no",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|x|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|x|x|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|x|x|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|x|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|x|12|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|x|12|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|x|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|x|21|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|x|21|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|12|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|12|x|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|12|x|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|12|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|12|12|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|12|12|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|12|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|12|21|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|12|21|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|21|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|21|x|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|21|x|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|21|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|21|12|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|21|12|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|21|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|21|21|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|9|21|21|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|x|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|x|x|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|x|x|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|x|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|x|12|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|x|12|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|x|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|x|21|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|x|21|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|12|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|12|x|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|12|x|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|12|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|12|12|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|12|12|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|12|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|12|21|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|12|21|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|21|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|21|x|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|21|x|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|21|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|21|12|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|21|12|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|21|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|21|21|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|4|24|21|21|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|x|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|x|x|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|x|x|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|x|12|x",
+   "festivals": [
+    {
+     "key": "sama_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nkk|5|9|x|12|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|x|12|21",
+   "festivals": [
+    {
+     "key": "sama_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nkk|5|9|x|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|x|21|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|x|21|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|12|x|x",
+   "festivals": [
+    {
+     "key": "sama_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nkk|5|9|12|x|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|12|x|21",
+   "festivals": [
+    {
+     "key": "sama_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nkk|5|9|12|12|x",
+   "festivals": [
+    {
+     "key": "sama_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nkk|5|9|12|12|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|12|12|21",
+   "festivals": [
+    {
+     "key": "sama_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nkk|5|9|12|21|x",
+   "festivals": [
+    {
+     "key": "sama_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nkk|5|9|12|21|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|12|21|21",
+   "festivals": [
+    {
+     "key": "sama_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nkk|5|9|21|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|21|x|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|21|x|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|21|12|x",
+   "festivals": [
+    {
+     "key": "sama_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nkk|5|9|21|12|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|21|12|21",
+   "festivals": [
+    {
+     "key": "sama_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "nkk|5|9|21|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|21|21|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|9|21|21|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|x|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|x|x|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|x|x|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|x|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|x|12|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|x|12|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|x|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|x|21|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|x|21|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|12|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|12|x|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|12|x|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|12|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|12|12|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|12|12|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|12|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|12|21|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|12|21|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|21|x|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|21|x|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|21|x|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|21|12|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|21|12|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|21|12|21",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|21|21|x",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|21|21|12",
+   "festivals": []
+  },
+  {
+   "label": "nkk|5|24|21|21|21",
+   "festivals": []
+  },
+  {
+   "label": "kl|x|x|x|x",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|x|x|x|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|x|x|29|x",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|x|x|29|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|x|28|x|x",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|x|28|x|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|x|28|29|x",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|x|28|29|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|x|29|x|x",
+   "festivals": [
+    {
+     "key": "vat_savitri_amavasya",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|x|29|x|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|x|29|29|x",
+   "festivals": [
+    {
+     "key": "vat_savitri_amavasya",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|x|29|29|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|28|x|x|x",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|28|x|x|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|28|x|29|x",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|28|x|29|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|28|28|x|x",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|28|28|x|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|28|28|29|x",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|28|28|29|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|28|29|x|x",
+   "festivals": [
+    {
+     "key": "vat_savitri_amavasya",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|28|29|x|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|28|29|29|x",
+   "festivals": [
+    {
+     "key": "vat_savitri_amavasya",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|28|29|29|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|29|x|x|x",
+   "festivals": [
+    {
+     "key": "vat_savitri_amavasya",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|29|x|x|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|29|x|29|x",
+   "festivals": [
+    {
+     "key": "vat_savitri_amavasya",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|29|x|29|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|29|28|x|x",
+   "festivals": [
+    {
+     "key": "vat_savitri_amavasya",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|29|28|x|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|29|28|29|x",
+   "festivals": [
+    {
+     "key": "vat_savitri_amavasya",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|29|28|29|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|29|29|x|x",
+   "festivals": [
+    {
+     "key": "vat_savitri_amavasya",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|29|29|x|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|29|29|29|x",
+   "festivals": [
+    {
+     "key": "vat_savitri_amavasya",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "kl|29|29|29|29",
+   "festivals": [
+    {
+     "key": "masik_shivaratri",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|0|0|x|N",
+   "festivals": [
+    {
+     "key": "ugadi",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "gudi_padwa",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|0|0|0|N",
+   "festivals": [
+    {
+     "key": "ugadi",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "gudi_padwa",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|0|0|1|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|0|1|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|1|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|1|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|1|1|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|1|1|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|2|x|N",
+   "festivals": [
+    {
+     "key": "gangaur",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|0|2|0|N",
+   "festivals": [
+    {
+     "key": "gangaur",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|0|2|1|N",
+   "festivals": [
+    {
+     "key": "gangaur",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|0|2|1|A",
+   "festivals": [
+    {
+     "key": "gangaur",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|0|4|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|4|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|4|1|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|4|1|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|6|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|6|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|6|1|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|6|1|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|13|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|13|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|13|1|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|13|1|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|14|x|N",
+   "festivals": [
+    {
+     "key": "hanuman_jayanti",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "karaga",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|0|14|0|N",
+   "festivals": [
+    {
+     "key": "hanuman_jayanti",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "karaga",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|0|14|1|N",
+   "festivals": [
+    {
+     "key": "hanuman_jayanti",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "karaga",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|0|14|1|A",
+   "festivals": [
+    {
+     "key": "hanuman_jayanti",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "karaga",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|0|28|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|28|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|28|1|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|28|1|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|29|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|29|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|29|1|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|29|1|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|0-1|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|0-1|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|0-1|1|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|0-1|1|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|13-14|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|13-14|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|13-14|1|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|13-14|1|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|x|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|x|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|x|1|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|0|x|1|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|0|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|0|2|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|0|3|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|0|3|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|1|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|1|2|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|1|3|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|1|3|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|2|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|2|2|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|2|3|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|2|3|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|4|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|4|2|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|4|3|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|4|3|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|6|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|6|2|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|6|3|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|6|3|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|13|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|13|2|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|13|3|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|13|3|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|14|x|N",
+   "festivals": [
+    {
+     "key": "vat_savitri_purnima",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|2|14|2|N",
+   "festivals": [
+    {
+     "key": "vat_savitri_purnima",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|2|14|3|N",
+   "festivals": [
+    {
+     "key": "vat_savitri_purnima",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|2|14|3|A",
+   "festivals": [
+    {
+     "key": "vat_savitri_purnima",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|2|28|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|28|2|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|28|3|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|28|3|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|29|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|29|2|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|29|3|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|29|3|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|0-1|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|0-1|2|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|0-1|3|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|0-1|3|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|13-14|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|13-14|2|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|13-14|3|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|13-14|3|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|x|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|x|2|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|x|3|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|2|x|3|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|0|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|0|4|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|0|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|0|5|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|1|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|1|4|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|1|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|1|5|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|2|x|N",
+   "festivals": [
+    {
+     "key": "hariyali_teej",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|4|2|4|N",
+   "festivals": [
+    {
+     "key": "hariyali_teej",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|4|2|5|N",
+   "festivals": [
+    {
+     "key": "hariyali_teej",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|4|2|5|A",
+   "festivals": [
+    {
+     "key": "hariyali_teej",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|4|4|x|N",
+   "festivals": [
+    {
+     "key": "nag_panchami",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|4|4|4|N",
+   "festivals": [
+    {
+     "key": "nag_panchami",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|4|4|5|N",
+   "festivals": [
+    {
+     "key": "nag_panchami",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|4|4|5|A",
+   "festivals": [
+    {
+     "key": "nag_panchami",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|4|6|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|6|4|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|6|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|6|5|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|13|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|13|4|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|13|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|13|5|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|14|x|N",
+   "festivals": [
+    {
+     "key": "raksha_bandhan",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "yajur_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|4|14|4|N",
+   "festivals": [
+    {
+     "key": "raksha_bandhan",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "yajur_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|4|14|5|N",
+   "festivals": [
+    {
+     "key": "raksha_bandhan",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "yajur_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|4|14|5|A",
+   "festivals": [
+    {
+     "key": "raksha_bandhan",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "yajur_upakarma",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|4|28|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|28|4|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|28|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|28|5|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|29|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|29|4|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|29|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|29|5|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|0-1|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|0-1|4|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|0-1|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|0-1|5|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|13-14|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|13-14|4|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|13-14|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|13-14|5|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|x|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|x|4|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|x|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|4|x|5|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|0|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|0|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|0|6|N",
+   "festivals": [
+    {
+     "key": "navaratri",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|5|0|6|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|1|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|1|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|1|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|1|6|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|2|x|N",
+   "festivals": [
+    {
+     "key": "hartalika_teej",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|5|2|5|N",
+   "festivals": [
+    {
+     "key": "hartalika_teej",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|5|2|6|N",
+   "festivals": [
+    {
+     "key": "hartalika_teej",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|5|2|6|A",
+   "festivals": [
+    {
+     "key": "hartalika_teej",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|5|4|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|4|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|4|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|4|6|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|6|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|6|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|6|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|6|6|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|13|x|N",
+   "festivals": [
+    {
+     "key": "anant_chaturdashi",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|5|13|5|N",
+   "festivals": [
+    {
+     "key": "anant_chaturdashi",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|5|13|6|N",
+   "festivals": [
+    {
+     "key": "anant_chaturdashi",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|5|13|6|A",
+   "festivals": [
+    {
+     "key": "anant_chaturdashi",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|5|14|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|14|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|14|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|14|6|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|28|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|28|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|28|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|28|6|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|29|x|N",
+   "festivals": [
+    {
+     "key": "mahalaya_amavasya",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "bathukamma_start",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|5|29|5|N",
+   "festivals": [
+    {
+     "key": "mahalaya_amavasya",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "bathukamma_start",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|5|29|6|N",
+   "festivals": [
+    {
+     "key": "mahalaya_amavasya",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "bathukamma_start",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|5|29|6|A",
+   "festivals": [
+    {
+     "key": "mahalaya_amavasya",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "bathukamma_start",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|5|0-1|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|0-1|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|0-1|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|0-1|6|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|13-14|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|13-14|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|13-14|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|13-14|6|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|x|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|x|5|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|x|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|5|x|6|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|0|x|N",
+   "festivals": [
+    {
+     "key": "navaratri",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|6|0|6|N",
+   "festivals": [
+    {
+     "key": "navaratri",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|6|0|7|N",
+   "festivals": [
+    {
+     "key": "govardhan_puja",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|6|0|7|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|1|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|1|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|1|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|1|7|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|2|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|2|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|2|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|2|7|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|4|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|4|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|4|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|4|7|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|6|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|6|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|6|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|6|7|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|13|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|13|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|13|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|13|7|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|14|x|N",
+   "festivals": [
+    {
+     "key": "sharad_purnima",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|6|14|6|N",
+   "festivals": [
+    {
+     "key": "sharad_purnima",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|6|14|7|N",
+   "festivals": [
+    {
+     "key": "sharad_purnima",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|6|14|7|A",
+   "festivals": [
+    {
+     "key": "sharad_purnima",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|6|28|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|28|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|28|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|28|7|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|29|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|29|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|29|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|29|7|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|0-1|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|0-1|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|0-1|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|0-1|7|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|13-14|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|13-14|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|13-14|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|13-14|7|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|x|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|x|6|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|x|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|6|x|7|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|0|x|N",
+   "festivals": [
+    {
+     "key": "govardhan_puja",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|7|0|7|N",
+   "festivals": [
+    {
+     "key": "govardhan_puja",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|7|0|8|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|0|8|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|1|x|N",
+   "festivals": [
+    {
+     "key": "bhai_dooj",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|7|1|7|N",
+   "festivals": [
+    {
+     "key": "bhai_dooj",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|7|1|8|N",
+   "festivals": [
+    {
+     "key": "bhai_dooj",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|7|1|8|A",
+   "festivals": [
+    {
+     "key": "bhai_dooj",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|7|2|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|2|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|2|8|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|2|8|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|4|x|N",
+   "festivals": [
+    {
+     "key": "chhath_kharna",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|7|4|7|N",
+   "festivals": [
+    {
+     "key": "chhath_kharna",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|7|4|8|N",
+   "festivals": [
+    {
+     "key": "chhath_kharna",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|7|4|8|A",
+   "festivals": [
+    {
+     "key": "chhath_kharna",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|7|6|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|6|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|6|8|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|6|8|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|13|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|13|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|13|8|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|13|8|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|14|x|N",
+   "festivals": [
+    {
+     "key": "kartika_purnima",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|7|14|7|N",
+   "festivals": [
+    {
+     "key": "kartika_purnima",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|7|14|8|N",
+   "festivals": [
+    {
+     "key": "kartika_purnima",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|7|14|8|A",
+   "festivals": [
+    {
+     "key": "kartika_purnima",
+     "type": "minor",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|7|28|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|28|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|28|8|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|28|8|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|29|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|29|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|29|8|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|29|8|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|0-1|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|0-1|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|0-1|8|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|0-1|8|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|13-14|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|13-14|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|13-14|8|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|13-14|8|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|x|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|x|7|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|x|8|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|7|x|8|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|0|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|0|11|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|0|0|N",
+   "festivals": [
+    {
+     "key": "ugadi",
+     "type": "major",
+     "description": null
+    },
+    {
+     "key": "gudi_padwa",
+     "type": "major",
+     "description": null
+    }
+   ]
+  },
+  {
+   "label": "ks|11|0|0|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|1|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|1|11|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|1|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|1|0|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|2|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|2|11|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|2|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|2|0|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|4|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|4|11|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|4|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|4|0|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|6|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|6|11|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|6|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|6|0|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|13|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|13|11|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|13|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|13|0|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|14|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|14|11|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|14|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|14|0|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|28|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|28|11|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|28|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|28|0|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|29|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|29|11|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|29|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|29|0|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|0-1|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|0-1|11|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|0-1|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|0-1|0|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|13-14|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|13-14|11|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|13-14|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|13-14|0|A",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|x|x|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|x|11|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|x|0|N",
+   "festivals": []
+  },
+  {
+   "label": "ks|11|x|0|A",
+   "festivals": []
   }
  ]
 }

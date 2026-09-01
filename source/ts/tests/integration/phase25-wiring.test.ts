@@ -32,7 +32,6 @@ describe('Phase 25: muhurta wiring in getDailyPanchang', () => {
   });
 
   it('amritKala windows are ordered and START inside the Hindu day', () => {
-    // A window belongs to the Hindu day by its START; its end may run past the next sunrise.
     expect(r.muhurtas.amritKala.length).toBeLessThanOrEqual(2);
     for (const w of r.muhurtas.amritKala) {
       expect(w.start.getTime()).toBeLessThan(w.end.getTime());
@@ -53,7 +52,6 @@ describe('Phase 25: eclipse wiring in getDailyPanchang', () => {
     expect(r.eclipse).not.toBeNull();
     expect(r.eclipse!.kind).toBe('lunar');
     expect(r.eclipse!.subtype).toMatch(/^(partial|total|penumbral)$/);
-    // sutakEnd is the umbral last contact, which precedes the penumbral end.
     expect(r.eclipse!.sutakEnd).not.toBeNull();
     expect(r.eclipse!.sutakEnd!.getTime()).toBeLessThan(r.eclipse!.end.getTime());
   });
@@ -76,7 +74,6 @@ describe('Phase 25: eclipse wiring in getDailyPanchang', () => {
     const r = getDailyPanchang(noonUtc('2025-03-14'), DELHI, { timezone: 330, language: 'hi' })!;
     const ecl = r.festivals.find((f) => f.type === 'eclipse');
     expect(ecl).toBeDefined();
-    // ग्रहण is the shared noun in both चंद्र ग्रहण and सूर्य ग्रहण.
     expect(ecl!.name).toMatch(/ग्रहण/);
   });
 });

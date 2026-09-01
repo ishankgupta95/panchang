@@ -96,7 +96,6 @@ describe('37.2: compute*ForYear agrees with the range enumerator it wraps', () =
     );
     expect(viaYear.map(p => p.time.toISOString()))
       .toEqual(viaRange.map(p => p.time.toISOString()));
-    // A synodic month is 29.53 days, four principal phases each: 49.4/year.
     expect(viaYear.length).toBeGreaterThanOrEqual(48);
     expect(viaYear.length).toBeLessThanOrEqual(50);
   });
@@ -177,7 +176,6 @@ describe('37.4: emitted tables carry `key` and round-trip through the reader', (
     expect(phases._dict).toHaveLength(4);
   });
 
-  // A measurement, not an invariant.
   it('packs to under 30% of the v1 size', () => {
     const ten = buildFestivalsTable({
       location: VARANASI, timezoneOffsetMinutes: TZ, startYear: 2024, endYear: 2033,
@@ -198,7 +196,6 @@ describe('37.4: emitted tables carry `key` and round-trip through the reader', (
     };
     const ratio = JSON.stringify(ten).length / JSON.stringify(v1).length;
     expect(ratio, `packed to ${(ratio * 100).toFixed(1)}% of v1`).toBeLessThan(0.30);
-    // 30 s: two ten-year tables built from scratch overran the 5 s default.
   }, 30_000);
 });
 

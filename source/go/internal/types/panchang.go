@@ -1,7 +1,5 @@
 package types
 
-// No field is ever absent: null for an inapplicable scalar, an empty non-nil slice for an inapplicable collection.
-
 type MasaInfo struct {
 	Index int    `json:"index"`
 	Name  string `json:"name"`
@@ -22,7 +20,6 @@ type MoonPosition struct {
 	Rashi             RashiInfo `json:"rashi"`
 }
 
-// Not an embedding of [SunPosition]: key order puts the position fields last.
 type DailySun struct {
 	Rise                 JSDate             `json:"rise"`
 	Set                  JSDate             `json:"set"`
@@ -38,7 +35,6 @@ type DailySun struct {
 	Nakshatra            NakshatraIndexInfo `json:"nakshatra"`
 }
 
-// Rise and Set are null on the days the Moon does not rise or set in the window.
 type DailyMoon struct {
 	Rise              *JSDate   `json:"rise"`
 	Set               *JSDate   `json:"set"`
@@ -97,7 +93,6 @@ type DailyKaranaInfo struct {
 	EndTimeLocal         *string    `json:"endTimeLocal"`
 }
 
-// Index 0 of each array is the anga active at sunrise.
 type DailyAngas struct {
 	Tithis     []DailyTithiInfo     `json:"tithis"`
 	Nakshatras []DailyNakshatraInfo `json:"nakshatras"`
@@ -119,16 +114,13 @@ type CalendarLabels struct {
 	Samvat      SamvatInfo      `json:"samvat"`
 }
 
-// Not an embedding of [CalendarLabels]: masa is emitted first.
 type DailyCalendarLabels struct {
-	// Masa is the solar month (the Sun's rashi), not the lunar Chandramasa.
 	Masa        MasaInfo        `json:"masa"`
 	Chandramasa ChandraMasaInfo `json:"chandramasa"`
 	Samvat      SamvatInfo      `json:"samvat"`
 }
 
 type MuhurtaWindows struct {
-	// Abhijit is null on Wednesday.
 	Abhijit        *TimePeriod  `json:"abhijit"`
 	Brahma         TimePeriod   `json:"brahma"`
 	Vijaya         TimePeriod   `json:"vijaya"`
@@ -191,7 +183,6 @@ type FestivalInfo struct {
 	Description string       `json:"description,omitempty"`
 }
 
-// The sutak fields are null for a penumbral lunar eclipse, which raises none.
 type EclipseInfo struct {
 	Kind                EclipseKind    `json:"kind"`
 	Subtype             EclipseSubtype `json:"subtype"`

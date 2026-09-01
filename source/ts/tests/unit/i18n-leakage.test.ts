@@ -8,7 +8,6 @@ const PUNE = { latitude: 18.5204, longitude: 73.8567 };
 /** 4+ letters, so "100%" and "D9" do not register. */
 const LATIN_RUN = /[A-Za-z]{4,}/;
 
-// Lunar eclipse, solar eclipse, Raksha Bandhan (Bhadra), Sankranti, ordinary day.
 const DAYS = ['2025-09-07', '2026-02-17', '2026-08-28', '2026-01-14', '2025-07-04'];
 
 function hindiPanchang(day: string) {
@@ -37,7 +36,6 @@ describe('Hindi output carries no untranslated English', () => {
         expect(r.eclipse.description, 'eclipse.description').not.toMatch(LATIN_RUN);
       }
       if (r.inauspicious.bhadra !== null) {
-        // `location` stays a machine key by design; `locationName` is display.
         expect(['earth', 'heaven', 'paatal']).toContain(r.inauspicious.bhadra.location);
         expect(r.inauspicious.bhadra.locationName, 'bhadra.locationName').not.toMatch(LATIN_RUN);
       }

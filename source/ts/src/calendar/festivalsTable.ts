@@ -1,4 +1,3 @@
-// Engine-free reader: astronomy imports here would drag the engine into a client bundle.
 
 import type {
   AnyFestivalsFile,
@@ -61,7 +60,6 @@ function flattenV1(
   raw: FestivalTableEntryRaw,
   lang: FestivalsTableLanguage,
 ): FestivalTableEntry {
-  // v1 tables carry no stable key, so there is nothing truthful to put here.
   const out: FestivalTableEntry = { key: '', name: pick(raw.name, lang), type: raw.type };
   if (raw.description) out.description = pick(raw.description, lang);
   return out;

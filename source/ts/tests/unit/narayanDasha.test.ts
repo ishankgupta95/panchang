@@ -227,8 +227,6 @@ describe('Narayan Dasha: fixture sweep', () => {
   });
 });
 
-// The variable-duration rules follow Sanjay Rath, *Narayana Dasa* (Sagar
-// Publications), Strength Source 1 Rule 2 and Source 2 Rule 1 breaking dual-lord ties.
 const VARIABLE_FIXTURE_CHARTS = (fixtures as { charts: {
   name: string; dateLocal: string; tzh: number; lat: number; lon: number;
 }[] }).charts;
@@ -263,9 +261,6 @@ describe('Narayan Dasha: variable-duration backwards-compat default', () => {
 });
 
 describe('Narayan Dasha: variable-duration opt-in, real fixture sweep', () => {
-  // Expected years are re-derived from the chart's rashis, never from output.
-
-  // Manteswara exaltation, which is what Rath uses for Narayan.
   const EXALTATION: Record<string, number> = {
     Sun: 0, Moon: 1, Mars: 9, Mercury: 5, Jupiter: 3,
     Venus: 11, Saturn: 6, Rahu: 2, Ketu: 8,
@@ -302,8 +297,6 @@ describe('Narayan Dasha: variable-duration opt-in, real fixture sweep', () => {
   });
 
   it.each(VARIABLE_SWEEP_NAMES)('%s: total of 12 variable years is between 12 and 144', (name) => {
-    // [0, 144] is the theoretical range; the floor of 12 is practical, the
-    // 0-year pile-up that would go below it not occurring on a real chart.
     const f = VARIABLE_FIXTURE_CHARTS.find((c) => c.name === name)!;
     const utc = variableLocalToUtc(f.dateLocal, f.tzh);
     const r = computeNarayanDasha(utc, { latitude: f.lat, longitude: f.lon }, 'lahiri',
@@ -311,7 +304,6 @@ describe('Narayan Dasha: variable-duration opt-in, real fixture sweep', () => {
     const total = r.mahaDashas.reduce((s, md) => s + md.years, 0);
     expect(total).toBeGreaterThanOrEqual(12);
     expect(total).toBeLessThanOrEqual(144);
-    // Rule 3 caps a single mahadasha at 12.
     for (const md of r.mahaDashas) {
       expect(md.years).toBeLessThanOrEqual(12);
       expect(md.years).toBeGreaterThanOrEqual(0);
@@ -331,7 +323,6 @@ describe('Narayan Dasha: variable-duration opt-in, real fixture sweep', () => {
 
 describe('Narayan variable: Rule 2 base count algorithm (first-principles cross-check)', () => {
   it('Modi: Sun in Kanya (rashi 5), Leo (rashi 4, samapada) Sun-lord dasha', () => {
-    // Leo is samapada: anti-count 4 to 5 = 12 inclusive, minus 1; Sun in Kanya draws no adjustment.
     const f = VARIABLE_FIXTURE_CHARTS.find((c) => c.name === 'Narendra Modi')!;
     const r = computeNarayanDasha(variableLocalToUtc(f.dateLocal, f.tzh),
                                   { latitude: f.lat, longitude: f.lon },
@@ -341,7 +332,6 @@ describe('Narayan variable: Rule 2 base count algorithm (first-principles cross-
   });
 
   it('Modi: Mars in Vrischika (rashi 7), Aries Mars-lord dasha (vimsapada zodiacal)', () => {
-    // Aries is vimsapada: zodiacal 0 to 7 = 8 inclusive, minus 1; Mars in its own sign, no adjustment.
     const f = VARIABLE_FIXTURE_CHARTS.find((c) => c.name === 'Narendra Modi')!;
     const r = computeNarayanDasha(variableLocalToUtc(f.dateLocal, f.tzh),
                                   { latitude: f.lat, longitude: f.lon },
@@ -353,7 +343,6 @@ describe('Narayan variable: Rule 2 base count algorithm (first-principles cross-
 
 describe('Narayan variable: Rule 3 exaltation / debilitation', () => {
   it('Modi: Saturn in Simha (rashi 4), Capricorn (Saturn-lord) dasha gets no exalt-adjust', () => {
-    // Capricorn is samapada: anti-count 9 to 4 = 6 inclusive, minus 1; Saturn exalts in Libra, not Simha.
     const f = VARIABLE_FIXTURE_CHARTS.find((c) => c.name === 'Narendra Modi')!;
     const r = computeNarayanDasha(variableLocalToUtc(f.dateLocal, f.tzh),
                                   { latitude: f.lat, longitude: f.lon },
@@ -363,7 +352,6 @@ describe('Narayan variable: Rule 3 exaltation / debilitation', () => {
   });
 
   it('Modi: Jupiter in Kumbha (rashi 10), Pisces (Jup-lord) dasha (samapada, 2 - 1 = 1)', () => {
-    // Pisces is samapada: anti-count 11 to 10 = 2 inclusive, minus 1; Jupiter exalts in Cancer, not Kumbha.
     const f = VARIABLE_FIXTURE_CHARTS.find((c) => c.name === 'Narendra Modi')!;
     const r = computeNarayanDasha(variableLocalToUtc(f.dateLocal, f.tzh),
                                   { latitude: f.lat, longitude: f.lon },
@@ -374,7 +362,6 @@ describe('Narayan variable: Rule 3 exaltation / debilitation', () => {
 });
 
 describe('Narayan variable: Rule 4 dual-lord (Scorpio / Aquarius)', () => {
-  // Rule 4(c) picks Ketu's Kanya, Mars being in Scorpio itself: zodiacal 7 to 5 = 11 inclusive, minus 1.
   it('Modi: Scorpio dasha applies Rule 4(c), uses Ketu since Mars is in Scorpio', () => {
     const f = VARIABLE_FIXTURE_CHARTS.find((c) => c.name === 'Narendra Modi')!;
     const r = computeNarayanDasha(variableLocalToUtc(f.dateLocal, f.tzh),
@@ -384,8 +371,6 @@ describe('Narayan variable: Rule 4 dual-lord (Scorpio / Aquarius)', () => {
     expect(scorpioDasha.years).toBe(10);
   });
 
-  // Rule 4(d) compares strength: Simha holds Venus and Saturn against Meena's
-  // lone Rahu, so Saturn's sign wins. Anti-count 10 to 4 = 7 inclusive, minus 1.
   it('Modi: Aquarius dasha applies Rule 4(d), Saturn-in-Simha wins by planet count over Rahu-in-Meena', () => {
     const f = VARIABLE_FIXTURE_CHARTS.find((c) => c.name === 'Narendra Modi')!;
     const r = computeNarayanDasha(variableLocalToUtc(f.dateLocal, f.tzh),
@@ -397,11 +382,6 @@ describe('Narayan variable: Rule 4 dual-lord (Scorpio / Aquarius)', () => {
 });
 
 describe('Narayan variable: Sanjay Rath worked Einstein table validation', () => {
-  // Einstein's 1879 birth is outside the library's date-validator range, so the
-  // placements are Rath's own (*Narayana Dasa* Chart 5, pp. 46-47) fed straight
-  // to the rules. Only his self-consistent rows are pinned: his Gemini and
-  // Virgo rows do not follow his own rules.
-
   function einsteinExpected(rashi: number, _lord: string, lordRashi: number, exalt: number): number {
     const anti = !VISHAMA_PADA_SET.has(rashi);
     let y = inclusiveSignCount(rashi, lordRashi, anti) - 1 + exalt;
@@ -409,26 +389,18 @@ describe('Narayan variable: Sanjay Rath worked Einstein table validation', () =>
   }
 
   it('Algorithm: Aries → Mars-in-Cap (exalted) → years=10', () => {
-    // Aries is vimsapada: zodiacal 0 to 9 = 10, minus 1, plus 1 for exalt.
     expect(einsteinExpected(0, 'Mars', 9, +1)).toBe(10);
   });
 
   it('Algorithm: Cancer → Moon-in-Scorpio (debilitated) → years=8 [Sanjay Rath table: 12]', () => {
-    // Cancer is samapada: anti-count 3 to 7 = 9, minus 1, minus 1 for Moon's
-    // debility. Rath's table prints 12, his worked calculation having omitted
-    // the debility adjustment; the rules-correct value is pinned instead.
     expect(einsteinExpected(3, 'Moon', 7, -1)).toBe(7);
   });
 
   it('Algorithm: Libra → Venus-in-Pisces (exalted) → years=6', () => {
-    // Libra is vimsapada: zodiacal 6 to 11 = 6, minus 1, plus 1 for exalt;
-    // matches Rath's published row.
     expect(einsteinExpected(6, 'Venus', 11, +1)).toBe(6);
   });
 
   it('Algorithm: Sagittarius → Jupiter-in-Aquarius → years=2', () => {
-    // Sagittarius is vimsapada: zodiacal 8 to 10 = 3, minus 1, no adjustment;
-    // matches Rath's published row.
     expect(einsteinExpected(8, 'Jupiter', 10, 0)).toBe(2);
   });
 });

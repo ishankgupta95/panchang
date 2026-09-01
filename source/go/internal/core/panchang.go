@@ -12,7 +12,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
 )
 
-// Always interpolated: the two modes disagree slightly.
 const panchangCacheMode = astronomy.ModeInterpolated
 
 func tithiAngle(getMoon, getSun LongitudeAt) utils.ElementAngle {
@@ -44,9 +43,8 @@ func yogaAngle(getMoon, getSun LongitudeAt) utils.ElementAngle {
 }
 
 type InstantPanchangOptions struct {
-	Ayanamsa types.AyanamsaType
-	Language types.Language
-	// nil means true.
+	Ayanamsa          types.AyanamsaType
+	Language          types.Language
 	ComputeEndTimes   *bool
 	MasaSystem        types.MasaSystem
 	JanmaRashi        *int
@@ -150,7 +148,6 @@ func varaIndexAtInstant(
 ) (int, error) {
 	localMs := utils.UtcToLocalDisplay(utcMs, offsetMinutes)
 
-	// From utc − 26 h: an evening instant would otherwise find tomorrow's sunrise.
 	sunriseMs, err := astronomy.ComputeSunrise(ctx, utcMs-26*3600_000, location, astronomy.DefaultRiseSetLimitDays)
 	if err == nil {
 		for {
@@ -232,7 +229,6 @@ func computeSpecialYogasOverDay(
 	return out, nil
 }
 
-// The spell's classical type is fixed by the vara the Moon entered the span on.
 func buildPanchakaInfo(
 	referenceUtcMs int64,
 	siderealMoonNow float64,
@@ -265,10 +261,8 @@ func buildPanchakaInfo(
 	}, nil
 }
 
-// Non-nil so it marshals as [].
 func noFestivals() []types.FestivalInfo { return []types.FestivalInfo{} }
 
-// Instant-only: canonical-time festival rules, transit Sankranti and the viddha split can be missed.
 func GetInstantPanchang(
 	ctx *astronomy.EphemerisCtx,
 	dateMs int64,
@@ -310,7 +304,6 @@ func GetInstantPanchang(
 	karana := ComputeKaranaFromLongitudes(siderealMoon, siderealSun,
 		i18n.ResolveKaranaName(GetKaranaIndex(siderealMoon, siderealSun), o.lang))
 
-	// No timezone here: an LMT offset from longitude gives the observer's day.
 	lmtOffsetMinutes := int(jsnum.Round(location.Longitude * 4))
 	sunriseUtcMs, err := astronomy.ComputeSunrise(ctx, dateMs-26*3600_000, location,
 		astronomy.DefaultRiseSetLimitDays)
@@ -467,7 +460,6 @@ func GetInstantPanchang(
 	}, true, nil
 }
 
-// Sunrise to sunrise, not midnight to midnight.
 func GetDailyPanchang(
 	ctx *astronomy.EphemerisCtx,
 	dateMs int64,
@@ -550,7 +542,6 @@ func GetDailyPanchang(
 	karanaAtSunrise := ComputeKaranaFromLongitudes(siderealMoonAtSunrise, siderealSunAtSunrise,
 		i18n.ResolveKaranaName(GetKaranaIndex(siderealMoonAtSunrise, siderealSunAtSunrise), o.lang))
 
-	// LOCAL sunrise: its UTC instant can land on the previous calendar day.
 	sunriseLocal := utils.UtcToLocalDisplay(sunriseUtcMs, offsetMinutes)
 	vara := ComputeVara(sunriseLocal, sunriseLocal, t.VaraNames)
 	masa := ComputeMasa(siderealSunAtSunrise,
@@ -580,7 +571,6 @@ func GetDailyPanchang(
 	gowriPanchangam := ComputeGowriPanchangam(sunriseUtcMs, sunsetUtcMs, nextSunriseUtcMs, vara.Index,
 		func(idx int) string { return t.GowriNames[idx] }, qualityNameFn)
 
-	// Moonset searches from moonrise: from local midnight it returns the previous lunation's.
 	needMoonrise := wantMoonTimes || wantFestivals
 	var moonriseSearchMs *int64
 	if needMoonrise {
@@ -659,6 +649,20 @@ func GetDailyPanchang(
 			SiderealMoonAtSunrise: siderealMoonAtSunrise,
 			SiderealSunAtSunrise:  siderealSunAtSunrise,
 			VaraIndex:             vara.Index, Chandramasa: chandramasa,
+			NextDayMasa: func() (int, bool) {
+				next, err := ComputeChandraMasa(getSun(nextSunriseUtcMs), getMoon(nextSunriseUtcMs),
+					func(idx int, isAdhika bool) string {
+						return i18n.ResolveChandraMasaName(idx, o.lang, isAdhika)
+					},
+					o.masaSystem, nextSunriseUtcMs, getSun,
+					func(ref int64) (astronomy.NewMoonBounds, error) {
+						return astronomy.BoundingNewMoons(ctx, ref)
+					})
+				if err != nil {
+					return chandramasa.AmantaIndex, chandramasa.IsAdhika
+				}
+				return next.AmantaIndex, next.IsAdhika
+			},
 			Lang: o.lang, T: t, Region: o.region,
 			MoonriseMs: moonriseSearchMs, Bhadra: bhadraUtc,
 			GetMoon: getMoon, GetSun: getSun,
@@ -709,7 +713,6 @@ func GetDailyPanchang(
 	var karanas []types.DailyKaranaInfo
 
 	if o.computeEndTimes {
-		// maxPerDay 3: a short element wholly inside the day makes three touch it; karanas 5.
 		tithis, err = utils.FindDailyElements(sunriseUtcMs, nextSunriseUtcMs, tithiAtSunrise,
 			func(e types.TithiInfo) int { return e.Index },
 			func(ms int64) int { return GetTithiIndexAtTime(ms, getMoon, getSun) },

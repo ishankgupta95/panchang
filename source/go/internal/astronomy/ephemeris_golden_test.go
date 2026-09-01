@@ -126,7 +126,6 @@ func ephemerisDigest(fn func(float64) float64, seed uint32, count int, tMax floa
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-// Platform sin/cos differ from V8 in the last ULPs, so these are bounded, not bit-identical.
 func usesPlatformTrig(name string) bool {
 	return strings.HasPrefix(name, "heliocentricRect:") ||
 		strings.HasPrefix(name, "earthRect:") ||
@@ -173,7 +172,6 @@ func TestEphemerisBitIdenticalToTypeScript(t *testing.T) {
 	}
 }
 
-// Direction, not per component: the Earth's z is r·sin(lat) with lat ~1e-6, a cancellation huge in relative error that barely moves the direction.
 func TestEphemerisRectWithinPlatformTrigBound(t *testing.T) {
 	const angleBound = 1e-13  // radians
 	const lengthBound = 1e-14 // relative

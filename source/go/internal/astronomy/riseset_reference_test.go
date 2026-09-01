@@ -7,9 +7,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// riseset.go with every optimization removed; it shares the ephemeris deliberately, so the difference against the shipped path is interpolation error.
-
-// Two deliberate differences from altitudeExcess: asin(r/d) against r/d, hypot against sqrt.
 func altitudeExcessReference(ctx *EphemerisCtx, body RiseSetBody, ms float64, observer types.GeoLocation) float64 {
 	msi := int64(ms)
 	ttDays := TTDaysSinceJ2000(msi)

@@ -179,7 +179,6 @@ function scoreGana(
   let score = GANA_SCORE[b]![g]!;
   let description = `${NAKSHATRA_GANA[boy.nakshatra]} ↔ ${NAKSHATRA_GANA[girl.nakshatra]}`;
 
-  // Doshic cells are only Manushya-Rakshasa (0) and Deva-Rakshasa (1).
   if (applyCancellation && score <= 1) {
     const boyLord = RASHI_LORD[boy.rashi]!;
     const girlLord = RASHI_LORD[girl.rashi]!;

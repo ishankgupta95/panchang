@@ -1,5 +1,3 @@
-// The `panchang-ts/muhurta` entry point. Must import NO astronomy code, so apps can
-// read pre-computed dates without pulling the engine into their bundle.
 
 import type {
   MuhurtaFile,

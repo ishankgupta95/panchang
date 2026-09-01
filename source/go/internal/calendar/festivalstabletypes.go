@@ -15,7 +15,6 @@ const (
 
 var AllTableLanguages = []FestivalsTableLanguage{TableLangEn, TableLangHi}
 
-// A struct, not a map: locale key order must round-trip and presence differs from emptiness.
 type LocalizedString struct {
 	En, Hi       string
 	HasEn, HasHi bool
@@ -27,7 +26,6 @@ func Localized(pairs ...LocalizedPair) LocalizedString {
 	for i, p := range pairs {
 		switch p.Lang {
 		case TableLangEn:
-			// En's first record decides: ["en","hi","en"] must not flip the order.
 			if !s.HasEn && i > 0 && s.HasHi {
 				s.HiFirst = true
 			}
@@ -103,7 +101,6 @@ func (s LocalizedString) MarshalJSON() ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-// json.Marshal escapes <, >, & and only an Encoder can unset that.
 func encodeJSONString(s string) []byte {
 	var buf bytes.Buffer
 	e := json.NewEncoder(&buf)
@@ -203,7 +200,6 @@ type PackedFestivalTableDay struct {
 }
 
 type FestivalTableMeta struct {
-	// 2 is the dictionary-encoded layout; absent means v1.
 	Format                int                      `json:"format"`
 	ReferenceLocation     string                   `json:"referenceLocation"`
 	Latitude              float64                  `json:"latitude"`

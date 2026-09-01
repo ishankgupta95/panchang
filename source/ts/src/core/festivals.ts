@@ -33,6 +33,16 @@ interface FestivalRule {
   /** Allow-list; omitted → pan-Indian. `'all'` marks a listed rule universal. */
   regions?: readonly FestivalRegion[];
   tithiRange?: readonly [number, number];
+  /** Kshaya anchor: `contain` gives it to the day that holds it, `exclude` drops it. */
+  kshayaRule?: 'contain' | 'exclude';
+  /** Confine the anchor to one paksha, judged on the sunrise tithi. */
+  paksha?: 'shukla' | 'krishna';
+  /** Which day wins when the anchor pervades the kala on two consecutive days. Default first. */
+  kalaPrefers?: 'first' | 'last';
+  /** Kala the anchor NAKSHATRA must pervade. Default sunrise; Sama Upakarma is aparahna. */
+  nakshatraDateRule?: FestivalDateRule;
+  /** Second choice, used only when the anchor is absent from the rest of the paksha. */
+  fallbackNakshatra?: number;
 }
 
 interface SankrantiRegionalRule {
@@ -42,10 +52,8 @@ interface SankrantiRegionalRule {
 }
 
 const SANKRANTI_REGIONAL: Readonly<Record<number, readonly SankrantiRegionalRule[]>> = {
-  // Mesha (0): Vaisakhi, Vishu and Pohela Boishakh key off the transit moment, not this day.
   0: [
     { key: 'puthandu',         regions: ['tamil-nadu'],           type: 'major' },
-    // Bohag Bihu sits on the transit day for want of a citable source.
     { key: 'bohag_bihu',       regions: ['assam'],                type: 'major' },
   ],
   3: [
@@ -88,7 +96,6 @@ const FESTIVAL_REGISTRY: readonly FestivalRule[] = [
   { key: 'parashurama_jayanti', masa: 1, tithi: 2,  type: 'major', dateRule: 'madhyahna' },
   { key: 'guru_purnima',       masa: 3,  tithi: 14, type: 'major' },
   { key: 'nag_panchami',       masa: 4,  tithi: 4,  type: 'minor' },
-  // Classically aparahna-vyapini Purnima; modern practice uses Purnima-at-sunrise.
   { key: 'raksha_bandhan',     masa: 4,  tithi: 14, type: 'major', bhadraExclude: true },
   { key: 'krishna_janmashtami', masa: 4, tithi: 22, type: 'major', dateRule: 'janmashtami-nishita', adhikaBehaviour: 'shift-to-nija' },
   { key: 'ganesh_chaturthi',   masa: 5,  tithi: 3,  type: 'major', dateRule: 'madhyahna' },
@@ -98,22 +105,22 @@ const FESTIVAL_REGISTRY: readonly FestivalRule[] = [
   { key: 'maha_navami',        masa: 6,  tithi: 8,  type: 'major' },
   { key: 'dussehra',           masa: 6,  tithi: 9,  type: 'major', dateRule: 'aparahna-full' },
   { key: 'sharad_purnima',     masa: 6,  tithi: 14, type: 'major' },
-  // Narak Chaturdashi stays on sunrise: its pre-dawn moon often falls outside the Hindu day.
   { key: 'karva_chauth',       masa: 6,  tithi: 18, type: 'major', dateRule: 'chandrodaya', namingSystem: 'purnimanta' },
   { key: 'dhanteras',          masa: 6,  tithi: 27, type: 'major', dateRule: 'pradosha', namingSystem: 'purnimanta' },
-  { key: 'narak_chaturdashi',  masa: 6,  tithi: 28, type: 'major', namingSystem: 'purnimanta' },
+  { key: 'narak_chaturdashi',  masa: 6,  tithi: 28, type: 'major', namingSystem: 'purnimanta',
+    kshayaRule: 'exclude' },
   { key: 'diwali',             masa: 6,  tithi: 29, type: 'major', dateRule: 'pradosha', namingSystem: 'purnimanta' },
   { key: 'kartika_purnima',    masa: 7,  tithi: 14, type: 'minor' },
   { key: 'vasant_panchami',    masa: 10, tithi: 4,  type: 'major', dateRule: 'madhyahna' },
   { key: 'maha_shivaratri',    masa: 10, tithi: 28, type: 'major', dateRule: 'nishita' },
-  { key: 'holi',               masa: 11, tithi: 14, type: 'major' },
+  { key: 'holi',               masa: 11, tithi: 14, type: 'major', kshayaRule: 'exclude' },
   { key: 'mahalaya_amavasya',  masa: 5,  tithi: 29, type: 'major' },
   { key: 'chhath_nahay_khay',       masa: 7, tithi: 3, type: 'major' },
   { key: 'chhath_kharna',           masa: 7, tithi: 4, type: 'major' },
   { key: 'chhath_sandhya_arghya',   masa: 7, tithi: 5, type: 'major', dateRule: 'pradosha' },
-  { key: 'chhath_usha_arghya',      masa: 7, tithi: 6, type: 'major' },
-  // Vat Savitri: the North observes the Amavasya, the South the Purnima.
-  { key: 'vat_savitri_amavasya', masa: 2, tithi: 29, type: 'major' },
+  { key: 'chhath_usha_arghya',      masa: 7, tithi: 6, type: 'major', kshayaRule: 'exclude' },
+  { key: 'vat_savitri_amavasya', masa: 1, tithi: 29, type: 'major',
+    dateRule: 'aparahna', kalaPrefers: 'last' },
   { key: 'vat_savitri_purnima',  masa: 2, tithi: 14, type: 'major' },
   { key: 'yajur_upakarma',       masa: 4, tithi: 14, type: 'major' },
   { key: 'shravan_somvar',   masa: 4,  vara: 1, type: 'minor', adhikaBehaviour: 'observe-in-both' },
@@ -121,8 +128,10 @@ const FESTIVAL_REGISTRY: readonly FestivalRule[] = [
   { key: 'kartik_somvar',    masa: 7,  vara: 1, type: 'minor', adhikaBehaviour: 'observe-in-both' },
   { key: 'magha_shanivar',   masa: 10, vara: 6, type: 'minor', adhikaBehaviour: 'observe-in-both' },
   { key: 'onam',               solarMasa: 4, nakshatra: 21, type: 'major' },
-  { key: 'rig_upakarma',       masa: 4, nakshatra: 21, type: 'major' },
-  { key: 'sama_upakarma',      masa: 5, nakshatra: 12, type: 'major' },
+  { key: 'rig_upakarma',       masa: 4, nakshatra: 21, type: 'major',
+    paksha: 'shukla', fallbackNakshatra: 12 },
+  { key: 'sama_upakarma',      masa: 5, nakshatra: 12, type: 'major',
+    paksha: 'shukla', nakshatraDateRule: 'aparahna' },
 
   { key: 'gudi_padwa',         masa: 0,  tithi: 0,  type: 'major',
     regions: ['maharashtra', 'goa'] },
@@ -139,7 +148,6 @@ const FESTIVAL_REGISTRY: readonly FestivalRule[] = [
     regions: ['rajasthan', 'uttar-pradesh', 'madhya-pradesh'] },
   { key: 'hartalika_teej',     masa: 5,  tithi: 2,  type: 'major',
     regions: ['rajasthan', 'uttar-pradesh', 'bihar', 'maharashtra', 'madhya-pradesh'] },
-  // Amanta and Purnimanta agree on this masa name, so no namingSystem tag.
   { key: 'govardhan_puja',     masa: 7,  tithi: 0,  type: 'major',
     regions: ['uttar-pradesh', 'bihar', 'haryana', 'rajasthan', 'gujarat',
               'madhya-pradesh', 'punjab', 'jharkhand'] },
@@ -147,12 +155,11 @@ const FESTIVAL_REGISTRY: readonly FestivalRule[] = [
     regions: ['uttar-pradesh', 'bihar', 'haryana', 'maharashtra', 'gujarat',
               'rajasthan', 'madhya-pradesh', 'west-bengal', 'jharkhand', 'nepal'] },
   { key: 'phagli',             masa: 11, tithi: 14, type: 'minor',
-    regions: ['himachal-pradesh'] },
+    regions: ['himachal-pradesh'], kshayaRule: 'exclude' },
   { key: 'jagannath_rath_yatra', masa: 3, tithi: 1, type: 'major' },
   { key: 'varamahalakshmi',    masa: 4,  vara: 5,  type: 'major',
     tithiRange: [7, 13],
     regions: ['karnataka', 'andhra-pradesh', 'telangana', 'tamil-nadu'] },
-  // Bathukamma runs 9 days; only its start and climax are emitted.
   { key: 'bathukamma_start',   masa: 5,  tithi: 29, type: 'major',
     regions: ['telangana'] },
   { key: 'bathukamma_saddula', masa: 6,  tithi: 8,  type: 'major',
@@ -193,6 +200,28 @@ export interface FestivalComputeContext {
   tithiIndex: number;
   nakshatraIndex: number;
   nakshatraIndicesInDay?: ReadonlySet<number>;
+  /** Nakshatra at each kala's opening and closing instant, mirroring the tithi ladder. */
+  nakshatraByRule?: Partial<Record<FestivalDateRule, number>>;
+  nakshatraByRuleStart?: Partial<Record<FestivalDateRule, number>>;
+  /** Nakshatra at YESTERDAY's sunrise, for the vriddha guard. */
+  priorDayNakshatraIndex?: number;
+  /** Nakshatras on a sunrise in the rest of this paksha. Lazy: only `fallbackNakshatra` asks. */
+  remainingPakshaSunriseNakshatras?: () => ReadonlySet<number>;
+  /** Tithi at TOMORROW's kala samples. Lazy: only a `kalaPrefers: 'last'` rule asks. */
+  nextDayTithiByRule?: () => {
+    start: Partial<Record<FestivalDateRule, number>>;
+    end: Partial<Record<FestivalDateRule, number>>;
+  };
+  /** Nakshatra at TOMORROW's kala samples, for the later-day dedupe. Lazy. */
+  nextDayNakshatraByRule?: () => {
+    start: Partial<Record<FestivalDateRule, number>>;
+    end: Partial<Record<FestivalDateRule, number>>;
+  };
+  /** Tithis current at neither sunrise. Omitted by the location-free call site in `panchang.ts`. */
+  kshayaTithiIndices?: ReadonlySet<number>;
+  /** Amanta masa at the NEXT sunrise. Read only for a kshaya Shukla Pratipada. */
+  nextDayMasaIndex?: number;
+  nextDayIsAdhika?: boolean;
   /** Amanta. */
   chandraMasaIndex: number;
   amantaMasaName?: string;
@@ -218,8 +247,6 @@ export interface FestivalComputeContext {
   sankrantiRashi?: number | null;
   nextDaySankrantiRashi?: number | null;
   prevDaySankrantiRashi?: number | null;
-  // Vaisakhi on the transit's CIVIL day, Vishu on the first sunrise at or after
-  // it, Pohela Boishakh the day after the transit's civil day.
   vaisakhiToday?: boolean;
   vishuToday?: boolean;
   pohelaBoishakhToday?: boolean;
@@ -258,6 +285,22 @@ export function computeFestivals(
 ): FestivalInfo[] {
   const results: FestivalInfo[] = [];
 
+  const nakshatraPrevails = (rule: FestivalRule, nakshatra: number): boolean => {
+    const dateRule = rule.nakshatraDateRule ?? 'sunrise';
+    if (dateRule === 'sunrise') {
+      return ctx.nakshatraIndex === nakshatra && ctx.priorDayNakshatraIndex !== nakshatra;
+    }
+    const prevailsToday =
+      ctx.nakshatraByRuleStart?.[dateRule] === nakshatra ||
+      ctx.nakshatraByRule?.[dateRule] === nakshatra;
+    if (!prevailsToday) return false;
+    const next = ctx.nextDayNakshatraByRule?.();
+    return (
+      next === undefined ||
+      (next.start[dateRule] !== nakshatra && next.end[dateRule] !== nakshatra)
+    );
+  };
+
   const tithiForRule = (rule: FestivalDateRule): number => {
     if (rule === 'sunrise') return ctx.tithiIndex;
     return ctx.tithiByRule?.[rule] ?? ctx.tithiIndex;
@@ -272,10 +315,8 @@ export function computeFestivals(
   };
 
   /** Vyapini test: EITHER end of the kala counts, so the dedupes below prevent both days. */
-  const prevailsInKala = (targetTithi: number, dateRule: FestivalDateRule): boolean => {
+  const prevailsInKala = (targetTithi: number, dateRule: FestivalDateRule, prefersLast = false): boolean => {
     if (dateRule === 'janmashtami-nishita') {
-      // Smarta ladder: the udaya-Ashtami day wins when Ashtami OR Rohini touches
-      // its nishita, else the day Ashtami covers nishita (Rohini alone cannot).
       const jn = ctx.janmashtamiNishita;
       if (jn === undefined) {
         return prevailsInKala(targetTithi, 'nishita');
@@ -286,8 +327,6 @@ export function computeFestivals(
       return jn.ashtamiAtNishita && !jn.nextDayClaims;
     }
     if (dateRule === 'aparahna-full') {
-      // Vijayadashami ladder: the day the tithi covers the ENTIRE aparahna wins
-      // (both days full: the first); else the day the tithi ENDS (para-viddha).
       const startTithi = ctx.tithiByRuleStart?.aparahna;
       const endTithi = ctx.tithiByRule?.aparahna;
       const priorStartTithi = ctx.priorDayTithiByRuleStart?.aparahna;
@@ -305,11 +344,15 @@ export function computeFestivals(
     const endTithi = tithiForRule(dateRule);
     const startTithi = tithiForRuleStart(dateRule);
     const priorEndTithi = priorDayTithiForRule(dateRule);
+    if (prefersLast && dateRule !== 'sunrise') {
+      const next = ctx.nextDayTithiByRule?.();
+      if (next !== undefined && (next.start[dateRule] === targetTithi || next.end[dateRule] === targetTithi)) {
+        return false;
+      }
+    }
 
     if (dateRule === 'chandrodaya') {
-      // An instant, not a span: the dedupes below never fire, so vriddha is deduped here.
       if (endTithi === targetTithi) return priorEndTithi !== targetTithi;
-      // No forward look needed: reaching tomorrow's moonrise needs a > 38 h tithi.
       return ctx.tithiIndex === targetTithi && priorEndTithi !== targetTithi;
     }
 
@@ -322,13 +365,14 @@ export function computeFestivals(
     if (!matchedByEnd && !matchedByStart) return false;
 
     if (
+      !prefersLast &&
       dateRule !== 'sunrise' &&
       startTithi !== undefined &&
       startTithi !== targetTithi &&
       priorEndTithi === targetTithi
     ) return false;
 
-    if (matchedByStart && priorEndTithi === targetTithi) return false;
+    if (!prefersLast && matchedByStart && priorEndTithi === targetTithi) return false;
 
     return true;
   };
@@ -346,7 +390,15 @@ export function computeFestivals(
       const masaMatches =
         rule.masa === ctx.chandraMasaIndex &&
         (adhikaBehaviour !== 'shift-to-nija' || !ctx.isAdhika);
-      match = masaMatches && rule.nakshatra === ctx.nakshatraIndex;
+      const pakshaMatches =
+        rule.paksha === undefined || (rule.paksha === 'shukla') === (ctx.tithiIndex < 15);
+      if (masaMatches && pakshaMatches) {
+        match =
+          nakshatraPrevails(rule, rule.nakshatra) ||
+          (rule.fallbackNakshatra !== undefined &&
+            nakshatraPrevails(rule, rule.fallbackNakshatra) &&
+            ctx.remainingPakshaSunriseNakshatras?.().has(rule.nakshatra) === false);
+      }
     } else if (rule.vara !== undefined && rule.masa !== undefined) {
       const masaMatches =
         rule.masa === ctx.chandraMasaIndex &&
@@ -360,11 +412,21 @@ export function computeFestivals(
       }
       match = masaMatches && rule.vara === ctx.varaIndex && inTithiRange;
     } else if (rule.masa !== undefined && rule.tithi !== undefined) {
+      const dateRule = rule.dateRule ?? 'sunrise';
+      const kshaya =
+        dateRule === 'sunrise' &&
+        (rule.kshayaRule ?? 'contain') === 'contain' &&
+        ctx.kshayaTithiIndices?.size === 1 &&
+        ctx.kshayaTithiIndices.has(rule.tithi);
+      const useNextDayMasa = kshaya && rule.tithi === 0;
+      const masaIndex = useNextDayMasa ? ctx.nextDayMasaIndex ?? ctx.chandraMasaIndex : ctx.chandraMasaIndex;
+      const isAdhika = useNextDayMasa ? ctx.nextDayIsAdhika ?? ctx.isAdhika : ctx.isAdhika;
       const masaMatches =
-        rule.masa === ctx.chandraMasaIndex &&
-        (adhikaBehaviour !== 'shift-to-nija' || !ctx.isAdhika);
+        rule.masa === masaIndex &&
+        (adhikaBehaviour !== 'shift-to-nija' || !isAdhika) &&
+        (adhikaBehaviour !== 'skip' || !isAdhika);
       if (masaMatches) {
-        match = prevailsInKala(rule.tithi, rule.dateRule ?? 'sunrise');
+        match = kshaya || prevailsInKala(rule.tithi, dateRule, rule.kalaPrefers === 'last');
       }
     }
 
@@ -405,7 +467,6 @@ export function computeFestivals(
   const paksha: 0 | 1 = ctx.tithiIndex === 10 ? 0 : ctx.tithiIndex === 25 ? 1 : 0;
 
   if (isEkadashiAtSunrise && ctx.ekadashiVriddhaFirstDay) {
-    // Nothing today: the fast is tomorrow's Mahadwadashi.
   } else if (isEkadashiAtSunrise && ctx.ekadashiTrisprishaYesterday) {
     results.push({
       key: 'vaishnava_ekadashi',
@@ -444,7 +505,6 @@ export function computeFestivals(
           : namedDescription,
     });
   } else if (ctx.ekadashiTrisprishaToday) {
-    // Smarta advances to today, the day the tithi begins; Vaishnava keeps tomorrow.
     const triPaksha: 0 | 1 = ctx.tithiIndex === 9 ? 0 : 1;
     const namedDescription = nameResolver(
       ekadashiNameKey(ctx.chandraMasaIndex, triPaksha, ctx.isAdhika),
@@ -522,7 +582,6 @@ export function computeFestivals(
     }
   }
 
-  // Deliberately duplicates `computeSpecialYogas`.
   if (ctx.nakshatraIndex === 7) {
     if (ctx.varaIndex === 0) {
       results.push({ key: 'ravi_pushya', name: nameResolver('ravi_pushya'), type: 'minor' });

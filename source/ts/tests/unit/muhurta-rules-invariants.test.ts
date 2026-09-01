@@ -48,8 +48,6 @@ describe('stock muhurta rules: classical tithi structure', () => {
     expect(rule.auspiciousTithis ?? []).not.toContain(29);
   });
 
-  // The Nanda/Bhadra/Jaya/Rikta/Purna cycle repeats in both pakshas; restricting
-  // to a fortnight is what `requirePaksha` is for.
   it.each(RULES)('%s: no tithi number contradicts itself across pakshas', (_key, rule) => {
     const ausp = rule.auspiciousTithis ?? [];
     const inausp = rule.inauspiciousTithis ?? [];
@@ -66,7 +64,6 @@ describe('stock muhurta rules: classical tithi structure', () => {
 });
 
 describe('stock muhurta rules: no unreachable auspicious entries', () => {
-  // Hard exclusions run before soft scoring, so a vetoed entry is dead data.
   it.each(RULES)('%s: excludeEkadashi does not veto its own auspicious tithis', (_key, rule) => {
     if (!rule.excludeEkadashi) return;
     const dead = (rule.auspiciousTithis ?? []).filter((t) => EKADASHI.includes(t));
@@ -89,7 +86,6 @@ describe('stock muhurta rules: no unreachable auspicious entries', () => {
 });
 
 describe('vivah rule: parity with the published classical list', () => {
-  // The Muhurta-chintamani list, per the almanac's marriage-nakshatra page.
   it('carries exactly the eleven canonical vivah nakshatras', () => {
     expect([...(STOCK_MUHURTA_RULES.vivah!.auspiciousNakshatras ?? [])].sort((a, b) => a - b))
       .toEqual([3, 4, 9, 11, 12, 14, 16, 18, 20, 25, 26]);

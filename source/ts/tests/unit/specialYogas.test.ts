@@ -3,14 +3,11 @@ import { computeSpecialYogas } from '../../src/core/specialYogas';
 
 const resolver = (type: string) => type;
 
-// Sun-nakshatra equal to the Moon's puts the distance-based yogas at distance
-// 1, which is in none of their sets, so only the Sun-independent ones can fire.
 const callLegacy = (vara: number, tithi: number, nak: number) =>
   computeSpecialYogas(vara, tithi, nak, nak, resolver);
 
 describe('computeSpecialYogas', () => {
   describe('Amrit Siddhi Yoga', () => {
-    // Fixed weekday x Moon-nakshatra pairs from BPHS, independent of tithi.
     it('detects Sunday + Hasta (nakshatra 12)', () => {
       expect(callLegacy(0, 5, 12).some(y => y.type === 'amrit_siddhi')).toBe(true);
     });
@@ -49,8 +46,6 @@ describe('computeSpecialYogas', () => {
     });
 
     it('does not detect for non-matching combination', () => {
-      // Ashwini would not serve as the negative: the almanac publishes five
-      // Sun + Ashwini occurrences.
       const yogas = callLegacy(0, 5, 1);
       expect(yogas.some(y => y.type === 'sarvartha_siddhi')).toBe(false);
     });
@@ -89,15 +84,12 @@ describe('computeSpecialYogas', () => {
   });
 
   it('returns empty array when no yoga matches', () => {
-    // Ashwini(0) is in neither Monday set, and distance 1 is in no
-    // Aadal/Vidaal/Ravi set.
     const yogas = callLegacy(1, 2, 0);
     expect(yogas).toEqual([]);
   });
 
   it('uses name resolver for translated names', () => {
     const customResolver = (type: string) => `translated_${type}`;
-    // Amrit Siddhi is pushed first, so it lands at index 0.
     const yogas = computeSpecialYogas(0, 0, 12, 12, customResolver);
     expect(yogas[0]!.name).toBe('translated_amrit_siddhi');
   });

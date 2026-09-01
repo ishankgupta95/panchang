@@ -11,8 +11,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
 )
 
-// Do not run alongside the TypeScript suite or Node benchmark.
-
 var gateLocations = []types.GeoLocation{
 	{Latitude: 18.5204, Longitude: 73.8567, Elevation: 560}, // Pune
 	{Latitude: 28.6139, Longitude: 77.2090},                 // Delhi

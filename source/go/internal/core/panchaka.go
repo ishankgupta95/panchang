@@ -5,7 +5,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
 )
 
-// Panchaka runs from Dhanishtha's 3rd pada to the end of the zodiac: the last 5 nakshatras.
 const panchakaStartDeg = 300
 
 func ComputePanchaka(siderealMoon float64) bool {
@@ -33,7 +32,6 @@ func IsPanchakaDosha(t types.PanchakaType) bool {
 	return t != types.PanchakaSamanya
 }
 
-// At ~13.2°/day the 60° span takes ~4.5 days, so a week back is always outside it.
 func FindPanchakaOnset(referenceUtcMs int64, getMoon LongitudeAt) (int64, bool) {
 	if !ComputePanchaka(getMoon(referenceUtcMs)) {
 		return 0, false

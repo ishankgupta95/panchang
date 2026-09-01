@@ -12,9 +12,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// The Sun half is held bit-identical, the Moon only bounded: moon.ts reaches atan2, where
-// sun.ts does not. Not the abscissae, which cache.go freezes to V8's values.
-
 type cacheGolden struct {
 	Meta         map[string]any       `json:"_meta"`
 	Seed         uint32               `json:"seed"`
@@ -112,7 +109,6 @@ func TestLongitudeCacheBitIdenticalToTypeScript(t *testing.T) {
 		exact, len(accessors), samples)
 }
 
-// 1e-11 deg is ~50× the ULP amplification at ten nodes, and inside the parity band.
 func TestLongitudeCacheWithinPlatformTrigBound(t *testing.T) {
 	const angleBoundDeg = 1e-11
 	g := loadCacheGolden(t)
@@ -200,12 +196,10 @@ func TestChebyshevAbscissae(t *testing.T) {
 		if diffs != 0 {
 			t.Errorf("%d abscissae must all match V8; %d differ", tc.nodes, diffs)
 		}
-		// The block-boundary argument needs x = ±1 to be exactly t1 and t0.
 		if got[0] != 1 || got[tc.nodes-1] != -1 {
 			t.Errorf("nodes=%d: endpoints are %v and %v, want exactly 1 and -1",
 				tc.nodes, got[0], got[tc.nodes-1])
 		}
-		// Antisymmetric only to rounding: θ and π−θ are each rounded once.
 		for k := 1; k < tc.nodes; k++ {
 			if !(got[k] < got[k-1]) {
 				t.Errorf("nodes=%d: abscissae not strictly decreasing at k=%d", tc.nodes, k)

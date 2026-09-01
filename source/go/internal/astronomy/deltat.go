@@ -2,9 +2,6 @@ package astronomy
 
 import "time"
 
-// ΔT = TT − UT, piecewise from Espenak & Meeus, Five Millennium Canon of Solar Eclipses §4.
-// Explicit products, not math.Pow; anti-FMA barriers throughout.
-
 const daysPerTropicalYear = 365.24217
 
 const j2000JD = 2451545.0
@@ -90,7 +87,6 @@ func DeltaTSecondsForYear(y float64) float64 {
 }
 
 func DeltaTSeconds(ms int64) float64 {
-	// −14: Espenak's y = 2000 is 2000-Jan-15.
 	utDays := float64(ms-j2000NoonMS) / 86_400_000
 	year := 2000 + (utDays-14)/daysPerTropicalYear
 
@@ -124,7 +120,6 @@ const ttMinusTAI = 32.184
 
 var leapSecondEpochMS = taiMinusUTCTable[0][0]
 
-// Leap seconds are announced six months ahead; bump with the table above.
 var observedThroughMS = utcMS(2027, 0, 1)
 
 func taiMinusUTC(ms int64) float64 {
@@ -149,7 +144,6 @@ func TTDaysSinceJ2000(ms int64) float64 {
 	return utDays + DeltaTSeconds(ms)/86400
 }
 
-// Lossy by ~10 µs; prefer TTDaysSinceJ2000 except at a JD boundary.
 func TerrestrialTimeJd(ms int64) float64 {
 	return j2000JD + TTDaysSinceJ2000(ms)
 }

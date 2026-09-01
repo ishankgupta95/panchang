@@ -17,8 +17,6 @@ const REYKJAVIK = { latitude: 64.1466, longitude: -21.9426 };
 /** Iceland keeps UTC year-round, so the local and UTC dates agree. */
 const TIMEZONE = 0;
 
-// `computeSankrantisForYear`'s `moment` stops at a 1 s bracket, and the pins
-// below are tighter than that.
 function transitInstant(degrees: number, afterUtc: number, beforeUtc: number): Date {
   let lo = afterUtc;
   let hi = beforeUtc;
@@ -37,7 +35,6 @@ describe('Tier 2: the Reykjavik Tula Sankranti ephemeris pin', () => {
   const marginSeconds = (transit.getTime() - sunrise.getTime()) / 1000;
 
   it('the margin is 1.4 s before sunrise: an ephemeris pin, no longer a date decider', () => {
-    // Measured margin −1.358 s, with a ±2 s drift-alarm band around it.
     expect(marginSeconds).toBeGreaterThan(-3.4);
     expect(marginSeconds).toBeLessThan(0.7);
   });
@@ -61,7 +58,6 @@ describe('Tier 2: the Reykjavik Tula Sankranti ephemeris pin', () => {
     const tula = sankrantis.find(s => s.rashiName === 'Tula');
     expect(tula, 'Tula Sankranti must be in the 2025 list').toBeDefined();
     expect(tula!.date.toISOString().slice(0, 10)).toBe('2025-10-17');
-    // Twelve transits to a sidereal year.
     expect(sankrantis).toHaveLength(12);
 
     const oct16 = getDailyPanchang(new Date('2025-10-16T00:00:00Z'), REYKJAVIK, { timezone: TIMEZONE });

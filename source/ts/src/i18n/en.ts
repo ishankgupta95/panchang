@@ -222,7 +222,6 @@ export const en: PanchangTranslations = {
     magha_shanivar: 'Magha Shanivar',
     surya_grahan: 'Surya Grahan (Solar Eclipse)',
     chandra_grahan: 'Chandra Grahan (Lunar Eclipse)',
-    // {name}/{masa}/{time} are substituted at use
     desc_ekadashi_viddha_vaishnava_next: 'Dashami-viddha: Smarta fast observed today; Vaishnava fast next day (Dwadashi).',
     desc_ekadashi_viddha_vaishnava_today: 'Dashami-viddha Ekadashi: Vaishnava fast observed today (Dwadashi).',
     desc_ekadashi_vriddha_dwadashi_next: 'Vriddha Dwadashi: Smarta fast observed today; Vaishnava fast next day (Dwadashi).',

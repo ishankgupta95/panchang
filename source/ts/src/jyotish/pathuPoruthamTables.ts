@@ -49,7 +49,6 @@ export const VEDHA_PAIRS: readonly (readonly [number, number])[] = [
   [10, 25], // P. Phalguni ↔ U. Bhadrapada
   [11, 24], // U. Phalguni ↔ P. Bhadrapada
   [12, 23], // Hasta ↔ Shatabhisha
-  // Chitra (13) has no Vedha partner in the canonical table.
 ];
 
 export function vedhaOf(nakIdx: number): number | null {

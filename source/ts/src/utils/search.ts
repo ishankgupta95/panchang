@@ -48,7 +48,6 @@ function secantBoundary(
     if (converged) break;
   }
 
-  // Never return early: walk forward until the index has actually flipped.
   const STEP_MS = 25;
   let t = t1;
   for (let k = 0; k < 8; k++) {
@@ -192,7 +191,6 @@ export function findDailyElements<T extends { index: number; endTime: Date | nul
   const results: Array<T & { startTime: Date | null; isActiveAtSunrise: boolean }> = [];
   let cursor = new Date(sunriseUtc.getTime());
 
-  // Safe to hoist: `getIndexAtTime` is pure through the call's longitude memo.
   const indexAtNextSunrise = getIndexAtTime(nextSunriseUtc);
 
   while (cursor.getTime() < nextSunriseUtc.getTime()) {

@@ -323,7 +323,6 @@ func TestChoghadiyaAndHoraShareTheWeekdayTable(t *testing.T) {
 				vara, chog.Day[0].Index, hora.Day[0].PlanetIndex)
 		}
 		if chog.Day[0].Index != vara*3%7 {
-			// A weekday's lord is three Chaldean steps on.
 			t.Errorf("vara %d: start index %d, want %d (3*vara mod 7)", vara, chog.Day[0].Index, vara*3%7)
 		}
 	}

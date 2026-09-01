@@ -59,12 +59,8 @@ describe('differential: own sin/cos vs the platform’s', () => {
       worstShift = Math.max(worstShift, Math.abs(cos(x) - sin(x + Math.PI / 2)));
       worstOdd = Math.max(worstOdd, Math.abs(sin(-x) + sin(x)), Math.abs(cos(-x) - cos(x)));
     }
-    // 8x the derivation: two kernels truncating at ~6e-12, squared and summed.
     expect(worstPythagoras, `sin² + cos² − 1 = ${worstPythagoras.toExponential(3)}`).toBeLessThan(1e-10);
-    // Looser than BOUND because `x + π/2` rounds before the reduction sees it:
-    // at |x| = 5000 that is already ~5e-13 of argument.
     expect(worstShift, `cos(x) − sin(x + π/2) = ${worstShift.toExponential(3)}`).toBeLessThan(1e-9);
-    // Parity is exact: the reduction is odd in x, so this is not a tolerance.
     expect(worstOdd, `parity violated by ${worstOdd.toExponential(3)}`).toBe(0);
   }, 60_000);
 
@@ -105,8 +101,6 @@ describe('differential: own sin/cos vs the platform’s', () => {
   it('differs from the platform in exactly one place: the sign of zero', () => {
     expect(Object.is(Math.sin(-0), -0), 'the platform still returns -0').toBe(true);
     expect(Object.is(sin(-0), 0), 'ours returns +0, by way of the reduction').toBe(true);
-    // `===` and not `toBe`: vitest's `toBe` is `Object.is` and would separate
-    // the two zeroes this line exists to join.
     expect(sin(-0) === Math.sin(-0), '-0 and +0 still compare equal').toBe(true);
     expect(Object.is(cos(-0), Math.cos(-0))).toBe(true);
   });

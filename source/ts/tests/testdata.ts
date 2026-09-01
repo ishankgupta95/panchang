@@ -1,4 +1,3 @@
-// Loader for the shared `testdata/` tree, which the Go tests read too.
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

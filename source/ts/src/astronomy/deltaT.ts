@@ -83,7 +83,6 @@ export function deltaTSecondsForYear(y: number): number {
 /** The decimal year uses mean-tropical-year days, not Espenak's `(month − 0.5)/12`; they differ far below the model's own error. */
 export function deltaTSeconds(date: Date): number {
   const ms = date.getTime();
-  // The `− 14` reproduces Espenak's convention that y = 2000 is 2000-Jan-15.
   const utDays = (ms - Date.UTC(2000, 0, 1, 12)) / 86_400_000;
   const year = 2000 + (utDays - 14) / DAYS_PER_TROPICAL_YEAR;
 
@@ -130,7 +129,6 @@ const OBSERVED_MINUS_MODEL_AT_HANDOFF: number = (() => {
   const year = 2000 + (utDays - 14) / DAYS_PER_TROPICAL_YEAR;
   return TT_MINUS_TAI + taiMinusUtc(OBSERVED_THROUGH_MS) - deltaTSecondsForYear(year);
 })();
-
 
 /** Preferred over an absolute Julian Date, which near the present spends 7 of a double's ~16 significant digits on its integer part, leaving ~10 µs. */
 export function ttDaysSinceJ2000(date: Date): number {

@@ -22,7 +22,6 @@ func NullableDate(ms *int64) *JSDate {
 	return &d
 }
 
-// DateUTC has Date.UTC semantics: month is 0-based, out-of-range components roll over, and a year in [0, 99] means 1900+year.
 func DateUTC(year, month, day int) JSDate {
 	if year >= 0 && year <= 99 {
 		year += 1900
@@ -33,7 +32,6 @@ func DateUTC(year, month, day int) JSDate {
 
 func (d JSDate) UTCFullYear() int { return d.utc().Year() }
 
-// UTCMonth is 0-based, like [DateUTC]'s month argument.
 func (d JSDate) UTCMonth() int { return int(d.utc().Month()) - 1 }
 
 func (d JSDate) UTCDate() int { return d.utc().Day() }
@@ -113,7 +111,6 @@ func (d *JSDate) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// Hand-written: no time layout expresses "four digits, or plus/minus six" for the year.
 func parseISOString(s string) (int64, error) {
 	year, rest := 0, ""
 	switch {

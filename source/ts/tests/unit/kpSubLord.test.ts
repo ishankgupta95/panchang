@@ -118,7 +118,6 @@ describe('computeKpCuspalSubLords', () => {
   });
 
   it('cusp 1 (ascendant) longitude matches lagna under Placidus-KP (KP ayanamsa)', () => {
-    // Compare under 'krishnamurti', the KP default, or the offset breaks it.
     const r = computeKpCuspalSubLords(SAMPLE, DELHI);
     const lagna = computeLagna(SAMPLE, DELHI, 'krishnamurti');
     expect(r.cusps[0]!.longitude).toBeCloseTo(lagna.siderealLongitude, 4);

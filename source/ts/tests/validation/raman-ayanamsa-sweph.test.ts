@@ -34,13 +34,11 @@ describe('Raman ayanamsa: SwissEph SIDM_RAMAN parity (mean-frame)', () => {
   }
 
   it('J2000.0 anchor is the measured nutation-free value, 22.410791°', () => {
-    // The smooth anchor was fitted at this epoch, so equality is by construction.
     const ours = computeAyanamsa(new Date('2000-01-01T12:00:00Z'), 'raman');
     expect(ours).toBeCloseTo(22.410791, 5);
   });
 
   it('old constant would fail this suite (guards against regression to it)', () => {
-    // 1.392722° is the literature offset from Lahiri, 3.62′ above the measured model.
     const oldRamanJ2000 = 23.863801 - 1.392722;
     expect(Math.abs(oldRamanJ2000 - 22.40690218)).toBeGreaterThan(10 * TOLERANCE_DEG);
   });

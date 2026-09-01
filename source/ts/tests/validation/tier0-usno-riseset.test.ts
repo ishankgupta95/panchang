@@ -25,15 +25,11 @@ interface Row {
 
 const rows = (fixture as { rows: Row[] }).rows;
 
-// The primitives search forward, so an event at or past the next local midnight
-// is "no event on this day", matching USNO's continuously above/below rows.
 function localMidnightUtc(date: string, tzHours: number): number {
   const [y, m, d] = date.split('-').map(Number) as [number, number, number];
   return Date.UTC(y, m - 1, d) - tzHours * 3600_000;
 }
 
-// The solar primitives throw a typed error where the lunar ones return null;
-// only the four NO_* codes count as "no such event".
 function eventWithin(
   fn: (at: Date, loc: { latitude: number; longitude: number }) => Date | null,
   start: number, loc: { latitude: number; longitude: number },
@@ -98,7 +94,6 @@ describe('Tier 0: rise/set vs the US Naval Observatory', () => {
       const worst = mine.reduce((p, c) => (Math.abs(c.seconds) > Math.abs(p.seconds) ? c : p));
       const meanAbs = mine.reduce((s, d) => s + Math.abs(d.seconds), 0) / mine.length;
       const bias = mine.reduce((s, d) => s + d.seconds, 0) / mine.length;
-      // 60 s, not 30: USNO's rounding puts a ±30 s floor under any solver.
       expect(
         Math.abs(worst.seconds),
         `worst ${worst.seconds.toFixed(1)} s at ${worst.where}; mean |Δ| ${meanAbs.toFixed(1)} s, bias ${bias.toFixed(1)} s`,

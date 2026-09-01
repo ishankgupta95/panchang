@@ -54,7 +54,6 @@ func stressDays() int {
 	return 40
 }
 
-// -race does not notice an order-dependent cache; only a bitwise rerun does.
 func TestGlobalStoresAreDeterministicUnderLoad(t *testing.T) {
 	const goroutines = 16
 	days := stressDays()
@@ -136,12 +135,10 @@ func TestGlobalStoresAreDeterministicUnderLoad(t *testing.T) {
 	}
 }
 
-// Clear-on-overflow rebuilds identically, so only the cap and the surviving answers matter.
 func TestStoresRespectTheirCapsUnderLoad(t *testing.T) {
 	const goroutines = 8
 	clearAllStores()
 
-	// 4,000 days × 4 locations overruns the 20,000-entry caps.
 	epoch := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli()
 	var wg sync.WaitGroup
 	for g := 0; g < goroutines; g++ {
@@ -158,7 +155,6 @@ func TestStoresRespectTheirCapsUnderLoad(t *testing.T) {
 	}
 	wg.Wait()
 
-	// Captured before the cold rerun below, which clears everything.
 	afterSweep := storeInventory()
 	evicted := 0
 	for _, c := range afterSweep {
@@ -235,7 +231,6 @@ func TestStoreStripeCountIsUniform(t *testing.T) {
 	check := func(name string, counts []int, total int) {
 		mean := float64(total) / stripes
 		for i, n := range counts {
-			// A zero stripe is the failure worth catching.
 			if float64(n) < mean/2 || float64(n) > mean*2 {
 				t.Errorf("%s: stripe %d took %d of %d keys, uniform is %.0f", name, i, n, total, mean)
 			}
@@ -246,7 +241,6 @@ func TestStoreStripeCountIsUniform(t *testing.T) {
 	t.Logf("%d stripes: day indices %v", stripes, int64Counts)
 }
 
-// The stripe count is a package constant, so the sweep builds its own stores.
 func BenchmarkStripeSweepBlockStore(b *testing.B) {
 	epoch := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli()
 	for _, stripes := range []int{1, 2, 4, 8, 16, 32, 64} {

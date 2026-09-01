@@ -1,4 +1,3 @@
-// Package symcheck requires every exported TypeScript value symbol of a mirrored file to have a matching Go declaration; exceptions live in docs/symbols.md.
 package symcheck
 
 import (
@@ -88,7 +87,6 @@ var (
 	reListOpen     = regexp.MustCompile(`^export\s*\{`)
 )
 
-// Comments are blanked, not deleted, so line numbers survive.
 func ExtractTSFile(repoRel string, src []byte) []TSSymbol {
 	blank := func(m string) string {
 		return strings.Map(func(r rune) rune {
@@ -166,7 +164,6 @@ func ExtractTSFile(repoRel string, src []byte) []TSSymbol {
 	return out
 }
 
-// Treecheck's rule, restated to avoid an import cycle.
 func GoPathFor(ts string) (string, bool) {
 	if !strings.HasPrefix(ts, tsRoot) || !strings.HasSuffix(ts, ".ts") || strings.HasSuffix(ts, ".d.ts") {
 		return "", false
@@ -440,7 +437,6 @@ func CheckRepo(root string) (*Report, error) {
 			return nil
 		}
 		if _, serr := os.Stat(filepath.Join(root, filepath.FromSlash(goFile))); serr != nil {
-			// No mirrored file: the barrels, which treecheck exempts.
 			return nil
 		}
 		src, rerr2 := os.ReadFile(p)

@@ -64,7 +64,6 @@ func (o ConvertOptions) resolvedMasaSystem() types.MasaSystem {
 	return o.MasaSystem
 }
 
-// Converts at sunrise; the time of day is ignored.
 func ConvertGregorianToHindu(
 	ctx *astronomy.EphemerisCtx,
 	dateMs int64,
@@ -116,7 +115,6 @@ type HinduDateCoords struct {
 	AdhikaOnly   bool
 }
 
-// Two dates when the tithi falls in both the nija and the adhika masa, or when it is long.
 func ConvertHinduToGregorian(
 	ctx *astronomy.EphemerisCtx,
 	coords HinduDateCoords,
@@ -139,7 +137,6 @@ func ConvertHinduToGregorian(
 			"paksha must be 'shukla' or 'krishna'")
 	}
 
-	// Under purnimanta, Chaitra Krishna is masaIndex 0 with the OLD samvat.
 	ceYear := coords.VikramSamvat - 57
 	masaSystem := options.resolvedMasaSystem()
 	wrapsYearEnd := masaSystem == types.Purnimanta &&
@@ -186,10 +183,8 @@ func ConvertHinduToGregorian(
 	return out, nil
 }
 
-// Astronomical year numbering: -3101 is 3102 BCE, when Kali Yuga begins.
 const kaliyugaEpochYear = -3101
 
-// Published panchangs increment at Chaitra Shukla Pratipada, not the epoch's anniversary.
 func GetKaliYugaYear(ctx *astronomy.EphemerisCtx, dateMs int64) (int, error) {
 	if err := utils.ValidateDate(dateMs); err != nil {
 		return 0, err
@@ -241,10 +236,8 @@ func findChaitraShuklaPratipada(
 	location types.GeoLocation,
 	options ConvertOptions,
 ) (types.JSDate, bool, error) {
-	// Amanta indexing locates the Chaitra start whatever the caller's MasaSystem.
 	amantaOptions := options.panchangOptions()
 	amantaOptions.MasaSystem = types.Amanta
-	// In an Adhika-Chaitra year the nija pratipada lands a month late.
 	startMs := types.DateUTC(gregorianYear, 1, 15).Ms()
 	endMs := types.DateUTC(gregorianYear, 4, 15).Ms()
 	var prev chandraMasaState
@@ -258,7 +251,6 @@ func findChaitraShuklaPratipada(
 		}
 		masa := p.Calendar.Chandramasa.Index
 		adhika := p.Calendar.Chandramasa.IsAdhika
-		// The day before nija Chaitra is Adhika Chaitra: also index 0, hence the adhika check.
 		if masa == 0 && !adhika && prev.have && (prev.masa != 0 || prev.adhika) {
 			return p.Date, true, nil
 		}
@@ -310,7 +302,6 @@ func findMeshaSankranti(
 		return int(math.Floor(lon/30)) % 12, nil
 	}
 
-	// Meena → Mesha always falls in the first half of April.
 	scanStart := types.DateUTC(gregorianYear, 3, 1).Ms() - int64(offsetMinutes)*60_000 - dayMs
 	scanEnd := types.DateUTC(gregorianYear, 3, 20).Ms() - int64(offsetMinutes)*60_000
 	transitMs, haveTransit := int64(0), false

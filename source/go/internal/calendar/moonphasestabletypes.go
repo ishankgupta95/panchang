@@ -43,7 +43,6 @@ type MoonPhaseTableDay struct {
 }
 
 type MoonPhaseTableMeta struct {
-	// 2 is the dictionary-encoded layout; absent means v1.
 	Format                int                      `json:"format"`
 	ReferenceLocation     string                   `json:"referenceLocation"`
 	TimezoneOffsetMinutes int                      `json:"timezoneOffsetMinutes"`

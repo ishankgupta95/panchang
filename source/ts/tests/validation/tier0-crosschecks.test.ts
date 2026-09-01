@@ -77,7 +77,6 @@ describe('cross-check: closure identities', () => {
     const getSun = (d: Date) => cache.getSun(d);
     const idx = (d: Date) => getTithiIndexAtTime(d, getMoon, getSun);
 
-    // The shortest tithi is ~19 h, so nothing can be stepped over.
     const start = new Date('2025-01-01T00:00:00Z');
     const stepMs = 30 * 60_000;
     let transitions = 0;
@@ -113,8 +112,6 @@ describe('cross-check: closure identities', () => {
     for (const year of [1950, 2025, 2099]) {
       const s = computeSankrantisForYear(year, PUNE, { timezone: TZ });
       expect(s, `sankrantis in ${year}`).toHaveLength(12);
-      // The Sun's speed varies with Earth's eccentricity, so consecutive
-      // sankrantis run 29-32 days apart.
       for (let i = 1; i < s.length; i++) {
         const gapDays = (s[i]!.date.getTime() - s[i - 1]!.date.getTime()) / DAY_MS;
         expect(gapDays, `${year} sankranti gap ${i}`).toBeGreaterThan(28);
@@ -132,7 +129,6 @@ describe('cross-check: closure identities', () => {
         expect(n, `${name} in ${year}`).toBeGreaterThanOrEqual(12);
         expect(n, `${name} in ${year}`).toBeLessThanOrEqual(14);
       }
-      // 365.2422 / 29.530589 = 12.37 lunations, ×4 phases.
       expect(phases.length, `phases in ${year}`).toBeGreaterThanOrEqual(48);
       expect(phases.length, `phases in ${year}`).toBeLessThanOrEqual(51);
     }
@@ -149,7 +145,6 @@ describe('cross-check: solver vs ephemeris separation', () => {
       const date = new Date(Date.UTC(2025, 5, 1) + d * DAY_MS);
       const r = getDailyPanchang(date, PUNE, { timezone: TZ })!;
 
-      // A fresh cache, so the bisection is not reading the panchang's memo.
       const cache = new LongitudeCache('lahiri', 'interpolated');
       const idx = (t: Date) => getTithiIndexAtTime(t, (x) => cache.getMoon(x), (x) => cache.getSun(x));
 
@@ -171,7 +166,6 @@ describe('cross-check: solver vs ephemeris separation', () => {
 
     expect(checked, 'no tithi end-times were checkable: the test went vacuous')
       .toBeGreaterThan(25);
-    // The bound is the solver's budget, not the observed worst (24 ms).
     expect(worst, `worst solver-vs-bisection disagreement ${worst} ms`)
       .toBeLessThan(TOL_MS);
   });
@@ -236,10 +230,6 @@ describe('cross-check: solver vs ephemeris separation', () => {
       }
 
       for (const varjyam of r.inauspicious.varjyam) {
-        // The owning nakshatra is the one active at the window's midpoint:
-        // sunrise's would be wrong for the second window of a transition day.
-        // The window is 4 ghatikas of 60, so its nakshatra runs fifteen times as
-        // long. Mula carries two spells, so try each tabulated offset.
         const duration = (varjyam.end.getTime() - varjyam.start.getTime()) * 15;
         const midMs = (varjyam.start.getTime() + varjyam.end.getTime()) / 2;
         const nakIdx = getNakshatraIndexAtTime(new Date(midMs), moonAt);
@@ -286,8 +276,6 @@ describe('cross-check: ordering invariants', () => {
             .toBeLessThan(r.sun.set.getTime());
           expect(r.sun.set.getTime(), `${name} ${y}-${m + 1}`)
             .toBeLessThan(r.sun.nextRise.getTime());
-          // Day and night are rounded to whole minutes independently, so their
-          // sum can sit 1 minute off the span; 0.5 fails legitimately.
           const spanMin = (r.sun.nextRise.getTime() - r.sun.rise.getTime()) / 60_000;
           expect(Math.abs(r.sun.dayDurationMinutes + r.sun.nightDurationMinutes - spanMin))
             .toBeLessThanOrEqual(1);
@@ -312,7 +300,6 @@ describe('cross-check: ordering invariants', () => {
     expect(windows.length).toBeGreaterThan(50);
     for (const w of windows) {
       expect(w.start.getTime()).toBeLessThanOrEqual(w.end.getTime());
-      // Brahma Muhurta and Pratah Sandhya legitimately begin before sunrise.
       expect(w.start.getTime()).toBeGreaterThanOrEqual(dayStart - 3 * 3600_000);
       expect(w.end.getTime()).toBeLessThanOrEqual(dayEnd + 60_000);
     }
@@ -326,7 +313,6 @@ describe('cross-check: ordering invariants', () => {
       const expected = (ORDER.indexOf(phases[i - 1]!.phase) + 1) % 4;
       expect(ORDER.indexOf(phases[i]!.phase), `phase ${i} follows ${phases[i - 1]!.phase}`)
         .toBe(expected);
-      // Quarter-to-quarter is a quarter lunation: 6.1-8.4 days.
       const gapDays = (phases[i]!.time.getTime() - phases[i - 1]!.time.getTime()) / DAY_MS;
       expect(gapDays).toBeGreaterThan(6.0);
       expect(gapDays).toBeLessThan(8.5);

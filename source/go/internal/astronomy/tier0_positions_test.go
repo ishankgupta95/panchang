@@ -8,8 +8,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/repopath"
 )
 
-// Against JPL Horizons (DE441), never against the TypeScript.
-
 type horizonsPositions struct {
 	Comment   string    `json:"_comment"`
 	Source    string    `json:"source"`
@@ -53,7 +51,6 @@ func angularDelta(a, b float64) float64 {
 	return d
 }
 
-// Inverting TTDaysSinceJ2000 cancels this library's own ΔT, leaving position theory alone.
 func msForTt(jdTt float64) int64 {
 	ttDays := jdTt - 2451545.0
 	ms := ttDays*86_400_000 + float64(j2000NoonMS)
@@ -86,7 +83,6 @@ func measureCurve(f horizonsPositions, body string, longitudeAt func(ms int64) f
 	}
 }
 
-// The ceilings may only ever move down.
 var ownMaxArcsec = map[string]float64{
 	"Sun": 0.5, "Moon": 1.6,
 	"Mercury": 0.7, "Venus": 1.5, "Mars": 2.0, "Jupiter": 1.2, "Saturn": 1.2,

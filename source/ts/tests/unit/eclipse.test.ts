@@ -8,6 +8,7 @@ import { computeSunrise as getSunrise, computeSunset as getSunset } from '../../
 
 const DELHI = { latitude: 28.6139, longitude: 77.209 };
 const SYDNEY = { latitude: -33.8688, longitude: 151.2093 };
+const VARANASI = { latitude: 25.3176, longitude: 82.9739 };
 
 describe('getUpcomingLunarEclipse', () => {
   it('finds the 2025-03-14 lunar eclipse when searching from early March 2025', () => {
@@ -22,9 +23,6 @@ describe('getUpcomingLunarEclipse', () => {
   });
 
   it('lunar sutak is anchored to the umbral (partial) phase, with a 9h lead', () => {
-    // Sutak runs from 9h before umbral first contact to umbral last contact,
-    // NOT the faint penumbral contacts. The two are solved separately and are
-    // genuinely asymmetric about greatest eclipse, by seconds not minutes.
     const info = getUpcomingLunarEclipse(new Date('2025-03-01T00:00:00Z'), DELHI, 30);
     expect(info).not.toBeNull();
     expect(info!.sutakStart).not.toBeNull();
@@ -47,7 +45,6 @@ describe('getUpcomingLunarEclipse', () => {
   });
 
   it('penumbral lunar eclipse carries no sutak (null window)', () => {
-    // 2027-02-20 is penumbral: no umbral phase, so no sutak.
     const info = getUpcomingLunarEclipse(new Date('2027-02-01T00:00:00Z'), DELHI, 40);
     expect(info).not.toBeNull();
     expect(info!.subtype).toBe('penumbral');
@@ -61,8 +58,6 @@ describe('getUpcomingLunarEclipse', () => {
   });
 
   it('obscuration is in [0, 1]; magnitude is the diameter fraction beside it', () => {
-    // On a total eclipse obscuration saturates at 1 while magnitude runs past
-    // it, so a build wiring both fields to one source shows them equal here.
     const info = getUpcomingLunarEclipse(new Date('2025-03-01T00:00:00Z'), DELHI, 30);
     expect(info).not.toBeNull();
     expect(info!.subtype).toBe('total');
@@ -72,8 +67,6 @@ describe('getUpcomingLunarEclipse', () => {
   });
 
   it('a penumbral lunar eclipse has zero obscuration and a negative magnitude', () => {
-    // The case a [0, 1] clamp would destroy: the Moon misses the umbra, so the
-    // umbral magnitude is the negative miss distance, as NASA's canon prints it.
     const info = getUpcomingLunarEclipse(new Date('2027-02-01T00:00:00Z'), DELHI, 40);
     expect(info).not.toBeNull();
     expect(info!.subtype).toBe('penumbral');
@@ -128,6 +121,21 @@ describe('getUpcomingSolarEclipse', () => {
     expect(info!.magnitude).toBeGreaterThan(info!.obscuration);
     expect(info!.magnitude).toBeLessThanOrEqual(1);
   });
+
+  it('never returns an eclipse that already ended, so a walk cannot stall on one', () => {
+    let cursor = new Date('2000-01-01T00:00:00Z');
+    const seen: string[] = [];
+    for (let i = 0; i < 40; i++) {
+      const info = getUpcomingSolarEclipse(cursor, VARANASI, 4000);
+      if (info === null) break;
+      expect(info.end.getTime()).toBeGreaterThan(cursor.getTime());
+      seen.push(info.peak.toISOString().slice(0, 10));
+      cursor = new Date(info.end.getTime() + 1000);
+    }
+    expect(seen.length).toBeGreaterThan(20);
+    expect(new Set(seen).size).toBe(seen.length);
+    expect(seen).toContain('2009-07-22');
+  });
 });
 
 describe('getEclipseDuringDay', () => {
@@ -171,7 +179,6 @@ describe('getEclipseDuringDay: syzygy guard is answer-preserving', () => {
     ['Delhi', DELHI],
     ['Sydney', SYDNEY],
   ] as const) {
-    // Vitest's 5 s default is not enough once the suite loads its workers.
     it(`matches the unguarded result on every day of 2025 (${name})`, () => {
       let eclipseDays = 0;
       for (let d = 0; d < 365; d++) {

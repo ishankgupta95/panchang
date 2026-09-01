@@ -2,9 +2,6 @@ package astronomy
 
 import "github.com/ishankgupta95/panchang-ts/source/go/v5/internal/astronomy/series"
 
-// ELP2000-82B: the Moon in ELP's own frame; frame.go carries it to the equinox of date.
-// The Sin here and the float64(...) barriers are load-bearing.
-
 func sumQuartic(s []float64, t float64) float64 {
 	sum := 0.0
 	for i := 0; i < len(s); i += 6 {
@@ -42,7 +39,6 @@ func MoonElpLatitude(t float64) float64 {
 	return (sumQuartic(series.MOON_LATITUDE_QUARTIC, t) + sumLinear(series.MOON_LATITUDE_LINEAR, t)) * ArcsecToRad
 }
 
-// 19″, enough for the frame rotation.
 func MoonElpLatitudeCoarse(t float64) float64 {
 	return (sumQuartic(series.MOON_LATITUDE_COARSE_QUARTIC, t) +
 		sumLinear(series.MOON_LATITUDE_COARSE_LINEAR, t)) * ArcsecToRad
@@ -52,12 +48,10 @@ func MoonElpDistance(t float64) float64 {
 	return sumQuartic(series.MOON_DISTANCE_QUARTIC, t) + sumLinear(series.MOON_DISTANCE_LINEAR, t)
 }
 
-// 5 km, the rise/set track's tier.
 func MoonElpDistanceTrack(t float64) float64 {
 	return sumQuartic(series.MOON_DISTANCE_TRACK_QUARTIC, t) + sumLinear(series.MOON_DISTANCE_TRACK_LINEAR, t)
 }
 
-// 89 km, light-time only.
 func MoonElpDistanceCoarse(t float64) float64 {
 	return sumQuartic(series.MOON_DISTANCE_COARSE_QUARTIC, t) + sumLinear(series.MOON_DISTANCE_COARSE_LINEAR, t)
 }

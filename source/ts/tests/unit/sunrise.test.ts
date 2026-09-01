@@ -6,11 +6,8 @@ const PUNE = { latitude: 18.5204, longitude: 73.8567 };
 
 const PUNE_JAN14_MIDNIGHT_UTC = new Date('2025-01-13T18:30:00Z');
 
-// astronomy-engine's answer. The almanac's 07:04 IST is 5.7 min earlier under
-// a different refraction model; both are correct within their own model.
 const COMPUTED_SUNRISE_UTC = new Date('2025-01-14T01:39:44Z');
 
-// astronomy-engine's answer.
 const COMPUTED_SUNSET_UTC = new Date('2025-01-14T12:47:39Z');
 
 const ONE_MINUTE_MS = 60_000;

@@ -47,7 +47,6 @@ func ComputeLagna(
 	eps := utils.DegToRad(MeanObliquity(t))
 	phi := utils.DegToRad(location.Latitude)
 
-	// Meeus eq. 13.6; denominator products FMA-barriered.
 	numerator := math.Cos(theta)
 	denominator := -float64(math.Sin(eps)*math.Tan(phi)) - float64(math.Cos(eps)*math.Sin(theta))
 	tropicalLagna := utils.Normalize360((math.Atan2(numerator, denominator) * 180) / jsnum.PI)
@@ -82,7 +81,6 @@ func findSunriseBefore(ctx *astronomy.EphemerisCtx, ms int64, location types.Geo
 	if err != nil {
 		return 0, err
 	}
-	// 22 h hops never overshoot a solar day
 	for i := 0; i < 4; i++ {
 		lookAhead := candidate + 22*3600_000
 		next, err := astronomy.ComputeSunrise(ctx, lookAhead, location, astronomy.DefaultRiseSetLimitDays)
@@ -136,7 +134,6 @@ func ComputeHoraLagna(
 	if err != nil {
 		return types.LagnaInfo{}, err
 	}
-	// BPHS Ch. 4: the Sun's sidereal longitude at sunrise, not the ascendant.
 	sunSidAtSunrise, err := astronomy.GetSiderealSunLongitude(ctx, sunriseMs, ayanamsaType)
 	if err != nil {
 		return types.LagnaInfo{}, err
@@ -204,7 +201,6 @@ func ComputeBhavaLagna(
 	return buildLagnaInfo(bhavaLon, lang), nil
 }
 
-// Sripati cusp 1 is the natal ascendant by construction.
 func ComputeSripatiLagna(
 	ctx *astronomy.EphemerisCtx,
 	birthMs int64,

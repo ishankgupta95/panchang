@@ -42,7 +42,6 @@ func msForJdUt(jdUt float64) int64 {
 	return int64((jdUt - 2440587.5) * 86_400_000)
 }
 
-// ≤2010 only: beyond that Horizons reports TT − UTC, a different quantity.
 func TestDeltaTAgainstHorizons(t *testing.T) {
 	f := loadHorizonsDeltaT(t)
 	worst, worstYear, checked := 0.0, 0, 0
@@ -92,7 +91,6 @@ func TestDeltaTHandoffIsContinuous(t *testing.T) {
 	}
 }
 
-// Segments are not constrained to meet exactly; a jump past 1 s is a transcription error.
 func TestDeltaTBranchContinuity(t *testing.T) {
 	boundaries := []float64{-500, 500, 1600, 1700, 1800, 1860, 1900, 1920, 1941,
 		1961, 1986, 2005, 2050, 2150}
@@ -125,14 +123,12 @@ func TestTTHelpersAreConsistent(t *testing.T) {
 	ms := int64(1749945600000)
 	utDays := float64(ms-j2000NoonMS) / 86_400_000
 
-	// The bound is one ULP of utDays: the subtraction cancels 1e4 down to 1e-3.
 	if d := math.Abs((TTDaysSinceJ2000(ms)-utDays)*86400 - DeltaTSeconds(ms)); d > 1e-6 {
 		t.Errorf("ΔT does not round-trip out of the day count: off by %.3e s", d)
 	}
 	if got, want := JulianCenturiesTt(ms), TTDaysSinceJ2000(ms)/36525; got != want {
 		t.Errorf("JulianCenturiesTt = %v, TTDaysSinceJ2000/36525 = %v", got, want)
 	}
-	// The absolute-JD path is lossy by design, by ~10 µs.
 	viaJd := (TerrestrialTimeJd(ms) - (2451545 + utDays)) * 86400
 	if d := math.Abs(viaJd - DeltaTSeconds(ms)); d >= 1e-4 {
 		t.Errorf("the absolute-JD path loses %.3e s, expected < 1e-4", d)
@@ -281,7 +277,6 @@ func TestDeltaTBitIdenticalInTheMeasuredEra(t *testing.T) {
 	}
 }
 
-// 27x the worst measured **-vs-products divergence.
 const deltaTPowBound = 1e-10
 
 func TestDeltaTWithinPowFormulationBound(t *testing.T) {

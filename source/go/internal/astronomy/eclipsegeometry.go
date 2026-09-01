@@ -9,12 +9,10 @@ import (
 
 const sunRadiusKm = SunRadiusAU * AuKm
 
-// Danjon's atmospheric enlargement, in Espenak's form. 1.0/85, not 1/85.
 const danjonEnlargement = 1 + 1.0/85 - 1.0/594
 
 const contactToleranceMS = 1
 
-// Not acos: it loses half its digits at sub-degree angles.
 func separationDegrees(lon1Deg, lat1Deg, lon2Deg, lat2Deg float64) float64 {
 	l1, b1 := lon1Deg/radToDeg, lat1Deg/radToDeg
 	l2, b2 := lon2Deg/radToDeg, lat2Deg/radToDeg
@@ -24,7 +22,6 @@ func separationDegrees(lon1Deg, lat1Deg, lon2Deg, lat2Deg float64) float64 {
 	cx := float64(y1*z2) - float64(z1*y2)
 	cy := float64(z1*x2) - float64(x1*z2)
 	cz := float64(x1*y2) - float64(y1*x2)
-	// jsnum.Hypot3, not math.Hypot: V8's Kahan-compensated squares differ.
 	return math.Atan2(jsnum.Hypot3(cx, cy, cz),
 		float64(x1*x2)+float64(y1*y2)+float64(z1*z2)) * radToDeg
 }
@@ -130,7 +127,6 @@ type LunarShadow struct {
 	MoonSemidiameter float64
 }
 
-// Meeus ch. 54.
 func LunarShadowAt(ctx *EphemerisCtx, ms int64) LunarShadow {
 	sun := GetSunPosition(ctx, ms)
 	moon := GetMoonPosition(ctx, ms)
@@ -192,10 +188,8 @@ func lunarSeparationSquared(ctx *EphemerisCtx, ms float64) float64 {
 	return s * s
 }
 
-// 0.5490°/hr Moon minus 0.0410°/hr antisolar; a bracket seed only.
 const lunarSeparationRateDegPerMS float64 = 0.5080 / 3_600_000
 
-// A penumbral phase runs under 6 h.
 const lunarContactLimitMS = 5 * 3600_000
 
 func seedFromChord(leastSeparation, threshold float64) float64 {
@@ -203,7 +197,6 @@ func seedFromChord(leastSeparation, threshold float64) float64 {
 	return chord / lunarSeparationRateDegPerMS
 }
 
-// oppositionMs must be a full moon; greatest eclipse is within an hour of it.
 func FindLunarEclipse(ctx *EphemerisCtx, oppositionMs int64) (LunarEclipse, bool) {
 	peakMs := refineMinimum(
 		func(ms float64) float64 { return lunarSeparationSquared(ctx, ms) },
@@ -341,8 +334,7 @@ const (
 )
 
 type LocalSolarEclipse struct {
-	Kind SolarEclipseKind
-	// Maximum for this observer, not geocentric greatest.
+	Kind           SolarEclipseKind
 	PeakMs         int64
 	PartialBeginMs int64
 	PartialEndMs   int64
@@ -356,10 +348,8 @@ type LocalSolarEclipse struct {
 	PeakAzimuth    float64
 }
 
-// A solar contact is never more than ~3 h from local maximum.
 const solarContactLimitMS = 3 * 3600_000
 
-// Parallax moves the observer's own maximum up to ~1 h off conjunction.
 const (
 	solarSearchHalfWidthMS = 3 * 3600_000
 	solarScanSteps         = 12
@@ -371,7 +361,6 @@ func FindLocalSolarEclipse(ctx *EphemerisCtx, conjunctionMs int64, location type
 		return s * s
 	}
 
-	// Not parabolic: a bare fit alone could settle on the wrong side.
 	centre := float64(conjunctionMs)
 	bestMs := centre
 	bestValue := math.Inf(1)

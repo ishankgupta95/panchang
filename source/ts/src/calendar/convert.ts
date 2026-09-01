@@ -89,8 +89,6 @@ export function convertHinduToGregorian(
     throw new RangeError(`paksha must be 'shukla' or 'krishna'`);
   }
 
-  // One coordinate wraps: under purnimanta, Chaitra *Krishna* closes the VS year
-  // carrying masaIndex 0, so it needs its own window around the FOLLOWING March.
   const ceYear = coords.vikramSamvat - 57;
   const dayMs = 24 * 3600_000;
   const masaSystem = options.masaSystem ?? 'purnimanta';
@@ -163,10 +161,7 @@ function findChaitraShuklaPratipada(
   location: GeoLocation,
   options: ConvertOptions,
 ): Date | null {
-  // Amanta regardless of the caller's `masaSystem`: there the masa boundary IS
-  // Chaitra Shukla Pratipada, even in a kshaya-tithi year.
   const amantaOptions = { ...options, masaSystem: 'amanta' as const };
-  // Ends mid-May: in an Adhika-Chaitra year the nija pratipada lands a month late.
   const start = new Date(Date.UTC(gregorianYear, 1, 15));
   const end = new Date(Date.UTC(gregorianYear, 4, 15));
   const dayMs = 24 * 3600_000;
@@ -177,8 +172,6 @@ function findChaitraShuklaPratipada(
     if (p === null) continue;
     const masa = p.calendar.chandramasa.index;
     const adhika = p.calendar.chandramasa.isAdhika;
-    // The `prev.adhika` half of the guard is load-bearing: in an Adhika-Chaitra year
-    // the preceding day is masa 0 too, so a bare `prev.masa !== 0` returns null.
     if (masa === 0 && !adhika && prev !== null && (prev.masa !== 0 || prev.adhika)) {
       return p.date;
     }
@@ -198,7 +191,6 @@ function meshaDayRuleFor(region: FestivalRegion | LegacyFestivalRegion): MeshaDa
     case 'bengal':
     case 'west-bengal':
       return 'civil-day-plus-1';
-    // Tamil Nadu, and Assam riding on it: Assamese practice is unpinned.
     default:
       return 'sankranti-day';
   }
@@ -215,7 +207,6 @@ function findMeshaSankranti(
   const rashiAt = (ms: number) =>
     Math.floor(getSiderealSunLongitude(new Date(ms), ayanamsa) / 30) % 12;
 
-  // Meena → Mesha always falls in the first half of April.
   const dayMs = 24 * 3600_000;
   const scanStart = Date.UTC(gregorianYear, 3, 1) - offset * 60_000 - dayMs;
   const scanEnd = Date.UTC(gregorianYear, 3, 20) - offset * 60_000;
@@ -249,7 +240,6 @@ function findMeshaSankranti(
   if (rule === 'civil-day') return civilDay(transitMs);
   if (rule === 'civil-day-plus-1') return civilDay(transitMs, 1);
 
-  // Same sunrise walk as `computeSankrantisForYear`, so the two cannot drift.
   try {
     let dayStart = computeSunrise(new Date(transitMs - 30 * 3600_000), location);
     for (let i = 0; i < 3; i++) {
@@ -257,13 +247,11 @@ function findMeshaSankranti(
       if (next.getTime() <= transitMs) dayStart = next; else break;
     }
     if (rule === 'next-sunrise') {
-      // Kerala: the day of the first sunrise at or after the transit.
       const sunriseAfter = dayStart.getTime() >= transitMs
         ? dayStart
         : computeSunrise(computeSunset(dayStart, location), location);
       return civilDay(sunriseAfter.getTime());
     }
-    // Tamil Nadu (and the default): a night transit moves to the next sunrise's day.
     const dayEnd = computeSunset(dayStart, location);
     const anchor = transitMs <= dayEnd.getTime()
       ? dayStart

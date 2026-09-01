@@ -1,5 +1,3 @@
-// Command treecheck reports the src/ ↔ go/ file correspondence. Exit 2, not 0,
-// when it cannot run: a parse error scored as clean would disable the gate.
 package main
 
 import (

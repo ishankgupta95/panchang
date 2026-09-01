@@ -10,7 +10,6 @@ import {
   computeSayahnaSandhya,
 } from '../../src/core/muhurta';
 
-// Abhijit is the 8th of the 15 day-muhurtas (index 7); Vijaya is the 11th.
 const sunrise = new Date('2024-01-01T06:00:00Z');
 const sunset = new Date('2024-01-01T18:00:00Z');
 const DAY_MS = 12 * 3600_000;
@@ -63,7 +62,6 @@ describe('computeAbhijitMuhurta', () => {
     expect(abhijit.end.getUTCMinutes()).toBe(48);
   });
 
-  // Almanac / Smarta convention: Abhijit is dropped on Wednesday.
   it('returns null on Wednesday (varaIndex === 3)', () => {
     expect(computeAbhijitMuhurta(sunrise, sunset, 3)).toBeNull();
   });
@@ -136,7 +134,6 @@ describe('computeGodhuliMuhurta', () => {
 });
 
 describe('computeNishitaMuhurta', () => {
-  // Nishita is the 8th of the 15 night-muhurtas (index 7).
   const nightSunset = new Date('2024-01-01T18:00:00Z');
   const nextSunrise = new Date('2024-01-02T06:00:00Z');
 
@@ -169,7 +166,6 @@ describe('computeNishitaMuhurta', () => {
 });
 
 describe('computeAmritKalaWindows', () => {
-  // Synthetic Moon: one nakshatra per 24 h from Ashwini at the epoch.
   const NAK_SPAN = 360 / 27;
   const epochMs = Date.parse('2024-01-01T00:00:00Z');
   const dayMs = 24 * 3600_000;
@@ -179,7 +175,6 @@ describe('computeAmritKalaWindows', () => {
   const nextSunrise = new Date('2024-01-02T06:00:00Z');
 
   it('anchors at the nakshatra start with the tabulated offset, width 4 elastic ghatikas', () => {
-    // Ashwini's tabulated offset is 42 ghatikas, and a ghatika is 24 min here.
     const windows = computeAmritKalaWindows(sunrise, nextSunrise, getMoon);
     expect(windows.length).toBeGreaterThanOrEqual(1);
     const w = windows[0]!;
@@ -188,7 +183,6 @@ describe('computeAmritKalaWindows', () => {
   });
 
   it('a window whose start falls before sunrise belongs to the previous day', () => {
-    // Bharani's 48-ghatika offset puts its window past this day's nextSunrise.
     const windows = computeAmritKalaWindows(sunrise, nextSunrise, getMoon);
     expect(windows).toHaveLength(1);
   });
@@ -255,7 +249,6 @@ describe('computePratahSandhya', () => {
   });
 
   it('scales with night length (winter → longer night → wider sandhya)', () => {
-    // Delhi 2026-01-15: the almanac gives an 81 min sandhya for this 808 min night.
     const sr = new Date('2026-01-15T01:45:00Z');
     const ss = new Date('2026-01-15T12:16:00Z');
     const nsr = new Date('2026-01-16T01:44:00Z');

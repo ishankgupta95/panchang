@@ -69,7 +69,6 @@ func (t *Timezone) UnmarshalJSON(b []byte) error {
 		*t = TimezoneName(s)
 		return nil
 	}
-	// A non-integer offset is rejected later, by ResolveUtcOffset.
 	var f float64
 	if err := json.Unmarshal(b, &f); err != nil {
 		return err

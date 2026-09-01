@@ -21,7 +21,6 @@ const (
 
 var AllLanguages = []Language{LanguageEn, LanguageHi}
 
-// Amanta months end at the new moon, Purnimanta at the full moon, so in Krishna Paksha the Purnimanta name runs one month ahead.
 type MasaSystem string
 
 const (
@@ -68,7 +67,6 @@ var AllFestivalRegions = []FestivalRegion{
 	RegionNepal,
 }
 
-// Deprecated: use the equivalent [FestivalRegion]. Removal in v6.
 const (
 	LegacyRegionTamil      FestivalRegion = "tamil"
 	LegacyRegionBengal     FestivalRegion = "bengal"

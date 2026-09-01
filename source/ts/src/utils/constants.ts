@@ -15,7 +15,6 @@ export function rashiOf(siderealLongitude: number): number {
   return Math.floor(siderealLongitude / RASHI_SPAN);
 }
 
-// Slot index (0-based from sunrise) per day of week (0 = Sunday … 6 = Saturday).
 export const RAHU_KALAM_SLOTS = [7, 1, 6, 4, 5, 3, 2] as const;
 export const YAMAGANDA_SLOTS = [4, 3, 2, 1, 0, 6, 5] as const;
 export const GULIKA_SLOTS = [6, 5, 4, 3, 2, 1, 0] as const;
@@ -40,9 +39,6 @@ export const NAKSHATRA_SEARCH_HOURS = 36;
 export const YOGA_SEARCH_HOURS = 36;
 export const KARANA_SEARCH_HOURS = 18;
 
-// Elapsed ghatikas from a nakshatra's start to its 4-ghatika Varjyam window,
-// elastic to that nakshatra's own duration (1 ghatika = duration / 60). From the
-// reference almanac's "Tyajya Ghatis" start..end labels, so offset = start_label − 1.
 export const VARJYAM_OFFSET_GHATIKAS: readonly number[] = [
   50, // 0  Ashwini
   24, // 1  Bharani
@@ -73,14 +69,10 @@ export const VARJYAM_OFFSET_GHATIKAS: readonly number[] = [
   30, // 26 Revati
 ];
 
-// Second tyajya spell; only Mula has one, attested by the reference almanac and
-// B.V. Raman's "Muhurta".
 export const VARJYAM_SECOND_OFFSET_GHATIKAS: Readonly<Record<number, number>> = {
   18: 20, // Mula
 };
 
-// Anandadi anchors at Ashwini on Sunday and advances +4 nakshatras per weekday
-// in the 28-nakshatra system that includes Abhijit (Muhurta-chintamani Ch. 4).
 function buildAnandadiTable(): readonly (readonly number[])[] {
   const rows: number[][] = [];
   for (let v = 0; v < 7; v++) {

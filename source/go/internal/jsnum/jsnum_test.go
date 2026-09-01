@@ -13,10 +13,8 @@ func TestRoundMatchesECMA262(t *testing.T) {
 		{0.5, 1}, {1.5, 2}, {2.5, 3}, {-0.5, 0}, {-1.5, -1}, {-2.5, -2},
 		{0.4, 0}, {0.6, 1}, {-0.4, 0}, {-0.6, -1},
 		{3, 3}, {-3, -3},
-		// The largest double below ½; math.Floor(x+0.5) gets this wrong.
 		{0.49999999999999994, 0},
 		{-0.49999999999999994, 0},
-		// Beyond 2⁵² every double is already integral.
 		{4503599627370497, 4503599627370497},
 		{-4503599627370497, -4503599627370497},
 		{math.MaxFloat64, math.MaxFloat64},
@@ -178,8 +176,6 @@ func TestHypotDivergesFromMathHypot(t *testing.T) {
 			diverged++
 		}
 	}
-	// Reported, not asserted: math.Hypot is per-architecture, so agreement is a fact about
-	// the host. TestHypotMatchesJS is the real guard, pinning Hypot2 to literal V8 output.
 	if diverged == 0 {
 		t.Logf("Hypot2 agreed with math.Hypot on all 200,000 pairs: on this toolchain the " +
 			"port buys nothing, but it is still needed where the two disagree")

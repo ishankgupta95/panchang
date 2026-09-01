@@ -279,7 +279,6 @@ function fixtureChart(name: string): BirthChart {
   return computeRashiChart(utc, loc);
 }
 
-// Generated from `computeJaiminiKarakas` once it was final; no outside authority.
 const FIXTURE_PINS: ReadonlyArray<{ name: string; expected: JaiminiKarakas }> = [
   {
     name: 'Narendra Modi',
@@ -523,7 +522,6 @@ describe('computeJaiminiKarakas (8-jaimini): monotonic-degree invariant', () => 
   });
 });
 
-// Hand-derived from the raw `degreeInRashi` values, not read off the implementation.
 const FIXTURE_PINS_8: ReadonlyArray<{ name: string; expected: Jaimini8Karakas }> = [
   {
     name: 'Narendra Modi',

@@ -32,7 +32,6 @@ func EvaluateVsop(s []float64, tau float64) float64 {
 	tau3 := tau2 * tau
 	sum := 0.0
 	for i := 0; i < len(s); i += 4 {
-		// Anti-FMA barrier.
 		value := float64(s[i] * Cos(s[i+1]+float64(s[i+2]*tau)))
 		switch s[i+3] {
 		case 0:
@@ -64,7 +63,6 @@ func HeliocentricRadius(body VsopBody, ttDays float64) float64 {
 	return EvaluateVsop(vsopSeriesTable[body][2], Millennia(ttDays))
 }
 
-// 8e-5 AU, enough only for the Sun's light-time.
 func EarthRadiusCoarse(ttDays float64) float64 {
 	return EvaluateVsop(series.EAR_R_COARSE, Millennia(ttDays))
 }
@@ -80,7 +78,6 @@ func HeliocentricRect(body VsopBody, ttDays float64) [3]float64 {
 }
 
 func EarthRect(ctx *EphemerisCtx, ttDays float64) [3]float64 {
-	// Only the filled prefix: an unwritten slot holds 0.0, which is J2000 exactly.
 	for i := 0; i < ctx.earthMemoLive; i++ {
 		if ctx.earthMemoKey[i] == ttDays {
 			return ctx.earthMemoVal[i]

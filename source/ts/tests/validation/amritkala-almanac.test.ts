@@ -22,11 +22,9 @@ const FIXTURES: {
   { city: 'Jaipur', loc: JAIPUR, date: '2027-02-01', windows: [
     { start: '2027-02-01T23:29', end: '2027-02-02T01:17' },
   ] },
-  // Printed on the almanac's Feb 2 page, as a post-midnight window.
   { city: 'Jaipur', loc: JAIPUR, date: '2027-02-02', windows: [
     { start: '2027-02-03T05:12', end: '2027-02-03T07:01' },
   ] },
-  // The almanac prints NO Amrit Kalam row on Feb 3.
   { city: 'Jaipur', loc: JAIPUR, date: '2027-02-03', windows: [] },
   { city: 'Jaipur', loc: JAIPUR, date: '2027-02-04', windows: [
     { start: '2027-02-04T10:07', end: '2027-02-04T11:55' },

@@ -2,8 +2,6 @@ package jyotish
 
 import "github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 
-// Ashtakoot tables: BPHS ch. 7, Brihat Samhita, Muhurta-chintamani.
-
 type Varna string
 
 const (
@@ -137,7 +135,6 @@ var yIndex = map[YoniAnimal]int{
 
 func YoniIndex(y YoniAnimal) int { return yIndex[y] }
 
-// Brihat Samhita ch. 102.
 var YoniScore [14][14]int
 
 var yoniEnemyPairs = [7][2]YoniAnimal{
@@ -172,7 +169,6 @@ func init() {
 		YoniScore[yIndex[p[0]]][yIndex[p[1]]] = 0
 		YoniScore[yIndex[p[1]]][yIndex[p[0]]] = 0
 	}
-	// the == 2 guard: {sheep, monkey} is also an enemy pair and must stay 0
 	for _, p := range yoniUnfriendlyPairs {
 		a, b := yIndex[p[0]], yIndex[p[1]]
 		if YoniScore[a][b] == 2 {
@@ -199,7 +195,6 @@ var RashiLord = [12]types.VisibleGraha{
 	types.VisibleJupiter, // 11 Pisces
 }
 
-// Natural friendship, BPHS ch. 4: row = that graha's view of the column.
 var NaisargikaMaitri = [7][7]int{
 	{0, 1, 1, 0, 1, -1, -1},  // Sun
 	{1, 0, 0, 1, 0, 0, 0},    // Moon
@@ -262,7 +257,6 @@ var gIndex = map[Gana]int{GanaDeva: 0, GanaManushya: 1, GanaRakshasa: 2}
 
 func GanaIdx(g Gana) int { return gIndex[g] }
 
-// Symmetric; several published tables are directional.
 var GanaScore = [3][3]int{
 	{6, 5, 1}, // Deva
 	{5, 6, 0}, // Manushya
@@ -309,10 +303,8 @@ var NakshatraNadi = [27]Nadi{
 	NadiAntya,  // 26 Revati
 }
 
-// 3 = Vipat, 5 = Pratyari, 7 = Vadha.
 var InauspiciousTaraRemainders = [3]int{3, 5, 7}
 
-// Pairs are (boy→girl, girl→boy) rashi distances.
 var BhakootDoshicDistances = [6][2]int{
 	{2, 12}, {12, 2},
 	{5, 9}, {9, 5},

@@ -112,7 +112,6 @@ function placidusCusps(
   const θRad = degToRad(lstDeg);
   const φRad = degToRad(latitudeDeg);
 
-  // Recomputed rather than imported from `computeLagna`: that would be circular.
   const ascTropical = computeAscTropical(θRad, φRad, εRad);
 
   const cusp11Trop = solvePlacidus(11, θRad, φRad, εRad, normalize360(mcTropical + 30));

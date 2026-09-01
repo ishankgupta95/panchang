@@ -22,10 +22,9 @@ type ElementBase struct {
 }
 
 type TithiInfo struct {
-	Index  int    `json:"index"`
-	Name   string `json:"name"`
-	Paksha string `json:"paksha"`
-	// Number is 1-15 within the paksha: index+1 in Shukla, index−14 in Krishna.
+	Index                int     `json:"index"`
+	Name                 string  `json:"name"`
+	Paksha               string  `json:"paksha"`
 	Number               int     `json:"number"`
 	CompletionPercentage float64 `json:"completionPercentage"`
 	EndTime              *JSDate `json:"endTime"`
@@ -86,7 +85,6 @@ type NakshatraIndexInfo struct {
 	Name  string `json:"name"`
 }
 
-// Index and Name follow System; the Amanta and Purnimanta pairs are always both published.
 type ChandraMasaInfo struct {
 	Index           int        `json:"index"`
 	Name            string     `json:"name"`
@@ -110,7 +108,6 @@ type UtcWindow struct {
 	EndMs   int64 `json:"end"`
 }
 
-// Start and End are true instants, never shifted by the zone offset; the *Local strings carry it.
 type TimePeriod struct {
 	Start      JSDate `json:"start"`
 	End        JSDate `json:"end"`
@@ -118,11 +115,9 @@ type TimePeriod struct {
 	EndLocal   string `json:"endLocal"`
 }
 
-// The slot pairs must not embed a window: embedding would put startLocal and endLocal ahead of index in the emitted key order.
 type UnlocalizedChoghadiyaSlot struct {
-	StartMs int64 `json:"start"`
-	EndMs   int64 `json:"end"`
-	// Index is the position in the 7-name cycle, not the slot ordinal.
+	StartMs     int64             `json:"start"`
+	EndMs       int64             `json:"end"`
 	Index       int               `json:"index"`
 	Name        string            `json:"name"`
 	Quality     ChoghadiyaQuality `json:"quality"`
@@ -151,9 +146,8 @@ type ChoghadiyaInfo struct {
 }
 
 type UnlocalizedHoraSlot struct {
-	StartMs int64 `json:"start"`
-	EndMs   int64 `json:"end"`
-	// PlanetIndex is 0-6 Chaldean: Sun, Venus, Mercury, Moon, Saturn, Jupiter, Mars.
+	StartMs     int64  `json:"start"`
+	EndMs       int64  `json:"end"`
 	PlanetIndex int    `json:"planetIndex"`
 	Planet      string `json:"planet"`
 }
@@ -208,9 +202,8 @@ type GowriInfo struct {
 }
 
 type UnlocalizedDoGhatiSlot struct {
-	StartMs int64 `json:"start"`
-	EndMs   int64 `json:"end"`
-	// Index is the global 0-29 slot: 0-14 daytime, 15-29 nighttime.
+	StartMs     int64             `json:"start"`
+	EndMs       int64             `json:"end"`
 	Index       int               `json:"index"`
 	Name        string            `json:"name"`
 	Quality     ChoghadiyaQuality `json:"quality"`
@@ -284,7 +277,6 @@ func (g GandaMulaInfo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(alias(g))
 }
 
-// PanchakaType samanya covers a spell begun on a Wednesday or Thursday: no affliction.
 type PanchakaType string
 
 const (
@@ -300,7 +292,6 @@ var AllPanchakaTypes = []PanchakaType{
 	PanchakaRoga, PanchakaRaja, PanchakaAgni, PanchakaChora, PanchakaMrityu, PanchakaSamanya,
 }
 
-// The applicable Panchaka is fixed by the weekday the spell began on, for the whole spell.
 type PanchakaInfo struct {
 	Active    bool         `json:"active"`
 	Type      PanchakaType `json:"type"`
@@ -309,7 +300,6 @@ type PanchakaInfo struct {
 	OnsetVara int          `json:"onsetVara"`
 }
 
-// Hand-written rather than omitempty, which would drop isDosha:false and onsetVara:0.
 func (p PanchakaInfo) MarshalJSON() ([]byte, error) {
 	if !p.Active {
 		return []byte(`{"active":false}`), nil
@@ -351,9 +341,8 @@ type BhadraVasaSegment struct {
 }
 
 type UnlocalizedBhadraInfo struct {
-	StartMs int64 `json:"start"`
-	EndMs   int64 `json:"end"`
-	// Location is the Moon's rashi at the window's start; Vasa has the piecewise breakdown.
+	StartMs      int64                          `json:"start"`
+	EndMs        int64                          `json:"end"`
 	Location     BhadraLocation                 `json:"location"`
 	LocationName string                         `json:"locationName"`
 	Vasa         []UnlocalizedBhadraVasaSegment `json:"vasa"`
@@ -386,7 +375,6 @@ const (
 	YogaRavi            SpecialYogaType = "ravi"
 )
 
-// Also the emission order: a computed result is a subsequence of this.
 var AllSpecialYogaTypes = []SpecialYogaType{
 	YogaAmritSiddhi, YogaSarvarthaSiddhi, YogaRaviPushya, YogaGuruPushya,
 	YogaDwipushkar, YogaTripushkar, YogaJwalamukhi, YogaAadal, YogaVidaal, YogaRavi,

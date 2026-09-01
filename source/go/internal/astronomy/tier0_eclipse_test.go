@@ -12,8 +12,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// NASA/Espenak: the Five Millennium Canon (geocentric) plus the local-circumstances catalogs.
-
 type lunarRow struct {
 	Date                 string  `json:"date"`
 	JdGreatestTt         float64 `json:"jdGreatestTt"`
@@ -97,7 +95,6 @@ func loadLocalCanon(t *testing.T) localCanonFile {
 	return c
 }
 
-// ΔT is a function of the UT instant sought; three passes reach the ms.
 func ttJulianDateToUtc(jdTt float64) int64 {
 	ttDays := jdTt - j2000JD
 	ms := float64(j2000NoonMS) + ttDays*dayMS
@@ -109,7 +106,6 @@ func ttJulianDateToUtc(jdTt float64) int64 {
 
 func utcToTtJulianDate(ms int64) float64 { return TTDaysSinceJ2000(ms) + j2000JD }
 
-// Not concurrency-safe: each worker keeps its own.
 type worst struct {
 	value float64
 	where string
@@ -248,7 +244,6 @@ func TestTier0LunarEclipsesVsNASACanon(t *testing.T) {
 		{"greatest eclipse (s TT)", &peak, 4.5},
 		{"penumbral magnitude", &penumbralMagnitude, 0.0004},
 		{"umbral magnitude", &umbralMagnitude, 0.0007},
-		// A penumbral contact is the shallowest crossing there is, hence the loosest bound.
 		{"penumbral duration (min)", &penumbralDuration, 1.2},
 		{"partial duration (min)", &partialDuration, 0.5},
 		{"total duration (min)", &totalDuration, 1.1},
@@ -262,10 +257,8 @@ func TestTier0LunarEclipsesVsNASACanon(t *testing.T) {
 
 func TestTier0PublishedLunarFields(t *testing.T) {
 	canon := loadEclipseCanon(t)
-	// Magnitude is geocentric; the observer only decides VisibleFromLocation.
 	observer := types.GeoLocation{Latitude: 28.6139, Longitude: 77.2090}
 
-	// Four decimals in the canon can straddle the line; excluded from the sign check only.
 	const boundaryBand = 0.002
 
 	type result struct {
@@ -299,7 +292,6 @@ func TestTier0PublishedLunarFields(t *testing.T) {
 				fmt.Sprintf("%s obscuration %v", row.Date, info.Obscuration))
 		}
 
-		// A clamp into [0, 1] would break every penumbral row here.
 		canonKind := "penumbral"
 		switch row.Kind {
 		case "T":
@@ -328,7 +320,6 @@ func TestTier0PublishedLunarFields(t *testing.T) {
 			r.penumbralWithObscuration = append(r.penumbralWithObscuration,
 				fmt.Sprintf("%s %v", row.Date, info.Obscuration))
 		}
-		// Area against diameter: wiring both fields to one source passes every bound above.
 		if canonKind == "partial" && row.UmbralMagnitude > 0.05 && row.UmbralMagnitude < 0.95 {
 			if info.Obscuration == info.Magnitude {
 				r.identical = append(r.identical, row.Date)

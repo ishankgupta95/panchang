@@ -209,7 +209,6 @@ func TestAshtottariExcludesKetu(t *testing.T) {
 	}
 }
 
-// Expected pairs are published worked examples (Devi-Bhagavata), not re-derived.
 func TestYoginiStartIsOffsetByThree(t *testing.T) {
 	cases := []struct {
 		nakshatra string
@@ -366,7 +365,6 @@ func TestRasiDrishtiIsThreeSignsEach(t *testing.T) {
 		}
 	}
 
-	// Adjacent duals do not exist, so the matrix has 36 ones.
 	ones := 0
 	for a := 0; a < 12; a++ {
 		for b := 0; b < 12; b++ {
@@ -398,7 +396,6 @@ func TestInclusiveSignCount(t *testing.T) {
 				if n < 1 || n > 12 {
 					t.Errorf("count(%d,%d,anti=%v) = %d out of range", src, dst, anti, n)
 				}
-				// Forward + backward count both endpoints twice.
 				m := inclusiveSignCount(src, dst, !anti)
 				want := 14
 				if src == dst {
@@ -479,7 +476,6 @@ func TestPlanetsInRashiCountsAllNine(t *testing.T) {
 	}
 }
 
-// Asserted to one millisecond, not zero: the float cursor accumulates nine boundaries.
 func TestVimshottariSequenceIsContiguous(t *testing.T) {
 	birth := int64(645_445_800_000)
 	for step := 0; step < 27; step++ {

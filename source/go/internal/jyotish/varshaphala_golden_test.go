@@ -104,7 +104,6 @@ func TestSunDegPerDayIsTwoStepped(t *testing.T) {
 	if sunDegPerDay != g.SunDegPerDay {
 		t.Errorf("sunDegPerDay = %.20g, TypeScript %.20g", sunDegPerDay, g.SunDegPerDay)
 	}
-	// Runtime var, not a const: forces the same two roundings V8 performs.
 	var y float64 = 365.25636
 	if want := 360 / y; sunDegPerDay != want {
 		t.Errorf("sunDegPerDay = %.20g but the two-step form gives %.20g; "+
@@ -271,7 +270,6 @@ func TestSolarReturnConvergesToTolerance(t *testing.T) {
 			worst = d
 		}
 	}
-	// Whole-millisecond rounding moves the Sun far below the loop's 1e-4 deg tolerance.
 	if worst > 1e-4 {
 		t.Errorf("worst |sidereal Sun − natal Sun| at a returned instant is %g deg, "+
 			"above the documented 1e-4", worst)
@@ -518,7 +516,6 @@ func TestSahamCompletionRuleFiresBothWays(t *testing.T) {
 			} else {
 				added++
 			}
-			// Exact ties resolve both operands to the same float, so nothing can flip.
 			if x == z {
 				exactTies++
 			} else if d := math.Abs(zy - xy); d < closest {

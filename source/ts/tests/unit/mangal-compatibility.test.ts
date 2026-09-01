@@ -9,7 +9,6 @@ import type { BirthChart } from '../../src/index';
 
 const DELHI = { latitude: 28.6139, longitude: 77.2090 };
 
-// Real computed charts, not hand-built placements no sky would produce.
 function findCharts(): { manglik: BirthChart[]; clean: BirthChart[] } {
   const manglik: BirthChart[] = [];
   const clean: BirthChart[] = [];
@@ -74,7 +73,6 @@ describe('computeMangalCompatibility', () => {
     expect(r.girl).toEqual(computeMangalDosha(clean[0]!));
   });
 
-  // Chart-level cancellations run first, and must not "cancel" the partner too.
   it('a chart-cancelled native does not mutually cancel a Manglik partner', () => {
     const cancelledByChart = clean.filter((c) => computeMangalDosha(c).cancellations.length > 0);
     for (const c of cancelledByChart) {

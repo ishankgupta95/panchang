@@ -78,8 +78,7 @@ type dashaGolden struct {
 		PratyantarOf       gPeriod   `json:"pratyantarOf"`
 		Pratyantar         []gPeriod `json:"pratyantar"`
 	} `json:"sweep"`
-	BoundaryBirthMs int64 `json:"boundaryBirthMs"`
-	// Recomputing this in Go would mix a ULP difference into an exact test.
+	BoundaryBirthMs      int64   `json:"boundaryBirthMs"`
 	BoundaryBirthMoonLon float64 `json:"boundaryBirthMoonLon"`
 	Boundary             []struct {
 		MoonLon             float64 `json:"moonLon"`
@@ -792,7 +791,6 @@ func TestPratyantarRejectsInvalidLord(t *testing.T) {
 	if err == nil {
 		t.Fatal("an out-of-range lord was accepted")
 	}
-	// INVALID_INPUT has no sentinel; only branched-on codes get one.
 	var pe *types.PanchangError
 	if !errors.As(err, &pe) || pe.Code != types.ErrInvalidInput {
 		t.Errorf("error is %v, expected a PanchangError with code INVALID_INPUT", err)
@@ -807,7 +805,6 @@ func TestPratyantarRejectsInvalidLord(t *testing.T) {
 	}
 }
 
-// The wrapper computes its own Moon longitude, so a truncation can flip: hence the 1 ms allowance.
 func TestVimshottariDashaFromBirthMatchesTypeScript(t *testing.T) {
 	g := loadDashaGolden(t)
 	ctx := astronomy.NewEphemerisCtx()

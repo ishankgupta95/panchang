@@ -15,7 +15,6 @@ function noonUtc(s: string) {
   return new Date(Date.UTC(y, m - 1, d, 12, 0, 0, 0));
 }
 
-// getUTC* on a published Date gives the instant, so read the `*Local` string.
 function secondsOfDay(local: string) {
   const [h, m, s] = local.slice(11, 19).split(':').map(Number) as [number, number, number];
   return h * 3600 + m * 60 + s;
@@ -34,7 +33,6 @@ type Fixture = {
   expected: { sunriseHHMM: string; sunsetHHMM: string };
 };
 
-// Worst observed |Δ| is 29s; 45s still sits inside the printed minute.
 const SECONDS_TOL = 45;
 
 describe('Phase 19-5 seconds-precision audit', () => {

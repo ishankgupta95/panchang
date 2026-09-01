@@ -53,7 +53,6 @@ describe('Anandadi Yoga wiring: instant panchang', () => {
 });
 
 describe('Anandadi Yoga wiring: reference-almanac cross-check (Delhi)', () => {
-  // Pinned from the reference almanac's Delhi day-panchang page, at sunrise.
   const DELHI_FIXTURES: Array<{
     label: string;
     date: Date;

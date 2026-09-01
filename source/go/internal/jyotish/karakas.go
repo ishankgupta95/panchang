@@ -16,7 +16,6 @@ var karakaGrahas7Required = func() []types.Graha {
 	return out
 }()
 
-// Rahu last, so it loses every tie.
 var karakaGrahas8 = [8]types.Graha{
 	types.GrahaSun, types.GrahaMoon, types.GrahaMars, types.GrahaMercury,
 	types.GrahaJupiter, types.GrahaVenus, types.GrahaSaturn, types.GrahaRahu,
@@ -27,14 +26,12 @@ type rankedGraha struct {
 	degree float64
 }
 
-// Stable, never sort.Slice: the tie-break rests on input order.
 func sortKarakasStable(ranked []rankedGraha) {
 	sort.SliceStable(ranked, func(i, j int) bool {
 		return ranked[i].degree > ranked[j].degree
 	})
 }
 
-// BPHS Ch. 32; Ketu is in neither variant.
 func ComputeJaiminiKarakas(chart *types.BirthChart) (types.JaiminiKarakas, error) {
 	byPlanet, err := karakaPlanetIndex(chart, karakaGrahas7Required)
 	if err != nil {
@@ -54,7 +51,6 @@ func ComputeJaiminiKarakas(chart *types.BirthChart) (types.JaiminiKarakas, error
 	return result, nil
 }
 
-// Jaimini, Upadesa Sutras 1.10.
 func ComputeJaimini8Karakas(chart *types.BirthChart) (types.Jaimini8Karakas, error) {
 	byPlanet, err := karakaPlanetIndex(chart, karakaGrahas8[:])
 	if err != nil {
@@ -77,7 +73,6 @@ func ComputeJaimini8Karakas(chart *types.BirthChart) (types.Jaimini8Karakas, err
 	return result, nil
 }
 
-// Absence must error: a zero placement reads as degree 0 and takes Darakaraka.
 func karakaPlanetIndex(chart *types.BirthChart, required []types.Graha) ([types.GrahaCount]types.PlanetPlacement, error) {
 	var out [types.GrahaCount]types.PlanetPlacement
 	var seen [types.GrahaCount]bool

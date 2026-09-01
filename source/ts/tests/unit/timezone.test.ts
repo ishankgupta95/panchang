@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getLocalMidnightUtc, utcToLocalDisplay } from '../../src/utils/timezone';
 
-// Inputs use `Date.UTC`: `new Date(y, m, d)` is a different instant per host.
 describe('getLocalMidnightUtc', () => {
   it('IST (330): noon-UTC Jan 14 anchors Jan 14 IST → Jan 13 18:30 UTC', () => {
     const date = new Date(Date.UTC(2025, 0, 14, 12, 0, 0));

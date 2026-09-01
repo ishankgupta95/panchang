@@ -65,8 +65,6 @@ describe('Tara koot', () => {
   });
 
   it('Tara is never zero in both directions simultaneously (structural property)', () => {
-    // The two distances sum to 2 (mod 9), which no pair of inauspicious
-    // remainders {3, 5, 7} can do.
     for (let bn = 0; bn < 27; bn++) {
       for (let gn = 0; gn < 27; gn++) {
         const r = computeAshtakoot({ rashi: 0, nakshatra: bn }, { rashi: 0, nakshatra: gn });
@@ -94,8 +92,6 @@ describe('Graha Maitri koot', () => {
     expect(r.koots[4]!.score).toBe(5);
   });
   it('5 marks when both lords are mutual friends', () => {
-    // Mars sees Moon as a friend, Moon sees Mars as neutral: friend x neutral
-    // scores 4, not 5.
     const r = computeAshtakoot({ rashi: 0, nakshatra: 0 }, { rashi: 3, nakshatra: 0 });
     expect(r.koots[4]!.score).toBe(4);
   });
@@ -113,7 +109,6 @@ describe('Gana koot', () => {
 });
 
 describe('Gana opt-in cancellation (options.ganaCancellation)', () => {
-  // Manushya/Rakshasa pair whose rashis Aries and Scorpio share the lord Mars.
   const sameLordBoy: NatalMoon = { rashi: 0, nakshatra: 1 };
   const sameLordGirl: NatalMoon = { rashi: 7, nakshatra: 17 };
 
@@ -137,7 +132,6 @@ describe('Gana opt-in cancellation (options.ganaCancellation)', () => {
   });
 
   it('mutual rashi-lord friendship restores a 1-score Deva/Rakshasa pair to 6', () => {
-    // Lords Moon (Cancer) and Sun (Leo) are mutual friends.
     const boy: NatalMoon = { rashi: 3, nakshatra: 7 };
     const girl: NatalMoon = { rashi: 4, nakshatra: 9 };
     expect(computeAshtakoot(boy, girl).koots[5]!.score).toBe(1);
@@ -148,7 +142,6 @@ describe('Gana opt-in cancellation (options.ganaCancellation)', () => {
   });
 
   it('doshic pair whose lords are neither same nor mutual friends stays doshic', () => {
-    // Mars sees Saturn as neutral, Saturn sees Mars as an enemy: not mutual.
     const r = computeAshtakoot(
       { rashi: 0, nakshatra: 1 }, { rashi: 10, nakshatra: 23 },
       { ganaCancellation: true },
@@ -177,12 +170,9 @@ describe('Bhakoot koot', () => {
     expect(r.koots[6]!.score).toBe(0);
   });
   it('cancellation applied when rashi-lords are friends: score becomes 7', () => {
-    // Moon sees Saturn as neutral, Saturn sees Moon as an enemy: no mutual
-    // friendship to cancel on.
     const r1 = computeAshtakoot({ rashi: 3, nakshatra: 0 }, { rashi: 10, nakshatra: 0 });
     expect(r1.koots[6]!.score).toBe(0);
 
-    // Aries and Scorpio are both lorded by Mars.
     const r2 = computeAshtakoot({ rashi: 0, nakshatra: 0 }, { rashi: 7, nakshatra: 0 });
     expect(r2.koots[6]!.score).toBe(7);
     expect(r2.cancellations.some((c) => c.startsWith('Bhakoot'))).toBe(true);
@@ -246,8 +236,6 @@ describe('Bhakoot opt-in cancellations (Phase 34b)', () => {
   });
 
   it('backward compat: omitting all optional fields preserves v3.5.0 behavior', () => {
-    // The nakshatras differ deliberately so the Nadi same-nakshatra
-    // cancellation cannot fire.
     const r = computeAshtakoot(
       { rashi: 0, nakshatra: 0 },
       { rashi: 5, nakshatra: 4 },
@@ -277,7 +265,6 @@ describe('Bhakoot opt-in cancellations (Phase 34b)', () => {
 
 describe('Nadi koot', () => {
   it('zero when both natives share the same nadi', () => {
-    // The rashis differ deliberately so the same-rashi cancellation cannot fire.
     expect(NAKSHATRA_NADI[0]).toBe('adi');
     expect(NAKSHATRA_NADI[5]).toBe('adi');
     const r = computeAshtakoot({ rashi: 0, nakshatra: 0 }, { rashi: 2, nakshatra: 5 });
@@ -296,7 +283,6 @@ describe('Nadi koot', () => {
 
 describe('total scoring: exemplar pairs', () => {
   it('identical chart (boy.rashi=girl.rashi, boy.nakshatra=girl.nakshatra) hits 36', () => {
-    // Nadi reaches 8 only via the same-nakshatra cancellation.
     const moon: NatalMoon = { rashi: 4, nakshatra: 11 };
     const r = computeAshtakoot(moon, moon);
     expect(r.totalScore).toBe(36);

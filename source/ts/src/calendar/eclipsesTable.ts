@@ -1,4 +1,3 @@
-// Engine-free reader: astronomy imports here would drag the engine into a client bundle.
 
 import type {
   EclipsesFile,

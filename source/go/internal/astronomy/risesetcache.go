@@ -24,7 +24,6 @@ func canonicalDayEventsShared(
 		jsnum.FormatFloat(location.Elevation) + "|" +
 		jsnum.FormatInt(dayIndex)
 	events, _ := eventCache.GetOrBuild(key, func() []float64 {
-		// dayEventsShared returns the scan cache's own slice; storing it would alias.
 		return append([]float64(nil), dayEventsShared(ctx, kind.Body, direction, location, dayIndex)...)
 	})
 	return events
@@ -47,7 +46,6 @@ func ResolveEvent(
 ) (int64, bool) {
 	fromMs := float64(searchFromMs)
 	limitMs := fromMs + float64(float64(limitDays)*dayMS)
-	// Math.floor, not truncation: negative before 1970.
 	startDay := floorDivInt(searchFromMs, dayMS)
 
 	for i := 0; i <= limitDays+1; i++ {

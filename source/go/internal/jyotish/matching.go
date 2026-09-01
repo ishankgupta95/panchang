@@ -178,7 +178,6 @@ func scoreGrahaMaitri(boy, girl NatalMoon) KootScore {
 	var description string
 	if boyLord == girlLord {
 		score = 5
-		// the published string reads "graha 2", not the lord's name
 		description = "Same rashi-lord (graha " + jsnum.FormatInt(int64(boyLord)) + "), full marks"
 	} else {
 		boyView := NaisargikaMaitri[boyLord][girlLord]
@@ -206,7 +205,6 @@ func scoreGana(boy, girl NatalMoon, cancellations *[]string, applyCancellation b
 	score := float64(GanaScore[GanaIdx(bg)][GanaIdx(gg)])
 	description := string(bg) + " ↔ " + string(gg)
 
-	// score ≤ 1 is the doshic pair: Manushya-Rakshasa (0) or Deva-Rakshasa (1)
 	if applyCancellation && score <= 1 {
 		boyLord := RashiLord[boy.Rashi]
 		girlLord := RashiLord[girl.Rashi]

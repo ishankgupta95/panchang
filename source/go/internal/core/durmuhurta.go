@@ -9,7 +9,6 @@ type durMuhurtaOrdinal struct {
 	segment types.DayNightSegment
 }
 
-// The Muhurta-Chintamani table as the reference almanac prints it; ordinals are 0-based within 15 muhurtas.
 var durMuhurtaOrdinals = [7][]durMuhurtaOrdinal{
 	{{13, types.SegmentDay}},                         // Sunday
 	{{8, types.SegmentDay}, {11, types.SegmentDay}},  // Monday
@@ -20,7 +19,6 @@ var durMuhurtaOrdinals = [7][]durMuhurtaOrdinal{
 	{{0, types.SegmentDay}, {1, types.SegmentDay}},   // Saturday
 }
 
-// FMA barriers below.
 func ComputeDurMuhurta(
 	sunriseMs, sunsetMs, nextSunriseMs int64,
 	varaIndex int,

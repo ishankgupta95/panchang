@@ -23,7 +23,6 @@ function angularDelta(a: number, b: number): number {
   return d;
 }
 
-// Inverting our own ΔT makes it cancel exactly out of the residual.
 function utDateForTt(jdTt: number): Date {
   const ttDays = jdTt - 2451545.0;
   let ms = ttDays * 86_400_000 + Date.UTC(2000, 0, 1, 12);
@@ -76,7 +75,6 @@ describe('Tier 0: own Sun and Moon vs JPL Horizons (DE441)', () => {
       checked++;
     }
     expect(checked).toBeGreaterThanOrEqual(60);
-    // 1e-9 rad is the printed precision of the check file.
     expect(worst, `worst |Δ| vs vsop87.chk was ${worst.toExponential(3)}`).toBeLessThan(1e-9);
   });
 

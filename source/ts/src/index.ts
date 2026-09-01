@@ -1,4 +1,17 @@
 export { getDailyPanchang, getInstantPanchang } from './core/panchang';
+export {
+  TRADITIONAL_REFERENCE,
+  MODERN_REFERENCE,
+  IST_TIMEZONE,
+  IST_OFFSET_MINUTES,
+  referenceLocation,
+  resolveLocation,
+} from './core/defaultLocation';
+export type {
+  PanchangReference,
+  ReferenceMode,
+  ResolvedLocation,
+} from './core/defaultLocation';
 
 export { computePlanetaryPositions, GRAHA_ABBR } from './jyotish/planets';
 export {

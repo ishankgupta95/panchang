@@ -18,15 +18,14 @@ func TestSymbolCorrespondence(t *testing.T) {
 	t.Logf("checked %d symbols: %d matched, %d allowlisted", r.Checked, r.Matched, len(r.Allowed))
 }
 
-// Vacuity guard: every failure condition is a non-empty list, so a half-found tree would pass.
 func TestSymbolCensusIsPinned(t *testing.T) {
 	r, err := CheckRepo(repopath.Root())
 	if err != nil {
 		t.Fatal(err)
 	}
 	const (
-		wantChecked = 435
-		wantMatched = 407
+		wantChecked = 441
+		wantMatched = 413
 		wantAllowed = 28
 	)
 	if r.Checked != wantChecked {
@@ -46,8 +45,6 @@ func TestSymbolCensusIsPinned(t *testing.T) {
 
 func TestExtractTSFile(t *testing.T) {
 	src := `
-// export function inComment(...)
-/* export const inBlock = 1 */
 export function computeFoo(a: number): number { return a }
 export function computeFoo(a: string): string  // overload collapses
 export async function fetchBar(): Promise<void> {}

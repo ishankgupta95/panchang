@@ -18,7 +18,6 @@ import { readTestData } from '../testdata';
 const fixtures = readTestData('charts', 'ashtakoot-pairs.json');
 
 describe('Ashtakoot tables: Varna (BPHS Ch.7)', () => {
-  // BPHS Ch.7: water Brahmin, fire Kshatriya, earth Vaishya, air Shudra.
   it('rashi-to-varna mapping has 3 of each varna across 12 rashis', () => {
     const counts: Record<string, number> = { brahmin: 0, kshatriya: 0, vaishya: 0, shudra: 0 };
     for (const v of RASHI_VARNA) counts[v] = (counts[v] ?? 0) + 1;
@@ -33,7 +32,6 @@ describe('Ashtakoot tables: Varna (BPHS Ch.7)', () => {
 });
 
 describe('Ashtakoot tables: Yoni (Brihat Samhita Ch.102 + reference almanac)', () => {
-  // Enemy pairs per the almanac's yoni-koota page and saravali.github.io.
   const ENEMY_PAIRS: Array<[string, string]> = [
     ['horse', 'buffalo'], ['elephant', 'lion'], ['sheep', 'monkey'],
     ['snake', 'mongoose'], ['dog', 'deer'], ['cat', 'rat'], ['cow', 'tiger'],
@@ -90,9 +88,6 @@ describe('Ashtakoot tables: Tara inauspicious remainders', () => {
 });
 
 describe('Ashtakoot: independent Yoni cross-check (NeeleshRoy/ashtakoot)', () => {
-  // Their YONI fixture (test/index.js, 1-based) asserts YONI[17][26] = 2: deer
-  // and cow are on neither Brihat Samhita list, so they take the default 2.
-  // Their Varna inverts BPHS Ch.7 and their Tara uses absolute positions.
   it('Yoni: nak 17×26 (Anuradha/deer × U.Bhadrapada/cow) = 2', () => {
     const r = computeAshtakoot(
       { rashi: 7, nakshatra: 16 },   // Anuradha
@@ -144,8 +139,6 @@ describe('Ashtakoot: 31 celebrity pair sweep (R-tier natal moons)', () => {
 
 describe('Ashtakoot: hand-derived totals (structurally clear cases)', () => {
   it('Modi × Modi (identical chart): perfect 36', () => {
-    // Same rashi gives Varna 1, Vashya 2, Bhakoot 7, Graha Maitri 5; same
-    // nakshatra gives Tara 3, Yoni 4, Gana 6, Nadi 8 by cancellation.
     const r = computeAshtakoot({ rashi: 7, nakshatra: 16 }, { rashi: 7, nakshatra: 16 });
     expect(r.totalScore).toBe(36);
   });

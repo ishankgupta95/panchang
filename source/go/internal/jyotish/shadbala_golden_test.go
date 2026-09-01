@@ -12,7 +12,6 @@ import (
 )
 
 const (
-	// far below the 1.875 V exact quantum
 	shadbalaBound = 1e-9
 )
 
@@ -492,7 +491,6 @@ func TestShadbalaStructuralInvariants(t *testing.T) {
 		for _, v := range types.AllVisibleGrahas {
 			p, _ := s.Get(v)
 			where := types.Date(c.Ms).ISOString() + "/" + v.String()
-			// derived from the components, never a quoted literal
 			sthanaMin := 0.0 + 7*saptVirupas[DignityDebilitated] + 0 + 0
 			sthanaMax := 60.0 + 7*saptVirupas[DignityExalted] + 2*15 + 15
 			if p.Sthana < sthanaMin-shadbalaBound || p.Sthana > sthanaMax+shadbalaBound {

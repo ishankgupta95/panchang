@@ -367,7 +367,6 @@ export function findLocalSolarEclipse(
     return s * s;
   };
 
-  // The topocentric separation is smooth but not always parabolic, so a bare fit could pick the wrong basin.
   const centre = conjunctionUtc.getTime();
   let bestMs = centre;
   let bestValue = Number.POSITIVE_INFINITY;
@@ -394,7 +393,6 @@ export function findLocalSolarEclipse(
     ? (moonSemidiameter >= sunSemidiameter ? 'total' : 'annular')
     : 'partial';
 
-  // No useful mean rate here: the observer's rotation contributes as much as the Moon.
   const probe = 600_000;
   const rate = Math.max(
     1e-12,

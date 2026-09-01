@@ -62,8 +62,6 @@ describe('Do Ghati wiring: slot durations sum to dayDuration / nightDuration', (
 });
 
 describe('Do Ghati wiring: reference-almanac cross-check', () => {
-  // Values from the reference almanac's daily do-ghati-muhurat page, which
-  // prints whole minutes.
   it('Delhi 2025-01-14: Rudra 07:15-07:57, Mitra 08:39-09:21, Ishwara start 17:46', () => {
     const r = getDailyPanchang(NOON_2025_01_14, DELHI, { timezone: 330 })!;
 
@@ -91,7 +89,6 @@ describe('Do Ghati wiring: Hindi localization', () => {
       timezone: 330,
       language: 'hi',
     })!;
-    // Devanagari range U+0900-U+097F.
     const devanagari = /[ऀ-ॿ]/;
     expect(r.muhurtas.doGhati.day[0]!.name).toMatch(devanagari);
     expect(r.muhurtas.doGhati.night[0]!.name).toMatch(devanagari);
@@ -136,13 +133,11 @@ describe('Panchaka Rahita / Do Ghati: multi-day Delhi sweep', () => {
   it('a 90-day sweep includes both empty and non-empty Panchaka Rahita days', () => {
     const empty = cases.filter(c => c.panchakaRahitaCount === 0).length;
     const nonEmpty = cases.filter(c => c.panchakaRahitaCount === 1).length;
-    // Panchaka runs ~5 of every ~28 days; these are floors, not counts.
     expect(empty).toBeGreaterThan(5);
     expect(nonEmpty).toBeGreaterThan(60);
   });
 
   it('a 90-day sweep includes at least a few Panchaka transition days', () => {
-    // Two transitions per ~28-day cycle.
     const transitions = cases.filter(c => c.transitionDay).length;
     expect(transitions).toBeGreaterThanOrEqual(4);
   });
@@ -150,7 +145,6 @@ describe('Panchaka Rahita / Do Ghati: multi-day Delhi sweep', () => {
 
 describe('Panchaka Rahita: cross-check with `panchaka` boolean', () => {
   it('on a "Panchaka all day" candidate, panchakaRahita is [] iff panchaka is true at sunrise AND no transition', () => {
-    // The panchaka boolean is sampled at sunrise, so only empty days constrain it.
     for (let day = 0; day < 60; day++) {
       const date = new Date(Date.UTC(2025, 5, 1) + day * 86_400_000);
       const r = getDailyPanchang(date, DELHI, { timezone: 330 });

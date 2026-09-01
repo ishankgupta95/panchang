@@ -13,7 +13,6 @@ type elpCanonical struct {
 	main  bool
 }
 
-// The FORTRAN's 1-based indexing; index 0 unused.
 type elpConstants struct {
 	w    [4][6]float64
 	p    [9][3]float64
@@ -23,7 +22,6 @@ type elpConstants struct {
 	ath  float64
 }
 
-// elp82b.f's initialisation block.
 var elpConst = func() elpConstants {
 	const (
 		rad = 648000 / jsnum.PI
@@ -190,7 +188,6 @@ func canonicalElp(tables *elpTables) [4][]elpCanonical {
 	return out
 }
 
-// Powers written out to keep the multiplication order: a * (t*t) * sin.
 func evalElpTerm(q elpCanonical, t float64) float64 {
 	ph := q.phase
 	y := ph[0] + t*(ph[1]+t*(ph[2]+t*(ph[3]+t*ph[4])))

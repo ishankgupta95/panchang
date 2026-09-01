@@ -394,8 +394,6 @@ describe('Raja Yoga (kendra-lord conjunct/aspecting trikona-lord)', () => {
   });
 
   it('Pisces lagna: kendra/trikona lords mutually isolated → no Raja Yoga', () => {
-    // No pair of these lords shares a rashi or forms a mutual aspect, and Sun,
-    // Venus and Saturn lord neither a kendra nor a trikona for Pisces.
     const chart = synthChart({
       lagnaRashi: 11,
       Jupiter: 11,
@@ -475,7 +473,6 @@ describe('Dhana Yoga (2-11) and Dhana Yoga (5-9)', () => {
 });
 
 describe('Vasumati Yoga', () => {
-  // The upachayas are 3, 6, 10 and 11 (Raman §21); the 12th is a vyaya house.
   it('positive: all natural benefics in upachayas (3, 6, 10, 11) from Aries lagna', () => {
     const chart = synthChart({
       lagnaRashi: 0,
@@ -714,9 +711,6 @@ function fixtureChart(name: string): { d1: BirthChart; d9: DivisionalChart } {
   return { d1: computeRashiChart(utc, loc), d9: computeNavamsa(utc, loc) };
 }
 
-// Derived from `computeYogas` itself once the catalog was finalized, so these
-// are regression detectors, not independent truth. Adding a yoga to the catalog
-// must extend each pin.
 const FIXTURE_PINS: ReadonlyArray<{ name: string; expected: readonly YogaName[] }> = [
   {
     name: 'Narendra Modi',
@@ -758,8 +752,6 @@ const FIXTURE_PINS: ReadonlyArray<{ name: string; expected: readonly YogaName[] 
   },
   {
     name: 'Dhirubhai Ambani',
-    // No Raja Yoga: the kendra/trikona lord pair here is connected by a one-way
-    // special aspect only, which is not a classical sambandha.
     expected: [
       'Anapha',
       'Daridra Yoga',

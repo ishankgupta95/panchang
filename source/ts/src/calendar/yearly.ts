@@ -53,8 +53,6 @@ export function computeEkadashiDatesForYear(
   const ayanamsa = options.ayanamsa ?? 'lahiri';
   const offset = resolveUtcOffset(options.timezone, new Date(Date.UTC(year, 6, 1)));
 
-  // The unused second sunrise call is load-bearing: it drops polar days exactly
-  // as `getDailyPanchang` does. The extra day past Dec 31 feeds the lookahead.
   const days: Array<{ d: Date; tithi: number }> = [];
   for (let t = start.getTime(); t <= end.getTime() + dayMs; t += dayMs) {
     const d = new Date(t);
@@ -82,7 +80,6 @@ export function computeEkadashiDatesForYear(
       : undefined;
     const isEkadashi = tithi === 10 || tithi === 25;
     if (isEkadashi && next !== tithi) {
-      // Kshaya Dwadashi (Trisprisha): no parana morning, so the fast moves back a day.
       if ((next === 12 || next === 27) && i > 0) {
         const prevEntry = days[i - 1]!;
         if (d.getTime() - prevEntry.d.getTime() === dayMs) {
@@ -93,7 +90,6 @@ export function computeEkadashiDatesForYear(
       out.push(d);
       continue;
     }
-    // Kshaya Ekadashi: the tithi touches no sunrise; fast on its begin day.
     if ((tithi === 9 && next === 11) || (tithi === 24 && next === 26)) out.push(d);
   }
   return out;
@@ -131,7 +127,6 @@ export function computeSankrantisForYear(
     }
     const transitUtc = new Date(hi);
 
-    // Per the almanac, a transit after sunset belongs to the next sunrise's civil day.
     let anchor: Date;
     try {
       let dayStart = computeSunrise(new Date(hi - 30 * 3600_000), location);
@@ -178,7 +173,6 @@ export function computeFestivalsInRange(
   const dayMs = 24 * 3600_000;
   for (let t = start.getTime(); t <= end.getTime(); t += dayMs) {
     const d = new Date(t);
-    // Eclipses surface as festival entries, so that section has to stay on.
     const p = getDailyPanchang(d, location, {
       ...options,
       sections: ['festivals', 'eclipse'],
@@ -203,7 +197,6 @@ export function getUpcomingEclipses(
   if (!Number.isInteger(count) || count < 1) {
     throw new RangeError(`count must be a positive integer, got ${count}`);
   }
-  // Eclipses recur every ~6 months, so 3 years covers a small `count`.
   const yearsAhead = Math.max(3, Math.ceil(count));
   const withinDays = yearsAhead * 366;
 
@@ -243,7 +236,6 @@ export function computeEclipsesInRange(
 
   const spanDays = Math.ceil((end.getTime() - start.getTime()) / (24 * 3600_000)) + 1;
   const endMs = end.getTime();
-  // Runaway-loop backstop, never the exit: the checks below end the walk first.
   const maxSteps = Math.ceil(spanDays / 20) + 50;
 
   const walk = (next: (from: Date) => EclipseInfo | null): EclipseInfo[] => {
@@ -258,7 +250,6 @@ export function computeEclipsesInRange(
     return acc;
   };
 
-  // `spanDays` as the window keeps `from + spanDays ≥ end` for every cursor.
   const solar = walk(from => getUpcomingSolarEclipse(from, location, spanDays));
   const lunar = walk(from => getUpcomingLunarEclipse(from, location, spanDays));
 

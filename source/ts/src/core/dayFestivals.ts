@@ -1,7 +1,7 @@
 import { computeSunrise, computeSunset } from '../astronomy/sunrise';
 import { getMoonrise } from '../astronomy/moonrise';
 import { PanchangError } from '../types/errors';
-import { nakshatraOf } from '../utils/constants';
+import { nakshatraOf, TOTAL_TITHIS } from '../utils/constants';
 import { utcToLocalDisplay } from '../utils/timezone';
 import { getTithiIndexFromLons } from './tithi';
 import { computeFestivals, type FestivalDateRule } from './festivals';
@@ -23,6 +23,8 @@ export interface DayFestivalInputs {
   siderealSunAtSunrise: number;
   varaIndex: number;
   chandramasa: ChandraMasaInfo;
+  /** Lazy: costs a bounding-new-moon search, and only a kshaya Shukla Pratipada reads it. */
+  nextDayMasa?: () => { index: number; isAdhika: boolean };
   lang: Language;
   t: PanchangTranslations;
   region?: FestivalRegion | LegacyFestivalRegion;
@@ -38,7 +40,7 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
   const {
     sunriseUtc, sunsetUtc, nextSunriseUtc, location, offsetMinutes,
     tithiIndexAtSunrise, siderealMoonAtSunrise, siderealSunAtSunrise,
-    varaIndex, chandramasa, lang, t, region,
+    varaIndex, chandramasa, nextDayMasa, lang, t, region,
     moonriseUtc, bhadraUtc, getMoon, getSun,
   } = input;
 
@@ -81,7 +83,6 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
     tithiByRuleStart.chandrodaya = tithiByRule.chandrodaya;
   }
 
-  // A nakshatra spell runs ≥ ~22 h, so four samples catch every transition.
   const nakshatraAt = (d: Date) => nakshatraOf(getMoon(d));
   const nakshatraIndicesInDay = new Set<number>([
     nakshatraAt(sunriseUtc),
@@ -89,11 +90,84 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
     nakshatraAt(sunsetUtc),
     nakshatraAt(nishitaUtc),
   ]);
+  const nakshatraByRule: Partial<Record<FestivalDateRule, number>> = {
+    madhyahna: nakshatraAt(madhyahnaUtc),
+    aparahna: nakshatraAt(aparahnaUtc),
+  };
+  const nakshatraByRuleStart: Partial<Record<FestivalDateRule, number>> = {
+    madhyahna: nakshatraAt(madhyahnaStartUtc),
+    aparahna: nakshatraAt(aparahnaStartUtc),
+  };
 
   const yesterdaySunriseUtc = computeSunrise(
     new Date(sunriseUtc.getTime() - 24 * 3600_000 - 2 * 3600_000),
     location,
   );
+  const priorDayNakshatraIndex = nakshatraAt(yesterdaySunriseUtc);
+
+  let nextDayTithiMemo: {
+    start: Partial<Record<FestivalDateRule, number>>;
+    end: Partial<Record<FestivalDateRule, number>>;
+  } | undefined;
+  const nextDayTithiByRule = () => {
+    if (nextDayTithiMemo !== undefined) return nextDayTithiMemo;
+    const start: TithiByRule = {};
+    const end: TithiByRule = {};
+    try {
+      const nextSunsetUtc = computeSunset(nextSunriseUtc, location);
+      const base = nextSunriseUtc.getTime();
+      const span = nextSunsetUtc.getTime() - base;
+      start.madhyahna = tithiAt(new Date(base + span / 4));
+      start.aparahna = tithiAt(new Date(base + (span * 3) / 5));
+      end.madhyahna = tithiAt(new Date(base + span / 2));
+      end.aparahna = tithiAt(new Date(base + (span * 8) / 10));
+    } catch { /* no sunset: leave empty */ }
+    nextDayTithiMemo = { start, end };
+    return nextDayTithiMemo;
+  };
+
+  let nextDayNakshatraMemo: {
+    start: Partial<Record<FestivalDateRule, number>>;
+    end: Partial<Record<FestivalDateRule, number>>;
+  } | undefined;
+  const nextDayNakshatraByRule = () => {
+    if (nextDayNakshatraMemo !== undefined) return nextDayNakshatraMemo;
+    const start: Partial<Record<FestivalDateRule, number>> = {};
+    const end: Partial<Record<FestivalDateRule, number>> = {};
+    try {
+      const nextSunsetUtc = computeSunset(nextSunriseUtc, location);
+      const base = nextSunriseUtc.getTime();
+      const span = nextSunsetUtc.getTime() - base;
+      start.madhyahna = nakshatraAt(new Date(base + span / 4));
+      start.aparahna = nakshatraAt(new Date(base + (span * 3) / 5));
+      end.madhyahna = nakshatraAt(new Date(base + span / 2));
+      end.aparahna = nakshatraAt(new Date(base + (span * 8) / 10));
+    } catch { /* no sunset: leave empty */ }
+    nextDayNakshatraMemo = { start, end };
+    return nextDayNakshatraMemo;
+  };
+
+  let remainingPakshaMemo: ReadonlySet<number> | undefined;
+  const remainingPakshaSunriseNakshatras = (): ReadonlySet<number> => {
+    if (remainingPakshaMemo !== undefined) return remainingPakshaMemo;
+    const startedShukla = tithiIndexAtSunrise < TOTAL_TITHIS / 2;
+    const found = new Set<number>([nakshatraOf(siderealMoonAtSunrise)]);
+    let cursor = sunriseUtc;
+    for (let i = 0; i < 16; i++) {   // 16 is a backstop; the paksha test is the exit
+      let next: Date;
+      try {
+        next = computeSunrise(new Date(cursor.getTime() + 22 * 3600_000), location);
+      } catch {
+        break;
+      }
+      if (getTithiIndexFromLons(getMoon(next), getSun(next)) < TOTAL_TITHIS / 2 !== startedShukla) break;
+      found.add(nakshatraAt(next));
+      cursor = next;
+    }
+    remainingPakshaMemo = found;
+    return found;
+  };
+
   const yesterdaySunsetUtc = computeSunset(yesterdaySunriseUtc, location);
   const yesterdayDayLengthMs = yesterdaySunsetUtc.getTime() - yesterdaySunriseUtc.getTime();
   const yesterdayMadhyahnaUtc = new Date(yesterdaySunriseUtc.getTime() + yesterdayDayLengthMs / 2);
@@ -112,7 +186,6 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
   const priorDayTithiByRuleStart: TithiByRule = {
     aparahna: tithiAt(new Date(yesterdaySunriseUtc.getTime() + (yesterdayDayLengthMs * 3) / 5)),
   };
-  // 18 = Krishna Chaturthi; dedupes a vriddha spell spanning two moonrises.
   if (tithiByRule.chandrodaya === 18 || tithiIndexAtSunrise === 18) {
     const yesterdayMoonriseUtc = getMoonrise(yesterdaySunriseUtc, location);
     if (yesterdayMoonriseUtc && yesterdayMoonriseUtc.getTime() < sunriseUtc.getTime()) {
@@ -120,7 +193,6 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
     }
   }
 
-  // The almanac's rule: day D observes iff the transit falls in (sunset D−1, sunset D].
   const rashiAtSunset = Math.floor(getSun(sunsetUtc) / 30) % 12;
   const rashiAtYesterdaySunset = Math.floor(getSun(yesterdaySunsetUtc) / 30) % 12;
   const sankrantiRashi: number | null =
@@ -162,13 +234,9 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
       if (!(e instanceof PanchangError && (e.code === 'NO_SUNRISE' || e.code === 'NO_SUNSET'))) {
         throw e;
       }
-      // Unreachable while the −26 h / −30 h offsets stand; kept because changing one revives it.
     }
   }
 
-  // Four new-year traditions key the Mesha transit MOMENT differently: Puthandu
-  // = the generic Sankranti day, Vaisakhi = the CIVIL day holding it, Vishu =
-  // the first sunrise at/after it, Pohela Boishakh = the day AFTER its civil day.
   let vaisakhiToday = false;
   let vishuToday = false;
   let pohelaBoishakhToday = false;
@@ -187,7 +255,6 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
     vishuToday = rashiAtSunrise === 0 && rashiAtYesterdaySunrise !== 0;
   }
 
-  // Only the VAISHNAVA fast rejects Dashami-viddha, deferring to tomorrow's Dwadashi.
   let ekadashiDashamiViddha = false;
   if (tithiIndexAtSunrise === 10 || tithiIndexAtSunrise === 25) {
     const tithiAtArunodaya = tithiAt(arunodayaUtc);
@@ -207,9 +274,20 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
     }
   }
 
-  // KSHAYA: the Ekadashi falls wholly between two sunrises. Smarta fasts on its
-  // begin day, Vaishnava (Gauna) tomorrow.
   const tithiAtNextSunrise = tithiAt(nextSunriseUtc);
+
+  const kshayaTithiIndices = new Set<number>();
+  if (tithiIndexAtSunrise !== tithiAtNextSunrise) {
+    for (
+      let i = (tithiIndexAtSunrise + 1) % TOTAL_TITHIS;
+      i !== tithiAtNextSunrise && kshayaTithiIndices.size < TOTAL_TITHIS;
+      i = (i + 1) % TOTAL_TITHIS
+    ) {
+      kshayaTithiIndices.add(i);
+    }
+  }
+  const nextDayMasaForKshaya =
+    kshayaTithiIndices.has(0) && nextDayMasa !== undefined ? nextDayMasa() : undefined;
   let ekadashiKshayaToday = false;
   if (tithiIndexAtSunrise === 9 || tithiIndexAtSunrise === 24) {
     const dwadashiIndex = tithiIndexAtSunrise === 9 ? 11 : 26;
@@ -220,8 +298,6 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
     const dashamiIndex = tithiIndexAtSunrise === 11 ? 9 : 24;
     ekadashiGaunaToday = tithiAt(yesterdaySunriseUtc) === dashamiIndex;
   }
-  // VRIDDHA DWADASHI (Pakshavardhini): the Dwadashi prevails at TWO sunrises.
-  // Smarta stays on the Ekadashi day, Vaishnava moves to the first Dwadashi day.
   let ekadashiVriddhaDwadashiToday = false;
   if (tithiIndexAtSunrise === 11 || tithiIndexAtSunrise === 26) {
     const ekadashiIndex = tithiIndexAtSunrise === 11 ? 10 : 25;
@@ -229,14 +305,10 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
       tithiAtNextSunrise === tithiIndexAtSunrise
       && tithiAt(yesterdaySunriseUtc) === ekadashiIndex;
   }
-  // VRIDDHA: Ekadashi prevails at TWO sunrises. The fast is a Mahadwadashi on
-  // the SECOND day only; the almanac lists no fast at all on the first.
   let ekadashiVriddhaFirstDay = false;
   if (tithiIndexAtSunrise === 10 || tithiIndexAtSunrise === 25) {
     ekadashiVriddhaFirstDay = tithiAtNextSunrise === tithiIndexAtSunrise;
   }
-  // TRISPRISHA (kshaya DWADASHI): the Dwadashi after tomorrow's Ekadashi has no
-  // sunrise, so every tradition's fast moves to TODAY.
   const tithiAtDayAfterSunrise = (): number | null => {
     try {
       const tomorrowSunsetUtc = computeSunset(nextSunriseUtc, location);
@@ -269,9 +341,6 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
     ekadashiTrisprishaYesterday = tithiAtNextSunrise === trayodashiIndex;
   }
 
-  // Janmashtami, the almanac's Smarta ladder: the UDAYA-Ashtami day wins whenever
-  // Ashtami or Rohini touches ITS nishita, else the day Ashtami covers nishita
-  // wins even when Saptami-viddha. Nishita = the midnight-centred 1/15th night.
   const KRISHNA_ASHTAMI = 22;
   const KRISHNA_SAPTAMI = 21;
   const ROHINI = 3;
@@ -280,8 +349,6 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
     const halfMs = (sunriseAfter.getTime() - sunset.getTime()) / 30;
     return [new Date(centerMs - halfMs), new Date(centerMs + halfMs)];
   };
-  // No tithi or nakshatra spell fits inside a ~48-min muhurta, so "touches the
-  // window" ⟺ present at either edge.
   const windowHas = (w: [Date, Date], pred: (d: Date) => boolean): boolean =>
     pred(w[0]) || pred(w[1]);
   let janmashtamiNishita:
@@ -339,6 +406,16 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
       priorDayTithiByRuleStart,
       janmashtamiNishita,
       nakshatraIndicesInDay,
+      nakshatraByRule,
+      nakshatraByRuleStart,
+      priorDayNakshatraIndex,
+      remainingPakshaSunriseNakshatras,
+      nextDayTithiByRule,
+      nextDayNakshatraByRule,
+      kshayaTithiIndices,
+      ...(nextDayMasaForKshaya === undefined
+        ? {}
+        : { nextDayMasaIndex: nextDayMasaForKshaya.index, nextDayIsAdhika: nextDayMasaForKshaya.isAdhika }),
       sankrantiRashi,
       nextDaySankrantiRashi,
       prevDaySankrantiRashi,

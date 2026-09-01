@@ -9,7 +9,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// Typed: untyped operands would fold at infinite precision.
 const moonRadiusAU = MoonRadiusKm / AuKm
 
 type RiseSetBody string
@@ -19,16 +18,13 @@ const (
 	RiseSetMoon RiseSetBody = "moon"
 )
 
-// ELP has argument families near a 5-day period.
 const (
 	trackBlockDays = 4
 	trackNodes     = 11
 )
 
-// Typed so the * dayMS product rounds as in JS.
 const scanStepDays float64 = 12.0 / (60 * 24)
 
-// 360 from the Earth's turn plus ~13 for the fastest body.
 const maxAltitudeSlopeDegPerDay = 380
 
 const rootToleranceDays float64 = 1e-8
@@ -58,7 +54,6 @@ func newPositionTrack(ctx *EphemerisCtx, body RiseSetBody, blockIndex int64) *po
 	}
 
 	for k := 0; k < trackNodes; k++ {
-		// math.Cos, not the package kernel.
 		x := math.Cos((jsnum.PI * float64(k)) / float64(trackNodes-1))
 		tr.nodeX[k] = x
 		end := 1.0
@@ -71,7 +66,6 @@ func newPositionTrack(ctx *EphemerisCtx, body RiseSetBody, blockIndex int64) *po
 		}
 		tr.weight[k] = end * sign
 
-		// FMA barrier; the truncation is new Date(ms)'s.
 		msf := tr.midMs + float64(tr.halfMs*x)
 		ms := int64(msf)
 		t := TTDaysSinceJ2000(ms) / 36525
@@ -140,7 +134,6 @@ func (f *dayFrame) gast(ms float64) float64 {
 	theta := float64(360 * jsnum.Mod(jsnum.Mod(0.7790572732640+float64(0.00273781191135448*utDays), 1)+jsnum.Mod(utDays, 1), 1))
 	frac := (ms - f.dayStartMs) / dayMS
 	eqeq := f.eqeq0 + float64((f.eqeq1-f.eqeq0)*frac)
-	// The precession polynomial takes TT, never UT.
 	t := (utDays + f.deltaTDays) / 36525
 	precession := 0.014506 + float64((4612.156534+float64((1.3915817+float64((-0.00000044+float64((-0.000029956+float64(-0.0000000368*t))*t))*t))*t))*t)
 	gast := jsnum.Mod(theta+(eqeq+precession)/3600, 360)
@@ -167,7 +160,6 @@ var (
 )
 
 func trackFor(ctx *EphemerisCtx, body RiseSetBody, dayIndex int64) *positionTrack {
-	// dayIndex is negative before 1970.
 	blockIndex := floorDivInt(dayIndex, trackBlockDays)
 	key := string(body) + "|" + jsnum.FormatInt(blockIndex)
 	track, _ := trackStore.GetOrBuild(key, func() *positionTrack {
@@ -214,18 +206,15 @@ func newObserverGeometry(location types.GeoLocation) observerGeometry {
 	return g
 }
 
-// Upper limb; semidiameter is r/d, not asin(r/d).
 func altitudeExcess(track *positionTrack, frame *dayFrame, geometry observerGeometry, ms float64) float64 {
 	bodyVec := track.position(ms)
 	local := (frame.gast(ms) + geometry.longitude) * degToRad
-	// Package kernel, not math.Cos.
 	cosLocal := Cos(local)
 	sinLocal := Sin(local)
 
 	x := bodyVec[0] - float64(geometry.equatorialAu*cosLocal)
 	y := bodyVec[1] - float64(geometry.equatorialAu*sinLocal)
 	z := bodyVec[2] - geometry.polarAu
-	// Plain sqrt, not jsnum.Hypot3; nothing here overflows.
 	distance := math.Sqrt(float64(x*x) + float64(y*y) + float64(z*z))
 
 	dot := (float64(float64(x*geometry.cosPhi)*cosLocal) +
@@ -354,7 +343,6 @@ func dayEventsShared(ctx *EphemerisCtx, body RiseSetBody, direction int, locatio
 	return pair.set
 }
 
-// == on a NaN latitude would lose the entry; FormatFloat prints -0 as "0".
 func riseSetScanKey(body RiseSetBody, location types.GeoLocation, dayIndex int64) string {
 	return string(body) + "|" +
 		jsnum.FormatFloat(location.Latitude) + "|" +

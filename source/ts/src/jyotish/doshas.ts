@@ -63,7 +63,6 @@ export function computeMangalDosha(chart: BirthChart): MangalDoshaInfo {
       afflicted = false;
     }
 
-    // Jupiter's whole-sign aspects land on the 5th, 7th and 9th from itself.
     const marsFromJupiter = ((marsRashi - jupiter.rashi.index + 12) % 12) + 1;
     if (marsFromJupiter === 5 || marsFromJupiter === 7 || marsFromJupiter === 9) {
       cancellations.push(`Mars aspected by Jupiter (${marsFromJupiter}th aspect)`);
@@ -145,7 +144,6 @@ export function computeKaalSarp(chart: BirthChart): KaalSarpDoshaInfo {
   let inForward = 0;
   let inBackward = 0;
   for (const d of distancesFromRahu) {
-    // Exactly on the axis (0 or 180) counts as outside both arcs.
     if (d > 0 && d < 180) inForward++;
     else if (d > 180 && d < 360) inBackward++;
   }
@@ -189,7 +187,6 @@ export function computePitruDosha(chart: BirthChart): PitruDoshaInfo {
   if (rahu.house === 9) {
     reasons.push('Rahu in the 9th house');
   }
-  // Skip when the 9th lord is Sun: already covered by the Sun + Rahu trigger.
   if (ninthLordName !== 'Sun' && ninthLord.house === rahu.house) {
     reasons.push(`9th-lord ${ninthLordName} conjunct Rahu in house ${ninthLord.house}`);
   }

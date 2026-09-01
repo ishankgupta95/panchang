@@ -32,7 +32,6 @@ export function searchMoonPhase(
   const startMs = startUtc.getTime();
   const limitMs = startMs + limitDays * DAY_MS;
 
-  // `signedDelta` lands in (−180, 180]; a target just behind must resolve nearly a full cycle ahead, not backwards.
   let deficit = signedDelta(targetDegrees, moonSunElongation(startUtc));
   if (deficit < 0) deficit += 360;
   let t = startMs + (deficit / ELONGATION_RATE_DEG_PER_DAY) * DAY_MS;

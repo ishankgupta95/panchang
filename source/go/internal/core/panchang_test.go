@@ -150,7 +150,6 @@ func checkTiling(t *testing.T, day, name string, sunrise, nextSunrise int64, bs 
 		if bs[i-1].end == nil || bs[i].start == nil {
 			t.Fatalf("%s: %s[%d] has a nil bound with end-times on", day, name, i)
 		}
-		// findDailyElements advances the cursor by rawEnd + 1.
 		if *bs[i].start != *bs[i-1].end+1 {
 			t.Errorf("%s: %s[%d] starts at %d, previous ended at %d",
 				day, name, i, *bs[i].start, *bs[i-1].end)
@@ -551,7 +550,6 @@ type endTimeFixture struct {
 	} `json:"expected"`
 }
 
-// The ayanamsa cancels in Moon − Sun (tithi, karana), applies once for nakshatra, twice for yoga.
 func TestDriftDoesNotGrowWithAyanamsaExposure(t *testing.T) {
 	b, err := repopath.ReadTestData("almanac", "almanac-verified.json")
 	if err != nil {
@@ -648,7 +646,6 @@ func splitISODate(t *testing.T, s string) (y, m, d int) {
 	return y, m, d
 }
 
-// The almanac prints HH:MM (`+1` = next day); the +30 compares against the printed minute's midpoint.
 func almanacSeconds(t *testing.T, hhmm string) float64 {
 	t.Helper()
 	nextDay := strings.HasSuffix(hhmm, "+1")

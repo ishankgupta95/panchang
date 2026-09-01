@@ -1,4 +1,3 @@
-// Tables are per-location: festival dates shift by ±1 day with the observer.
 
 import { computeFestivalsInRange } from './yearly';
 import type { GeoLocation } from '../types/location';
@@ -126,7 +125,6 @@ function buildYear(
   const start = new Date(Date.UTC(year, 0, 1));
   const end = new Date(Date.UTC(year, 11, 31));
 
-  // Selection is locale-independent, so the per-locale runs align and zip by index.
   const runs = languages.map(language =>
     computeFestivalsInRange(start, end, location, {
       timezone: offsetMinutes,

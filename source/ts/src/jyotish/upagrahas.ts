@@ -81,11 +81,7 @@ function locateGulikaSegment(
   location: GeoLocation,
 ): { start: Date; midpoint: Date } {
   const baseSunrise = findSunriseBeforeBirth(birthDate, location);
-  // Day/night must use the same refracted sunset that divides the segments; an
-  // apparent-centre horizon test disagrees, and a birth in that gap lands hours away.
   const day = birthDate.getTime() < computeSunset(baseSunrise, location).getTime();
-  // The weekday must come from the LOCAL date of that sunrise: east of ~82°E it can
-  // precede 00:00 UTC, where a bare `getUTCDay()` names yesterday and picks the wrong slot.
   const varaIndex = new Date(
     baseSunrise.getTime() + (location.longitude / 15) * 3600_000,
   ).getUTCDay();

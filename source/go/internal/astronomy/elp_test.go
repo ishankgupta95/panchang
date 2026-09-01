@@ -18,7 +18,6 @@ func TestSumQuarticMatchesDefinition(t *testing.T) {
 		phase := s[i+1] + tt*(s[i+2]+tt*(s[i+3]+tt*(s[i+4]+tt*s[i+5])))
 		want += s[i] * Sin(phase)
 	}
-	// Relative, not bit: the recomputation above is unbarriered.
 	if got := sumQuartic(s, tt); math.Abs(got-want) > 1e-14*math.Abs(want) {
 		t.Errorf("sumQuartic = %v, want %v", got, want)
 	}
@@ -64,7 +63,6 @@ func TestElpAccessorsAreTiered(t *testing.T) {
 		if d := math.Abs(dist - MoonElpDistanceCoarse(tt)); d > 100 {
 			t.Errorf("t=%v: coarse distance is %v km from the full series, budget 100 km", tt, d)
 		}
-		// Moon range is 356,500-406,700 km.
 		for name, v := range map[string]float64{
 			"full": dist, "track": MoonElpDistanceTrack(tt), "coarse": MoonElpDistanceCoarse(tt),
 		} {
@@ -80,7 +78,6 @@ func TestMoonElpLongitudeIncludesW1(t *testing.T) {
 		w := series.MOON_MEAN_LONGITUDE
 		periodic := float64((sumQuartic(series.MOON_LONGITUDE_QUARTIC, tt) +
 			sumLinear(series.MOON_LONGITUDE_LINEAR, tt)) * ArcsecToRad)
-		// Same association and barriers as MoonElpLongitude, or the equality fails.
 		want := periodic + w[0] +
 			float64(tt*(w[1]+float64(tt*(w[2]+float64(tt*(w[3]+float64(tt*w[4])))))))
 		if got := MoonElpLongitude(tt); got != want {

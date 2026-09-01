@@ -1,5 +1,3 @@
-// The `recommended` flag is checked against ProKerala by hand; this suite pins
-// the rule mechanics only.
 
 import { describe, it, expect } from 'vitest';
 import { computePathuPorutham } from '../../src/jyotish/pathuPorutham';
@@ -182,7 +180,6 @@ describe('Mahendra Porutham', () => {
 });
 
 describe('Sthree Deergha', () => {
-  // Counted girl→boy; the > 13 threshold is the FindYourFate / AstroVed rule.
   it('passes when girl→boy distance > 13', () => {
     const r = computePathuPorutham(
       { rashi: 7, nakshatra: 16 },
@@ -323,8 +320,6 @@ describe('Vasya Porutham', () => {
 });
 
 describe('Rajju Porutham (veto on same group)', () => {
-  // Groups per AstroVed / ProKerala; the ladder runs feet-upward (Pada), which
-  // is easy to invert.
   it('canonical group spot-checks', () => {
     expect(NAKSHATRA_RAJJU[0]).toBe('Pada');
     expect(NAKSHATRA_RAJJU[8]).toBe('Pada');
@@ -404,7 +399,6 @@ describe('Aggregate recommendation flag', () => {
   });
 
   it('low passing count (<5) fails recommendation even without veto', () => {
-    // Conditional: a veto would decide `recommended` on its own.
     const r = computePathuPorutham(
       { rashi: 0, nakshatra: 0 },
       { rashi: 0, nakshatra: 4 },
@@ -416,7 +410,6 @@ describe('Aggregate recommendation flag', () => {
   });
 
   it('high passing count + no veto → recommended', () => {
-    // Conditional: the assertion applies only if the pair clears the bar.
     const r = computePathuPorutham(
       { rashi: 0, nakshatra: 0 },
       { rashi: 8, nakshatra: 20 },

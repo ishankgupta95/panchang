@@ -49,7 +49,6 @@ const localCanon = JSON.parse(
 const DAY_MS = 86_400_000;
 const JD_J2000 = 2451545.0;
 
-// dΔT/dt is under 10⁻⁷, so three passes are exact to the millisecond.
 function ttJulianDateToUtc(jdTt: number): Date {
   const ttDays = jdTt - JD_J2000;
   let ms = Date.UTC(2000, 0, 1, 12) + ttDays * DAY_MS;
@@ -124,12 +123,10 @@ describe('Tier 0: lunar eclipses vs the NASA/Espenak canon', () => {
     expect(notFound, 'every canon eclipse must be found').toEqual([]);
     expect(typeMismatches, 'eclipse type is an invariant, not a tolerance').toEqual([]);
 
-    // Bounds below are measured maxima plus ~15% headroom, not round numbers.
     expect(Math.abs(peak.value), `greatest eclipse (s TT): ${peak.label}`).toBeLessThan(4.5);
     expect(
       Math.abs(penumbralMagnitude.value), `penumbral magnitude: ${penumbralMagnitude.label}`,
     ).toBeLessThan(0.0004);
-    // Measured 0.000615; 1″ of lunar position is worth 0.00054 here.
     expect(
       Math.abs(umbralMagnitude.value), `umbral magnitude: ${umbralMagnitude.label}`,
     ).toBeLessThan(0.0007);
@@ -148,7 +145,6 @@ describe('Tier 0: lunar eclipses vs the NASA/Espenak canon', () => {
 describe('Tier 0: the published fields, not the geometry', () => {
   const OBSERVER = { latitude: 28.6139, longitude: 77.2090 };
 
-  // Four-decimal printing can put the canon's class and ours either side.
   const BOUNDARY_BAND = 0.002;
 
   it('EclipseInfo.magnitude is the canon’s umbral magnitude, over all 457 lunar eclipses', () => {
@@ -182,8 +178,6 @@ describe('Tier 0: the published fields, not the geometry', () => {
         outOfRange.push(`${row.date} obscuration ${info.obscuration}`);
       }
 
-      // Clamping the published magnitude into [0, 1], the obvious "fix" for a
-      // negative-looking value, breaks every penumbral row here and nothing else.
       const canonKind = row.kind === 'T' ? 'total' : row.kind === 'P' ? 'partial' : 'penumbral';
       const nearBoundary =
         Math.abs(row.umbralMagnitude) < BOUNDARY_BAND
@@ -220,7 +214,6 @@ describe('Tier 0: the published fields, not the geometry', () => {
       Math.abs(magnitude.value), `published magnitude vs canon umbral: ${magnitude.label}`,
     ).toBeLessThan(0.0007);
 
-    // The canon's 457 rows are 166 total / 122 partial / 169 penumbral.
     expect(negatives, 'penumbral eclipses publish a negative magnitude').toBe(169);
     expect(aboveOne, 'total eclipses publish a magnitude above 1').toBe(166);
     expect(obscurationLower, 'shallow partials cover less area than diameter').toBeGreaterThan(0);
@@ -228,7 +221,6 @@ describe('Tier 0: the published fields, not the geometry', () => {
   }, 600_000);
 
   it('the published solar fields carry magnitude and obscuration the right way round', () => {
-    // Only these catalogs print both columns for the same instant.
     const site = localCanon.sites[0]!;
     const magnitude = new Worst();
     const obscuration = new Worst();
@@ -277,15 +269,11 @@ describe('Tier 0: solar eclipses, geocentric', () => {
     }
 
     expect(canon.solar.length).toBe(452);
-    // Measured 0.00012, 1.2 units in the last digit NASA prints.
     expect(Math.abs(gamma.value), `gamma (Earth radii): ${gamma.label}`).toBeLessThan(0.0002);
     expect(Math.abs(peak.value), `greatest eclipse (s TT): ${peak.label}`).toBeLessThan(3.0);
   }, 300_000);
 
   it('type and magnitude at the canon’s own greatest-eclipse point', () => {
-    // The canon prints the greatest-eclipse point to the whole degree, up to
-    // 55 km: at |magnitude − 1| ≥ 0.025 zero type mismatches, at ≥ 0.02 four.
-    // Grazing incidence makes that 55 km worth 0.032, so four rows also drop out.
     const NEAR_CENTRAL_BAND = 0.025;
     const GRAZING_ALTITUDE_DEG = 5;
     const magnitude = new Worst();
@@ -307,8 +295,6 @@ describe('Tier 0: solar eclipses, geocentric', () => {
       const view = solarViewAt(eclipse.peak, location);
       altitude.add(eclipse.peakAltitude - row.greatestSunAltitude, row.date);
 
-      // The canon's magnitude column is an apparent-diameter ratio for a central
-      // eclipse, a covered fraction of the Sun's diameter for a partial one.
       const ours = row.kind === 'P'
         ? eclipse.magnitude
         : view.moonSemidiameter / view.sunSemidiameter;
@@ -334,9 +320,7 @@ describe('Tier 0: solar eclipses, geocentric', () => {
     expect(excludedNearCentral).toBe(72);
     expect(excludedGrazing).toBe(4);
     expect(typeMismatches, 'solar eclipse type is an invariant').toEqual([]);
-    // Measured 0.00145, which is the whole-degree coordinate rounding.
     expect(Math.abs(magnitude.value), `magnitude: ${magnitude.label}`).toBeLessThan(0.002);
-    // Altitude and site are printed to the whole degree, so ~1° is the fixture's.
     expect(Math.abs(altitude.value), `sun altitude (deg): ${altitude.label}`).toBeLessThan(1.2);
   }, 300_000);
 });
@@ -405,14 +389,10 @@ describe('Tier 0: solar LOCAL circumstances vs NASA’s city catalogs', () => {
 
     expect(clipped).toBeGreaterThan(300);
 
-    // Printed to the minute, so ±30 s is baked in; measured 73.7 / 71.4 / 69.3 s.
-    // 80 not 70 because these catalogs use Espenak-Meeus ΔT, ~6.5 s from ours.
     expect(Math.abs(begin.value), `first contact (s): ${begin.label}`).toBeLessThan(80);
     expect(Math.abs(maximum.value), `maximum (s): ${maximum.label}`).toBeLessThan(80);
     expect(Math.abs(end.value), `last contact (s): ${end.label}`).toBeLessThan(80);
 
-    // The residual is near zero through 1900-1999 and climbs to +33.9 s in the
-    // 2040s: zero where ΔT is observed, so a ΔT model difference, not geometry.
     expect(
       Math.abs(historical.bias), `1901-2002 bias (s): ${historical.label}`,
     ).toBeLessThan(2);
@@ -420,23 +400,19 @@ describe('Tier 0: solar LOCAL circumstances vs NASA’s city catalogs', () => {
     expect(future.bias, `2003-2100 bias (s): ${future.label}`).toBeGreaterThan(5);
     expect(future.bias, `2003-2100 bias (s): ${future.label}`).toBeLessThan(30);
 
-    // Whole degrees, and the Sun moves 0.25° in the quantised minute. 0.617 / 0.714.
     expect(Math.abs(altitude.value), `sun altitude (deg): ${altitude.label}`).toBeLessThan(0.8);
     expect(Math.abs(azimuth.value), `sun azimuth (deg): ${azimuth.label}`).toBeLessThan(0.8);
-    // Printed to three decimals. Measured 0.0026 / 0.0030.
     expect(Math.abs(magnitude.value), `magnitude: ${magnitude.label}`).toBeLessThan(0.004);
     expect(Math.abs(obscuration.value), `obscuration: ${obscuration.label}`).toBeLessThan(0.004);
   }, 600_000);
 
   it('a site where the eclipse is partial, and a site where it is not visible at all', () => {
-    // Sound only because these catalogs are complete over 0001-3000 CE.
     const byName = new Map(localCanon.sites.map((s) => [s.name, s]));
     const sydney = byName.get('Sydney, Australia');
     const london = byName.get('London, England');
     expect(sydney).toBeDefined();
     expect(london).toBeDefined();
 
-    // 2028 Jul 22 is total over Australia and Sydney is close to the path.
     const partialRow = (sydney as LocalSite).eclipses.find((r) => r.date === '2028-07-22');
     expect(partialRow, 'Sydney should be listed for the 2028 Jul 22 eclipse').toBeDefined();
     const partial = localEclipseFor(sydney as LocalSite, partialRow as LocalRow);

@@ -15,7 +15,6 @@ type jyotishKeyOrderGolden struct {
 	Published   map[string][]string `json:"published"`
 }
 
-// PoruthamScore twice: veto absent on a passing koot, present-and-true on a failing one.
 func jyotishKeyOrderRegistry() map[string]any {
 	vetoTrue := true
 	return map[string]any{
@@ -57,7 +56,6 @@ func jyotishKeyOrderRegistry() map[string]any {
 	}
 }
 
-// jyotishDeclaredShapes must equal `internal/core`'s `ownedByJyotish` key set.
 var jyotishDeclaredShapes = []string{
 	"AshtakootResult", "KootScore",
 	"PathuPoruthamResult", "PoruthamScore", "PoruthamScoreWithVeto",
@@ -85,7 +83,6 @@ func loadJyotishKeyOrderGolden(t *testing.T) jyotishKeyOrderGolden {
 	return g
 }
 
-// json.Decoder, never Unmarshal: key order is the assertion.
 func jyotishMarshalledKeys(t *testing.T, v any) []string {
 	t.Helper()
 	b, err := json.Marshal(v)

@@ -1,4 +1,3 @@
-// Muhurta-chintamani Ch. 4 and BPHS Ch. 71: nine taras, thrice over the 27.
 
 import { describe, it, expect } from 'vitest';
 import { computeTarabala } from '../../src/jyotish/tarabala';

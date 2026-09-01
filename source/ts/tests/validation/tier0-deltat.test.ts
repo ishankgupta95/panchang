@@ -25,8 +25,6 @@ describe('Tier 0: ΔT (TT − UT), isolated', () => {
     expect(fixture.year[20]).toBe(2100);
   });
 
-  // The floor is the 0.9 s UT1/UTC band leap seconds maintain, not model
-  // accuracy; worst measured is 0.831 s at 1910. Not re-pinnable.
   it('agrees with Horizons to ≤1.0 s over 1900-2010', () => {
     let worst = 0, worstYear = 0;
     for (let i = 0; i < fixture.year.length; i++) {
@@ -46,8 +44,6 @@ describe('Tier 0: ΔT (TT − UT), isolated', () => {
     }
   });
 
-  // CGPM Resolution 4 (2022) resolved to stop inserting leap seconds by 2035,
-  // after which far-future tithi and nakshatra ends carry the full difference.
   it('pins the post-2035 UTC-vs-UT1 exposure', () => {
     const at = (year: number) =>
       libraryDeltaT(fixture.jd[fixture.year.indexOf(year)]!) - TT_MINUS_UTC_FROZEN;

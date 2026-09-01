@@ -11,7 +11,6 @@ const VARA_NAMES = [
   { name: 'Shaniwara', short: 'Shani' },  // 6 = Saturday
 ] as const;
 
-// Jan 8, 2024 is a Monday.
 const MONDAY_SUNRISE = new Date('2024-01-08T06:00:00Z');
 
 describe('computeVara: day boundary', () => {

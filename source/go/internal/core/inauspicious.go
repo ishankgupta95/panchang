@@ -5,7 +5,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
 )
 
-// FMA barrier; the end measures from the truncated start.
 func ComputeInauspiciousPeriod(
 	sunriseMs, sunsetMs int64,
 	varaIndex int,

@@ -9,7 +9,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// Widening this to a bare err != nil would turn a real failure into "no sun".
 func TestIsPolarRiseSetErrorClassifiesOnlyTheTwoSentinels(t *testing.T) {
 	for _, code := range types.AllErrorCodes {
 		want := code == types.ErrNoSunrise || code == types.ErrNoSunset

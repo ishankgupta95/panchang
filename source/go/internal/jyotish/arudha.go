@@ -5,7 +5,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
 )
 
-// Jaimini Upadesa Sutras 1.1.30-31: the pada may occupy neither the bhava nor the 7th.
 func ComputeArudhas(chart *types.BirthChart, lang types.Language) ([]types.Arudha, error) {
 	lang = resolveLang(lang)
 	lagnaRashi := chart.Lagna.Rashi.Index

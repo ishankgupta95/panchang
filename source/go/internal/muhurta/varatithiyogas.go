@@ -4,8 +4,6 @@ import (
 	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
 )
 
-// Tables from Ernst Wilhelm's *Muhurta Yogas*; they contradict in six cells, so every match is reported.
-
 type VaraTithiYogaType string
 
 const (
@@ -37,7 +35,6 @@ type VaraTithiYoga struct {
 
 type varaTable [7][]int
 
-// A slice, not a map: entry order is observable in the emitted factors.
 type varaTithiRow struct {
 	yoga  VaraTithiYogaType
 	table varaTable
@@ -49,7 +46,6 @@ var auspiciousTables = []varaTithiRow{
 }
 
 var inauspiciousTables = []varaTithiRow{
-	// Mercury's Dagdha cell is given as "the 2nd or 3rd"; both are carried.
 	{YogaDagdha, varaTable{{12}, {11}, {5}, {2, 3}, {6}, {8}, {9}}},
 	{YogaVisha, varaTable{{4}, {6}, {7}, {2}, {8}, {9}, {7}}},
 	{YogaHutasana, varaTable{{12}, {6}, {7}, {8}, {9}, {10}, {11}}},
@@ -66,7 +62,6 @@ func ComputeVaraTithiYogas(varaIndex, tithiIndex int) ([]VaraTithiYoga, error) {
 	}
 
 	tithiNumber := tithiIndex%15 + 1
-	// Non-nil: `[]` on the wire, never `null`.
 	out := []VaraTithiYoga{}
 
 	for _, row := range auspiciousTables {
