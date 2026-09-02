@@ -198,8 +198,8 @@ A tithi that begins and ends between two consecutive sunrises is current at no
 sunrise. A rule keyed on the sunrise tithi matched it on no day of the year, so the
 festival disappeared from that year entirely. Ugadi and Gudi Padwa were absent from
 2026 at every location; Navaratri 2027, Gangaur 2025, both Teejes, Govardhan Puja,
-Bhai Dooj, Anant Chaturdashi and Kartika Purnima were missing at some cities and
-present at others. The Hindu day that wholly contains the tithi now claims it, which
+Bhai Dooj, Anant Chaturdashi, Kartika Purnima and Chhath Kharna were missing at some
+cities and present at others. The Hindu day that wholly contains the tithi now claims it, which
 is what the reference almanac publishes.
 
 Measured over eight Indian cities across 2020 to 2030: **87 dates added, and no
@@ -230,8 +230,9 @@ unaffected and still correct, because a purnima sits inside the amanta month it 
 Both Upakarma rules matched on the nakshatra at sunrise and nothing else. Sama
 Upakarma fired a **second** time in six of thirteen years, on the Bhadrapada Krishna
 Amavasya that carries Hasta again, and was a day late in five more. Rig Upakarma
-emitted two dates when its nakshatra spanned two sunrises, and nothing at all in the
-years it fell outside Shukla paksha. Both now emit exactly one date in all 88
+emitted two dates when its nakshatra spanned two sunrises (2019, 2029), a date in the
+wrong paksha when the nakshatra slipped into Krishna (2020), and nothing at all in
+the one year it fell outside Shukla paksha entirely (2022). Both now emit exactly one date in all 88
 city-years of the eight-city sweep. Sama Upakarma is anchored to aparahna and is
 therefore longitude sensitive: in 2026 it is the 13th of September at Kolkata and the
 12th elsewhere, which is what the reference publishes.
