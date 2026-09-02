@@ -1,0 +1,181 @@
+{
+  "_readme": [
+    "The machine-readable form of the parity bands, plus the pins that",
+    "record where the port actually sits inside them. `gate.mjs` asserts this file",
+    "against a pair of dumps; nothing else in the tree may hold a second copy of",
+    "these numbers.",
+    "",
+    "Two severities, and the difference matters:",
+    "",
+    "  BAND: the band itself. Zero tolerance on invariants, 1 ms on published",
+    "         instants, 1e-9 on published degrees. A breach is a defect. A band",
+    "         moves only with a written prediction first and Ishank's approval;",
+    "         one has moved once, for the eclipse-table row.",
+    "",
+    "  PIN:  where the port measures *today*, far inside the band. A pin breach",
+    "         is a review event, not necessarily a defect: a Node or Go bump can",
+    "         move the last digits. Investigate, then re-pin deliberately and",
+    "         write the delta down. `gate.mjs --allow-pin-drift`",
+    "         downgrades pin breaches to notices while you are doing that; CI",
+    "         never passes it.",
+    "",
+    "`numericAbs` is applied to every numeric leaf, including the shadbala virupa",
+    "leaves (`*.total`, `*.sthana`, `*.dig`, `*.kala`) that have no row of their own.",
+    "That is the strictest existing band read onto leaves nothing else covers,",
+    "not a new one: those quantities run to O(500) virupas, so 1e-9",
+    "absolute is far tighter for them than for a degree."
+  ],
+  "provenance": {
+    "measured": "2026-08-24; darwin/arm64 pins re-measured 2026-08-25 after the audit's FMA-barrier and typed-constant fixes",
+    "baseline": "c38c606 plus the uncommitted src/ + tests/ working tree, with dasha.ts asOfDate applied",
+    "hosts": {
+      "darwin/arm64": "Apple M3 Max, node v24.4.1, go1.26.4, Ishank's machine, where every earlier recorded number was taken",
+      "linux/x64": "Docker node:24-bookworm / golang:1.26 (node v24.19.0, go1.26.7) under --platform linux/amd64 on the same Apple silicon host, i.e. Rosetta-translated x86-64. IEEE semantics are preserved by translation, so these should equal native amd64, but that is an argument, not a measurement, and no native amd64 run has been made. Confirm on the first real CI run before treating these pins as blocking. STALE as of 2026-08-25: these numbers were measured before the audit barriered five astronomy products and typed the two FK5 constants, which tightened darwin by 2 leaves and ~450 changed values per stage. Expect linux to tighten similarly; the first native run must re-pin from the block the gate prints (it will report TIGHTENED, never a band breach)."
+    },
+    "bytesPinNote": "The document-byte pins have moved twice on 2026-08-29, both times with the delta predicted before it was measured, and neither time to make a failing check pass.\n(1) -28 on every pin: the dump's `_meta` carried a key whose only content cited an internal planning document that does not ship. Removing it from both dumps removes a 28-byte JSON member.\n(2) -243 at g2, -930 at g3, -1557 at full, identically on the TypeScript and the Go side: every em dash was removed from the library's own output strings (festival names, table descriptions, matching and dosha descriptions) and from the harness metadata. Each ' - ' written with an em dash is 5 bytes and became a 2-byte ': ' or ', ', so every replacement saves exactly 3 bytes. All three deltas are exact multiples of 3 (81, 310 and 519 replacements) and the TypeScript and Go deltas are equal to the byte, which is what says the two languages changed in lockstep. Every band held at 0 invariants and 0 shifted instants, and every non-byte pin (leaf counts, changed values, worst |delta|, worst leaf and path) was unchanged through both moves."
+  },
+  "bands": {
+    "invariants": 0,
+    "instantMs": 1,
+    "numericAbs": 1e-9
+  },
+  "stages": {
+    "g2": {
+      "tsLabel": "ts-g2",
+      "goLabel": "go-g2",
+      "tsEnv": {
+        "PARITY_STAGE": "g2"
+      },
+      "goEnv": {
+        "PARITY_STAGE": "g2"
+      },
+      "pins": {
+        "darwin/arm64": {
+          "invariants": 0,
+          "timeLeaves": 0,
+          "numericLeaves": 3,
+          "changedNumericValues": 2264,
+          "worstNumericLeaf": "moon.siderealLongitude",
+          "worstNumericAbs": 1.1368683772161603e-13,
+          "worstNumericPath": "daily.Pune|2025|2025-03-20|s1-default.moon.siderealLongitude",
+          "bytes": {
+            "ts": 250723409,
+            "go": 250723499
+          }
+        }
+      }
+    },
+    "g3": {
+      "tsLabel": "ts-g3",
+      "goLabel": "go-g3",
+      "tsEnv": {
+        "PARITY_STAGE": "g3"
+      },
+      "goEnv": {
+        "PARITY_STAGE": "g3"
+      },
+      "pins": {
+        "darwin/arm64": {
+          "invariants": 0,
+          "timeLeaves": 0,
+          "numericLeaves": 97,
+          "changedNumericValues": 3046,
+          "worstNumericLeaf": "planets.longitude",
+          "worstNumericAbs": 3.410605131648481e-13,
+          "worstNumericPath": "charts.e1-1912-pune.divisionals.D12.planets.2.longitude",
+          "bytes": {
+            "ts": 251329961,
+            "go": 251330072
+          }
+        }
+      }
+    },
+    "full": {
+      "tsLabel": "ts-full",
+      "goLabel": "go-full",
+      "tsEnv": {
+        "PARITY_STAGE": "full"
+      },
+      "goEnv": {
+        "PARITY_STAGE": "full"
+      },
+      "pins": {
+        "darwin/arm64": {
+          "invariants": 0,
+          "timeLeaves": 0,
+          "numericLeaves": 99,
+          "changedNumericValues": 3141,
+          "worstNumericLeaf": "planets.longitude",
+          "worstNumericAbs": 3.410605131648481e-13,
+          "worstNumericPath": "charts.e1-1912-pune.divisionals.D12.planets.2.longitude",
+          "bytes": {
+            "ts": 255536691,
+            "go": 255536796
+          }
+        }
+      }
+    }
+  },
+  "tables": {
+    "_readme": [
+      "The byte-identical gate the table band describes, over the",
+      "twelve table files `PARITY_STAGE=full` writes on each side.",
+      "",
+      "Nine must be byte-identical. The three eclipse tables take an amended",
+      "row: byte-identical *except* `obscuration` and `magnitude`, which are the",
+      "only computed floats in any of the four formats and both end in the",
+      "platform's asin/sqrt, which can never be bit-identical. The gate",
+      "is that band's own wording: a masked comparison of every byte but those two",
+      "keys' digits, plus the numeric band on the digits."
+    ],
+    "files": 12,
+    "byteIdentical": [
+      "festivals-*.json",
+      "moonPhases-*.json",
+      "muhurta-*.json"
+    ],
+    "maskedIdentical": [
+      "eclipses-*.json"
+    ],
+    "maskedKeys": [
+      "obscuration",
+      "magnitude"
+    ],
+    "numericAbs": 1e-9,
+    "pins": {
+      "byteIdenticalFiles": 9,
+      "maskedFiles": 3,
+      "differingLines": 10,
+      "worstAbs": 6.203371150093062e-15,
+      "worstAt": "eclipses-1912.json:32 obscuration"
+    }
+  },
+  "_hostNote": [
+    "The bands are host-independent; the pins are not. Both were measured, not assumed.",
+    "",
+    "On linux/x64 every band holds exactly as on darwin/arm64: 0 invariants,",
+    "0 shifted instants, and the worst |Δ| is *bit-identical* on the two hosts",
+    "(1.7053025658242404e-13 at g2, 3.410605131648481e-13 at g3 and full). The table",
+    "gate is fully host-stable too: the same 9 files byte-identical, the same 10",
+    "differing lines, and the same worst masked |Δ| to the last digit.",
+    "",
+    "What moves is the *counts*, and the identity of the worst leaf at g2. That is why",
+    "`pins` is keyed by host. A host with no block here is not a failure: the gate",
+    "asserts the bands, prints the measured block to paste, and says so.",
+    "",
+    "The cause is the platform, not the toolchain. Measured by running the TypeScript",
+    "dump on linux with node v24.4.1 (the exact version darwin uses) and getting",
+    "250723677, byte-identical to linux with node v24.19.0 and 3 bytes off darwin's",
+    "250723680. A Node patch bump did not move the document at all; changing OS and",
+    "architecture did.",
+    "",
+    "The two builds differ from each other by very different amounts. TS arm64 vs TS",
+    "amd64 at g2: 1 leaf, 14 changed values, worst 5.684e-14. Go arm64 vs Go amd64 at",
+    "g2: 4 leaves, worst 1.705e-13, over 2102 `sun.siderealLongitude` and 1780",
+    "`moon.siderealLongitude` values. So the Go build is markedly less",
+    "architecture-stable than V8 is, and `sun.siderealLongitude` matches the",
+    "TypeScript exactly on arm64 while differing on amd64. docs/porting.md §1.1's FMA",
+    "barriers are the obvious suspect and an unbarriered site the obvious lead, but",
+    "no site has been named yet."
+  ]
+}

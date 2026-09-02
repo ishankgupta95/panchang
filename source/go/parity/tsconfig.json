@@ -1,0 +1,16 @@
+{
+  "extends": "../../ts/tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    // The base config pins `rootDir` to `src`; this harness sits outside it.
+    "rootDir": "../../..",
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "types": ["node"],
+    // `node_modules` lives at `source/ts/`, which is not an ancestor of this file.
+    "typeRoots": ["../../ts/node_modules/@types"]
+  },
+  "exclude": ["node_modules", "dist"],
+  "include": ["dump.src.ts", "goldens.src.ts"]
+}

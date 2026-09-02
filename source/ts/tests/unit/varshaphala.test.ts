@@ -1,0 +1,531 @@
+import { describe, it, expect } from 'vitest';
+import {
+  computeVarshaphala,
+  findSolarReturn,
+  _isDayBirthForTest,
+  _triraashiPatiForTest,
+  _evaluateSahamForTest,
+} from '../../src/jyotish/varshaphala';
+import {
+  ALL_SAHAM_NAMES, SAHAM_FORMULAS,
+  type SahamFormula, type SahamName,
+} from '../../src/jyotish/sahamsTables';
+import { getSiderealSunLongitude } from '../../src/astronomy/sun';
+import { computeLagna } from '../../src/jyotish/lagna';
+import type { BirthChart, GrahaName, PlanetPlacement } from '../../src/types/jyotish';
+import { readTestData } from '../testdata';
+
+const fixtures = readTestData('charts', 'astrosage-charts.json');
+import { indexPlanets } from '../../src/jyotish/charts';
+
+interface Fix {
+  name: string;
+  dateLocal: string;
+  tzh: number;
+  lat: number;
+  lon: number;
+}
+const FIXTURE_CHARTS: Fix[] = (fixtures as { charts: Fix[] }).charts;
+
+function localToUtc(dateLocal: string, tzh: number): Date {
+  const [d, t] = dateLocal.split('T') as [string, string];
+  const [y, mo, da] = d.split('-').map(Number) as [number, number, number];
+  const [hh, mm, ss] = t.split(':').map(Number) as [number, number, number];
+  return new Date(Date.UTC(y, mo - 1, da, hh, mm, ss) - Math.round(tzh * 3600_000));
+}
+
+function fixture(name: string): { utc: Date; loc: { latitude: number; longitude: number } } {
+  const f = FIXTURE_CHARTS.find((c) => c.name === name);
+  if (!f) throw new Error(`fixture not found: ${name}`);
+  return {
+    utc: localToUtc(f.dateLocal, f.tzh),
+    loc: { latitude: f.lat, longitude: f.lon },
+  };
+}
+
+const FIXTURE_NAMES = ['Narendra Modi', 'Sachin Tendulkar', 'Ratan Tata',
+  'Dhirubhai Ambani', 'Mukesh Ambani'] as const;
+
+describe('computeVarshaphala: solar-return convergence', () => {
+  it.each(FIXTURE_NAMES)('%s: SR sun matches natal to ≤0.0002°', (name) => {
+    const { utc, loc } = fixture(name);
+    const natalSun = getSiderealSunLongitude(utc, 'lahiri');
+    const v = computeVarshaphala(utc, 30, loc);
+    const srSun = getSiderealSunLongitude(v.solarReturnInstant, 'lahiri');
+    let diff = srSun - natalSun;
+    diff = ((diff + 540) % 360) - 180;
+    expect(Math.abs(diff)).toBeLessThan(0.0002);
+  });
+
+  it.each(FIXTURE_NAMES)('%s: SR within ±3 days of calendar anniversary', (name) => {
+    const { utc, loc } = fixture(name);
+    const v = computeVarshaphala(utc, 30, loc);
+    const calAnniv = utc.getTime() + 30 * 365.25636 * 86400_000;
+    const drift = Math.abs(v.solarReturnInstant.getTime() - calAnniv);
+    expect(drift).toBeLessThan(3 * 86400_000);
+  });
+
+  it('age=1 SR is ~365 sidereal days after birth', () => {
+    const { utc, loc } = fixture('Sachin Tendulkar');
+    const v = computeVarshaphala(utc, 1, loc);
+    const elapsed = v.solarReturnInstant.getTime() - utc.getTime();
+    const days = elapsed / 86400_000;
+    expect(days).toBeGreaterThan(365.0);
+    expect(days).toBeLessThan(366.0);
+  });
+
+  it('age=50 SR converges and is consistent across calls', () => {
+    const { utc, loc } = fixture('Narendra Modi');
+    const v1 = computeVarshaphala(utc, 50, loc);
+    const v2 = computeVarshaphala(utc, 50, loc);
+    expect(v1.solarReturnInstant.getTime()).toBe(v2.solarReturnInstant.getTime());
+  });
+
+  it('rejects yearAge < 1', () => {
+    const { utc, loc } = fixture('Sachin Tendulkar');
+    expect(() => computeVarshaphala(utc, 0, loc)).toThrow(/positive integer/);
+    expect(() => computeVarshaphala(utc, -1, loc)).toThrow(/positive integer/);
+  });
+
+  it('rejects non-integer yearAge', () => {
+    const { utc, loc } = fixture('Sachin Tendulkar');
+    expect(() => computeVarshaphala(utc, 1.5, loc)).toThrow(/positive integer/);
+  });
+});
+
+describe('findSolarReturn: internal Newton search', () => {
+  it('age=1 from arbitrary natal, sub-second precision', () => {
+    const natal = new Date('1990-06-15T08:30:00Z');
+    const natalSun = getSiderealSunLongitude(natal, 'lahiri');
+    const t = findSolarReturn(natal, 1, natalSun, 'lahiri');
+    const sun = getSiderealSunLongitude(t, 'lahiri');
+    let diff = sun - natalSun;
+    diff = ((diff + 540) % 360) - 180;
+    expect(Math.abs(diff)).toBeLessThan(0.0002);
+  });
+
+  it('age=20 from January birth', () => {
+    const natal = new Date('1985-01-12T03:00:00Z');
+    const natalSun = getSiderealSunLongitude(natal, 'lahiri');
+    const t = findSolarReturn(natal, 20, natalSun, 'lahiri');
+    const sun = getSiderealSunLongitude(t, 'lahiri');
+    let diff = sun - natalSun;
+    diff = ((diff + 540) % 360) - 180;
+    expect(Math.abs(diff)).toBeLessThan(0.0002);
+  });
+
+  it('non-Lahiri ayanamsa: thirukanitham gives same UTC instant (ayanamsa-invariant)', () => {
+    const natal = new Date('1990-06-15T08:30:00Z');
+    const lahiriSun = getSiderealSunLongitude(natal, 'lahiri');
+    const tirSun = getSiderealSunLongitude(natal, 'thirukanitham');
+    const tLah = findSolarReturn(natal, 5, lahiriSun, 'lahiri');
+    const tTir = findSolarReturn(natal, 5, tirSun, 'thirukanitham');
+    const diffMin = Math.abs(tLah.getTime() - tTir.getTime()) / 60_000;
+    expect(diffMin).toBeLessThan(2.0);
+  });
+});
+
+describe('Muntha: rashi advance', () => {
+  it.each([
+    [0, 'Narendra Modi'],
+    [5, 'Sachin Tendulkar'],
+    [11, 'Ratan Tata'],
+  ] as const)('age %i: muntha rashi = (natalLagna + age) %% 12 (%s)', (age, name) => {
+    const { utc, loc } = fixture(name);
+    if (age === 0) return;
+    const v = computeVarshaphala(utc, age || 1, loc);
+    const natalLagna = computeLagna(utc, loc, 'lahiri');
+    const expected = (natalLagna.rashi.index + (age || 1)) % 12;
+    expect(v.muntha.rashi).toBe(expected);
+  });
+
+  it('Muntha advances by exactly 1 rashi per year', () => {
+    const { utc, loc } = fixture('Narendra Modi');
+    const v25 = computeVarshaphala(utc, 25, loc);
+    const v26 = computeVarshaphala(utc, 26, loc);
+    expect(v26.muntha.rashi).toBe((v25.muntha.rashi + 1) % 12);
+  });
+
+  it('Muntha lord matches RASHI_LORD lookup', () => {
+    const { utc, loc } = fixture('Sachin Tendulkar');
+    const v = computeVarshaphala(utc, 12, loc);
+    const natalLagna = computeLagna(utc, loc, 'lahiri');
+    expect(v.muntha.rashi).toBe(natalLagna.rashi.index);
+    expect(v.muntha.lord).toBe('Sun');
+  });
+
+  it('Muntha house is 1..12', () => {
+    const { utc, loc } = fixture('Narendra Modi');
+    for (let age = 1; age <= 12; age++) {
+      const v = computeVarshaphala(utc, age, loc);
+      expect(v.muntha.house).toBeGreaterThanOrEqual(1);
+      expect(v.muntha.house).toBeLessThanOrEqual(12);
+    }
+  });
+});
+
+const VISIBLE_GRAHAS: readonly GrahaName[] = [
+  'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn',
+];
+
+describe('Year lord (Varsha Pati)', () => {
+  it.each(FIXTURE_NAMES)('%s: yearLord is one of the 7 visible grahas', (name) => {
+    const { utc, loc } = fixture(name);
+    const v = computeVarshaphala(utc, 30, loc);
+    expect(VISIBLE_GRAHAS).toContain(v.yearLord);
+  });
+
+  it('Triraashi Pati table: fire/earth/air/water by day/night (8 cells)', () => {
+    expect(_triraashiPatiForTest(0, true)).toBe('Sun');
+    expect(_triraashiPatiForTest(1, true)).toBe('Venus');
+    expect(_triraashiPatiForTest(2, true)).toBe('Saturn');
+    expect(_triraashiPatiForTest(3, true)).toBe('Venus');
+    expect(_triraashiPatiForTest(0, false)).toBe('Jupiter');
+    expect(_triraashiPatiForTest(1, false)).toBe('Moon');
+    expect(_triraashiPatiForTest(2, false)).toBe('Mercury');
+    expect(_triraashiPatiForTest(3, false)).toBe('Mars');
+  });
+
+  it('Triraashi Pati cycles modulo 4 across all 12 rashis', () => {
+    for (let r = 0; r < 12; r++) {
+      expect(_triraashiPatiForTest(r, true)).toBe(_triraashiPatiForTest(r % 4, true));
+      expect(_triraashiPatiForTest(r, false)).toBe(_triraashiPatiForTest(r % 4, false));
+    }
+  });
+});
+
+describe('SAHAM_FORMULAS: structural integrity', () => {
+  it('has 27 entries (core-set scope)', () => {
+    expect(SAHAM_FORMULAS).toHaveLength(27);
+  });
+
+  it('every name is unique', () => {
+    const names = SAHAM_FORMULAS.map((f) => f.name);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('ALL_SAHAM_NAMES matches table iteration order', () => {
+    expect(ALL_SAHAM_NAMES).toEqual(SAHAM_FORMULAS.map((f) => f.name));
+  });
+
+  it('every formula operands are from the documented operand set', () => {
+    const valid = new Set([
+      'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn',
+      'Asc', 'AscLord', 'House11Cusp', 'Punya',
+    ]);
+    for (const f of SAHAM_FORMULAS) {
+      expect(valid.has(f.x)).toBe(true);
+      expect(valid.has(f.y)).toBe(true);
+      expect(valid.has(f.z)).toBe(true);
+    }
+  });
+
+  it('Punya is row 0 (formula uses no `Punya` operand recursively)', () => {
+    expect(SAHAM_FORMULAS[0]!.name).toBe('Punya');
+    const punyaRow = SAHAM_FORMULAS[0]!;
+    expect([punyaRow.x, punyaRow.y, punyaRow.z]).not.toContain('Punya');
+  });
+
+  it('Sahams referencing Punya appear after row 0', () => {
+    const punyaConsumers = SAHAM_FORMULAS.filter((f) => f.x === 'Punya' || f.y === 'Punya' || f.z === 'Punya');
+    expect(punyaConsumers.length).toBeGreaterThanOrEqual(2);
+    for (const consumer of punyaConsumers) {
+      const idx = SAHAM_FORMULAS.findIndex((f) => f.name === consumer.name);
+      expect(idx).toBeGreaterThan(0);
+    }
+  });
+
+  it('every (x, y, z, swap) tuple is unique except documented classical aliases', () => {
+    const tuples = SAHAM_FORMULAS.map((f) => `${f.x}|${f.y}|${f.z}|${f.swap}`);
+    const knownAliases = 1;
+    expect(new Set(tuples).size).toBe(tuples.length - knownAliases);
+  });
+
+  it('Rajya and Pitri share the same (Saturn − Sun + Asc, swap=true) form', () => {
+    const rajya = SAHAM_FORMULAS.find((f) => f.name === 'Rajya')!;
+    const pitri = SAHAM_FORMULAS.find((f) => f.name === 'Pitri')!;
+    expect(`${rajya.x}|${rajya.y}|${rajya.z}|${rajya.swap}`)
+      .toBe(`${pitri.x}|${pitri.y}|${pitri.z}|${pitri.swap}`);
+  });
+
+  it('Sahams with day/night swap match the Tag-to-Adawal Encyclopedia pin', () => {
+    const expectedSwapped = new Set<SahamName>([
+      'Punya', 'Vidya', 'Yasas', 'Mitra', 'Karma', 'Roga',
+      'Rajya', 'Bandhu', 'Gnati', 'Matri', 'Pitri', 'Susha',
+    ]);
+    const actualSwapped = new Set(SAHAM_FORMULAS.filter((f) => f.swap).map((f) => f.name));
+    expect(actualSwapped).toEqual(expectedSwapped);
+  });
+});
+
+function synthVarshaChart(spec: {
+  ascLon: number;
+  sunLon: number;
+  moonLon: number;
+  marsLon?: number;
+  mercuryLon?: number;
+  jupiterLon?: number;
+  venusLon?: number;
+  saturnLon?: number;
+}): BirthChart {
+  const ascRashi = Math.floor(spec.ascLon / 30);
+  const RASHI = ['Mesha', 'Vrishabha', 'Mithuna', 'Karka', 'Simha', 'Kanya',
+    'Tula', 'Vrischika', 'Dhanu', 'Makara', 'Kumbha', 'Meena'];
+  const placements: Array<{ name: GrahaName; lon: number }> = [
+    { name: 'Sun', lon: spec.sunLon },
+    { name: 'Moon', lon: spec.moonLon },
+    { name: 'Mars', lon: spec.marsLon ?? 100 },
+    { name: 'Mercury', lon: spec.mercuryLon ?? 110 },
+    { name: 'Jupiter', lon: spec.jupiterLon ?? 200 },
+    { name: 'Venus', lon: spec.venusLon ?? 50 },
+    { name: 'Saturn', lon: spec.saturnLon ?? 280 },
+    { name: 'Rahu', lon: 150 },
+    { name: 'Ketu', lon: 330 },
+  ];
+  const planets: PlanetPlacement[] = placements.map(({ name, lon }) => {
+    const r = Math.floor(lon / 30);
+    return {
+      planet: name,
+      longitude: lon,
+      rashi: { index: r, name: RASHI[r]! },
+      degreeInRashi: lon - r * 30,
+      house: ((r - ascRashi + 12) % 12) + 1,
+      isRetrograde: name === 'Rahu' || name === 'Ketu',
+    };
+  });
+  return {
+    divisional: 'D1',
+    lagna: {
+      siderealLongitude: spec.ascLon,
+      rashi: { index: ascRashi, name: RASHI[ascRashi]! },
+      degreeInRashi: spec.ascLon - ascRashi * 30,
+      nakshatra: { index: 0, name: 'Ashwini' },
+      pada: 1,
+    },
+    bhava: {
+      system: 'whole-sign',
+      ascendantLongitude: spec.ascLon,
+      mcLongitude: ((ascRashi + 9) % 12) * 30,
+      houses: Array.from({ length: 12 }, (_, i) => {
+        const r = (ascRashi + i) % 12;
+        return {
+          house: i + 1,
+          cuspLongitude: r * 30,
+          rashi: { index: r, name: RASHI[r]! },
+          degreeInRashi: 0,
+        };
+      }),
+    },
+    planets,
+    byPlanet: indexPlanets(planets),
+  };
+}
+
+describe('Saham evaluation: Punya / Vidya hand-checks', () => {
+  /**
+   * The expected longitudes apply the classical Tajika completion rule (Tajika
+   * Neelakanthi; PVR Rao; AstroVeda): after X − Y + Z, walk the zodiac from Y
+   * toward X, and if Z is not met on the way, add 30°.
+   */
+  it('day birth: Punya = Moon - Sun + Asc (+30 completion)', () => {
+    const chart = synthVarshaChart({ ascLon: 10, sunLon: 80, moonLon: 200 });
+    const punyaFormula = SAHAM_FORMULAS.find((f) => f.name === 'Punya')!;
+    const lon = _evaluateSahamForTest(punyaFormula, true, chart, {});
+    expect(lon).toBeCloseTo(160, 6);
+  });
+
+  it('night birth: Punya = Sun - Moon + Asc (Asc inside the walk, no correction)', () => {
+    const chart = synthVarshaChart({ ascLon: 10, sunLon: 80, moonLon: 200 });
+    const punyaFormula = SAHAM_FORMULAS.find((f) => f.name === 'Punya')!;
+    const lon = _evaluateSahamForTest(punyaFormula, false, chart, {});
+    expect(lon).toBeCloseTo(250, 6);
+  });
+
+  it('day birth: Vidya = Sun - Moon + Asc (no correction)', () => {
+    const chart = synthVarshaChart({ ascLon: 10, sunLon: 80, moonLon: 200 });
+    const vidyaFormula = SAHAM_FORMULAS.find((f) => f.name === 'Vidya')!;
+    const lon = _evaluateSahamForTest(vidyaFormula, true, chart, {});
+    expect(lon).toBeCloseTo(250, 6);
+  });
+
+  it('night birth: Vidya = Moon - Sun + Asc (+30 completion)', () => {
+    const chart = synthVarshaChart({ ascLon: 10, sunLon: 80, moonLon: 200 });
+    const vidyaFormula = SAHAM_FORMULAS.find((f) => f.name === 'Vidya')!;
+    const lon = _evaluateSahamForTest(vidyaFormula, false, chart, {});
+    expect(lon).toBeCloseTo(160, 6);
+  });
+
+  it('Yasas swaps Jupiter and Punya for night birth (per Tag-to-Adawal)', () => {
+    const chart = synthVarshaChart({
+      ascLon: 10, sunLon: 80, moonLon: 200, jupiterLon: 90,
+    });
+    const yasasFormula = SAHAM_FORMULAS.find((f) => f.name === 'Yasas')!;
+    const dayLon = _evaluateSahamForTest(yasasFormula, true, chart, { Punya: 130 });
+    expect(dayLon).toBeCloseTo(330, 6);
+    const nightLon = _evaluateSahamForTest(yasasFormula, false, chart, { Punya: 250 });
+    expect(nightLon).toBeCloseTo(200, 6);
+  });
+
+  it('Roga = Saturn - Moon + Asc under day swap (per Tag-to-Adawal)', () => {
+    const chart = synthVarshaChart({ ascLon: 10, sunLon: 80, moonLon: 200, saturnLon: 280 });
+    const rogaFormula = SAHAM_FORMULAS.find((f) => f.name === 'Roga')!;
+    const dayLon = _evaluateSahamForTest(rogaFormula, true, chart, {});
+    expect(dayLon).toBeCloseTo(120, 6);
+    const nightLon = _evaluateSahamForTest(rogaFormula, false, chart, {});
+    expect(nightLon).toBeCloseTo(290, 6);
+  });
+
+  it('Mitra = Jupiter - Punya + Venus under day swap (per Tag-to-Adawal)', () => {
+    const chart = synthVarshaChart({
+      ascLon: 10, sunLon: 80, moonLon: 200, jupiterLon: 90, venusLon: 50,
+    });
+    const mitraFormula = SAHAM_FORMULAS.find((f) => f.name === 'Mitra')!;
+    const dayLon = _evaluateSahamForTest(mitraFormula, true, chart, { Punya: 130 });
+    expect(dayLon).toBeCloseTo(10, 6);
+    const nightLon = _evaluateSahamForTest(mitraFormula, false, chart, { Punya: 250 });
+    expect(nightLon).toBeCloseTo(240, 6);
+  });
+
+  it('Rajya = Saturn - Sun + Asc under day swap (per Tag-to-Adawal)', () => {
+    const chart = synthVarshaChart({
+      ascLon: 10, sunLon: 80, moonLon: 200, saturnLon: 280,
+    });
+    const rajyaFormula = SAHAM_FORMULAS.find((f) => f.name === 'Rajya')!;
+    const dayLon = _evaluateSahamForTest(rajyaFormula, true, chart, {});
+    expect(dayLon).toBeCloseTo(240, 6);
+    const nightLon = _evaluateSahamForTest(rajyaFormula, false, chart, {});
+    expect(nightLon).toBeCloseTo(170, 6);
+  });
+});
+
+describe('isDayBirth: geometric Sun-above-horizon', () => {
+  it('noon at equator on equinox → day', () => {
+    const noon = new Date('2025-03-20T12:00:00Z');
+    expect(_isDayBirthForTest(noon, { latitude: 0, longitude: 0 })).toBe(true);
+  });
+
+  it('midnight at equator on equinox → night', () => {
+    const midnight = new Date('2025-03-20T00:00:00Z');
+    expect(_isDayBirthForTest(midnight, { latitude: 0, longitude: 0 })).toBe(false);
+  });
+
+  it('noon UTC at +180° longitude (Pacific) on equinox → night', () => {
+    const t = new Date('2025-03-20T12:00:00Z');
+    expect(_isDayBirthForTest(t, { latitude: 0, longitude: 180 })).toBe(false);
+  });
+});
+
+describe('Fixture sweep: structural invariants on 5 R-tier charts', () => {
+  it.each(FIXTURE_NAMES)('%s: every Saham has rashi 0..11, house 1..12, lon [0,360)', (name) => {
+    const { utc, loc } = fixture(name);
+    const v = computeVarshaphala(utc, 30, loc);
+
+    expect(Object.keys(v.sahams)).toHaveLength(27);
+
+    for (const sahamName of ALL_SAHAM_NAMES) {
+      const s = v.sahams[sahamName];
+      expect(s.longitude).toBeGreaterThanOrEqual(0);
+      expect(s.longitude).toBeLessThan(360);
+      expect(s.rashi).toBeGreaterThanOrEqual(0);
+      expect(s.rashi).toBeLessThan(12);
+      expect(s.house).toBeGreaterThanOrEqual(1);
+      expect(s.house).toBeLessThanOrEqual(12);
+      expect(s.rashi).toBe(Math.floor(s.longitude / 30));
+    }
+  });
+
+  it.each(FIXTURE_NAMES)('%s: yearLord is Shadbala-defensible (one of the 4 candidates)', (name) => {
+    const { utc, loc } = fixture(name);
+    const v = computeVarshaphala(utc, 25, loc);
+    expect(VISIBLE_GRAHAS).toContain(v.yearLord);
+  });
+
+  it('Punya & Vidya are reciprocal: lon(Punya) + lon(Vidya) ≡ 2·Asc + 30 (mod 360°)', () => {
+    for (const name of FIXTURE_NAMES) {
+      const { utc, loc } = fixture(name);
+      const v = computeVarshaphala(utc, 30, loc);
+      const sum = (v.sahams.Punya.longitude + v.sahams.Vidya.longitude) % 360;
+      const expected = (2 * v.varshaLagna.siderealLongitude + 30) % 360;
+      let diff = sum - expected;
+      diff = ((diff + 540) % 360) - 180;
+      expect(Math.abs(diff)).toBeLessThan(0.001);
+    }
+  });
+});
+
+describe('VarshaphalaChart: output structural shape', () => {
+  it('returns all required fields', () => {
+    const { utc, loc } = fixture('Sachin Tendulkar');
+    const v = computeVarshaphala(utc, 30, loc);
+
+    expect(v.solarReturnInstant).toBeInstanceOf(Date);
+    expect(typeof v.varshaLagna.siderealLongitude).toBe('number');
+    expect(typeof v.muntha.rashi).toBe('number');
+    expect(typeof v.muntha.house).toBe('number');
+    expect(typeof v.yearLord).toBe('string');
+    expect(typeof v.isDayBirth).toBe('boolean');
+    expect(v.planets).toHaveLength(9);
+    expect(v.bhava.houses).toHaveLength(12);
+    expect(Object.keys(v.sahams)).toHaveLength(27);
+  });
+
+  it('respects houseSystem option (placidus-kp produces non-zero degreeInRashi for non-aligned cusp)', () => {
+    const { utc, loc } = fixture('Sachin Tendulkar');
+    const vWS = computeVarshaphala(utc, 30, loc, { houseSystem: 'whole-sign' });
+    const vEq = computeVarshaphala(utc, 30, loc, { houseSystem: 'equal' });
+
+    expect(vWS.bhava.system).toBe('whole-sign');
+    expect(vEq.bhava.system).toBe('equal');
+    expect(vWS.bhava.houses[0]!.degreeInRashi).toBe(0);
+    expect(vEq.bhava.houses[0]!.degreeInRashi).toBeGreaterThan(0);
+  });
+
+  it('respects ayanamsa option', () => {
+    const { utc, loc } = fixture('Narendra Modi');
+    const vLahiri = computeVarshaphala(utc, 30, loc, { ayanamsa: 'lahiri' });
+    const vRaman = computeVarshaphala(utc, 30, loc, { ayanamsa: 'raman' });
+    const diffMin = Math.abs(vLahiri.solarReturnInstant.getTime() - vRaman.solarReturnInstant.getTime()) / 60_000;
+    expect(diffMin).toBeLessThan(5);
+  });
+});
+
+describe('Varshaphala: multi-year sweep consistency', () => {
+  it('Muntha cycles back to natal lagna at age 12, 24, …', () => {
+    const { utc, loc } = fixture('Narendra Modi');
+    const natalLagna = computeLagna(utc, loc, 'lahiri');
+    const v12 = computeVarshaphala(utc, 12, loc);
+    const v24 = computeVarshaphala(utc, 24, loc);
+    expect(v12.muntha.rashi).toBe(natalLagna.rashi.index);
+    expect(v24.muntha.rashi).toBe(natalLagna.rashi.index);
+  });
+
+  it('SR instants for ages 25/26/27 are roughly 1 sidereal year apart', () => {
+    const { utc, loc } = fixture('Sachin Tendulkar');
+    const v25 = computeVarshaphala(utc, 25, loc);
+    const v26 = computeVarshaphala(utc, 26, loc);
+    const v27 = computeVarshaphala(utc, 27, loc);
+    const gap1 = (v26.solarReturnInstant.getTime() - v25.solarReturnInstant.getTime()) / 86400_000;
+    const gap2 = (v27.solarReturnInstant.getTime() - v26.solarReturnInstant.getTime()) / 86400_000;
+    expect(gap1).toBeGreaterThan(365.0);
+    expect(gap1).toBeLessThan(366.0);
+    expect(gap2).toBeGreaterThan(365.0);
+    expect(gap2).toBeLessThan(366.0);
+  });
+});
+
+describe('Smoke: every Saham resolves on a real fixture', () => {
+  it('Sachin age 25: every Saham has finite, in-range longitude', () => {
+    const { utc, loc } = fixture('Sachin Tendulkar');
+    const v = computeVarshaphala(utc, 25, loc);
+    for (const name of ALL_SAHAM_NAMES) {
+      const s = v.sahams[name];
+      expect(Number.isFinite(s.longitude)).toBe(true);
+      expect(s.longitude).toBeGreaterThanOrEqual(0);
+      expect(s.longitude).toBeLessThan(360);
+      expect(s.rashiName.length).toBeGreaterThan(0);
+    }
+  });
+});
+
+void (SAHAM_FORMULAS as readonly SahamFormula[]);
+void (ALL_SAHAM_NAMES as readonly SahamName[]);

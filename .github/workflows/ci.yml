@@ -1,74 +1,93 @@
 name: CI
+
+# Gates only. Releasing is manual, by docs/release.md, so nothing here publishes or writes.
 on:
   push:
-    branches: [main]
+    # `master`, not `main`: this repository has never had a `main` branch.
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # Superseded PR runs are cancelled; master runs are the branch's recorded state, so they finish.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NODE_VERSION: '24'
+  GO_VERSION: '1.26.x'
 
 jobs:
-  lint-and-typecheck:
+  typescript:
+    name: typescript
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: source/ts
     steps:
       - uses: actions/checkout@v4
+      # First: needs no toolchain, fails in seconds.
+      - run: bash ci/hygiene.sh
+        working-directory: ${{ github.workspace }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: source/ts/package-lock.json
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
-
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22, 24]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - run: npm ci
       - run: npm run test:run
-
-  coverage:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - run: npm ci
-      - run: npm run test:coverage
-
-  hermes:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - run: npm ci
-      - run: npm run build
+      # Builds internally, so this covers the compile too.
       - run: npm run test:hermes
+      - name: dist is publishable
+        run: |
+          for f in dist/index.js dist/index.cjs dist/index.d.ts dist/index.d.cts; do
+            test -f "$f" || { echo "missing $f"; exit 1; }
+          done
+          npm pack --dry-run
 
-  build-check:
+  go:
+    name: go
     runs-on: ubuntu-latest
-    needs: test
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: source/go
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        # cache: false throughout, there is no go.sum for setup-go to key on.
+        with: { go-version: '${{ env.GO_VERSION }}', cache: false }
+      - name: gofmt
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then echo "gofmt -l:"; echo "$unformatted"; exit 1; fi
+      # vet's stdversion analyzer is what asserts go.mod's declared minimum.
+      - run: go vet ./...
+      - run: go test ./...
+      # Only these three start goroutines; ci/hygiene.sh enforces that they stay the only ones.
+      - run: go test -race ./internal/store/... ./internal/core/... ./internal/astronomy/...
+
+  parity:
+    name: parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: source/ts/package-lock.json
+      - uses: actions/setup-go@v5
+        with: { go-version: '${{ env.GO_VERSION }}', cache: false }
       - run: npm ci
-      - run: npm run build
-      - name: Verify dist contents
-        run: |
-          test -f dist/index.js     || (echo "Missing dist/index.js" && exit 1)
-          test -f dist/index.cjs    || (echo "Missing dist/index.cjs" && exit 1)
-          test -f dist/index.d.ts   || (echo "Missing dist/index.d.ts" && exit 1)
-          test -f dist/index.d.cts  || (echo "Missing dist/index.d.cts" && exit 1)
-          echo "All expected output files present"
-      - name: Dry-run npm pack
-        run: npm pack --dry-run
+        working-directory: source/ts
+      - run: node --test source/go/parity/gate.test.mjs
+      # `full` only: it strictly contains g2 and g3.
+      - run: bash ci/parity.sh full

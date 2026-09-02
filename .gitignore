@@ -1,49 +1,55 @@
-# Dependencies
 node_modules/
 
-# Build output
 dist/
+source/ts/dist/
 
-# Coverage
 coverage/
 
-# OS
 .DS_Store
 Thumbs.db
 
-# Editor
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# npm
 *.tgz
 .npm
 
-# Environment
 .env
 .env.local
 
-# Vitest
 __snapshots__/
 
-# Claude Code memory (local AI context, not project source)
+# Claude Code memory
 memory/
 
-# v5 measurement harnesses — generated, and the dumps are ~230 MB each
-notes/*.mjs
-!notes/diff.mjs
-!notes/driver.mjs
-!notes/pi-split.mjs
-!notes/*-fetch.mjs
-notes/dump-*.json
-notes/bench-*.json
+# Generated measurement harnesses; the dumps are ~230 MB each.
+generate/notes/*.mjs
+!generate/notes/diff.mjs
+!generate/notes/driver.mjs
+!generate/notes/pi-split.mjs
+!generate/notes/*-fetch.mjs
+generate/notes/dump-*.json
+generate/notes/bench-*.json
 
-# npm pack output
 *.tgz
 
-# the builds vcompare/ measures against: the published npm artifact, and a
-# build of git HEAD (the pre-Phase-36 tree — see notes/vcompare/README.md)
-notes/vcompare/v4/
-notes/vcompare/head/
+# The builds vcompare/ measures against: the published npm artifact and a
+# build of git HEAD.
+generate/notes/vcompare/v4/
+generate/notes/vcompare/head/
+
+# Local working plan for the Go port, not committed.
+PLAN.md
+
+# Parity dumps: ~250 MB each, six of them.
+source/go/parity/out/
+
+# Binaries `go build ./cmd/...` drops in the module root.
+source/go/dump
+source/go/gen
+source/go/treecheck
+
+# Internal working documents. Kept on disk, never published.
+docs/internal/

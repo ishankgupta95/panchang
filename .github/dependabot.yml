@@ -1,0 +1,15 @@
+version: 2
+updates:
+  # The workflows pin actions by major tag, so this is what notices a v4 -> v5.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: npm
+    directory: /source/ts
+    schedule:
+      interval: monthly
+
+# No gomod entry: no third-party dependencies, so its only PR would move the `go` directive,
+# which is a deliberate decision about the floor promised to consumers.

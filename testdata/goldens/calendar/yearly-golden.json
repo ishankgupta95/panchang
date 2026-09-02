@@ -1,0 +1,7219 @@
+{
+  "_meta": {
+    "generator": "source/go/parity/goldens.src.ts (bash source/go/parity/goldens.sh)",
+    "source": "src/calendar/yearly.ts + src/calendar/convert.ts",
+    "claim": "Go internal/calendar produces the same Ekadashi dates, Sankranti moments and observance days, eclipse lists, Hindu-calendar coordinates and regional New Year dates as the TypeScript, for the same places and years. The Sankranti `moment` pins the bisection midpoint sequence, which is where a truncating Go integer division would show and nowhere else (docs/porting.md §1.5).",
+    "note": "1912 carries negative epoch milliseconds throughout, which is the only span in which Math.floor((lo+hi)/2) and a truncating (lo+hi)/2 differ. Longyearbyen and Alert exist to reach the three polar guards; guardHits counts each, so a span that stops reaching one fails rather than passing quietly."
+  },
+  "locations": [
+    {
+      "name": "Pune",
+      "latitude": 18.5204,
+      "longitude": 73.8567,
+      "timezone": 330,
+      "years": [
+        1912,
+        2025,
+        2026,
+        2027,
+        2088
+      ]
+    },
+    {
+      "name": "Chennai",
+      "latitude": 13.0827,
+      "longitude": 80.2707,
+      "timezone": 330,
+      "years": [
+        2026,
+        2028
+      ]
+    },
+    {
+      "name": "NewYork",
+      "latitude": 40.7128,
+      "longitude": -74.006,
+      "timezone": "America/New_York",
+      "years": [
+        2025,
+        2026
+      ]
+    },
+    {
+      "name": "Sydney",
+      "latitude": -33.8688,
+      "longitude": 151.2093,
+      "timezone": "Australia/Sydney",
+      "years": [
+        2026
+      ]
+    },
+    {
+      "name": "Longyearbyen",
+      "latitude": 78.2232,
+      "longitude": 15.6267,
+      "timezone": 60,
+      "years": [
+        2025,
+        2026
+      ]
+    },
+    {
+      "name": "Alert",
+      "latitude": 82.5018,
+      "longitude": -62.3481,
+      "timezone": -300,
+      "years": [
+        2026,
+        2027
+      ]
+    }
+  ],
+  "regions": [
+    "all",
+    "tamil-nadu",
+    "kerala",
+    "karnataka",
+    "andhra-pradesh",
+    "telangana",
+    "west-bengal",
+    "odisha",
+    "assam",
+    "bihar",
+    "jharkhand",
+    "gujarat",
+    "maharashtra",
+    "goa",
+    "rajasthan",
+    "punjab",
+    "haryana",
+    "himachal-pradesh",
+    "uttarakhand",
+    "uttar-pradesh",
+    "madhya-pradesh",
+    "nepal",
+    "tamil",
+    "bengal",
+    "north-india"
+  ],
+  "digest": "55f3ca31926bce15afa735fc016f737bd72802bb3d47a8c8b6a8fe35b0d99aaa",
+  "convertDigest": "e2ea5d1ceaf4aa7ecb64a6c4511276edd9ffdb3e2a479c5acc77fa4fcb32756d",
+  "eraDigest": "d85b2575843fb8fe609983734720682b06bdd9ae31ba23f72576d5293662bed5",
+  "newYearDigest": "9ee41dc03ed0c84c4dd30d9a0c20b2d0491618645d3ca6e3593808abe9893645",
+  "upcomingDigest": "1f6d6b968828a99127c69cdfdd849c11bfcdf2cf2c5074252897a2cebfa56cb1",
+  "outcomeCounts": {
+    "ok,ok,ok,ok": 14
+  },
+  "guardHits": {
+    "ekadashiPolarContinue": 1055,
+    "ekadashiDaysProbed": 5127,
+    "yearlyBareCatch": 36,
+    "sankrantiTransits": 168,
+    "meshaCatch": 2,
+    "meshaSolarAnchorCalls": 14,
+    "chaitraNull": 36,
+    "hinduNewYearCalls": 375,
+    "convertPolarThrow": 38,
+    "convertCalls": 182
+  },
+  "cases": [
+    {
+      "label": "Pune|1912",
+      "ekadashi": [
+        -1830384000000,
+        -1829260800000,
+        -1827878400000,
+        -1826668800000,
+        -1825372800000,
+        -1824076800000,
+        -1822780800000,
+        -1821484800000,
+        -1820275200000,
+        -1818892800000,
+        -1817769600000,
+        -1816387200000,
+        -1815177600000,
+        -1813881600000,
+        -1812672000000,
+        -1811289600000,
+        -1810080000000,
+        -1808784000000,
+        -1807488000000,
+        -1806278400000,
+        -1804982400000,
+        -1803686400000,
+        -1802390400000,
+        -1801180800000,
+        -1799798400000
+      ],
+      "sankrantis": [
+        {
+          "date": -1829260800000,
+          "moment": -1829246557325,
+          "rashi": 9,
+          "rashiName": "Makara"
+        },
+        {
+          "date": -1826668800000,
+          "moment": -1826694249830,
+          "rashi": 10,
+          "rashiName": "Kumbha"
+        },
+        {
+          "date": -1824076800000,
+          "moment": -1824113185622,
+          "rashi": 11,
+          "rashiName": "Meena"
+        },
+        {
+          "date": -1821484800000,
+          "moment": -1821490056520,
+          "rashi": 0,
+          "rashiName": "Mesha"
+        },
+        {
+          "date": -1818806400000,
+          "moment": -1818822351710,
+          "rashi": 1,
+          "rashiName": "Vrishabha"
+        },
+        {
+          "date": -1816128000000,
+          "moment": -1816119742677,
+          "rashi": 2,
+          "rashiName": "Mithuna"
+        },
+        {
+          "date": -1813449600000,
+          "moment": -1813401965260,
+          "rashi": 3,
+          "rashiName": "Karka"
+        },
+        {
+          "date": -1810684800000,
+          "moment": -1810693280568,
+          "rashi": 4,
+          "rashiName": "Simha"
+        },
+        {
+          "date": -1808006400000,
+          "moment": -1808015322877,
+          "rashi": 5,
+          "rashiName": "Kanya"
+        },
+        {
+          "date": -1805414400000,
+          "moment": -1805380748438,
+          "rashi": 6,
+          "rashiName": "Tula"
+        },
+        {
+          "date": -1802822400000,
+          "moment": -1802790101735,
+          "rashi": 7,
+          "rashiName": "Vrischika"
+        },
+        {
+          "date": -1800230400000,
+          "moment": -1800232423243,
+          "rashi": 8,
+          "rashiName": "Dhanus"
+        }
+      ],
+      "eclipses": [
+        {
+          "kind": "lunar",
+          "subtype": "partial",
+          "peak": -1822441558460,
+          "start": -1822449834517,
+          "end": -1822433285399,
+          "obscuration": 0.10930542700759627,
+          "magnitude": 0.18234818656982194,
+          "visible": true,
+          "sutakStart": -1822476823397,
+          "sutakEnd": -1822438704546
+        },
+        {
+          "kind": "lunar",
+          "subtype": "partial",
+          "peak": -1807100125465,
+          "start": -1807108942675,
+          "end": -1807091305738,
+          "obscuration": 0.0579247794373257,
+          "magnitude": 0.1186470925185786,
+          "visible": false,
+          "sutakStart": -1807134976200,
+          "sutakEnd": -1807097665004
+        }
+      ],
+      "festivalCount": 269,
+      "festivalFirst": "-1830403800000|vaishnava_ekadashi",
+      "festivalLast": "-1799299800000|guru_pushya"
+    },
+    {
+      "label": "Pune|2025",
+      "ekadashi": [
+        1736467200000,
+        1737763200000,
+        1738972800000,
+        1740355200000,
+        1741564800000,
+        1742860800000,
+        1744070400000,
+        1745452800000,
+        1746662400000,
+        1747958400000,
+        1749168000000,
+        1750464000000,
+        1751760000000,
+        1753056000000,
+        1754352000000,
+        1755561600000,
+        1756857600000,
+        1758067200000,
+        1759449600000,
+        1760659200000,
+        1761955200000,
+        1763164800000,
+        1764547200000,
+        1765756800000,
+        1767052800000
+      ],
+      "sankrantis": [
+        {
+          "date": 1736812800000,
+          "moment": 1736825682787,
+          "rashi": 9,
+          "rashiName": "Makara"
+        },
+        {
+          "date": 1739404800000,
+          "moment": 1739378099706,
+          "rashi": 10,
+          "rashiName": "Kumbha"
+        },
+        {
+          "date": 1741996800000,
+          "moment": 1741958996484,
+          "rashi": 11,
+          "rashiName": "Meena"
+        },
+        {
+          "date": 1744588800000,
+          "moment": 1744581678661,
+          "rashi": 0,
+          "rashiName": "Mesha"
+        },
+        {
+          "date": 1747267200000,
+          "moment": 1747248718359,
+          "rashi": 1,
+          "rashiName": "Vrishabha"
+        },
+        {
+          "date": 1749945600000,
+          "moment": 1749950624046,
+          "rashi": 2,
+          "rashiName": "Mithuna"
+        },
+        {
+          "date": 1752624000000,
+          "moment": 1752667868187,
+          "rashi": 3,
+          "rashiName": "Karka"
+        },
+        {
+          "date": 1755388800000,
+          "moment": 1755376280638,
+          "rashi": 4,
+          "rashiName": "Simha"
+        },
+        {
+          "date": 1758067200000,
+          "moment": 1758054355003,
+          "rashi": 5,
+          "rashiName": "Kanya"
+        },
+        {
+          "date": 1760659200000,
+          "moment": 1760689485131,
+          "rashi": 6,
+          "rashiName": "Tula"
+        },
+        {
+          "date": 1763251200000,
+          "moment": 1763280957787,
+          "rashi": 7,
+          "rashiName": "Vrischika"
+        },
+        {
+          "date": 1765843200000,
+          "moment": 1765839467503,
+          "rashi": 8,
+          "rashiName": "Dhanus"
+        }
+      ],
+      "eclipses": [
+        {
+          "kind": "lunar",
+          "subtype": "total",
+          "peak": 1741935526409,
+          "start": 1741924648018,
+          "end": 1741946408174,
+          "obscuration": 1,
+          "magnitude": 1.1787389234818788,
+          "visible": false,
+          "sutakStart": 1741896575698,
+          "sutakEnd": 1741942075034
+        },
+        {
+          "kind": "lunar",
+          "subtype": "total",
+          "peak": 1757268708389,
+          "start": 1757258904700,
+          "end": 1757278507573,
+          "obscuration": 1,
+          "magnitude": 1.3621799606665859,
+          "visible": true,
+          "sutakStart": 1757230025498,
+          "sutakEnd": 1757274993726
+        }
+      ],
+      "festivalCount": 263,
+      "festivalFirst": "1735842600000|vinayaka_chaturthi",
+      "festivalLast": "1767119400000|masik_karthigai"
+    },
+    {
+      "label": "Pune|2026",
+      "ekadashi": [
+        1768348800000,
+        1769644800000,
+        1770940800000,
+        1772150400000,
+        1773532800000,
+        1774742400000,
+        1776038400000,
+        1777248000000,
+        1778630400000,
+        1779840000000,
+        1781136000000,
+        1782345600000,
+        1783641600000,
+        1784937600000,
+        1786233600000,
+        1787443200000,
+        1788739200000,
+        1790035200000,
+        1791244800000,
+        1792627200000,
+        1793836800000,
+        1795132800000,
+        1796342400000,
+        1797724800000
+      ],
+      "sankrantis": [
+        {
+          "date": 1768348800000,
+          "moment": 1768383860228,
+          "rashi": 9,
+          "rashiName": "Makara"
+        },
+        {
+          "date": 1770940800000,
+          "moment": 1770936340429,
+          "rashi": 10,
+          "rashiName": "Kumbha"
+        },
+        {
+          "date": 1773532800000,
+          "moment": 1773517198974,
+          "rashi": 11,
+          "rashiName": "Meena"
+        },
+        {
+          "date": 1776124800000,
+          "moment": 1776139807323,
+          "rashi": 0,
+          "rashiName": "Mesha"
+        },
+        {
+          "date": 1778803200000,
+          "moment": 1778806784398,
+          "rashi": 1,
+          "rashiName": "Vrishabha"
+        },
+        {
+          "date": 1781481600000,
+          "moment": 1781508604394,
+          "rashi": 2,
+          "rashiName": "Mithuna"
+        },
+        {
+          "date": 1784246400000,
+          "moment": 1784225740429,
+          "rashi": 3,
+          "rashiName": "Karka"
+        },
+        {
+          "date": 1786924800000,
+          "moment": 1786934094872,
+          "rashi": 4,
+          "rashiName": "Simha"
+        },
+        {
+          "date": 1789603200000,
+          "moment": 1789612156713,
+          "rashi": 5,
+          "rashiName": "Kanya"
+        },
+        {
+          "date": 1792281600000,
+          "moment": 1792247290136,
+          "rashi": 6,
+          "rashiName": "Tula"
+        },
+        {
+          "date": 1794873600000,
+          "moment": 1794838767406,
+          "rashi": 7,
+          "rashiName": "Vrischika"
+        },
+        {
+          "date": 1797379200000,
+          "moment": 1797397242846,
+          "rashi": 8,
+          "rashiName": "Dhanus"
+        }
+      ],
+      "eclipses": [
+        {
+          "kind": "lunar",
+          "subtype": "total",
+          "peak": 1772537622765,
+          "start": 1772527464924,
+          "end": 1772547785620,
+          "obscuration": 1,
+          "magnitude": 1.1511902344335134,
+          "visible": false,
+          "sutakStart": 1772499003607,
+          "sutakEnd": 1772543838273
+        },
+        {
+          "kind": "lunar",
+          "subtype": "partial",
+          "peak": 1787890374577,
+          "start": 1787880238273,
+          "end": 1787900507253,
+          "obscuration": 0.9625365441883004,
+          "magnitude": 0.9303966993675451,
+          "visible": false,
+          "sutakStart": 1787852030687,
+          "sutakEnd": 1787896323077
+        }
+      ],
+      "festivalCount": 259,
+      "festivalFirst": "1767205800000|pradosha",
+      "festivalLast": "1798223400000|sankashti_chaturthi"
+    },
+    {
+      "label": "Pune|2027",
+      "ekadashi": [
+        1798934400000,
+        1800230400000,
+        1801526400000,
+        1802822400000,
+        1804118400000,
+        1805328000000,
+        1806624000000,
+        1807920000000,
+        1809216000000,
+        1810425600000,
+        1811808000000,
+        1812931200000,
+        1814313600000,
+        1815523200000,
+        1816819200000,
+        1818028800000,
+        1819411200000,
+        1820620800000,
+        1821916800000,
+        1823212800000,
+        1824422400000,
+        1825804800000,
+        1827014400000,
+        1828310400000,
+        1829520000000
+      ],
+      "sankrantis": [
+        {
+          "date": 1799971200000,
+          "moment": 1799941528125,
+          "rashi": 9,
+          "rashiName": "Makara"
+        },
+        {
+          "date": 1802476800000,
+          "moment": 1802493836937,
+          "rashi": 10,
+          "rashiName": "Kumbha"
+        },
+        {
+          "date": 1805068800000,
+          "moment": 1805074513549,
+          "rashi": 11,
+          "rashiName": "Meena"
+        },
+        {
+          "date": 1807660800000,
+          "moment": 1807697028954,
+          "rashi": 0,
+          "rashiName": "Mesha"
+        },
+        {
+          "date": 1810339200000,
+          "moment": 1810364118750,
+          "rashi": 1,
+          "rashiName": "Vrishabha"
+        },
+        {
+          "date": 1813017600000,
+          "moment": 1813066270971,
+          "rashi": 2,
+          "rashiName": "Mithuna"
+        },
+        {
+          "date": 1815782400000,
+          "moment": 1815783805809,
+          "rashi": 3,
+          "rashiName": "Karka"
+        },
+        {
+          "date": 1818460800000,
+          "moment": 1818492477318,
+          "rashi": 4,
+          "rashiName": "Simha"
+        },
+        {
+          "date": 1821139200000,
+          "moment": 1821170707909,
+          "rashi": 5,
+          "rashiName": "Kanya"
+        },
+        {
+          "date": 1823817600000,
+          "moment": 1823805832103,
+          "rashi": 6,
+          "rashiName": "Tula"
+        },
+        {
+          "date": 1826409600000,
+          "moment": 1826397196654,
+          "rashi": 7,
+          "rashiName": "Vrischika"
+        },
+        {
+          "date": 1828915200000,
+          "moment": 1828955577171,
+          "rashi": 8,
+          "rashiName": "Dhanus"
+        }
+      ],
+      "eclipses": [
+        {
+          "kind": "lunar",
+          "subtype": "penumbral",
+          "peak": 1803165175672,
+          "start": 1803157942752,
+          "end": 1803172404471,
+          "obscuration": 0,
+          "magnitude": -0.056465571191024105,
+          "visible": true,
+          "sutakStart": null,
+          "sutakEnd": null
+        },
+        {
+          "kind": "lunar",
+          "subtype": "penumbral",
+          "peak": 1815926580319,
+          "start": 1815926255352,
+          "end": 1815926902087,
+          "obscuration": 0,
+          "magnitude": -1.0676789559701867,
+          "visible": true,
+          "sutakStart": null,
+          "sutakEnd": null
+        },
+        {
+          "kind": "solar",
+          "subtype": "partial",
+          "peak": 1817205196841,
+          "start": 1817201976065,
+          "end": 1817208148932,
+          "obscuration": 0.31629098761155133,
+          "magnitude": 0.4248143571808614,
+          "visible": true,
+          "sutakStart": 1817158776065,
+          "sutakEnd": 1817208148932
+        },
+        {
+          "kind": "lunar",
+          "subtype": "penumbral",
+          "peak": 1818486827651,
+          "start": 1818480271380,
+          "end": 1818493387662,
+          "obscuration": 0,
+          "magnitude": -0.5249244328641423,
+          "visible": false,
+          "sutakStart": null,
+          "sutakEnd": null
+        }
+      ],
+      "festivalCount": 269,
+      "festivalFirst": "1798914600000|vaishnava_ekadashi",
+      "festivalLast": "1830191400000|vinayaka_chaturthi"
+    },
+    {
+      "label": "Pune|2088",
+      "ekadashi": [
+        3724012800000,
+        3725308800000,
+        3726604800000,
+        3727900800000,
+        3729110400000,
+        3730492800000,
+        3731616000000,
+        3732998400000,
+        3734208000000,
+        3735590400000,
+        3736713600000,
+        3738096000000,
+        3739305600000,
+        3740601600000,
+        3741897600000,
+        3743193600000,
+        3744403200000,
+        3745699200000,
+        3746995200000,
+        3748204800000,
+        3749587200000,
+        3750796800000,
+        3752092800000,
+        3753302400000,
+        3754684800000
+      ],
+      "sankrantis": [
+        {
+          "date": 3724963200000,
+          "moment": 3724989209691,
+          "rashi": 9,
+          "rashiName": "Makara"
+        },
+        {
+          "date": 3727555200000,
+          "moment": 3727541631884,
+          "rashi": 10,
+          "rashiName": "Kumbha"
+        },
+        {
+          "date": 3730147200000,
+          "moment": 3730122299266,
+          "rashi": 11,
+          "rashiName": "Meena"
+        },
+        {
+          "date": 3732739200000,
+          "moment": 3732744653172,
+          "rashi": 0,
+          "rashiName": "Mesha"
+        },
+        {
+          "date": 3735417600000,
+          "moment": 3735411472045,
+          "rashi": 1,
+          "rashiName": "Vrishabha"
+        },
+        {
+          "date": 3738096000000,
+          "moment": 3738113353343,
+          "rashi": 2,
+          "rashiName": "Mithuna"
+        },
+        {
+          "date": 3740860800000,
+          "moment": 3740830698339,
+          "rashi": 3,
+          "rashiName": "Karka"
+        },
+        {
+          "date": 3743539200000,
+          "moment": 3743539295360,
+          "rashi": 4,
+          "rashiName": "Simha"
+        },
+        {
+          "date": 3746217600000,
+          "moment": 3746217561546,
+          "rashi": 5,
+          "rashiName": "Kanya"
+        },
+        {
+          "date": 3748809600000,
+          "moment": 3748852788573,
+          "rashi": 6,
+          "rashiName": "Tula"
+        },
+        {
+          "date": 3751401600000,
+          "moment": 3751444292870,
+          "rashi": 7,
+          "rashiName": "Vrischika"
+        },
+        {
+          "date": 3753993600000,
+          "moment": 3754002830273,
+          "rashi": 8,
+          "rashiName": "Dhanus"
+        }
+      ],
+      "eclipses": [
+        {
+          "kind": "solar",
+          "subtype": "partial",
+          "peak": 3733387979152,
+          "start": 3733385204151,
+          "end": 3733390508011,
+          "obscuration": 0.1715688555193346,
+          "magnitude": 0.2796412231893573,
+          "visible": true,
+          "sutakStart": 3733342004151,
+          "sutakEnd": 3733390508011
+        },
+        {
+          "kind": "lunar",
+          "subtype": "partial",
+          "peak": 3734612039305,
+          "start": 3734603099940,
+          "end": 3734620976837,
+          "obscuration": 0.046506954416634154,
+          "magnitude": 0.10231578527255586,
+          "visible": true,
+          "sutakStart": 3734577317682,
+          "sutakEnd": 3734614354036
+        },
+        {
+          "kind": "lunar",
+          "subtype": "partial",
+          "peak": 3749943627715,
+          "start": 3749935572221,
+          "end": 3749951685941,
+          "obscuration": 0.11038771772026992,
+          "magnitude": 0.1835058880827334,
+          "visible": false,
+          "sutakStart": 3749908419828,
+          "sutakEnd": 3749946445128
+        }
+      ],
+      "festivalCount": 279,
+      "festivalFirst": "3723993000000|smarta_ekadashi",
+      "festivalLast": "3755183400000|guru_pushya"
+    },
+    {
+      "label": "Chennai|2026",
+      "ekadashi": [
+        1768348800000,
+        1769644800000,
+        1770940800000,
+        1772150400000,
+        1773532800000,
+        1774742400000,
+        1776038400000,
+        1777248000000,
+        1778630400000,
+        1779840000000,
+        1781136000000,
+        1782345600000,
+        1783641600000,
+        1784937600000,
+        1786233600000,
+        1787443200000,
+        1788739200000,
+        1790035200000,
+        1791244800000,
+        1792627200000,
+        1793836800000,
+        1795132800000,
+        1796342400000,
+        1797724800000
+      ],
+      "sankrantis": [
+        {
+          "date": 1768348800000,
+          "moment": 1768383860228,
+          "rashi": 9,
+          "rashiName": "Makara"
+        },
+        {
+          "date": 1770940800000,
+          "moment": 1770936340429,
+          "rashi": 10,
+          "rashiName": "Kumbha"
+        },
+        {
+          "date": 1773532800000,
+          "moment": 1773517198974,
+          "rashi": 11,
+          "rashiName": "Meena"
+        },
+        {
+          "date": 1776124800000,
+          "moment": 1776139807323,
+          "rashi": 0,
+          "rashiName": "Mesha"
+        },
+        {
+          "date": 1778803200000,
+          "moment": 1778806784398,
+          "rashi": 1,
+          "rashiName": "Vrishabha"
+        },
+        {
+          "date": 1781481600000,
+          "moment": 1781508604394,
+          "rashi": 2,
+          "rashiName": "Mithuna"
+        },
+        {
+          "date": 1784246400000,
+          "moment": 1784225740429,
+          "rashi": 3,
+          "rashiName": "Karka"
+        },
+        {
+          "date": 1786924800000,
+          "moment": 1786934094872,
+          "rashi": 4,
+          "rashiName": "Simha"
+        },
+        {
+          "date": 1789603200000,
+          "moment": 1789612156713,
+          "rashi": 5,
+          "rashiName": "Kanya"
+        },
+        {
+          "date": 1792281600000,
+          "moment": 1792247290136,
+          "rashi": 6,
+          "rashiName": "Tula"
+        },
+        {
+          "date": 1794873600000,
+          "moment": 1794838767406,
+          "rashi": 7,
+          "rashiName": "Vrischika"
+        },
+        {
+          "date": 1797379200000,
+          "moment": 1797397242846,
+          "rashi": 8,
+          "rashiName": "Dhanus"
+        }
+      ],
+      "eclipses": [
+        {
+          "kind": "lunar",
+          "subtype": "total",
+          "peak": 1772537622765,
+          "start": 1772527464924,
+          "end": 1772547785620,
+          "obscuration": 1,
+          "magnitude": 1.1511902344335134,
+          "visible": false,
+          "sutakStart": 1772499003607,
+          "sutakEnd": 1772543838273
+        },
+        {
+          "kind": "lunar",
+          "subtype": "partial",
+          "peak": 1787890374577,
+          "start": 1787880238273,
+          "end": 1787900507253,
+          "obscuration": 0.9625365441883004,
+          "magnitude": 0.9303966993675451,
+          "visible": false,
+          "sutakStart": 1787852030687,
+          "sutakEnd": 1787896323077
+        }
+      ],
+      "festivalCount": 260,
+      "festivalFirst": "1767205800000|pradosha",
+      "festivalLast": "1798223400000|sankashti_chaturthi"
+    },
+    {
+      "label": "Chennai|2028",
+      "ekadashi": [
+        1830902400000,
+        1832112000000,
+        1833494400000,
+        1834617600000,
+        1836000000000,
+        1837209600000,
+        1838505600000,
+        1839801600000,
+        1841097600000,
+        1842393600000,
+        1843603200000,
+        1844899200000,
+        1846108800000,
+        1847491200000,
+        1848700800000,
+        1849996800000,
+        1851206400000,
+        1852588800000,
+        1853798400000,
+        1855094400000,
+        1856390400000,
+        1857600000000,
+        1858896000000,
+        1860192000000,
+        1861488000000
+      ],
+      "sankrantis": [
+        {
+          "date": 1831507200000,
+          "moment": 1831499842015,
+          "rashi": 9,
+          "rashiName": "Makara"
+        },
+        {
+          "date": 1834012800000,
+          "moment": 1834052189062,
+          "rashi": 10,
+          "rashiName": "Kumbha"
+        },
+        {
+          "date": 1836604800000,
+          "moment": 1836632925000,
+          "rashi": 11,
+          "rashiName": "Meena"
+        },
+        {
+          "date": 1839283200000,
+          "moment": 1839255499730,
+          "rashi": 0,
+          "rashiName": "Mesha"
+        },
+        {
+          "date": 1841961600000,
+          "moment": 1841922648193,
+          "rashi": 1,
+          "rashiName": "Vrishabha"
+        },
+        {
+          "date": 1844640000000,
+          "moment": 1844624859740,
+          "rashi": 2,
+          "rashiName": "Mithuna"
+        },
+        {
+          "date": 1847318400000,
+          "moment": 1847342388647,
+          "rashi": 3,
+          "rashiName": "Karka"
+        },
+        {
+          "date": 1850083200000,
+          "moment": 1850050905248,
+          "rashi": 4,
+          "rashiName": "Simha"
+        },
+        {
+          "date": 1852761600000,
+          "moment": 1852728881396,
+          "rashi": 5,
+          "rashiName": "Kanya"
+        },
+        {
+          "date": 1855353600000,
+          "moment": 1855363753784,
+          "rashi": 6,
+          "rashiName": "Tula"
+        },
+        {
+          "date": 1857945600000,
+          "moment": 1857954928490,
+          "rashi": 7,
+          "rashiName": "Vrischika"
+        },
+        {
+          "date": 1860537600000,
+          "moment": 1860513231884,
+          "rashi": 8,
+          "rashiName": "Dhanus"
+        }
+      ],
+      "eclipses": [
+        {
+          "kind": "lunar",
+          "subtype": "partial",
+          "peak": 1831263183281,
+          "start": 1831255662491,
+          "end": 1831270706363,
+          "obscuration": 0.024655102884358977,
+          "magnitude": 0.06654943016718111,
+          "visible": false,
+          "sutakStart": 1831229101588,
+          "sutakEnd": 1831264871462
+        },
+        {
+          "kind": "lunar",
+          "subtype": "partial",
+          "peak": 1846520386066,
+          "start": 1846511065239,
+          "end": 1846529706619,
+          "obscuration": 0.3258414667653953,
+          "magnitude": 0.38957891351898616,
+          "visible": true,
+          "sutakStart": 1846483734471,
+          "sutakEnd": 1846524629456
+        },
+        {
+          "kind": "solar",
+          "subtype": "partial",
+          "peak": 1847841652779,
+          "start": 1847839923573,
+          "end": 1847843496522,
+          "obscuration": 0.05380134640751145,
+          "magnitude": 0.1268378121987515,
+          "visible": true,
+          "sutakStart": 1847796723573,
+          "sutakEnd": 1847843496522
+        },
+        {
+          "kind": "lunar",
+          "subtype": "total",
+          "peak": 1861894324209,
+          "start": 1861884232593,
+          "end": 1861904410415,
+          "obscuration": 1,
+          "magnitude": 1.2465860732766911,
+          "visible": true,
+          "sutakStart": 1861855658885,
+          "sutakEnd": 1861900592763
+        }
+      ],
+      "festivalCount": 263,
+      "festivalFirst": "1830882600000|vaishnava_ekadashi",
+      "festivalLast": "1861813800000|chandra_grahan"
+    },
+    {
+      "label": "NewYork|2025",
+      "ekadashi": [
+        1736467200000,
+        1737849600000,
+        1739059200000,
+        1740355200000,
+        1741564800000,
+        1742947200000,
+        1744156800000,
+        1745452800000,
+        1746662400000,
+        1748044800000,
+        1749254400000,
+        1750550400000,
+        1751846400000,
+        1753056000000,
+        1754352000000,
+        1755561600000,
+        1756944000000,
+        1758153600000,
+        1759536000000,
+        1760659200000,
+        1762041600000,
+        1763251200000,
+        1764547200000,
+        1765843200000,
+        1767139200000
+      ],
+      "sankrantis": [
+        {
+          "date": 1736812800000,
+          "moment": 1736825683227,
+          "rashi": 9,
+          "rashiName": "Makara"
+        },
+        {
+          "date": 1739318400000,
+          "moment": 1739378099487,
+          "rashi": 10,
+          "rashiName": "Kumbha"
+        },
+        {
+          "date": 1741910400000,
+          "moment": 1741958996263,
+          "rashi": 11,
+          "rashiName": "Meena"
+        },
+        {
+          "date": 1744502400000,
+          "moment": 1744581678441,
+          "rashi": 0,
+          "rashiName": "Mesha"
+        },
+        {
+          "date": 1747180800000,
+          "moment": 1747248718797,
+          "rashi": 1,
+          "rashiName": "Vrishabha"
+        },
+        {
+          "date": 1749945600000,
+          "moment": 1749950623828,
+          "rashi": 2,
+          "rashiName": "Mithuna"
+        },
+        {
+          "date": 1752624000000,
+          "moment": 1752667867968,
+          "rashi": 3,
+          "rashiName": "Karka"
+        },
+        {
+          "date": 1755302400000,
+          "moment": 1755376281078,
+          "rashi": 4,
+          "rashiName": "Simha"
+        },
+        {
+          "date": 1757980800000,
+          "moment": 1758054354784,
+          "rashi": 5,
+          "rashiName": "Kanya"
+        },
+        {
+          "date": 1760659200000,
+          "moment": 1760689485570,
+          "rashi": 6,
+          "rashiName": "Tula"
+        },
+        {
+          "date": 1763251200000,
+          "moment": 1763280958227,
+          "rashi": 7,
+          "rashiName": "Vrischika"
+        },
+        {
+          "date": 1765843200000,
+          "moment": 1765839467943,
+          "rashi": 8,
+          "rashiName": "Dhanus"
+        }
+      ],
+      "eclipses": [
+        {
+          "kind": "lunar",
+          "subtype": "total",
+          "peak": 1741935526409,
+          "start": 1741924648018,
+          "end": 1741946408174,
+          "obscuration": 1,
+          "magnitude": 1.1787389234818788,
+          "visible": true,
+          "sutakStart": 1741896575698,
+          "sutakEnd": 1741942075034
+        },
+        {
+          "kind": "solar",
+          "subtype": "partial",
+          "peak": 1743243174416,
+          "start": 1743240227100,
+          "end": 1743246294608,
+          "obscuration": 0.7750624104569458,
+          "magnitude": 0.8152706483780714,
+          "visible": false,
+          "sutakStart": 1743197027100,
+          "sutakEnd": 1743246294608
+        },
+        {
+          "kind": "lunar",
+          "subtype": "total",
+          "peak": 1757268708389,
+          "start": 1757258904700,
+          "end": 1757278507573,
+          "obscuration": 1,
+          "magnitude": 1.3621799606665859,
+          "visible": false,
+          "sutakStart": 1757230025498,
+          "sutakEnd": 1757274993726
+        }
+      ],
+      "festivalCount": 255,
+      "festivalFirst": "1735963200000|vinayaka_chaturthi",
+      "festivalLast": "1767153600000|masik_karthigai"
+    },
+    {
+      "label": "NewYork|2026",
+      "ekadashi": [
+        1768435200000,
+        1769644800000,
+        1770940800000,
+        1772236800000,
+        1773532800000,
+        1774742400000,
+        1776124800000,
+        1777334400000,
+        1778630400000,
+        1779840000000,
+        1781222400000,
+        1782432000000,
+        1783728000000,
+        1784937600000,
+        1786233600000,
+        1787529600000,
+        1788739200000,
+        1790121600000,
+        1791331200000,
+        1792627200000,
+        1793836800000,
+        1795219200000,
+        1796428800000,
+        1797724800000
+      ],
+      "sankrantis": [
+        {
+          "date": 1768348800000,
+          "moment": 1768383860009,
+          "rashi": 9,
+          "rashiName": "Makara"
+        },
+        {
+          "date": 1770940800000,
+          "moment": 1770936340209,
+          "rashi": 10,
+          "rashiName": "Kumbha"
+        },
+        {
+          "date": 1773446400000,
+          "moment": 1773517199413,
+          "rashi": 11,
+          "rashiName": "Meena"
+        },
+        {
+          "date": 1776124800000,
+          "moment": 1776139807762,
+          "rashi": 0,
+          "rashiName": "Mesha"
+        },
+        {
+          "date": 1778803200000,
+          "moment": 1778806784179,
+          "rashi": 1,
+          "rashiName": "Vrishabha"
+        },
+        {
+          "date": 1781481600000,
+          "moment": 1781508604174,
+          "rashi": 2,
+          "rashiName": "Mithuna"
+        },
+        {
+          "date": 1784160000000,
+          "moment": 1784225740209,
+          "rashi": 3,
+          "rashiName": "Karka"
+        },
+        {
+          "date": 1786924800000,
+          "moment": 1786934094652,
+          "rashi": 4,
+          "rashiName": "Simha"
+        },
+        {
+          "date": 1789603200000,
+          "moment": 1789612156493,
+          "rashi": 5,
+          "rashiName": "Kanya"
+        },
+        {
+          "date": 1792195200000,
+          "moment": 1792247290575,
+          "rashi": 6,
+          "rashiName": "Tula"
+        },
+        {
+          "date": 1794787200000,
+          "moment": 1794838767846,
+          "rashi": 7,
+          "rashiName": "Vrischika"
+        },
+        {
+          "date": 1797379200000,
+          "moment": 1797397243284,
+          "rashi": 8,
+          "rashiName": "Dhanus"
+        }
+      ],
+      "eclipses": [
+        {
+          "kind": "lunar",
+          "subtype": "total",
+          "peak": 1772537622765,
+          "start": 1772527464924,
+          "end": 1772547785620,
+          "obscuration": 1,
+          "magnitude": 1.1511902344335134,
+          "visible": false,
+          "sutakStart": 1772499003607,
+          "sutakEnd": 1772543838273
+        },
+        {
+          "kind": "solar",
+          "subtype": "partial",
+          "peak": 1786557253605,
+          "start": 1786554468352,
+          "end": 1786559931957,
+          "obscuration": 0.09468813621767941,
+          "magnitude": 0.18596867889913007,
+          "visible": true,
+          "sutakStart": 1786511268352,
+          "sutakEnd": 1786559931957
+        },
+        {
+          "kind": "lunar",
+          "subtype": "partial",
+          "peak": 1787890374577,
+          "start": 1787880238273,
+          "end": 1787900507253,
+          "obscuration": 0.9625365441883004,
+          "magnitude": 0.9303966993675451,
+          "visible": true,
+          "sutakStart": 1787852030687,
+          "sutakEnd": 1787896323077
+        }
+      ],
+      "festivalCount": 258,
+      "festivalFirst": "1767240000000|masik_karthigai",
+      "festivalLast": "1798344000000|sankashti_chaturthi"
+    },
+    {
+      "label": "Sydney|2026",
+      "ekadashi": [
+        1768348800000,
+        1769644800000,
+        1770940800000,
+        1772150400000,
+        1773532800000,
+        1774742400000,
+        1776038400000,
+        1777248000000,
+        1778630400000,
+        1779840000000,
+        1781136000000,
+        1782345600000,
+        1783641600000,
+        1784937600000,
+        1786233600000,
+        1787529600000,
+        1788739200000,
+        1790035200000,
+        1791244800000,
+        1792627200000,
+        1793836800000,
+        1795219200000,
+        1796342400000,
+        1797724800000
+      ],
+      "sankrantis": [
+        {
+          "date": 1768435200000,
+          "moment": 1768383860228,
+          "rashi": 9,
+          "rashiName": "Makara"
+        },
+        {
+          "date": 1770940800000,
+          "moment": 1770936340429,
+          "rashi": 10,
+          "rashiName": "Kumbha"
+        },
+        {
+          "date": 1773532800000,
+          "moment": 1773517198974,
+          "rashi": 11,
+          "rashiName": "Meena"
+        },
+        {
+          "date": 1776124800000,
+          "moment": 1776139807323,
+          "rashi": 0,
+          "rashiName": "Mesha"
+        },
+        {
+          "date": 1778803200000,
+          "moment": 1778806784398,
+          "rashi": 1,
+          "rashiName": "Vrishabha"
+        },
+        {
+          "date": 1781568000000,
+          "moment": 1781508604394,
+          "rashi": 2,
+          "rashiName": "Mithuna"
+        },
+        {
+          "date": 1784246400000,
+          "moment": 1784225740429,
+          "rashi": 3,
+          "rashiName": "Karka"
+        },
+        {
+          "date": 1786924800000,
+          "moment": 1786934094872,
+          "rashi": 4,
+          "rashiName": "Simha"
+        },
+        {
+          "date": 1789603200000,
+          "moment": 1789612156713,
+          "rashi": 5,
+          "rashiName": "Kanya"
+        },
+        {
+          "date": 1792281600000,
+          "moment": 1792247290136,
+          "rashi": 6,
+          "rashiName": "Tula"
+        },
+        {
+          "date": 1794873600000,
+          "moment": 1794838767406,
+          "rashi": 7,
+          "rashiName": "Vrischika"
+        },
+        {
+          "date": 1797379200000,
+          "moment": 1797397242846,
+          "rashi": 8,
+          "rashiName": "Dhanus"
+        }
+      ],
+      "eclipses": [
+        {
+          "kind": "lunar",
+          "subtype": "total",
+          "peak": 1772537622765,
+          "start": 1772527464924,
+          "end": 1772547785620,
+          "obscuration": 1,
+          "magnitude": 1.1511902344335134,
+          "visible": true,
+          "sutakStart": 1772499003607,
+          "sutakEnd": 1772543838273
+        },
+        {
+          "kind": "lunar",
+          "subtype": "partial",
+          "peak": 1787890374577,
+          "start": 1787880238273,
+          "end": 1787900507253,
+          "obscuration": 0.9625365441883004,
+          "magnitude": 0.9303966993675451,
+          "visible": false,
+          "sutakStart": 1787852030687,
+          "sutakEnd": 1787896323077
+        }
+      ],
+      "festivalCount": 254,
+      "festivalFirst": "1767189600000|masik_karthigai",
+      "festivalLast": "1797861600000|masik_karthigai"
+    },
+    {
+      "label": "Longyearbyen|2025",
+      "ekadashi": [
+        1740268800000,
+        1741478400000,
+        1742860800000,
+        1744070400000,
+        1756857600000,
+        1758067200000,
+        1759449600000,
+        1760572800000
+      ],
+      "sankrantis": [
+        {
+          "date": 1736812800000,
+          "moment": 1736825682787,
+          "rashi": 9,
+          "rashiName": "Makara"
+        },
+        {
+          "date": 1739318400000,
+          "moment": 1739378099706,
+          "rashi": 10,
+          "rashiName": "Kumbha"
+        },
+        {
+          "date": 1741910400000,
+          "moment": 1741958996484,
+          "rashi": 11,
+          "rashiName": "Meena"
+        },
+        {
+          "date": 1744588800000,
+          "moment": 1744581678661,
+          "rashi": 0,
+          "rashiName": "Mesha"
+        },
+        {
+          "date": 1747180800000,
+          "moment": 1747248718359,
+          "rashi": 1,
+          "rashiName": "Vrishabha"
+        },
+        {
+          "date": 1749945600000,
+          "moment": 1749950624046,
+          "rashi": 2,
+          "rashiName": "Mithuna"
+        },
+        {
+          "date": 1752624000000,
+          "moment": 1752667868187,
+          "rashi": 3,
+          "rashiName": "Karka"
+        },
+        {
+          "date": 1755302400000,
+          "moment": 1755376280638,
+          "rashi": 4,
+          "rashiName": "Simha"
+        },
+        {
+          "date": 1758067200000,
+          "moment": 1758054355003,
+          "rashi": 5,
+          "rashiName": "Kanya"
+        },
+        {
+          "date": 1760659200000,
+          "moment": 1760689485131,
+          "rashi": 6,
+          "rashiName": "Tula"
+        },
+        {
+          "date": 1763251200000,
+          "moment": 1763280957787,
+          "rashi": 7,
+          "rashiName": "Vrischika"
+        },
+        {
+          "date": 1765756800000,
+          "moment": 1765839467503,
+          "rashi": 8,
+          "rashiName": "Dhanus"
+        }
+      ],
+      "eclipses": [
+        {
+          "kind": "lunar",
+          "subtype": "total",
+          "peak": 1741935526409,
+          "start": 1741924648018,
+          "end": 1741946408174,
+          "obscuration": 1,
+          "magnitude": 1.1787389234818788,
+          "visible": false,
+          "sutakStart": 1741896575698,
+          "sutakEnd": 1741942075034
+        },
+        {
+          "kind": "solar",
+          "subtype": "partial",
+          "peak": 1743248213760,
+          "start": 1743244908782,
+          "end": 1743251512400,
+          "obscuration": 0.5303418293320725,
+          "magnitude": 0.6160354981917282,
+          "visible": true,
+          "sutakStart": 1743201708782,
+          "sutakEnd": 1743251512400
+        },
+        {
+          "kind": "lunar",
+          "subtype": "total",
+          "peak": 1757268708389,
+          "start": 1757258904700,
+          "end": 1757278507573,
+          "obscuration": 1,
+          "magnitude": 1.3621799606665859,
+          "visible": false,
+          "sutakStart": 1757230025498,
+          "sutakEnd": 1757274993726
+        }
+      ],
+      "festivalCount": 101,
+      "festivalFirst": "1739487600000|magha_shanivar",
+      "festivalLast": "1761346800000|vinayaka_chaturthi"
+    },
+    {
+      "label": "Longyearbyen|2026",
+      "ekadashi": [
+        1772150400000,
+        1773446400000,
+        1774656000000,
+        1776038400000,
+        1788739200000,
+        1790035200000,
+        1791244800000,
+        1792627200000
+      ],
+      "sankrantis": [
+        {
+          "date": 1768348800000,
+          "moment": 1768383860228,
+          "rashi": 9,
+          "rashiName": "Makara"
+        },
+        {
+          "date": 1770854400000,
+          "moment": 1770936340429,
+          "rashi": 10,
+          "rashiName": "Kumbha"
+        },
+        {
+          "date": 1773532800000,
+          "moment": 1773517198974,
+          "rashi": 11,
+          "rashiName": "Meena"
+        },
+        {
+          "date": 1776124800000,
+          "moment": 1776139807323,
+          "rashi": 0,
+          "rashiName": "Mesha"
+        },
+        {
+          "date": 1778803200000,
+          "moment": 1778806784398,
+          "rashi": 1,
+          "rashiName": "Vrishabha"
+        },
+        {
+          "date": 1781481600000,
+          "moment": 1781508604394,
+          "rashi": 2,
+          "rashiName": "Mithuna"
+        },
+        {
+          "date": 1784160000000,
+          "moment": 1784225740429,
+          "rashi": 3,
+          "rashiName": "Karka"
+        },
+        {
+          "date": 1786924800000,
+          "moment": 1786934094872,
+          "rashi": 4,
+          "rashiName": "Simha"
+        },
+        {
+          "date": 1789603200000,
+          "moment": 1789612156713,
+          "rashi": 5,
+          "rashiName": "Kanya"
+        },
+        {
+          "date": 1792281600000,
+          "moment": 1792247290136,
+          "rashi": 6,
+          "rashiName": "Tula"
+        },
+        {
+          "date": 1794787200000,
+          "moment": 1794838767406,
+          "rashi": 7,
+          "rashiName": "Vrischika"
+        },
+        {
+          "date": 1797379200000,
+          "moment": 1797397242846,
+          "rashi": 8,
+          "rashiName": "Dhanus"
+        }
+      ],
+      "eclipses": [
+        {
+          "kind": "lunar",
+          "subtype": "total",
+          "peak": 1772537622765,
+          "start": 1772527464924,
+          "end": 1772547785620,
+          "obscuration": 1,
+          "magnitude": 1.1511902344335134,
+          "visible": false,
+          "sutakStart": 1772499003607,
+          "sutakEnd": 1772543838273
+        },
+        {
+          "kind": "solar",
+          "subtype": "partial",
+          "peak": 1786555493830,
+          "start": 1786552133123,
+          "end": 1786558792151,
+          "obscuration": 0.9078856582651318,
+          "magnitude": 0.9201086168277689,
+          "visible": true,
+          "sutakStart": 1786508933123,
+          "sutakEnd": 1786558792151
+        },
+        {
+          "kind": "lunar",
+          "subtype": "partial",
+          "peak": 1787890374577,
+          "start": 1787880238273,
+          "end": 1787900507253,
+          "obscuration": 0.9625365441883004,
+          "magnitude": 0.9303966993675451,
+          "visible": false,
+          "sutakStart": 1787852030687,
+          "sutakEnd": 1787896323077
+        }
+      ],
+      "festivalCount": 99,
+      "festivalFirst": "1771023600000|maha_shivaratri",
+      "festivalLast": "1792882800000|sharad_purnima"
+    },
+    {
+      "label": "Alert|2026",
+      "ekadashi": [
+        1772236800000,
+        1773532800000,
+        1774742400000,
+        1788825600000,
+        1790121600000,
+        1791331200000
+      ],
+      "sankrantis": [
+        {
+          "date": 1768348800000,
+          "moment": 1768383860228,
+          "rashi": 9,
+          "rashiName": "Makara"
+        },
+        {
+          "date": 1770854400000,
+          "moment": 1770936340429,
+          "rashi": 10,
+          "rashiName": "Kumbha"
+        },
+        {
+          "date": 1773446400000,
+          "moment": 1773517198974,
+          "rashi": 11,
+          "rashiName": "Meena"
+        },
+        {
+          "date": 1776038400000,
+          "moment": 1776139807323,
+          "rashi": 0,
+          "rashiName": "Mesha"
+        },
+        {
+          "date": 1778716800000,
+          "moment": 1778806784398,
+          "rashi": 1,
+          "rashiName": "Vrishabha"
+        },
+        {
+          "date": 1781481600000,
+          "moment": 1781508604394,
+          "rashi": 2,
+          "rashiName": "Mithuna"
+        },
+        {
+          "date": 1784160000000,
+          "moment": 1784225740429,
+          "rashi": 3,
+          "rashiName": "Karka"
+        },
+        {
+          "date": 1786838400000,
+          "moment": 1786934094872,
+          "rashi": 4,
+          "rashiName": "Simha"
+        },
+        {
+          "date": 1789603200000,
+          "moment": 1789612156713,
+          "rashi": 5,
+          "rashiName": "Kanya"
+        },
+        {
+          "date": 1792195200000,
+          "moment": 1792247290136,
+          "rashi": 6,
+          "rashiName": "Tula"
+        },
+        {
+          "date": 1794787200000,
+          "moment": 1794838767406,
+          "rashi": 7,
+          "rashiName": "Vrischika"
+        },
+        {
+          "date": 1797379200000,
+          "moment": 1797397242846,
+          "rashi": 8,
+          "rashiName": "Dhanus"
+        }
+      ],
+      "eclipses": [
+        {
+          "kind": "lunar",
+          "subtype": "total",
+          "peak": 1772537622765,
+          "start": 1772527464924,
+          "end": 1772547785620,
+          "obscuration": 1,
+          "magnitude": 1.1511902344335134,
+          "visible": true,
+          "sutakStart": 1772499003607,
+          "sutakEnd": 1772543838273
+        },
+        {
+          "kind": "solar",
+          "subtype": "partial",
+          "peak": 1786554572098,
+          "start": 1786550991365,
+          "end": 1786558135665,
+          "obscuration": 0.9342514445437499,
+          "magnitude": 0.9405462295212805,
+          "visible": true,
+          "sutakStart": 1786507791365,
+          "sutakEnd": 1786558135665
+        },
+        {
+          "kind": "lunar",
+          "subtype": "partial",
+          "peak": 1787890374577,
+          "start": 1787880238273,
+          "end": 1787900507253,
+          "obscuration": 0.9625365441883004,
+          "magnitude": 0.9303966993675451,
+          "visible": false,
+          "sutakStart": 1787852030687,
+          "sutakEnd": 1787896323077
+        }
+      ],
+      "festivalCount": 58,
+      "festivalFirst": "1772082000000|vaishnava_ekadashi",
+      "festivalLast": "1791694800000|navaratri"
+    },
+    {
+      "label": "Alert|2027",
+      "ekadashi": [
+        1804118400000,
+        1805414400000,
+        1806710400000,
+        1820707200000,
+        1822003200000,
+        1823212800000
+      ],
+      "sankrantis": [
+        {
+          "date": 1799884800000,
+          "moment": 1799941528125,
+          "rashi": 9,
+          "rashiName": "Makara"
+        },
+        {
+          "date": 1802390400000,
+          "moment": 1802493836937,
+          "rashi": 10,
+          "rashiName": "Kumbha"
+        },
+        {
+          "date": 1805068800000,
+          "moment": 1805074513549,
+          "rashi": 11,
+          "rashiName": "Meena"
+        },
+        {
+          "date": 1807660800000,
+          "moment": 1807697028954,
+          "rashi": 0,
+          "rashiName": "Mesha"
+        },
+        {
+          "date": 1810339200000,
+          "moment": 1810364118750,
+          "rashi": 1,
+          "rashiName": "Vrishabha"
+        },
+        {
+          "date": 1813017600000,
+          "moment": 1813066270971,
+          "rashi": 2,
+          "rashiName": "Mithuna"
+        },
+        {
+          "date": 1815696000000,
+          "moment": 1815783805809,
+          "rashi": 3,
+          "rashiName": "Karka"
+        },
+        {
+          "date": 1818460800000,
+          "moment": 1818492477318,
+          "rashi": 4,
+          "rashiName": "Simha"
+        },
+        {
+          "date": 1821139200000,
+          "moment": 1821170707909,
+          "rashi": 5,
+          "rashiName": "Kanya"
+        },
+        {
+          "date": 1823731200000,
+          "moment": 1823805832103,
+          "rashi": 6,
+          "rashiName": "Tula"
+        },
+        {
+          "date": 1826323200000,
+          "moment": 1826397196654,
+          "rashi": 7,
+          "rashiName": "Vrischika"
+        },
+        {
+          "date": 1828915200000,
+          "moment": 1828955577171,
+          "rashi": 8,
+          "rashiName": "Dhanus"
+        }
+      ],
+      "eclipses": [
+        {
+          "kind": "lunar",
+          "subtype": "penumbral",
+          "peak": 1803165175672,
+          "start": 1803157942752,
+          "end": 1803172404471,
+          "obscuration": 0,
+          "magnitude": -0.056465571191024105,
+          "visible": true,
+          "sutakStart": null,
+          "sutakEnd": null
+        },
+        {
+          "kind": "lunar",
+          "subtype": "penumbral",
+          "peak": 1815926580319,
+          "start": 1815926255352,
+          "end": 1815926902087,
+          "obscuration": 0,
+          "magnitude": -1.0676789559701867,
+          "visible": false,
+          "sutakStart": null,
+          "sutakEnd": null
+        },
+        {
+          "kind": "lunar",
+          "subtype": "penumbral",
+          "peak": 1818486827651,
+          "start": 1818480271380,
+          "end": 1818493387662,
+          "obscuration": 0,
+          "magnitude": -0.5249244328641423,
+          "visible": false,
+          "sutakStart": null,
+          "sutakEnd": null
+        }
+      ],
+      "festivalCount": 52,
+      "festivalFirst": "1803618000000|magha_shanivar",
+      "festivalLast": "1823317200000|pradosha"
+    }
+  ],
+  "convertCases": [
+    {
+      "key": "Pune|1912-01-01",
+      "hindu": {
+        "tithiName": "Shukla Ekadashi",
+        "tithi": 11,
+        "pakshaTithi": 11,
+        "paksha": "shukla",
+        "masaName": "Pausha",
+        "masaIndex": 9,
+        "isAdhika": false,
+        "vikramSamvat": 1968,
+        "shakaSamvat": 1833,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        -1830384000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|1912-01-30",
+      "hindu": {
+        "tithiName": "Shukla Ekadashi",
+        "tithi": 11,
+        "pakshaTithi": 11,
+        "paksha": "shukla",
+        "masaName": "Magha",
+        "masaIndex": 10,
+        "isAdhika": false,
+        "vikramSamvat": 1968,
+        "shakaSamvat": 1833,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        -1827878400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|1912-02-28",
+      "hindu": {
+        "tithiName": "Shukla Dashami",
+        "tithi": 10,
+        "pakshaTithi": 10,
+        "paksha": "shukla",
+        "masaName": "Phalguna",
+        "masaIndex": 11,
+        "isAdhika": false,
+        "vikramSamvat": 1968,
+        "shakaSamvat": 1833,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        -1825372800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|1912-03-28",
+      "hindu": {
+        "tithiName": "Shukla Dashami",
+        "tithi": 10,
+        "pakshaTithi": 10,
+        "paksha": "shukla",
+        "masaName": "Chaitra",
+        "masaIndex": 0,
+        "isAdhika": false,
+        "vikramSamvat": 1969,
+        "shakaSamvat": 1834,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        -1822867200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|1912-04-26",
+      "hindu": {
+        "tithiName": "Shukla Dashami",
+        "tithi": 10,
+        "pakshaTithi": 10,
+        "paksha": "shukla",
+        "masaName": "Vaishakha",
+        "masaIndex": 1,
+        "isAdhika": false,
+        "vikramSamvat": 1969,
+        "shakaSamvat": 1834,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        -1820361600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|1912-05-25",
+      "hindu": {
+        "tithiName": "Shukla Dashami",
+        "tithi": 10,
+        "pakshaTithi": 10,
+        "paksha": "shukla",
+        "masaName": "Jyeshtha",
+        "masaIndex": 2,
+        "isAdhika": false,
+        "vikramSamvat": 1969,
+        "shakaSamvat": 1834,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        -1817856000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|1912-06-23",
+      "hindu": {
+        "tithiName": "Shukla Navami",
+        "tithi": 9,
+        "pakshaTithi": 9,
+        "paksha": "shukla",
+        "masaName": "Adhika Ashadha",
+        "masaIndex": 3,
+        "isAdhika": true,
+        "vikramSamvat": 1969,
+        "shakaSamvat": 1834,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        -1815350400000,
+        -1812844800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|1912-07-22",
+      "hindu": {
+        "tithiName": "Shukla Navami",
+        "tithi": 9,
+        "pakshaTithi": 9,
+        "paksha": "shukla",
+        "masaName": "Ashadha",
+        "masaIndex": 3,
+        "isAdhika": false,
+        "vikramSamvat": 1969,
+        "shakaSamvat": 1834,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        -1815350400000,
+        -1812844800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|1912-08-20",
+      "hindu": {
+        "tithiName": "Shukla Ashtami",
+        "tithi": 8,
+        "pakshaTithi": 8,
+        "paksha": "shukla",
+        "masaName": "Shravana",
+        "masaIndex": 4,
+        "isAdhika": false,
+        "vikramSamvat": 1969,
+        "shakaSamvat": 1834,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        -1810339200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|1912-09-18",
+      "hindu": {
+        "tithiName": "Shukla Ashtami",
+        "tithi": 8,
+        "pakshaTithi": 8,
+        "paksha": "shukla",
+        "masaName": "Bhadrapada",
+        "masaIndex": 5,
+        "isAdhika": false,
+        "vikramSamvat": 1969,
+        "shakaSamvat": 1834,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        -1807833600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|1912-10-17",
+      "hindu": {
+        "tithiName": "Shukla Saptami",
+        "tithi": 7,
+        "pakshaTithi": 7,
+        "paksha": "shukla",
+        "masaName": "Ashwina",
+        "masaIndex": 6,
+        "isAdhika": false,
+        "vikramSamvat": 1969,
+        "shakaSamvat": 1834,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        -1805328000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|1912-11-15",
+      "hindu": {
+        "tithiName": "Shukla Shashthi",
+        "tithi": 6,
+        "pakshaTithi": 6,
+        "paksha": "shukla",
+        "masaName": "Kartika",
+        "masaIndex": 7,
+        "isAdhika": false,
+        "vikramSamvat": 1969,
+        "shakaSamvat": 1834,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        -1802822400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|1912-12-14",
+      "hindu": {
+        "tithiName": "Shukla Panchami",
+        "tithi": 5,
+        "pakshaTithi": 5,
+        "paksha": "shukla",
+        "masaName": "Margashirsha",
+        "masaIndex": 8,
+        "isAdhika": false,
+        "vikramSamvat": 1969,
+        "shakaSamvat": 1834,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        -1800403200000,
+        -1800316800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2025-01-01",
+      "hindu": {
+        "tithiName": "Shukla Dwitiya",
+        "tithi": 2,
+        "pakshaTithi": 2,
+        "paksha": "shukla",
+        "masaName": "Pausha",
+        "masaIndex": 9,
+        "isAdhika": false,
+        "vikramSamvat": 2081,
+        "shakaSamvat": 1946,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        1735689600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2025-01-30",
+      "hindu": {
+        "tithiName": "Shukla Pratipada",
+        "tithi": 1,
+        "pakshaTithi": 1,
+        "paksha": "shukla",
+        "masaName": "Magha",
+        "masaIndex": 10,
+        "isAdhika": false,
+        "vikramSamvat": 2081,
+        "shakaSamvat": 1946,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        1738195200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2025-02-28",
+      "hindu": {
+        "tithiName": "Shukla Pratipada",
+        "tithi": 1,
+        "pakshaTithi": 1,
+        "paksha": "shukla",
+        "masaName": "Phalguna",
+        "masaIndex": 11,
+        "isAdhika": false,
+        "vikramSamvat": 2081,
+        "shakaSamvat": 1946,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1740700800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2025-03-29",
+      "hindu": {
+        "tithiName": "Amavasya",
+        "tithi": 30,
+        "pakshaTithi": 15,
+        "paksha": "krishna",
+        "masaName": "Chaitra",
+        "masaIndex": 0,
+        "isAdhika": false,
+        "vikramSamvat": 2081,
+        "shakaSamvat": 1946,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1743206400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2025-04-27",
+      "hindu": {
+        "tithiName": "Amavasya",
+        "tithi": 30,
+        "pakshaTithi": 15,
+        "paksha": "krishna",
+        "masaName": "Vaishakha",
+        "masaIndex": 1,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1745712000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2025-05-26",
+      "hindu": {
+        "tithiName": "Krishna Chaturdashi",
+        "tithi": 29,
+        "pakshaTithi": 14,
+        "paksha": "krishna",
+        "masaName": "Jyeshtha",
+        "masaIndex": 2,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        1748217600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2025-06-24",
+      "hindu": {
+        "tithiName": "Krishna Chaturdashi",
+        "tithi": 29,
+        "pakshaTithi": 14,
+        "paksha": "krishna",
+        "masaName": "Ashadha",
+        "masaIndex": 3,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        1750723200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2025-07-23",
+      "hindu": {
+        "tithiName": "Krishna Chaturdashi",
+        "tithi": 29,
+        "pakshaTithi": 14,
+        "paksha": "krishna",
+        "masaName": "Shravana",
+        "masaIndex": 4,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        1753228800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2025-08-21",
+      "hindu": {
+        "tithiName": "Krishna Trayodashi",
+        "tithi": 28,
+        "pakshaTithi": 13,
+        "paksha": "krishna",
+        "masaName": "Bhadrapada",
+        "masaIndex": 5,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        1755734400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2025-09-19",
+      "hindu": {
+        "tithiName": "Krishna Trayodashi",
+        "tithi": 28,
+        "pakshaTithi": 13,
+        "paksha": "krishna",
+        "masaName": "Ashwina",
+        "masaIndex": 6,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1758240000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2025-10-18",
+      "hindu": {
+        "tithiName": "Krishna Dwadashi",
+        "tithi": 27,
+        "pakshaTithi": 12,
+        "paksha": "krishna",
+        "masaName": "Kartika",
+        "masaIndex": 7,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1760745600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2025-11-16",
+      "hindu": {
+        "tithiName": "Krishna Dwadashi",
+        "tithi": 27,
+        "pakshaTithi": 12,
+        "paksha": "krishna",
+        "masaName": "Margashirsha",
+        "masaIndex": 8,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1763251200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2025-12-15",
+      "hindu": {
+        "tithiName": "Krishna Ekadashi",
+        "tithi": 26,
+        "pakshaTithi": 11,
+        "paksha": "krishna",
+        "masaName": "Pausha",
+        "masaIndex": 9,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        1765756800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2026-01-01",
+      "hindu": {
+        "tithiName": "Shukla Trayodashi",
+        "tithi": 13,
+        "pakshaTithi": 13,
+        "paksha": "shukla",
+        "masaName": "Pausha",
+        "masaIndex": 9,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        1767225600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2026-01-30",
+      "hindu": {
+        "tithiName": "Shukla Dwadashi",
+        "tithi": 12,
+        "pakshaTithi": 12,
+        "paksha": "shukla",
+        "masaName": "Magha",
+        "masaIndex": 10,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1769731200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2026-02-28",
+      "hindu": {
+        "tithiName": "Shukla Dwadashi",
+        "tithi": 12,
+        "pakshaTithi": 12,
+        "paksha": "shukla",
+        "masaName": "Phalguna",
+        "masaIndex": 11,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1772236800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2026-03-29",
+      "hindu": {
+        "tithiName": "Shukla Ekadashi",
+        "tithi": 11,
+        "pakshaTithi": 11,
+        "paksha": "shukla",
+        "masaName": "Chaitra",
+        "masaIndex": 0,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1774742400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2026-04-27",
+      "hindu": {
+        "tithiName": "Shukla Ekadashi",
+        "tithi": 11,
+        "pakshaTithi": 11,
+        "paksha": "shukla",
+        "masaName": "Vaishakha",
+        "masaIndex": 1,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        1777248000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2026-05-26",
+      "hindu": {
+        "tithiName": "Shukla Ekadashi",
+        "tithi": 11,
+        "pakshaTithi": 11,
+        "paksha": "shukla",
+        "masaName": "Adhika Jyeshtha",
+        "masaIndex": 2,
+        "isAdhika": true,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        1779753600000,
+        1779840000000,
+        1782345600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2026-06-24",
+      "hindu": {
+        "tithiName": "Shukla Dashami",
+        "tithi": 10,
+        "pakshaTithi": 10,
+        "paksha": "shukla",
+        "masaName": "Jyeshtha",
+        "masaIndex": 2,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        1779667200000,
+        1782259200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2026-07-23",
+      "hindu": {
+        "tithiName": "Shukla Navami",
+        "tithi": 9,
+        "pakshaTithi": 9,
+        "paksha": "shukla",
+        "masaName": "Ashadha",
+        "masaIndex": 3,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        1784678400000,
+        1784764800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2026-08-21",
+      "hindu": {
+        "tithiName": "Shukla Navami",
+        "tithi": 9,
+        "pakshaTithi": 9,
+        "paksha": "shukla",
+        "masaName": "Shravana",
+        "masaIndex": 4,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1787270400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2026-09-19",
+      "hindu": {
+        "tithiName": "Shukla Ashtami",
+        "tithi": 8,
+        "pakshaTithi": 8,
+        "paksha": "shukla",
+        "masaName": "Bhadrapada",
+        "masaIndex": 5,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1789776000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2026-10-18",
+      "hindu": {
+        "tithiName": "Shukla Saptami",
+        "tithi": 7,
+        "pakshaTithi": 7,
+        "paksha": "shukla",
+        "masaName": "Ashwina",
+        "masaIndex": 6,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1792195200000,
+        1792281600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2026-11-16",
+      "hindu": {
+        "tithiName": "Shukla Saptami",
+        "tithi": 7,
+        "pakshaTithi": 7,
+        "paksha": "shukla",
+        "masaName": "Kartika",
+        "masaIndex": 7,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        1794787200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2026-12-15",
+      "hindu": {
+        "tithiName": "Shukla Shashthi",
+        "tithi": 6,
+        "pakshaTithi": 6,
+        "paksha": "shukla",
+        "masaName": "Margashirsha",
+        "masaIndex": 8,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        1797292800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2027-01-01",
+      "hindu": {
+        "tithiName": "Krishna Navami",
+        "tithi": 24,
+        "pakshaTithi": 9,
+        "paksha": "krishna",
+        "masaName": "Pausha",
+        "masaIndex": 9,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1798761600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2027-01-30",
+      "hindu": {
+        "tithiName": "Krishna Navami",
+        "tithi": 24,
+        "pakshaTithi": 9,
+        "paksha": "krishna",
+        "masaName": "Magha",
+        "masaIndex": 10,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1801267200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2027-02-28",
+      "hindu": {
+        "tithiName": "Krishna Ashtami",
+        "tithi": 23,
+        "pakshaTithi": 8,
+        "paksha": "krishna",
+        "masaName": "Phalguna",
+        "masaIndex": 11,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1803772800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2027-03-29",
+      "hindu": {
+        "tithiName": "Krishna Saptami",
+        "tithi": 22,
+        "pakshaTithi": 7,
+        "paksha": "krishna",
+        "masaName": "Chaitra",
+        "masaIndex": 0,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        1806278400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2027-04-27",
+      "hindu": {
+        "tithiName": "Krishna Shashthi",
+        "tithi": 21,
+        "pakshaTithi": 6,
+        "paksha": "krishna",
+        "masaName": "Vaishakha",
+        "masaIndex": 1,
+        "isAdhika": false,
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        1808784000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2027-05-26",
+      "hindu": {
+        "tithiName": "Krishna Shashthi",
+        "tithi": 21,
+        "pakshaTithi": 6,
+        "paksha": "krishna",
+        "masaName": "Jyeshtha",
+        "masaIndex": 2,
+        "isAdhika": false,
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        1811289600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2027-06-24",
+      "hindu": {
+        "tithiName": "Krishna Panchami",
+        "tithi": 20,
+        "pakshaTithi": 5,
+        "paksha": "krishna",
+        "masaName": "Ashadha",
+        "masaIndex": 3,
+        "isAdhika": false,
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        1813795200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2027-07-23",
+      "hindu": {
+        "tithiName": "Krishna Chaturthi",
+        "tithi": 19,
+        "pakshaTithi": 4,
+        "paksha": "krishna",
+        "masaName": "Shravana",
+        "masaIndex": 4,
+        "isAdhika": false,
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1816214400000,
+        1816300800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2027-08-21",
+      "hindu": {
+        "tithiName": "Krishna Chaturthi",
+        "tithi": 19,
+        "pakshaTithi": 4,
+        "paksha": "krishna",
+        "masaName": "Bhadrapada",
+        "masaIndex": 5,
+        "isAdhika": false,
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1818806400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2027-09-19",
+      "hindu": {
+        "tithiName": "Krishna Tritiya",
+        "tithi": 18,
+        "pakshaTithi": 3,
+        "paksha": "krishna",
+        "masaName": "Ashwina",
+        "masaIndex": 6,
+        "isAdhika": false,
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1821312000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2027-10-18",
+      "hindu": {
+        "tithiName": "Krishna Tritiya",
+        "tithi": 18,
+        "pakshaTithi": 3,
+        "paksha": "krishna",
+        "masaName": "Kartika",
+        "masaIndex": 7,
+        "isAdhika": false,
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        1823817600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2027-11-16",
+      "hindu": {
+        "tithiName": "Krishna Tritiya",
+        "tithi": 18,
+        "pakshaTithi": 3,
+        "paksha": "krishna",
+        "masaName": "Margashirsha",
+        "masaIndex": 8,
+        "isAdhika": false,
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        1826323200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2027-12-15",
+      "hindu": {
+        "tithiName": "Krishna Dwitiya",
+        "tithi": 17,
+        "pakshaTithi": 2,
+        "paksha": "krishna",
+        "masaName": "Pausha",
+        "masaIndex": 9,
+        "isAdhika": false,
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        1828828800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2088-01-01",
+      "hindu": {
+        "tithiName": "Shukla Saptami",
+        "tithi": 7,
+        "pakshaTithi": 7,
+        "paksha": "shukla",
+        "masaName": "Pausha",
+        "masaIndex": 9,
+        "isAdhika": false,
+        "vikramSamvat": 2144,
+        "shakaSamvat": 2009,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        3723753600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2088-01-30",
+      "hindu": {
+        "tithiName": "Shukla Saptami",
+        "tithi": 7,
+        "pakshaTithi": 7,
+        "paksha": "shukla",
+        "masaName": "Magha",
+        "masaIndex": 10,
+        "isAdhika": false,
+        "vikramSamvat": 2144,
+        "shakaSamvat": 2009,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        3726259200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2088-02-28",
+      "hindu": {
+        "tithiName": "Shukla Shashthi",
+        "tithi": 6,
+        "pakshaTithi": 6,
+        "paksha": "shukla",
+        "masaName": "Phalguna",
+        "masaIndex": 11,
+        "isAdhika": false,
+        "vikramSamvat": 2144,
+        "shakaSamvat": 2009,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        3728764800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2088-03-28",
+      "hindu": {
+        "tithiName": "Shukla Shashthi",
+        "tithi": 6,
+        "pakshaTithi": 6,
+        "paksha": "shukla",
+        "masaName": "Chaitra",
+        "masaIndex": 0,
+        "isAdhika": false,
+        "vikramSamvat": 2145,
+        "shakaSamvat": 2010,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        3731270400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2088-04-26",
+      "hindu": {
+        "tithiName": "Shukla Shashthi",
+        "tithi": 6,
+        "pakshaTithi": 6,
+        "paksha": "shukla",
+        "masaName": "Vaishakha",
+        "masaIndex": 1,
+        "isAdhika": false,
+        "vikramSamvat": 2145,
+        "shakaSamvat": 2010,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        3733776000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2088-05-25",
+      "hindu": {
+        "tithiName": "Shukla Panchami",
+        "tithi": 5,
+        "pakshaTithi": 5,
+        "paksha": "shukla",
+        "masaName": "Jyeshtha",
+        "masaIndex": 2,
+        "isAdhika": false,
+        "vikramSamvat": 2145,
+        "shakaSamvat": 2010,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        3736281600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2088-06-23",
+      "hindu": {
+        "tithiName": "Shukla Panchami",
+        "tithi": 5,
+        "pakshaTithi": 5,
+        "paksha": "shukla",
+        "masaName": "Ashadha",
+        "masaIndex": 3,
+        "isAdhika": false,
+        "vikramSamvat": 2145,
+        "shakaSamvat": 2010,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        3738787200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2088-07-22",
+      "hindu": {
+        "tithiName": "Shukla Panchami",
+        "tithi": 5,
+        "pakshaTithi": 5,
+        "paksha": "shukla",
+        "masaName": "Adhika Shravana",
+        "masaIndex": 4,
+        "isAdhika": true,
+        "vikramSamvat": 2145,
+        "shakaSamvat": 2010,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        3741292800000,
+        3743884800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2088-08-20",
+      "hindu": {
+        "tithiName": "Shukla Chaturthi",
+        "tithi": 4,
+        "pakshaTithi": 4,
+        "paksha": "shukla",
+        "masaName": "Shravana",
+        "masaIndex": 4,
+        "isAdhika": false,
+        "vikramSamvat": 2145,
+        "shakaSamvat": 2010,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        3741206400000,
+        3743798400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2088-09-18",
+      "hindu": {
+        "tithiName": "Shukla Chaturthi",
+        "tithi": 4,
+        "pakshaTithi": 4,
+        "paksha": "shukla",
+        "masaName": "Bhadrapada",
+        "masaIndex": 5,
+        "isAdhika": false,
+        "vikramSamvat": 2145,
+        "shakaSamvat": 2010,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        3746304000000,
+        3746390400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2088-10-17",
+      "hindu": {
+        "tithiName": "Shukla Tritiya",
+        "tithi": 3,
+        "pakshaTithi": 3,
+        "paksha": "shukla",
+        "masaName": "Ashwina",
+        "masaIndex": 6,
+        "isAdhika": false,
+        "vikramSamvat": 2145,
+        "shakaSamvat": 2010,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        3748809600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2088-11-15",
+      "hindu": {
+        "tithiName": "Shukla Dwitiya",
+        "tithi": 2,
+        "pakshaTithi": 2,
+        "paksha": "shukla",
+        "masaName": "Kartika",
+        "masaIndex": 7,
+        "isAdhika": false,
+        "vikramSamvat": 2145,
+        "shakaSamvat": 2010,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        3751315200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Pune|2088-12-14",
+      "hindu": {
+        "tithiName": "Shukla Pratipada",
+        "tithi": 1,
+        "pakshaTithi": 1,
+        "paksha": "shukla",
+        "masaName": "Margashirsha",
+        "masaIndex": 8,
+        "isAdhika": false,
+        "vikramSamvat": 2145,
+        "shakaSamvat": 2010,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        3753734400000,
+        3753820800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2026-01-01",
+      "hindu": {
+        "tithiName": "Shukla Trayodashi",
+        "tithi": 13,
+        "pakshaTithi": 13,
+        "paksha": "shukla",
+        "masaName": "Pausha",
+        "masaIndex": 9,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        1767225600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2026-01-30",
+      "hindu": {
+        "tithiName": "Shukla Dwadashi",
+        "tithi": 12,
+        "pakshaTithi": 12,
+        "paksha": "shukla",
+        "masaName": "Magha",
+        "masaIndex": 10,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1769731200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2026-02-28",
+      "hindu": {
+        "tithiName": "Shukla Dwadashi",
+        "tithi": 12,
+        "pakshaTithi": 12,
+        "paksha": "shukla",
+        "masaName": "Phalguna",
+        "masaIndex": 11,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1772236800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2026-03-29",
+      "hindu": {
+        "tithiName": "Shukla Ekadashi",
+        "tithi": 11,
+        "pakshaTithi": 11,
+        "paksha": "shukla",
+        "masaName": "Chaitra",
+        "masaIndex": 0,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1774742400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2026-04-27",
+      "hindu": {
+        "tithiName": "Shukla Ekadashi",
+        "tithi": 11,
+        "pakshaTithi": 11,
+        "paksha": "shukla",
+        "masaName": "Vaishakha",
+        "masaIndex": 1,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        1777248000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2026-05-26",
+      "hindu": {
+        "tithiName": "Shukla Ekadashi",
+        "tithi": 11,
+        "pakshaTithi": 11,
+        "paksha": "shukla",
+        "masaName": "Adhika Jyeshtha",
+        "masaIndex": 2,
+        "isAdhika": true,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        1779753600000,
+        1779840000000,
+        1782345600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2026-06-24",
+      "hindu": {
+        "tithiName": "Shukla Dashami",
+        "tithi": 10,
+        "pakshaTithi": 10,
+        "paksha": "shukla",
+        "masaName": "Jyeshtha",
+        "masaIndex": 2,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        1779667200000,
+        1782259200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2026-07-23",
+      "hindu": {
+        "tithiName": "Shukla Navami",
+        "tithi": 9,
+        "pakshaTithi": 9,
+        "paksha": "shukla",
+        "masaName": "Ashadha",
+        "masaIndex": 3,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        1784678400000,
+        1784764800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2026-08-21",
+      "hindu": {
+        "tithiName": "Shukla Navami",
+        "tithi": 9,
+        "pakshaTithi": 9,
+        "paksha": "shukla",
+        "masaName": "Shravana",
+        "masaIndex": 4,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1787270400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2026-09-19",
+      "hindu": {
+        "tithiName": "Shukla Ashtami",
+        "tithi": 8,
+        "pakshaTithi": 8,
+        "paksha": "shukla",
+        "masaName": "Bhadrapada",
+        "masaIndex": 5,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1789776000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2026-10-18",
+      "hindu": {
+        "tithiName": "Shukla Saptami",
+        "tithi": 7,
+        "pakshaTithi": 7,
+        "paksha": "shukla",
+        "masaName": "Ashwina",
+        "masaIndex": 6,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1792195200000,
+        1792281600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2026-11-16",
+      "hindu": {
+        "tithiName": "Shukla Saptami",
+        "tithi": 7,
+        "pakshaTithi": 7,
+        "paksha": "shukla",
+        "masaName": "Kartika",
+        "masaIndex": 7,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        1794787200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2026-12-15",
+      "hindu": {
+        "tithiName": "Shukla Shashthi",
+        "tithi": 6,
+        "pakshaTithi": 6,
+        "paksha": "shukla",
+        "masaName": "Margashirsha",
+        "masaIndex": 8,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        1797292800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2028-01-01",
+      "hindu": {
+        "tithiName": "Shukla Chaturthi",
+        "tithi": 4,
+        "pakshaTithi": 4,
+        "paksha": "shukla",
+        "masaName": "Pausha",
+        "masaIndex": 9,
+        "isAdhika": false,
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1830297600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2028-01-30",
+      "hindu": {
+        "tithiName": "Shukla Chaturthi",
+        "tithi": 4,
+        "pakshaTithi": 4,
+        "paksha": "shukla",
+        "masaName": "Magha",
+        "masaIndex": 10,
+        "isAdhika": false,
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1832803200000,
+        1832889600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2028-02-28",
+      "hindu": {
+        "tithiName": "Shukla Tritiya",
+        "tithi": 3,
+        "pakshaTithi": 3,
+        "paksha": "shukla",
+        "masaName": "Phalguna",
+        "masaIndex": 11,
+        "isAdhika": false,
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        1835308800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2028-03-28",
+      "hindu": {
+        "tithiName": "Shukla Dwitiya",
+        "tithi": 2,
+        "pakshaTithi": 2,
+        "paksha": "shukla",
+        "masaName": "Chaitra",
+        "masaIndex": 0,
+        "isAdhika": false,
+        "vikramSamvat": 2085,
+        "shakaSamvat": 1950,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        1837814400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2028-04-26",
+      "hindu": {
+        "tithiName": "Shukla Dwitiya",
+        "tithi": 2,
+        "pakshaTithi": 2,
+        "paksha": "shukla",
+        "masaName": "Vaishakha",
+        "masaIndex": 1,
+        "isAdhika": false,
+        "vikramSamvat": 2085,
+        "shakaSamvat": 1950,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        1840320000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2028-05-25",
+      "hindu": {
+        "tithiName": "Shukla Pratipada",
+        "tithi": 1,
+        "pakshaTithi": 1,
+        "paksha": "shukla",
+        "masaName": "Jyeshtha",
+        "masaIndex": 2,
+        "isAdhika": false,
+        "vikramSamvat": 2085,
+        "shakaSamvat": 1950,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        1842825600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2028-06-23",
+      "hindu": {
+        "tithiName": "Shukla Pratipada",
+        "tithi": 1,
+        "pakshaTithi": 1,
+        "paksha": "shukla",
+        "masaName": "Ashadha",
+        "masaIndex": 3,
+        "isAdhika": false,
+        "vikramSamvat": 2085,
+        "shakaSamvat": 1950,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1845331200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2028-07-22",
+      "hindu": {
+        "tithiName": "Amavasya",
+        "tithi": 30,
+        "pakshaTithi": 15,
+        "paksha": "krishna",
+        "masaName": "Shravana",
+        "masaIndex": 4,
+        "isAdhika": false,
+        "vikramSamvat": 2085,
+        "shakaSamvat": 1950,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1847836800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2028-08-20",
+      "hindu": {
+        "tithiName": "Amavasya",
+        "tithi": 30,
+        "pakshaTithi": 15,
+        "paksha": "krishna",
+        "masaName": "Bhadrapada",
+        "masaIndex": 5,
+        "isAdhika": false,
+        "vikramSamvat": 2085,
+        "shakaSamvat": 1950,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1850342400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2028-09-18",
+      "hindu": {
+        "tithiName": "Amavasya",
+        "tithi": 30,
+        "pakshaTithi": 15,
+        "paksha": "krishna",
+        "masaName": "Ashwina",
+        "masaIndex": 6,
+        "isAdhika": false,
+        "vikramSamvat": 2085,
+        "shakaSamvat": 1950,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        1852848000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2028-10-17",
+      "hindu": {
+        "tithiName": "Krishna Chaturdashi",
+        "tithi": 29,
+        "pakshaTithi": 14,
+        "paksha": "krishna",
+        "masaName": "Kartika",
+        "masaIndex": 7,
+        "isAdhika": false,
+        "vikramSamvat": 2085,
+        "shakaSamvat": 1950,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        1855353600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2028-11-15",
+      "hindu": {
+        "tithiName": "Krishna Chaturdashi",
+        "tithi": 29,
+        "pakshaTithi": 14,
+        "paksha": "krishna",
+        "masaName": "Margashirsha",
+        "masaIndex": 8,
+        "isAdhika": false,
+        "vikramSamvat": 2085,
+        "shakaSamvat": 1950,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        1857859200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Chennai|2028-12-14",
+      "hindu": {
+        "tithiName": "Krishna Trayodashi",
+        "tithi": 28,
+        "pakshaTithi": 13,
+        "paksha": "krishna",
+        "masaName": "Pausha",
+        "masaIndex": 9,
+        "isAdhika": false,
+        "vikramSamvat": 2085,
+        "shakaSamvat": 1950,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        1860364800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2025-01-01",
+      "hindu": {
+        "tithiName": "Shukla Pratipada",
+        "tithi": 1,
+        "pakshaTithi": 1,
+        "paksha": "shukla",
+        "masaName": "Pausha",
+        "masaIndex": 9,
+        "isAdhika": false,
+        "vikramSamvat": 2081,
+        "shakaSamvat": 1946,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        1735689600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2025-01-30",
+      "hindu": {
+        "tithiName": "Amavasya",
+        "tithi": 30,
+        "pakshaTithi": 15,
+        "paksha": "krishna",
+        "masaName": "Magha",
+        "masaIndex": 10,
+        "isAdhika": false,
+        "vikramSamvat": 2081,
+        "shakaSamvat": 1946,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        1738195200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2025-02-28",
+      "hindu": {
+        "tithiName": "Amavasya",
+        "tithi": 30,
+        "pakshaTithi": 15,
+        "paksha": "krishna",
+        "masaName": "Phalguna",
+        "masaIndex": 11,
+        "isAdhika": false,
+        "vikramSamvat": 2081,
+        "shakaSamvat": 1946,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        1740700800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2025-03-29",
+      "hindu": {
+        "tithiName": "Krishna Chaturdashi",
+        "tithi": 29,
+        "pakshaTithi": 14,
+        "paksha": "krishna",
+        "masaName": "Chaitra",
+        "masaIndex": 0,
+        "isAdhika": false,
+        "vikramSamvat": 2081,
+        "shakaSamvat": 1946,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1743206400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2025-04-27",
+      "hindu": {
+        "tithiName": "Krishna Chaturdashi",
+        "tithi": 29,
+        "pakshaTithi": 14,
+        "paksha": "krishna",
+        "masaName": "Vaishakha",
+        "masaIndex": 1,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1745712000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2025-05-26",
+      "hindu": {
+        "tithiName": "Krishna Trayodashi",
+        "tithi": 28,
+        "pakshaTithi": 13,
+        "paksha": "krishna",
+        "masaName": "Jyeshtha",
+        "masaIndex": 2,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1748217600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2025-06-24",
+      "hindu": {
+        "tithiName": "Krishna Trayodashi",
+        "tithi": 28,
+        "pakshaTithi": 13,
+        "paksha": "krishna",
+        "masaName": "Ashadha",
+        "masaIndex": 3,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        1750723200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2025-07-23",
+      "hindu": {
+        "tithiName": "Krishna Trayodashi",
+        "tithi": 28,
+        "pakshaTithi": 13,
+        "paksha": "krishna",
+        "masaName": "Shravana",
+        "masaIndex": 4,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        1753228800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2025-08-21",
+      "hindu": {
+        "tithiName": "Krishna Trayodashi",
+        "tithi": 28,
+        "pakshaTithi": 13,
+        "paksha": "krishna",
+        "masaName": "Bhadrapada",
+        "masaIndex": 5,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        1755734400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2025-09-19",
+      "hindu": {
+        "tithiName": "Krishna Dwadashi",
+        "tithi": 27,
+        "pakshaTithi": 12,
+        "paksha": "krishna",
+        "masaName": "Ashwina",
+        "masaIndex": 6,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        1758240000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2025-10-18",
+      "hindu": {
+        "tithiName": "Krishna Dwadashi",
+        "tithi": 27,
+        "pakshaTithi": 12,
+        "paksha": "krishna",
+        "masaName": "Kartika",
+        "masaIndex": 7,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1760745600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2025-11-16",
+      "hindu": {
+        "tithiName": "Krishna Ekadashi",
+        "tithi": 26,
+        "pakshaTithi": 11,
+        "paksha": "krishna",
+        "masaName": "Margashirsha",
+        "masaIndex": 8,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1763251200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2025-12-15",
+      "hindu": {
+        "tithiName": "Krishna Dashami",
+        "tithi": 25,
+        "pakshaTithi": 10,
+        "paksha": "krishna",
+        "masaName": "Pausha",
+        "masaIndex": 9,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1765670400000,
+        1765756800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2026-01-01",
+      "hindu": {
+        "tithiName": "Shukla Dwadashi",
+        "tithi": 12,
+        "pakshaTithi": 12,
+        "paksha": "shukla",
+        "masaName": "Pausha",
+        "masaIndex": 9,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        1767225600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2026-01-30",
+      "hindu": {
+        "tithiName": "Shukla Dwadashi",
+        "tithi": 12,
+        "pakshaTithi": 12,
+        "paksha": "shukla",
+        "masaName": "Magha",
+        "masaIndex": 10,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        1769731200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2026-02-28",
+      "hindu": {
+        "tithiName": "Shukla Ekadashi",
+        "tithi": 11,
+        "pakshaTithi": 11,
+        "paksha": "shukla",
+        "masaName": "Phalguna",
+        "masaIndex": 11,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1772236800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2026-03-29",
+      "hindu": {
+        "tithiName": "Shukla Ekadashi",
+        "tithi": 11,
+        "pakshaTithi": 11,
+        "paksha": "shukla",
+        "masaName": "Chaitra",
+        "masaIndex": 0,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1774742400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2026-04-27",
+      "hindu": {
+        "tithiName": "Shukla Dashami",
+        "tithi": 10,
+        "pakshaTithi": 10,
+        "paksha": "shukla",
+        "masaName": "Vaishakha",
+        "masaIndex": 1,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1777248000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2026-05-26",
+      "hindu": {
+        "tithiName": "Shukla Dashami",
+        "tithi": 10,
+        "pakshaTithi": 10,
+        "paksha": "shukla",
+        "masaName": "Adhika Jyeshtha",
+        "masaIndex": 2,
+        "isAdhika": true,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        1779753600000,
+        1782345600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2026-06-24",
+      "hindu": {
+        "tithiName": "Shukla Navami",
+        "tithi": 9,
+        "pakshaTithi": 9,
+        "paksha": "shukla",
+        "masaName": "Jyeshtha",
+        "masaIndex": 2,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        1779667200000,
+        1782259200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2026-07-23",
+      "hindu": {
+        "tithiName": "Shukla Navami",
+        "tithi": 9,
+        "pakshaTithi": 9,
+        "paksha": "shukla",
+        "masaName": "Ashadha",
+        "masaIndex": 3,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        1784764800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2026-08-21",
+      "hindu": {
+        "tithiName": "Shukla Ashtami",
+        "tithi": 8,
+        "pakshaTithi": 8,
+        "paksha": "shukla",
+        "masaName": "Shravana",
+        "masaIndex": 4,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        1787270400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2026-09-19",
+      "hindu": {
+        "tithiName": "Shukla Ashtami",
+        "tithi": 8,
+        "pakshaTithi": 8,
+        "paksha": "shukla",
+        "masaName": "Bhadrapada",
+        "masaIndex": 5,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1789776000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2026-10-18",
+      "hindu": {
+        "tithiName": "Shukla Saptami",
+        "tithi": 7,
+        "pakshaTithi": 7,
+        "paksha": "shukla",
+        "masaName": "Ashwina",
+        "masaIndex": 6,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1792281600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2026-11-16",
+      "hindu": {
+        "tithiName": "Shukla Shashthi",
+        "tithi": 6,
+        "pakshaTithi": 6,
+        "paksha": "shukla",
+        "masaName": "Kartika",
+        "masaIndex": 7,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1794787200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "NewYork|2026-12-15",
+      "hindu": {
+        "tithiName": "Shukla Panchami",
+        "tithi": 5,
+        "pakshaTithi": 5,
+        "paksha": "shukla",
+        "masaName": "Margashirsha",
+        "masaIndex": 8,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        1797206400000,
+        1797292800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Sydney|2026-01-01",
+      "hindu": {
+        "tithiName": "Shukla Dwadashi",
+        "tithi": 12,
+        "pakshaTithi": 12,
+        "paksha": "shukla",
+        "masaName": "Pausha",
+        "masaIndex": 9,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        1767225600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Sydney|2026-01-30",
+      "hindu": {
+        "tithiName": "Shukla Dwadashi",
+        "tithi": 12,
+        "pakshaTithi": 12,
+        "paksha": "shukla",
+        "masaName": "Magha",
+        "masaIndex": 10,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1769731200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Sydney|2026-02-28",
+      "hindu": {
+        "tithiName": "Shukla Dwadashi",
+        "tithi": 12,
+        "pakshaTithi": 12,
+        "paksha": "shukla",
+        "masaName": "Phalguna",
+        "masaIndex": 11,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1772236800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Sydney|2026-03-29",
+      "hindu": {
+        "tithiName": "Shukla Ekadashi",
+        "tithi": 11,
+        "pakshaTithi": 11,
+        "paksha": "shukla",
+        "masaName": "Chaitra",
+        "masaIndex": 0,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1774742400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Sydney|2026-04-27",
+      "hindu": {
+        "tithiName": "Shukla Ekadashi",
+        "tithi": 11,
+        "pakshaTithi": 11,
+        "paksha": "shukla",
+        "masaName": "Vaishakha",
+        "masaIndex": 1,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        1777248000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Sydney|2026-05-26",
+      "hindu": {
+        "tithiName": "Shukla Dashami",
+        "tithi": 10,
+        "pakshaTithi": 10,
+        "paksha": "shukla",
+        "masaName": "Adhika Jyeshtha",
+        "masaIndex": 2,
+        "isAdhika": true,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        1779753600000,
+        1782259200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Sydney|2026-06-24",
+      "hindu": {
+        "tithiName": "Shukla Dashami",
+        "tithi": 10,
+        "pakshaTithi": 10,
+        "paksha": "shukla",
+        "masaName": "Jyeshtha",
+        "masaIndex": 2,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Budhawara",
+        "varaIndex": 3
+      },
+      "roundTrip": [
+        1779753600000,
+        1782259200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Sydney|2026-07-23",
+      "hindu": {
+        "tithiName": "Shukla Navami",
+        "tithi": 9,
+        "pakshaTithi": 9,
+        "paksha": "shukla",
+        "masaName": "Ashadha",
+        "masaIndex": 3,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Guruwara",
+        "varaIndex": 4
+      },
+      "roundTrip": [
+        1784764800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Sydney|2026-08-21",
+      "hindu": {
+        "tithiName": "Shukla Navami",
+        "tithi": 9,
+        "pakshaTithi": 9,
+        "paksha": "shukla",
+        "masaName": "Shravana",
+        "masaIndex": 4,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1787270400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Sydney|2026-09-19",
+      "hindu": {
+        "tithiName": "Shukla Ashtami",
+        "tithi": 8,
+        "pakshaTithi": 8,
+        "paksha": "shukla",
+        "masaName": "Bhadrapada",
+        "masaIndex": 5,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1789776000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Sydney|2026-10-18",
+      "hindu": {
+        "tithiName": "Shukla Saptami",
+        "tithi": 7,
+        "pakshaTithi": 7,
+        "paksha": "shukla",
+        "masaName": "Ashwina",
+        "masaIndex": 6,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1792281600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Sydney|2026-11-16",
+      "hindu": {
+        "tithiName": "Shukla Shashthi",
+        "tithi": 6,
+        "pakshaTithi": 6,
+        "paksha": "shukla",
+        "masaName": "Kartika",
+        "masaIndex": 7,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Somawara",
+        "varaIndex": 1
+      },
+      "roundTrip": [
+        1794700800000,
+        1794787200000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Sydney|2026-12-15",
+      "hindu": {
+        "tithiName": "Shukla Shashthi",
+        "tithi": 6,
+        "pakshaTithi": 6,
+        "paksha": "shukla",
+        "masaName": "Margashirsha",
+        "masaIndex": 8,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Mangalawara",
+        "varaIndex": 2
+      },
+      "roundTrip": [
+        1797292800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Longyearbyen|2025-01-01",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2025-01-30",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2025-02-28",
+      "hindu": {
+        "tithiName": "Shukla Pratipada",
+        "tithi": 1,
+        "pakshaTithi": 1,
+        "paksha": "shukla",
+        "masaName": "Phalguna",
+        "masaIndex": 11,
+        "isAdhika": false,
+        "vikramSamvat": 2081,
+        "shakaSamvat": 1946,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1740700800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Longyearbyen|2025-03-29",
+      "hindu": {
+        "tithiName": "Amavasya",
+        "tithi": 30,
+        "pakshaTithi": 15,
+        "paksha": "krishna",
+        "masaName": "Chaitra",
+        "masaIndex": 0,
+        "isAdhika": false,
+        "vikramSamvat": 2081,
+        "shakaSamvat": 1946,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1743206400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Longyearbyen|2025-04-27",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2025-05-26",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2025-06-24",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2025-07-23",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2025-08-21",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2025-09-19",
+      "hindu": {
+        "tithiName": "Krishna Trayodashi",
+        "tithi": 28,
+        "pakshaTithi": 13,
+        "paksha": "krishna",
+        "masaName": "Ashwina",
+        "masaIndex": 6,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1758240000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Longyearbyen|2025-10-18",
+      "hindu": {
+        "tithiName": "Krishna Trayodashi",
+        "tithi": 28,
+        "pakshaTithi": 13,
+        "paksha": "krishna",
+        "masaName": "Kartika",
+        "masaIndex": 7,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1760745600000,
+        1760832000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Longyearbyen|2025-11-16",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2025-12-15",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2026-01-01",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2026-01-30",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2026-02-28",
+      "hindu": {
+        "tithiName": "Shukla Dwadashi",
+        "tithi": 12,
+        "pakshaTithi": 12,
+        "paksha": "shukla",
+        "masaName": "Phalguna",
+        "masaIndex": 11,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1772236800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Longyearbyen|2026-03-29",
+      "hindu": {
+        "tithiName": "Shukla Dwadashi",
+        "tithi": 12,
+        "pakshaTithi": 12,
+        "paksha": "shukla",
+        "masaName": "Chaitra",
+        "masaIndex": 0,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1774742400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Longyearbyen|2026-04-27",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2026-05-26",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2026-06-24",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2026-07-23",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2026-08-21",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2026-09-19",
+      "hindu": {
+        "tithiName": "Shukla Ashtami",
+        "tithi": 8,
+        "pakshaTithi": 8,
+        "paksha": "shukla",
+        "masaName": "Bhadrapada",
+        "masaIndex": 5,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1789776000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Longyearbyen|2026-10-18",
+      "hindu": {
+        "tithiName": "Shukla Ashtami",
+        "tithi": 8,
+        "pakshaTithi": 8,
+        "paksha": "shukla",
+        "masaName": "Ashwina",
+        "masaIndex": 6,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1792281600000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Longyearbyen|2026-11-16",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Longyearbyen|2026-12-15",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2026-01-01",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2026-01-30",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2026-02-28",
+      "hindu": {
+        "tithiName": "Shukla Ekadashi",
+        "tithi": 11,
+        "pakshaTithi": 11,
+        "paksha": "shukla",
+        "masaName": "Phalguna",
+        "masaIndex": 11,
+        "isAdhika": false,
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1772150400000,
+        1772236800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Alert|2026-03-29",
+      "hindu": {
+        "tithiName": "Shukla Ekadashi",
+        "tithi": 11,
+        "pakshaTithi": 11,
+        "paksha": "shukla",
+        "masaName": "Chaitra",
+        "masaIndex": 0,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1774742400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Alert|2026-04-27",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2026-05-26",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2026-06-24",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2026-07-23",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2026-08-21",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2026-09-19",
+      "hindu": {
+        "tithiName": "Shukla Ashtami",
+        "tithi": 8,
+        "pakshaTithi": 8,
+        "paksha": "shukla",
+        "masaName": "Bhadrapada",
+        "masaIndex": 5,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Shukrawara",
+        "varaIndex": 5
+      },
+      "roundTrip": [
+        1789776000000,
+        1789862400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Alert|2026-10-18",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2026-11-16",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2026-12-15",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2027-01-01",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2027-01-30",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2027-02-28",
+      "hindu": {
+        "tithiName": "Krishna Saptami",
+        "tithi": 22,
+        "pakshaTithi": 7,
+        "paksha": "krishna",
+        "masaName": "Phalguna",
+        "masaIndex": 11,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1803686400000,
+        1803772800000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Alert|2027-03-29",
+      "hindu": {
+        "tithiName": "Krishna Shashthi",
+        "tithi": 21,
+        "pakshaTithi": 6,
+        "paksha": "krishna",
+        "masaName": "Chaitra",
+        "masaIndex": 0,
+        "isAdhika": false,
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "varaName": "Raviwara",
+        "varaIndex": 0
+      },
+      "roundTrip": [
+        1806192000000,
+        1806278400000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Alert|2027-04-27",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2027-05-26",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2027-06-24",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2027-07-23",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2027-08-21",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2027-09-19",
+      "hindu": {
+        "tithiName": "Krishna Tritiya",
+        "tithi": 18,
+        "pakshaTithi": 3,
+        "paksha": "krishna",
+        "masaName": "Ashwina",
+        "masaIndex": 6,
+        "isAdhika": false,
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "varaName": "Shaniwara",
+        "varaIndex": 6
+      },
+      "roundTrip": [
+        1821312000000
+      ],
+      "roundTripContains": true
+    },
+    {
+      "key": "Alert|2027-10-18",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2027-11-16",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    },
+    {
+      "key": "Alert|2027-12-15",
+      "hindu": "error:NO_SUNRISE",
+      "roundTrip": null
+    }
+  ],
+  "eras": [
+    {
+      "key": "1912-01-01",
+      "samvat": {
+        "vikramSamvat": 1968,
+        "shakaSamvat": 1833,
+        "vikramSamvatsara": "Raktakshi",
+        "shakaSamvatsara": "Virodhakrit"
+      },
+      "kaliYuga": 5012
+    },
+    {
+      "key": "1912-02-18",
+      "samvat": {
+        "vikramSamvat": 1968,
+        "shakaSamvat": 1833,
+        "vikramSamvatsara": "Raktakshi",
+        "shakaSamvatsara": "Virodhakrit"
+      },
+      "kaliYuga": 5012
+    },
+    {
+      "key": "1912-03-15",
+      "samvat": {
+        "vikramSamvat": 1968,
+        "shakaSamvat": 1833,
+        "vikramSamvatsara": "Raktakshi",
+        "shakaSamvatsara": "Virodhakrit"
+      },
+      "kaliYuga": 5012
+    },
+    {
+      "key": "1912-03-20",
+      "samvat": {
+        "vikramSamvat": 1969,
+        "shakaSamvat": 1834,
+        "vikramSamvatsara": "Krodhana",
+        "shakaSamvatsara": "Paridhavi"
+      },
+      "kaliYuga": 5013
+    },
+    {
+      "key": "1912-03-25",
+      "samvat": {
+        "vikramSamvat": 1969,
+        "shakaSamvat": 1834,
+        "vikramSamvatsara": "Krodhana",
+        "shakaSamvatsara": "Paridhavi"
+      },
+      "kaliYuga": 5013
+    },
+    {
+      "key": "1912-04-05",
+      "samvat": {
+        "vikramSamvat": 1969,
+        "shakaSamvat": 1834,
+        "vikramSamvatsara": "Krodhana",
+        "shakaSamvatsara": "Paridhavi"
+      },
+      "kaliYuga": 5013
+    },
+    {
+      "key": "1912-12-31",
+      "samvat": {
+        "vikramSamvat": 1969,
+        "shakaSamvat": 1834,
+        "vikramSamvatsara": "Krodhana",
+        "shakaSamvatsara": "Paridhavi"
+      },
+      "kaliYuga": 5013
+    },
+    {
+      "key": "2025-01-01",
+      "samvat": {
+        "vikramSamvat": 2081,
+        "shakaSamvat": 1946,
+        "vikramSamvatsara": "Pingala",
+        "shakaSamvatsara": "Krodhi"
+      },
+      "kaliYuga": 5125
+    },
+    {
+      "key": "2025-02-18",
+      "samvat": {
+        "vikramSamvat": 2081,
+        "shakaSamvat": 1946,
+        "vikramSamvatsara": "Pingala",
+        "shakaSamvatsara": "Krodhi"
+      },
+      "kaliYuga": 5125
+    },
+    {
+      "key": "2025-03-15",
+      "samvat": {
+        "vikramSamvat": 2081,
+        "shakaSamvat": 1946,
+        "vikramSamvatsara": "Pingala",
+        "shakaSamvatsara": "Krodhi"
+      },
+      "kaliYuga": 5125
+    },
+    {
+      "key": "2025-03-20",
+      "samvat": {
+        "vikramSamvat": 2081,
+        "shakaSamvat": 1946,
+        "vikramSamvatsara": "Pingala",
+        "shakaSamvatsara": "Krodhi"
+      },
+      "kaliYuga": 5125
+    },
+    {
+      "key": "2025-03-25",
+      "samvat": {
+        "vikramSamvat": 2081,
+        "shakaSamvat": 1946,
+        "vikramSamvatsara": "Pingala",
+        "shakaSamvatsara": "Krodhi"
+      },
+      "kaliYuga": 5125
+    },
+    {
+      "key": "2025-04-05",
+      "samvat": {
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "vikramSamvatsara": "Kalayukta",
+        "shakaSamvatsara": "Vishvavasu"
+      },
+      "kaliYuga": 5126
+    },
+    {
+      "key": "2025-12-31",
+      "samvat": {
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "vikramSamvatsara": "Kalayukta",
+        "shakaSamvatsara": "Vishvavasu"
+      },
+      "kaliYuga": 5126
+    },
+    {
+      "key": "2026-01-01",
+      "samvat": {
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "vikramSamvatsara": "Kalayukta",
+        "shakaSamvatsara": "Vishvavasu"
+      },
+      "kaliYuga": 5126
+    },
+    {
+      "key": "2026-02-18",
+      "samvat": {
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "vikramSamvatsara": "Kalayukta",
+        "shakaSamvatsara": "Vishvavasu"
+      },
+      "kaliYuga": 5126
+    },
+    {
+      "key": "2026-03-15",
+      "samvat": {
+        "vikramSamvat": 2082,
+        "shakaSamvat": 1947,
+        "vikramSamvatsara": "Kalayukta",
+        "shakaSamvatsara": "Vishvavasu"
+      },
+      "kaliYuga": 5126
+    },
+    {
+      "key": "2026-03-20",
+      "samvat": {
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "vikramSamvatsara": "Siddharthi",
+        "shakaSamvatsara": "Parabhava"
+      },
+      "kaliYuga": 5127
+    },
+    {
+      "key": "2026-03-25",
+      "samvat": {
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "vikramSamvatsara": "Siddharthi",
+        "shakaSamvatsara": "Parabhava"
+      },
+      "kaliYuga": 5127
+    },
+    {
+      "key": "2026-04-05",
+      "samvat": {
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "vikramSamvatsara": "Siddharthi",
+        "shakaSamvatsara": "Parabhava"
+      },
+      "kaliYuga": 5127
+    },
+    {
+      "key": "2026-12-31",
+      "samvat": {
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "vikramSamvatsara": "Siddharthi",
+        "shakaSamvatsara": "Parabhava"
+      },
+      "kaliYuga": 5127
+    },
+    {
+      "key": "2027-01-01",
+      "samvat": {
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "vikramSamvatsara": "Siddharthi",
+        "shakaSamvatsara": "Parabhava"
+      },
+      "kaliYuga": 5127
+    },
+    {
+      "key": "2027-02-18",
+      "samvat": {
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "vikramSamvatsara": "Siddharthi",
+        "shakaSamvatsara": "Parabhava"
+      },
+      "kaliYuga": 5127
+    },
+    {
+      "key": "2027-03-15",
+      "samvat": {
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "vikramSamvatsara": "Siddharthi",
+        "shakaSamvatsara": "Parabhava"
+      },
+      "kaliYuga": 5127
+    },
+    {
+      "key": "2027-03-20",
+      "samvat": {
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "vikramSamvatsara": "Siddharthi",
+        "shakaSamvatsara": "Parabhava"
+      },
+      "kaliYuga": 5127
+    },
+    {
+      "key": "2027-03-25",
+      "samvat": {
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "vikramSamvatsara": "Siddharthi",
+        "shakaSamvatsara": "Parabhava"
+      },
+      "kaliYuga": 5127
+    },
+    {
+      "key": "2027-04-05",
+      "samvat": {
+        "vikramSamvat": 2083,
+        "shakaSamvat": 1948,
+        "vikramSamvatsara": "Siddharthi",
+        "shakaSamvatsara": "Parabhava"
+      },
+      "kaliYuga": 5127
+    },
+    {
+      "key": "2027-12-31",
+      "samvat": {
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "vikramSamvatsara": "Raudra",
+        "shakaSamvatsara": "Plavanga"
+      },
+      "kaliYuga": 5128
+    },
+    {
+      "key": "2028-01-01",
+      "samvat": {
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "vikramSamvatsara": "Raudra",
+        "shakaSamvatsara": "Plavanga"
+      },
+      "kaliYuga": 5128
+    },
+    {
+      "key": "2028-02-18",
+      "samvat": {
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "vikramSamvatsara": "Raudra",
+        "shakaSamvatsara": "Plavanga"
+      },
+      "kaliYuga": 5128
+    },
+    {
+      "key": "2028-03-15",
+      "samvat": {
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "vikramSamvatsara": "Raudra",
+        "shakaSamvatsara": "Plavanga"
+      },
+      "kaliYuga": 5128
+    },
+    {
+      "key": "2028-03-20",
+      "samvat": {
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "vikramSamvatsara": "Raudra",
+        "shakaSamvatsara": "Plavanga"
+      },
+      "kaliYuga": 5128
+    },
+    {
+      "key": "2028-03-25",
+      "samvat": {
+        "vikramSamvat": 2084,
+        "shakaSamvat": 1949,
+        "vikramSamvatsara": "Raudra",
+        "shakaSamvatsara": "Plavanga"
+      },
+      "kaliYuga": 5128
+    },
+    {
+      "key": "2028-04-05",
+      "samvat": {
+        "vikramSamvat": 2085,
+        "shakaSamvat": 1950,
+        "vikramSamvatsara": "Durmati",
+        "shakaSamvatsara": "Kilaka"
+      },
+      "kaliYuga": 5129
+    },
+    {
+      "key": "2028-12-31",
+      "samvat": {
+        "vikramSamvat": 2085,
+        "shakaSamvat": 1950,
+        "vikramSamvatsara": "Durmati",
+        "shakaSamvatsara": "Kilaka"
+      },
+      "kaliYuga": 5129
+    },
+    {
+      "key": "2029-01-01",
+      "samvat": {
+        "vikramSamvat": 2085,
+        "shakaSamvat": 1950,
+        "vikramSamvatsara": "Durmati",
+        "shakaSamvatsara": "Kilaka"
+      },
+      "kaliYuga": 5129
+    },
+    {
+      "key": "2029-02-18",
+      "samvat": {
+        "vikramSamvat": 2085,
+        "shakaSamvat": 1950,
+        "vikramSamvatsara": "Durmati",
+        "shakaSamvatsara": "Kilaka"
+      },
+      "kaliYuga": 5129
+    },
+    {
+      "key": "2029-03-15",
+      "samvat": {
+        "vikramSamvat": 2085,
+        "shakaSamvat": 1950,
+        "vikramSamvatsara": "Durmati",
+        "shakaSamvatsara": "Kilaka"
+      },
+      "kaliYuga": 5129
+    },
+    {
+      "key": "2029-03-20",
+      "samvat": {
+        "vikramSamvat": 2086,
+        "shakaSamvat": 1951,
+        "vikramSamvatsara": "Dundubhi",
+        "shakaSamvatsara": "Saumya"
+      },
+      "kaliYuga": 5130
+    },
+    {
+      "key": "2029-03-25",
+      "samvat": {
+        "vikramSamvat": 2086,
+        "shakaSamvat": 1951,
+        "vikramSamvatsara": "Dundubhi",
+        "shakaSamvatsara": "Saumya"
+      },
+      "kaliYuga": 5130
+    },
+    {
+      "key": "2029-04-05",
+      "samvat": {
+        "vikramSamvat": 2086,
+        "shakaSamvat": 1951,
+        "vikramSamvatsara": "Dundubhi",
+        "shakaSamvatsara": "Saumya"
+      },
+      "kaliYuga": 5130
+    },
+    {
+      "key": "2029-12-31",
+      "samvat": {
+        "vikramSamvat": 2086,
+        "shakaSamvat": 1951,
+        "vikramSamvatsara": "Dundubhi",
+        "shakaSamvatsara": "Saumya"
+      },
+      "kaliYuga": 5130
+    },
+    {
+      "key": "2088-01-01",
+      "samvat": {
+        "vikramSamvat": 2144,
+        "shakaSamvat": 2009,
+        "vikramSamvatsara": "Raudra",
+        "shakaSamvatsara": "Plavanga"
+      },
+      "kaliYuga": 5188
+    },
+    {
+      "key": "2088-02-18",
+      "samvat": {
+        "vikramSamvat": 2144,
+        "shakaSamvat": 2009,
+        "vikramSamvatsara": "Raudra",
+        "shakaSamvatsara": "Plavanga"
+      },
+      "kaliYuga": 5188
+    },
+    {
+      "key": "2088-03-15",
+      "samvat": {
+        "vikramSamvat": 2144,
+        "shakaSamvat": 2009,
+        "vikramSamvatsara": "Raudra",
+        "shakaSamvatsara": "Plavanga"
+      },
+      "kaliYuga": 5188
+    },
+    {
+      "key": "2088-03-20",
+      "samvat": {
+        "vikramSamvat": 2144,
+        "shakaSamvat": 2009,
+        "vikramSamvatsara": "Raudra",
+        "shakaSamvatsara": "Plavanga"
+      },
+      "kaliYuga": 5188
+    },
+    {
+      "key": "2088-03-25",
+      "samvat": {
+        "vikramSamvat": 2145,
+        "shakaSamvat": 2010,
+        "vikramSamvatsara": "Durmati",
+        "shakaSamvatsara": "Kilaka"
+      },
+      "kaliYuga": 5189
+    },
+    {
+      "key": "2088-04-05",
+      "samvat": {
+        "vikramSamvat": 2145,
+        "shakaSamvat": 2010,
+        "vikramSamvatsara": "Durmati",
+        "shakaSamvatsara": "Kilaka"
+      },
+      "kaliYuga": 5189
+    },
+    {
+      "key": "2088-12-31",
+      "samvat": {
+        "vikramSamvat": 2145,
+        "shakaSamvat": 2010,
+        "vikramSamvatsara": "Durmati",
+        "shakaSamvatsara": "Kilaka"
+      },
+      "kaliYuga": 5189
+    }
+  ],
+  "newYears": [
+    {
+      "key": "Pune|2025|all",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|tamil-nadu",
+      "at": 1744588800000
+    },
+    {
+      "key": "Pune|2025|kerala",
+      "at": 1744588800000
+    },
+    {
+      "key": "Pune|2025|karnataka",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|andhra-pradesh",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|telangana",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|west-bengal",
+      "at": 1744675200000
+    },
+    {
+      "key": "Pune|2025|odisha",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|assam",
+      "at": 1744588800000
+    },
+    {
+      "key": "Pune|2025|bihar",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|jharkhand",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|gujarat",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|maharashtra",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|goa",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|rajasthan",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|punjab",
+      "at": 1744588800000
+    },
+    {
+      "key": "Pune|2025|haryana",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|himachal-pradesh",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|uttarakhand",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|uttar-pradesh",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|madhya-pradesh",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|nepal",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2025|tamil",
+      "at": 1744588800000
+    },
+    {
+      "key": "Pune|2025|bengal",
+      "at": 1744675200000
+    },
+    {
+      "key": "Pune|2025|north-india",
+      "at": 1743292800000
+    },
+    {
+      "key": "Pune|2026|all",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|tamil-nadu",
+      "at": 1776124800000
+    },
+    {
+      "key": "Pune|2026|kerala",
+      "at": 1776211200000
+    },
+    {
+      "key": "Pune|2026|karnataka",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|andhra-pradesh",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|telangana",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|west-bengal",
+      "at": 1776211200000
+    },
+    {
+      "key": "Pune|2026|odisha",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|assam",
+      "at": 1776124800000
+    },
+    {
+      "key": "Pune|2026|bihar",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|jharkhand",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|gujarat",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|maharashtra",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|goa",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|rajasthan",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|punjab",
+      "at": 1776124800000
+    },
+    {
+      "key": "Pune|2026|haryana",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|himachal-pradesh",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|uttarakhand",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|uttar-pradesh",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|madhya-pradesh",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|nepal",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2026|tamil",
+      "at": 1776124800000
+    },
+    {
+      "key": "Pune|2026|bengal",
+      "at": 1776211200000
+    },
+    {
+      "key": "Pune|2026|north-india",
+      "at": 1773964800000
+    },
+    {
+      "key": "Pune|2027|all",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|tamil-nadu",
+      "at": 1807660800000
+    },
+    {
+      "key": "Pune|2027|kerala",
+      "at": 1807747200000
+    },
+    {
+      "key": "Pune|2027|karnataka",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|andhra-pradesh",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|telangana",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|west-bengal",
+      "at": 1807747200000
+    },
+    {
+      "key": "Pune|2027|odisha",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|assam",
+      "at": 1807660800000
+    },
+    {
+      "key": "Pune|2027|bihar",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|jharkhand",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|gujarat",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|maharashtra",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|goa",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|rajasthan",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|punjab",
+      "at": 1807660800000
+    },
+    {
+      "key": "Pune|2027|haryana",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|himachal-pradesh",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|uttarakhand",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|uttar-pradesh",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|madhya-pradesh",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|nepal",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2027|tamil",
+      "at": 1807660800000
+    },
+    {
+      "key": "Pune|2027|bengal",
+      "at": 1807747200000
+    },
+    {
+      "key": "Pune|2027|north-india",
+      "at": 1807056000000
+    },
+    {
+      "key": "Pune|2028|all",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|tamil-nadu",
+      "at": 1839283200000
+    },
+    {
+      "key": "Pune|2028|kerala",
+      "at": 1839283200000
+    },
+    {
+      "key": "Pune|2028|karnataka",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|andhra-pradesh",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|telangana",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|west-bengal",
+      "at": 1839283200000
+    },
+    {
+      "key": "Pune|2028|odisha",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|assam",
+      "at": 1839283200000
+    },
+    {
+      "key": "Pune|2028|bihar",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|jharkhand",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|gujarat",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|maharashtra",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|goa",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|rajasthan",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|punjab",
+      "at": 1839196800000
+    },
+    {
+      "key": "Pune|2028|haryana",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|himachal-pradesh",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|uttarakhand",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|uttar-pradesh",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|madhya-pradesh",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|nepal",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2028|tamil",
+      "at": 1839283200000
+    },
+    {
+      "key": "Pune|2028|bengal",
+      "at": 1839283200000
+    },
+    {
+      "key": "Pune|2028|north-india",
+      "at": 1837728000000
+    },
+    {
+      "key": "Pune|2029|all",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|tamil-nadu",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|kerala",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|karnataka",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|andhra-pradesh",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|telangana",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|west-bengal",
+      "at": 1870905600000
+    },
+    {
+      "key": "Pune|2029|odisha",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|assam",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|bihar",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|jharkhand",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|gujarat",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|maharashtra",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|goa",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|rajasthan",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|punjab",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|haryana",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|himachal-pradesh",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|uttarakhand",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|uttar-pradesh",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|madhya-pradesh",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|nepal",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|tamil",
+      "at": 1870819200000
+    },
+    {
+      "key": "Pune|2029|bengal",
+      "at": 1870905600000
+    },
+    {
+      "key": "Pune|2029|north-india",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2025|all",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|tamil-nadu",
+      "at": 1744588800000
+    },
+    {
+      "key": "Chennai|2025|kerala",
+      "at": 1744588800000
+    },
+    {
+      "key": "Chennai|2025|karnataka",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|andhra-pradesh",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|telangana",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|west-bengal",
+      "at": 1744675200000
+    },
+    {
+      "key": "Chennai|2025|odisha",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|assam",
+      "at": 1744588800000
+    },
+    {
+      "key": "Chennai|2025|bihar",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|jharkhand",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|gujarat",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|maharashtra",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|goa",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|rajasthan",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|punjab",
+      "at": 1744588800000
+    },
+    {
+      "key": "Chennai|2025|haryana",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|himachal-pradesh",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|uttarakhand",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|uttar-pradesh",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|madhya-pradesh",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|nepal",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2025|tamil",
+      "at": 1744588800000
+    },
+    {
+      "key": "Chennai|2025|bengal",
+      "at": 1744675200000
+    },
+    {
+      "key": "Chennai|2025|north-india",
+      "at": 1743292800000
+    },
+    {
+      "key": "Chennai|2026|all",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|tamil-nadu",
+      "at": 1776124800000
+    },
+    {
+      "key": "Chennai|2026|kerala",
+      "at": 1776211200000
+    },
+    {
+      "key": "Chennai|2026|karnataka",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|andhra-pradesh",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|telangana",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|west-bengal",
+      "at": 1776211200000
+    },
+    {
+      "key": "Chennai|2026|odisha",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|assam",
+      "at": 1776124800000
+    },
+    {
+      "key": "Chennai|2026|bihar",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|jharkhand",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|gujarat",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|maharashtra",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|goa",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|rajasthan",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|punjab",
+      "at": 1776124800000
+    },
+    {
+      "key": "Chennai|2026|haryana",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|himachal-pradesh",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|uttarakhand",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|uttar-pradesh",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|madhya-pradesh",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|nepal",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2026|tamil",
+      "at": 1776124800000
+    },
+    {
+      "key": "Chennai|2026|bengal",
+      "at": 1776211200000
+    },
+    {
+      "key": "Chennai|2026|north-india",
+      "at": 1773964800000
+    },
+    {
+      "key": "Chennai|2027|all",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|tamil-nadu",
+      "at": 1807660800000
+    },
+    {
+      "key": "Chennai|2027|kerala",
+      "at": 1807747200000
+    },
+    {
+      "key": "Chennai|2027|karnataka",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|andhra-pradesh",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|telangana",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|west-bengal",
+      "at": 1807747200000
+    },
+    {
+      "key": "Chennai|2027|odisha",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|assam",
+      "at": 1807660800000
+    },
+    {
+      "key": "Chennai|2027|bihar",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|jharkhand",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|gujarat",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|maharashtra",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|goa",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|rajasthan",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|punjab",
+      "at": 1807660800000
+    },
+    {
+      "key": "Chennai|2027|haryana",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|himachal-pradesh",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|uttarakhand",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|uttar-pradesh",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|madhya-pradesh",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|nepal",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2027|tamil",
+      "at": 1807660800000
+    },
+    {
+      "key": "Chennai|2027|bengal",
+      "at": 1807747200000
+    },
+    {
+      "key": "Chennai|2027|north-india",
+      "at": 1807056000000
+    },
+    {
+      "key": "Chennai|2028|all",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|tamil-nadu",
+      "at": 1839283200000
+    },
+    {
+      "key": "Chennai|2028|kerala",
+      "at": 1839283200000
+    },
+    {
+      "key": "Chennai|2028|karnataka",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|andhra-pradesh",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|telangana",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|west-bengal",
+      "at": 1839283200000
+    },
+    {
+      "key": "Chennai|2028|odisha",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|assam",
+      "at": 1839283200000
+    },
+    {
+      "key": "Chennai|2028|bihar",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|jharkhand",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|gujarat",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|maharashtra",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|goa",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|rajasthan",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|punjab",
+      "at": 1839196800000
+    },
+    {
+      "key": "Chennai|2028|haryana",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|himachal-pradesh",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|uttarakhand",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|uttar-pradesh",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|madhya-pradesh",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|nepal",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2028|tamil",
+      "at": 1839283200000
+    },
+    {
+      "key": "Chennai|2028|bengal",
+      "at": 1839283200000
+    },
+    {
+      "key": "Chennai|2028|north-india",
+      "at": 1837728000000
+    },
+    {
+      "key": "Chennai|2029|all",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|tamil-nadu",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|kerala",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|karnataka",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|andhra-pradesh",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|telangana",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|west-bengal",
+      "at": 1870905600000
+    },
+    {
+      "key": "Chennai|2029|odisha",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|assam",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|bihar",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|jharkhand",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|gujarat",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|maharashtra",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|goa",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|rajasthan",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|punjab",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|haryana",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|himachal-pradesh",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|uttarakhand",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|uttar-pradesh",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|madhya-pradesh",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|nepal",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|tamil",
+      "at": 1870819200000
+    },
+    {
+      "key": "Chennai|2029|bengal",
+      "at": 1870905600000
+    },
+    {
+      "key": "Chennai|2029|north-india",
+      "at": 1870819200000
+    },
+    {
+      "key": "Alert|2025|all",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|tamil-nadu",
+      "at": 1744502400000
+    },
+    {
+      "key": "Alert|2025|kerala",
+      "at": 1744502400000
+    },
+    {
+      "key": "Alert|2025|karnataka",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|andhra-pradesh",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|telangana",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|west-bengal",
+      "at": 1744588800000
+    },
+    {
+      "key": "Alert|2025|odisha",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|assam",
+      "at": 1744502400000
+    },
+    {
+      "key": "Alert|2025|bihar",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|jharkhand",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|gujarat",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|maharashtra",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|goa",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|rajasthan",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|punjab",
+      "at": 1744502400000
+    },
+    {
+      "key": "Alert|2025|haryana",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|himachal-pradesh",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|uttarakhand",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|uttar-pradesh",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|madhya-pradesh",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|nepal",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2025|tamil",
+      "at": 1744502400000
+    },
+    {
+      "key": "Alert|2025|bengal",
+      "at": 1744588800000
+    },
+    {
+      "key": "Alert|2025|north-india",
+      "at": 1743379200000
+    },
+    {
+      "key": "Alert|2026|all",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|tamil-nadu",
+      "at": 1776038400000
+    },
+    {
+      "key": "Alert|2026|kerala",
+      "at": 1776038400000
+    },
+    {
+      "key": "Alert|2026|karnataka",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|andhra-pradesh",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|telangana",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|west-bengal",
+      "at": 1776124800000
+    },
+    {
+      "key": "Alert|2026|odisha",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|assam",
+      "at": 1776038400000
+    },
+    {
+      "key": "Alert|2026|bihar",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|jharkhand",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|gujarat",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|maharashtra",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|goa",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|rajasthan",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|punjab",
+      "at": 1776038400000
+    },
+    {
+      "key": "Alert|2026|haryana",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|himachal-pradesh",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|uttarakhand",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|uttar-pradesh",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|madhya-pradesh",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|nepal",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2026|tamil",
+      "at": 1776038400000
+    },
+    {
+      "key": "Alert|2026|bengal",
+      "at": 1776124800000
+    },
+    {
+      "key": "Alert|2026|north-india",
+      "at": 1773964800000
+    },
+    {
+      "key": "Alert|2027|all",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|tamil-nadu",
+      "at": 1807660800000
+    },
+    {
+      "key": "Alert|2027|kerala",
+      "at": 1807660800000
+    },
+    {
+      "key": "Alert|2027|karnataka",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|andhra-pradesh",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|telangana",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|west-bengal",
+      "at": 1807747200000
+    },
+    {
+      "key": "Alert|2027|odisha",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|assam",
+      "at": 1807660800000
+    },
+    {
+      "key": "Alert|2027|bihar",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|jharkhand",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|gujarat",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|maharashtra",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|goa",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|rajasthan",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|punjab",
+      "at": 1807660800000
+    },
+    {
+      "key": "Alert|2027|haryana",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|himachal-pradesh",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|uttarakhand",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|uttar-pradesh",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|madhya-pradesh",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|nepal",
+      "at": null
+    },
+    {
+      "key": "Alert|2027|tamil",
+      "at": 1807660800000
+    },
+    {
+      "key": "Alert|2027|bengal",
+      "at": 1807747200000
+    },
+    {
+      "key": "Alert|2027|north-india",
+      "at": null
+    },
+    {
+      "key": "Alert|2028|all",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|tamil-nadu",
+      "at": 1839196800000
+    },
+    {
+      "key": "Alert|2028|kerala",
+      "at": 1839196800000
+    },
+    {
+      "key": "Alert|2028|karnataka",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|andhra-pradesh",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|telangana",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|west-bengal",
+      "at": 1839283200000
+    },
+    {
+      "key": "Alert|2028|odisha",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|assam",
+      "at": 1839196800000
+    },
+    {
+      "key": "Alert|2028|bihar",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|jharkhand",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|gujarat",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|maharashtra",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|goa",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|rajasthan",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|punjab",
+      "at": 1839196800000
+    },
+    {
+      "key": "Alert|2028|haryana",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|himachal-pradesh",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|uttarakhand",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|uttar-pradesh",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|madhya-pradesh",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|nepal",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2028|tamil",
+      "at": 1839196800000
+    },
+    {
+      "key": "Alert|2028|bengal",
+      "at": 1839283200000
+    },
+    {
+      "key": "Alert|2028|north-india",
+      "at": 1837728000000
+    },
+    {
+      "key": "Alert|2029|all",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|tamil-nadu",
+      "at": 1870732800000
+    },
+    {
+      "key": "Alert|2029|kerala",
+      "at": 1870732800000
+    },
+    {
+      "key": "Alert|2029|karnataka",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|andhra-pradesh",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|telangana",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|west-bengal",
+      "at": 1870819200000
+    },
+    {
+      "key": "Alert|2029|odisha",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|assam",
+      "at": 1870732800000
+    },
+    {
+      "key": "Alert|2029|bihar",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|jharkhand",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|gujarat",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|maharashtra",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|goa",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|rajasthan",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|punjab",
+      "at": 1870732800000
+    },
+    {
+      "key": "Alert|2029|haryana",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|himachal-pradesh",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|uttarakhand",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|uttar-pradesh",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|madhya-pradesh",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|nepal",
+      "at": null
+    },
+    {
+      "key": "Alert|2029|tamil",
+      "at": 1870732800000
+    },
+    {
+      "key": "Alert|2029|bengal",
+      "at": 1870819200000
+    },
+    {
+      "key": "Alert|2029|north-india",
+      "at": null
+    }
+  ],
+  "upcoming": [
+    {
+      "key": "Pune|2025-01-01|5",
+      "eclipses": [
+        "lunar/total/1741935526409/0",
+        "lunar/total/1757268708389/1",
+        "lunar/total/1772537622765/0",
+        "lunar/partial/1787890374577/0",
+        "lunar/penumbral/1803165175672/1"
+      ]
+    },
+    {
+      "key": "Pune|2026-06-15|3",
+      "eclipses": [
+        "lunar/partial/1787890374577/0",
+        "lunar/penumbral/1803165175672/1",
+        "lunar/penumbral/1815926580319/1"
+      ]
+    },
+    {
+      "key": "Pune|1912-06-01|4",
+      "eclipses": [
+        "lunar/partial/-1807100125465/0",
+        "lunar/total/-1791806547158/0",
+        "lunar/total/-1776510718281/0",
+        "lunar/partial/-1761162429754/0"
+      ]
+    },
+    {
+      "key": "Sydney|2025-01-01|5",
+      "eclipses": [
+        "lunar/total/1741935526409/0",
+        "lunar/total/1757268708389/1",
+        "solar/partial/1758480747575/0",
+        "lunar/total/1772537622765/1",
+        "lunar/partial/1787890374577/0"
+      ]
+    },
+    {
+      "key": "Sydney|2026-06-15|3",
+      "eclipses": [
+        "lunar/partial/1787890374577/0",
+        "lunar/penumbral/1803165175672/0",
+        "lunar/penumbral/1815926580319/1"
+      ]
+    },
+    {
+      "key": "Sydney|1912-06-01|4",
+      "eclipses": [
+        "lunar/partial/-1807100125465/1",
+        "lunar/total/-1791806547158/1",
+        "lunar/total/-1776510718281/1",
+        "lunar/partial/-1761162429754/0"
+      ]
+    },
+    {
+      "key": "Longyearbyen|2025-01-01|5",
+      "eclipses": [
+        "lunar/total/1741935526409/0",
+        "solar/partial/1743248213760/1",
+        "lunar/total/1757268708389/0",
+        "lunar/total/1772537622765/0",
+        "solar/partial/1786555493830/1"
+      ]
+    },
+    {
+      "key": "Longyearbyen|2026-06-15|3",
+      "eclipses": [
+        "solar/partial/1786555493830/1",
+        "lunar/partial/1787890374577/0",
+        "lunar/penumbral/1803165175672/1"
+      ]
+    },
+    {
+      "key": "Longyearbyen|1912-06-01|4",
+      "eclipses": [
+        "lunar/partial/-1807100125465/0",
+        "lunar/total/-1791806547158/0",
+        "solar/partial/-1790485949303/1",
+        "solar/partial/-1777779825384/1"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,818 @@
+{
+  "_meta": {
+    "generator": "source/go/parity/goldens.src.ts (bash source/go/parity/goldens.sh)",
+    "source": "the object literals themselves, via Object.keys on real results",
+    "baseline": "master @ c38c606 (intended tag v5.1.1) + the uncommitted fixes in src/core/nakshatra.ts, src/core/panchang.ts, src/jyotish/lagna.ts",
+    "claim": "D6: JSON key order is an invariant of the parity diff, and Go gets it from struct declaration order. These are the orders JSON.stringify actually produces, insertion order, i.e. the object literal, which for several of these is NOT the interface declaration order."
+  },
+  "unlocalized": {
+    "TithiInfo": [
+      "index",
+      "name",
+      "paksha",
+      "number",
+      "completionPercentage",
+      "endTime"
+    ],
+    "NakshatraInfo": [
+      "index",
+      "name",
+      "pada",
+      "degreesInNakshatra",
+      "completionPercentage",
+      "endTime"
+    ],
+    "YogaInfo": [
+      "index",
+      "name",
+      "completionPercentage",
+      "endTime"
+    ],
+    "KaranaInfo": [
+      "index",
+      "name",
+      "type",
+      "completionPercentage",
+      "endTime"
+    ],
+    "VaraInfo": [
+      "index",
+      "name",
+      "shortName",
+      "englishName"
+    ],
+    "RashiInfo": [
+      "index",
+      "name"
+    ],
+    "NakshatraIndexInfo": [
+      "index",
+      "name"
+    ],
+    "MasaInfo": [
+      "index",
+      "name"
+    ],
+    "SamvatInfo": [
+      "vikramSamvat",
+      "shakaSamvat",
+      "vikramSamvatsara",
+      "shakaSamvatsara"
+    ],
+    "UnlocalizedChoghadiyaInfo": [
+      "day",
+      "night"
+    ],
+    "UnlocalizedChoghadiyaSlot": [
+      "start",
+      "end",
+      "index",
+      "name",
+      "quality",
+      "qualityName"
+    ],
+    "UnlocalizedHoraSlot": [
+      "start",
+      "end",
+      "planetIndex",
+      "planet"
+    ],
+    "UnlocalizedGowriSlot": [
+      "start",
+      "end",
+      "index",
+      "name",
+      "quality",
+      "qualityName"
+    ],
+    "UnlocalizedDoGhatiSlot": [
+      "start",
+      "end",
+      "index",
+      "name",
+      "quality",
+      "qualityName"
+    ],
+    "UtcWindow": [
+      "start",
+      "end"
+    ],
+    "UnlocalizedDurMuhurtaPeriod": [
+      "start",
+      "end",
+      "segment"
+    ],
+    "AnandadiYogaInfo": [
+      "index",
+      "name",
+      "quality"
+    ],
+    "GandaMulaInfoInactive": [
+      "active"
+    ],
+    "GandaMulaInfoActive": [
+      "active",
+      "nakshatraName",
+      "severity"
+    ],
+    "ChandraMasaInfo": [
+      "index",
+      "name",
+      "isAdhika",
+      "system",
+      "amantaIndex",
+      "amantaName",
+      "purnimantaIndex",
+      "purnimantaName"
+    ]
+  },
+  "published": {
+    "ChoghadiyaInfo": [
+      "day",
+      "night"
+    ],
+    "ChoghadiyaSlot": [
+      "start",
+      "end",
+      "index",
+      "name",
+      "quality",
+      "qualityName",
+      "startLocal",
+      "endLocal"
+    ],
+    "HoraInfo": [
+      "day",
+      "night"
+    ],
+    "HoraSlot": [
+      "start",
+      "end",
+      "planetIndex",
+      "planet",
+      "startLocal",
+      "endLocal"
+    ],
+    "GowriInfo": [
+      "day",
+      "night"
+    ],
+    "GowriSlot": [
+      "start",
+      "end",
+      "index",
+      "name",
+      "quality",
+      "qualityName",
+      "startLocal",
+      "endLocal"
+    ],
+    "DoGhatiInfo": [
+      "day",
+      "night"
+    ],
+    "DoGhatiSlot": [
+      "start",
+      "end",
+      "index",
+      "name",
+      "quality",
+      "qualityName",
+      "startLocal",
+      "endLocal"
+    ],
+    "TimePeriod": [
+      "start",
+      "end",
+      "startLocal",
+      "endLocal"
+    ],
+    "DailyTithiInfo": [
+      "index",
+      "name",
+      "paksha",
+      "number",
+      "completionPercentage",
+      "endTime",
+      "startTime",
+      "isActiveAtSunrise",
+      "startTimeLocal",
+      "endTimeLocal"
+    ],
+    "DailyNakshatraInfo": [
+      "index",
+      "name",
+      "pada",
+      "degreesInNakshatra",
+      "completionPercentage",
+      "endTime",
+      "startTime",
+      "isActiveAtSunrise",
+      "startTimeLocal",
+      "endTimeLocal"
+    ],
+    "DailyYogaInfo": [
+      "index",
+      "name",
+      "completionPercentage",
+      "endTime",
+      "startTime",
+      "isActiveAtSunrise",
+      "startTimeLocal",
+      "endTimeLocal"
+    ],
+    "DailyKaranaInfo": [
+      "index",
+      "name",
+      "type",
+      "completionPercentage",
+      "endTime",
+      "startTime",
+      "isActiveAtSunrise",
+      "startTimeLocal",
+      "endTimeLocal"
+    ],
+    "DailyPanchangResult": [
+      "date",
+      "location",
+      "timezone",
+      "ayanamsa",
+      "sun",
+      "moon",
+      "angas",
+      "calendar",
+      "muhurtas",
+      "inauspicious",
+      "periods",
+      "specialYogas",
+      "anandadiYoga",
+      "festivals",
+      "eclipse",
+      "chandraBalam",
+      "tarabala"
+    ],
+    "DailySun": [
+      "rise",
+      "set",
+      "nextRise",
+      "riseLocal",
+      "setLocal",
+      "nextRiseLocal",
+      "dayDurationMinutes",
+      "nightDurationMinutes",
+      "dinamanaMinutes",
+      "ratrimanaMinutes",
+      "siderealLongitude",
+      "nakshatra"
+    ],
+    "DailyMoon": [
+      "rise",
+      "set",
+      "riseLocal",
+      "setLocal",
+      "siderealLongitude",
+      "rashi"
+    ],
+    "DailyAngas": [
+      "tithis",
+      "nakshatras",
+      "yogas",
+      "karanas",
+      "vara"
+    ],
+    "DailyCalendarLabels": [
+      "masa",
+      "chandramasa",
+      "samvat"
+    ],
+    "MuhurtaWindows": [
+      "abhijit",
+      "brahma",
+      "vijaya",
+      "godhuli",
+      "nishita",
+      "amritKala",
+      "madhyahna",
+      "pratahSandhya",
+      "sayahnaSandhya",
+      "doGhati"
+    ],
+    "InauspiciousWindows": [
+      "rahuKalam",
+      "gulikaKalam",
+      "yamaganda",
+      "durMuhurta",
+      "varjyam",
+      "bhadra",
+      "gandaMula",
+      "panchaka",
+      "panchakaInfo",
+      "panchakaRahita"
+    ],
+    "DayPeriods": [
+      "choghadiya",
+      "hora",
+      "gowri"
+    ],
+    "ResolvedTimezoneOffset": [
+      "offsetMinutes"
+    ],
+    "ResolvedTimezoneNamed": [
+      "offsetMinutes",
+      "zone"
+    ],
+    "InstantPanchangResult": [
+      "timestamp",
+      "location",
+      "ayanamsa",
+      "sun",
+      "moon",
+      "angas",
+      "calendar",
+      "inauspicious",
+      "specialYogas",
+      "anandadiYoga",
+      "festivals",
+      "chandraBalam",
+      "tarabala"
+    ],
+    "SunPosition": [
+      "siderealLongitude",
+      "nakshatra"
+    ],
+    "MoonPosition": [
+      "siderealLongitude",
+      "rashi"
+    ],
+    "InstantAngas": [
+      "tithi",
+      "nakshatra",
+      "yoga",
+      "karana",
+      "vara"
+    ],
+    "CalendarLabels": [
+      "chandramasa",
+      "samvat"
+    ],
+    "InstantInauspicious": [
+      "panchaka",
+      "panchakaInfo",
+      "gandaMula"
+    ],
+    "DurMuhurtaPeriod": [
+      "start",
+      "end",
+      "startLocal",
+      "endLocal",
+      "segment"
+    ],
+    "PanchakaInfoInactive": [
+      "active"
+    ],
+    "PanchakaInfoActive": [
+      "active",
+      "type",
+      "name",
+      "isDosha",
+      "onsetVara"
+    ],
+    "PlanetaryPositions": [
+      "sun",
+      "moon",
+      "mars",
+      "mercury",
+      "jupiter",
+      "venus",
+      "saturn",
+      "rahu",
+      "ketu"
+    ],
+    "GrahaPosition": [
+      "planet",
+      "siderealLongitude",
+      "rashi",
+      "degreeInRashi",
+      "nakshatra",
+      "isRetrograde"
+    ],
+    "LagnaInfo": [
+      "siderealLongitude",
+      "rashi",
+      "degreeInRashi",
+      "nakshatra",
+      "pada"
+    ],
+    "LagnaNakshatra": [
+      "index",
+      "name"
+    ],
+    "SripatiLagnaInfo": [
+      "siderealLongitude",
+      "rashi",
+      "degreeInRashi",
+      "nakshatra",
+      "pada",
+      "cusps"
+    ],
+    "BhavaChart": [
+      "system",
+      "houses",
+      "ascendantLongitude",
+      "mcLongitude"
+    ],
+    "HouseInfo": [
+      "house",
+      "cuspLongitude",
+      "rashi",
+      "degreeInRashi"
+    ],
+    "BirthChart": [
+      "divisional",
+      "lagna",
+      "bhava",
+      "planets",
+      "byPlanet"
+    ],
+    "PlanetPlacement": [
+      "planet",
+      "longitude",
+      "rashi",
+      "degreeInRashi",
+      "house",
+      "isRetrograde"
+    ],
+    "PlanetsByGraha": [
+      "Sun",
+      "Moon",
+      "Mars",
+      "Mercury",
+      "Jupiter",
+      "Venus",
+      "Saturn",
+      "Rahu",
+      "Ketu"
+    ],
+    "DivisionalChart": [
+      "divisional",
+      "lagnaRashi",
+      "planets"
+    ],
+    "AshtakavargaResult": [
+      "sarvashtaka",
+      "bhinnashtaka",
+      "reduced"
+    ],
+    "BhinnashtakaByGraha": [
+      "Sun",
+      "Moon",
+      "Mars",
+      "Mercury",
+      "Jupiter",
+      "Venus",
+      "Saturn"
+    ],
+    "AshtakavargaReduced": [
+      "sarvashtaka",
+      "bhinnashtaka"
+    ],
+    "JaiminiKarakas": [
+      "Atmakaraka",
+      "Amatyakaraka",
+      "Bhratrukaraka",
+      "Matrukaraka",
+      "Putrakaraka",
+      "Gnatikaraka",
+      "Darakaraka"
+    ],
+    "Jaimini8Karakas": [
+      "Atmakaraka",
+      "Amatyakaraka",
+      "Bhratrukaraka",
+      "Matrukaraka",
+      "Pitrukaraka",
+      "Putrakaraka",
+      "Gnatikaraka",
+      "Darakaraka"
+    ],
+    "ArgalaPerBhava": [
+      "bhava",
+      "argala",
+      "virodhargala",
+      "trikona"
+    ],
+    "ArgalaTrikona": [
+      "sources",
+      "virodhakas"
+    ],
+    "Arudha": [
+      "bhava",
+      "arudhaRashi",
+      "arudhaRashiName",
+      "arudhaLord"
+    ],
+    "MangalDoshaInfo": [
+      "afflicted",
+      "severity",
+      "fromLagna",
+      "fromMoon",
+      "fromVenus",
+      "cancellations"
+    ],
+    "MangalReference": [
+      "afflicted",
+      "house"
+    ],
+    "MangalCompatibility": [
+      "boy",
+      "girl",
+      "afflicted",
+      "cancellations",
+      "description"
+    ],
+    "KaalSarpDoshaInfo": [
+      "afflicted",
+      "subtype",
+      "partial",
+      "rahuHouse",
+      "ketuHouse"
+    ],
+    "PitruDoshaInfo": [
+      "afflicted",
+      "reasons"
+    ],
+    "AshtakootResult": [
+      "totalScore",
+      "koots",
+      "cancellations"
+    ],
+    "KootScore": [
+      "name",
+      "score",
+      "maxScore",
+      "description"
+    ],
+    "PathuPoruthamResult": [
+      "totalPasses",
+      "recommended",
+      "poruthams"
+    ],
+    "PoruthamScoreWithVeto": [
+      "name",
+      "passes",
+      "description",
+      "veto"
+    ],
+    "PoruthamScore": [
+      "name",
+      "passes",
+      "description"
+    ],
+    "PlanetShadbala": [
+      "sthana",
+      "dig",
+      "kala",
+      "chesta",
+      "naisargika",
+      "drik",
+      "total"
+    ],
+    "ShadbalaResult": [
+      "Sun",
+      "Moon",
+      "Mars",
+      "Mercury",
+      "Jupiter",
+      "Venus",
+      "Saturn"
+    ],
+    "BhavaBalaResult": [
+      "houses"
+    ],
+    "BhavaBalaPerHouse": [
+      "bhavadhipati",
+      "dik",
+      "drik",
+      "sthana",
+      "total"
+    ],
+    "Yoga": [
+      "name",
+      "type",
+      "reasons"
+    ],
+    "YogaWithBhanga": [
+      "name",
+      "type",
+      "reasons",
+      "bhanga"
+    ],
+    "YogaBhanga": [
+      "applies",
+      "reasons"
+    ],
+    "ArgalaPerBhavaWithoutTrikona": [
+      "bhava",
+      "argala",
+      "virodhargala"
+    ],
+    "AshtakavargaResultWithoutReduced": [
+      "sarvashtaka",
+      "bhinnashtaka"
+    ],
+    "VimshottariDashaResult": [
+      "currentMahaDashaLord",
+      "currentIndex",
+      "mahaDashas"
+    ],
+    "MahaDasha": [
+      "lord",
+      "startDate",
+      "endDate",
+      "years",
+      "antarDashas"
+    ],
+    "AntarDasha": [
+      "lord",
+      "startDate",
+      "endDate"
+    ],
+    "PratyantarDasha": [
+      "lord",
+      "startDate",
+      "endDate"
+    ],
+    "YoginiDashaResult": [
+      "currentYogini",
+      "currentIndex",
+      "mahaDashas"
+    ],
+    "YoginiMahaDasha": [
+      "yogini",
+      "lord",
+      "startDate",
+      "endDate",
+      "years",
+      "antarDashas"
+    ],
+    "YoginiAntarDasha": [
+      "yogini",
+      "lord",
+      "startDate",
+      "endDate"
+    ],
+    "CharaDashaResult": [
+      "currentIndex",
+      "currentRashi",
+      "mahaDashas"
+    ],
+    "CharaMahaDasha": [
+      "rashi",
+      "lord",
+      "startDate",
+      "endDate",
+      "years"
+    ],
+    "NarayanDashaResult": [
+      "direction",
+      "startingRashi",
+      "currentIndex",
+      "currentRashi",
+      "mahaDashas"
+    ],
+    "NarayanMahaDasha": [
+      "rashi",
+      "lord",
+      "startDate",
+      "endDate",
+      "years"
+    ],
+    "SadeSatiInfo": [
+      "active",
+      "phase",
+      "currentArcStart",
+      "currentArcEnd",
+      "nextArcStart"
+    ],
+    "SadeSatiInfoInactive": [
+      "active",
+      "phase",
+      "currentArcStart",
+      "currentArcEnd",
+      "nextArcStart"
+    ],
+    "Upagrahas": [
+      "gulika",
+      "mandi",
+      "dhuma",
+      "vyatipata",
+      "parivesha",
+      "indrachapa",
+      "upaketu"
+    ],
+    "UpagrahaPosition": [
+      "longitude",
+      "rashi",
+      "rashiName",
+      "house"
+    ],
+    "VarshaphalaChart": [
+      "solarReturnInstant",
+      "varshaLagna",
+      "muntha",
+      "yearLord",
+      "sahams",
+      "isDayBirth",
+      "planets",
+      "bhava"
+    ],
+    "MunthaInfo": [
+      "rashi",
+      "lord",
+      "house"
+    ],
+    "Sahams": [
+      "Punya",
+      "Vidya",
+      "Yasas",
+      "Mitra",
+      "Karma",
+      "Vivaha",
+      "Putra",
+      "Roga",
+      "Marana",
+      "Rajya",
+      "Raja",
+      "Bandhu",
+      "Dharma",
+      "Gnati",
+      "Apamrityu",
+      "Bhratri",
+      "Matri",
+      "Pitri",
+      "Sama",
+      "Bandhana",
+      "Karyasiddhi",
+      "Vyapara",
+      "Sastra",
+      "Asha",
+      "Labha",
+      "Susha",
+      "Tapas"
+    ],
+    "SahamPosition": [
+      "longitude",
+      "rashi",
+      "rashiName",
+      "house"
+    ],
+    "KpCuspalSubLords": [
+      "cusps"
+    ],
+    "KpSubLordInfo": [
+      "longitude",
+      "rashi",
+      "nakshatra",
+      "signLord",
+      "starLord",
+      "subLord"
+    ],
+    "KpSignificators": [
+      "byPlanet",
+      "byHouse"
+    ],
+    "KpByPlanet": [
+      "Sun",
+      "Moon",
+      "Mars",
+      "Mercury",
+      "Jupiter",
+      "Venus",
+      "Saturn",
+      "Rahu",
+      "Ketu"
+    ],
+    "KpByHouse": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12"
+    ],
+    "TithiPraveshaChart": [
+      "praveshInstant",
+      "natalTithi",
+      "praveshTithi",
+      "varshaLagna",
+      "planets",
+      "bhava"
+    ]
+  }
+}

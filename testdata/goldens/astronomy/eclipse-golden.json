@@ -1,0 +1,6385 @@
+{
+  "_meta": {
+    "generator": "source/go/parity/goldens.src.ts (bash source/go/parity/goldens.sh)",
+    "source": "src/astronomy/{eclipseGeometry,eclipse}.ts",
+    "baseline": "master @ c38c606 (intended tag v5.1.1) + the uncommitted fixes in src/core/nakshatra.ts, src/core/panchang.ts, src/jyotish/lagna.ts",
+    "claim": "Unlike rise/set and the phase search, the eclipse solvers read the VALUE of a non-bit-identical separation, a parabolic vertex and Illinois false position both interpolate. Probes are still truncated to whole milliseconds and contacts still rounded to them, so the prediction is agreement within a millisecond or two on instants and at the platform-trig floor on magnitudes. The Go test measures which."
+  },
+  "lunarSeeds": [
+    -2166912000000,
+    -1791849600000,
+    -607996800000,
+    410054400000,
+    963705600000,
+    1428105600000,
+    1532649600000,
+    1667865600000,
+    1741910400000,
+    1877126400000,
+    2788041600000,
+    4094323200000
+  ],
+  "solarSeeds": [
+    -2165616000000,
+    -1596672000000,
+    -458697600000,
+    679190400000,
+    934329600000,
+    1503273600000,
+    1712534400000,
+    1817164800000,
+    2386108800000,
+    3524083200000
+  ],
+  "sites": [
+    {
+      "name": "Varanasi",
+      "latitude": 25.3176,
+      "longitude": 82.9739,
+      "elevation": 80
+    },
+    {
+      "name": "Casper",
+      "latitude": 42.8666,
+      "longitude": -106.3131,
+      "elevation": 1580
+    },
+    {
+      "name": "London",
+      "latitude": 51.5074,
+      "longitude": -0.1278,
+      "elevation": 0
+    },
+    {
+      "name": "Sydney",
+      "latitude": -33.8688,
+      "longitude": 151.2093,
+      "elevation": 0
+    }
+  ],
+  "shadows": [
+    {
+      "ms": -2166933600000,
+      "separation": 11.164664938294687,
+      "umbra": 0.6469420968209932,
+      "penumbra": 1.1754812409493494,
+      "moonSemidiameter": 0.2451655579048883
+    },
+    {
+      "ms": -2166922800000,
+      "separation": 9.809955644137755,
+      "umbra": 0.6470409698030966,
+      "penumbra": 1.1755639125300406,
+      "moonSemidiameter": 0.24519006473190616
+    },
+    {
+      "ms": -2166915600000,
+      "separation": 8.907429433101935,
+      "umbra": 0.64711999968219,
+      "penumbra": 1.1756321479391034,
+      "moonSemidiameter": 0.24520994124292791
+    },
+    {
+      "ms": -2166912000000,
+      "separation": 8.456427819591582,
+      "umbra": 0.6471634219050424,
+      "penumbra": 1.175670174869516,
+      "moonSemidiameter": 0.2452209337805878
+    },
+    {
+      "ms": -2166908400000,
+      "separation": 8.00564973695676,
+      "umbra": 0.6472094374275036,
+      "penumbra": 1.1757107963961446,
+      "moonSemidiameter": 0.24523262605588406
+    },
+    {
+      "ms": -2166901200000,
+      "separation": 7.1049712612019285,
+      "umbra": 0.6473092149605566,
+      "penumbra": 1.1757997898322705,
+      "moonSemidiameter": 0.24525810080713267
+    },
+    {
+      "ms": -2166890400000,
+      "separation": 5.757366468749629,
+      "umbra": 0.6474781277662267,
+      "penumbra": 1.1759525362488368,
+      "moonSemidiameter": 0.2453015061439367
+    },
+    {
+      "ms": -1791871200000,
+      "separation": 10.576188328890947,
+      "umbra": 0.7642233185797762,
+      "penumbra": 1.2989752749582228,
+      "moonSemidiameter": 0.2776328674249456
+    },
+    {
+      "ms": -1791860400000,
+      "separation": 8.80679367729354,
+      "umbra": 0.7640098973156499,
+      "penumbra": 1.2987429207319146,
+      "moonSemidiameter": 0.2775727671517067
+    },
+    {
+      "ms": -1791853200000,
+      "separation": 7.627715114883153,
+      "umbra": 0.7638213239038041,
+      "penumbra": 1.2985417145359472,
+      "moonSemidiameter": 0.27752021144505695
+    },
+    {
+      "ms": -1791849600000,
+      "separation": 7.0383784605571975,
+      "umbra": 0.7637131727018507,
+      "penumbra": 1.298427243704495,
+      "moonSemidiameter": 0.27749019321285373
+    },
+    {
+      "ms": -1791846000000,
+      "separation": 6.449200886038934,
+      "umbra": 0.7635957944977025,
+      "penumbra": 1.298303543715311,
+      "moonSemidiameter": 0.2774576857094822
+    },
+    {
+      "ms": -1791838800000,
+      "separation": 5.271410376071856,
+      "umbra": 0.7633334195649384,
+      "penumbra": 1.298028518755075,
+      "moonSemidiameter": 0.2773852197439631
+    },
+    {
+      "ms": -1791828000000,
+      "separation": 3.5066334945792517,
+      "umbra": 0.7628711083057385,
+      "penumbra": 1.297547216349866,
+      "moonSemidiameter": 0.2772579736369078
+    },
+    {
+      "ms": -608018400000,
+      "separation": 4.981864897195367,
+      "umbra": 0.6746390155995996,
+      "penumbra": 1.2061521663945085,
+      "moonSemidiameter": 0.25303442426489503
+    },
+    {
+      "ms": -608007600000,
+      "separation": 3.533951233178327,
+      "umbra": 0.6736374620026196,
+      "penumbra": 1.2051694128804007,
+      "moonSemidiameter": 0.2527667609196662
+    },
+    {
+      "ms": -608000400000,
+      "separation": 2.574215318807598,
+      "umbra": 0.6729738283403235,
+      "penumbra": 1.2045183111863589,
+      "moonSemidiameter": 0.25258941602969753
+    },
+    {
+      "ms": -607996800000,
+      "separation": 2.0975351907976645,
+      "umbra": 0.6726432974198135,
+      "penumbra": 1.2041940458169988,
+      "moonSemidiameter": 0.252501090398415
+    },
+    {
+      "ms": -607993200000,
+      "separation": 1.6250441802081632,
+      "umbra": 0.6723136533886607,
+      "penumbra": 1.2038706670454662,
+      "moonSemidiameter": 0.25241300396496796
+    },
+    {
+      "ms": -607986000000,
+      "separation": 0.7231303579095627,
+      "umbra": 0.6716571163557379,
+      "penumbra": 1.2032266596490315,
+      "moonSemidiameter": 0.2522375730663084
+    },
+    {
+      "ms": -607975200000,
+      "separation": 0.9111476329642391,
+      "umbra": 0.6706795337443616,
+      "penumbra": 1.202267869256859,
+      "moonSemidiameter": 0.2519763748004619
+    },
+    {
+      "ms": 410032800000,
+      "separation": 10.363643901298758,
+      "umbra": 0.7617330827826098,
+      "penumbra": 1.3036828191371295,
+      "moonSemidiameter": 0.27792293673359325
+    },
+    {
+      "ms": 410043600000,
+      "separation": 8.593440047756,
+      "umbra": 0.7625206280605921,
+      "penumbra": 1.3044721022179495,
+      "moonSemidiameter": 0.2781356090182748
+    },
+    {
+      "ms": 410050800000,
+      "separation": 7.412081618732607,
+      "umbra": 0.7629984754516594,
+      "penumbra": 1.3049510763070744,
+      "moonSemidiameter": 0.278264658721226
+    },
+    {
+      "ms": 410054400000,
+      "separation": 6.821134538326244,
+      "umbra": 0.7632230724767004,
+      "penumbra": 1.3051762271213605,
+      "moonSemidiameter": 0.27832531767541996
+    },
+    {
+      "ms": 410058000000,
+      "separation": 6.230071185303517,
+      "umbra": 0.763438047689454,
+      "penumbra": 1.3053917497467151,
+      "moonSemidiameter": 0.27838338029404175
+    },
+    {
+      "ms": 410065200000,
+      "separation": 5.047878982528034,
+      "umbra": 0.7638389354829485,
+      "penumbra": 1.3057937132261055,
+      "moonSemidiameter": 0.27849166333190656
+    },
+    {
+      "ms": 410076000000,
+      "separation": 3.2765922973568227,
+      "umbra": 0.7643669375628368,
+      "penumbra": 1.3063232809557574,
+      "moonSemidiameter": 0.27863430084312174
+    },
+    {
+      "ms": 963684000000,
+      "separation": 9.051583020271801,
+      "umbra": 0.6490426104158273,
+      "penumbra": 1.1733536598626626,
+      "moonSemidiameter": 0.24516718802762938
+    },
+    {
+      "ms": 963694800000,
+      "separation": 7.689765408053412,
+      "umbra": 0.6490723666014006,
+      "penumbra": 1.1733868810919175,
+      "moonSemidiameter": 0.24517567804511634
+    },
+    {
+      "ms": 963702000000,
+      "separation": 6.781758919461187,
+      "umbra": 0.6491053498939896,
+      "penumbra": 1.1734221901572237,
+      "moonSemidiameter": 0.2451848863609397
+    },
+    {
+      "ms": 963705600000,
+      "separation": 6.327710835005738,
+      "umbra": 0.649125766060622,
+      "penumbra": 1.17344377392905,
+      "moonSemidiameter": 0.2451905498219661
+    },
+    {
+      "ms": 963709200000,
+      "separation": 5.873630076973016,
+      "umbra": 0.6491487905134283,
+      "penumbra": 1.1734679691311445,
+      "moonSemidiameter": 0.24519691731036766
+    },
+    {
+      "ms": 963716400000,
+      "separation": 4.965362485083687,
+      "umbra": 0.6492026413596717,
+      "penumbra": 1.1735241709030992,
+      "moonSemidiameter": 0.24521175818626187
+    },
+    {
+      "ms": 963727200000,
+      "separation": 3.60266809556458,
+      "umbra": 0.6493028421251059,
+      "penumbra": 1.1736279216066545,
+      "moonSemidiameter": 0.24523926256858217
+    },
+    {
+      "ms": 1428084000000,
+      "separation": 8.280623076945794,
+      "umbra": 0.6492886597954786,
+      "penumbra": 1.1822923465338286,
+      "moonSemidiameter": 0.2463951602229157
+    },
+    {
+      "ms": 1428094800000,
+      "separation": 6.908682400974593,
+      "umbra": 0.6497509806712655,
+      "penumbra": 1.1827355620656643,
+      "moonSemidiameter": 0.24651732199510296
+    },
+    {
+      "ms": 1428102000000,
+      "separation": 5.993661142476734,
+      "umbra": 0.6500706266912301,
+      "penumbra": 1.1830424665725383,
+      "moonSemidiameter": 0.24660184645419653
+    },
+    {
+      "ms": 1428105600000,
+      "separation": 5.536101806438934,
+      "umbra": 0.650233838357696,
+      "penumbra": 1.1831993061020696,
+      "moonSemidiameter": 0.24664502261428747
+    },
+    {
+      "ms": 1428109200000,
+      "separation": 5.07856201366586,
+      "umbra": 0.6503992914169243,
+      "penumbra": 1.1833583861063224,
+      "moonSemidiameter": 0.24668880328376913
+    },
+    {
+      "ms": 1428116400000,
+      "separation": 4.163804979182317,
+      "umbra": 0.6507368698818381,
+      "penumbra": 1.1836832157140897,
+      "moonSemidiameter": 0.24677816416947662
+    },
+    {
+      "ms": 1428127200000,
+      "separation": 2.79463098471955,
+      "umbra": 0.6512597298518787,
+      "penumbra": 1.1841869455576521,
+      "moonSemidiameter": 0.24691665349279082
+    },
+    {
+      "ms": 1532628000000,
+      "separation": 11.966941008952166,
+      "umbra": 0.6489578258538649,
+      "penumbra": 1.1736875695963351,
+      "moonSemidiameter": 0.2452002668826097
+    },
+    {
+      "ms": 1532638800000,
+      "separation": 10.605408779496287,
+      "umbra": 0.6488733452001894,
+      "penumbra": 1.173609661828442,
+      "moonSemidiameter": 0.24517835584762543
+    },
+    {
+      "ms": 1532646000000,
+      "separation": 9.697784020800686,
+      "umbra": 0.6488303747355733,
+      "penumbra": 1.1735710881705654,
+      "moonSemidiameter": 0.24516735174727847
+    },
+    {
+      "ms": 1532649600000,
+      "separation": 9.243984666553601,
+      "umbra": 0.6488128742409205,
+      "penumbra": 1.173555790538123,
+      "moonSemidiameter": 0.24516292520962238
+    },
+    {
+      "ms": 1532653200000,
+      "separation": 8.790191488284206,
+      "umbra": 0.6487980217032221,
+      "penumbra": 1.1735431438326096,
+      "moonSemidiameter": 0.24515921337763907
+    },
+    {
+      "ms": 1532660400000,
+      "separation": 7.882616709694104,
+      "umbra": 0.6487762361141596,
+      "penumbra": 1.173525778810338,
+      "moonSemidiameter": 0.2451539272517834
+    },
+    {
+      "ms": 1532671200000,
+      "separation": 6.521261311946488,
+      "umbra": 0.6487632704198225,
+      "penumbra": 1.1735194661951205,
+      "moonSemidiameter": 0.2451513186983232
+    },
+    {
+      "ms": 1667844000000,
+      "separation": 8.422598088090462,
+      "umbra": 0.6847385047071595,
+      "penumbra": 1.2225024939669924,
+      "moonSemidiameter": 0.25659411523624903
+    },
+    {
+      "ms": 1667854800000,
+      "separation": 6.927916958866025,
+      "umbra": 0.6836387055182919,
+      "penumbra": 1.2214192837344044,
+      "moonSemidiameter": 0.25629965504368296
+    },
+    {
+      "ms": 1667862000000,
+      "separation": 5.933685705520163,
+      "umbra": 0.6829043178867573,
+      "penumbra": 1.2206959370848651,
+      "moonSemidiameter": 0.25610302523716694
+    },
+    {
+      "ms": 1667865600000,
+      "separation": 5.437273171176716,
+      "umbra": 0.6825368458348848,
+      "penumbra": 1.2203339800184068,
+      "moonSemidiameter": 0.25600463452832745
+    },
+    {
+      "ms": 1667869200000,
+      "separation": 4.941355865550594,
+      "umbra": 0.6821692238740563,
+      "penumbra": 1.2199718693688641,
+      "moonSemidiameter": 0.255906202880308
+    },
+    {
+      "ms": 1667876400000,
+      "separation": 3.95114334707918,
+      "umbra": 0.6814336390425317,
+      "penumbra": 1.2192472961268799,
+      "moonSemidiameter": 0.2557092461192868
+    },
+    {
+      "ms": 1667887200000,
+      "separation": 2.47108737380825,
+      "umbra": 0.6803298264841942,
+      "penumbra": 1.2181599733328403,
+      "moonSemidiameter": 0.25541368978858786
+    },
+    {
+      "ms": 1741888800000,
+      "separation": 6.051786600227433,
+      "umbra": 0.6567490677222458,
+      "penumbra": 1.192846069285266,
+      "moonSemidiameter": 0.2488210232082117
+    },
+    {
+      "ms": 1741899600000,
+      "separation": 4.653793044971316,
+      "umbra": 0.6560545027714908,
+      "penumbra": 1.1921333644691299,
+      "moonSemidiameter": 0.24863123503169093
+    },
+    {
+      "ms": 1741906800000,
+      "separation": 3.7240763380923325,
+      "umbra": 0.6556003213431687,
+      "penumbra": 1.1916670768194322,
+      "moonSemidiameter": 0.24850709838512447
+    },
+    {
+      "ms": 1741910400000,
+      "separation": 3.260164311391773,
+      "umbra": 0.6553759200355564,
+      "penumbra": 1.1914366185190637,
+      "moonSemidiameter": 0.24844575502558283
+    },
+    {
+      "ms": 1741914000000,
+      "separation": 2.7971368988570173,
+      "umbra": 0.6551533259465327,
+      "penumbra": 1.191207964854384,
+      "moonSemidiameter": 0.2483848988283823
+    },
+    {
+      "ms": 1741921200000,
+      "separation": 1.8756265096847136,
+      "umbra": 0.6547136037351657,
+      "penumbra": 1.1907561157587856,
+      "moonSemidiameter": 0.24826465987666171
+    },
+    {
+      "ms": 1741932000000,
+      "separation": 0.5543748343845945,
+      "umbra": 0.6540678579035648,
+      "penumbra": 1.1900921603292116,
+      "moonSemidiameter": 0.24808803161690327
+    },
+    {
+      "ms": 1877104800000,
+      "separation": 5.120092260746314,
+      "umbra": 0.7329511552208131,
+      "penumbra": 1.2572256624082372,
+      "moonSemidiameter": 0.2677970994568555
+    },
+    {
+      "ms": 1877115600000,
+      "separation": 3.476323922833475,
+      "umbra": 0.7317996930291237,
+      "penumbra": 1.25607140863426,
+      "moonSemidiameter": 0.26748611654915244
+    },
+    {
+      "ms": 1877122800000,
+      "separation": 2.382759401063474,
+      "umbra": 0.7310110871045543,
+      "penumbra": 1.2552809562001908,
+      "moonSemidiameter": 0.26727314127992086
+    },
+    {
+      "ms": 1877126400000,
+      "separation": 1.8366808005234982,
+      "umbra": 0.7306106465653615,
+      "penumbra": 1.2548795967719768,
+      "moonSemidiameter": 0.2671649985835201
+    },
+    {
+      "ms": 1877130000000,
+      "separation": 1.2910833821124974,
+      "umbra": 0.7302061838489174,
+      "penumbra": 1.2544742180782316,
+      "moonSemidiameter": 0.2670557712710738
+    },
+    {
+      "ms": 1877137200000,
+      "separation": 0.20160417945434242,
+      "umbra": 0.729385405713194,
+      "penumbra": 1.2536516167275065,
+      "moonSemidiameter": 0.266834120478158
+    },
+    {
+      "ms": 1877148000000,
+      "separation": 1.4298109122972595,
+      "umbra": 0.7281254306165226,
+      "penumbra": 1.2523889286772154,
+      "moonSemidiameter": 0.2664938761057331
+    },
+    {
+      "ms": 2788020000000,
+      "separation": 9.28816490964466,
+      "umbra": 0.7219559398518713,
+      "penumbra": 1.2501350476006767,
+      "moonSemidiameter": 0.26535287049329653
+    },
+    {
+      "ms": 2788030800000,
+      "separation": 7.739264633912935,
+      "umbra": 0.7233608893508932,
+      "penumbra": 1.2515243759545251,
+      "moonSemidiameter": 0.26572977261028446
+    },
+    {
+      "ms": 2788038000000,
+      "separation": 6.720975209356181,
+      "umbra": 0.7242812686524496,
+      "penumbra": 1.2524343471819535,
+      "moonSemidiameter": 0.26597665692941425
+    },
+    {
+      "ms": 2788041600000,
+      "separation": 6.218685040204603,
+      "umbra": 0.7247363844083765,
+      "penumbra": 1.2528842607072184,
+      "moonSemidiameter": 0.2660987306090005
+    },
+    {
+      "ms": 2788045200000,
+      "separation": 5.722784839636204,
+      "umbra": 0.7251880311593168,
+      "penumbra": 1.2533307064318646,
+      "moonSemidiameter": 0.26621986866013003
+    },
+    {
+      "ms": 2788052400000,
+      "separation": 4.758880960458845,
+      "umbra": 0.7260806624876804,
+      "penumbra": 1.2542129393217603,
+      "moonSemidiameter": 0.2664592690487433
+    },
+    {
+      "ms": 2788063200000,
+      "separation": 3.4451404306574065,
+      "umbra": 0.7273920159317545,
+      "penumbra": 1.255508704150412,
+      "moonSemidiameter": 0.2668109272945375
+    },
+    {
+      "ms": 4094301600000,
+      "separation": 7.552672042198076,
+      "umbra": 0.6452299061638673,
+      "penumbra": 1.1769637219008007,
+      "moonSemidiameter": 0.24513058463436851
+    },
+    {
+      "ms": 4094312400000,
+      "separation": 6.206564509939507,
+      "umbra": 0.6451970308082567,
+      "penumbra": 1.1769497078081632,
+      "moonSemidiameter": 0.2451242366632607
+    },
+    {
+      "ms": 4094319600000,
+      "separation": 5.312595183508418,
+      "umbra": 0.6451878796249342,
+      "penumbra": 1.1769531293724953,
+      "moonSemidiameter": 0.24512344815303128
+    },
+    {
+      "ms": 4094323200000,
+      "separation": 4.867205902115895,
+      "umbra": 0.6451871200164684,
+      "penumbra": 1.1769586556983556,
+      "moonSemidiameter": 0.24512408323300225
+    },
+    {
+      "ms": 4094326800000,
+      "separation": 4.423309048935339,
+      "umbra": 0.645188898828577,
+      "penumbra": 1.1769667201469094,
+      "moonSemidiameter": 0.24512540303363517
+    },
+    {
+      "ms": 4094334000000,
+      "separation": 3.542242851927772,
+      "umbra": 0.6452000563978053,
+      "penumbra": 1.176990448080974,
+      "moonSemidiameter": 0.24513009266313648
+    },
+    {
+      "ms": 4094344800000,
+      "separation": 2.2572789627891208,
+      "umbra": 0.6452357412928498,
+      "penumbra": 1.1770449862001928,
+      "moonSemidiameter": 0.24514223832646304
+    }
+  ],
+  "views": [
+    {
+      "site": "Varanasi",
+      "ms": -2165626800000,
+      "separation": 4.646970643423777,
+      "sunSemidiameter": 0.2633500252212741,
+      "moonSemidiameter": 0.2749454868728243,
+      "sunAltitude": -31.05724582296184,
+      "sunAzimuth": 44.0457707433465
+    },
+    {
+      "site": "Varanasi",
+      "ms": -2165616000000,
+      "separation": 2.6056038442790737,
+      "sunSemidiameter": 0.2633497578010684,
+      "moonSemidiameter": 0.27764844208563416,
+      "sunAltitude": 3.171999202349783,
+      "sunAzimuth": 69.96342531616484
+    },
+    {
+      "site": "Varanasi",
+      "ms": -2165605200000,
+      "separation": 1.085513571911206,
+      "sunSemidiameter": 0.2633500960172082,
+      "moonSemidiameter": 0.28051270508848963,
+      "sunAltitude": 42.674061278702425,
+      "sunAzimuth": 86.38141629438466
+    },
+    {
+      "site": "Varanasi",
+      "ms": -1596682800000,
+      "separation": 8.99987152468005,
+      "sunSemidiameter": 0.262870372596375,
+      "moonSemidiameter": 0.27573682223021334,
+      "sunAltitude": -29.607926961080114,
+      "sunAzimuth": 42.28730897247623
+    },
+    {
+      "site": "Varanasi",
+      "ms": -1596672000000,
+      "separation": 6.94845771873126,
+      "sunSemidiameter": 0.2628712343903263,
+      "moonSemidiameter": 0.27859255517146103,
+      "sunAltitude": 3.8732781614388045,
+      "sunAzimuth": 68.01393063876056
+    },
+    {
+      "site": "Varanasi",
+      "ms": -1596661200000,
+      "separation": 5.3868052082919045,
+      "sunSemidiameter": 0.2628727133578388,
+      "moonSemidiameter": 0.2814252182992224,
+      "sunAltitude": 43.06108234757736,
+      "sunAzimuth": 83.60546013403292
+    },
+    {
+      "site": "Varanasi",
+      "ms": -458708400000,
+      "separation": 3.6912464517031536,
+      "sunSemidiameter": 0.2621967176847532,
+      "moonSemidiameter": 0.2759168585050868,
+      "sunAltitude": -28.66047112979434,
+      "sunAzimuth": 39.94413441407336
+    },
+    {
+      "site": "Varanasi",
+      "ms": -458697600000,
+      "separation": 1.6152609985166744,
+      "sunSemidiameter": 0.2622004663188288,
+      "moonSemidiameter": 0.27852619992879907,
+      "sunAltitude": 3.8895963202097446,
+      "sunAzimuth": 65.780404184991
+    },
+    {
+      "site": "Varanasi",
+      "ms": -458686800000,
+      "separation": 0.2745573032970243,
+      "sunSemidiameter": 0.26220492113578,
+      "moonSemidiameter": 0.2813772912738771,
+      "sunAltitude": 42.62461095481196,
+      "sunAzimuth": 80.64657004016472
+    },
+    {
+      "site": "Varanasi",
+      "ms": 679179600000,
+      "separation": 12.373766606154646,
+      "sunSemidiameter": 0.26208327330487713,
+      "moonSemidiameter": 0.276533274554175,
+      "sunAltitude": -30.217693408306378,
+      "sunAzimuth": 39.95980426012651
+    },
+    {
+      "site": "Varanasi",
+      "ms": 679190400000,
+      "separation": 10.401200990631123,
+      "sunSemidiameter": 0.2620901330900757,
+      "moonSemidiameter": 0.27945635901344296,
+      "sunAltitude": 2.5492521733912428,
+      "sunAzimuth": 66.45669041113449
+    },
+    {
+      "site": "Varanasi",
+      "ms": 679201200000,
+      "separation": 8.932051789338477,
+      "sunSemidiameter": 0.26209780416037753,
+      "moonSemidiameter": 0.28230820536788975,
+      "sunAltitude": 41.390214719346815,
+      "sunAzimuth": 81.95405053210585
+    },
+    {
+      "site": "Varanasi",
+      "ms": 934318800000,
+      "separation": 6.980156979151727,
+      "sunSemidiameter": 0.2628517663159051,
+      "moonSemidiameter": 0.2659596888392501,
+      "sunAltitude": -35.388913939831475,
+      "sunAzimuth": 45.14079605874247
+    },
+    {
+      "site": "Varanasi",
+      "ms": 934329600000,
+      "separation": 5.098190229208063,
+      "sunSemidiameter": 0.26286338837407985,
+      "moonSemidiameter": 0.2683086407310287,
+      "sunAltitude": -0.12528314240573668,
+      "sunAzimuth": 72.48579526358425
+    },
+    {
+      "site": "Varanasi",
+      "ms": 934340400000,
+      "separation": 3.706916521307616,
+      "sunSemidiameter": 0.2628758569916036,
+      "moonSemidiameter": 0.2708143553074124,
+      "sunAltitude": 39.355270780502664,
+      "sunAzimuth": 90.41488353004088
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1503262800000,
+      "separation": 11.064009916796637,
+      "sunSemidiameter": 0.2633593735946844,
+      "moonSemidiameter": 0.26754294929876743,
+      "sunAltitude": -37.51120819419309,
+      "sunAzimuth": 48.44215114566715
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1503273600000,
+      "separation": 9.20872750877169,
+      "sunSemidiameter": 0.26337240685798896,
+      "moonSemidiameter": 0.27008101623711894,
+      "sunAltitude": -1.1143319068824433,
+      "sunAzimuth": 75.71028892932388
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1503284400000,
+      "separation": 7.834504087711101,
+      "sunSemidiameter": 0.26338624708292935,
+      "moonSemidiameter": 0.2726054119396041,
+      "sunAltitude": 38.60315808976955,
+      "sunAzimuth": 94.66575382773624
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1712523600000,
+      "separation": 12.152291463668446,
+      "sunSemidiameter": 0.2661127229370746,
+      "moonSemidiameter": 0.27462005004145473,
+      "sunAltitude": -40.74113984874611,
+      "sunAzimuth": 53.26399910446006
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1712534400000,
+      "separation": 10.175321155064783,
+      "sunSemidiameter": 0.26610992458216637,
+      "moonSemidiameter": 0.2776849364363993,
+      "sunAltitude": -2.953388662612944,
+      "sunAzimuth": 80.17908749214847
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1712545200000,
+      "separation": 8.6204391103988,
+      "sunSemidiameter": 0.26610790942191936,
+      "moonSemidiameter": 0.2807319859857515,
+      "sunAltitude": 36.946422666687745,
+      "sunAzimuth": 100.2764382432478
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1817154000000,
+      "separation": 7.011935539055197,
+      "sunSemidiameter": 0.2625140323479122,
+      "moonSemidiameter": 0.2762655192497267,
+      "sunAltitude": -33.723659572648025,
+      "sunAzimuth": 42.99640031200232
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1817164800000,
+      "separation": 5.01515566660339,
+      "sunSemidiameter": 0.26252430752294886,
+      "moonSemidiameter": 0.2791015821358329,
+      "sunAltitude": 0.5988810514761055,
+      "sunAzimuth": 70.22582918593243
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1817175600000,
+      "separation": 3.503334237883959,
+      "sunSemidiameter": 0.2625354427025827,
+      "moonSemidiameter": 0.282135692573132,
+      "sunAltitude": 39.923251511915666,
+      "sunAzimuth": 87.35669162823895
+    },
+    {
+      "site": "Varanasi",
+      "ms": 2386098000000,
+      "separation": 11.46227789007947,
+      "sunSemidiameter": 0.26291098733889123,
+      "moonSemidiameter": 0.2761201064889933,
+      "sunAltitude": -35.77322131821402,
+      "sunAzimuth": 45.65403386079127
+    },
+    {
+      "site": "Varanasi",
+      "ms": 2386108800000,
+      "separation": 9.52977532118811,
+      "sunSemidiameter": 0.26292277153507326,
+      "moonSemidiameter": 0.2791445746430834,
+      "sunAltitude": -0.2924049350131507,
+      "sunAzimuth": 73.01364246838078
+    },
+    {
+      "site": "Varanasi",
+      "ms": 2386119600000,
+      "separation": 8.0648107865909,
+      "sunSemidiameter": 0.26293539924385684,
+      "moonSemidiameter": 0.28219293769024717,
+      "sunAltitude": 39.21024848115623,
+      "sunAzimuth": 91.12150644337689
+    },
+    {
+      "site": "Varanasi",
+      "ms": 3524072400000,
+      "separation": 6.376391739491192,
+      "sunSemidiameter": 0.26407459396967803,
+      "moonSemidiameter": 0.2756640054805756,
+      "sunAltitude": -40.192264132805974,
+      "sunAzimuth": 53.67125560651371
+    },
+    {
+      "site": "Varanasi",
+      "ms": 3524083200000,
+      "separation": 4.406174513630178,
+      "sunSemidiameter": 0.2640890898699642,
+      "moonSemidiameter": 0.2786871642541725,
+      "sunAltitude": -2.3775505748272057,
+      "sunAzimuth": 80.40033830342789
+    },
+    {
+      "site": "Varanasi",
+      "ms": 3524094000000,
+      "separation": 2.870165425347297,
+      "sunSemidiameter": 0.26410430818107333,
+      "moonSemidiameter": 0.2818975967874718,
+      "sunAltitude": 37.477047639886656,
+      "sunAzimuth": 100.66235851936173
+    },
+    {
+      "site": "Casper",
+      "ms": -2165626800000,
+      "separation": 5.6002460499664855,
+      "sunSemidiameter": 0.2633650041137146,
+      "moonSemidiameter": 0.2812411854818064,
+      "sunAltitude": 55.72395559027834,
+      "sunAzimuth": 235.93354859876587
+    },
+    {
+      "site": "Casper",
+      "ms": -2165616000000,
+      "separation": 4.182484729833011,
+      "sunSemidiameter": 0.26335372376209476,
+      "moonSemidiameter": 0.27896923036718063,
+      "sunAltitude": 24.151577806211368,
+      "sunAzimuth": 274.5702491225454
+    },
+    {
+      "site": "Casper",
+      "ms": -2165605200000,
+      "separation": 2.4778590045631224,
+      "sunSemidiameter": 0.26334127351405057,
+      "moonSemidiameter": 0.2763521921581219,
+      "sunAltitude": -6.071035878355584,
+      "sunAzimuth": 304.35348027634006
+    },
+    {
+      "site": "Casper",
+      "ms": -1596682800000,
+      "separation": 10.106472319593902,
+      "sunSemidiameter": 0.26288523773898476,
+      "moonSemidiameter": 0.2816093446138135,
+      "sunAltitude": 57.41434202475061,
+      "sunAzimuth": 238.1521612575058
+    },
+    {
+      "site": "Casper",
+      "ms": -1596672000000,
+      "separation": 8.621960491561449,
+      "sunSemidiameter": 0.2628752982403678,
+      "moonSemidiameter": 0.2793249294909817,
+      "sunAltitude": 25.596230768054564,
+      "sunAzimuth": 276.21535964845293
+    },
+    {
+      "site": "Casper",
+      "ms": -1596661200000,
+      "separation": 6.758703241129674,
+      "sunSemidiameter": 0.2628641954804442,
+      "moonSemidiameter": 0.2768461764555203,
+      "sunAltitude": -4.35245157858718,
+      "sunAzimuth": 305.5344098304386
+    },
+    {
+      "site": "Casper",
+      "ms": -458708400000,
+      "separation": 4.682024196869308,
+      "sunSemidiameter": 0.2622115642505605,
+      "moonSemidiameter": 0.282314002265736,
+      "sunAltitude": 59.554332848513006,
+      "sunAzimuth": 239.44267548259305
+    },
+    {
+      "site": "Casper",
+      "ms": -458697600000,
+      "separation": 3.2579630518047935,
+      "sunSemidiameter": 0.2622048488989843,
+      "moonSemidiameter": 0.28017772162961085,
+      "sunAltitude": 27.58880065040035,
+      "sunAzimuth": 277.3260122148083
+    },
+    {
+      "site": "Casper",
+      "ms": -458686800000,
+      "separation": 1.6139904032040946,
+      "sunSemidiameter": 0.2621969190313912,
+      "moonSemidiameter": 0.27762912684739405,
+      "sunAltitude": -2.191717608031218,
+      "sunAzimuth": 306.08145345564714
+    },
+    {
+      "site": "Casper",
+      "ms": 679179600000,
+      "separation": 13.6025170857578,
+      "sunSemidiameter": 0.26209834082097494,
+      "moonSemidiameter": 0.2821802764341469,
+      "sunAltitude": 59.309918337231984,
+      "sunAzimuth": 236.44130441662205
+    },
+    {
+      "site": "Casper",
+      "ms": 679190400000,
+      "separation": 12.039249247034439,
+      "sunSemidiameter": 0.2620947828437457,
+      "moonSemidiameter": 0.2800278986231261,
+      "sunAltitude": 27.595708539923965,
+      "sunAzimuth": 275.5676626977224
+    },
+    {
+      "site": "Casper",
+      "ms": 679201200000,
+      "separation": 10.073742662355626,
+      "sunSemidiameter": 0.2620899227136312,
+      "moonSemidiameter": 0.277720855214371,
+      "sunAltitude": -2.519626593920301,
+      "sunAzimuth": 304.54186229751247
+    },
+    {
+      "site": "Casper",
+      "ms": 934318800000,
+      "separation": 8.022384399870708,
+      "sunSemidiameter": 0.2628671915277909,
+      "moonSemidiameter": 0.27183051276417375,
+      "sunAltitude": 54.02161505628289,
+      "sunAzimuth": 228.88718519384784
+    },
+    {
+      "site": "Casper",
+      "ms": 934329600000,
+      "separation": 6.63245481856074,
+      "sunSemidiameter": 0.26286790361028023,
+      "moonSemidiameter": 0.2694683169456849,
+      "sunAltitude": 23.333584088011012,
+      "sunAzimuth": 269.7930797696019
+    },
+    {
+      "site": "Casper",
+      "ms": 934340400000,
+      "separation": 4.864020810212834,
+      "sunSemidiameter": 0.26286724642349046,
+      "moonSemidiameter": 0.2667926030434238,
+      "sunAltitude": -7.673710602661411,
+      "sunAzimuth": 300.1036684564048
+    },
+    {
+      "site": "Casper",
+      "ms": 1503262800000,
+      "separation": 12.188395578155376,
+      "sunSemidiameter": 0.26337482512957633,
+      "moonSemidiameter": 0.2731011653818554,
+      "sunAltitude": 50.9661453419809,
+      "sunAzimuth": 226.52028378164357
+    },
+    {
+      "site": "Casper",
+      "ms": 1503273600000,
+      "separation": 10.742081296734858,
+      "sunSemidiameter": 0.2633766755856683,
+      "moonSemidiameter": 0.27063355450361437,
+      "sunAltitude": 20.755475609731583,
+      "sunAzimuth": 267.43445167672587
+    },
+    {
+      "site": "Casper",
+      "ms": 1503284400000,
+      "separation": 8.911511545497824,
+      "sunSemidiameter": 0.26337717033217684,
+      "moonSemidiameter": 0.26798801352618373,
+      "sunAltitude": -10.555376869039865,
+      "sunAzimuth": 298.25915552593176
+    },
+    {
+      "site": "Casper",
+      "ms": 1712523600000,
+      "separation": 13.278542922833452,
+      "sunSemidiameter": 0.2661284227850185,
+      "moonSemidiameter": 0.2803916281341473,
+      "sunAltitude": 46.61885632220937,
+      "sunAzimuth": 223.05598309886187
+    },
+    {
+      "site": "Casper",
+      "ms": 1712534400000,
+      "separation": 11.742512250007065,
+      "sunSemidiameter": 0.2661139936601626,
+      "moonSemidiameter": 0.27801849799005646,
+      "sunAltitude": 17.28774794550168,
+      "sunAzimuth": 263.8994814442152
+    },
+    {
+      "site": "Casper",
+      "ms": 1712545200000,
+      "separation": 9.856591277796534,
+      "sunSemidiameter": 0.2660981802726865,
+      "moonSemidiameter": 0.2754447326609613,
+      "sunAltitude": -14.33824728196897,
+      "sunAzimuth": 295.299445169062
+    },
+    {
+      "site": "Casper",
+      "ms": 1817154000000,
+      "separation": 8.09666158890458,
+      "sunSemidiameter": 0.2625293867305882,
+      "moonSemidiameter": 0.28258570420011014,
+      "sunAltitude": 56.10774591900979,
+      "sunAzimuth": 231.00210460200367
+    },
+    {
+      "site": "Casper",
+      "ms": 1817164800000,
+      "separation": 6.559676078181814,
+      "sunSemidiameter": 0.2625289500503189,
+      "moonSemidiameter": 0.28045685759194977,
+      "sunAltitude": 25.066045833638007,
+      "sunAzimuth": 271.6386897852438
+    },
+    {
+      "site": "Casper",
+      "ms": 1817175600000,
+      "separation": 4.645782741692399,
+      "sunSemidiameter": 0.26252714783672393,
+      "moonSemidiameter": 0.27794954275169514,
+      "sunAltitude": -5.680392622190322,
+      "sunAzimuth": 301.5134207288171
+    },
+    {
+      "site": "Casper",
+      "ms": 2386098000000,
+      "separation": 12.613009324788292,
+      "sunSemidiameter": 0.2629264230277401,
+      "moonSemidiameter": 0.2820400161067981,
+      "sunAltitude": 53.529356894332864,
+      "sunAzimuth": 228.42207227263557
+    },
+    {
+      "site": "Casper",
+      "ms": 2386108800000,
+      "separation": 11.026044953435271,
+      "sunSemidiameter": 0.2629272553574686,
+      "moonSemidiameter": 0.2798794097704857,
+      "sunAltitude": 22.926337008457338,
+      "sunAzimuth": 269.368159947265
+    },
+    {
+      "site": "Casper",
+      "ms": 2386119600000,
+      "separation": 9.052931169161226,
+      "sunSemidiameter": 0.26292671846905735,
+      "moonSemidiameter": 0.2774846049973622,
+      "sunAltitude": -8.138097335593583,
+      "sunAzimuth": 299.771674803223
+    },
+    {
+      "site": "Casper",
+      "ms": 3524072400000,
+      "separation": 7.332773169977036,
+      "sunSemidiameter": 0.26408994904935723,
+      "moonSemidiameter": 0.28200399764904766,
+      "sunAltitude": 46.43442988524388,
+      "sunAzimuth": 223.92523426527683
+    },
+    {
+      "site": "Casper",
+      "ms": 3524083200000,
+      "separation": 5.791730300956933,
+      "sunSemidiameter": 0.2640929090497686,
+      "moonSemidiameter": 0.2797992237250723,
+      "sunAltitude": 16.87595762223003,
+      "sunAzimuth": 264.3729200815586
+    },
+    {
+      "site": "Casper",
+      "ms": 3524094000000,
+      "separation": 3.8880439713388926,
+      "sunSemidiameter": 0.2640945600126011,
+      "moonSemidiameter": 0.27722404676483664,
+      "sunAltitude": -14.779517141258694,
+      "sunAzimuth": 295.7444101651744
+    },
+    {
+      "site": "London",
+      "ms": -2165626800000,
+      "separation": 5.711188619877608,
+      "sunSemidiameter": 0.26335401000614317,
+      "moonSemidiameter": 0.2762342982224907,
+      "sunAltitude": -8.758722279350994,
+      "sunAzimuth": 318.20256681568014
+    },
+    {
+      "site": "London",
+      "ms": -2165616000000,
+      "separation": 3.6214551462790094,
+      "sunSemidiameter": 0.2633455321673872,
+      "moonSemidiameter": 0.27551261782127856,
+      "sunAltitude": -18.630791647664115,
+      "sunAzimuth": 0.8198157635015544
+    },
+    {
+      "site": "London",
+      "ms": -2165605200000,
+      "separation": 1.7606794108699304,
+      "sunSemidiameter": 0.26334089985253484,
+      "moonSemidiameter": 0.27631569529678723,
+      "sunAltitude": -8.01285811439556,
+      "sunAzimuth": 43.175928258407936
+    },
+    {
+      "site": "London",
+      "ms": -1596682800000,
+      "separation": 10.087530814625469,
+      "sunSemidiameter": 0.2628744760819188,
+      "moonSemidiameter": 0.27669218577690785,
+      "sunAltitude": -6.795645619237501,
+      "sunAzimuth": 318.95568506456516
+    },
+    {
+      "site": "London",
+      "ms": -1596672000000,
+      "separation": 7.889946472422314,
+      "sunSemidiameter": 0.26286726246840614,
+      "moonSemidiameter": 0.276212026882488,
+      "sunAltitude": -16.547046984010176,
+      "sunAzimuth": 0.60262219318556
+    },
+    {
+      "site": "London",
+      "ms": -1596661200000,
+      "separation": 5.7271500933101365,
+      "sunSemidiameter": 0.2628638312313896,
+      "moonSemidiameter": 0.27723020858513936,
+      "sunAltitude": -6.2441973909386705,
+      "sunAzimuth": 42.06672136625355
+    },
+    {
+      "site": "London",
+      "ms": -458708400000,
+      "separation": 4.7487294580510255,
+      "sunSemidiameter": 0.2622010712800624,
+      "moonSemidiameter": 0.2774851804993267,
+      "sunAltitude": -4.535203330056786,
+      "sunAzimuth": 318.99571756690983
+    },
+    {
+      "site": "London",
+      "ms": -458697600000,
+      "separation": 2.638360359068327,
+      "sunSemidiameter": 0.26219688230612587,
+      "moonSemidiameter": 0.2767321203868503,
+      "sunAltitude": -14.521395836948615,
+      "sunAzimuth": 359.60223706552557
+    },
+    {
+      "site": "London",
+      "ms": -458686800000,
+      "separation": 1.0350517143600075,
+      "sunSemidiameter": 0.2621964049989463,
+      "moonSemidiameter": 0.277463514494037,
+      "sunAltitude": -4.873778142502406,
+      "sunAzimuth": 40.310538131734376
+    },
+    {
+      "site": "London",
+      "ms": 679179600000,
+      "separation": 13.395317637315191,
+      "sunSemidiameter": 0.2620877570055094,
+      "moonSemidiameter": 0.2774575599828604,
+      "sunAltitude": -5.187703954817541,
+      "sunAzimuth": 317.5854525525228
+    },
+    {
+      "site": "London",
+      "ms": 679190400000,
+      "separation": 11.14570820692445,
+      "sunSemidiameter": 0.2620865966582077,
+      "moonSemidiameter": 0.2771417841137444,
+      "sunAltitude": -15.74731147111904,
+      "sunAzimuth": 358.5906799110643
+    },
+    {
+      "site": "London",
+      "ms": 679201200000,
+      "separation": 8.967903319512375,
+      "sunSemidiameter": 0.26208917776286045,
+      "moonSemidiameter": 0.27828273359300254,
+      "sunAltitude": -6.4234150617095604,
+      "sunAzimuth": 39.98766956912769
+    },
+    {
+      "site": "London",
+      "ms": 934318800000,
+      "separation": 7.924782535735245,
+      "sunSemidiameter": 0.2628559676283888,
+      "moonSemidiameter": 0.26712744098070423,
+      "sunAltitude": -11.203207591222329,
+      "sunAzimuth": 314.4737362116716
+    },
+    {
+      "site": "London",
+      "ms": 934329600000,
+      "separation": 5.8393917488164995,
+      "sunSemidiameter": 0.2628591889715819,
+      "moonSemidiameter": 0.26623107252676836,
+      "sunAltitude": -22.532677507267323,
+      "sunAzimuth": 358.472322829089
+    },
+    {
+      "site": "London",
+      "ms": 934340400000,
+      "separation": 3.7972592916615304,
+      "sunSemidiameter": 0.26286632514929453,
+      "moonSemidiameter": 0.2667887536384537,
+      "sunAltitude": -12.545793796678296,
+      "sunAzimuth": 42.98953445076515
+    },
+    {
+      "site": "London",
+      "ms": 1503262800000,
+      "separation": 12.000533886077607,
+      "sunSemidiameter": 0.26336331548310427,
+      "moonSemidiameter": 0.26831397050675665,
+      "sunAltitude": -14.42533522581288,
+      "sunAzimuth": 313.3544066403776
+    },
+    {
+      "site": "London",
+      "ms": 1503273600000,
+      "separation": 9.888595206717103,
+      "sunSemidiameter": 0.26336780129856996,
+      "moonSemidiameter": 0.2675951643752074,
+      "sunAltitude": -25.909046279946967,
+      "sunAzimuth": 358.98610082272586
+    },
+    {
+      "site": "London",
+      "ms": 1503284400000,
+      "separation": 7.846954296460478,
+      "sunSemidiameter": 0.2633762726676598,
+      "moonSemidiameter": 0.2683472312411522,
+      "sunAltitude": -15.335419573206421,
+      "sunAzimuth": 45.008287563446274
+    },
+    {
+      "site": "London",
+      "ms": 1712523600000,
+      "separation": 13.228361838729672,
+      "sunSemidiameter": 0.26611639007479504,
+      "moonSemidiameter": 0.2750599054183819,
+      "sunAltitude": -18.946780407907383,
+      "sunAzimuth": 311.26898349668426
+    },
+    {
+      "site": "London",
+      "ms": 1712534400000,
+      "separation": 11.072830620002568,
+      "sunSemidiameter": 0.2661047500211852,
+      "moonSemidiameter": 0.27460205828977075,
+      "sunAltitude": -30.75785807782492,
+      "sunAzimuth": 359.31869968382426
+    },
+    {
+      "site": "London",
+      "ms": 1712545200000,
+      "separation": 8.963632632083845,
+      "sunSemidiameter": 0.26609722627765653,
+      "moonSemidiameter": 0.27574311606910024,
+      "sunAltitude": -19.41253385004003,
+      "sunAzimuth": 47.59013806596877
+    },
+    {
+      "site": "London",
+      "ms": 1817154000000,
+      "separation": 7.946085336831603,
+      "sunSemidiameter": 0.2625183858534727,
+      "moonSemidiameter": 0.2776274775269745,
+      "sunAltitude": -8.944569730165325,
+      "sunAzimuth": 315.3802238261592
+    },
+    {
+      "site": "London",
+      "ms": 1817164800000,
+      "separation": 5.716101480151671,
+      "sunSemidiameter": 0.26252038373438885,
+      "moonSemidiameter": 0.27701159899950917,
+      "sunAltitude": -20.10540486935181,
+      "sunAzimuth": 358.25821094386754
+    },
+    {
+      "site": "London",
+      "ms": 1817175600000,
+      "separation": 3.5376596399011513,
+      "sunSemidiameter": 0.26252623865404645,
+      "moonSemidiameter": 0.27792604441163815,
+      "sunAltitude": -10.470826867190652,
+      "sunAzimuth": 41.68471070226367
+    },
+    {
+      "site": "London",
+      "ms": 2386098000000,
+      "separation": 12.356514103640862,
+      "sunSemidiameter": 0.26291515141085015,
+      "moonSemidiameter": 0.27709307429057983,
+      "sunAltitude": -11.730439276824605,
+      "sunAzimuth": 314.25896526203223
+    },
+    {
+      "site": "London",
+      "ms": 2386108800000,
+      "separation": 10.12480604183314,
+      "sunSemidiameter": 0.2629185093873399,
+      "moonSemidiameter": 0.27670859857850494,
+      "sunAltitude": -23.09989317968572,
+      "sunAzimuth": 358.52243856091366
+    },
+    {
+      "site": "London",
+      "ms": 2386119600000,
+      "separation": 7.974635917227963,
+      "sunSemidiameter": 0.2629257945416842,
+      "moonSemidiameter": 0.27785169116101616,
+      "sunAltitude": -13.030058769089845,
+      "sunAzimuth": 43.29652779740922
+    },
+    {
+      "site": "London",
+      "ms": 3524072400000,
+      "separation": 7.175977610556007,
+      "sunSemidiameter": 0.2640780957689543,
+      "moonSemidiameter": 0.27674912727297873,
+      "sunAltitude": -19.10534159180547,
+      "sunAzimuth": 311.9119044982345
+    },
+    {
+      "site": "London",
+      "ms": 3524083200000,
+      "separation": 4.973808713809962,
+      "sunSemidiameter": 0.26408389078797884,
+      "moonSemidiameter": 0.2761569237500339,
+      "sunAltitude": -30.706953969826277,
+      "sunAzimuth": 0.032430816748425476
+    },
+    {
+      "site": "London",
+      "ms": 3524094000000,
+      "separation": 2.819033933970669,
+      "sunSemidiameter": 0.26409374871987507,
+      "moonSemidiameter": 0.27716945372192947,
+      "sunAltitude": -19.16104473051972,
+      "sunAzimuth": 48.185840955937806
+    },
+    {
+      "site": "Sydney",
+      "ms": -2165626800000,
+      "separation": 4.169619067905235,
+      "sunSemidiameter": 0.2633563682943655,
+      "moonSemidiameter": 0.27792920273557975,
+      "sunAltitude": 2.923804367210375,
+      "sunAzimuth": 64.51347755993886
+    },
+    {
+      "site": "Sydney",
+      "ms": -2165616000000,
+      "separation": 2.827045387202722,
+      "sunSemidiameter": 0.26335485662430785,
+      "moonSemidiameter": 0.27988655156308384,
+      "sunAltitude": 30.565740961557854,
+      "sunAzimuth": 30.773158201476885
+    },
+    {
+      "site": "Sydney",
+      "ms": -2165605200000,
+      "separation": 1.7255119605382665,
+      "sunSemidiameter": 0.2633488565236148,
+      "moonSemidiameter": 0.2798739337098363,
+      "sunAltitude": 34.32584895464467,
+      "sunAzimuth": 340.3129239412692
+    },
+    {
+      "site": "Sydney",
+      "ms": -1596682800000,
+      "separation": 8.710012232418844,
+      "sunSemidiameter": 0.26287618391439194,
+      "moonSemidiameter": 0.2785727407626609,
+      "sunAltitude": 1.607424825315886,
+      "sunAzimuth": 62.97533678627908
+    },
+    {
+      "site": "Sydney",
+      "ms": -1596672000000,
+      "separation": 7.396109890934459,
+      "sunSemidiameter": 0.2628758508851102,
+      "moonSemidiameter": 0.2804227138626041,
+      "sunAltitude": 28.631661389168876,
+      "sunAzimuth": 29.902840338330723
+    },
+    {
+      "site": "Sydney",
+      "ms": -1596661200000,
+      "separation": 6.26201676257448,
+      "sunSemidiameter": 0.2628711166349175,
+      "moonSemidiameter": 0.28025328917100867,
+      "sunAltitude": 32.41066016316999,
+      "sunAzimuth": 341.25283559366864
+    },
+    {
+      "site": "Sydney",
+      "ms": -458708400000,
+      "separation": 3.531799152444566,
+      "sunSemidiameter": 0.2622019620961198,
+      "moonSemidiameter": 0.27831508580965647,
+      "sunAltitude": -0.12081586177623527,
+      "sunAzimuth": 61.936302707272006
+    },
+    {
+      "site": "Sydney",
+      "ms": -458697600000,
+      "separation": 2.256734802469848,
+      "sunSemidiameter": 0.2622046784334625,
+      "moonSemidiameter": 0.280336108418119,
+      "sunAltitude": 26.40607523426897,
+      "sunAzimuth": 29.85444673917507
+    },
+    {
+      "site": "Sydney",
+      "ms": -458686800000,
+      "separation": 1.206485035146702,
+      "sunSemidiameter": 0.26220312596992285,
+      "moonSemidiameter": 0.2804931249703476,
+      "sunAltitude": 30.761156940657337,
+      "sunAzimuth": 342.9829721499805
+    },
+    {
+      "site": "Sydney",
+      "ms": 679179600000,
+      "separation": 12.529418920235702,
+      "sunSemidiameter": 0.2620887602062593,
+      "moonSemidiameter": 0.2788918357372476,
+      "sunAltitude": -0.15912370345358517,
+      "sunAzimuth": 63.4818237175328
+    },
+    {
+      "site": "Sydney",
+      "ms": 679190400000,
+      "separation": 11.267226912279476,
+      "sunSemidiameter": 0.26209472091153435,
+      "moonSemidiameter": 0.28078002873215746,
+      "sunAltitude": 27.05428694580501,
+      "sunAzimuth": 31.440817908165798
+    },
+    {
+      "site": "Sydney",
+      "ms": 679201200000,
+      "separation": 10.104855306351828,
+      "sunSemidiameter": 0.2620964228809332,
+      "moonSemidiameter": 0.2806929818239901,
+      "sunAltitude": 32.21031354105489,
+      "sunAzimuth": 343.69171344972943
+    },
+    {
+      "site": "Sydney",
+      "ms": 934318800000,
+      "separation": 7.15657961780859,
+      "sunSemidiameter": 0.2628588785851099,
+      "moonSemidiameter": 0.2688258556652311,
+      "sunAltitude": 3.4511109602391734,
+      "sunAzimuth": 68.88045437660216
+    },
+    {
+      "site": "Sydney",
+      "ms": 934329600000,
+      "separation": 5.985145059583058,
+      "sunSemidiameter": 0.26286956408741236,
+      "moonSemidiameter": 0.27051180714808876,
+      "sunAltitude": 32.95340295018611,
+      "sunAzimuth": 35.18746898371386
+    },
+    {
+      "site": "Sydney",
+      "ms": 934340400000,
+      "separation": 4.946032404723072,
+      "sunSemidiameter": 0.26287578448180143,
+      "moonSemidiameter": 0.27033970682867486,
+      "sunAltitude": 38.723883995750974,
+      "sunAzimuth": 341.5019741751984
+    },
+    {
+      "site": "Sydney",
+      "ms": 1503262800000,
+      "separation": 11.303658240515082,
+      "sunSemidiameter": 0.2633672995540981,
+      "moonSemidiameter": 0.27069685951001876,
+      "sunAltitude": 5.7782606121927715,
+      "sunAzimuth": 71.26903395134302
+    },
+    {
+      "site": "Sydney",
+      "ms": 1503273600000,
+      "separation": 10.119315078851121,
+      "sunSemidiameter": 0.2633793056977383,
+      "moonSemidiameter": 0.2723154555354774,
+      "sunAltitude": 36.10229584067659,
+      "sunAzimuth": 36.68454860468418
+    },
+    {
+      "site": "Sydney",
+      "ms": 1503284400000,
+      "separation": 9.045449605964013,
+      "sunSemidiameter": 0.263386737233874,
+      "moonSemidiameter": 0.2719613844761876,
+      "sunAltitude": 41.78623500167965,
+      "sunAzimuth": 339.60334460910286
+    },
+    {
+      "site": "Sydney",
+      "ms": 1712523600000,
+      "separation": 11.599698140793427,
+      "sunSemidiameter": 0.2661219210931513,
+      "moonSemidiameter": 0.27925774507308443,
+      "sunAltitude": 8.900477948534153,
+      "sunAzimuth": 75.0515597926674
+    },
+    {
+      "site": "Sydney",
+      "ms": 1712534400000,
+      "separation": 10.246184165923458,
+      "sunSemidiameter": 0.26611798872116216,
+      "moonSemidiameter": 0.2812396689306517,
+      "sunAltitude": 40.38463095406009,
+      "sunAzimuth": 39.50223999492792
+    },
+    {
+      "site": "Sydney",
+      "ms": 1712545200000,
+      "separation": 9.062771057905886,
+      "sunSemidiameter": 0.2661092877744076,
+      "moonSemidiameter": 0.28101593482133846,
+      "sunAltitude": 46.16844144372455,
+      "sunAzimuth": 337.1192096934746
+    },
+    {
+      "site": "Sydney",
+      "ms": 1817154000000,
+      "separation": 7.340183359207378,
+      "sunSemidiameter": 0.26252055609744346,
+      "moonSemidiameter": 0.2790085630988188,
+      "sunAltitude": 1.9210094146402135,
+      "sunAzimuth": 67.09254113387667
+    },
+    {
+      "site": "Sydney",
+      "ms": 1817164800000,
+      "separation": 6.041019285858389,
+      "sunSemidiameter": 0.2625299422044961,
+      "moonSemidiameter": 0.28119537601954175,
+      "sunAltitude": 30.741880072971068,
+      "sunAzimuth": 34.04274718483667
+    },
+    {
+      "site": "Sydney",
+      "ms": 1817175600000,
+      "separation": 4.839671793572572,
+      "sunSemidiameter": 0.2625349442495741,
+      "moonSemidiameter": 0.2814247425096271,
+      "sunAltitude": 36.46810790774112,
+      "sunAzimuth": 342.6131587057267
+    },
+    {
+      "site": "Sydney",
+      "ms": 2386098000000,
+      "separation": 11.886481878286816,
+      "sunSemidiameter": 0.26291823470894327,
+      "moonSemidiameter": 0.2789960237290173,
+      "sunAltitude": 3.814420325163994,
+      "sunAzimuth": 69.29970214592791
+    },
+    {
+      "site": "Sydney",
+      "ms": 2386108800000,
+      "separation": 10.602548056033706,
+      "sunSemidiameter": 0.26292907166751445,
+      "moonSemidiameter": 0.2811188510983498,
+      "sunAltitude": 33.46830952096273,
+      "sunAzimuth": 35.464127506787726
+    },
+    {
+      "site": "Sydney",
+      "ms": 2386119600000,
+      "separation": 9.39175810736336,
+      "sunSemidiameter": 0.2629354267793881,
+      "moonSemidiameter": 0.28120170801520966,
+      "sunAltitude": 39.24962735399619,
+      "sunAzimuth": 341.2335013242279
+    },
+    {
+      "site": "Sydney",
+      "ms": 3524072400000,
+      "separation": 6.886477137907214,
+      "sunSemidiameter": 0.26408364982974747,
+      "moonSemidiameter": 0.27940655933559944,
+      "sunAltitude": 9.302790664482375,
+      "sunAzimuth": 74.56933937467743
+    },
+    {
+      "site": "Sydney",
+      "ms": 3524083200000,
+      "separation": 5.534967234225079,
+      "sunSemidiameter": 0.2640969620315956,
+      "moonSemidiameter": 0.2817670873130059,
+      "sunAltitude": 40.66240455401552,
+      "sunAzimuth": 38.783867348204396
+    },
+    {
+      "site": "Sydney",
+      "ms": 3524094000000,
+      "separation": 4.278533734345338,
+      "sunSemidiameter": 0.26410556101300753,
+      "moonSemidiameter": 0.2820363629936155,
+      "sunAltitude": 46.003454554202534,
+      "sunAzimuth": 336.26737528439605
+    }
+  ],
+  "obscurations": [
+    {
+      "separation": 0,
+      "disc": 0,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 0.01,
+      "disc": 0,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 0.05,
+      "disc": 0,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 0.1,
+      "disc": 0,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 0.25,
+      "disc": 0,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 0.4,
+      "disc": 0,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 0.5,
+      "disc": 0,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 0.51,
+      "disc": 0,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 1,
+      "disc": 0,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 0,
+      "disc": 0,
+      "cover": 0.25,
+      "value": 0
+    },
+    {
+      "separation": 0.01,
+      "disc": 0,
+      "cover": 0.25,
+      "value": 0
+    },
+    {
+      "separation": 0.05,
+      "disc": 0,
+      "cover": 0.25,
+      "value": 0
+    },
+    {
+      "separation": 0.1,
+      "disc": 0,
+      "cover": 0.25,
+      "value": 0
+    },
+    {
+      "separation": 0.25,
+      "disc": 0,
+      "cover": 0.25,
+      "value": 0
+    },
+    {
+      "separation": 0.4,
+      "disc": 0,
+      "cover": 0.25,
+      "value": 0
+    },
+    {
+      "separation": 0.5,
+      "disc": 0,
+      "cover": 0.25,
+      "value": 0
+    },
+    {
+      "separation": 0.51,
+      "disc": 0,
+      "cover": 0.25,
+      "value": 0
+    },
+    {
+      "separation": 1,
+      "disc": 0,
+      "cover": 0.25,
+      "value": 0
+    },
+    {
+      "separation": 0,
+      "disc": 0,
+      "cover": 0.27,
+      "value": 0
+    },
+    {
+      "separation": 0.01,
+      "disc": 0,
+      "cover": 0.27,
+      "value": 0
+    },
+    {
+      "separation": 0.05,
+      "disc": 0,
+      "cover": 0.27,
+      "value": 0
+    },
+    {
+      "separation": 0.1,
+      "disc": 0,
+      "cover": 0.27,
+      "value": 0
+    },
+    {
+      "separation": 0.25,
+      "disc": 0,
+      "cover": 0.27,
+      "value": 0
+    },
+    {
+      "separation": 0.4,
+      "disc": 0,
+      "cover": 0.27,
+      "value": 0
+    },
+    {
+      "separation": 0.5,
+      "disc": 0,
+      "cover": 0.27,
+      "value": 0
+    },
+    {
+      "separation": 0.51,
+      "disc": 0,
+      "cover": 0.27,
+      "value": 0
+    },
+    {
+      "separation": 1,
+      "disc": 0,
+      "cover": 0.27,
+      "value": 0
+    },
+    {
+      "separation": 0,
+      "disc": 0,
+      "cover": 0.5,
+      "value": 0
+    },
+    {
+      "separation": 0.01,
+      "disc": 0,
+      "cover": 0.5,
+      "value": 0
+    },
+    {
+      "separation": 0.05,
+      "disc": 0,
+      "cover": 0.5,
+      "value": 0
+    },
+    {
+      "separation": 0.1,
+      "disc": 0,
+      "cover": 0.5,
+      "value": 0
+    },
+    {
+      "separation": 0.25,
+      "disc": 0,
+      "cover": 0.5,
+      "value": 0
+    },
+    {
+      "separation": 0.4,
+      "disc": 0,
+      "cover": 0.5,
+      "value": 0
+    },
+    {
+      "separation": 0.5,
+      "disc": 0,
+      "cover": 0.5,
+      "value": 0
+    },
+    {
+      "separation": 0.51,
+      "disc": 0,
+      "cover": 0.5,
+      "value": 0
+    },
+    {
+      "separation": 1,
+      "disc": 0,
+      "cover": 0.5,
+      "value": 0
+    },
+    {
+      "separation": 0,
+      "disc": 0.25,
+      "cover": 0.2,
+      "value": 0.6400000000000001
+    },
+    {
+      "separation": 0.01,
+      "disc": 0.25,
+      "cover": 0.2,
+      "value": 0.6400000000000001
+    },
+    {
+      "separation": 0.05,
+      "disc": 0.25,
+      "cover": 0.2,
+      "value": 0.6399999992721113
+    },
+    {
+      "separation": 0.1,
+      "disc": 0.25,
+      "cover": 0.2,
+      "value": 0.5627575633144297
+    },
+    {
+      "separation": 0.25,
+      "disc": 0.25,
+      "cover": 0.2,
+      "value": 0.26475757372845854
+    },
+    {
+      "separation": 0.4,
+      "disc": 0.25,
+      "cover": 0.2,
+      "value": 0.03515394904543066
+    },
+    {
+      "separation": 0.5,
+      "disc": 0.25,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 0.51,
+      "disc": 0.25,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 1,
+      "disc": 0.25,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 0,
+      "disc": 0.25,
+      "cover": 0.25,
+      "value": 1
+    },
+    {
+      "separation": 0.01,
+      "disc": 0.25,
+      "cover": 0.25,
+      "value": 0.9745369068598965
+    },
+    {
+      "separation": 0.05,
+      "disc": 0.25,
+      "cover": 0.25,
+      "value": 0.8728885715695383
+    },
+    {
+      "separation": 0.1,
+      "disc": 0.25,
+      "cover": 0.25,
+      "value": 0.7470600781046619
+    },
+    {
+      "separation": 0.25,
+      "disc": 0.25,
+      "cover": 0.25,
+      "value": 0.39100221895577075
+    },
+    {
+      "separation": 0.4,
+      "disc": 0.25,
+      "cover": 0.25,
+      "value": 0.10408803866182773
+    },
+    {
+      "separation": 0.5,
+      "disc": 0.25,
+      "cover": 0.25,
+      "value": 0
+    },
+    {
+      "separation": 0.51,
+      "disc": 0.25,
+      "cover": 0.25,
+      "value": 0
+    },
+    {
+      "separation": 1,
+      "disc": 0.25,
+      "cover": 0.25,
+      "value": 0
+    },
+    {
+      "separation": 0,
+      "disc": 0.25,
+      "cover": 0.27,
+      "value": 1
+    },
+    {
+      "separation": 0.01,
+      "disc": 0.25,
+      "cover": 0.27,
+      "value": 1
+    },
+    {
+      "separation": 0.05,
+      "disc": 0.25,
+      "cover": 0.27,
+      "value": 0.9401985092335962
+    },
+    {
+      "separation": 0.1,
+      "disc": 0.25,
+      "cover": 0.27,
+      "value": 0.814595892658718
+    },
+    {
+      "separation": 0.25,
+      "disc": 0.25,
+      "cover": 0.27,
+      "value": 0.4452184437568838
+    },
+    {
+      "separation": 0.4,
+      "disc": 0.25,
+      "cover": 0.27,
+      "value": 0.13870525921063434
+    },
+    {
+      "separation": 0.5,
+      "disc": 0.25,
+      "cover": 0.27,
+      "value": 0.009729310518089802
+    },
+    {
+      "separation": 0.51,
+      "disc": 0.25,
+      "cover": 0.27,
+      "value": 0.0034499256442089513
+    },
+    {
+      "separation": 1,
+      "disc": 0.25,
+      "cover": 0.27,
+      "value": 0
+    },
+    {
+      "separation": 0,
+      "disc": 0.25,
+      "cover": 0.5,
+      "value": 1
+    },
+    {
+      "separation": 0.01,
+      "disc": 0.25,
+      "cover": 0.5,
+      "value": 1
+    },
+    {
+      "separation": 0.05,
+      "disc": 0.25,
+      "cover": 0.5,
+      "value": 1
+    },
+    {
+      "separation": 0.1,
+      "disc": 0.25,
+      "cover": 0.5,
+      "value": 1
+    },
+    {
+      "separation": 0.25,
+      "disc": 0.25,
+      "cover": 0.5,
+      "value": 1
+    },
+    {
+      "separation": 0.4,
+      "disc": 0.25,
+      "cover": 0.5,
+      "value": 0.6991437517773189
+    },
+    {
+      "separation": 0.5,
+      "disc": 0.25,
+      "cover": 0.5,
+      "value": 0.44660991872466393
+    },
+    {
+      "separation": 0.51,
+      "disc": 0.25,
+      "cover": 0.5,
+      "value": 0.42207385140911774
+    },
+    {
+      "separation": 1,
+      "disc": 0.25,
+      "cover": 0.5,
+      "value": 0
+    },
+    {
+      "separation": 0,
+      "disc": 0.26,
+      "cover": 0.2,
+      "value": 0.591715976331361
+    },
+    {
+      "separation": 0.01,
+      "disc": 0.26,
+      "cover": 0.2,
+      "value": 0.591715976331361
+    },
+    {
+      "separation": 0.05,
+      "disc": 0.26,
+      "cover": 0.2,
+      "value": 0.591715976331361
+    },
+    {
+      "separation": 0.1,
+      "disc": 0.26,
+      "cover": 0.2,
+      "value": 0.5398282477376727
+    },
+    {
+      "separation": 0.25,
+      "disc": 0.26,
+      "cover": 0.2,
+      "value": 0.26433273577381494
+    },
+    {
+      "separation": 0.4,
+      "disc": 0.26,
+      "cover": 0.2,
+      "value": 0.042937850332348114
+    },
+    {
+      "separation": 0.5,
+      "disc": 0.26,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 0.51,
+      "disc": 0.26,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 1,
+      "disc": 0.26,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 0,
+      "disc": 0.26,
+      "cover": 0.25,
+      "value": 0.9245562130177514
+    },
+    {
+      "separation": 0.01,
+      "disc": 0.26,
+      "cover": 0.25,
+      "value": 0.9245562130177514
+    },
+    {
+      "separation": 0.05,
+      "disc": 0.26,
+      "cover": 0.25,
+      "value": 0.8399772311538601
+    },
+    {
+      "separation": 0.1,
+      "disc": 0.26,
+      "cover": 0.25,
+      "value": 0.7224560435306959
+    },
+    {
+      "separation": 0.25,
+      "disc": 0.26,
+      "cover": 0.25,
+      "value": 0.38637108192191716
+    },
+    {
+      "separation": 0.4,
+      "disc": 0.26,
+      "cover": 0.25,
+      "value": 0.11181878831887648
+    },
+    {
+      "separation": 0.5,
+      "disc": 0.26,
+      "cover": 0.25,
+      "value": 0.003160423479929683
+    },
+    {
+      "separation": 0.51,
+      "disc": 0.26,
+      "cover": 0.25,
+      "value": 0
+    },
+    {
+      "separation": 1,
+      "disc": 0.26,
+      "cover": 0.25,
+      "value": 0
+    },
+    {
+      "separation": 0,
+      "disc": 0.26,
+      "cover": 0.27,
+      "value": 1
+    },
+    {
+      "separation": 0.01,
+      "disc": 0.26,
+      "cover": 0.27,
+      "value": 1
+    },
+    {
+      "separation": 0.05,
+      "disc": 0.26,
+      "cover": 0.27,
+      "value": 0.9120902329628394
+    },
+    {
+      "separation": 0.1,
+      "disc": 0.26,
+      "cover": 0.27,
+      "value": 0.7898563617165025
+    },
+    {
+      "separation": 0.25,
+      "disc": 0.26,
+      "cover": 0.27,
+      "value": 0.4387167556697148
+    },
+    {
+      "separation": 0.4,
+      "disc": 0.26,
+      "cover": 0.27,
+      "value": 0.14575055434944698
+    },
+    {
+      "separation": 0.5,
+      "disc": 0.26,
+      "cover": 0.27,
+      "value": 0.01664722818547875
+    },
+    {
+      "separation": 0.51,
+      "disc": 0.26,
+      "cover": 0.27,
+      "value": 0.009087731549034918
+    },
+    {
+      "separation": 1,
+      "disc": 0.26,
+      "cover": 0.27,
+      "value": 0
+    },
+    {
+      "separation": 0,
+      "disc": 0.26,
+      "cover": 0.5,
+      "value": 1
+    },
+    {
+      "separation": 0.01,
+      "disc": 0.26,
+      "cover": 0.5,
+      "value": 1
+    },
+    {
+      "separation": 0.05,
+      "disc": 0.26,
+      "cover": 0.5,
+      "value": 1
+    },
+    {
+      "separation": 0.1,
+      "disc": 0.26,
+      "cover": 0.5,
+      "value": 1
+    },
+    {
+      "separation": 0.25,
+      "disc": 0.26,
+      "cover": 0.5,
+      "value": 0.9936024725954077
+    },
+    {
+      "separation": 0.4,
+      "disc": 0.26,
+      "cover": 0.5,
+      "value": 0.6870661210384267
+    },
+    {
+      "separation": 0.5,
+      "disc": 0.26,
+      "cover": 0.5,
+      "value": 0.44444494429239734
+    },
+    {
+      "separation": 0.51,
+      "disc": 0.26,
+      "cover": 0.5,
+      "value": 0.42091568018028946
+    },
+    {
+      "separation": 1,
+      "disc": 0.26,
+      "cover": 0.5,
+      "value": 0
+    },
+    {
+      "separation": 0,
+      "disc": 0.5,
+      "cover": 0.2,
+      "value": 0.16000000000000003
+    },
+    {
+      "separation": 0.01,
+      "disc": 0.5,
+      "cover": 0.2,
+      "value": 0.16000000000000003
+    },
+    {
+      "separation": 0.05,
+      "disc": 0.5,
+      "cover": 0.2,
+      "value": 0.16000000000000003
+    },
+    {
+      "separation": 0.1,
+      "disc": 0.5,
+      "cover": 0.2,
+      "value": 0.16000000000000003
+    },
+    {
+      "separation": 0.25,
+      "disc": 0.5,
+      "cover": 0.2,
+      "value": 0.16000000000000003
+    },
+    {
+      "separation": 0.4,
+      "disc": 0.5,
+      "cover": 0.2,
+      "value": 0.12349349435815303
+    },
+    {
+      "separation": 0.5,
+      "disc": 0.5,
+      "cover": 0.2,
+      "value": 0.07318187080472574
+    },
+    {
+      "separation": 0.51,
+      "disc": 0.5,
+      "cover": 0.2,
+      "value": 0.0682174766592396
+    },
+    {
+      "separation": 1,
+      "disc": 0.5,
+      "cover": 0.2,
+      "value": 0
+    },
+    {
+      "separation": 0,
+      "disc": 0.5,
+      "cover": 0.25,
+      "value": 0.25
+    },
+    {
+      "separation": 0.01,
+      "disc": 0.5,
+      "cover": 0.25,
+      "value": 0.25
+    },
+    {
+      "separation": 0.05,
+      "disc": 0.5,
+      "cover": 0.25,
+      "value": 0.25
+    },
+    {
+      "separation": 0.1,
+      "disc": 0.5,
+      "cover": 0.25,
+      "value": 0.25
+    },
+    {
+      "separation": 0.25,
+      "disc": 0.5,
+      "cover": 0.25,
+      "value": 0.25
+    },
+    {
+      "separation": 0.4,
+      "disc": 0.5,
+      "cover": 0.25,
+      "value": 0.17478593794432973
+    },
+    {
+      "separation": 0.5,
+      "disc": 0.5,
+      "cover": 0.25,
+      "value": 0.11165247968116598
+    },
+    {
+      "separation": 0.51,
+      "disc": 0.5,
+      "cover": 0.25,
+      "value": 0.10551846285227943
+    },
+    {
+      "separation": 1,
+      "disc": 0.5,
+      "cover": 0.25,
+      "value": 0
+    },
+    {
+      "separation": 0,
+      "disc": 0.5,
+      "cover": 0.27,
+      "value": 0.2916
+    },
+    {
+      "separation": 0.01,
+      "disc": 0.5,
+      "cover": 0.27,
+      "value": 0.2916
+    },
+    {
+      "separation": 0.05,
+      "disc": 0.5,
+      "cover": 0.27,
+      "value": 0.2916
+    },
+    {
+      "separation": 0.1,
+      "disc": 0.5,
+      "cover": 0.27,
+      "value": 0.2916
+    },
+    {
+      "separation": 0.25,
+      "disc": 0.5,
+      "cover": 0.27,
+      "value": 0.2866160150949207
+    },
+    {
+      "separation": 0.4,
+      "disc": 0.5,
+      "cover": 0.27,
+      "value": 0.19701280853036263
+    },
+    {
+      "separation": 0.5,
+      "disc": 0.5,
+      "cover": 0.27,
+      "value": 0.1289677989984691
+    },
+    {
+      "separation": 0.51,
+      "disc": 0.5,
+      "cover": 0.27,
+      "value": 0.12237926903054601
+    },
+    {
+      "separation": 1,
+      "disc": 0.5,
+      "cover": 0.27,
+      "value": 0
+    },
+    {
+      "separation": 0,
+      "disc": 0.5,
+      "cover": 0.5,
+      "value": 1
+    },
+    {
+      "separation": 0.01,
+      "disc": 0.5,
+      "cover": 0.5,
+      "value": 0.987267816762423
+    },
+    {
+      "separation": 0.05,
+      "disc": 0.5,
+      "cover": 0.5,
+      "value": 0.9363645585431667
+    },
+    {
+      "separation": 0.1,
+      "disc": 0.5,
+      "cover": 0.5,
+      "value": 0.8728885715695383
+    },
+    {
+      "separation": 0.25,
+      "disc": 0.5,
+      "cover": 0.5,
+      "value": 0.6850376424742927
+    },
+    {
+      "separation": 0.4,
+      "disc": 0.5,
+      "cover": 0.5,
+      "value": 0.5046315754686909
+    },
+    {
+      "separation": 0.5,
+      "disc": 0.5,
+      "cover": 0.5,
+      "value": 0.39100221895577075
+    },
+    {
+      "separation": 0.51,
+      "disc": 0.5,
+      "cover": 0.5,
+      "value": 0.3800127246716371
+    },
+    {
+      "separation": 1,
+      "disc": 0.5,
+      "cover": 0.5,
+      "value": 0
+    }
+  ],
+  "lunar": [
+    {
+      "seed": -2166912000000,
+      "opposition": -2166846078528,
+      "eclipse": {
+        "kind": "penumbral",
+        "peak": -2166845363825,
+        "penumbralBegin": -2166854011939,
+        "penumbralEnd": -2166836714736,
+        "partialBegin": null,
+        "partialEnd": null,
+        "totalBegin": null,
+        "totalEnd": null,
+        "penumbralMagnitude": 1.0430137580474628,
+        "umbralMagnitude": -0.032958741807472575,
+        "umbralObscuration": 0
+      }
+    },
+    {
+      "seed": -1791849600000,
+      "opposition": -1791806650448,
+      "eclipse": {
+        "kind": "total",
+        "peak": -1791806547158,
+        "penumbralBegin": -1791816138120,
+        "penumbralEnd": -1791796953757,
+        "partialBegin": -1791812831650,
+        "partialEnd": -1791800263671,
+        "totalBegin": -1791809331959,
+        "totalEnd": -1791803762982,
+        "penumbralMagnitude": 2.533807793398809,
+        "umbralMagnitude": 1.5685472670286345,
+        "umbralObscuration": 1
+      }
+    },
+    {
+      "seed": -607996800000,
+      "opposition": -607981114862,
+      "eclipse": {
+        "kind": "total",
+        "peak": -607981398686,
+        "penumbralBegin": -607991899718,
+        "penumbralEnd": -607970893007,
+        "partialBegin": -607987695509,
+        "partialEnd": -607975105440,
+        "totalBegin": -607982732300,
+        "totalEnd": -607980067812,
+        "penumbralMagnitude": 2.1330253243448305,
+        "umbralMagnitude": 1.0788350448798962,
+        "umbralObscuration": 1
+      }
+    },
+    {
+      "seed": 410054400000,
+      "opposition": 410095955059,
+      "eclipse": {
+        "kind": "total",
+        "peak": 410095724139,
+        "penumbralBegin": 410086404152,
+        "penumbralEnd": 410105043189,
+        "partialBegin": 410089845704,
+        "partialEnd": 410101603336,
+        "totalBegin": 410093921136,
+        "totalEnd": 410097527715,
+        "penumbralMagnitude": 2.1543586416838925,
+        "umbralMagnitude": 1.182523105427029,
+        "umbralObscuration": 1
+      }
+    },
+    {
+      "seed": 963705600000,
+      "opposition": 963755712731,
+      "eclipse": {
+        "kind": "total",
+        "peak": 963755734387,
+        "penumbralBegin": 963744499332,
+        "penumbralEnd": 963766968258,
+        "partialBegin": 963748652264,
+        "partialEnd": 963762816860,
+        "totalBegin": 963752540720,
+        "totalEnd": 963758928250,
+        "penumbralMagnitude": 2.837312564120737,
+        "umbralMagnitude": 1.7687334838045157,
+        "umbralObscuration": 1
+      }
+    },
+    {
+      "seed": 1428105600000,
+      "opposition": 1428149133851,
+      "eclipse": {
+        "kind": "total",
+        "peak": 1428148815883,
+        "penumbralBegin": 1428138086683,
+        "penumbralEnd": 1428159542184,
+        "partialBegin": 1428142544572,
+        "partialEnd": 1428155089651,
+        "totalBegin": 1428148646935,
+        "totalEnd": 1428148986746,
+        "penumbralMagnitude": 2.0789911704437465,
+        "umbralMagnitude": 1.001183085913656,
+        "umbralObscuration": 1
+      }
+    },
+    {
+      "seed": 1532649600000,
+      "opposition": 1532722820700,
+      "eclipse": {
+        "kind": "total",
+        "peak": 1532722904661,
+        "penumbralBegin": 1532711688081,
+        "penumbralEnd": 1532734120535,
+        "partialBegin": 1532715866150,
+        "partialEnd": 1532729943399,
+        "totalBegin": 1532719814493,
+        "totalEnd": 1532725994963,
+        "penumbralMagnitude": 2.6791338203044774,
+        "umbralMagnitude": 1.6091252695707492,
+        "umbralObscuration": 1
+      }
+    },
+    {
+      "seed": 1667865600000,
+      "opposition": 1667905328632,
+      "eclipse": {
+        "kind": "total",
+        "peak": 1667905152373,
+        "penumbralBegin": 1667894537895,
+        "penumbralEnd": 1667915772995,
+        "partialBegin": 1667898553473,
+        "partialEnd": 1667911748494,
+        "totalBegin": 1667902600338,
+        "totalEnd": 1667907702538,
+        "penumbralMagnitude": 2.414253292111965,
+        "umbralMagnitude": 1.3593105309717048,
+        "umbralObscuration": 1
+      }
+    },
+    {
+      "seed": 1741910400000,
+      "opposition": 1741935278559,
+      "eclipse": {
+        "kind": "total",
+        "peak": 1741935526409,
+        "penumbralBegin": 1741924648018,
+        "penumbralEnd": 1741946408174,
+        "partialBegin": 1741928975698,
+        "partialEnd": 1741942075034,
+        "totalBegin": 1741933561492,
+        "totalEnd": 1741937489790,
+        "penumbralMagnitude": 2.2592845302257913,
+        "umbralMagnitude": 1.1787389234818788,
+        "umbralObscuration": 1
+      }
+    },
+    {
+      "seed": 1877126400000,
+      "opposition": 1877138538912,
+      "eclipse": {
+        "kind": "total",
+        "peak": 1877138530955,
+        "penumbralBegin": 1877128477618,
+        "penumbralEnd": 1877148590098,
+        "partialBegin": 1877131941916,
+        "partialEnd": 1877145118092,
+        "totalBegin": 1877135472491,
+        "totalEnd": 1877141588354,
+        "penumbralMagnitude": 2.8264795093866875,
+        "umbralMagnitude": 1.8439453184452301,
+        "umbralObscuration": 1
+      }
+    },
+    {
+      "seed": 2788041600000,
+      "opposition": 2788078327853,
+      "eclipse": null
+    },
+    {
+      "seed": 4094323200000,
+      "opposition": 4094361922334,
+      "eclipse": {
+        "kind": "penumbral",
+        "peak": 4094361199720,
+        "penumbralBegin": 4094352548210,
+        "penumbralEnd": 4094369851860,
+        "partialBegin": null,
+        "partialEnd": null,
+        "totalBegin": null,
+        "totalEnd": null,
+        "penumbralMagnitude": 1.0340357310584638,
+        "umbralMagnitude": -0.050584595424177876,
+        "umbralObscuration": 0
+      }
+    }
+  ],
+  "solar": [
+    {
+      "site": "Varanasi",
+      "seed": -2165616000000,
+      "conjunction": -2165595750403,
+      "eclipse": {
+        "kind": "partial",
+        "peak": -2165597039387,
+        "partialBegin": -2165598088316,
+        "partialEnd": -2165595967496,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.004128199676750745,
+        "magnitude": 0.02258227974756715,
+        "peakAltitude": 73.15535086154918,
+        "beginAltitude": 69.33334010888295,
+        "endAltitude": 76.93452881463628,
+        "peakAzimuth": 107.13618712620183
+      }
+    },
+    {
+      "site": "Varanasi",
+      "seed": -1596672000000,
+      "conjunction": -1596624506593,
+      "eclipse": null
+    },
+    {
+      "site": "Varanasi",
+      "seed": -458697600000,
+      "conjunction": -458682496266,
+      "eclipse": {
+        "kind": "partial",
+        "peak": -458686870749,
+        "partialBegin": -458690389910,
+        "partialEnd": -458682941168,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.413801730530555,
+        "magnitude": 0.5132516382756013,
+        "peakAltitude": 42.36191539260027,
+        "beginAltitude": 29.393932790439056,
+        "endAltitude": 57.03798258654103,
+        "peakAzimuth": 80.56037126756901
+      }
+    },
+    {
+      "site": "Varanasi",
+      "seed": 679190400000,
+      "conjunction": 679259164961,
+      "eclipse": null
+    },
+    {
+      "site": "Varanasi",
+      "seed": 934329600000,
+      "conjunction": 934369709020,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 934374480851,
+        "partialBegin": 934370902670,
+        "partialEnd": 934377736987,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.8212429289065143,
+        "magnitude": 0.8556730153163649,
+        "peakAltitude": 7.766875488749347,
+        "beginAltitude": 20.950106792877857,
+        "endAltitude": -3.5042309494561104,
+        "peakAzimuth": 283.3644670266777
+      }
+    },
+    {
+      "site": "Varanasi",
+      "seed": 1503273600000,
+      "conjunction": 1503340209832,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 1503339384400,
+        "partialBegin": 1503336999935,
+        "partialEnd": 1503341766376,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.6329908526069418,
+        "magnitude": 0.7071207315455883,
+        "peakAltitude": -52.375972903683966,
+        "beginAltitude": -50.227344352705046,
+        "endAltitude": -52.05994721870835,
+        "peakAzimuth": 354.05989710604706
+      }
+    },
+    {
+      "site": "Varanasi",
+      "seed": 1712534400000,
+      "conjunction": 1712600451001,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 1712601496944,
+        "partialBegin": 1712599150501,
+        "partialEnd": 1712603842902,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.6619984973109581,
+        "magnitude": 0.7271298637889292,
+        "peakAltitude": -56.78151356102531,
+        "beginAltitude": -56.021939176620045,
+        "endAltitude": -54.841050901511196,
+        "peakAzimuth": 3.894476261567648
+      }
+    },
+    {
+      "site": "Varanasi",
+      "seed": 1817164800000,
+      "conjunction": 1817201113615,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 1817204873645,
+        "partialBegin": 1817202937670,
+        "partialEnd": 1817206705866,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.06984981491605305,
+        "magnitude": 0.15075253726878068,
+        "peakAltitude": 26.628670579391446,
+        "beginAltitude": 33.86548110904896,
+        "endAltitude": 19.832420321174805,
+        "peakAzimuth": 278.06594039324807
+      }
+    },
+    {
+      "site": "Varanasi",
+      "seed": 2386108800000,
+      "conjunction": 2386172346695,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 2386172350356,
+        "partialBegin": 2386171088997,
+        "partialEnd": 2386173605633,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.06946515807097006,
+        "magnitude": 0.15076707215898108,
+        "peakAltitude": -47.59948764991154,
+        "beginAltitude": -45.71424613998409,
+        "endAltitude": -48.91477248058223,
+        "peakAzimuth": 340.35191610364114
+      }
+    },
+    {
+      "site": "Varanasi",
+      "seed": 3524083200000,
+      "conjunction": 3524115689167,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 3524118260354,
+        "partialBegin": 3524114689961,
+        "partialEnd": 3524121563731,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.34780807069159525,
+        "magnitude": 0.45442478289973826,
+        "peakAltitude": 39.742971713621316,
+        "beginAltitude": 52.57345701297667,
+        "endAltitude": 27.45039576330124,
+        "peakAzimuth": 257.72763286729565
+      }
+    },
+    {
+      "site": "Casper",
+      "seed": -2165616000000,
+      "conjunction": -2165595750403,
+      "eclipse": null
+    },
+    {
+      "site": "Casper",
+      "seed": -1596672000000,
+      "conjunction": -1596624506593,
+      "eclipse": null
+    },
+    {
+      "site": "Casper",
+      "seed": -458697600000,
+      "conjunction": -458682496266,
+      "eclipse": null
+    },
+    {
+      "site": "Casper",
+      "seed": 679190400000,
+      "conjunction": 679259164961,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 679257991551,
+        "partialBegin": 679254376439,
+        "partialEnd": 679261605382,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.27814202143589006,
+        "magnitude": 0.3877873047244727,
+        "peakAltitude": 68.63646959849792,
+        "beginAltitude": 62.81978132539442,
+        "endAltitude": 67.9171307812259,
+        "peakAzimuth": 164.47540169907288
+      }
+    },
+    {
+      "site": "Casper",
+      "seed": 934329600000,
+      "conjunction": 934369709020,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 934365330988,
+        "partialBegin": 934362695407,
+        "partialEnd": 934368061708,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.6092014239128184,
+        "magnitude": 0.6864747991721224,
+        "peakAltitude": -20.072275069178204,
+        "beginAltitude": -25.023232274023027,
+        "endAltitude": -13.880596555214892,
+        "peakAzimuth": 42.77969681206372
+      }
+    },
+    {
+      "site": "Casper",
+      "seed": 1503273600000,
+      "conjunction": 1503340209832,
+      "eclipse": {
+        "kind": "total",
+        "peak": 1503337430475,
+        "partialBegin": 1503332536940,
+        "partialEnd": 1503342562651,
+        "centralBegin": 1503337354657,
+        "centralEnd": 1503337506422,
+        "obscuration": 1,
+        "magnitude": 1.013754679920032,
+        "peakAltitude": 54.0174303987739,
+        "beginAltitude": 42.650855249839566,
+        "endAltitude": 58.99309456926164,
+        "peakAzimuth": 143.15247330452465
+      }
+    },
+    {
+      "site": "Casper",
+      "seed": 1712534400000,
+      "conjunction": 1712600451001,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 1712601766142,
+        "partialBegin": 1712597638322,
+        "partialEnd": 1712605971010,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.5489299016147968,
+        "magnitude": 0.630370451562222,
+        "peakAltitude": 54.345588475159694,
+        "beginAltitude": 49.24628231037545,
+        "endAltitude": 53.338723270356745,
+        "peakAzimuth": 169.7165014931183
+      }
+    },
+    {
+      "site": "Casper",
+      "seed": 1817164800000,
+      "conjunction": 1817201113615,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 1817197657442,
+        "partialBegin": 1817197031360,
+        "partialEnd": 1817198289911,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.006363418868526869,
+        "magnitude": 0.030230618066786036,
+        "peakAltitude": -23.269423688301394,
+        "beginAltitude": -24.202679859018147,
+        "endAltitude": -22.252919416880932,
+        "peakAzimuth": 30.305335855874493
+      }
+    },
+    {
+      "site": "Casper",
+      "seed": 2386108800000,
+      "conjunction": 2386172346695,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 2386168596984,
+        "partialBegin": 2386164433302,
+        "partialEnd": 2386173009788,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.896891912600909,
+        "magnitude": 0.9057304432849659,
+        "peakAltitude": 46.74438413991735,
+        "beginAltitude": 34.88795135956497,
+        "endAltitude": 56.99846228337606,
+        "peakAzimuth": 118.76148558797809
+      }
+    },
+    {
+      "site": "Casper",
+      "seed": 3524083200000,
+      "conjunction": 3524115689167,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 3524112716133,
+        "partialBegin": 3524110419117,
+        "partialEnd": 3524115042387,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.4787679596459457,
+        "magnitude": 0.5725298147410859,
+        "peakAltitude": -37.225454430073036,
+        "beginAltitude": -39.087440775024646,
+        "endAltitude": -33.99290978031683,
+        "peakAzimuth": 21.28861815236397
+      }
+    },
+    {
+      "site": "London",
+      "seed": -2165616000000,
+      "conjunction": -2165595750403,
+      "eclipse": null
+    },
+    {
+      "site": "London",
+      "seed": -1596672000000,
+      "conjunction": -1596624506593,
+      "eclipse": null
+    },
+    {
+      "site": "London",
+      "seed": -458697600000,
+      "conjunction": -458682496266,
+      "eclipse": null
+    },
+    {
+      "site": "London",
+      "seed": 679190400000,
+      "conjunction": 679259164961,
+      "eclipse": null
+    },
+    {
+      "site": "London",
+      "seed": 934329600000,
+      "conjunction": 934369709020,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 934366794528,
+        "partialBegin": 934362217208,
+        "partialEnd": 934371599467,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.9661904883616306,
+        "magnitude": 0.967926348456681,
+        "peakAltitude": 48.11753430015153,
+        "beginAltitude": 38.893228468775376,
+        "endAltitude": 53.45753983228826,
+        "peakAzimuth": 139.93927734197132
+      }
+    },
+    {
+      "site": "London",
+      "seed": 1503273600000,
+      "conjunction": 1503340209832,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 1503342280734,
+        "partialBegin": 1503340830219,
+        "partialEnd": 1503343689381,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.03963128141321997,
+        "magnitude": 0.10372720771366184,
+        "peakAltitude": 0.4874199557456534,
+        "beginAltitude": 3.811271849979898,
+        "endAltitude": -2.7671520949516957,
+        "peakAzimuth": 289.258912785088
+      }
+    },
+    {
+      "site": "London",
+      "seed": 1712534400000,
+      "conjunction": 1712600451001,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 1712605612873,
+        "partialBegin": 1712602572878,
+        "partialEnd": 1712608520701,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.7671975723843383,
+        "magnitude": 0.8092697753223342,
+        "peakAltitude": -9.122813613887317,
+        "beginAltitude": -1.6977267248878323,
+        "endAltitude": -15.638003711112807,
+        "peakAzimuth": 295.53238944832066
+      }
+    },
+    {
+      "site": "London",
+      "seed": 1817164800000,
+      "conjunction": 1817201113615,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 1817197207073,
+        "partialBegin": 1817193817775,
+        "partialEnd": 1817200769452,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.41933229370850483,
+        "magnitude": 0.5180408085562791,
+        "peakAltitude": 40.22711355997467,
+        "beginAltitude": 31.90820251971996,
+        "endAltitude": 47.94689816604458,
+        "peakAzimuth": 114.88695474431385
+      }
+    },
+    {
+      "site": "London",
+      "seed": 2386108800000,
+      "conjunction": 2386172346695,
+      "eclipse": null
+    },
+    {
+      "site": "London",
+      "seed": 3524083200000,
+      "conjunction": 3524115689167,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 3524110652700,
+        "partialBegin": 3524107086022,
+        "partialEnd": 3524114445093,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.9312510451422087,
+        "magnitude": 0.9348395027089086,
+        "peakAltitude": 20.782925926445003,
+        "beginAltitude": 11.706388254063162,
+        "endAltitude": 29.854544195591753,
+        "peakAzimuth": 105.04639396025851
+      }
+    },
+    {
+      "site": "Sydney",
+      "seed": -2165616000000,
+      "conjunction": -2165595750403,
+      "eclipse": {
+        "kind": "partial",
+        "peak": -2165591276740,
+        "partialBegin": -2165594285294,
+        "partialEnd": -2165588515851,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.2662776897223499,
+        "magnitude": 0.37802307289126874,
+        "peakAltitude": 1.2466157649800644,
+        "beginAltitude": 10.158158363834279,
+        "endAltitude": -7.4443508712140485,
+        "peakAzimuth": 294.23744988680386
+      }
+    },
+    {
+      "site": "Sydney",
+      "seed": -1596672000000,
+      "conjunction": -1596624506593,
+      "eclipse": {
+        "kind": "partial",
+        "peak": -1596624053438,
+        "partialBegin": -1596626472897,
+        "partialEnd": -1596621651041,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.8552136056093345,
+        "magnitude": 0.8785440609722956,
+        "peakAltitude": -75.53470141898022,
+        "beginAltitude": -69.4806295959562,
+        "endAltitude": -77.45783447629115,
+        "peakAzimuth": 212.7124414197434
+      }
+    },
+    {
+      "site": "Sydney",
+      "seed": -458697600000,
+      "conjunction": -458682496266,
+      "eclipse": {
+        "kind": "partial",
+        "peak": -458677516299,
+        "partialBegin": -458678999038,
+        "partialEnd": -458676106641,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.021129020476469244,
+        "magnitude": 0.06742469572987937,
+        "peakAltitude": 12.769619991437711,
+        "beginAltitude": 16.558188665611098,
+        "endAltitude": 8.956729834828657,
+        "peakAzimuth": 309.95490488693594
+      }
+    },
+    {
+      "site": "Sydney",
+      "seed": 679190400000,
+      "conjunction": 679259164961,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 679254965955,
+        "partialBegin": 679254173935,
+        "partialEnd": 679255776563,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.010711574196936828,
+        "magnitude": 0.04285103673931891,
+        "peakAltitude": -37.0180041964736,
+        "beginAltitude": -39.7756729419856,
+        "endAltitude": -34.20051831776696,
+        "peakAzimuth": 86.7145092726911
+      }
+    },
+    {
+      "site": "Sydney",
+      "seed": 934329600000,
+      "conjunction": 934369709020,
+      "eclipse": null
+    },
+    {
+      "site": "Sydney",
+      "seed": 1503273600000,
+      "conjunction": 1503340209832,
+      "eclipse": null
+    },
+    {
+      "site": "Sydney",
+      "seed": 1712534400000,
+      "conjunction": 1712600451001,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 1712595759680,
+        "partialBegin": 1712594574916,
+        "partialEnd": 1712596966152,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.042527400758214096,
+        "magnitude": 0.10853528093879884,
+        "peakAltitude": -39.4581333825705,
+        "beginAltitude": -43.26291286932301,
+        "endAltitude": -35.47942164016767,
+        "peakAzimuth": 110.67009586577242
+      }
+    },
+    {
+      "site": "Sydney",
+      "seed": 1817164800000,
+      "conjunction": 1817201113615,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 1817205138361,
+        "partialBegin": 1817202876084,
+        "partialEnd": 1817207345320,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.43092142211236456,
+        "magnitude": 0.5307332079077524,
+        "peakAltitude": -48.717704491900484,
+        "beginAltitude": -40.93708688914374,
+        "endAltitude": -56.09818700264335,
+        "peakAzimuth": 257.72047880074933
+      }
+    },
+    {
+      "site": "Sydney",
+      "seed": 2386108800000,
+      "conjunction": 2386172346695,
+      "eclipse": null
+    },
+    {
+      "site": "Sydney",
+      "seed": 3524083200000,
+      "conjunction": 3524115689167,
+      "eclipse": {
+        "kind": "partial",
+        "peak": 3524120713866,
+        "partialBegin": 3524119328551,
+        "partialEnd": 3524122068732,
+        "centralBegin": null,
+        "centralEnd": null,
+        "obscuration": 0.06517707983204811,
+        "magnitude": 0.14443315753425928,
+        "peakAltitude": -34.611421009764925,
+        "beginAltitude": -29.942804929593315,
+        "endAltitude": -39.07932789457767,
+        "peakAzimuth": 253.3918143105119
+      }
+    }
+  ],
+  "published": [
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": -2166912000000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "penumbral",
+        "start": -2166854011939,
+        "peak": -2166845363825,
+        "end": -2166836714736,
+        "visibleFromLocation": true,
+        "obscuration": 0,
+        "magnitude": -0.032958741807472575,
+        "sutakStart": null,
+        "sutakEnd": null,
+        "description": "Penumbral lunar eclipse: 0% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": -1791849600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": -1791816138120,
+        "peak": -1791806547158,
+        "end": -1791796953757,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.5685472670286345,
+        "sutakStart": -1791845231650,
+        "sutakEnd": -1791800263671,
+        "description": "Total lunar eclipse: 100% obscuration, not visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": -607996800000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": -607991899718,
+        "peak": -607981398686,
+        "end": -607970893007,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.0788350448798962,
+        "sutakStart": -608020095509,
+        "sutakEnd": -607975105440,
+        "description": "Total lunar eclipse: 100% obscuration, not visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 410054400000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 410086404152,
+        "peak": 410095724139,
+        "end": 410105043189,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.182523105427029,
+        "sutakStart": 410057445704,
+        "sutakEnd": 410101603336,
+        "description": "Total lunar eclipse: 100% obscuration, not visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 963705600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 963744499332,
+        "peak": 963755734387,
+        "end": 963766968258,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.7687334838045157,
+        "sutakStart": 963716252264,
+        "sutakEnd": 963762816860,
+        "description": "Total lunar eclipse: 100% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 1428105600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1428138086683,
+        "peak": 1428148815883,
+        "end": 1428159542184,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.001183085913656,
+        "sutakStart": 1428110144572,
+        "sutakEnd": 1428155089651,
+        "description": "Total lunar eclipse: 100% obscuration, not visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 1532649600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1532711688081,
+        "peak": 1532722904661,
+        "end": 1532734120535,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.6091252695707492,
+        "sutakStart": 1532683466150,
+        "sutakEnd": 1532729943399,
+        "description": "Total lunar eclipse: 100% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 1667865600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1667894537895,
+        "peak": 1667905152373,
+        "end": 1667915772995,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.3593105309717048,
+        "sutakStart": 1667866153473,
+        "sutakEnd": 1667911748494,
+        "description": "Total lunar eclipse: 100% obscuration, not visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 1741910400000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1741924648018,
+        "peak": 1741935526409,
+        "end": 1741946408174,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.1787389234818788,
+        "sutakStart": 1741896575698,
+        "sutakEnd": 1741942075034,
+        "description": "Total lunar eclipse: 100% obscuration, not visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 1877126400000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1877128477618,
+        "peak": 1877138530955,
+        "end": 1877148590098,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.8439453184452301,
+        "sutakStart": 1877099541916,
+        "sutakEnd": 1877145118092,
+        "description": "Total lunar eclipse: 100% obscuration, not visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 2788041600000,
+      "info": null
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 4094323200000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "penumbral",
+        "start": 4094352548210,
+        "peak": 4094361199720,
+        "end": 4094369851860,
+        "visibleFromLocation": false,
+        "obscuration": 0,
+        "magnitude": -0.050584595424177876,
+        "sutakStart": null,
+        "sutakEnd": null,
+        "description": "Penumbral lunar eclipse: 0% obscuration, not visible from location."
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": -2165616000000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": -2165598088316,
+        "peak": -2165597039387,
+        "end": -2165595967496,
+        "visibleFromLocation": true,
+        "obscuration": 0.004128199676750745,
+        "magnitude": 0.02258227974756715,
+        "sutakStart": -2165641288316,
+        "sutakEnd": -2165595967496,
+        "description": "Partial solar eclipse: 0% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": -1596672000000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": -458697600000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": -458690389910,
+        "peak": -458686870749,
+        "end": -458682941168,
+        "visibleFromLocation": true,
+        "obscuration": 0.413801730530555,
+        "magnitude": 0.5132516382756013,
+        "sutakStart": -458733589910,
+        "sutakEnd": -458682941168,
+        "description": "Partial solar eclipse: 41% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 679190400000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 934329600000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": 934370902670,
+        "peak": 934374480851,
+        "end": 934377736987,
+        "visibleFromLocation": true,
+        "obscuration": 0.8212429289065143,
+        "magnitude": 0.8556730153163649,
+        "sutakStart": 934327702670,
+        "sutakEnd": 934377736987,
+        "description": "Partial solar eclipse: 82% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 1503273600000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 1712534400000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 1817164800000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": 1817202937670,
+        "peak": 1817204873645,
+        "end": 1817206705866,
+        "visibleFromLocation": true,
+        "obscuration": 0.06984981491605305,
+        "magnitude": 0.15075253726878068,
+        "sutakStart": 1817159737670,
+        "sutakEnd": 1817206705866,
+        "description": "Partial solar eclipse: 7% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 2386108800000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Varanasi",
+      "seed": 3524083200000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": 3524114689961,
+        "peak": 3524118260354,
+        "end": 3524121563731,
+        "visibleFromLocation": true,
+        "obscuration": 0.34780807069159525,
+        "magnitude": 0.45442478289973826,
+        "sutakStart": 3524071489961,
+        "sutakEnd": 3524121563731,
+        "description": "Partial solar eclipse: 35% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": -2166912000000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "penumbral",
+        "start": -2166854011939,
+        "peak": -2166845363825,
+        "end": -2166836714736,
+        "visibleFromLocation": false,
+        "obscuration": 0,
+        "magnitude": -0.032958741807472575,
+        "sutakStart": null,
+        "sutakEnd": null,
+        "description": "Penumbral lunar eclipse: 0% obscuration, not visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": -1791849600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": -1791816138120,
+        "peak": -1791806547158,
+        "end": -1791796953757,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.5685472670286345,
+        "sutakStart": -1791845231650,
+        "sutakEnd": -1791800263671,
+        "description": "Total lunar eclipse: 100% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": -607996800000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": -607991899718,
+        "peak": -607981398686,
+        "end": -607970893007,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.0788350448798962,
+        "sutakStart": -608020095509,
+        "sutakEnd": -607975105440,
+        "description": "Total lunar eclipse: 100% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 410054400000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 410086404152,
+        "peak": 410095724139,
+        "end": 410105043189,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.182523105427029,
+        "sutakStart": 410057445704,
+        "sutakEnd": 410101603336,
+        "description": "Total lunar eclipse: 100% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 963705600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 963744499332,
+        "peak": 963755734387,
+        "end": 963766968258,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.7687334838045157,
+        "sutakStart": 963716252264,
+        "sutakEnd": 963762816860,
+        "description": "Total lunar eclipse: 100% obscuration, not visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 1428105600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1428138086683,
+        "peak": 1428148815883,
+        "end": 1428159542184,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.001183085913656,
+        "sutakStart": 1428110144572,
+        "sutakEnd": 1428155089651,
+        "description": "Total lunar eclipse: 100% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 1532649600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1532711688081,
+        "peak": 1532722904661,
+        "end": 1532734120535,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.6091252695707492,
+        "sutakStart": 1532683466150,
+        "sutakEnd": 1532729943399,
+        "description": "Total lunar eclipse: 100% obscuration, not visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 1667865600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1667894537895,
+        "peak": 1667905152373,
+        "end": 1667915772995,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.3593105309717048,
+        "sutakStart": 1667866153473,
+        "sutakEnd": 1667911748494,
+        "description": "Total lunar eclipse: 100% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 1741910400000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1741924648018,
+        "peak": 1741935526409,
+        "end": 1741946408174,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.1787389234818788,
+        "sutakStart": 1741896575698,
+        "sutakEnd": 1741942075034,
+        "description": "Total lunar eclipse: 100% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 1877126400000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1877128477618,
+        "peak": 1877138530955,
+        "end": 1877148590098,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.8439453184452301,
+        "sutakStart": 1877099541916,
+        "sutakEnd": 1877145118092,
+        "description": "Total lunar eclipse: 100% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 2788041600000,
+      "info": null
+    },
+    {
+      "fn": "lunar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 4094323200000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "penumbral",
+        "start": 4094352548210,
+        "peak": 4094361199720,
+        "end": 4094369851860,
+        "visibleFromLocation": true,
+        "obscuration": 0,
+        "magnitude": -0.050584595424177876,
+        "sutakStart": null,
+        "sutakEnd": null,
+        "description": "Penumbral lunar eclipse: 0% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": -2165616000000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": -1596672000000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": -458697600000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 679190400000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": 679254376439,
+        "peak": 679257991551,
+        "end": 679261605382,
+        "visibleFromLocation": true,
+        "obscuration": 0.27814202143589006,
+        "magnitude": 0.3877873047244727,
+        "sutakStart": 679211176439,
+        "sutakEnd": 679261605382,
+        "description": "Partial solar eclipse: 28% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 934329600000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 1503273600000,
+      "info": {
+        "kind": "solar",
+        "subtype": "total",
+        "start": 1503332536940,
+        "peak": 1503337430475,
+        "end": 1503342562651,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.013754679920032,
+        "sutakStart": 1503289336940,
+        "sutakEnd": 1503342562651,
+        "description": "Total solar eclipse: 100% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 1712534400000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": 1712597638322,
+        "peak": 1712601766142,
+        "end": 1712605971010,
+        "visibleFromLocation": true,
+        "obscuration": 0.5489299016147968,
+        "magnitude": 0.630370451562222,
+        "sutakStart": 1712554438322,
+        "sutakEnd": 1712605971010,
+        "description": "Partial solar eclipse: 55% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 1817164800000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 2386108800000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": 2386164433302,
+        "peak": 2386168596984,
+        "end": 2386173009788,
+        "visibleFromLocation": true,
+        "obscuration": 0.896891912600909,
+        "magnitude": 0.9057304432849659,
+        "sutakStart": 2386121233302,
+        "sutakEnd": 2386173009788,
+        "description": "Partial solar eclipse: 90% obscuration, visible from location."
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "en",
+      "site": "Casper",
+      "seed": 3524083200000,
+      "info": null
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": -2166912000000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "penumbral",
+        "start": -2166854011939,
+        "peak": -2166845363825,
+        "end": -2166836714736,
+        "visibleFromLocation": true,
+        "obscuration": 0,
+        "magnitude": -0.032958741807472575,
+        "sutakStart": null,
+        "sutakEnd": null,
+        "description": "उपच्छाया चंद्र ग्रहण: 0% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": -1791849600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": -1791816138120,
+        "peak": -1791806547158,
+        "end": -1791796953757,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.5685472670286345,
+        "sutakStart": -1791845231650,
+        "sutakEnd": -1791800263671,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से अदृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": -607996800000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": -607991899718,
+        "peak": -607981398686,
+        "end": -607970893007,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.0788350448798962,
+        "sutakStart": -608020095509,
+        "sutakEnd": -607975105440,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से अदृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 410054400000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 410086404152,
+        "peak": 410095724139,
+        "end": 410105043189,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.182523105427029,
+        "sutakStart": 410057445704,
+        "sutakEnd": 410101603336,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से अदृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 963705600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 963744499332,
+        "peak": 963755734387,
+        "end": 963766968258,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.7687334838045157,
+        "sutakStart": 963716252264,
+        "sutakEnd": 963762816860,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 1428105600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1428138086683,
+        "peak": 1428148815883,
+        "end": 1428159542184,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.001183085913656,
+        "sutakStart": 1428110144572,
+        "sutakEnd": 1428155089651,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से अदृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 1532649600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1532711688081,
+        "peak": 1532722904661,
+        "end": 1532734120535,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.6091252695707492,
+        "sutakStart": 1532683466150,
+        "sutakEnd": 1532729943399,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 1667865600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1667894537895,
+        "peak": 1667905152373,
+        "end": 1667915772995,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.3593105309717048,
+        "sutakStart": 1667866153473,
+        "sutakEnd": 1667911748494,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से अदृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 1741910400000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1741924648018,
+        "peak": 1741935526409,
+        "end": 1741946408174,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.1787389234818788,
+        "sutakStart": 1741896575698,
+        "sutakEnd": 1741942075034,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से अदृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 1877126400000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1877128477618,
+        "peak": 1877138530955,
+        "end": 1877148590098,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.8439453184452301,
+        "sutakStart": 1877099541916,
+        "sutakEnd": 1877145118092,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से अदृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 2788041600000,
+      "info": null
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 4094323200000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "penumbral",
+        "start": 4094352548210,
+        "peak": 4094361199720,
+        "end": 4094369851860,
+        "visibleFromLocation": false,
+        "obscuration": 0,
+        "magnitude": -0.050584595424177876,
+        "sutakStart": null,
+        "sutakEnd": null,
+        "description": "उपच्छाया चंद्र ग्रहण: 0% ग्रस्त, इस स्थान से अदृश्य।"
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": -2165616000000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": -2165598088316,
+        "peak": -2165597039387,
+        "end": -2165595967496,
+        "visibleFromLocation": true,
+        "obscuration": 0.004128199676750745,
+        "magnitude": 0.02258227974756715,
+        "sutakStart": -2165641288316,
+        "sutakEnd": -2165595967496,
+        "description": "आंशिक सूर्य ग्रहण: 0% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": -1596672000000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": -458697600000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": -458690389910,
+        "peak": -458686870749,
+        "end": -458682941168,
+        "visibleFromLocation": true,
+        "obscuration": 0.413801730530555,
+        "magnitude": 0.5132516382756013,
+        "sutakStart": -458733589910,
+        "sutakEnd": -458682941168,
+        "description": "आंशिक सूर्य ग्रहण: 41% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 679190400000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 934329600000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": 934370902670,
+        "peak": 934374480851,
+        "end": 934377736987,
+        "visibleFromLocation": true,
+        "obscuration": 0.8212429289065143,
+        "magnitude": 0.8556730153163649,
+        "sutakStart": 934327702670,
+        "sutakEnd": 934377736987,
+        "description": "आंशिक सूर्य ग्रहण: 82% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 1503273600000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 1712534400000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 1817164800000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": 1817202937670,
+        "peak": 1817204873645,
+        "end": 1817206705866,
+        "visibleFromLocation": true,
+        "obscuration": 0.06984981491605305,
+        "magnitude": 0.15075253726878068,
+        "sutakStart": 1817159737670,
+        "sutakEnd": 1817206705866,
+        "description": "आंशिक सूर्य ग्रहण: 7% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 2386108800000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Varanasi",
+      "seed": 3524083200000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": 3524114689961,
+        "peak": 3524118260354,
+        "end": 3524121563731,
+        "visibleFromLocation": true,
+        "obscuration": 0.34780807069159525,
+        "magnitude": 0.45442478289973826,
+        "sutakStart": 3524071489961,
+        "sutakEnd": 3524121563731,
+        "description": "आंशिक सूर्य ग्रहण: 35% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": -2166912000000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "penumbral",
+        "start": -2166854011939,
+        "peak": -2166845363825,
+        "end": -2166836714736,
+        "visibleFromLocation": false,
+        "obscuration": 0,
+        "magnitude": -0.032958741807472575,
+        "sutakStart": null,
+        "sutakEnd": null,
+        "description": "उपच्छाया चंद्र ग्रहण: 0% ग्रस्त, इस स्थान से अदृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": -1791849600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": -1791816138120,
+        "peak": -1791806547158,
+        "end": -1791796953757,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.5685472670286345,
+        "sutakStart": -1791845231650,
+        "sutakEnd": -1791800263671,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": -607996800000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": -607991899718,
+        "peak": -607981398686,
+        "end": -607970893007,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.0788350448798962,
+        "sutakStart": -608020095509,
+        "sutakEnd": -607975105440,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 410054400000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 410086404152,
+        "peak": 410095724139,
+        "end": 410105043189,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.182523105427029,
+        "sutakStart": 410057445704,
+        "sutakEnd": 410101603336,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 963705600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 963744499332,
+        "peak": 963755734387,
+        "end": 963766968258,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.7687334838045157,
+        "sutakStart": 963716252264,
+        "sutakEnd": 963762816860,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से अदृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 1428105600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1428138086683,
+        "peak": 1428148815883,
+        "end": 1428159542184,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.001183085913656,
+        "sutakStart": 1428110144572,
+        "sutakEnd": 1428155089651,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 1532649600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1532711688081,
+        "peak": 1532722904661,
+        "end": 1532734120535,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.6091252695707492,
+        "sutakStart": 1532683466150,
+        "sutakEnd": 1532729943399,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से अदृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 1667865600000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1667894537895,
+        "peak": 1667905152373,
+        "end": 1667915772995,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.3593105309717048,
+        "sutakStart": 1667866153473,
+        "sutakEnd": 1667911748494,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 1741910400000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1741924648018,
+        "peak": 1741935526409,
+        "end": 1741946408174,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.1787389234818788,
+        "sutakStart": 1741896575698,
+        "sutakEnd": 1741942075034,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 1877126400000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 1877128477618,
+        "peak": 1877138530955,
+        "end": 1877148590098,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.8439453184452301,
+        "sutakStart": 1877099541916,
+        "sutakEnd": 1877145118092,
+        "description": "पूर्ण चंद्र ग्रहण: 100% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 2788041600000,
+      "info": null
+    },
+    {
+      "fn": "lunar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 4094323200000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "penumbral",
+        "start": 4094352548210,
+        "peak": 4094361199720,
+        "end": 4094369851860,
+        "visibleFromLocation": true,
+        "obscuration": 0,
+        "magnitude": -0.050584595424177876,
+        "sutakStart": null,
+        "sutakEnd": null,
+        "description": "उपच्छाया चंद्र ग्रहण: 0% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": -2165616000000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": -1596672000000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": -458697600000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 679190400000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": 679254376439,
+        "peak": 679257991551,
+        "end": 679261605382,
+        "visibleFromLocation": true,
+        "obscuration": 0.27814202143589006,
+        "magnitude": 0.3877873047244727,
+        "sutakStart": 679211176439,
+        "sutakEnd": 679261605382,
+        "description": "आंशिक सूर्य ग्रहण: 28% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 934329600000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 1503273600000,
+      "info": {
+        "kind": "solar",
+        "subtype": "total",
+        "start": 1503332536940,
+        "peak": 1503337430475,
+        "end": 1503342562651,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.013754679920032,
+        "sutakStart": 1503289336940,
+        "sutakEnd": 1503342562651,
+        "description": "पूर्ण सूर्य ग्रहण: 100% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 1712534400000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": 1712597638322,
+        "peak": 1712601766142,
+        "end": 1712605971010,
+        "visibleFromLocation": true,
+        "obscuration": 0.5489299016147968,
+        "magnitude": 0.630370451562222,
+        "sutakStart": 1712554438322,
+        "sutakEnd": 1712605971010,
+        "description": "आंशिक सूर्य ग्रहण: 55% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 1817164800000,
+      "info": null
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 2386108800000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": 2386164433302,
+        "peak": 2386168596984,
+        "end": 2386173009788,
+        "visibleFromLocation": true,
+        "obscuration": 0.896891912600909,
+        "magnitude": 0.9057304432849659,
+        "sutakStart": 2386121233302,
+        "sutakEnd": 2386173009788,
+        "description": "आंशिक सूर्य ग्रहण: 90% ग्रस्त, इस स्थान से दृश्य।"
+      }
+    },
+    {
+      "fn": "solar",
+      "lang": "hi",
+      "site": "Casper",
+      "seed": 3524083200000,
+      "info": null
+    }
+  ],
+  "duringDay": [
+    {
+      "site": "Varanasi",
+      "sunrise": -2166994800000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -2166908400000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "penumbral",
+        "start": -2166854011939,
+        "peak": -2166845363825,
+        "end": -2166836714736,
+        "visibleFromLocation": true,
+        "obscuration": 0,
+        "magnitude": -0.032958741807472575,
+        "sutakStart": null,
+        "sutakEnd": null,
+        "description": "Penumbral lunar eclipse: 0% obscuration, visible from location."
+      }
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -2166822000000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -1791932400000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -1791846000000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": -1791816138120,
+        "peak": -1791806547158,
+        "end": -1791796953757,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.5685472670286345,
+        "sutakStart": -1791845231650,
+        "sutakEnd": -1791800263671,
+        "description": "Total lunar eclipse: 100% obscuration, not visible from location."
+      }
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -1791759600000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -608079600000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -607993200000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": -607991899718,
+        "peak": -607981398686,
+        "end": -607970893007,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.0788350448798962,
+        "sutakStart": -608020095509,
+        "sutakEnd": -607975105440,
+        "description": "Total lunar eclipse: 100% obscuration, not visible from location."
+      }
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -607906800000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": 409971600000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": 410058000000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 410086404152,
+        "peak": 410095724139,
+        "end": 410105043189,
+        "visibleFromLocation": false,
+        "obscuration": 1,
+        "magnitude": 1.182523105427029,
+        "sutakStart": 410057445704,
+        "sutakEnd": 410101603336,
+        "description": "Total lunar eclipse: 100% obscuration, not visible from location."
+      }
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": 410144400000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -2165698800000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -2165612400000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": -2165598088316,
+        "peak": -2165597039387,
+        "end": -2165595967496,
+        "visibleFromLocation": true,
+        "obscuration": 0.004128199676750745,
+        "magnitude": 0.02258227974756715,
+        "sutakStart": -2165641288316,
+        "sutakEnd": -2165595967496,
+        "description": "Partial solar eclipse: 0% obscuration, visible from location."
+      }
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -2165526000000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -1596754800000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -1596668400000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -1596582000000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -458780400000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -458694000000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": -458690389910,
+        "peak": -458686870748,
+        "end": -458682941168,
+        "visibleFromLocation": true,
+        "obscuration": 0.413801730530555,
+        "magnitude": 0.5132516382756013,
+        "sutakStart": -458733589910,
+        "sutakEnd": -458682941168,
+        "description": "Partial solar eclipse: 41% obscuration, visible from location."
+      }
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -458607600000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": 679107600000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": 679194000000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": 679280400000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": 1736730000000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": 1736816400000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": 1736902800000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -1817334000000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -1817247600000,
+      "info": null
+    },
+    {
+      "site": "Varanasi",
+      "sunrise": -1817161200000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -2166994800000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -2166908400000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "penumbral",
+        "start": -2166854011939,
+        "peak": -2166845363825,
+        "end": -2166836714736,
+        "visibleFromLocation": false,
+        "obscuration": 0,
+        "magnitude": -0.032958741807472575,
+        "sutakStart": null,
+        "sutakEnd": null,
+        "description": "Penumbral lunar eclipse: 0% obscuration, not visible from location."
+      }
+    },
+    {
+      "site": "Casper",
+      "sunrise": -2166822000000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -1791932400000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -1791846000000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": -1791816138120,
+        "peak": -1791806547158,
+        "end": -1791796953757,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.5685472670286345,
+        "sutakStart": -1791845231650,
+        "sutakEnd": -1791800263671,
+        "description": "Total lunar eclipse: 100% obscuration, visible from location."
+      }
+    },
+    {
+      "site": "Casper",
+      "sunrise": -1791759600000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -608079600000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -607993200000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": -607991899718,
+        "peak": -607981398686,
+        "end": -607970893007,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.0788350448798962,
+        "sutakStart": -608020095509,
+        "sutakEnd": -607975105440,
+        "description": "Total lunar eclipse: 100% obscuration, visible from location."
+      }
+    },
+    {
+      "site": "Casper",
+      "sunrise": -607906800000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": 409971600000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": 410058000000,
+      "info": {
+        "kind": "lunar",
+        "subtype": "total",
+        "start": 410086404152,
+        "peak": 410095724139,
+        "end": 410105043189,
+        "visibleFromLocation": true,
+        "obscuration": 1,
+        "magnitude": 1.182523105427029,
+        "sutakStart": 410057445704,
+        "sutakEnd": 410101603336,
+        "description": "Total lunar eclipse: 100% obscuration, visible from location."
+      }
+    },
+    {
+      "site": "Casper",
+      "sunrise": 410144400000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -2165698800000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -2165612400000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -2165526000000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -1596754800000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -1596668400000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -1596582000000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -458780400000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -458694000000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -458607600000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": 679107600000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": 679194000000,
+      "info": {
+        "kind": "solar",
+        "subtype": "partial",
+        "start": 679254376439,
+        "peak": 679257991551,
+        "end": 679261605382,
+        "visibleFromLocation": true,
+        "obscuration": 0.27814202143589006,
+        "magnitude": 0.3877873047244727,
+        "sutakStart": 679211176439,
+        "sutakEnd": 679261605382,
+        "description": "Partial solar eclipse: 28% obscuration, visible from location."
+      }
+    },
+    {
+      "site": "Casper",
+      "sunrise": 679280400000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": 1736730000000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": 1736816400000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": 1736902800000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -1817334000000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -1817247600000,
+      "info": null
+    },
+    {
+      "site": "Casper",
+      "sunrise": -1817161200000,
+      "info": null
+    }
+  ],
+  "horizon": [
+    {
+      "site": "Varanasi",
+      "ms": -2165616000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": -2165594400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": -2165572800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": -2165551200000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Varanasi",
+      "ms": -1596672000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": -1596650400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": -1596628800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": -1596607200000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Varanasi",
+      "ms": -458697600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": -458676000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": -458654400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": -458632800000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Varanasi",
+      "ms": 679190400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 679212000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 679233600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 679255200000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Varanasi",
+      "ms": 934329600000,
+      "sun": false,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 934351200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 934372800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 934394400000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1503273600000,
+      "sun": false,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1503295200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1503316800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1503338400000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1712534400000,
+      "sun": false,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1712556000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1712577600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1712599200000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1817164800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1817186400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1817208000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 1817229600000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Varanasi",
+      "ms": 2386108800000,
+      "sun": false,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 2386130400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 2386152000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 2386173600000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Varanasi",
+      "ms": 3524083200000,
+      "sun": false,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 3524104800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 3524126400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Varanasi",
+      "ms": 3524148000000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": -2165616000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": -2165594400000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": -2165572800000,
+      "sun": true,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": -2165551200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": -1596672000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": -1596650400000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": -1596628800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": -1596607200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": -458697600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": -458676000000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": -458654400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": -458632800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 679190400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 679212000000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": 679233600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 679255200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 934329600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 934351200000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": 934372800000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": 934394400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 1503273600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 1503295200000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": 1503316800000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": 1503338400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 1712534400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 1712556000000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": 1712577600000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": 1712599200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 1817164800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 1817186400000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": 1817208000000,
+      "sun": true,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": 1817229600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 2386108800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 2386130400000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": 2386152000000,
+      "sun": false,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 2386173600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 3524083200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Casper",
+      "ms": 3524104800000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": 3524126400000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Casper",
+      "ms": 3524148000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": -2165616000000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "London",
+      "ms": -2165594400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": -2165572800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": -2165551200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": -1596672000000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "London",
+      "ms": -1596650400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": -1596628800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": -1596607200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": -458697600000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "London",
+      "ms": -458676000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": -458654400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": -458632800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 679190400000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "London",
+      "ms": 679212000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 679233600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 679255200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 934329600000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "London",
+      "ms": 934351200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 934372800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 934394400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 1503273600000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "London",
+      "ms": 1503295200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 1503316800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 1503338400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 1712534400000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "London",
+      "ms": 1712556000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 1712577600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 1712599200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 1817164800000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "London",
+      "ms": 1817186400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 1817208000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 1817229600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 2386108800000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "London",
+      "ms": 2386130400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 2386152000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 2386173600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 3524083200000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "London",
+      "ms": 3524104800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 3524126400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "London",
+      "ms": 3524148000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": -2165616000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": -2165594400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": -2165572800000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": -2165551200000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": -1596672000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": -1596650400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": -1596628800000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": -1596607200000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": -458697600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": -458676000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": -458654400000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": -458632800000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": 679190400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": 679212000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": 679233600000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": 679255200000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": 934329600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": 934351200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": 934372800000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": 934394400000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": 1503273600000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": 1503295200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": 1503316800000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": 1503338400000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": 1712534400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": 1712556000000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": 1712577600000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": 1712599200000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": 1817164800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": 1817186400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": 1817208000000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": 1817229600000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": 2386108800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": 2386130400000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": 2386152000000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": 2386173600000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": 3524083200000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": 3524104800000,
+      "sun": true,
+      "moon": true
+    },
+    {
+      "site": "Sydney",
+      "ms": 3524126400000,
+      "sun": false,
+      "moon": false
+    },
+    {
+      "site": "Sydney",
+      "ms": 3524148000000,
+      "sun": false,
+      "moon": false
+    }
+  ],
+  "anyPhase": [
+    {
+      "site": "Varanasi",
+      "seed": -2166912000000,
+      "visible": true
+    },
+    {
+      "site": "Varanasi",
+      "seed": -1791849600000,
+      "visible": true
+    },
+    {
+      "site": "Varanasi",
+      "seed": -607996800000,
+      "visible": false
+    },
+    {
+      "site": "Varanasi",
+      "seed": 410054400000,
+      "visible": true
+    },
+    {
+      "site": "Varanasi",
+      "seed": 963705600000,
+      "visible": true
+    },
+    {
+      "site": "Varanasi",
+      "seed": 1428105600000,
+      "visible": true
+    },
+    {
+      "site": "Varanasi",
+      "seed": 1532649600000,
+      "visible": true
+    },
+    {
+      "site": "Varanasi",
+      "seed": 1667865600000,
+      "visible": true
+    },
+    {
+      "site": "Varanasi",
+      "seed": 1741910400000,
+      "visible": false
+    },
+    {
+      "site": "Varanasi",
+      "seed": 1877126400000,
+      "visible": false
+    },
+    {
+      "site": "Varanasi",
+      "seed": 2788041600000,
+      "visible": null
+    },
+    {
+      "site": "Varanasi",
+      "seed": 4094323200000,
+      "visible": true
+    },
+    {
+      "site": "Casper",
+      "seed": -2166912000000,
+      "visible": false
+    },
+    {
+      "site": "Casper",
+      "seed": -1791849600000,
+      "visible": true
+    },
+    {
+      "site": "Casper",
+      "seed": -607996800000,
+      "visible": true
+    },
+    {
+      "site": "Casper",
+      "seed": 410054400000,
+      "visible": true
+    },
+    {
+      "site": "Casper",
+      "seed": 963705600000,
+      "visible": true
+    },
+    {
+      "site": "Casper",
+      "seed": 1428105600000,
+      "visible": true
+    },
+    {
+      "site": "Casper",
+      "seed": 1532649600000,
+      "visible": false
+    },
+    {
+      "site": "Casper",
+      "seed": 1667865600000,
+      "visible": true
+    },
+    {
+      "site": "Casper",
+      "seed": 1741910400000,
+      "visible": true
+    },
+    {
+      "site": "Casper",
+      "seed": 1877126400000,
+      "visible": true
+    },
+    {
+      "site": "Casper",
+      "seed": 2788041600000,
+      "visible": null
+    },
+    {
+      "site": "Casper",
+      "seed": 4094323200000,
+      "visible": true
+    },
+    {
+      "site": "London",
+      "seed": -2166912000000,
+      "visible": true
+    },
+    {
+      "site": "London",
+      "seed": -1791849600000,
+      "visible": false
+    },
+    {
+      "site": "London",
+      "seed": -607996800000,
+      "visible": true
+    },
+    {
+      "site": "London",
+      "seed": 410054400000,
+      "visible": false
+    },
+    {
+      "site": "London",
+      "seed": 963705600000,
+      "visible": false
+    },
+    {
+      "site": "London",
+      "seed": 1428105600000,
+      "visible": false
+    },
+    {
+      "site": "London",
+      "seed": 1532649600000,
+      "visible": true
+    },
+    {
+      "site": "London",
+      "seed": 1667865600000,
+      "visible": false
+    },
+    {
+      "site": "London",
+      "seed": 1741910400000,
+      "visible": true
+    },
+    {
+      "site": "London",
+      "seed": 1877126400000,
+      "visible": true
+    },
+    {
+      "site": "London",
+      "seed": 2788041600000,
+      "visible": null
+    },
+    {
+      "site": "London",
+      "seed": 4094323200000,
+      "visible": false
+    },
+    {
+      "site": "Sydney",
+      "seed": -2166912000000,
+      "visible": true
+    },
+    {
+      "site": "Sydney",
+      "seed": -1791849600000,
+      "visible": true
+    },
+    {
+      "site": "Sydney",
+      "seed": -607996800000,
+      "visible": false
+    },
+    {
+      "site": "Sydney",
+      "seed": 410054400000,
+      "visible": true
+    },
+    {
+      "site": "Sydney",
+      "seed": 963705600000,
+      "visible": true
+    },
+    {
+      "site": "Sydney",
+      "seed": 1428105600000,
+      "visible": true
+    },
+    {
+      "site": "Sydney",
+      "seed": 1532649600000,
+      "visible": true
+    },
+    {
+      "site": "Sydney",
+      "seed": 1667865600000,
+      "visible": true
+    },
+    {
+      "site": "Sydney",
+      "seed": 1741910400000,
+      "visible": true
+    },
+    {
+      "site": "Sydney",
+      "seed": 1877126400000,
+      "visible": false
+    },
+    {
+      "site": "Sydney",
+      "seed": 2788041600000,
+      "visible": null
+    },
+    {
+      "site": "Sydney",
+      "seed": 4094323200000,
+      "visible": true
+    }
+  ]
+}

@@ -1,0 +1,4012 @@
+{
+  "_meta": {
+    "generator": "source/go/parity/goldens.src.ts (bash source/go/parity/goldens.sh)",
+    "source": "src/jyotish/sadeSati.ts",
+    "baseline": "master @ c38c606 (intended tag v5.1.1) + the later uncommitted fixes",
+    "claim": "Exact equality on every leaf: active, phase, and three day-precision instants. Nothing here is a float on the wire.",
+    "why": "The file is three scan loops, not a formula. Two of its iteration bounds are non-integral divisions that a Go int port would truncate (docs/porting.md 1.7), and findNextEntry bisects with float endpoints that a D4-style int64 port would floor. Neither shows up except at a scan or arc boundary, so the golden carries a day-by-day walk across a real boundary as well as a phase sweep.",
+    "span": [
+      "1930-01-01T00:00:00.000Z",
+      "2070-01-01T00:00:00.000Z"
+    ]
+  },
+  "msLo": -1262304000000,
+  "msHi": 3155760000000,
+  "samples": 24,
+  "stabilityDays": 90,
+  "coarseStepDays": 7,
+  "maxForwardScanDays": 10950,
+  "maxBackwardScanDays": 4380,
+  "instants": [
+    -1262304000000,
+    -1078218000000,
+    -894132000000,
+    -710046000000,
+    -525960000000,
+    -341874000000,
+    -157788000000,
+    26298000000,
+    210384000000,
+    394470000000,
+    578556000000,
+    762642000000,
+    946728000000,
+    1130814000000,
+    1314900000000,
+    1498986000000,
+    1683072000000,
+    1867158000000,
+    2051244000000,
+    2235330000000,
+    2419416000000,
+    2603502000000,
+    2787588000000,
+    2971674000000
+  ],
+  "saturnRashis": [
+    {
+      "ms": -1262304000000,
+      "siderealLongitude": 250.826080656005,
+      "rashi": 8
+    },
+    {
+      "ms": -1078218000000,
+      "siderealLongitude": 310.57416930291,
+      "rashi": 10
+    },
+    {
+      "ms": -894132000000,
+      "siderealLongitude": 35.4200308550855,
+      "rashi": 1
+    },
+    {
+      "ms": -710046000000,
+      "siderealLongitude": 105.06520762119094,
+      "rashi": 3
+    },
+    {
+      "ms": -525960000000,
+      "siderealLongitude": 179.3920080182034,
+      "rashi": 5
+    },
+    {
+      "ms": -341874000000,
+      "siderealLongitude": 252.18753740269105,
+      "rashi": 8
+    },
+    {
+      "ms": -157788000000,
+      "siderealLongitude": 307.8917641746506,
+      "rashi": 10
+    },
+    {
+      "ms": 26298000000,
+      "siderealLongitude": 26.522564908322057,
+      "rashi": 0
+    },
+    {
+      "ms": 210384000000,
+      "siderealLongitude": 107.21678082921483,
+      "rashi": 3
+    },
+    {
+      "ms": 394470000000,
+      "siderealLongitude": 172.04596368961808,
+      "rashi": 5
+    },
+    {
+      "ms": 578556000000,
+      "siderealLongitude": 248.49097722099057,
+      "rashi": 8
+    },
+    {
+      "ms": 762642000000,
+      "siderealLongitude": 310.17206864788795,
+      "rashi": 10
+    },
+    {
+      "ms": 946728000000,
+      "siderealLongitude": 16.531917076887442,
+      "rashi": 0
+    },
+    {
+      "ms": 1130814000000,
+      "siderealLongitude": 106.94694450704714,
+      "rashi": 3
+    },
+    {
+      "ms": 1314900000000,
+      "siderealLongitude": 171.23547249276493,
+      "rashi": 5
+    },
+    {
+      "ms": 1498986000000,
+      "siderealLongitude": 239.17675394369445,
+      "rashi": 7
+    },
+    {
+      "ms": 1683072000000,
+      "siderealLongitude": 311.3574063990651,
+      "rashi": 10
+    },
+    {
+      "ms": 1867158000000,
+      "siderealLongitude": 12.899615603559852,
+      "rashi": 0
+    },
+    {
+      "ms": 2051244000000,
+      "siderealLongitude": 99.21101658300881,
+      "rashi": 3
+    },
+    {
+      "ms": 2235330000000,
+      "siderealLongitude": 173.54059630369622,
+      "rashi": 5
+    },
+    {
+      "ms": 2419416000000,
+      "siderealLongitude": 232.19945837244944,
+      "rashi": 7
+    },
+    {
+      "ms": 2603502000000,
+      "siderealLongitude": 307.52457332275,
+      "rashi": 10
+    },
+    {
+      "ms": 2787588000000,
+      "siderealLongitude": 14.908796478392969,
+      "rashi": 0
+    },
+    {
+      "ms": 2971674000000,
+      "siderealLongitude": 88.53364523147422,
+      "rashi": 2
+    }
+  ],
+  "sweep": [
+    {
+      "ms": -1262304000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1937-02-26T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1262304000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1939-04-27T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1262304000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1941-06-18T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1262304000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1943-08-05T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1262304000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1945-09-23T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1262304000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1948-07-27T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1262304000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1950-09-20T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1262304000000,
+      "rashi": 7,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1923-10-16T00:00:00.000Z",
+        "currentArcEnd": "1931-12-25T00:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -1262304000000,
+      "rashi": 8,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "1926-09-30T00:00:00.000Z",
+        "currentArcEnd": "1934-03-16T00:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -1262304000000,
+      "rashi": 9,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "1928-12-25T00:00:00.000Z",
+        "currentArcEnd": "1937-02-26T00:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -1262304000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1931-04-12T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1262304000000,
+      "rashi": 11,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1934-03-16T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1078218000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1937-02-26T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1078218000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1939-04-27T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1078218000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1941-06-18T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1078218000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1943-08-05T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1078218000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1945-09-23T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1078218000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1948-07-27T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1078218000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1950-09-20T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1078218000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1952-11-26T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1078218000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1955-11-12T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": -1078218000000,
+      "rashi": 9,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1928-12-25T15:00:00.000Z",
+        "currentArcEnd": "1937-02-26T15:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -1078218000000,
+      "rashi": 10,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "1931-12-25T15:00:00.000Z",
+        "currentArcEnd": "1939-04-28T15:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -1078218000000,
+      "rashi": 11,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "1934-03-16T15:00:00.000Z",
+        "currentArcEnd": "1941-06-18T15:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -894132000000,
+      "rashi": 0,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -894132000000,
+      "rashi": 1,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "1939-04-28T06:00:00.000Z",
+        "currentArcEnd": "1945-09-23T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -894132000000,
+      "rashi": 2,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "1941-06-19T06:00:00.000Z",
+        "currentArcEnd": "1948-07-27T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -894132000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1943-08-05T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": -894132000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1945-09-23T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": -894132000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1948-07-27T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": -894132000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1950-09-20T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -894132000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1952-11-26T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": -894132000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1955-11-12T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": -894132000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1958-02-08T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": -894132000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1961-02-01T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -894132000000,
+      "rashi": 11,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1964-01-28T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": -710046000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": -710046000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1968-06-17T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": -710046000000,
+      "rashi": 2,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1941-06-18T21:00:00.000Z",
+        "currentArcEnd": "1948-07-26T21:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -710046000000,
+      "rashi": 3,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "1944-04-23T21:00:00.000Z",
+        "currentArcEnd": "1950-09-20T21:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -710046000000,
+      "rashi": 4,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "1946-06-08T21:00:00.000Z",
+        "currentArcEnd": "1952-11-25T21:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -710046000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1948-07-27T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": -710046000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1950-09-20T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -710046000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1952-11-26T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": -710046000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1955-11-12T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": -710046000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1958-02-08T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": -710046000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1961-02-01T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -710046000000,
+      "rashi": 11,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1964-01-28T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": -525960000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": -525960000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1968-06-17T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": -525960000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1971-04-28T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -525960000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1973-06-11T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": -525960000000,
+      "rashi": 4,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1953-04-24T12:00:00.000Z",
+        "currentArcEnd": "1953-08-21T12:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -525960000000,
+      "rashi": 5,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "1948-07-26T12:00:00.000Z",
+        "currentArcEnd": "1955-11-12T12:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -525960000000,
+      "rashi": 6,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "1950-09-20T12:00:00.000Z",
+        "currentArcEnd": "1958-02-08T12:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -525960000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1953-08-21T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": -525960000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1955-11-12T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": -525960000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1958-02-08T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": -525960000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1961-02-01T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -525960000000,
+      "rashi": 11,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1964-01-28T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": -341874000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": -341874000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1968-06-17T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": -341874000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1971-04-28T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -341874000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1973-06-11T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": -341874000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1975-07-23T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -341874000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1977-09-07T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -341874000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1979-11-04T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": -341874000000,
+      "rashi": 7,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1953-08-22T03:00:00.000Z",
+        "currentArcEnd": "1961-02-02T03:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -341874000000,
+      "rashi": 8,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "1955-11-13T03:00:00.000Z",
+        "currentArcEnd": "1964-01-28T03:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -341874000000,
+      "rashi": 9,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "1958-11-08T03:00:00.000Z",
+        "currentArcEnd": "1966-04-09T03:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -341874000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1961-02-01T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -341874000000,
+      "rashi": 11,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1964-01-28T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": -157788000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": -157788000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1968-06-17T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": -157788000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1971-04-28T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -157788000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1973-06-11T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": -157788000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1975-07-23T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -157788000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1977-09-07T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -157788000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1979-11-04T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": -157788000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1982-10-06T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -157788000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1984-12-21T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": -157788000000,
+      "rashi": 9,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1958-11-07T18:00:00.000Z",
+        "currentArcEnd": "1966-04-09T18:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -157788000000,
+      "rashi": 10,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "1961-02-02T18:00:00.000Z",
+        "currentArcEnd": "1968-06-17T18:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -157788000000,
+      "rashi": 11,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "1964-01-27T18:00:00.000Z",
+        "currentArcEnd": "1971-04-28T18:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 26298000000,
+      "rashi": 0,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "1966-04-09T09:00:00.000Z",
+        "currentArcEnd": "1973-06-11T09:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 26298000000,
+      "rashi": 1,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "1969-03-08T09:00:00.000Z",
+        "currentArcEnd": "1975-07-24T09:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 26298000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1971-04-28T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 26298000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1973-06-11T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 26298000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1975-07-23T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 26298000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1977-09-07T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 26298000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1979-11-04T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": 26298000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1982-10-06T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 26298000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1984-12-21T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 26298000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1987-12-17T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 26298000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1990-03-21T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 26298000000,
+      "rashi": 11,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1964-01-28T09:00:00.000Z",
+        "currentArcEnd": "1971-04-28T09:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 210384000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1995-06-02T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 210384000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1998-04-17T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 210384000000,
+      "rashi": 2,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1971-04-29T00:00:00.000Z",
+        "currentArcEnd": "1977-09-08T00:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 210384000000,
+      "rashi": 3,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "1973-06-11T00:00:00.000Z",
+        "currentArcEnd": "1979-11-04T00:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 210384000000,
+      "rashi": 4,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "1975-07-24T00:00:00.000Z",
+        "currentArcEnd": "1982-10-07T00:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 210384000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1977-09-07T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 210384000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1979-11-04T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": 210384000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1982-10-06T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 210384000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1984-12-21T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 210384000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1987-12-17T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 210384000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1990-03-21T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 210384000000,
+      "rashi": 11,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1993-03-05T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 394470000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1995-06-02T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 394470000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1998-04-17T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 394470000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2000-06-07T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 394470000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2002-07-24T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 394470000000,
+      "rashi": 4,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1975-07-23T15:00:00.000Z",
+        "currentArcEnd": "1982-10-06T15:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 394470000000,
+      "rashi": 5,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "1977-09-07T15:00:00.000Z",
+        "currentArcEnd": "1984-12-21T15:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 394470000000,
+      "rashi": 6,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "1980-07-27T15:00:00.000Z",
+        "currentArcEnd": "1987-12-17T15:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 394470000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1982-10-06T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 394470000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1984-12-21T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 394470000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1987-12-17T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 394470000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1990-03-21T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 394470000000,
+      "rashi": 11,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1993-03-05T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 578556000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1995-06-02T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 578556000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1998-04-17T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 578556000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2000-06-07T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 578556000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2002-07-24T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 578556000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2004-09-06T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 578556000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2006-11-01T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 578556000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2009-09-09T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 578556000000,
+      "rashi": 7,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1982-10-06T06:00:00.000Z",
+        "currentArcEnd": "1990-03-21T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 578556000000,
+      "rashi": 8,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "1985-09-17T06:00:00.000Z",
+        "currentArcEnd": "1993-03-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 578556000000,
+      "rashi": 9,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "1987-12-17T06:00:00.000Z",
+        "currentArcEnd": "1996-02-17T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 578556000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1990-03-21T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 578556000000,
+      "rashi": 11,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1993-03-05T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 762642000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1995-06-02T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 762642000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1998-04-17T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 762642000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2000-06-07T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 762642000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2002-07-24T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 762642000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2004-09-06T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 762642000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2006-11-01T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 762642000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2009-09-09T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 762642000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2011-11-16T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 762642000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2014-11-03T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 762642000000,
+      "rashi": 9,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1987-12-17T21:00:00.000Z",
+        "currentArcEnd": "1996-02-16T21:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 762642000000,
+      "rashi": 10,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "1990-12-14T21:00:00.000Z",
+        "currentArcEnd": "1998-04-17T21:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 762642000000,
+      "rashi": 11,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "1993-03-05T21:00:00.000Z",
+        "currentArcEnd": "2000-06-07T21:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 946728000000,
+      "rashi": 0,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "1996-02-17T12:00:00.000Z",
+        "currentArcEnd": "2002-07-23T12:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 946728000000,
+      "rashi": 1,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "1998-04-17T12:00:00.000Z",
+        "currentArcEnd": "2004-09-06T12:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 946728000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2000-06-07T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 946728000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2002-07-24T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 946728000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2004-09-06T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 946728000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2006-11-01T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 946728000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2009-09-09T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 946728000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2011-11-16T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 946728000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2014-11-03T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 946728000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2017-01-26T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 946728000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2020-01-24T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 946728000000,
+      "rashi": 11,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1993-03-06T12:00:00.000Z",
+        "currentArcEnd": "2000-06-07T12:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 1130814000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2025-03-30T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1130814000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2027-06-03T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1130814000000,
+      "rashi": 2,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "2000-06-07T03:00:00.000Z",
+        "currentArcEnd": "2007-07-16T03:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 1130814000000,
+      "rashi": 3,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "2002-07-24T03:00:00.000Z",
+        "currentArcEnd": "2009-09-10T03:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 1130814000000,
+      "rashi": 4,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "2005-05-27T03:00:00.000Z",
+        "currentArcEnd": "2011-11-16T03:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 1130814000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2006-11-01T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1130814000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2009-09-09T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1130814000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2011-11-16T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1130814000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2014-11-03T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1130814000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2017-01-26T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1130814000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2020-01-24T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1130814000000,
+      "rashi": 11,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2022-04-29T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1314900000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2025-03-30T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1314900000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2027-06-03T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1314900000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2029-08-08T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1314900000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2032-05-31T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1314900000000,
+      "rashi": 4,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "2005-05-26T18:00:00.000Z",
+        "currentArcEnd": "2011-11-15T18:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 1314900000000,
+      "rashi": 5,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "2007-07-16T18:00:00.000Z",
+        "currentArcEnd": "2014-11-02T18:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 1314900000000,
+      "rashi": 6,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "2009-09-10T18:00:00.000Z",
+        "currentArcEnd": "2017-01-26T18:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 1314900000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2011-11-16T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1314900000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2014-11-03T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1314900000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2017-01-26T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1314900000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2020-01-24T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1314900000000,
+      "rashi": 11,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2022-04-29T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1498986000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2025-03-30T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1498986000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2027-06-03T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1498986000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2029-08-08T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1498986000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2032-05-31T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1498986000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2034-07-13T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1498986000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2036-08-27T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1498986000000,
+      "rashi": 6,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "2017-06-21T09:00:00.000Z",
+        "currentArcEnd": "2017-10-27T09:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 1498986000000,
+      "rashi": 7,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "2011-11-15T09:00:00.000Z",
+        "currentArcEnd": "2020-01-24T09:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 1498986000000,
+      "rashi": 8,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "2014-11-03T09:00:00.000Z",
+        "currentArcEnd": "2023-01-18T09:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 1498986000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2017-10-26T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1498986000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2020-01-24T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1498986000000,
+      "rashi": 11,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2022-04-29T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1683072000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2025-03-30T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1683072000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2027-06-03T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1683072000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2029-08-08T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1683072000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2032-05-31T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1683072000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2034-07-13T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1683072000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2036-08-27T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1683072000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2038-10-22T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1683072000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2041-01-30T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1683072000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2043-12-12T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1683072000000,
+      "rashi": 9,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "2017-10-27T00:00:00.000Z",
+        "currentArcEnd": "2025-03-30T00:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 1683072000000,
+      "rashi": 10,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "2020-01-25T00:00:00.000Z",
+        "currentArcEnd": "2027-06-04T00:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 1683072000000,
+      "rashi": 11,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "2023-01-18T00:00:00.000Z",
+        "currentArcEnd": "2030-04-18T00:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 1867158000000,
+      "rashi": 0,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "2025-03-30T15:00:00.000Z",
+        "currentArcEnd": "2032-05-31T15:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 1867158000000,
+      "rashi": 1,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "2028-02-23T15:00:00.000Z",
+        "currentArcEnd": "2034-07-13T15:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 1867158000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2029-08-08T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1867158000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2032-05-31T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1867158000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2034-07-13T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1867158000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2036-08-27T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1867158000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2038-10-22T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1867158000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2041-01-30T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1867158000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2043-12-12T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1867158000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2046-12-08T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1867158000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2049-03-06T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 1867158000000,
+      "rashi": 11,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "2023-01-17T15:00:00.000Z",
+        "currentArcEnd": "2030-04-17T15:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2051244000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2054-05-14T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2051244000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2057-04-07T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2051244000000,
+      "rashi": 2,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "2030-04-17T06:00:00.000Z",
+        "currentArcEnd": "2036-08-28T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2051244000000,
+      "rashi": 3,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "2032-05-31T06:00:00.000Z",
+        "currentArcEnd": "2038-10-23T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2051244000000,
+      "rashi": 4,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "2034-07-13T06:00:00.000Z",
+        "currentArcEnd": "2041-09-26T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2051244000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2036-08-27T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2051244000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2038-10-22T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2051244000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2041-01-30T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2051244000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2043-12-12T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2051244000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2046-12-08T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2051244000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2049-03-06T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2051244000000,
+      "rashi": 11,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2052-02-25T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2235330000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2054-05-14T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2235330000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2057-04-07T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2235330000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2059-05-28T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2235330000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2061-07-11T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2235330000000,
+      "rashi": 4,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "2034-07-13T21:00:00.000Z",
+        "currentArcEnd": "2041-09-26T21:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2235330000000,
+      "rashi": 5,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "2036-08-27T21:00:00.000Z",
+        "currentArcEnd": "2043-12-11T21:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2235330000000,
+      "rashi": 6,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "2039-07-13T21:00:00.000Z",
+        "currentArcEnd": "2046-12-07T21:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2235330000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2041-01-30T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2235330000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2043-12-12T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2235330000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2046-12-08T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2235330000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2049-03-06T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2235330000000,
+      "rashi": 11,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2052-02-25T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2419416000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2054-05-14T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2419416000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2057-04-07T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2419416000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2059-05-28T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2419416000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2061-07-11T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2419416000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2063-08-24T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2419416000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2065-10-13T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2419416000000,
+      "rashi": 6,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "2039-07-13T12:00:00.000Z",
+        "currentArcEnd": "2046-12-08T12:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2419416000000,
+      "rashi": 7,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "2041-09-26T12:00:00.000Z",
+        "currentArcEnd": "2049-03-06T12:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2419416000000,
+      "rashi": 8,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "2043-12-12T12:00:00.000Z",
+        "currentArcEnd": "2052-02-25T12:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2419416000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2046-12-08T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2419416000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2049-03-06T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2419416000000,
+      "rashi": 11,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2052-02-25T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2603502000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2054-05-14T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2603502000000,
+      "rashi": 1,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2057-04-07T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2603502000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2059-05-28T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2603502000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2061-07-11T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2603502000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2063-08-24T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2603502000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2065-10-13T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2603502000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2068-08-30T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2603502000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2070-11-05T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2603502000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2073-02-06T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2603502000000,
+      "rashi": 9,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "2046-12-08T03:00:00.000Z",
+        "currentArcEnd": "2054-05-15T03:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2603502000000,
+      "rashi": 10,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "2049-12-04T03:00:00.000Z",
+        "currentArcEnd": "2057-04-08T03:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2603502000000,
+      "rashi": 11,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "2052-02-25T03:00:00.000Z",
+        "currentArcEnd": "2059-05-28T03:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2787588000000,
+      "rashi": 0,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "2055-02-05T18:00:00.000Z",
+        "currentArcEnd": "2061-07-11T18:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2787588000000,
+      "rashi": 1,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "2057-04-07T18:00:00.000Z",
+        "currentArcEnd": "2063-08-24T18:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2787588000000,
+      "rashi": 2,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2059-05-28T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2787588000000,
+      "rashi": 3,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2061-07-11T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2787588000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2063-08-24T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2787588000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2065-10-13T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2787588000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2068-08-30T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2787588000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2070-11-05T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2787588000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2073-02-06T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2787588000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2076-01-16T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2787588000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2079-01-15T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2787588000000,
+      "rashi": 11,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "2052-02-25T18:00:00.000Z",
+        "currentArcEnd": "2059-05-28T18:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2971674000000,
+      "rashi": 0,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2084-03-20T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2971674000000,
+      "rashi": 1,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "2064-02-06T09:00:00.000Z",
+        "currentArcEnd": "2064-05-10T09:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2971674000000,
+      "rashi": 2,
+      "result": {
+        "active": true,
+        "phase": 2,
+        "currentArcStart": "2059-05-28T09:00:00.000Z",
+        "currentArcEnd": "2065-10-13T09:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2971674000000,
+      "rashi": 3,
+      "result": {
+        "active": true,
+        "phase": 1,
+        "currentArcStart": "2061-07-11T09:00:00.000Z",
+        "currentArcEnd": "2068-08-30T09:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": 2971674000000,
+      "rashi": 4,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2064-05-09T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2971674000000,
+      "rashi": 5,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2065-10-13T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2971674000000,
+      "rashi": 6,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2068-08-30T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2971674000000,
+      "rashi": 7,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2070-11-05T00:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2971674000000,
+      "rashi": 8,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2073-02-06T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2971674000000,
+      "rashi": 9,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2076-01-16T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2971674000000,
+      "rashi": 10,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2079-01-15T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": 2971674000000,
+      "rashi": 11,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2081-04-12T12:00:00.000Z"
+      }
+    }
+  ],
+  "walkRashi": 0,
+  "walkAnchorMs": -833306400000,
+  "walk": [
+    {
+      "ms": -835898400000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -835812000000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -835725600000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -835639200000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -835552800000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -835466400000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -835380000000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -835293600000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -835207200000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -835120800000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -835034400000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -834948000000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -834861600000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -834775200000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -834688800000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -834602400000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -834516000000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -834429600000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -834343200000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -834256800000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -834170400000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -834084000000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -833997600000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -833911200000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -833824800000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -833738400000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -833652000000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -833565600000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -833479200000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -833392800000,
+      "result": {
+        "active": true,
+        "phase": 3,
+        "currentArcStart": "1937-02-26T06:00:00.000Z",
+        "currentArcEnd": "1943-08-06T06:00:00.000Z",
+        "nextArcStart": null
+      }
+    },
+    {
+      "ms": -833306400000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": -833220000000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": -833133600000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": -833047200000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": -832960800000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": -832874400000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": -832788000000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -832701600000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": -832615200000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": -832528800000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": -832442400000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": -832356000000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": -832269600000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": -832183200000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -832096800000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": -832010400000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": -831924000000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": -831837600000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": -831751200000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": -831664800000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": -831578400000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -831492000000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": -831405600000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": -831319200000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T09:00:00.000Z"
+      }
+    },
+    {
+      "ms": -831232800000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T12:00:00.000Z"
+      }
+    },
+    {
+      "ms": -831146400000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T15:00:00.000Z"
+      }
+    },
+    {
+      "ms": -831060000000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T18:00:00.000Z"
+      }
+    },
+    {
+      "ms": -830973600000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T21:00:00.000Z"
+      }
+    },
+    {
+      "ms": -830887200000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T03:00:00.000Z"
+      }
+    },
+    {
+      "ms": -830800800000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T06:00:00.000Z"
+      }
+    },
+    {
+      "ms": -830714400000,
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "1966-04-09T09:00:00.000Z"
+      }
+    }
+  ],
+  "ayanamsaAt": 946728000000,
+  "byAyanamsa": [
+    {
+      "ayanamsa": "lahiri",
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2002-07-24T00:00:00.000Z"
+      }
+    },
+    {
+      "ayanamsa": "raman",
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2002-07-10T21:00:00.000Z"
+      }
+    },
+    {
+      "ayanamsa": "krishnamurti",
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2002-07-23T03:00:00.000Z"
+      }
+    },
+    {
+      "ayanamsa": "true-chitra",
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2002-07-24T00:00:00.000Z"
+      }
+    },
+    {
+      "ayanamsa": "thirukanitham",
+      "result": {
+        "active": false,
+        "phase": null,
+        "currentArcStart": null,
+        "currentArcEnd": null,
+        "nextArcStart": "2002-07-24T00:00:00.000Z"
+      }
+    }
+  ],
+  "defaultAyanamsa": {
+    "active": false,
+    "phase": null,
+    "currentArcStart": null,
+    "currentArcEnd": null,
+    "nextArcStart": "2002-07-24T00:00:00.000Z"
+  }
+}

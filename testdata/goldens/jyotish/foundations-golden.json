@@ -1,0 +1,2438 @@
+{
+  "_meta": {
+    "generator": "source/go/parity/goldens.src.ts (bash source/go/parity/goldens.sh)",
+    "source": "src/jyotish/{dignity,aspects,matchingTables}.ts",
+    "baseline": "master @ c38c606 (intended tag v5.1.1) + the uncommitted fixes in src/core/nakshatra.ts, src/core/panchang.ts, src/jyotish/lagna.ts",
+    "claim": "Bit-identical to the TypeScript over the WHOLE domain of each: these three files contain no floating-point path at all, they are table lookups, integer modulo and comparisons, so there is nothing for a platform transcendental to perturb and no bound to state.",
+    "sample": "108 dignity cases (9 grahas x 12 rashis, exhaustive), 24 aspect charts (every graha in every house, both node conventions), and every cell of 23 tables"
+  },
+  "dignity": [
+    {
+      "graha": "Sun",
+      "rashi": 0,
+      "dignity": "exalted"
+    },
+    {
+      "graha": "Sun",
+      "rashi": 1,
+      "dignity": "enemy"
+    },
+    {
+      "graha": "Sun",
+      "rashi": 2,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Sun",
+      "rashi": 3,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Sun",
+      "rashi": 4,
+      "dignity": "moolatrikona"
+    },
+    {
+      "graha": "Sun",
+      "rashi": 5,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Sun",
+      "rashi": 6,
+      "dignity": "debilitated"
+    },
+    {
+      "graha": "Sun",
+      "rashi": 7,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Sun",
+      "rashi": 8,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Sun",
+      "rashi": 9,
+      "dignity": "enemy"
+    },
+    {
+      "graha": "Sun",
+      "rashi": 10,
+      "dignity": "enemy"
+    },
+    {
+      "graha": "Sun",
+      "rashi": 11,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Moon",
+      "rashi": 0,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Moon",
+      "rashi": 1,
+      "dignity": "exalted"
+    },
+    {
+      "graha": "Moon",
+      "rashi": 2,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Moon",
+      "rashi": 3,
+      "dignity": "own"
+    },
+    {
+      "graha": "Moon",
+      "rashi": 4,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Moon",
+      "rashi": 5,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Moon",
+      "rashi": 6,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Moon",
+      "rashi": 7,
+      "dignity": "debilitated"
+    },
+    {
+      "graha": "Moon",
+      "rashi": 8,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Moon",
+      "rashi": 9,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Moon",
+      "rashi": 10,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Moon",
+      "rashi": 11,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Mars",
+      "rashi": 0,
+      "dignity": "moolatrikona"
+    },
+    {
+      "graha": "Mars",
+      "rashi": 1,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Mars",
+      "rashi": 2,
+      "dignity": "enemy"
+    },
+    {
+      "graha": "Mars",
+      "rashi": 3,
+      "dignity": "debilitated"
+    },
+    {
+      "graha": "Mars",
+      "rashi": 4,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Mars",
+      "rashi": 5,
+      "dignity": "enemy"
+    },
+    {
+      "graha": "Mars",
+      "rashi": 6,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Mars",
+      "rashi": 7,
+      "dignity": "own"
+    },
+    {
+      "graha": "Mars",
+      "rashi": 8,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Mars",
+      "rashi": 9,
+      "dignity": "exalted"
+    },
+    {
+      "graha": "Mars",
+      "rashi": 10,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Mars",
+      "rashi": 11,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Mercury",
+      "rashi": 0,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Mercury",
+      "rashi": 1,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Mercury",
+      "rashi": 2,
+      "dignity": "own"
+    },
+    {
+      "graha": "Mercury",
+      "rashi": 3,
+      "dignity": "enemy"
+    },
+    {
+      "graha": "Mercury",
+      "rashi": 4,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Mercury",
+      "rashi": 5,
+      "dignity": "exalted"
+    },
+    {
+      "graha": "Mercury",
+      "rashi": 6,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Mercury",
+      "rashi": 7,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Mercury",
+      "rashi": 8,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Mercury",
+      "rashi": 9,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Mercury",
+      "rashi": 10,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Mercury",
+      "rashi": 11,
+      "dignity": "debilitated"
+    },
+    {
+      "graha": "Jupiter",
+      "rashi": 0,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Jupiter",
+      "rashi": 1,
+      "dignity": "enemy"
+    },
+    {
+      "graha": "Jupiter",
+      "rashi": 2,
+      "dignity": "enemy"
+    },
+    {
+      "graha": "Jupiter",
+      "rashi": 3,
+      "dignity": "exalted"
+    },
+    {
+      "graha": "Jupiter",
+      "rashi": 4,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Jupiter",
+      "rashi": 5,
+      "dignity": "enemy"
+    },
+    {
+      "graha": "Jupiter",
+      "rashi": 6,
+      "dignity": "enemy"
+    },
+    {
+      "graha": "Jupiter",
+      "rashi": 7,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Jupiter",
+      "rashi": 8,
+      "dignity": "moolatrikona"
+    },
+    {
+      "graha": "Jupiter",
+      "rashi": 9,
+      "dignity": "debilitated"
+    },
+    {
+      "graha": "Jupiter",
+      "rashi": 10,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Jupiter",
+      "rashi": 11,
+      "dignity": "own"
+    },
+    {
+      "graha": "Venus",
+      "rashi": 0,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Venus",
+      "rashi": 1,
+      "dignity": "own"
+    },
+    {
+      "graha": "Venus",
+      "rashi": 2,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Venus",
+      "rashi": 3,
+      "dignity": "enemy"
+    },
+    {
+      "graha": "Venus",
+      "rashi": 4,
+      "dignity": "enemy"
+    },
+    {
+      "graha": "Venus",
+      "rashi": 5,
+      "dignity": "debilitated"
+    },
+    {
+      "graha": "Venus",
+      "rashi": 6,
+      "dignity": "moolatrikona"
+    },
+    {
+      "graha": "Venus",
+      "rashi": 7,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Venus",
+      "rashi": 8,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Venus",
+      "rashi": 9,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Venus",
+      "rashi": 10,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Venus",
+      "rashi": 11,
+      "dignity": "exalted"
+    },
+    {
+      "graha": "Saturn",
+      "rashi": 0,
+      "dignity": "debilitated"
+    },
+    {
+      "graha": "Saturn",
+      "rashi": 1,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Saturn",
+      "rashi": 2,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Saturn",
+      "rashi": 3,
+      "dignity": "enemy"
+    },
+    {
+      "graha": "Saturn",
+      "rashi": 4,
+      "dignity": "enemy"
+    },
+    {
+      "graha": "Saturn",
+      "rashi": 5,
+      "dignity": "friend"
+    },
+    {
+      "graha": "Saturn",
+      "rashi": 6,
+      "dignity": "exalted"
+    },
+    {
+      "graha": "Saturn",
+      "rashi": 7,
+      "dignity": "enemy"
+    },
+    {
+      "graha": "Saturn",
+      "rashi": 8,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Saturn",
+      "rashi": 9,
+      "dignity": "own"
+    },
+    {
+      "graha": "Saturn",
+      "rashi": 10,
+      "dignity": "moolatrikona"
+    },
+    {
+      "graha": "Saturn",
+      "rashi": 11,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Rahu",
+      "rashi": 0,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Rahu",
+      "rashi": 1,
+      "dignity": "exalted"
+    },
+    {
+      "graha": "Rahu",
+      "rashi": 2,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Rahu",
+      "rashi": 3,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Rahu",
+      "rashi": 4,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Rahu",
+      "rashi": 5,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Rahu",
+      "rashi": 6,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Rahu",
+      "rashi": 7,
+      "dignity": "debilitated"
+    },
+    {
+      "graha": "Rahu",
+      "rashi": 8,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Rahu",
+      "rashi": 9,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Rahu",
+      "rashi": 10,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Rahu",
+      "rashi": 11,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Ketu",
+      "rashi": 0,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Ketu",
+      "rashi": 1,
+      "dignity": "debilitated"
+    },
+    {
+      "graha": "Ketu",
+      "rashi": 2,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Ketu",
+      "rashi": 3,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Ketu",
+      "rashi": 4,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Ketu",
+      "rashi": 5,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Ketu",
+      "rashi": 6,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Ketu",
+      "rashi": 7,
+      "dignity": "exalted"
+    },
+    {
+      "graha": "Ketu",
+      "rashi": 8,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Ketu",
+      "rashi": 9,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Ketu",
+      "rashi": 10,
+      "dignity": "neutral"
+    },
+    {
+      "graha": "Ketu",
+      "rashi": 11,
+      "dignity": "neutral"
+    }
+  ],
+  "aspects": [
+    {
+      "chart": 0,
+      "nodeAspects": "7-only",
+      "houses": {
+        "Sun": 1,
+        "Moon": 2,
+        "Mars": 3,
+        "Mercury": 4,
+        "Jupiter": 5,
+        "Venus": 6,
+        "Saturn": 7,
+        "Rahu": 8,
+        "Ketu": 9
+      },
+      "result": {
+        "Sun": [
+          7
+        ],
+        "Moon": [
+          8
+        ],
+        "Mars": [
+          6,
+          9,
+          10
+        ],
+        "Mercury": [
+          10
+        ],
+        "Jupiter": [
+          1,
+          9,
+          11
+        ],
+        "Venus": [
+          12
+        ],
+        "Saturn": [
+          1,
+          4,
+          9
+        ],
+        "Rahu": [
+          2
+        ],
+        "Ketu": [
+          3
+        ]
+      }
+    },
+    {
+      "chart": 0,
+      "nodeAspects": "5-and-9",
+      "houses": {
+        "Sun": 1,
+        "Moon": 2,
+        "Mars": 3,
+        "Mercury": 4,
+        "Jupiter": 5,
+        "Venus": 6,
+        "Saturn": 7,
+        "Rahu": 8,
+        "Ketu": 9
+      },
+      "result": {
+        "Sun": [
+          7
+        ],
+        "Moon": [
+          8
+        ],
+        "Mars": [
+          6,
+          9,
+          10
+        ],
+        "Mercury": [
+          10
+        ],
+        "Jupiter": [
+          1,
+          9,
+          11
+        ],
+        "Venus": [
+          12
+        ],
+        "Saturn": [
+          1,
+          4,
+          9
+        ],
+        "Rahu": [
+          2,
+          4,
+          12
+        ],
+        "Ketu": [
+          1,
+          3,
+          5
+        ]
+      }
+    },
+    {
+      "chart": 1,
+      "nodeAspects": "7-only",
+      "houses": {
+        "Sun": 2,
+        "Moon": 3,
+        "Mars": 4,
+        "Mercury": 5,
+        "Jupiter": 6,
+        "Venus": 7,
+        "Saturn": 8,
+        "Rahu": 9,
+        "Ketu": 10
+      },
+      "result": {
+        "Sun": [
+          8
+        ],
+        "Moon": [
+          9
+        ],
+        "Mars": [
+          7,
+          10,
+          11
+        ],
+        "Mercury": [
+          11
+        ],
+        "Jupiter": [
+          2,
+          10,
+          12
+        ],
+        "Venus": [
+          1
+        ],
+        "Saturn": [
+          2,
+          5,
+          10
+        ],
+        "Rahu": [
+          3
+        ],
+        "Ketu": [
+          4
+        ]
+      }
+    },
+    {
+      "chart": 1,
+      "nodeAspects": "5-and-9",
+      "houses": {
+        "Sun": 2,
+        "Moon": 3,
+        "Mars": 4,
+        "Mercury": 5,
+        "Jupiter": 6,
+        "Venus": 7,
+        "Saturn": 8,
+        "Rahu": 9,
+        "Ketu": 10
+      },
+      "result": {
+        "Sun": [
+          8
+        ],
+        "Moon": [
+          9
+        ],
+        "Mars": [
+          7,
+          10,
+          11
+        ],
+        "Mercury": [
+          11
+        ],
+        "Jupiter": [
+          2,
+          10,
+          12
+        ],
+        "Venus": [
+          1
+        ],
+        "Saturn": [
+          2,
+          5,
+          10
+        ],
+        "Rahu": [
+          1,
+          3,
+          5
+        ],
+        "Ketu": [
+          2,
+          4,
+          6
+        ]
+      }
+    },
+    {
+      "chart": 2,
+      "nodeAspects": "7-only",
+      "houses": {
+        "Sun": 3,
+        "Moon": 4,
+        "Mars": 5,
+        "Mercury": 6,
+        "Jupiter": 7,
+        "Venus": 8,
+        "Saturn": 9,
+        "Rahu": 10,
+        "Ketu": 11
+      },
+      "result": {
+        "Sun": [
+          9
+        ],
+        "Moon": [
+          10
+        ],
+        "Mars": [
+          8,
+          11,
+          12
+        ],
+        "Mercury": [
+          12
+        ],
+        "Jupiter": [
+          1,
+          3,
+          11
+        ],
+        "Venus": [
+          2
+        ],
+        "Saturn": [
+          3,
+          6,
+          11
+        ],
+        "Rahu": [
+          4
+        ],
+        "Ketu": [
+          5
+        ]
+      }
+    },
+    {
+      "chart": 2,
+      "nodeAspects": "5-and-9",
+      "houses": {
+        "Sun": 3,
+        "Moon": 4,
+        "Mars": 5,
+        "Mercury": 6,
+        "Jupiter": 7,
+        "Venus": 8,
+        "Saturn": 9,
+        "Rahu": 10,
+        "Ketu": 11
+      },
+      "result": {
+        "Sun": [
+          9
+        ],
+        "Moon": [
+          10
+        ],
+        "Mars": [
+          8,
+          11,
+          12
+        ],
+        "Mercury": [
+          12
+        ],
+        "Jupiter": [
+          1,
+          3,
+          11
+        ],
+        "Venus": [
+          2
+        ],
+        "Saturn": [
+          3,
+          6,
+          11
+        ],
+        "Rahu": [
+          2,
+          4,
+          6
+        ],
+        "Ketu": [
+          3,
+          5,
+          7
+        ]
+      }
+    },
+    {
+      "chart": 3,
+      "nodeAspects": "7-only",
+      "houses": {
+        "Sun": 4,
+        "Moon": 5,
+        "Mars": 6,
+        "Mercury": 7,
+        "Jupiter": 8,
+        "Venus": 9,
+        "Saturn": 10,
+        "Rahu": 11,
+        "Ketu": 12
+      },
+      "result": {
+        "Sun": [
+          10
+        ],
+        "Moon": [
+          11
+        ],
+        "Mars": [
+          1,
+          9,
+          12
+        ],
+        "Mercury": [
+          1
+        ],
+        "Jupiter": [
+          2,
+          4,
+          12
+        ],
+        "Venus": [
+          3
+        ],
+        "Saturn": [
+          4,
+          7,
+          12
+        ],
+        "Rahu": [
+          5
+        ],
+        "Ketu": [
+          6
+        ]
+      }
+    },
+    {
+      "chart": 3,
+      "nodeAspects": "5-and-9",
+      "houses": {
+        "Sun": 4,
+        "Moon": 5,
+        "Mars": 6,
+        "Mercury": 7,
+        "Jupiter": 8,
+        "Venus": 9,
+        "Saturn": 10,
+        "Rahu": 11,
+        "Ketu": 12
+      },
+      "result": {
+        "Sun": [
+          10
+        ],
+        "Moon": [
+          11
+        ],
+        "Mars": [
+          1,
+          9,
+          12
+        ],
+        "Mercury": [
+          1
+        ],
+        "Jupiter": [
+          2,
+          4,
+          12
+        ],
+        "Venus": [
+          3
+        ],
+        "Saturn": [
+          4,
+          7,
+          12
+        ],
+        "Rahu": [
+          3,
+          5,
+          7
+        ],
+        "Ketu": [
+          4,
+          6,
+          8
+        ]
+      }
+    },
+    {
+      "chart": 4,
+      "nodeAspects": "7-only",
+      "houses": {
+        "Sun": 5,
+        "Moon": 6,
+        "Mars": 7,
+        "Mercury": 8,
+        "Jupiter": 9,
+        "Venus": 10,
+        "Saturn": 11,
+        "Rahu": 12,
+        "Ketu": 1
+      },
+      "result": {
+        "Sun": [
+          11
+        ],
+        "Moon": [
+          12
+        ],
+        "Mars": [
+          1,
+          2,
+          10
+        ],
+        "Mercury": [
+          2
+        ],
+        "Jupiter": [
+          1,
+          3,
+          5
+        ],
+        "Venus": [
+          4
+        ],
+        "Saturn": [
+          1,
+          5,
+          8
+        ],
+        "Rahu": [
+          6
+        ],
+        "Ketu": [
+          7
+        ]
+      }
+    },
+    {
+      "chart": 4,
+      "nodeAspects": "5-and-9",
+      "houses": {
+        "Sun": 5,
+        "Moon": 6,
+        "Mars": 7,
+        "Mercury": 8,
+        "Jupiter": 9,
+        "Venus": 10,
+        "Saturn": 11,
+        "Rahu": 12,
+        "Ketu": 1
+      },
+      "result": {
+        "Sun": [
+          11
+        ],
+        "Moon": [
+          12
+        ],
+        "Mars": [
+          1,
+          2,
+          10
+        ],
+        "Mercury": [
+          2
+        ],
+        "Jupiter": [
+          1,
+          3,
+          5
+        ],
+        "Venus": [
+          4
+        ],
+        "Saturn": [
+          1,
+          5,
+          8
+        ],
+        "Rahu": [
+          4,
+          6,
+          8
+        ],
+        "Ketu": [
+          5,
+          7,
+          9
+        ]
+      }
+    },
+    {
+      "chart": 5,
+      "nodeAspects": "7-only",
+      "houses": {
+        "Sun": 6,
+        "Moon": 7,
+        "Mars": 8,
+        "Mercury": 9,
+        "Jupiter": 10,
+        "Venus": 11,
+        "Saturn": 12,
+        "Rahu": 1,
+        "Ketu": 2
+      },
+      "result": {
+        "Sun": [
+          12
+        ],
+        "Moon": [
+          1
+        ],
+        "Mars": [
+          2,
+          3,
+          11
+        ],
+        "Mercury": [
+          3
+        ],
+        "Jupiter": [
+          2,
+          4,
+          6
+        ],
+        "Venus": [
+          5
+        ],
+        "Saturn": [
+          2,
+          6,
+          9
+        ],
+        "Rahu": [
+          7
+        ],
+        "Ketu": [
+          8
+        ]
+      }
+    },
+    {
+      "chart": 5,
+      "nodeAspects": "5-and-9",
+      "houses": {
+        "Sun": 6,
+        "Moon": 7,
+        "Mars": 8,
+        "Mercury": 9,
+        "Jupiter": 10,
+        "Venus": 11,
+        "Saturn": 12,
+        "Rahu": 1,
+        "Ketu": 2
+      },
+      "result": {
+        "Sun": [
+          12
+        ],
+        "Moon": [
+          1
+        ],
+        "Mars": [
+          2,
+          3,
+          11
+        ],
+        "Mercury": [
+          3
+        ],
+        "Jupiter": [
+          2,
+          4,
+          6
+        ],
+        "Venus": [
+          5
+        ],
+        "Saturn": [
+          2,
+          6,
+          9
+        ],
+        "Rahu": [
+          5,
+          7,
+          9
+        ],
+        "Ketu": [
+          6,
+          8,
+          10
+        ]
+      }
+    },
+    {
+      "chart": 6,
+      "nodeAspects": "7-only",
+      "houses": {
+        "Sun": 7,
+        "Moon": 8,
+        "Mars": 9,
+        "Mercury": 10,
+        "Jupiter": 11,
+        "Venus": 12,
+        "Saturn": 1,
+        "Rahu": 2,
+        "Ketu": 3
+      },
+      "result": {
+        "Sun": [
+          1
+        ],
+        "Moon": [
+          2
+        ],
+        "Mars": [
+          3,
+          4,
+          12
+        ],
+        "Mercury": [
+          4
+        ],
+        "Jupiter": [
+          3,
+          5,
+          7
+        ],
+        "Venus": [
+          6
+        ],
+        "Saturn": [
+          3,
+          7,
+          10
+        ],
+        "Rahu": [
+          8
+        ],
+        "Ketu": [
+          9
+        ]
+      }
+    },
+    {
+      "chart": 6,
+      "nodeAspects": "5-and-9",
+      "houses": {
+        "Sun": 7,
+        "Moon": 8,
+        "Mars": 9,
+        "Mercury": 10,
+        "Jupiter": 11,
+        "Venus": 12,
+        "Saturn": 1,
+        "Rahu": 2,
+        "Ketu": 3
+      },
+      "result": {
+        "Sun": [
+          1
+        ],
+        "Moon": [
+          2
+        ],
+        "Mars": [
+          3,
+          4,
+          12
+        ],
+        "Mercury": [
+          4
+        ],
+        "Jupiter": [
+          3,
+          5,
+          7
+        ],
+        "Venus": [
+          6
+        ],
+        "Saturn": [
+          3,
+          7,
+          10
+        ],
+        "Rahu": [
+          6,
+          8,
+          10
+        ],
+        "Ketu": [
+          7,
+          9,
+          11
+        ]
+      }
+    },
+    {
+      "chart": 7,
+      "nodeAspects": "7-only",
+      "houses": {
+        "Sun": 8,
+        "Moon": 9,
+        "Mars": 10,
+        "Mercury": 11,
+        "Jupiter": 12,
+        "Venus": 1,
+        "Saturn": 2,
+        "Rahu": 3,
+        "Ketu": 4
+      },
+      "result": {
+        "Sun": [
+          2
+        ],
+        "Moon": [
+          3
+        ],
+        "Mars": [
+          1,
+          4,
+          5
+        ],
+        "Mercury": [
+          5
+        ],
+        "Jupiter": [
+          4,
+          6,
+          8
+        ],
+        "Venus": [
+          7
+        ],
+        "Saturn": [
+          4,
+          8,
+          11
+        ],
+        "Rahu": [
+          9
+        ],
+        "Ketu": [
+          10
+        ]
+      }
+    },
+    {
+      "chart": 7,
+      "nodeAspects": "5-and-9",
+      "houses": {
+        "Sun": 8,
+        "Moon": 9,
+        "Mars": 10,
+        "Mercury": 11,
+        "Jupiter": 12,
+        "Venus": 1,
+        "Saturn": 2,
+        "Rahu": 3,
+        "Ketu": 4
+      },
+      "result": {
+        "Sun": [
+          2
+        ],
+        "Moon": [
+          3
+        ],
+        "Mars": [
+          1,
+          4,
+          5
+        ],
+        "Mercury": [
+          5
+        ],
+        "Jupiter": [
+          4,
+          6,
+          8
+        ],
+        "Venus": [
+          7
+        ],
+        "Saturn": [
+          4,
+          8,
+          11
+        ],
+        "Rahu": [
+          7,
+          9,
+          11
+        ],
+        "Ketu": [
+          8,
+          10,
+          12
+        ]
+      }
+    },
+    {
+      "chart": 8,
+      "nodeAspects": "7-only",
+      "houses": {
+        "Sun": 9,
+        "Moon": 10,
+        "Mars": 11,
+        "Mercury": 12,
+        "Jupiter": 1,
+        "Venus": 2,
+        "Saturn": 3,
+        "Rahu": 4,
+        "Ketu": 5
+      },
+      "result": {
+        "Sun": [
+          3
+        ],
+        "Moon": [
+          4
+        ],
+        "Mars": [
+          2,
+          5,
+          6
+        ],
+        "Mercury": [
+          6
+        ],
+        "Jupiter": [
+          5,
+          7,
+          9
+        ],
+        "Venus": [
+          8
+        ],
+        "Saturn": [
+          5,
+          9,
+          12
+        ],
+        "Rahu": [
+          10
+        ],
+        "Ketu": [
+          11
+        ]
+      }
+    },
+    {
+      "chart": 8,
+      "nodeAspects": "5-and-9",
+      "houses": {
+        "Sun": 9,
+        "Moon": 10,
+        "Mars": 11,
+        "Mercury": 12,
+        "Jupiter": 1,
+        "Venus": 2,
+        "Saturn": 3,
+        "Rahu": 4,
+        "Ketu": 5
+      },
+      "result": {
+        "Sun": [
+          3
+        ],
+        "Moon": [
+          4
+        ],
+        "Mars": [
+          2,
+          5,
+          6
+        ],
+        "Mercury": [
+          6
+        ],
+        "Jupiter": [
+          5,
+          7,
+          9
+        ],
+        "Venus": [
+          8
+        ],
+        "Saturn": [
+          5,
+          9,
+          12
+        ],
+        "Rahu": [
+          8,
+          10,
+          12
+        ],
+        "Ketu": [
+          1,
+          9,
+          11
+        ]
+      }
+    },
+    {
+      "chart": 9,
+      "nodeAspects": "7-only",
+      "houses": {
+        "Sun": 10,
+        "Moon": 11,
+        "Mars": 12,
+        "Mercury": 1,
+        "Jupiter": 2,
+        "Venus": 3,
+        "Saturn": 4,
+        "Rahu": 5,
+        "Ketu": 6
+      },
+      "result": {
+        "Sun": [
+          4
+        ],
+        "Moon": [
+          5
+        ],
+        "Mars": [
+          3,
+          6,
+          7
+        ],
+        "Mercury": [
+          7
+        ],
+        "Jupiter": [
+          6,
+          8,
+          10
+        ],
+        "Venus": [
+          9
+        ],
+        "Saturn": [
+          1,
+          6,
+          10
+        ],
+        "Rahu": [
+          11
+        ],
+        "Ketu": [
+          12
+        ]
+      }
+    },
+    {
+      "chart": 9,
+      "nodeAspects": "5-and-9",
+      "houses": {
+        "Sun": 10,
+        "Moon": 11,
+        "Mars": 12,
+        "Mercury": 1,
+        "Jupiter": 2,
+        "Venus": 3,
+        "Saturn": 4,
+        "Rahu": 5,
+        "Ketu": 6
+      },
+      "result": {
+        "Sun": [
+          4
+        ],
+        "Moon": [
+          5
+        ],
+        "Mars": [
+          3,
+          6,
+          7
+        ],
+        "Mercury": [
+          7
+        ],
+        "Jupiter": [
+          6,
+          8,
+          10
+        ],
+        "Venus": [
+          9
+        ],
+        "Saturn": [
+          1,
+          6,
+          10
+        ],
+        "Rahu": [
+          1,
+          9,
+          11
+        ],
+        "Ketu": [
+          2,
+          10,
+          12
+        ]
+      }
+    },
+    {
+      "chart": 10,
+      "nodeAspects": "7-only",
+      "houses": {
+        "Sun": 11,
+        "Moon": 12,
+        "Mars": 1,
+        "Mercury": 2,
+        "Jupiter": 3,
+        "Venus": 4,
+        "Saturn": 5,
+        "Rahu": 6,
+        "Ketu": 7
+      },
+      "result": {
+        "Sun": [
+          5
+        ],
+        "Moon": [
+          6
+        ],
+        "Mars": [
+          4,
+          7,
+          8
+        ],
+        "Mercury": [
+          8
+        ],
+        "Jupiter": [
+          7,
+          9,
+          11
+        ],
+        "Venus": [
+          10
+        ],
+        "Saturn": [
+          2,
+          7,
+          11
+        ],
+        "Rahu": [
+          12
+        ],
+        "Ketu": [
+          1
+        ]
+      }
+    },
+    {
+      "chart": 10,
+      "nodeAspects": "5-and-9",
+      "houses": {
+        "Sun": 11,
+        "Moon": 12,
+        "Mars": 1,
+        "Mercury": 2,
+        "Jupiter": 3,
+        "Venus": 4,
+        "Saturn": 5,
+        "Rahu": 6,
+        "Ketu": 7
+      },
+      "result": {
+        "Sun": [
+          5
+        ],
+        "Moon": [
+          6
+        ],
+        "Mars": [
+          4,
+          7,
+          8
+        ],
+        "Mercury": [
+          8
+        ],
+        "Jupiter": [
+          7,
+          9,
+          11
+        ],
+        "Venus": [
+          10
+        ],
+        "Saturn": [
+          2,
+          7,
+          11
+        ],
+        "Rahu": [
+          2,
+          10,
+          12
+        ],
+        "Ketu": [
+          1,
+          3,
+          11
+        ]
+      }
+    },
+    {
+      "chart": 11,
+      "nodeAspects": "7-only",
+      "houses": {
+        "Sun": 12,
+        "Moon": 1,
+        "Mars": 2,
+        "Mercury": 3,
+        "Jupiter": 4,
+        "Venus": 5,
+        "Saturn": 6,
+        "Rahu": 7,
+        "Ketu": 8
+      },
+      "result": {
+        "Sun": [
+          6
+        ],
+        "Moon": [
+          7
+        ],
+        "Mars": [
+          5,
+          8,
+          9
+        ],
+        "Mercury": [
+          9
+        ],
+        "Jupiter": [
+          8,
+          10,
+          12
+        ],
+        "Venus": [
+          11
+        ],
+        "Saturn": [
+          3,
+          8,
+          12
+        ],
+        "Rahu": [
+          1
+        ],
+        "Ketu": [
+          2
+        ]
+      }
+    },
+    {
+      "chart": 11,
+      "nodeAspects": "5-and-9",
+      "houses": {
+        "Sun": 12,
+        "Moon": 1,
+        "Mars": 2,
+        "Mercury": 3,
+        "Jupiter": 4,
+        "Venus": 5,
+        "Saturn": 6,
+        "Rahu": 7,
+        "Ketu": 8
+      },
+      "result": {
+        "Sun": [
+          6
+        ],
+        "Moon": [
+          7
+        ],
+        "Mars": [
+          5,
+          8,
+          9
+        ],
+        "Mercury": [
+          9
+        ],
+        "Jupiter": [
+          8,
+          10,
+          12
+        ],
+        "Venus": [
+          11
+        ],
+        "Saturn": [
+          3,
+          8,
+          12
+        ],
+        "Rahu": [
+          1,
+          3,
+          11
+        ],
+        "Ketu": [
+          2,
+          4,
+          12
+        ]
+      }
+    }
+  ],
+  "aspectsDefault": {
+    "Sun": [
+      7
+    ],
+    "Moon": [
+      8
+    ],
+    "Mars": [
+      6,
+      9,
+      10
+    ],
+    "Mercury": [
+      10
+    ],
+    "Jupiter": [
+      1,
+      9,
+      11
+    ],
+    "Venus": [
+      12
+    ],
+    "Saturn": [
+      1,
+      4,
+      9
+    ],
+    "Rahu": [
+      2
+    ],
+    "Ketu": [
+      3
+    ]
+  },
+  "tables": {
+    "varnaOrder": [
+      "brahmin",
+      "kshatriya",
+      "vaishya",
+      "shudra"
+    ],
+    "varnaRank": [
+      4,
+      3,
+      2,
+      1
+    ],
+    "rashiVarna": [
+      "kshatriya",
+      "vaishya",
+      "shudra",
+      "brahmin",
+      "kshatriya",
+      "vaishya",
+      "shudra",
+      "brahmin",
+      "kshatriya",
+      "vaishya",
+      "shudra",
+      "brahmin"
+    ],
+    "vashyaOrder": [
+      "quadruped",
+      "human",
+      "water",
+      "wild",
+      "insect"
+    ],
+    "vashyaIndex": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "rashiVashya": [
+      "quadruped",
+      "quadruped",
+      "human",
+      "water",
+      "wild",
+      "human",
+      "human",
+      "insect",
+      "human",
+      "quadruped",
+      "human",
+      "water"
+    ],
+    "vashyaScore": [
+      [
+        2,
+        0,
+        1,
+        0,
+        1
+      ],
+      [
+        0,
+        2,
+        0.5,
+        0,
+        0.5
+      ],
+      [
+        1,
+        0.5,
+        2,
+        0,
+        0.5
+      ],
+      [
+        0,
+        0,
+        0,
+        2,
+        0
+      ],
+      [
+        0.5,
+        0.5,
+        0.5,
+        0,
+        2
+      ]
+    ],
+    "yoniOrder": [
+      "horse",
+      "elephant",
+      "sheep",
+      "snake",
+      "dog",
+      "cat",
+      "rat",
+      "cow",
+      "buffalo",
+      "tiger",
+      "deer",
+      "monkey",
+      "mongoose",
+      "lion"
+    ],
+    "yoniIndex": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "nakshatraYoni": [
+      "horse",
+      "elephant",
+      "sheep",
+      "snake",
+      "snake",
+      "dog",
+      "cat",
+      "sheep",
+      "cat",
+      "rat",
+      "rat",
+      "cow",
+      "buffalo",
+      "tiger",
+      "buffalo",
+      "tiger",
+      "deer",
+      "deer",
+      "dog",
+      "monkey",
+      "mongoose",
+      "monkey",
+      "lion",
+      "horse",
+      "lion",
+      "cow",
+      "elephant"
+    ],
+    "yoniScore": [
+      [
+        4,
+        2,
+        2,
+        1,
+        2,
+        2,
+        2,
+        1,
+        0,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      [
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        2,
+        2,
+        2,
+        0
+      ],
+      [
+        2,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        0,
+        2,
+        2
+      ],
+      [
+        1,
+        2,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        0,
+        2
+      ],
+      [
+        2,
+        2,
+        2,
+        2,
+        4,
+        1,
+        2,
+        2,
+        2,
+        2,
+        0,
+        2,
+        2,
+        2
+      ],
+      [
+        2,
+        2,
+        2,
+        2,
+        1,
+        4,
+        0,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      [
+        2,
+        2,
+        2,
+        2,
+        2,
+        0,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      [
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        2,
+        0,
+        2,
+        2,
+        2,
+        2
+      ],
+      [
+        0,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      [
+        2,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        0,
+        2,
+        4,
+        2,
+        2,
+        2,
+        2
+      ],
+      [
+        2,
+        2,
+        2,
+        2,
+        0,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        2,
+        2,
+        2
+      ],
+      [
+        2,
+        2,
+        0,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        2,
+        2
+      ],
+      [
+        2,
+        2,
+        2,
+        0,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        2
+      ],
+      [
+        2,
+        0,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4
+      ]
+    ],
+    "rashiLord": [
+      2,
+      5,
+      3,
+      1,
+      0,
+      3,
+      5,
+      2,
+      4,
+      6,
+      6,
+      4
+    ],
+    "naisargikaMaitri": [
+      [
+        0,
+        1,
+        1,
+        0,
+        1,
+        -1,
+        -1
+      ],
+      [
+        1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        1,
+        0,
+        -1,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        -1,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        1,
+        1,
+        1,
+        -1,
+        0,
+        -1,
+        0
+      ],
+      [
+        -1,
+        -1,
+        0,
+        1,
+        0,
+        0,
+        1
+      ],
+      [
+        -1,
+        -1,
+        -1,
+        1,
+        0,
+        1,
+        0
+      ]
+    ],
+    "grahaMaitriScore": [
+      [
+        0,
+        1,
+        0.5
+      ],
+      [
+        1,
+        3,
+        4
+      ],
+      [
+        0.5,
+        4,
+        5
+      ]
+    ],
+    "maitriIdx": [
+      0,
+      1,
+      2
+    ],
+    "ganaOrder": [
+      "deva",
+      "manushya",
+      "rakshasa"
+    ],
+    "ganaIdx": [
+      0,
+      1,
+      2
+    ],
+    "nakshatraGana": [
+      "deva",
+      "manushya",
+      "rakshasa",
+      "manushya",
+      "deva",
+      "manushya",
+      "deva",
+      "deva",
+      "rakshasa",
+      "rakshasa",
+      "manushya",
+      "manushya",
+      "deva",
+      "rakshasa",
+      "deva",
+      "rakshasa",
+      "deva",
+      "rakshasa",
+      "rakshasa",
+      "manushya",
+      "manushya",
+      "deva",
+      "rakshasa",
+      "rakshasa",
+      "manushya",
+      "manushya",
+      "deva"
+    ],
+    "ganaScore": [
+      [
+        6,
+        5,
+        1
+      ],
+      [
+        5,
+        6,
+        0
+      ],
+      [
+        1,
+        0,
+        6
+      ]
+    ],
+    "nadiOrder": [
+      "adi",
+      "madhya",
+      "antya"
+    ],
+    "nakshatraNadi": [
+      "adi",
+      "madhya",
+      "antya",
+      "antya",
+      "madhya",
+      "adi",
+      "adi",
+      "madhya",
+      "antya",
+      "antya",
+      "madhya",
+      "adi",
+      "adi",
+      "madhya",
+      "antya",
+      "antya",
+      "madhya",
+      "adi",
+      "adi",
+      "madhya",
+      "antya",
+      "antya",
+      "madhya",
+      "adi",
+      "adi",
+      "madhya",
+      "antya"
+    ],
+    "inauspiciousTaraRemainders": [
+      3,
+      5,
+      7
+    ],
+    "bhakootDoshicDistances": [
+      [
+        2,
+        12
+      ],
+      [
+        12,
+        2
+      ],
+      [
+        5,
+        9
+      ],
+      [
+        9,
+        5
+      ],
+      [
+        6,
+        8
+      ],
+      [
+        8,
+        6
+      ]
+    ]
+  }
+}

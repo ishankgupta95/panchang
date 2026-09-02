@@ -1,0 +1,3 @@
+module github.com/ishankgupta95/panchang-ts/source/go/v5
+
+go 1.22
