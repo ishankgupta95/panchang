@@ -35,7 +35,7 @@ fi
 
 for tag in "v$VERSION" "source/go/v$VERSION"; do
   if [ -n "$(git tag -l "$tag")" ]; then
-    at="$(git rev-parse --short "$tag")"
+    at="$(git rev-parse --short "$tag^{commit}")"
     if [ "$at" = "$COMMIT" ]; then
       ok "$tag already exists and is this commit"
     else
