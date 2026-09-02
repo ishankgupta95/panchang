@@ -60,7 +60,7 @@ jobs:
         working-directory: source/go
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         # cache: false throughout, there is no go.sum for setup-go to key on.
         with: { go-version: '${{ env.GO_VERSION }}', cache: false }
       - name: gofmt
@@ -84,7 +84,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: source/ts/package-lock.json
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with: { go-version: '${{ env.GO_VERSION }}', cache: false }
       - run: npm ci
         working-directory: source/ts
