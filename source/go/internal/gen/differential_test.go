@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/astronomy"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/astronomy/series"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy/series"
 )
 
 func differentialProbeCount() int {

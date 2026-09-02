@@ -1,6 +1,6 @@
 package utils
 
-import "github.com/ishankgupta95/panchang-ts/source/go/v5/internal/jsnum"
+import "github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
 
 func Normalize360(degrees float64) float64 {
 	r := jsnum.Mod(degrees, 360)

@@ -5,11 +5,11 @@
   "author": "Ishank",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ishankgupta95/panchang-ts.git"
+    "url": "git+https://github.com/ishankgupta95/panchang.git"
   },
-  "homepage": "https://github.com/ishankgupta95/panchang-ts#readme",
+  "homepage": "https://github.com/ishankgupta95/panchang#readme",
   "bugs": {
-    "url": "https://github.com/ishankgupta95/panchang-ts/issues"
+    "url": "https://github.com/ishankgupta95/panchang/issues"
   },
   "license": "MIT",
   "keywords": [

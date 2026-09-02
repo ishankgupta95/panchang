@@ -7,7 +7,7 @@ import (
 	"testing"
 	"unicode/utf8"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 )
 
 func TestEveryLanguageHasEveryEclipseString(t *testing.T) {

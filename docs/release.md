@@ -44,7 +44,7 @@ not an import path. Then:
 
 - **no Go tag exists at all**, and none of §3's mechanics apply;
 - lockstep is: the image tag *is* the npm version, and both name the same commit;
-- `source/go/go.mod`'s module path stays `github.com/ishankgupta95/panchang-ts/go` and
+- `source/go/go.mod`'s module path stays `github.com/ishankgupta95/panchang/go` and
   never needs a major-version suffix.
 
 This is the cheapest by a wide margin and it is what the default already says.
@@ -64,13 +64,13 @@ recorded in the tag message and the release notes.
 
 Superficially the tidiest and the most expensive. Go requires a module path to
 end in `/vN` for every major N ≥ 2, so parity at 5.x means the module path is
-`github.com/ishankgupta95/panchang-ts/go/v5` **today**, and every npm major bump
+`github.com/ishankgupta95/panchang/go/v5` **today**, and every npm major bump
 after that rewrites the module path and every import statement in every
 consumer. `panchang-ts` went 2 → 5 inside a few months; option A pays that cost
 each time, for a version string.
 
 **SETTLED 2026-08-24: Ishank chose A, version parity.** `source/go/go.mod` declares
-`module github.com/ishankgupta95/panchang-ts/source/go/v5` and the module tracks
+`module github.com/ishankgupta95/panchang/source/go/v5` and the module tracks
 npm's version. The cost is stated above and accepted: every npm major bump
 rewrites the module path and every consumer's imports. `release-check.sh` now
 reports the path as *consistent* rather than warning about it, and it checks the
@@ -107,8 +107,8 @@ lookup. First with a two-file scratch module, then with this repository's actual
 tree. Both resolved, and the real one compiled and ran:
 
 ```
-go: downloading github.com/ishankgupta95/panchang-ts/source/go/v5 v5.1.1
-go: added github.com/ishankgupta95/panchang-ts/source/go/v5 v5.1.1
+go: downloading github.com/ishankgupta95/panchang/source/go/v5 v5.1.1
+go: added github.com/ishankgupta95/panchang/source/go/v5 v5.1.1
 ok: true | tithi: Shukla Navami | nakshatra: Chitra
 ```
 

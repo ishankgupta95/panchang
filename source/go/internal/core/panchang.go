@@ -4,12 +4,12 @@ import (
 	"errors"
 	"math"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/jsnum"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/astronomy"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/i18n"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/i18n"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
 )
 
 const panchangCacheMode = astronomy.ModeInterpolated

@@ -1,6 +1,6 @@
 package astronomy
 
-import "github.com/ishankgupta95/panchang-ts/source/go/v5/internal/jsnum"
+import "github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
 
 const dayMS = 86_400_000
 

@@ -1,7 +1,7 @@
 package astronomy
 
 import (
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 )
 
 func ComputeAyanamsa(ms int64, typ types.AyanamsaType) (float64, error) {

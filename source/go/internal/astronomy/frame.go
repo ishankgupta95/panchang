@@ -3,9 +3,9 @@ package astronomy
 import (
 	"math"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/jsnum"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/astronomy/series"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy/series"
 )
 
 const turnArcsec = 1_296_000

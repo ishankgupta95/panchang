@@ -4,7 +4,7 @@
 > way astronomy-engine does it: `source/ts/` is the npm package (its own
 > `package.json`, `src/` and `tests/`), `source/go/` is this module, and
 > `generate/` holds the cross-language generators and research notes. The Go
-> module path carries the npm major (`github.com/ishankgupta95/panchang-ts/source/go/v5`),
+> module path carries the npm major (`github.com/ishankgupta95/panchang/source/go/v5`),
 > and `panchang/` is the only package outside `internal/`.
 
 Distilled from what the first stage of the port actually hit. Where the port's

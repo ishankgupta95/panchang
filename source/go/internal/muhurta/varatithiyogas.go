@@ -1,7 +1,7 @@
 package muhurta
 
 import (
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
 )
 
 type VaraTithiYogaType string

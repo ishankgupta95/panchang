@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/repopath"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
 	"math"
 	"os"
 	"sort"

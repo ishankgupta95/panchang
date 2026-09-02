@@ -2,12 +2,12 @@ package utils
 
 import (
 	"encoding/json"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/repopath"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
 	"math"
 	"testing"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/jsnum"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 )
 
 type utilsGolden struct {

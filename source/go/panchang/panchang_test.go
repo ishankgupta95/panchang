@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/astronomy"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/core"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/jyotish"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/core"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/jyotish"
 )
 
 var (

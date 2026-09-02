@@ -1,4 +1,4 @@
-# panchang-ts, Go module
+# panchang, Go module
 
 A Hindu calendar (panchang) and Jyotish engine with its own ephemeris: tithi,
 nakshatra, yoga, karana, sunrise and moonrise, festivals, muhurta, birth charts,
@@ -8,13 +8,13 @@ nothing to download at startup.
 This is the Go port of [`panchang-ts`](../ts). The TypeScript is canonical and this
 module reproduces its arithmetic, checked leaf for leaf on every change.
 
-**API reference: [pkg.go.dev](https://pkg.go.dev/github.com/ishankgupta95/panchang-ts/source/go/v5/panchang)**
+**API reference: [pkg.go.dev](https://pkg.go.dev/github.com/ishankgupta95/panchang/source/go/v5/panchang)**
 **Concepts, options and accuracy: [dharmagya.app/docs/panchang-ts](https://dharmagya.app/docs/panchang-ts)**
 
 ## Install
 
 ```bash
-go get github.com/ishankgupta95/panchang-ts/source/go/v5
+go get github.com/ishankgupta95/panchang/source/go/v5
 ```
 
 Go 1.22 or newer. The module path ends in `/v5` for major version 5, and its tags are
@@ -30,7 +30,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/panchang"
+	"github.com/ishankgupta95/panchang/source/go/v5/panchang"
 )
 
 func main() {

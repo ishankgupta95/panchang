@@ -1,8 +1,8 @@
 package jyotish
 
 import (
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/i18n"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/i18n"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 )
 
 func ComputeArudhas(chart *types.BirthChart, lang types.Language) ([]types.Arudha, error) {

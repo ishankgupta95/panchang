@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/astronomy"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/repopath"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 )
 
 const almanacSadeSatiAsOfISO = "2026-05-04T12:00:00Z"

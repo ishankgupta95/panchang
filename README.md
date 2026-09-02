@@ -1,4 +1,4 @@
-# panchang-ts
+# panchang
 
 A Hindu calendar (panchang) and Jyotish engine with its own ephemeris: tithi,
 nakshatra, yoga, karana, sunrise and moonrise, festivals, muhurta, birth charts,
@@ -10,7 +10,7 @@ Two implementations, one set of answers.
 | language | install | docs |
 |---|---|---|
 | **TypeScript** | `npm install panchang-ts` | [`source/ts/README.md`](source/ts/README.md) |
-| **Go** | `go get github.com/ishankgupta95/panchang-ts/source/go/v5` | [`source/go/README.md`](source/go/README.md) |
+| **Go** | `go get github.com/ishankgupta95/panchang/source/go/v5` | [`source/go/README.md`](source/go/README.md) |
 
 **Full documentation: [dharmagya.app/docs/panchang-ts](https://dharmagya.app/docs/panchang-ts)**,
 covering every option, result field, table format, accuracy bound and performance note.

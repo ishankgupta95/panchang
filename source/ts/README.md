@@ -15,7 +15,7 @@ Zero runtime dependencies. Works offline in React Native (Hermes), Node.js, and 
 
 A Go port of the same engine ships from the same repository, held to this package's
 exact arithmetic by a parity harness. See
-[the repository](https://github.com/ishankgupta95/panchang-ts) if you need it.
+[the repository](https://github.com/ishankgupta95/panchang) if you need it.
 
 ---
 

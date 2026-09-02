@@ -1,7 +1,7 @@
 package jyotish
 
 import (
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/jsnum"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
 )
 
 type PoruthamName string

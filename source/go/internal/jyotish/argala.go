@@ -1,6 +1,6 @@
 package jyotish
 
-import "github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
+import "github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 
 var argalaOffsets = [3]int{1, 3, 10} // argala houses 2, 4 and 11, 0-based
 

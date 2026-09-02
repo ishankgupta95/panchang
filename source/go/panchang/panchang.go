@@ -3,14 +3,14 @@ package panchang
 import (
 	"time"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/astronomy"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/calendar"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/core"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/jyotish"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/muhurta"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/muhurta/rules"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/calendar"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/core"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/jyotish"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/muhurta"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/muhurta/rules"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
 )
 
 type (

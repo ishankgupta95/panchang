@@ -1,6 +1,6 @@
 package astronomy
 
-import "github.com/ishankgupta95/panchang-ts/source/go/v5/internal/astronomy/series"
+import "github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy/series"
 
 func sumQuartic(s []float64, t float64) float64 {
 	sum := 0.0

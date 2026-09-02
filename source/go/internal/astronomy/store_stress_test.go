@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/store"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/store"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 )
 
 var stressLocations = []types.GeoLocation{

@@ -1,6 +1,6 @@
 package rules
 
-import "github.com/ishankgupta95/panchang-ts/source/go/v5/internal/muhurta"
+import "github.com/ishankgupta95/panchang/source/go/v5/internal/muhurta"
 
 func bothPakshas(numbers ...int) []int {
 	out := make([]int, 0, len(numbers)*2)

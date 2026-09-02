@@ -3,7 +3,7 @@ package core
 import (
 	"errors"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 )
 
 type LongitudeAt func(ms int64) float64

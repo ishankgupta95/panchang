@@ -3,10 +3,10 @@ package jyotish
 import (
 	"encoding/json"
 	"errors"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/repopath"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
 	"testing"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 )
 
 type matchingGolden struct {

@@ -9,12 +9,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/astronomy"
-	mu "github.com/ishankgupta95/panchang-ts/source/go/v5/internal/muhurta"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/muhurta/rules"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/repopath"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/tablejson"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
+	mu "github.com/ishankgupta95/panchang/source/go/v5/internal/muhurta"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/muhurta/rules"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/tablejson"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 )
 
 type muRuleJSON struct {

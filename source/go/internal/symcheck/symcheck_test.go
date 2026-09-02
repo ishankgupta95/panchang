@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/repopath"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
 )
 
 func TestSymbolCorrespondence(t *testing.T) {

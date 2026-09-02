@@ -1,8 +1,8 @@
 package jyotish
 
 import (
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/jsnum"
-	"github.com/ishankgupta95/panchang-ts/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 )
 
 var mangalHouses = [13]bool{1: true, 2: true, 4: true, 7: true, 8: true, 12: true}
