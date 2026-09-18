@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 func ResolveUtcOffset(timezone types.Timezone, referenceMs int64) (int, error) {

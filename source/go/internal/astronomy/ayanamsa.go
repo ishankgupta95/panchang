@@ -1,7 +1,10 @@
+// Package astronomy is the built-in ephemeris: Sun and Moon positions from frozen
+// VSOP87D, ELP2000-82B and IAU2000 nutation series, sidereal time, rise and set
+// searches, eclipses and lunar phases. EphemerisCtx carries the per-request memo.
 package astronomy
 
 import (
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 func ComputeAyanamsa(ms int64, typ types.AyanamsaType) (float64, error) {

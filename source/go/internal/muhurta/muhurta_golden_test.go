@@ -1,6 +1,7 @@
 package muhurta_test
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -14,7 +15,7 @@ import (
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/muhurta/rules"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/tablejson"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 type muRuleJSON struct {
@@ -600,7 +601,7 @@ func TestMuhurtaBuildAndReadMatchTypeScript(t *testing.T) {
 		}
 		for _, includeFailures := range []bool{false, true} {
 			ctx := &astronomy.EphemerisCtx{}
-			days, err := mu.ComputeAuspiciousDatesInRange(ctx, rule,
+			days, err := mu.ComputeAuspiciousDatesInRange(context.Background(), ctx, rule,
 				types.DateUTC(2025, 0, 1).Ms(), types.DateUTC(2025, 1, 28).Ms(), pune,
 				mu.MuhurtaScoreOptions{
 					Timezone: types.TimezoneOffset(330), IncludeFailures: includeFailures,
@@ -655,7 +656,7 @@ func TestMuhurtaBuildAndReadMatchTypeScript(t *testing.T) {
 		}
 		for _, includeFailures := range []bool{false, true} {
 			ctx := &astronomy.EphemerisCtx{}
-			file, err := mu.BuildMuhurtaTable(ctx, mu.BuildMuhurtaTableOptions{
+			file, err := mu.BuildMuhurtaTable(context.Background(), ctx, mu.BuildMuhurtaTableOptions{
 				Rule: rule, Location: pune, TimezoneOffsetMinutes: 330,
 				StartYear: 2025, EndYear: 2025, IncludeFailures: includeFailures,
 				ReferenceLocation: "Pune", GeneratedAt: muPinnedGeneratedAt,
@@ -760,7 +761,7 @@ func TestMuhurtaBuildAndReadMatchTypeScript(t *testing.T) {
 	if !ok {
 		t.Fatal("no seemantham rule")
 	}
-	yearDays, err := mu.ComputeAuspiciousDatesForYear(ctx, 2025, seemantham, pune,
+	yearDays, err := mu.ComputeAuspiciousDatesForYear(context.Background(), ctx, 2025, seemantham, pune,
 		mu.MuhurtaScoreOptions{Timezone: types.TimezoneOffset(330)})
 	if err != nil {
 		t.Fatalf("seemantham 2025: %v", err)

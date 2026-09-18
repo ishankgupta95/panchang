@@ -4,8 +4,8 @@ import (
 	"math"
 	"testing"
 
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 func buildAntarDashasTruncating(mahaLord types.DashaLord, mahaVirtualStart int64, mahaFullDurationMs float64, clipStartMs int64) []types.AntarDasha {

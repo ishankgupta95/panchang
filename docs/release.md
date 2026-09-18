@@ -167,8 +167,8 @@ the script trusts.
 ## 6. Owed, and not by this document
 
 **The port's freeze tag is still missing.** `package.json` has said 5.1.1 since
-before the port began, the newest tag in the repository is **v5.0.1**, and both
-5.1.0 and 5.1.1 were published untagged. Every measurement the port has recorded
+before the port began, no v5.1.x tag exists (the tags jump from **v5.0.1** to
+v5.2.0), and both 5.1.0 and 5.1.1 were published untagged. Every measurement the port has recorded
 is against `c38c606`, so the tag that would make that baseline findable is:
 
 ```bash

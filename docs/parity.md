@@ -20,7 +20,7 @@ untracked `generate/notes/dump.src.ts` was lost once already.
 
 ```bash
 bash source/go/parity/dump.sh ts          # TS side  -> out/dump-ts.json + out/tables-ts/
-go run ./go/cmd/dump   > …         # Go side  (from G2 onward)
+(cd source/go && go run ./internal/cmd/dump) > …   # Go side  (from G2 onward)
 node --max-old-space-size=8000 source/go/parity/diff.mjs out/dump-ts.json out/dump-go.json
 cmp out/tables-ts/festivals-2025.json out/tables-go/festivals-2025.json
 ```
@@ -187,7 +187,7 @@ measure wall time and a lookup table has none.
 
 ```bash
 PARITY_G2=1 bash source/go/parity/dump.sh ts-g2
-cd source/go && go run ./cmd/dump > parity/out/dump-go-g2.json
+cd source/go && go run ./internal/cmd/dump > parity/out/dump-go-g2.json
 node --max-old-space-size=12000 source/go/parity/diff.mjs \
   source/go/parity/out/dump-ts-g2.json source/go/parity/out/dump-go-g2.json
 ```

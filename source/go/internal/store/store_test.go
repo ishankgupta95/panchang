@@ -213,8 +213,7 @@ func TestShardIsOneCacheLine(t *testing.T) {
 	if got != cacheLine {
 		t.Errorf("shard is %d bytes, want %d", got, cacheLine)
 	}
-	s := newIntStore(1024, 16)
-	if n := unsafe.Sizeof(s.shards[0]); n != cacheLine {
+	if n := unsafe.Sizeof((*Store[int64, *int64])(nil).shards[0]); n != cacheLine {
 		t.Errorf("shard in a slice is %d bytes, want %d", n, cacheLine)
 	}
 }

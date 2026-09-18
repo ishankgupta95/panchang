@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 func mustBhava(t *testing.T, ctx *astronomy.EphemerisCtx, ms int64,

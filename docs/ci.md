@@ -18,7 +18,7 @@ cost:
 | | what it answers | where | runs |
 |---|---|---|---|
 | **hygiene** | did a rule that regresses silently regress? em/en dashes, absolute developer paths, links to documents that do not ship, the vendor name. First step of the `typescript` job, since it needs no toolchain and takes a second | `hygiene.sh` | every PR |
-| **tree correspondence** | did a `source/ts/src/` file arrive without a Go counterpart, or a Go file without a justification? | `tree.sh` → `cmd/treecheck` → `internal/treecheck` | every PR, as `TestTreeCorrespondence` inside `go test` |
+| **tree correspondence** | did a `source/ts/src/` file arrive without a Go counterpart, or a Go file without a justification? | `tree.sh` → `internal/cmd/treecheck` → `internal/treecheck` | every PR, as `TestTreeCorrespondence` inside `go test` |
 | **parity** | do the two implementations still agree, leaf for leaf, inside the parity bands? | `parity.sh` → `parity/gate.mjs` + `parity/tables-gate.mjs` over `parity/bands.json` | every PR, stage `full` |
 | **goldens** | did `source/ts/src/` behaviour move without the pinned answers moving with it? | `goldens.sh` → `parity/goldens.sh` | **release only**, §2.2 |
 | **generators** | does each language's generated coefficient series still match the generator that writes it? | `GEN_FULL=1 go test ./internal/gen/` and `generate/notes/ephemeris-generate.sh` | **release only** |
@@ -97,7 +97,8 @@ raises it, so the whole workflow can only read the repository.
 
 The highest-value piece here, and the cheapest: **50 ms**.
 
-`source/ts/src/a/b/cName.ts` must have `source/go/internal/a/b/cname.go`, and vice versa. The
+`source/ts/src/a/b/cName.ts` must have `source/go/internal/a/b/cname.go` (`source/ts/src/types/*.ts`
+maps to the public `source/go/types/*.go` instead), and vice versa. The
 exceptions in both directions are the two markdown tables in `docs/porting.md` §3,
 which `internal/treecheck` **parses** rather than duplicating. §3's list was
 missing six of its twenty-three entries until 2026-08-24, which is exactly the

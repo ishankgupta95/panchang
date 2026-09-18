@@ -1,6 +1,7 @@
 package calendar
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -15,8 +16,8 @@ import (
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/core"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 type calLocation struct {
@@ -176,10 +177,10 @@ func TestCalendarMatchesTypeScript(t *testing.T) {
 			label := fmt.Sprintf("%s|%d", loc.Name, year)
 			ctx := &astronomy.EphemerisCtx{}
 
-			ekadashi, ekErr := ComputeEkadashiDatesForYear(ctx, year, geo, opts)
-			sankrantis, saErr := ComputeSankrantisForYear(ctx, year, geo, opts)
-			eclipses, ecErr := ComputeEclipsesForYear(ctx, year, geo, loc.Timezone)
-			festivals, feErr := ComputeFestivalsForYear(ctx, year, geo, opts)
+			ekadashi, ekErr := ComputeEkadashiDatesForYear(context.Background(), ctx, year, geo, opts)
+			sankrantis, saErr := ComputeSankrantisForYear(context.Background(), ctx, year, geo, opts)
+			eclipses, ecErr := ComputeEclipsesForYear(context.Background(), ctx, year, geo, loc.Timezone)
+			festivals, feErr := ComputeFestivalsForYear(context.Background(), ctx, year, geo, opts)
 
 			h.Write([]byte(label + " "))
 
@@ -292,7 +293,7 @@ func TestCalendarExplicitCases(t *testing.T) {
 			}
 			ctx := &astronomy.EphemerisCtx{}
 
-			ekadashi, err := ComputeEkadashiDatesForYear(ctx, year, geo, opts)
+			ekadashi, err := ComputeEkadashiDatesForYear(context.Background(), ctx, year, geo, opts)
 			if tag, isErr := isErrTag(want.Ekadashi); isErr {
 				if err == nil || errTag(err) != tag {
 					t.Errorf("%s ekadashi: want %s, got %v", label, tag, err)
@@ -316,7 +317,7 @@ func TestCalendarExplicitCases(t *testing.T) {
 				}
 			}
 
-			sankrantis, err := ComputeSankrantisForYear(ctx, year, geo, opts)
+			sankrantis, err := ComputeSankrantisForYear(context.Background(), ctx, year, geo, opts)
 			if tag, isErr := isErrTag(want.Sankrantis); isErr {
 				if err == nil || errTag(err) != tag {
 					t.Errorf("%s sankrantis: want %s, got %v", label, tag, err)
@@ -342,7 +343,7 @@ func TestCalendarExplicitCases(t *testing.T) {
 				}
 			}
 
-			eclipses, err := ComputeEclipsesForYear(ctx, year, geo, loc.Timezone)
+			eclipses, err := ComputeEclipsesForYear(context.Background(), ctx, year, geo, loc.Timezone)
 			if tag, isErr := isErrTag(want.Eclipses); isErr {
 				if err == nil || errTag(err) != tag {
 					t.Errorf("%s eclipses: want %s, got %v", label, tag, err)
@@ -390,7 +391,7 @@ func TestCalendarExplicitCases(t *testing.T) {
 				}
 			}
 
-			festivals, err := ComputeFestivalsForYear(ctx, year, geo, opts)
+			festivals, err := ComputeFestivalsForYear(context.Background(), ctx, year, geo, opts)
 			if tag, isErr := isErrTag(want.FestivalCount); isErr {
 				if err == nil || errTag(err) != tag {
 					t.Errorf("%s festivals: want %s, got %v", label, tag, err)
@@ -700,7 +701,7 @@ func TestCalendarGuardsAreReached(t *testing.T) {
 				}
 			}
 
-			sank, err := ComputeSankrantisForYear(ctx, year, geo, opts)
+			sank, err := ComputeSankrantisForYear(context.Background(), ctx, year, geo, opts)
 			if err != nil {
 				t.Fatalf("%s %d sankrantis: %v", loc.Name, year, err)
 			}
@@ -765,7 +766,7 @@ func TestCalendarGuardsAreReached(t *testing.T) {
 }
 
 func TestCoreGetDailyPanchangIsTheSeam(t *testing.T) {
-	opts := YearlyListingOptions{Timezone: types.TimezoneOffset(330)}.panchangOptions()
+	opts := yearlyPanchangOptions(YearlyListingOptions{Timezone: types.TimezoneOffset(330)})
 	opts.Sections = core.Sections(core.SectionFestivals, core.SectionEclipse)
 	opts.SectionsGiven = true
 	if opts.Sections.Wants(core.SectionMoonTimes) || opts.Sections.Wants(core.SectionLunarWindows) {

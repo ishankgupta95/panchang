@@ -5,7 +5,7 @@
 > `package.json`, `src/` and `tests/`), `source/go/` is this module, and
 > `generate/` holds the cross-language generators and research notes. The Go
 > module path carries the npm major (`github.com/ishankgupta95/panchang/source/go/v5`),
-> and `panchang/` is the only package outside `internal/`.
+> and `panchang/` and `types/` are the only packages outside `internal/`.
 
 Distilled from what the first stage of the port actually hit. Where the port's
 decision ledger says *what* to decide, this says *how the two languages differ
@@ -531,20 +531,29 @@ generator too. (The first ΔT golden was 8.6 MB before this.)
   | `internal/astronomy/series/registry.go` | generated-series index; the three series files themselves *do* mirror `source/ts/src/astronomy/series/` |
   | `internal/store/store.go` | D19 class D: the striped global store. JS needs no locking |
   | `internal/gen/*.go` | the series generator (one glob, not a hand count: the row read "(6 files)" while seven were on disk); its TS counterpart is `generate/notes/ephemeris-generate.src.ts`, which the port does not mirror |
-  | `internal/types/jsdate.go` | `types.JSDate`: a `Date` at the JSON boundary over a D4 `int64` |
-  | `internal/types/timezone.go` | `types.Timezone`: the `number \| string` union as a Go type (D16); TS declares it inline at each site |
+  | `types/jsdate.go` | `types.JSDate`: a `Date` at the JSON boundary over a D4 `int64` |
+  | `types/timezone.go` | `types.Timezone`: the `number \| string` union as a Go type (D16); TS declares it inline at each site |
   | `internal/utils/jsstring.go` | `${x}` float rendering, used only inside error messages |
   | `internal/core/core.go` | `LongitudeAt` and `NatalResolvers`; TS writes the first inline four times and resolves the second by import |
   | `internal/jyotish/itoa.go` | integer rendering for chart keys |
   | `internal/jyotish/coredeps.go` | wires this package's two leaf functions into `core.NatalResolvers`: the back-edge break |
   | `internal/calendar/tablekeys.go` | `toDateKey`, which **eight** import-free TS modules each declare (six calendar, two muhurta; all eight checked character-identical 2026-08-25); the six calendar copies share this one, `muhurta` keeps its own (added at G4.5, when the count was six) |
   | `internal/tablejson/tablejson.go` | `JSON.stringify(file, null, 2) + '\n'`, which lives in `generate/` on the TS side; see below (added at G4.5) |
-  | `panchang/panchang.go` | **the public API**, and the only package outside `internal/`. Its TypeScript counterpart is the `source/ts/src/index.ts` barrel, which is allowlisted on the other side for being one: a barrel is a language's way of naming a surface, and the two languages spell it differently enough that neither maps onto the other |
+  | `types/astronomy.go` | the eclipse and moon-phase types: the results, `MoonPhasesForYearOptions` and the `SyzygyLongitudes` input. TypeScript declares them beside the functions that build or take them; Go collects every type the public API names into one importable package, so that a caller can spell them and their fields and methods render on pkg.go.dev |
+  | `types/calendar.go` | the calendar option, result and static-table types, gathered for the same reason |
+  | `types/core.go` | the panchang option types and the reference-frame constants, gathered for the same reason |
+  | `types/muhurta.go` | the muhurta rule, score and table types, gathered for the same reason |
+  | `internal/astronomy/sharedtypes.go` | aliases back to `types` for the declarations this package used to own, so its own code keeps spelling them unqualified. The other side of the `types/astronomy.go` move |
+  | `internal/calendar/sharedtypes.go` | the same, for `types/calendar.go`, plus the unexported option-resolution helpers: they are package-level functions here rather than methods because a method on a type declared in `types` could not stay unexported and still be callable from this package |
+  | `internal/core/sharedtypes.go` | the same, for `types/core.go` |
+  | `internal/jyotish/sharedtypes.go` | the same, for the jyotish half of `types/jyotish.go`, plus the unexported `AspectsOptions` resolver |
+  | `internal/muhurta/sharedtypes.go` | the same, for `types/muhurta.go`, plus the unexported `MuhurtaRule` and `MuhurtaScoreOptions` resolvers |
+  | `panchang/panchang.go` | **the public API**, and with `types/` one of the two packages outside `internal/`. Its TypeScript counterpart is the `source/ts/src/index.ts` barrel, which is allowlisted on the other side for being one: a barrel is a language's way of naming a surface, and the two languages spell it differently enough that neither maps onto the other |
   | `internal/treecheck/treecheck.go` | the tree-correspondence check itself (G5.2); it reads the two tables in this section |
   | `internal/symcheck/symcheck.go` | the symbol-level correspondence gate (2026-08-25 audit); reads `docs/symbols.md`. The file-level check above cannot see a missing function in a present file, which is how `computeVarjyam` survived from G2 to G5.3 |
-  | `source/go/cmd/dump/main.go` | the Go half of the parity harness; its counterpart is `source/go/parity/dump.src.ts` |
-  | `source/go/cmd/gen/main.go` | the series-generator binary |
-  | `source/go/cmd/treecheck/main.go` | the CLI over `internal/treecheck`, so CI and a human get the same report without running the suite |
+  | `source/go/internal/cmd/dump/main.go` | the Go half of the parity harness; its counterpart is `source/go/parity/dump.src.ts` |
+  | `source/go/internal/cmd/gen/main.go` | the series-generator binary |
+  | `source/go/internal/cmd/treecheck/main.go` | the CLI over `internal/treecheck`, so CI and a human get the same report without running the suite |
 
   `source/go/parity/**` is the harness itself and held a row here until G5.2. It holds
   no `.go` file, so the row matched nothing, and "matches nothing" is now a
@@ -564,7 +573,8 @@ generator too. (The first ΔT golden was 8.6 MB before this.)
 
   **The mapping rule the checker implements:** `source/ts/src/a/b/cName.ts` ↔
   `source/go/internal/a/b/cname.go` (path preserved under the two roots,
-  basename lowercased, extension swapped). Verified: **116 of 118** TypeScript files map to an existing Go file
+  basename lowercased, extension swapped), with one exception: `source/ts/src/types/*.ts`
+  maps to the public `source/go/types/*.go`, not under `internal/`. Verified: **116 of 118** TypeScript files map to an existing Go file
   under that rule with no exceptions. The lowercasing is not injective, so
   `foo.ts` and `Foo.ts` in one directory would both claim `foo.go` and one would
   look ported when it was not; the checker reports that as a collision.
@@ -629,8 +639,9 @@ generator too. (The first ΔT golden was 8.6 MB before this.)
 - **A TypeScript union with optional keys becomes two Go types, not one type
   with `omitempty`.** `EclipseInfo` is the case: the astronomy producer omits the
   five `*Local` keys entirely and the panchang producer sets all five, so
-  `types.EclipseInfo` and `astronomy.EclipseInfo` are two nominal types with the
-  two key sets. `omitempty` cannot express "absent here, null there", and D11's
+  `types.DailyEclipseInfo` and `types.EclipseInfo` (the astronomy producer's, the
+  one the public `EclipseInfo` name has always meant) are two nominal types with
+  the two key sets. `omitempty` cannot express "absent here, null there", and D11's
   trap says why guessing from a value is worse: `isDosha: false` and
   `onsetVara: 0` are meaningful.
 

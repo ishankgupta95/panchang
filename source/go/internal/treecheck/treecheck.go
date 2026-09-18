@@ -1,3 +1,6 @@
+// Package treecheck enforces the file-for-file correspondence between
+// source/ts/src and source/go, reading the two allowlist tables in docs/porting.md
+// so that every exemption carries a written justification.
 package treecheck
 
 import (
@@ -113,6 +116,12 @@ func GoPathFor(ts string) (string, error) {
 	rel := strings.TrimPrefix(ts, tsRoot)
 	dir, base := path.Split(rel)
 	base = strings.ToLower(strings.TrimSuffix(base, ".ts")) + ".go"
+	// The shared types live at the module root rather than under internal/, so
+	// that their fields and methods render on pkg.go.dev and a caller can
+	// import them. Everything else is implementation and stays internal.
+	if dir == "types/" {
+		return path.Join(goRoot, dir, base), nil
+	}
 	return path.Join(goRoot+"internal", dir, base), nil
 }
 

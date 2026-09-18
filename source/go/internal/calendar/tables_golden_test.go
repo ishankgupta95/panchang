@@ -1,6 +1,7 @@
 package calendar
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -14,7 +15,7 @@ import (
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/tablejson"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 type tblCase struct {
@@ -103,7 +104,7 @@ func TestTablesAreByteIdenticalToTypeScript(t *testing.T) {
 		}
 		ctx := &astronomy.EphemerisCtx{}
 
-		festivals, err := BuildFestivalsTable(ctx, BuildFestivalsTableOptions{
+		festivals, err := BuildFestivalsTable(context.Background(), ctx, BuildFestivalsTableOptions{
 			Location: c.geo(), TimezoneOffsetMinutes: c.Tz,
 			StartYear: c.StartYear, EndYear: c.EndYear, Languages: c.langs(),
 			ReferenceLocation: c.Key, GeneratedAt: tblPinnedGeneratedAt,
@@ -111,7 +112,7 @@ func TestTablesAreByteIdenticalToTypeScript(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%s festivals: %v", c.Key, err)
 		}
-		eclipses, err := BuildEclipsesTable(ctx, BuildEclipsesTableOptions{
+		eclipses, err := BuildEclipsesTable(context.Background(), ctx, BuildEclipsesTableOptions{
 			Location: c.geo(), TimezoneOffsetMinutes: c.Tz,
 			StartYear: c.StartYear, EndYear: c.EndYear, Languages: c.langs(),
 			VisibleOnly:       c.VisibleOnly,
@@ -120,7 +121,7 @@ func TestTablesAreByteIdenticalToTypeScript(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%s eclipses: %v", c.Key, err)
 		}
-		phases, err := BuildMoonPhasesTable(ctx, BuildMoonPhasesTableOptions{
+		phases, err := BuildMoonPhasesTable(context.Background(), ctx, BuildMoonPhasesTableOptions{
 			TimezoneOffsetMinutes: c.Tz,
 			StartYear:             c.StartYear, EndYear: c.EndYear, Languages: c.langs(),
 			ReferenceLocation: c.Key, GeneratedAt: tblPinnedGeneratedAt,
@@ -215,7 +216,7 @@ func TestEclipseTableFloatsAreWithinTheNumericBand(t *testing.T) {
 
 	for _, c := range g.Cases {
 		ctx := &astronomy.EphemerisCtx{}
-		eclipses, err := BuildEclipsesTable(ctx, BuildEclipsesTableOptions{
+		eclipses, err := BuildEclipsesTable(context.Background(), ctx, BuildEclipsesTableOptions{
 			Location: c.geo(), TimezoneOffsetMinutes: c.Tz,
 			StartYear: c.StartYear, EndYear: c.EndYear, Languages: c.langs(),
 			VisibleOnly:       c.VisibleOnly,
@@ -269,7 +270,7 @@ func TestTableEntryKeyOrderMatchesInsertionOrder(t *testing.T) {
 	for _, c := range g.Cases {
 		want := byKey[c.Key]
 		ctx := &astronomy.EphemerisCtx{}
-		festivals, err := BuildFestivalsTable(ctx, BuildFestivalsTableOptions{
+		festivals, err := BuildFestivalsTable(context.Background(), ctx, BuildFestivalsTableOptions{
 			Location: c.geo(), TimezoneOffsetMinutes: c.Tz,
 			StartYear: c.StartYear, EndYear: c.EndYear, Languages: c.langs(),
 			ReferenceLocation: c.Key, GeneratedAt: tblPinnedGeneratedAt,
@@ -277,7 +278,7 @@ func TestTableEntryKeyOrderMatchesInsertionOrder(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		eclipses, err := BuildEclipsesTable(ctx, BuildEclipsesTableOptions{
+		eclipses, err := BuildEclipsesTable(context.Background(), ctx, BuildEclipsesTableOptions{
 			Location: c.geo(), TimezoneOffsetMinutes: c.Tz,
 			StartYear: c.StartYear, EndYear: c.EndYear, Languages: c.langs(),
 			VisibleOnly:       c.VisibleOnly,
@@ -286,7 +287,7 @@ func TestTableEntryKeyOrderMatchesInsertionOrder(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		phases, err := BuildMoonPhasesTable(ctx, BuildMoonPhasesTableOptions{
+		phases, err := BuildMoonPhasesTable(context.Background(), ctx, BuildMoonPhasesTableOptions{
 			TimezoneOffsetMinutes: c.Tz,
 			StartYear:             c.StartYear, EndYear: c.EndYear, Languages: c.langs(),
 			ReferenceLocation: c.Key, GeneratedAt: tblPinnedGeneratedAt,
@@ -441,7 +442,7 @@ func TestTableReadersMatchTypeScript(t *testing.T) {
 
 	for _, c := range g.Cases {
 		ctx := &astronomy.EphemerisCtx{}
-		festivals, err := BuildFestivalsTable(ctx, BuildFestivalsTableOptions{
+		festivals, err := BuildFestivalsTable(context.Background(), ctx, BuildFestivalsTableOptions{
 			Location: c.geo(), TimezoneOffsetMinutes: c.Tz,
 			StartYear: c.StartYear, EndYear: c.EndYear, Languages: c.langs(),
 			ReferenceLocation: c.Key, GeneratedAt: tblPinnedGeneratedAt,
@@ -449,7 +450,7 @@ func TestTableReadersMatchTypeScript(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		eclipses, err := BuildEclipsesTable(ctx, BuildEclipsesTableOptions{
+		eclipses, err := BuildEclipsesTable(context.Background(), ctx, BuildEclipsesTableOptions{
 			Location: c.geo(), TimezoneOffsetMinutes: c.Tz,
 			StartYear: c.StartYear, EndYear: c.EndYear, Languages: c.langs(),
 			VisibleOnly:       c.VisibleOnly,
@@ -458,7 +459,7 @@ func TestTableReadersMatchTypeScript(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		phases, err := BuildMoonPhasesTable(ctx, BuildMoonPhasesTableOptions{
+		phases, err := BuildMoonPhasesTable(context.Background(), ctx, BuildMoonPhasesTableOptions{
 			TimezoneOffsetMinutes: c.Tz,
 			StartYear:             c.StartYear, EndYear: c.EndYear, Languages: c.langs(),
 			ReferenceLocation: c.Key, GeneratedAt: tblPinnedGeneratedAt,
@@ -624,7 +625,7 @@ func TestV1TablesStillRead(t *testing.T) {
 
 func TestPackedAndV1ReadTheSameWayWhereTheyCan(t *testing.T) {
 	ctx := &astronomy.EphemerisCtx{}
-	f, err := BuildFestivalsTable(ctx, BuildFestivalsTableOptions{
+	f, err := BuildFestivalsTable(context.Background(), ctx, BuildFestivalsTableOptions{
 		Location:              types.GeoLocation{Latitude: 18.5204, Longitude: 73.8567},
 		TimezoneOffsetMinutes: 330, StartYear: 2025, EndYear: 2025,
 		GeneratedAt: tblPinnedGeneratedAt,

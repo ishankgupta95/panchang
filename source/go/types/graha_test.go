@@ -277,3 +277,19 @@ func skipOneValue(dec *json.Decoder) error {
 	}
 	return nil
 }
+
+func TestGrahaAsDashaLordRoundTrips(t *testing.T) {
+	for _, g := range AllGrahas {
+		d, ok := GrahaAsDashaLord(g)
+		if !ok {
+			t.Errorf("GrahaAsDashaLord(%v) reported no lord", g)
+			continue
+		}
+		if back := d.Graha(); back != g {
+			t.Errorf("GrahaAsDashaLord(%v) = %v, whose Graha() is %v", g, d, back)
+		}
+	}
+	if _, ok := GrahaAsDashaLord(Graha(GrahaCount)); ok {
+		t.Errorf("GrahaAsDashaLord(%d) accepted an out of range graha", GrahaCount)
+	}
+}

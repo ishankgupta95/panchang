@@ -1,26 +1,18 @@
+// Package calendar converts between Gregorian and Hindu lunisolar dates and lists
+// the events that hang off that calendar: festivals, Ekadashis, Sankrantis,
+// samvat years, and the pre-computed festival, eclipse and moon-phase tables.
 package calendar
 
 import (
+	"context"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
-
-type BuildEclipsesTableOptions struct {
-	Location              types.GeoLocation
-	TimezoneOffsetMinutes int
-	StartYear             int
-	EndYear               int
-	Languages             []FestivalsTableLanguage
-	VisibleOnly           *bool
-	ReferenceLocation     string
-	GeneratedAt           string
-	Note                  *string
-}
 
 const DefaultEclipsesNote = "Pre-computed eclipse table. Includes every eclipse observable from the " +
 	"reference location during any phase (eclipsed body above the horizon " +
@@ -114,9 +106,12 @@ func makeEclipseEntry(
 	return entry
 }
 
-func BuildEclipsesTable(
-	ctx *astronomy.EphemerisCtx, opts BuildEclipsesTableOptions,
+func BuildEclipsesTable(ctx context.Context,
+	eph *astronomy.EphemerisCtx, opts BuildEclipsesTableOptions,
 ) (EclipsesFile, error) {
+	if err := ctx.Err(); err != nil {
+		return EclipsesFile{}, err
+	}
 	languages := opts.Languages
 	if languages == nil {
 		languages = AllTableLanguages
@@ -142,7 +137,7 @@ func BuildEclipsesTable(
 	windowStartMs := types.DateUTC(opts.StartYear, 0, 1).Ms() - 2*dayMs
 	windowEndMs := types.DateUTC(opts.EndYear, 11, 31).Ms() + dayMs - 1 + 2*dayMs
 
-	all, err := ComputeEclipsesInRange(ctx, windowStartMs, windowEndMs, opts.Location)
+	all, err := ComputeEclipsesInRange(ctx, eph, windowStartMs, windowEndMs, opts.Location)
 	if err != nil {
 		return EclipsesFile{}, err
 	}
@@ -152,7 +147,10 @@ func BuildEclipsesTable(
 	}
 	eclipses := make([]visibleEclipse, 0, len(all))
 	for _, e := range all {
-		anyPhase := astronomy.IsEclipseVisibleAnyPhase(ctx, e, opts.Location)
+		if err := ctx.Err(); err != nil {
+			return EclipsesFile{}, err
+		}
+		anyPhase := astronomy.IsEclipseVisibleAnyPhase(eph, e, opts.Location)
 		if !visibleOnly || anyPhase {
 			eclipses = append(eclipses, visibleEclipse{e: e, anyPhase: anyPhase})
 		}

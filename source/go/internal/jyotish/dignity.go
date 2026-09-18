@@ -1,23 +1,6 @@
 package jyotish
 
-import "github.com/ishankgupta95/panchang/source/go/v5/internal/types"
-
-type Dignity string
-
-const (
-	DignityExalted      Dignity = "exalted"
-	DignityMoolatrikona Dignity = "moolatrikona"
-	DignityOwn          Dignity = "own"
-	DignityFriend       Dignity = "friend"
-	DignityNeutral      Dignity = "neutral"
-	DignityEnemy        Dignity = "enemy"
-	DignityDebilitated  Dignity = "debilitated"
-)
-
-var AllDignities = []Dignity{
-	DignityExalted, DignityMoolatrikona, DignityOwn, DignityFriend,
-	DignityNeutral, DignityEnemy, DignityDebilitated,
-}
+import "github.com/ishankgupta95/panchang/source/go/v5/types"
 
 const noRashi = -1 // a zero would read as Mesha
 

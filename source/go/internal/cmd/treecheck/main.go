@@ -1,3 +1,5 @@
+// Command treecheck reports the TypeScript-to-Go tree correspondence, so CI and a
+// human get the same output without running the test suite.
 package main
 
 import (

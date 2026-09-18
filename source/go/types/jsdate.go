@@ -8,12 +8,27 @@ import (
 	"time"
 )
 
+// JSDate is an instant as milliseconds since the Unix epoch in UTC, the
+// value JavaScript's Date.getTime returns; an int64 rather than a time.Time
+// keeps the port bit-identical. A result field typed JSDate is always a UTC
+// instant. Where a same-named *Local string sits beside it, that string is
+// the same instant rendered in the result's timezone; many JSDate fields (an
+// echoed-back input, a Dasha boundary, an EclipseInfo contact, every field
+// of InstantPanchangResult) have no Local companion. A nil *JSDate is
+// TypeScript's null and marshals as JSON null. The methods mirror the Date
+// UTC accessors, index bases included, and JSON is the ISO 8601 string
+// JSON.stringify gives a Date; all of it is checked against a golden
+// generated from those built-ins.
 type JSDate int64
 
+// Ms returns the instant as epoch milliseconds.
 func (d JSDate) Ms() int64 { return int64(d) }
 
+// Date wraps epoch milliseconds as a [JSDate].
 func Date(ms int64) JSDate { return JSDate(ms) }
 
+// NullableDate wraps an optional epoch-millisecond value: nil in, nil out.
+// The result does not alias ms.
 func NullableDate(ms *int64) *JSDate {
 	if ms == nil {
 		return nil
@@ -22,6 +37,10 @@ func NullableDate(ms *int64) *JSDate {
 	return &d
 }
 
+// DateUTC is JavaScript's Date.UTC(year, month, day) at 00:00:00.000 UTC:
+// month is 0-based (0 = January), a year from 0 to 99 means 1900 to 1999,
+// and an out-of-range month or day rolls over into the neighbouring month or
+// year.
 func DateUTC(year, month, day int) JSDate {
 	if year >= 0 && year <= 99 {
 		year += 1900
@@ -30,20 +49,31 @@ func DateUTC(year, month, day int) JSDate {
 	return JSDate(t.UnixMilli())
 }
 
+// UTCFullYear returns the year in UTC, as getUTCFullYear does.
 func (d JSDate) UTCFullYear() int { return d.utc().Year() }
 
+// UTCMonth returns the month in UTC, 0-based: 0 = January, 11 = December.
 func (d JSDate) UTCMonth() int { return int(d.utc().Month()) - 1 }
 
+// UTCDate returns the day of the month in UTC, 1 to 31.
 func (d JSDate) UTCDate() int { return d.utc().Day() }
 
+// UTCHours returns the hour in UTC, 0 to 23.
 func (d JSDate) UTCHours() int { return d.utc().Hour() }
 
+// UTCMinutes returns the minute in UTC, 0 to 59.
 func (d JSDate) UTCMinutes() int { return d.utc().Minute() }
 
+// UTCDay returns the weekday in UTC, 0 = Sunday to 6 = Saturday, as
+// getUTCDay does.
 func (d JSDate) UTCDay() int { return int(d.utc().Weekday()) }
 
 func (d JSDate) utc() time.Time { return time.UnixMilli(int64(d)).UTC() }
 
+// ISOString renders the instant as Date.prototype.toISOString does:
+// "YYYY-MM-DDTHH:mm:ss.sssZ", always UTC with millisecond precision, and a
+// signed six-digit year ("+275760-09-13T...", "-271821-04-20T...") when the
+// year is outside 0 to 9999.
 func (d JSDate) ISOString() string {
 	t := d.utc()
 	b := make([]byte, 0, 27)
@@ -85,6 +115,8 @@ func appendPad(b []byte, v, width int) []byte {
 	return append(b, s...)
 }
 
+// MarshalJSON emits the [JSDate.ISOString] text as a JSON string, which is
+// what JSON.stringify does with a Date. A nil *JSDate marshals as null.
 func (d JSDate) MarshalJSON() ([]byte, error) {
 	b := make([]byte, 0, 29)
 	b = append(b, '"')
@@ -95,6 +127,10 @@ func (d JSDate) MarshalJSON() ([]byte, error) {
 
 var errJSDateShape = errors.New("types: JSDate must be an ISO 8601 string or null")
 
+// UnmarshalJSON accepts exactly the string shape [JSDate.ISOString]
+// produces, the signed six-digit year included, and rejects anything else: a
+// bare number, an offset other than Z, or missing milliseconds. JSON null
+// leaves the value unchanged, so a *JSDate field stays nil.
 func (d *JSDate) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
 		return nil
@@ -155,6 +191,8 @@ func errISOShape(s string) error {
 		"YYYY-MM-DDTHH:mm:ss.sssZ (or ±YYYYYY-…)", s)
 }
 
+// ParseISODay parses a "YYYY-MM-DD" calendar day and returns 00:00:00.000
+// UTC on that day as epoch milliseconds. Any other shape is an error.
 func ParseISODay(s string) (int64, error) {
 	if len(s) != 10 || s[4] != '-' || s[7] != '-' {
 		return 0, errISOShape(s)

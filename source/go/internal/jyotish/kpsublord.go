@@ -5,137 +5,13 @@ import (
 	"sort"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 var kpVisibleGrahasByIndex = types.AllVisibleGrahas
 
 var kpAllGrahas = types.AllGrahas
-
-type KpSubLordInfo struct {
-	Longitude float64            `json:"longitude"`
-	Rashi     int                `json:"rashi"`
-	Nakshatra int                `json:"nakshatra"`
-	SignLord  types.VisibleGraha `json:"signLord"`
-	StarLord  types.DashaLord    `json:"starLord"`
-	SubLord   types.DashaLord    `json:"subLord"`
-}
-
-type KpCuspalSubLords struct {
-	Cusps []KpSubLordInfo `json:"cusps"`
-}
-
-type KpByPlanet struct {
-	Sun     []int `json:"Sun"`
-	Moon    []int `json:"Moon"`
-	Mars    []int `json:"Mars"`
-	Mercury []int `json:"Mercury"`
-	Jupiter []int `json:"Jupiter"`
-	Venus   []int `json:"Venus"`
-	Saturn  []int `json:"Saturn"`
-	Rahu    []int `json:"Rahu"`
-	Ketu    []int `json:"Ketu"`
-}
-
-func (b *KpByPlanet) field(g types.Graha) *[]int {
-	switch g {
-	case types.GrahaSun:
-		return &b.Sun
-	case types.GrahaMoon:
-		return &b.Moon
-	case types.GrahaMars:
-		return &b.Mars
-	case types.GrahaMercury:
-		return &b.Mercury
-	case types.GrahaJupiter:
-		return &b.Jupiter
-	case types.GrahaVenus:
-		return &b.Venus
-	case types.GrahaSaturn:
-		return &b.Saturn
-	case types.GrahaRahu:
-		return &b.Rahu
-	case types.GrahaKetu:
-		return &b.Ketu
-	}
-	return nil
-}
-
-func (b *KpByPlanet) Get(g types.Graha) ([]int, bool) {
-	f := b.field(g)
-	if f == nil {
-		return nil, false
-	}
-	return *f, true
-}
-
-func (b *KpByPlanet) Set(g types.Graha, houses []int) bool {
-	f := b.field(g)
-	if f == nil {
-		return false
-	}
-	*f = houses
-	return true
-}
-
-type KpByHouse struct {
-	H1  []types.Graha `json:"1"`
-	H2  []types.Graha `json:"2"`
-	H3  []types.Graha `json:"3"`
-	H4  []types.Graha `json:"4"`
-	H5  []types.Graha `json:"5"`
-	H6  []types.Graha `json:"6"`
-	H7  []types.Graha `json:"7"`
-	H8  []types.Graha `json:"8"`
-	H9  []types.Graha `json:"9"`
-	H10 []types.Graha `json:"10"`
-	H11 []types.Graha `json:"11"`
-	H12 []types.Graha `json:"12"`
-}
-
-func (b *KpByHouse) field(house int) *[]types.Graha {
-	switch house {
-	case 1:
-		return &b.H1
-	case 2:
-		return &b.H2
-	case 3:
-		return &b.H3
-	case 4:
-		return &b.H4
-	case 5:
-		return &b.H5
-	case 6:
-		return &b.H6
-	case 7:
-		return &b.H7
-	case 8:
-		return &b.H8
-	case 9:
-		return &b.H9
-	case 10:
-		return &b.H10
-	case 11:
-		return &b.H11
-	case 12:
-		return &b.H12
-	}
-	return nil
-}
-
-func (b *KpByHouse) Get(house int) ([]types.Graha, bool) {
-	f := b.field(house)
-	if f == nil {
-		return nil, false
-	}
-	return *f, true
-}
-
-type KpSignificators struct {
-	ByPlanet KpByPlanet `json:"byPlanet"`
-	ByHouse  KpByHouse  `json:"byHouse"`
-}
 
 func subWidth(lord types.DashaLord) float64 {
 	return float64((DashaYears[lord] / 120) * utils.NakshatraSpan)
@@ -267,16 +143,16 @@ func ComputeKpSignificators(chart *types.BirthChart) KpSignificators {
 
 	var byHouse KpByHouse
 	for h := 1; h <= 12; h++ {
-		*byHouse.field(h) = []types.Graha{}
+		byHouse.Set(h, []types.Graha{})
 	}
 	for _, planet := range kpAllGrahas {
 		hs, _ := byPlanet.Get(planet)
 		for _, h := range hs {
-			f := byHouse.field(h)
-			if f == nil {
+			existing, ok := byHouse.Get(h)
+			if !ok {
 				continue
 			}
-			*f = append(*f, planet)
+			byHouse.Set(h, append(existing, planet))
 		}
 	}
 

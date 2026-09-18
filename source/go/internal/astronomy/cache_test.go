@@ -7,7 +7,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 const (

@@ -6,8 +6,8 @@ import (
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/core"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 var GrahaAbbr = [types.GrahaCount]string{
@@ -113,13 +113,6 @@ func buildGrahaPosition(
 }
 
 func identityName(idx int) string { return jsnum.FormatInt(int64(idx)) }
-
-type NodeType string
-
-const (
-	NodeMean NodeType = "mean"
-	NodeTrue NodeType = "true"
-)
 
 var AllNodeTypes = []NodeType{NodeMean, NodeTrue}
 

@@ -1,3 +1,5 @@
+// Package i18n resolves the display names the library reports into a language.
+// Only en and hi ship; there is no Sanskrit locale.
 package i18n
 
 var en = PanchangTranslations{

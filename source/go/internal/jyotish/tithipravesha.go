@@ -5,18 +5,9 @@ import (
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
-
-type TithiPraveshaChart struct {
-	PraveshInstant types.JSDate            `json:"praveshInstant"`
-	NatalTithi     int                     `json:"natalTithi"`
-	PraveshTithi   int                     `json:"praveshTithi"`
-	VarshaLagna    types.LagnaInfo         `json:"varshaLagna"`
-	Planets        []types.PlanetPlacement `json:"planets"`
-	Bhava          types.BhavaChart        `json:"bhava"`
-}
 
 const tithiPraveshaSiderealYearDays float64 = 365.25636 // a separate, unused copy of siderealYearDays
 

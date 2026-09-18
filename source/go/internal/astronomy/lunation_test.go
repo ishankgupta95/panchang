@@ -1,10 +1,11 @@
 package astronomy
 
 import (
+	"context"
 	"math"
 	"testing"
 
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 func TestPhasesPerYearIsAboutFortyNine(t *testing.T) {
@@ -12,7 +13,7 @@ func TestPhasesPerYearIsAboutFortyNine(t *testing.T) {
 	for year := 1900; year <= 2100; year += 7 {
 		startMs := utcMS(year, 0, 1)
 		endMs := utcMS(year, 11, 31) + 23*3600_000 + 59*60_000 + 59*1000 + 999
-		events, err := ComputeMoonPhasesInRange(ctx, startMs, endMs)
+		events, err := ComputeMoonPhasesInRange(context.Background(), ctx, startMs, endMs)
 		if err != nil {
 			t.Fatalf("%d: %v", year, err)
 		}
@@ -140,12 +141,12 @@ func TestNewMoonCacheEvicts(t *testing.T) {
 
 func TestMoonPhaseInputValidation(t *testing.T) {
 	ctx := NewEphemerisCtx()
-	if _, err := ComputeMoonPhasesInRange(ctx, utcMS(1899, 11, 31), utcMS(1900, 0, 5)); err == nil {
+	if _, err := ComputeMoonPhasesInRange(context.Background(), ctx, utcMS(1899, 11, 31), utcMS(1900, 0, 5)); err == nil {
 		t.Error("a start before 1900 was accepted")
 	} else if !isPanchangCode(err, types.ErrInvalidDate) {
 		t.Errorf("start before 1900 gave %v, want INVALID_DATE", err)
 	}
-	if _, err := ComputeMoonPhasesInRange(ctx, utcMS(2100, 0, 1), utcMS(2101, 0, 2)); err == nil {
+	if _, err := ComputeMoonPhasesInRange(context.Background(), ctx, utcMS(2100, 0, 1), utcMS(2101, 0, 2)); err == nil {
 		t.Error("an end after 2100 was accepted")
 	}
 	err := ComputeMoonPhasesInRangeErr(ctx, utcMS(2025, 5, 1), utcMS(2025, 0, 1))
@@ -155,19 +156,19 @@ func TestMoonPhaseInputValidation(t *testing.T) {
 	if !isPanchangCode(err, types.ErrInvalidInput) {
 		t.Errorf("reversed range gave %v, want INVALID_INPUT", err)
 	}
-	events, err := ComputeMoonPhasesInRange(ctx, utcMS(2025, 0, 1), utcMS(2025, 0, 1))
+	events, err := ComputeMoonPhasesInRange(context.Background(), ctx, utcMS(2025, 0, 1), utcMS(2025, 0, 1))
 	if err != nil {
 		t.Fatal(err)
 	}
 	if events == nil {
 		t.Error("an empty result is nil; JSON would write `null` where the TypeScript writes `[]`")
 	}
-	if _, err := ComputeMoonPhasesForYear(ctx, 2025, MoonPhasesForYearOptions{}); err == nil {
+	if _, err := ComputeMoonPhasesForYear(context.Background(), ctx, 2025, MoonPhasesForYearOptions{}); err == nil {
 		t.Error("a missing timezone was accepted")
 	} else if !isPanchangCode(err, types.ErrInvalidTimezone) {
 		t.Errorf("missing timezone gave %v, want INVALID_TIMEZONE", err)
 	}
-	if _, err := ComputeMoonPhasesForYear(ctx, 2025,
+	if _, err := ComputeMoonPhasesForYear(context.Background(), ctx, 2025,
 		MoonPhasesForYearOptions{Timezone: types.TimezoneName("Not/AZone")}); err == nil {
 		t.Error("an unknown zone was accepted")
 	} else if !isPanchangCode(err, types.ErrTimezoneResolutionFailed) {
@@ -176,7 +177,7 @@ func TestMoonPhaseInputValidation(t *testing.T) {
 }
 
 func ComputeMoonPhasesInRangeErr(ctx *EphemerisCtx, startMs, endMs int64) error {
-	_, err := ComputeMoonPhasesInRange(ctx, startMs, endMs)
+	_, err := ComputeMoonPhasesInRange(context.Background(), ctx, startMs, endMs)
 	return err
 }
 
@@ -227,7 +228,7 @@ func BenchmarkMoonPhasesForYear(b *testing.B) {
 	ctx := NewEphemerisCtx()
 	opts := MoonPhasesForYearOptions{Timezone: types.TimezoneOffset(330)}
 	for i := 0; i < b.N; i++ {
-		if _, err := ComputeMoonPhasesForYear(ctx, 2025, opts); err != nil {
+		if _, err := ComputeMoonPhasesForYear(context.Background(), ctx, 2025, opts); err != nil {
 			b.Fatal(err)
 		}
 	}

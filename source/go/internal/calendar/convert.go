@@ -5,64 +5,11 @@ import (
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/core"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
-)
-
-type HinduCalendarCoords struct {
-	TithiName    string `json:"tithiName"`
-	Tithi        int    `json:"tithi"`
-	PakshaTithi  int    `json:"pakshaTithi"`
-	Paksha       Paksha `json:"paksha"`
-	MasaName     string `json:"masaName"`
-	MasaIndex    int    `json:"masaIndex"`
-	IsAdhika     bool   `json:"isAdhika"`
-	VikramSamvat int    `json:"vikramSamvat"`
-	ShakaSamvat  int    `json:"shakaSamvat"`
-	VaraName     string `json:"varaName"`
-	VaraIndex    int    `json:"varaIndex"`
-}
-
-type Paksha string
-
-const (
-	PakshaShukla  Paksha = "shukla"
-	PakshaKrishna Paksha = "krishna"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 var AllPakshas = []Paksha{PakshaShukla, PakshaKrishna}
-
-type ConvertOptions struct {
-	Timezone   types.Timezone
-	Ayanamsa   types.AyanamsaType
-	MasaSystem types.MasaSystem
-	Language   types.Language
-}
-
-func (o ConvertOptions) panchangOptions() core.PanchangOptions {
-	return core.PanchangOptions{
-		InstantPanchangOptions: core.InstantPanchangOptions{
-			Ayanamsa:   o.Ayanamsa,
-			Language:   o.Language,
-			MasaSystem: o.MasaSystem,
-		},
-		Timezone: o.Timezone,
-	}
-}
-
-func (o ConvertOptions) resolvedAyanamsa() types.AyanamsaType {
-	if o.Ayanamsa == "" {
-		return types.Lahiri
-	}
-	return o.Ayanamsa
-}
-
-func (o ConvertOptions) resolvedMasaSystem() types.MasaSystem {
-	if o.MasaSystem == "" {
-		return types.Purnimanta
-	}
-	return o.MasaSystem
-}
 
 func ConvertGregorianToHindu(
 	ctx *astronomy.EphemerisCtx,
@@ -77,7 +24,7 @@ func ConvertGregorianToHindu(
 		return HinduCalendarCoords{}, err
 	}
 	panchang, ok, err := core.GetDailyPanchang(ctx, dateMs, location,
-		options.panchangOptions(), core.NatalResolvers{})
+		convertPanchangOptions(options), core.NatalResolvers{})
 	if err != nil {
 		return HinduCalendarCoords{}, err
 	}
@@ -107,14 +54,6 @@ func ConvertGregorianToHindu(
 	}, nil
 }
 
-type HinduDateCoords struct {
-	VikramSamvat int
-	MasaIndex    int
-	Paksha       Paksha
-	PakshaTithi  int
-	AdhikaOnly   bool
-}
-
 func ConvertHinduToGregorian(
 	ctx *astronomy.EphemerisCtx,
 	coords HinduDateCoords,
@@ -138,7 +77,7 @@ func ConvertHinduToGregorian(
 	}
 
 	ceYear := coords.VikramSamvat - 57
-	masaSystem := options.resolvedMasaSystem()
+	masaSystem := convertResolvedMasaSystem(options)
 	wrapsYearEnd := masaSystem == types.Purnimanta &&
 		coords.MasaIndex == 0 && coords.Paksha == PakshaKrishna
 	var masaMidMs int64
@@ -154,7 +93,7 @@ func ConvertHinduToGregorian(
 		targetTithi += 15
 	}
 
-	opts := options.panchangOptions()
+	opts := convertPanchangOptions(options)
 	out := []types.JSDate{}
 	for t := startMs; t <= endMs; t += dayMs {
 		p, ok, err := core.GetDailyPanchang(ctx, t, location, opts, core.NatalResolvers{})
@@ -236,7 +175,7 @@ func findChaitraShuklaPratipada(
 	location types.GeoLocation,
 	options ConvertOptions,
 ) (types.JSDate, bool, error) {
-	amantaOptions := options.panchangOptions()
+	amantaOptions := convertPanchangOptions(options)
 	amantaOptions.MasaSystem = types.Amanta
 	startMs := types.DateUTC(gregorianYear, 1, 15).Ms()
 	endMs := types.DateUTC(gregorianYear, 4, 15).Ms()
@@ -293,7 +232,7 @@ func findMeshaSankranti(
 	if err != nil {
 		return 0, false, err
 	}
-	ayanamsa := options.resolvedAyanamsa()
+	ayanamsa := convertResolvedAyanamsa(options)
 	rashiAt := func(ms int64) (int, error) {
 		lon, err := astronomy.GetSiderealSunLongitude(ctx, ms, ayanamsa)
 		if err != nil {

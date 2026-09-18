@@ -1,3 +1,4 @@
+// Command gen regenerates the frozen ephemeris series files.
 package main
 
 import (

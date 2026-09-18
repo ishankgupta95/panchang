@@ -1,10 +1,6 @@
 package jyotish
 
-import "github.com/ishankgupta95/panchang/source/go/v5/internal/types"
-
-type AshtakavargaOptions struct {
-	Reductions bool
-}
+import "github.com/ishankgupta95/panchang/source/go/v5/types"
 
 func ComputeAshtakavarga(chart *types.BirthChart, options AshtakavargaOptions) types.AshtakavargaResult {
 	contributorRashi := collectContributorRashis(chart)

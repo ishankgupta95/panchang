@@ -1,50 +1,8 @@
 package jyotish
 
 import (
-	"encoding/json"
 	"fmt"
 )
-
-type SahamName int
-
-const (
-	SahamPunya SahamName = iota
-	SahamVidya
-	SahamYasas
-	SahamMitra
-	SahamKarma
-	SahamVivaha
-	SahamPutra
-	SahamRoga
-	SahamMarana
-	SahamRajya
-	SahamRaja
-	SahamBandhu
-	SahamDharma
-	SahamGnati
-	SahamApamrityu
-	SahamBhratri
-	SahamMatri
-	SahamPitri
-	SahamSama
-	SahamBandhana
-	SahamKaryasiddhi
-	SahamVyapara
-	SahamSastra
-	SahamAsha
-	SahamLabha
-	SahamSusha
-	SahamTapas
-
-	SahamNameCount = 27
-)
-
-var sahamNames = [SahamNameCount]string{
-	"Punya", "Vidya", "Yasas", "Mitra", "Karma", "Vivaha", "Putra", "Roga",
-	"Marana", "Rajya", "Raja", "Bandhu", "Dharma", "Gnati", "Apamrityu",
-	"Bhratri", "Matri", "Pitri", "Sama", "Bandhana", "Karyasiddhi", "Vyapara",
-	"Sastra", "Asha", "Labha", "Susha", "Tapas",
-}
 
 var AllSahamNames [SahamNameCount]SahamName
 
@@ -52,36 +10,6 @@ func init() {
 	for i, f := range SahamFormulas {
 		AllSahamNames[i] = f.Name
 	}
-}
-
-func (n SahamName) Valid() bool { return n >= 0 && n < SahamNameCount }
-
-func (n SahamName) String() string {
-	if !n.Valid() {
-		return fmt.Sprintf("SahamName(%d)", int(n))
-	}
-	return sahamNames[n]
-}
-
-func (n SahamName) MarshalJSON() ([]byte, error) {
-	if !n.Valid() {
-		return nil, fmt.Errorf("jyotish: invalid SahamName %d", int(n))
-	}
-	return json.Marshal(sahamNames[n])
-}
-
-func (n *SahamName) UnmarshalJSON(b []byte) error {
-	var s string
-	if err := json.Unmarshal(b, &s); err != nil {
-		return fmt.Errorf("jyotish: SahamName must be a string")
-	}
-	for i, name := range sahamNames {
-		if name == s {
-			*n = SahamName(i)
-			return nil
-		}
-	}
-	return fmt.Errorf("jyotish: unknown SahamName %q", s)
 }
 
 type SahamOperand int

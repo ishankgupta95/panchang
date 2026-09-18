@@ -4,21 +4,6 @@ import (
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
 )
 
-type PoruthamName string
-
-const (
-	PoruthamDina           PoruthamName = "Dina"
-	PoruthamGana           PoruthamName = "Gana"
-	PoruthamMahendra       PoruthamName = "Mahendra"
-	PoruthamSthreeDeergha  PoruthamName = "SthreeDeergha"
-	PoruthamYoni           PoruthamName = "Yoni"
-	PoruthamRashi          PoruthamName = "Rashi"
-	PoruthamRashyathipathi PoruthamName = "Rashyathipathi"
-	PoruthamVasya          PoruthamName = "Vasya"
-	PoruthamRajju          PoruthamName = "Rajju"
-	PoruthamVedha          PoruthamName = "Vedha"
-)
-
 var AllPoruthamNames = [10]PoruthamName{
 	PoruthamDina, PoruthamGana, PoruthamMahendra, PoruthamSthreeDeergha,
 	PoruthamYoni, PoruthamRashi, PoruthamRashyathipathi, PoruthamVasya,
@@ -26,19 +11,6 @@ var AllPoruthamNames = [10]PoruthamName{
 }
 
 var VetoPoruthams = [3]PoruthamName{PoruthamYoni, PoruthamRajju, PoruthamVedha}
-
-type PoruthamScore struct {
-	Name        PoruthamName `json:"name"`
-	Passes      bool         `json:"passes"`
-	Description string       `json:"description"`
-	Veto        *bool        `json:"veto,omitempty"`
-}
-
-type PathuPoruthamResult struct {
-	TotalPasses int             `json:"totalPasses"`
-	Recommended bool            `json:"recommended"`
-	Poruthams   []PoruthamScore `json:"poruthams"`
-}
 
 func ComputePathuPorutham(boy, girl NatalMoon) (PathuPoruthamResult, error) {
 	if err := validateNatalMoon(boy, "boy"); err != nil {

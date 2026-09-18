@@ -1,7 +1,10 @@
+// Command dump is the Go half of the parity harness: it writes the JSON document
+// that is compared leaf for leaf against the TypeScript twin's output.
 package main
 
 import (
 	"bufio"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -23,8 +26,8 @@ import (
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/muhurta"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/muhurta/rules"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/tablejson"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 var out = bufio.NewWriterSize(os.Stdout, 4<<20)
@@ -808,11 +811,11 @@ func writeYearly(doc *obj) {
 			y := ep.Year
 			o := yearly.obj(fmt.Sprintf("%s|%d", l.Name, y))
 			opts := calendar.YearlyListingOptions{Timezone: l.Timezone}
-			o.put("festivals", safe2(calendar.ComputeFestivalsForYear(newCtx(), y, l.geo, opts)))
-			o.put("ekadashi", safe2(calendar.ComputeEkadashiDatesForYear(newCtx(), y, l.geo, opts)))
-			o.put("sankrantis", safe2(calendar.ComputeSankrantisForYear(newCtx(), y, l.geo, opts)))
-			o.put("eclipses", safe2(calendar.ComputeEclipsesForYear(newCtx(), y, l.geo, l.Timezone)))
-			o.put("moonPhases", safe2(astronomy.ComputeMoonPhasesForYear(newCtx(), y,
+			o.put("festivals", safe2(calendar.ComputeFestivalsForYear(context.Background(), newCtx(), y, l.geo, opts)))
+			o.put("ekadashi", safe2(calendar.ComputeEkadashiDatesForYear(context.Background(), newCtx(), y, l.geo, opts)))
+			o.put("sankrantis", safe2(calendar.ComputeSankrantisForYear(context.Background(), newCtx(), y, l.geo, opts)))
+			o.put("eclipses", safe2(calendar.ComputeEclipsesForYear(context.Background(), newCtx(), y, l.geo, l.Timezone)))
+			o.put("moonPhases", safe2(astronomy.ComputeMoonPhasesForYear(context.Background(), newCtx(), y,
 				astronomy.MoonPhasesForYearOptions{Timezone: l.Timezone})))
 			o.end()
 		}
@@ -845,10 +848,10 @@ func writeMuhurta(doc *obj) {
 	if !ok {
 		fatal(errors.New("dump: STOCK_MUHURTA_RULES is missing \"vivah\""))
 	}
-	mu.put("vivahPasses", safe2(muhurta.ComputeAuspiciousDatesInRange(
+	mu.put("vivahPasses", safe2(muhurta.ComputeAuspiciousDatesInRange(context.Background(),
 		newCtx(), vivah, startMs, endMs, pune.geo,
 		muhurta.MuhurtaScoreOptions{Timezone: types.TimezoneOffset(330)})))
-	mu.put("vivahAll", safe2(muhurta.ComputeAuspiciousDatesInRange(
+	mu.put("vivahAll", safe2(muhurta.ComputeAuspiciousDatesInRange(context.Background(),
 		newCtx(), vivah, startMs, endMs, pune.geo,
 		muhurta.MuhurtaScoreOptions{
 			Timezone: types.TimezoneOffset(330), IncludeFailures: true,
@@ -1132,21 +1135,21 @@ func writeTables(doc *obj) {
 	hashes := doc.obj("tables")
 	for _, ep := range epochs {
 		y := ep.Year
-		festivals, err := calendar.BuildFestivalsTable(newCtx(), calendar.BuildFestivalsTableOptions{
+		festivals, err := calendar.BuildFestivalsTable(context.Background(), newCtx(), calendar.BuildFestivalsTableOptions{
 			Location: pune.geo, TimezoneOffsetMinutes: 330, StartYear: y, EndYear: y,
 			ReferenceLocation: "Pune", GeneratedAt: pinnedGeneratedAt,
 		})
 		if err != nil {
 			fatal(err)
 		}
-		eclipses, err := calendar.BuildEclipsesTable(newCtx(), calendar.BuildEclipsesTableOptions{
+		eclipses, err := calendar.BuildEclipsesTable(context.Background(), newCtx(), calendar.BuildEclipsesTableOptions{
 			Location: pune.geo, TimezoneOffsetMinutes: 330, StartYear: y, EndYear: y,
 			ReferenceLocation: "Pune", GeneratedAt: pinnedGeneratedAt,
 		})
 		if err != nil {
 			fatal(err)
 		}
-		phases, err := calendar.BuildMoonPhasesTable(newCtx(), calendar.BuildMoonPhasesTableOptions{
+		phases, err := calendar.BuildMoonPhasesTable(context.Background(), newCtx(), calendar.BuildMoonPhasesTableOptions{
 			TimezoneOffsetMinutes: 330, StartYear: y, EndYear: y,
 			ReferenceLocation: "Pune", GeneratedAt: pinnedGeneratedAt,
 		})
@@ -1157,7 +1160,7 @@ func writeTables(doc *obj) {
 		if !ok {
 			fatal(errors.New("dump: STOCK_MUHURTA_RULES is missing \"vivah\""))
 		}
-		muhurtaTable, err := muhurta.BuildMuhurtaTable(newCtx(), muhurta.BuildMuhurtaTableOptions{
+		muhurtaTable, err := muhurta.BuildMuhurtaTable(context.Background(), newCtx(), muhurta.BuildMuhurtaTableOptions{
 			Rule: vivah, Location: pune.geo, TimezoneOffsetMinutes: 330,
 			StartYear: y, EndYear: y,
 			ReferenceLocation: "Pune", GeneratedAt: pinnedGeneratedAt,

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 type usnoFixture struct {

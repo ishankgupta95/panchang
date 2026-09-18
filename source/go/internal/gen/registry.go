@@ -43,22 +43,29 @@ func writeRegistry(outDir string, files []string) error {
 	sort.Strings(constNames)
 
 	var b strings.Builder
-	b.WriteString(goDirective)
-	b.WriteString(`// GENERATED FILE: do not edit. The maps let the coefficient-identity test walk
-// every emitted series without a hand-maintained list.
-package series
-
+	b.WriteString(generatedMarker + "\n\n")
+	b.WriteString(`// Package series holds the frozen ephemeris coefficient tables (VSOP87D,
+// ELP2000-82B and the IAU 2000 nutation series) that the astronomy package
+// evaluates, regenerated from testdata/ephemeris by internal/gen. The maps
+// here let the coefficient-identity test walk every emitted series without a
+// hand-maintained list.
+//
 `)
+	b.WriteString(goDirective)
+	b.WriteString("package series\n\n")
+	b.WriteString("// Float64Series maps the Go name of every float64 table to the table.\n")
 	b.WriteString("var Float64Series = map[string][]float64{\n")
 	for _, n := range floats {
 		fmt.Fprintf(&b, "\t%q: %s,\n", n, n)
 	}
 	b.WriteString("}\n\n")
+	b.WriteString("// Int8Series maps the Go name of every int8 table to the table.\n")
 	b.WriteString("var Int8Series = map[string][]int8{\n")
 	for _, n := range int8s {
 		fmt.Fprintf(&b, "\t%q: %s,\n", n, n)
 	}
 	b.WriteString("}\n\n")
+	b.WriteString("// Scalars maps the Go name of every emitted scalar constant to its value.\n")
 	b.WriteString("var Scalars = map[string]float64{\n")
 	for _, n := range constNames {
 		fmt.Fprintf(&b, "\t%q: %s,\n", n, n)

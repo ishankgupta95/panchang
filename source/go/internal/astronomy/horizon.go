@@ -1,6 +1,6 @@
 package astronomy
 
-import "github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+import "github.com/ishankgupta95/panchang/source/go/v5/types"
 
 type HorizonBody int
 

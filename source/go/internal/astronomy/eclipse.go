@@ -7,8 +7,8 @@ import (
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/i18n"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 type (
@@ -25,20 +25,6 @@ const (
 	EclipseSolar = types.EclipseSolar
 	EclipseLunar = types.EclipseLunar
 )
-
-type EclipseInfo struct {
-	Kind                EclipseKind    `json:"kind"`
-	Subtype             EclipseSubtype `json:"subtype"`
-	StartMs             types.JSDate   `json:"start"`
-	PeakMs              types.JSDate   `json:"peak"`
-	EndMs               types.JSDate   `json:"end"`
-	VisibleFromLocation bool           `json:"visibleFromLocation"`
-	Obscuration         float64        `json:"obscuration"`
-	Magnitude           float64        `json:"magnitude"`
-	SutakStartMs        *types.JSDate  `json:"sutakStart"`
-	SutakEndMs          *types.JSDate  `json:"sutakEnd"`
-	Description         string         `json:"description"`
-}
 
 const (
 	solarSutakHours = 12
@@ -188,11 +174,6 @@ func GetUpcomingSolarEclipse(
 		Description: describeEclipse(
 			EclipseSolar, subtype, eclipse.Obscuration, visibleFromLocation, lang),
 	}, true
-}
-
-type SyzygyLongitudes struct {
-	TropicalMoon func(ms int64) float64
-	TropicalSun  func(ms int64) float64
 }
 
 func DirectLongitudes(ctx *EphemerisCtx) SyzygyLongitudes {

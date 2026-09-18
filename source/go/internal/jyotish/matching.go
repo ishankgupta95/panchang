@@ -2,29 +2,8 @@ package jyotish
 
 import (
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
-)
-
-type NatalMoon struct {
-	Rashi         int
-	Nakshatra     int
-	LagnaRashi    *int
-	NavamsaRashi  *int
-	NakshatraPada *int // validated, never read
-}
-
-type KootName string
-
-const (
-	KootVarna       KootName = "Varna"
-	KootVashya      KootName = "Vashya"
-	KootTara        KootName = "Tara"
-	KootYoni        KootName = "Yoni"
-	KootGrahaMaitri KootName = "Graha Maitri"
-	KootGana        KootName = "Gana"
-	KootBhakoot     KootName = "Bhakoot"
-	KootNadi        KootName = "Nadi"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 var AllKootNames = [8]KootName{
@@ -33,23 +12,6 @@ var AllKootNames = [8]KootName{
 }
 
 var KootMaxScores = [8]float64{1, 2, 3, 4, 5, 6, 7, 8}
-
-type AshtakootOptions struct {
-	GanaCancellation bool // the reference almanac's 36-guna table applies no Gana cancellation
-}
-
-type KootScore struct {
-	Name        KootName `json:"name"`
-	Score       float64  `json:"score"` // float64 for Tara alone: 1.5 per auspicious direction
-	MaxScore    float64  `json:"maxScore"`
-	Description string   `json:"description"`
-}
-
-type AshtakootResult struct {
-	TotalScore    float64     `json:"totalScore"`
-	Koots         []KootScore `json:"koots"`
-	Cancellations []string    `json:"cancellations"` // non-nil even when empty
-}
 
 func ComputeAshtakoot(boy, girl NatalMoon, options AshtakootOptions) (AshtakootResult, error) {
 	if err := validateNatalMoon(boy, "boy"); err != nil {

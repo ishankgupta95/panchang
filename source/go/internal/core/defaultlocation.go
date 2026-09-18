@@ -1,16 +1,8 @@
 package core
 
 import (
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
-)
-
-type Reference string
-
-const (
-	ReferenceTraditional Reference = "traditional"
-	ReferenceModern      Reference = "modern"
-	ReferencePractical   Reference = "practical"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 func TraditionalReference() types.GeoLocation {
@@ -20,10 +12,6 @@ func TraditionalReference() types.GeoLocation {
 func ModernReference() types.GeoLocation {
 	return types.GeoLocation{Latitude: 23.1833, Longitude: 82.5, Elevation: 0}
 }
-
-const ISTTimezone = "Asia/Kolkata"
-
-const ISTOffsetMinutes = 330
 
 func ReferenceLocation(mode Reference) (types.GeoLocation, error) {
 	switch mode {

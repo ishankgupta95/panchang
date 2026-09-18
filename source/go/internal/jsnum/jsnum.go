@@ -1,3 +1,5 @@
+// Package jsnum reproduces JavaScript's number formatting and math helpers so the
+// Go port renders and rounds identically to the TypeScript it is checked against.
 package jsnum
 
 import (

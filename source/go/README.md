@@ -8,7 +8,7 @@ nothing to download at startup.
 This is the Go port of [`panchang-ts`](../ts). The TypeScript is canonical and this
 module reproduces its arithmetic, checked leaf for leaf on every change.
 
-**API reference: [pkg.go.dev](https://pkg.go.dev/github.com/ishankgupta95/panchang/source/go/v5/panchang)**
+**API reference: [pkg.go.dev](https://pkg.go.dev/github.com/ishankgupta95/panchang/source/go/v5/panchang) (the engine) and [types](https://pkg.go.dev/github.com/ishankgupta95/panchang/source/go/v5/types) (every data type)**
 **Concepts, options and accuracy: [dharmagya.app/docs/panchang-ts](https://dharmagya.app/docs/panchang-ts)**
 
 ## Install
@@ -31,15 +31,16 @@ import (
 	"time"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/panchang"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 func main() {
 	s := panchang.New()
 
 	when := time.Date(2025, 7, 4, 0, 0, 0, 0, time.UTC)
-	pune := panchang.GeoLocation{Latitude: 18.52, Longitude: 73.86}
+	pune := types.GeoLocation{Latitude: 18.52, Longitude: 73.86}
 
-	day, ok, err := s.GetDailyPanchang(when, pune, panchang.Options{
+	day, ok, err := s.GetDailyPanchang(when, pune, types.PanchangOptions{
 		Timezone: panchang.OffsetMinutes(330),
 	})
 	if err != nil {
@@ -56,6 +57,18 @@ func main() {
 }
 ```
 
+`panchang` holds the engine: `New`, the `Session` methods and the standalone
+calculations. `types` holds every data type they take and return, so that a
+caller can name them and their fields and methods are documented in one place.
+The same-named aliases in `panchang` (`panchang.GeoLocation` for
+`types.GeoLocation`, and so on) are the spellings earlier v5 releases used;
+they stay, so existing code keeps compiling, and either spelling works.
+
+The methods that walk a range of dates (the `Build*Table` builders and the
+`Compute*ForYear` and `Compute*InRange` listings) each have a twin ending in `Context` that
+takes a `context.Context` and stops early once it is cancelled or its deadline
+passes. The plain form runs to completion.
+
 ## Three things worth knowing
 
 **A `Session` is not safe for concurrent use.** It memoises the ephemeris as it works,
@@ -67,13 +80,16 @@ long-lived worker that walks far apart in time.
 eclipse lookups return `(value, ok)`. A false `ok` with a nil error means a polar day
 with no sunrise, or a date with no moonrise, and the caller decides what that means.
 
-**Branch on `Code`, never on message text.** Errors carry a stable `panchang.Error`
-with a `Code`; all fourteen codes are exported as constants, with `AllErrorCodes()`
-for exhaustiveness checks.
+**Branch on `Code`, never on message text.** Errors carry a stable
+`*types.PanchangError` with a `Code`; all fourteen codes are exported as
+constants, with `panchang.AllErrorCodes()` for exhaustiveness checks. The codes
+are `types.ErrorCode` values rather than errors, so `errors.Is` cannot take one:
+use `panchang.IsCode`, `errors.Is` against one of the four `types.Err*Sentinel`
+variables (a `PanchangError` matches on code), or `errors.As` when you want the
+code itself.
 
 ```go
-var pe *panchang.Error
-if errors.As(err, &pe) && pe.Code == panchang.ErrInvalidDate {
+if panchang.IsCode(err, types.ErrInvalidDate) {
 	// ...
 }
 ```
@@ -88,7 +104,7 @@ two languages cannot produce the same double, each one bounded rather than waved
 through: [`docs/parity.md`](../../docs/parity.md).
 
 ```bash
-cd source/go && go test ./... -race     # 557 tests across 14 packages, what CI runs
+cd source/go && go test ./... -race     # 560 tests across 14 packages, what CI runs
 ```
 
 ## Licence

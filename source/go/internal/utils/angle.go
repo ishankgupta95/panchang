@@ -1,3 +1,5 @@
+// Package utils holds the input validation and the small shared helpers that do
+// not belong to any one subsystem.
 package utils
 
 import "github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"

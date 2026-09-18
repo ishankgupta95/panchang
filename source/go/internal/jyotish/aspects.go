@@ -3,7 +3,7 @@ package jyotish
 import (
 	"sort"
 
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 var specialOffsets = [types.GrahaCount][]int{
@@ -20,31 +20,8 @@ var specialOffsets = [types.GrahaCount][]int{
 
 var node59Offsets = [2]int{4, 8}
 
-type NodeAspects string
-
-const (
-	NodeAspects7Only NodeAspects = "7-only"
-	NodeAspects5And9 NodeAspects = "5-and-9"
-)
-
-type AspectsOptions struct {
-	NodeAspects NodeAspects
-}
-
-func (o AspectsOptions) resolve() (NodeAspects, error) {
-	switch o.NodeAspects {
-	case "":
-		return NodeAspects7Only, nil
-	case NodeAspects7Only, NodeAspects5And9:
-		return o.NodeAspects, nil
-	}
-	return "", types.NewPanchangError(
-		`nodeAspects must be "7-only" or "5-and-9", got "`+string(o.NodeAspects)+`"`,
-		types.ErrInvalidInput)
-}
-
 func ComputeAspects(chart *types.BirthChart, options AspectsOptions) (types.AspectMap, error) {
-	nodeAspects, err := options.resolve()
+	nodeAspects, err := resolveAspectsOptions(options)
 	if err != nil {
 		return types.AspectMap{}, err
 	}

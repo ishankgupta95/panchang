@@ -8,8 +8,8 @@ import (
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/i18n"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 const panchangCacheMode = astronomy.ModeInterpolated
@@ -42,33 +42,8 @@ func yogaAngle(getMoon, getSun LongitudeAt) utils.ElementAngle {
 	}
 }
 
-type InstantPanchangOptions struct {
-	Ayanamsa          types.AyanamsaType
-	Language          types.Language
-	ComputeEndTimes   *bool
-	MasaSystem        types.MasaSystem
-	JanmaRashi        *int
-	JanmaNakshatra    *int
-	Region            types.FestivalRegion
-	RegionAliasWarner RegionAliasWarner
-}
-
-type PanchangSection string
-
-const (
-	SectionFestivals    PanchangSection = "festivals"
-	SectionEclipse      PanchangSection = "eclipse"
-	SectionMoonTimes    PanchangSection = "moonTimes"
-	SectionLunarWindows PanchangSection = "lunarWindows"
-)
-
 var AllPanchangSections = []PanchangSection{
 	SectionFestivals, SectionEclipse, SectionMoonTimes, SectionLunarWindows,
-}
-
-type SectionSet struct {
-	All bool
-	Set map[PanchangSection]bool
 }
 
 func AllSections() SectionSet { return SectionSet{All: true} }
@@ -81,17 +56,6 @@ func Sections(list ...PanchangSection) SectionSet {
 		set[s] = true
 	}
 	return SectionSet{Set: set}
-}
-
-func (s SectionSet) Wants(section PanchangSection) bool {
-	return s.All || s.Set[section]
-}
-
-type PanchangOptions struct {
-	InstantPanchangOptions
-	Timezone      types.Timezone
-	Sections      SectionSet
-	SectionsGiven bool
 }
 
 type resolvedOptions struct {
@@ -927,9 +891,9 @@ func GetDailyPanchang(
 		}
 	}
 
-	var eclipse *types.EclipseInfo
+	var eclipse *types.DailyEclipseInfo
 	if eclipseUtc != nil {
-		e := types.EclipseInfo{
+		e := types.DailyEclipseInfo{
 			Kind: eclipseUtc.Kind, Subtype: eclipseUtc.Subtype,
 			Start: eclipseUtc.StartMs, Peak: eclipseUtc.PeakMs, End: eclipseUtc.EndMs,
 			StartLocal:          local(eclipseUtc.StartMs.Ms()),

@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 type gPeriod struct {
@@ -374,14 +374,6 @@ func narayanPeriods(r NarayanDashaResult) []gPeriod {
 		rashi := m.Rashi
 		out = append(out, gPeriod{Lord: m.Lord, Rashi: &rashi, StartDate: m.StartDate,
 			EndDate: m.EndDate, Years: m.Years})
-	}
-	return out
-}
-
-func antarPeriods(list []types.AntarDasha) []gPeriod {
-	out := make([]gPeriod, 0, len(list))
-	for _, a := range list {
-		out = append(out, gPeriod{Lord: a.Lord, StartDate: a.StartDate, EndDate: a.EndDate})
 	}
 	return out
 }

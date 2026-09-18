@@ -1,6 +1,7 @@
 package calendar
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"math"
@@ -8,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 var (
@@ -58,7 +59,7 @@ func TestBisectionMidpointIsFloorDivision(t *testing.T) {
 
 func TestPre1970TransitsAreNegativeAndOdd(t *testing.T) {
 	ctx := &astronomy.EphemerisCtx{}
-	sankrantis, err := ComputeSankrantisForYear(ctx, 1912, pune, istOptions)
+	sankrantis, err := ComputeSankrantisForYear(context.Background(), ctx, 1912, pune, istOptions)
 	if err != nil {
 		t.Fatalf("1912 sankrantis: %v", err)
 	}
@@ -85,7 +86,7 @@ func TestPre1970TransitsAreNegativeAndOdd(t *testing.T) {
 func TestSankrantisAreTwelvePerYear(t *testing.T) {
 	for _, year := range []int{1912, 1999, 2000, 2025, 2026, 2027, 2028, 2029, 2088, 2100} {
 		ctx := &astronomy.EphemerisCtx{}
-		got, err := ComputeSankrantisForYear(ctx, year, pune, istOptions)
+		got, err := ComputeSankrantisForYear(context.Background(), ctx, year, pune, istOptions)
 		if err != nil {
 			t.Fatalf("%d: %v", year, err)
 		}
@@ -116,7 +117,7 @@ func TestSankrantiDateIsTheObservanceDayNotTheTransitDay(t *testing.T) {
 	same, next, other := 0, 0, 0
 	for _, year := range []int{2025, 2026, 2027, 2028, 2029} {
 		ctx := &astronomy.EphemerisCtx{}
-		got, err := ComputeSankrantisForYear(ctx, year, pune, istOptions)
+		got, err := ComputeSankrantisForYear(context.Background(), ctx, year, pune, istOptions)
 		if err != nil {
 			t.Fatalf("%d: %v", year, err)
 		}
@@ -167,7 +168,7 @@ func TestSankrantiAnchorReachesOnlyTheTwoSentinels(t *testing.T) {
 	sentinels, others := 0, 0
 	for _, year := range []int{2025, 2026} {
 		ctx := &astronomy.EphemerisCtx{}
-		got, err := ComputeSankrantisForYear(ctx, year, longyearbyen,
+		got, err := ComputeSankrantisForYear(context.Background(), ctx, year, longyearbyen,
 			YearlyListingOptions{Timezone: types.TimezoneOffset(60)})
 		if err != nil {
 			t.Fatalf("%d: %v", year, err)
@@ -246,18 +247,18 @@ func TestEmptyListingsMarshalAsArrays(t *testing.T) {
 	ctx := &astronomy.EphemerisCtx{}
 	startMs := types.DateUTC(2025, 5, 10).Ms()
 
-	festivals, err := ComputeFestivalsInRange(ctx, startMs, startMs, pune, istOptions)
+	festivals, err := ComputeFestivalsInRange(context.Background(), ctx, startMs, startMs, pune, istOptions)
 	if err != nil {
 		t.Fatalf("festivals: %v", err)
 	}
-	eclipses, err := ComputeEclipsesInRange(ctx, startMs, startMs, pune)
+	eclipses, err := ComputeEclipsesInRange(context.Background(), ctx, startMs, startMs, pune)
 	if err != nil {
 		t.Fatalf("eclipses: %v", err)
 	}
 	if len(eclipses) != 0 {
 		t.Fatalf("expected no eclipse on 2025-06-10, got %d", len(eclipses))
 	}
-	empty, err := ComputeEkadashiDatesForYear(ctx, 2025, pune, istOptions)
+	empty, err := ComputeEkadashiDatesForYear(context.Background(), ctx, 2025, pune, istOptions)
 	if err != nil {
 		t.Fatalf("ekadashi: %v", err)
 	}
@@ -288,7 +289,7 @@ func TestEclipsesInRangeIsSortedAndStable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := ComputeEclipsesInRange(ctx, startMs, endMs, pune)
+	got, err := ComputeEclipsesInRange(context.Background(), ctx, startMs, endMs, pune)
 	if err != nil {
 		t.Fatalf("eclipses: %v", err)
 	}
@@ -376,13 +377,13 @@ func TestRangeEnumeratorsRejectInvertedRanges(t *testing.T) {
 	ctx := &astronomy.EphemerisCtx{}
 	early := types.DateUTC(2025, 0, 1).Ms()
 	late := types.DateUTC(2025, 5, 1).Ms()
-	if _, err := ComputeFestivalsInRange(ctx, late, early, pune, istOptions); err == nil {
+	if _, err := ComputeFestivalsInRange(context.Background(), ctx, late, early, pune, istOptions); err == nil {
 		t.Error("ComputeFestivalsInRange accepted start > end")
 	}
-	if _, err := ComputeEclipsesInRange(ctx, late, early, pune); err == nil {
+	if _, err := ComputeEclipsesInRange(context.Background(), ctx, late, early, pune); err == nil {
 		t.Error("ComputeEclipsesInRange accepted start > end")
 	}
-	if _, err := ComputeFestivalsInRange(ctx, early, early, pune, istOptions); err != nil {
+	if _, err := ComputeFestivalsInRange(context.Background(), ctx, early, early, pune, istOptions); err != nil {
 		t.Errorf("ComputeFestivalsInRange rejected a one-day range: %v", err)
 	}
 }

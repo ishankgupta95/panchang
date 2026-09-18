@@ -1,8 +1,12 @@
 package panchang
 
 import (
+	"context"
+	"errors"
 	"testing"
 	"time"
+
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/core"
@@ -10,11 +14,11 @@ import (
 )
 
 var (
-	pune = GeoLocation{Latitude: 18.5204, Longitude: 73.8567}
+	pune = types.GeoLocation{Latitude: 18.5204, Longitude: 73.8567}
 	when = time.Date(2025, 7, 4, 0, 0, 0, 0, time.UTC)
 )
 
-func ist() Options { return Options{Timezone: OffsetMinutes(330)} }
+func ist() types.PanchangOptions { return types.PanchangOptions{Timezone: OffsetMinutes(330)} }
 
 func TestFacadeIsAFaithfulPassThrough(t *testing.T) {
 	direct, directOK, directErr := core.GetDailyPanchang(
@@ -88,7 +92,7 @@ func TestSessionsAreIndependent(t *testing.T) {
 }
 
 func TestPackageLevelFunctionsNeedNoSession(t *testing.T) {
-	ay, err := ComputeAyanamsa(when, Lahiri)
+	ay, err := ComputeAyanamsa(when, types.Lahiri)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -106,7 +110,7 @@ func TestPackageLevelFunctionsNeedNoSession(t *testing.T) {
 func TestAllAyanamsaTypesIsACopy(t *testing.T) {
 	first := AllAyanamsaTypes()
 	first[0] = "tampered"
-	if AllAyanamsaTypes()[0] != Lahiri {
+	if AllAyanamsaTypes()[0] != types.Lahiri {
 		t.Error("AllAyanamsaTypes returns the shared table, not a copy")
 	}
 }
@@ -130,7 +134,7 @@ func TestEveryWiringPathIsExercised(t *testing.T) {
 		if _, _, err := s.GetMoonrise(when, pune, 2); err != nil {
 			t.Error(err)
 		}
-		lon, err := s.GetSiderealMoonLongitude(when, Lahiri)
+		lon, err := s.GetSiderealMoonLongitude(when, types.Lahiri)
 		if err != nil || lon < 0 || lon >= 360 {
 			t.Errorf("sidereal moon = %v, err=%v", lon, err)
 		}
@@ -144,20 +148,20 @@ func TestEveryWiringPathIsExercised(t *testing.T) {
 		if rk.StartMs < sunrise.Ms() || rk.EndMs > sunset.Ms() {
 			t.Errorf("rahu kalam %d..%d falls outside the day %d..%d", rk.StartMs, rk.EndMs, sunrise.Ms(), sunset.Ms())
 		}
-		if _, err := ComputeGandaMula(0, English); err != nil {
+		if _, err := ComputeGandaMula(0, types.LanguageEn); err != nil {
 			t.Error(err)
 		}
 	})
 
 	t.Run("jyotish", func(t *testing.T) {
-		chart, err := s.ComputeRashiChart(when, pune, BirthChartOptions{})
+		chart, err := s.ComputeRashiChart(when, pune, types.BirthChartOptions{})
 		if err != nil {
 			t.Fatal(err)
 		}
 		if len(chart.Planets) == 0 {
 			t.Fatal("no planets; the checks below would be vacuous")
 		}
-		if _, err := s.ComputeShadbala(when, pune, BirthChartOptions{}); err != nil {
+		if _, err := s.ComputeShadbala(when, pune, types.BirthChartOptions{}); err != nil {
 			t.Error(err)
 		}
 		if _, err := ComputeJaiminiKarakas(&chart); err != nil {
@@ -220,15 +224,15 @@ func TestEveryWiringPathIsExercised(t *testing.T) {
 	})
 }
 
-func sunriseTime(d JSDate) time.Time { return time.UnixMilli(d.Ms()) }
+func sunriseTime(d types.JSDate) time.Time { return time.UnixMilli(d.Ms()) }
 
 func TestGetEclipseDuringDayZeroLongitudesMeansTheEphemeris(t *testing.T) {
 	s := New()
 	sunrise := time.Date(2025, 3, 29, 1, 0, 0, 0, time.UTC) // solar eclipse day
 	next := sunrise.Add(24 * time.Hour)
-	gotZero, okZero := s.GetEclipseDuringDay(sunrise, next, pune, English, SyzygyLongitudes{})
-	gotExpl, okExpl := s.GetEclipseDuringDay(sunrise, next, pune, English,
-		astronomy.DirectLongitudes(s.ctx))
+	gotZero, okZero := s.GetEclipseDuringDay(sunrise, next, pune, types.LanguageEn, types.SyzygyLongitudes{})
+	gotExpl, okExpl := s.GetEclipseDuringDay(sunrise, next, pune, types.LanguageEn,
+		astronomy.DirectLongitudes(s.eph))
 	if okZero != okExpl || gotZero != gotExpl {
 		t.Errorf("zero-value longitudes (%v, %v) != explicit DirectLongitudes (%v, %v)",
 			gotZero, okZero, gotExpl, okExpl)
@@ -236,7 +240,7 @@ func TestGetEclipseDuringDayZeroLongitudesMeansTheEphemeris(t *testing.T) {
 }
 
 func TestStockRuleAccessorsReturnIndependentCopies(t *testing.T) {
-	accessors := map[string]func() MuhurtaRule{
+	accessors := map[string]func() types.MuhurtaRule{
 		"vivah": VivahRule, "grihaPravesh": GrihaPraveshRule,
 		"namakarana": NamakaranaRule, "vidyarambh": VidyarambhRule,
 		"vahanKharidi": VahanKharidiRule, "annaprashan": AnnaprashanRule,
@@ -261,5 +265,85 @@ func TestStockRuleAccessorsReturnIndependentCopies(t *testing.T) {
 	}
 	if all := StockMuhurtaRules(); all[0].AuspiciousTithis[0] == -99 {
 		t.Error("the mutation reached StockMuhurtaRules' backing table")
+	}
+}
+
+// TestContextTwinsStopOnACancelledContext checks that every Context method
+// returns the context's error before doing any work, so a caller can abandon a
+// long walk. The inputs are deliberately zero values: the context is checked
+// ahead of validation, so nothing else should be reported.
+func TestContextTwinsStopOnACancelledContext(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	s := New()
+	var geo types.GeoLocation
+	calls := map[string]func() error{
+		"BuildFestivalsTableContext": func() error {
+			_, err := s.BuildFestivalsTableContext(ctx, types.BuildFestivalsTableOptions{})
+			return err
+		},
+		"BuildEclipsesTableContext": func() error {
+			_, err := s.BuildEclipsesTableContext(ctx, types.BuildEclipsesTableOptions{})
+			return err
+		},
+		"BuildMoonPhasesTableContext": func() error {
+			_, err := s.BuildMoonPhasesTableContext(ctx, types.BuildMoonPhasesTableOptions{})
+			return err
+		},
+		"BuildMuhurtaTableContext": func() error {
+			_, err := s.BuildMuhurtaTableContext(ctx, types.BuildMuhurtaTableOptions{})
+			return err
+		},
+		"ComputeAuspiciousDatesForYearContext": func() error {
+			_, err := s.ComputeAuspiciousDatesForYearContext(ctx, 2025, types.MuhurtaRule{}, geo, types.MuhurtaScoreOptions{})
+			return err
+		},
+		"ComputeAuspiciousDatesInRangeContext": func() error {
+			_, err := s.ComputeAuspiciousDatesInRangeContext(ctx, types.MuhurtaRule{}, when, when, geo, types.MuhurtaScoreOptions{})
+			return err
+		},
+		"ComputeEclipsesForYearContext": func() error {
+			_, err := s.ComputeEclipsesForYearContext(ctx, 2025, geo, OffsetMinutes(330))
+			return err
+		},
+		"ComputeEclipsesInRangeContext": func() error {
+			_, err := s.ComputeEclipsesInRangeContext(ctx, when, when, geo)
+			return err
+		},
+		"ComputeEkadashiDatesForYearContext": func() error {
+			_, err := s.ComputeEkadashiDatesForYearContext(ctx, 2025, geo, types.YearlyListingOptions{})
+			return err
+		},
+		"ComputeFestivalsForYearContext": func() error {
+			_, err := s.ComputeFestivalsForYearContext(ctx, 2025, geo, types.YearlyListingOptions{})
+			return err
+		},
+		"ComputeFestivalsInRangeContext": func() error {
+			_, err := s.ComputeFestivalsInRangeContext(ctx, when, when, geo, types.YearlyListingOptions{})
+			return err
+		},
+		"ComputeMoonPhasesForYearContext": func() error {
+			_, err := s.ComputeMoonPhasesForYearContext(ctx, 2025, types.MoonPhasesForYearOptions{})
+			return err
+		},
+		"ComputeMoonPhasesInRangeContext": func() error {
+			_, err := s.ComputeMoonPhasesInRangeContext(ctx, when, when)
+			return err
+		},
+		"ComputeSankrantisForYearContext": func() error {
+			_, err := s.ComputeSankrantisForYearContext(ctx, 2025, geo, types.YearlyListingOptions{})
+			return err
+		},
+	}
+	for name, call := range calls {
+		if err := call(); !errors.Is(err, context.Canceled) {
+			t.Errorf("%s with a cancelled context returned %v, want context.Canceled", name, err)
+		}
+	}
+
+	// The plain form is the Context form on context.Background: it must not be
+	// affected by a cancelled context it never saw.
+	if _, err := s.ComputeMoonPhasesInRange(when, when.Add(48*time.Hour)); err != nil {
+		t.Errorf("plain form errored: %v", err)
 	}
 }

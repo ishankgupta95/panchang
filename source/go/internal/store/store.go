@@ -1,3 +1,5 @@
+// Package store is the striped, generically-typed global cache behind the
+// ephemeris block memos. JavaScript needs no locking here; Go does.
 package store
 
 import (

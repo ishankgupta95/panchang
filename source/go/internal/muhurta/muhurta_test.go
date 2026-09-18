@@ -1,6 +1,7 @@
 package muhurta
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -8,7 +9,7 @@ import (
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/tablejson"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 var (
@@ -26,14 +27,14 @@ func TestVaraTithiYogasDefaultsToOnWhenUnset(t *testing.T) {
 	explicitFalse := base
 	explicitFalse.VaraTithiYogas = &no
 
-	if !unset.scoresVaraTithiYogas() {
+	if !ruleScoresVaraTithiYogas(unset) {
 		t.Fatal("an unset VaraTithiYogas must score the layer: a nil pointer is the " +
 			"TypeScript's `undefined`, and `undefined !== false` is true")
 	}
-	if !explicitTrue.scoresVaraTithiYogas() {
+	if !ruleScoresVaraTithiYogas(explicitTrue) {
 		t.Error("VaraTithiYogas: &true must score the layer")
 	}
-	if explicitFalse.scoresVaraTithiYogas() {
+	if ruleScoresVaraTithiYogas(explicitFalse) {
 		t.Error("VaraTithiYogas: &false must suppress the layer")
 	}
 
@@ -86,7 +87,7 @@ func TestBhadraIsThreeStateAndSupersedesTheDeprecatedBoolean(t *testing.T) {
 		{"both, bhadra strictest", MuhurtaRule{Bhadra: &exclude, ExcludeBhadra: false}, BhadraExclude},
 		{"both, bhadra middle", MuhurtaRule{Bhadra: &penalize, ExcludeBhadra: true}, BhadraPenalize},
 	} {
-		if got := c.rule.resolvedBhadra(); got != c.want {
+		if got := ruleResolvedBhadra(c.rule); got != c.want {
 			t.Errorf("%s: want %q, got %q", c.name, c.want, got)
 		}
 	}
@@ -95,11 +96,11 @@ func TestBhadraIsThreeStateAndSupersedesTheDeprecatedBoolean(t *testing.T) {
 func TestExcludeBhadraFalseIsIndistinguishableFromAbsent(t *testing.T) {
 	absent := MuhurtaRule{Occasion: "a"}
 	explicitFalse := MuhurtaRule{Occasion: "a", ExcludeBhadra: false}
-	if absent.resolvedBhadra() != explicitFalse.resolvedBhadra() {
+	if ruleResolvedBhadra(absent) != ruleResolvedBhadra(explicitFalse) {
 		t.Error("an absent excludeBhadra and an explicit false must resolve alike")
 	}
-	if absent.resolvedBhadra() != BhadraIgnore {
-		t.Errorf("both must resolve to %q, got %q", BhadraIgnore, absent.resolvedBhadra())
+	if ruleResolvedBhadra(absent) != BhadraIgnore {
+		t.Errorf("both must resolve to %q, got %q", BhadraIgnore, ruleResolvedBhadra(absent))
 	}
 }
 
@@ -191,7 +192,7 @@ func TestEmptyReasonsAndFactorsMarshalAsArrays(t *testing.T) {
 		InauspiciousNakshatras: []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
 			14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26},
 	}
-	days, err := ComputeAuspiciousDatesInRange(ctx, strict,
+	days, err := ComputeAuspiciousDatesInRange(context.Background(), ctx, strict,
 		types.DateUTC(2025, 0, 1).Ms(), types.DateUTC(2025, 0, 5).Ms(), pune, ist)
 	if err != nil {
 		t.Fatal(err)
@@ -226,7 +227,7 @@ func TestPolarDayScoresZeroWithoutAnError(t *testing.T) {
 	if r.Date.Ms() != ms {
 		t.Errorf("the polar arm must echo the requested instant, got %s", r.Date.ISOString())
 	}
-	days, err := ComputeAuspiciousDatesInRange(ctx, MuhurtaRule{Occasion: "probe"},
+	days, err := ComputeAuspiciousDatesInRange(context.Background(), ctx, MuhurtaRule{Occasion: "probe"},
 		ms, ms+3*dayMs, longyearbyen,
 		MuhurtaScoreOptions{Timezone: types.TimezoneOffset(60), IncludeFailures: true})
 	if err != nil {
@@ -316,7 +317,7 @@ func TestAuspiciousWinsWhenAnIndexIsInBothLists(t *testing.T) {
 func TestRangeSortIsStableOnEqualScores(t *testing.T) {
 	ctx := &astronomy.EphemerisCtx{}
 	rule := MuhurtaRule{Occasion: "probe", AuspiciousTithis: []int{0, 5, 10, 15, 20, 25}}
-	days, err := ComputeAuspiciousDatesInRange(ctx, rule,
+	days, err := ComputeAuspiciousDatesInRange(context.Background(), ctx, rule,
 		types.DateUTC(2025, 0, 1).Ms(), types.DateUTC(2025, 2, 31).Ms(), pune,
 		MuhurtaScoreOptions{Timezone: types.TimezoneOffset(330), IncludeFailures: true})
 	if err != nil {
@@ -385,7 +386,7 @@ func TestBuildMuhurtaTableRejectsBadInput(t *testing.T) {
 	}
 	noRule := base
 	noRule.Rule = MuhurtaRule{}
-	if _, err := BuildMuhurtaTable(ctx, noRule); err == nil {
+	if _, err := BuildMuhurtaTable(context.Background(), ctx, noRule); err == nil {
 		t.Error("a rule with no Occasion must be rejected")
 	} else {
 		var pe *types.PanchangError
@@ -395,12 +396,12 @@ func TestBuildMuhurtaTableRejectsBadInput(t *testing.T) {
 	}
 	inverted := base
 	inverted.StartYear, inverted.EndYear = 2026, 2025
-	if _, err := BuildMuhurtaTable(ctx, inverted); err == nil {
+	if _, err := BuildMuhurtaTable(context.Background(), ctx, inverted); err == nil {
 		t.Error("startYear > endYear must be rejected")
 	}
 	badLoc := base
 	badLoc.Location = types.GeoLocation{Latitude: 91}
-	if _, err := BuildMuhurtaTable(ctx, badLoc); err == nil {
+	if _, err := BuildMuhurtaTable(context.Background(), ctx, badLoc); err == nil {
 		t.Error("an invalid location must be rejected")
 	}
 }
@@ -416,7 +417,7 @@ func TestMuhurtaTableOmitsOccasionNameWhenUnnamed(t *testing.T) {
 		{"named", MuhurtaRule{Occasion: "probe", Name: "Probe rule"}, true, "Probe rule"},
 		{"unnamed", MuhurtaRule{Occasion: "probe"}, false, ""},
 	} {
-		file, err := BuildMuhurtaTable(ctx, BuildMuhurtaTableOptions{
+		file, err := BuildMuhurtaTable(context.Background(), ctx, BuildMuhurtaTableOptions{
 			Rule: c.rule, Location: pune, TimezoneOffsetMinutes: 330,
 			StartYear: 2025, EndYear: 2025,
 		})
@@ -452,7 +453,7 @@ func TestBuildMuhurtaTableNoteDefaultsButCanBeEmptied(t *testing.T) {
 		Rule: MuhurtaRule{Occasion: "probe"}, Location: pune,
 		TimezoneOffsetMinutes: 330, StartYear: 2025, EndYear: 2025,
 	}
-	def, err := BuildMuhurtaTable(ctx, base)
+	def, err := BuildMuhurtaTable(context.Background(), ctx, base)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -462,7 +463,7 @@ func TestBuildMuhurtaTableNoteDefaultsButCanBeEmptied(t *testing.T) {
 	empty := ""
 	withEmpty := base
 	withEmpty.Note = &empty
-	got, err := BuildMuhurtaTable(ctx, withEmpty)
+	got, err := BuildMuhurtaTable(context.Background(), ctx, withEmpty)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -572,7 +573,7 @@ func TestTableJSONMatchesJSONStringify(t *testing.T) {
 
 func TestPackedDayPassesFlagIsZeroOrOne(t *testing.T) {
 	ctx := &astronomy.EphemerisCtx{}
-	file, err := BuildMuhurtaTable(ctx, BuildMuhurtaTableOptions{
+	file, err := BuildMuhurtaTable(context.Background(), ctx, BuildMuhurtaTableOptions{
 		Rule:     MuhurtaRule{Occasion: "probe", AuspiciousTithis: []int{0, 5, 10}},
 		Location: pune, TimezoneOffsetMinutes: 330,
 		StartYear: 2025, EndYear: 2025, IncludeFailures: true,

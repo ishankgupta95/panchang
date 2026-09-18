@@ -43,7 +43,7 @@ for stage in "${STAGES[@]}"; do
   echo "── $stage: Go dump ─────────────────────────────"
   # cd first: from the repo root `go run` fails only after the shell has
   # truncated the redirect target, which reads as a size failure.
-  ( cd source/go && env $(cd ../.. && envfor "$stage" goEnv) go run ./cmd/dump > "parity/out/dump-$golabel.json" )
+  ( cd source/go && env $(cd ../.. && envfor "$stage" goEnv) go run ./internal/cmd/dump > "parity/out/dump-$golabel.json" )
 
   echo "── $stage: band gate ───────────────────────────"
   node --max-old-space-size=4096 source/go/parity/gate.mjs "$stage" "${FLAGS[@]}"

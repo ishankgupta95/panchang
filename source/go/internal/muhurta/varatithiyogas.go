@@ -4,33 +4,9 @@ import (
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
 )
 
-type VaraTithiYogaType string
-
-const (
-	YogaSiddha     VaraTithiYogaType = "siddha"
-	YogaAmrita     VaraTithiYogaType = "amrita"
-	YogaDagdha     VaraTithiYogaType = "dagdha"
-	YogaVisha      VaraTithiYogaType = "visha"
-	YogaHutasana   VaraTithiYogaType = "hutasana"
-	YogaKrakacha   VaraTithiYogaType = "krakacha"
-	YogaSamvartaka VaraTithiYogaType = "samvartaka"
-)
-
 var AllVaraTithiYogaTypes = []VaraTithiYogaType{
 	YogaSiddha, YogaAmrita,
 	YogaDagdha, YogaVisha, YogaHutasana, YogaKrakacha, YogaSamvartaka,
-}
-
-type YogaPolarity string
-
-const (
-	PolarityAuspicious   YogaPolarity = "auspicious"
-	PolarityInauspicious YogaPolarity = "inauspicious"
-)
-
-type VaraTithiYoga struct {
-	Type     VaraTithiYogaType `json:"type"`
-	Polarity YogaPolarity      `json:"polarity"`
 }
 
 type varaTable [7][]int

@@ -32,7 +32,7 @@ the narrower one wins.
 
 ```
 source/ts/        the npm package
-source/go/        the Go module: panchang/ is the public API, internal/ the port
+source/go/        the Go module: panchang/ and types/ are the public API, internal/ the port
 testdata/         golden files, shared by both languages
 generate/         cross-language generators and their research notes
 ci/               the gates

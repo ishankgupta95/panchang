@@ -1,6 +1,6 @@
 package calendar
 
-import "github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+import "github.com/ishankgupta95/panchang/source/go/v5/types"
 
 func ReadMoonPhasesYearRange(source AnyMoonPhasesFile) MuhurtaYearRangeLike {
 	return MuhurtaYearRangeLike{Start: source.Meta.StartYear, End: source.Meta.EndYear}

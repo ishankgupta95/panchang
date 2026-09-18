@@ -1,3 +1,6 @@
+// Package symcheck is the symbol-level correspondence gate. The file-level check
+// in treecheck cannot see a missing function inside a file that is present, which
+// is how one function survived four porting stages unnoticed.
 package symcheck
 
 import (
@@ -171,6 +174,12 @@ func GoPathFor(ts string) (string, bool) {
 	rel := strings.TrimPrefix(ts, tsRoot)
 	dir, base := path.Split(rel)
 	base = strings.ToLower(strings.TrimSuffix(base, ".ts")) + ".go"
+	// The shared types live at the module root rather than under internal/, so
+	// that their fields and methods render on pkg.go.dev and a caller can
+	// import them. Everything else is implementation and stays internal.
+	if dir == "types/" {
+		return path.Join(goRoot, dir, base), true
+	}
 	return path.Join(goRoot+"internal", dir, base), true
 }
 

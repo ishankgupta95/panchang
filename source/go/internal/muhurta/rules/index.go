@@ -1,3 +1,5 @@
+// Package rules holds the stock muhurta rule for each occasion the library ships,
+// keyed by occasion name.
 package rules
 
 import "github.com/ishankgupta95/panchang/source/go/v5/internal/muhurta"

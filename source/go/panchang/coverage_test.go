@@ -2,6 +2,7 @@ package panchang
 
 import (
 	"os"
+	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -56,28 +57,58 @@ func TestDeprecatedAliasesPointAtSomethingCovered(t *testing.T) {
 	}
 }
 
+// TestCoveredNamesExist checks that every TypeScript barrel export the table
+// claims is ported really is declared on the Go side. Functions and methods live
+// in panchang.go; the types and their constants live in the shared types
+// package, which is why this reads both trees.
 func TestCoveredNamesExist(t *testing.T) {
-	src, err := os.ReadFile(repopath.Go("panchang", "panchang.go"))
+	facade, err := os.ReadFile(repopath.Go("panchang", "panchang.go"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	text := regexp.MustCompile(`[ \t]+`).ReplaceAllString(string(src), " ")
+	typeFiles, err := filepath.Glob(repopath.Go("types", "*.go"))
+	if err != nil || len(typeFiles) == 0 {
+		t.Fatalf("no files in the types package: %v", err)
+	}
+	var shared strings.Builder
+	for _, f := range typeFiles {
+		if strings.HasSuffix(f, "_test.go") {
+			continue
+		}
+		b, err := os.ReadFile(f)
+		if err != nil {
+			t.Fatal(err)
+		}
+		shared.Write(b)
+	}
+	squash := func(s string) string {
+		return regexp.MustCompile(`[ \t]+`).ReplaceAllString(s, " ")
+	}
+	facadeText, sharedText := squash(string(facade)), squash(shared.String())
+
 	for ts, goName := range covered {
-		var want string
+		var want, where string
+		text := facadeText
 		switch {
 		case strings.HasPrefix(goName, "(*Session)."):
-			want = "func (s *Session) " + strings.TrimPrefix(goName, "(*Session).") + "("
+			want, where = "func (s *Session) "+strings.TrimPrefix(goName, "(*Session).")+"(", "panchang.go"
 		case strings.HasPrefix(goName, "type "):
-			want = strings.TrimPrefix(goName, "type ") + " = "
+			want, where, text = "type "+bare(goName, "type ")+" ", "the types package", sharedText
 		case strings.HasPrefix(goName, "const "):
-			want = strings.TrimPrefix(goName, "const ") + " = "
+			want, where, text = " "+bare(goName, "const ")+" ", "the types package", sharedText
 		default:
-			want = "func " + goName + "("
+			want, where = "func "+goName+"(", "panchang.go"
 		}
 		if !strings.Contains(text, want) {
-			t.Errorf("%s maps to %s, but panchang.go declares no %q", ts, goName, want)
+			t.Errorf("%s maps to %s, but %s declares no %q", ts, goName, where, want)
 		}
 	}
+}
+
+// bare strips the table's kind prefix and the types. qualifier, leaving the
+// identifier as it is spelled at its declaration.
+func bare(goName, prefix string) string {
+	return strings.TrimPrefix(strings.TrimPrefix(goName, prefix), "types.")
 }
 
 func parseBarrelExports(t *testing.T) []string {
@@ -120,9 +151,9 @@ var covered = map[string]string{
 	"MODERN_REFERENCE":                 "ModernReference",
 	"CHARA_RASHI_YEARS":                "CharaRashiYears",
 	"GRAHA_ABBR":                       "GrahaAbbr",
-	"IST_OFFSET_MINUTES":               "const ISTOffsetMinutes",
-	"IST_TIMEZONE":                     "const ISTTimezone",
-	"PanchangError":                    "type Error",
+	"IST_OFFSET_MINUTES":               "const types.ISTOffsetMinutes",
+	"IST_TIMEZONE":                     "const types.ISTTimezone",
+	"PanchangError":                    "type types.PanchangError",
 	"SAMA_PADA_RASHIS":                 "SamaPadaRashis",
 	"STOCK_MUHURTA_RULES":              "StockMuhurtaRules",
 	"TRADITIONAL_REFERENCE":            "TraditionalReference",

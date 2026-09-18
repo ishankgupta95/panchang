@@ -1,29 +1,17 @@
+// Package muhurta scores a day against a rule: which angas help, which hurt and
+// which conditions veto the day outright, plus the pre-computed muhurta tables.
 package muhurta
 
 import (
+	"context"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
-
-type BuildMuhurtaTableOptions struct {
-	Rule                  MuhurtaRule
-	Location              types.GeoLocation
-	TimezoneOffsetMinutes int
-	StartYear             int
-	EndYear               int
-	IncludeFailures       bool
-	Ayanamsa              types.AyanamsaType
-	MasaSystem            types.MasaSystem
-	Language              types.Language
-	ReferenceLocation     string
-	GeneratedAt           string
-	Note                  *string
-}
 
 const DefaultMuhurtaNote = "Pre-computed muhurta table for one occasion at one location. Scores are " +
 	"location- and rule-dependent, so a table built for one place and rule says " +
@@ -59,9 +47,12 @@ func (d *factorDictionary) intern(f MuhurtaFactor) int {
 	return next
 }
 
-func BuildMuhurtaTable(
-	ctx *astronomy.EphemerisCtx, opts BuildMuhurtaTableOptions,
+func BuildMuhurtaTable(ctx context.Context,
+	eph *astronomy.EphemerisCtx, opts BuildMuhurtaTableOptions,
 ) (MuhurtaFile, error) {
+	if err := ctx.Err(); err != nil {
+		return MuhurtaFile{}, err
+	}
 	ayanamsa := opts.Ayanamsa
 	if ayanamsa == "" {
 		ayanamsa = types.Lahiri
@@ -95,11 +86,14 @@ func BuildMuhurtaTable(
 	years := map[string][]PackedMuhurtaTableDay{}
 
 	for year := opts.StartYear; year <= opts.EndYear; year++ {
+		if err := ctx.Err(); err != nil {
+			return MuhurtaFile{}, err
+		}
 		off := int64(opts.TimezoneOffsetMinutes) * 60_000
 		startMs := types.DateUTC(year, 0, 1).Ms() - off
 		endMs := types.DateUTC(year, 11, 31).Ms() + dayMs - 1 - off
 
-		scored, err := ComputeAuspiciousDatesInRange(ctx, opts.Rule, startMs, endMs, opts.Location,
+		scored, err := ComputeAuspiciousDatesInRange(ctx, eph, opts.Rule, startMs, endMs, opts.Location,
 			MuhurtaScoreOptions{
 				Timezone:        types.TimezoneOffset(opts.TimezoneOffsetMinutes),
 				Ayanamsa:        ayanamsa,

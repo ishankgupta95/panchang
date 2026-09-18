@@ -1,23 +1,14 @@
 package calendar
 
 import (
+	"context"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
-
-type BuildMoonPhasesTableOptions struct {
-	TimezoneOffsetMinutes int
-	StartYear             int
-	EndYear               int
-	Languages             []FestivalsTableLanguage
-	ReferenceLocation     string
-	GeneratedAt           string
-	Note                  *string
-}
 
 const DefaultMoonPhasesNote = "Pre-computed Moon-phase table (new / first quarter / full / last quarter). " +
 	"Phases are astronomical instants, the same worldwide; the date column is " +
@@ -64,9 +55,12 @@ func makeMoonPhaseDictEntry(
 	return MoonPhaseDictEntry{Phase: phase, Name: Localized(namePairs...), Description: &desc}
 }
 
-func BuildMoonPhasesTable(
-	ctx *astronomy.EphemerisCtx, opts BuildMoonPhasesTableOptions,
+func BuildMoonPhasesTable(ctx context.Context,
+	eph *astronomy.EphemerisCtx, opts BuildMoonPhasesTableOptions,
 ) (MoonPhasesFile, error) {
+	if err := ctx.Err(); err != nil {
+		return MoonPhasesFile{}, err
+	}
 	languages := opts.Languages
 	if languages == nil {
 		languages = AllTableLanguages
@@ -88,7 +82,7 @@ func BuildMoonPhasesTable(
 	windowStartMs := types.DateUTC(opts.StartYear, 0, 1).Ms() - 2*dayMs
 	windowEndMs := types.DateUTC(opts.EndYear, 11, 31).Ms() + dayMs - 1 + 2*dayMs
 
-	events, err := astronomy.ComputeMoonPhasesInRange(ctx, windowStartMs, windowEndMs)
+	events, err := astronomy.ComputeMoonPhasesInRange(ctx, eph, windowStartMs, windowEndMs)
 	if err != nil {
 		return MoonPhasesFile{}, err
 	}
@@ -96,6 +90,9 @@ func BuildMoonPhasesTable(
 	dict := make([]MoonPhaseDictEntry, 0, len(PhaseOrder))
 	dictIndex := map[MoonPhaseTableName]int{}
 	for i, phase := range PhaseOrder {
+		if err := ctx.Err(); err != nil {
+			return MoonPhasesFile{}, err
+		}
 		dict = append(dict, makeMoonPhaseDictEntry(phase, languages))
 		dictIndex[phase] = i
 	}

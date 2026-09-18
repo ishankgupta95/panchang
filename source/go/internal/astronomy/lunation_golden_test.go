@@ -1,14 +1,15 @@
 package astronomy
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
 	"math"
 	"testing"
 
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 type lunationGolden struct {
@@ -316,7 +317,7 @@ func TestMoonPhasesMatchTypeScript(t *testing.T) {
 	for _, c := range g.PhasesInRange {
 		startMs := utcMS(c.Year, 0, 1)
 		endMs := utcMS(c.Year, 11, 31) + 23*3600_000 + 59*60_000 + 59*1000 + 999
-		got, err := ComputeMoonPhasesInRange(ctx, startMs, endMs)
+		got, err := ComputeMoonPhasesInRange(context.Background(), ctx, startMs, endMs)
 		if err != nil {
 			t.Fatalf("%d: %v", c.Year, err)
 		}
@@ -355,7 +356,7 @@ func TestMoonPhasesMatchTypeScript(t *testing.T) {
 		if err := json.Unmarshal(c.Timezone, &tz); err != nil {
 			t.Fatalf("timezone %s: %v", c.Timezone, err)
 		}
-		got, err := ComputeMoonPhasesForYear(ctx, c.Year, MoonPhasesForYearOptions{Timezone: tz})
+		got, err := ComputeMoonPhasesForYear(context.Background(), ctx, c.Year, MoonPhasesForYearOptions{Timezone: tz})
 		if err != nil {
 			t.Fatalf("%d %s: %v", c.Year, c.Timezone, err)
 		}

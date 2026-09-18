@@ -1,106 +1,22 @@
 package muhurta
 
 import (
+	"context"
 	"fmt"
 	"sort"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/core"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 const dayMs int64 = 24 * 3600_000
 
-type BhadraMode string
-
-const (
-	BhadraIgnore   BhadraMode = "ignore"
-	BhadraPenalize BhadraMode = "penalize"
-	BhadraExclude  BhadraMode = "exclude"
-)
-
 var AllBhadraModes = []BhadraMode{BhadraIgnore, BhadraPenalize, BhadraExclude}
 
-type Paksha string
-
-const (
-	PakshaShukla  Paksha = "shukla"
-	PakshaKrishna Paksha = "krishna"
-)
-
-type MuhurtaRule struct {
-	Occasion string
-	Name     string
-
-	AuspiciousTithis       []int
-	InauspiciousTithis     []int
-	AuspiciousNakshatras   []int
-	InauspiciousNakshatras []int
-	AuspiciousVaras        []int
-	InauspiciousVaras      []int
-	AuspiciousYogas        []int
-	InauspiciousYogas      []int
-
-	Bhadra            *BhadraMode
-	ExcludeBhadra     bool
-	ExcludeEkadashi   bool
-	RequirePaksha     Paksha
-	ExcludeAdhikaMasa bool
-	ExcludeEclipse    bool
-	ExcludeGandaMula  bool
-	ExcludePanchaka   bool
-	VaraTithiYogas    *bool
-}
-
-func (r MuhurtaRule) resolvedBhadra() BhadraMode {
-	if r.Bhadra != nil {
-		return *r.Bhadra
-	}
-	if r.ExcludeBhadra {
-		return BhadraExclude
-	}
-	return BhadraIgnore
-}
-
-func (r MuhurtaRule) scoresVaraTithiYogas() bool {
-	return r.VaraTithiYogas == nil || *r.VaraTithiYogas
-}
-
-type MuhurtaScore struct {
-	Date    types.JSDate    `json:"date"`
-	Score   int             `json:"score"`
-	Passes  bool            `json:"passes"`
-	Reasons []string        `json:"reasons"`
-	Factors []MuhurtaFactor `json:"factors"`
-}
-
-type MuhurtaDay struct {
-	MuhurtaScore
-	Panchang types.DailyPanchangResult `json:"panchang"`
-}
-
-type MuhurtaScoreOptions struct {
-	Timezone        types.Timezone
-	Ayanamsa        types.AyanamsaType
-	Language        types.Language
-	MasaSystem      types.MasaSystem
-	IncludeFailures bool
-}
-
-func (o MuhurtaScoreOptions) panchangOptions() core.PanchangOptions {
-	return core.PanchangOptions{
-		InstantPanchangOptions: core.InstantPanchangOptions{
-			Ayanamsa:   o.Ayanamsa,
-			Language:   o.Language,
-			MasaSystem: o.MasaSystem,
-		},
-		Timezone: o.Timezone,
-	}
-}
-
 func ScoreMuhurta(
-	ctx *astronomy.EphemerisCtx,
+	eph *astronomy.EphemerisCtx,
 	dateMs int64,
 	location types.GeoLocation,
 	rule MuhurtaRule,
@@ -112,11 +28,11 @@ func ScoreMuhurta(
 	if err := utils.ValidateLocation(location); err != nil {
 		return MuhurtaScore{}, err
 	}
-	opts := options.panchangOptions()
+	opts := scoreOptionsPanchangOptions(options)
 	opts.Sections = core.Sections(core.SectionEclipse, core.SectionLunarWindows)
 	opts.SectionsGiven = true
 
-	p, ok, err := core.GetDailyPanchang(ctx, dateMs, location, opts, core.NatalResolvers{})
+	p, ok, err := core.GetDailyPanchang(eph, dateMs, location, opts, core.NatalResolvers{})
 	if err != nil {
 		return MuhurtaScore{}, err
 	}
@@ -132,13 +48,16 @@ func ScoreMuhurta(
 	return scoreFromPanchang(p, rule)
 }
 
-func ComputeAuspiciousDatesInRange(
-	ctx *astronomy.EphemerisCtx,
+func ComputeAuspiciousDatesInRange(ctx context.Context,
+	eph *astronomy.EphemerisCtx,
 	rule MuhurtaRule,
 	startMs, endMs int64,
 	location types.GeoLocation,
 	options MuhurtaScoreOptions,
 ) ([]MuhurtaDay, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if err := utils.ValidateDate(startMs); err != nil {
 		return nil, err
 	}
@@ -156,8 +75,11 @@ func ComputeAuspiciousDatesInRange(
 
 	out := []MuhurtaDay{}
 	for t := startMs; t <= endMs; t += dayMs {
-		p, ok, err := core.GetDailyPanchang(ctx, t, location,
-			options.panchangOptions(), core.NatalResolvers{})
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		p, ok, err := core.GetDailyPanchang(eph, t, location,
+			scoreOptionsPanchangOptions(options), core.NatalResolvers{})
 		if err != nil {
 			return nil, err
 		}
@@ -192,7 +114,7 @@ func scoreFromPanchang(p types.DailyPanchangResult, rule MuhurtaRule) (MuhurtaSc
 	yogaAtSunrise := p.Angas.Yogas[0].Index
 	varaIdx := p.Angas.Vara.Index
 
-	bhadraMode := rule.resolvedBhadra()
+	bhadraMode := ruleResolvedBhadra(rule)
 
 	if bhadraMode == BhadraExclude && p.Inauspicious.Bhadra != nil {
 		return zero(p.Date, "Bhadra Kala active on this day", "bhadra"), nil
@@ -260,7 +182,7 @@ func scoreFromPanchang(p types.DailyPanchangResult, rule MuhurtaRule) (MuhurtaSc
 		}
 	}
 
-	if rule.scoresVaraTithiYogas() {
+	if ruleScoresVaraTithiYogas(rule) {
 		yogas, err := ComputeVaraTithiYogas(varaIdx, tithiAtSunrise)
 		if err != nil {
 			return MuhurtaScore{}, err
@@ -329,13 +251,16 @@ func zero(date types.JSDate, reason, code string) MuhurtaScore {
 	}
 }
 
-func ComputeAuspiciousDatesForYear(
-	ctx *astronomy.EphemerisCtx,
+func ComputeAuspiciousDatesForYear(ctx context.Context,
+	eph *astronomy.EphemerisCtx,
 	year int,
 	rule MuhurtaRule,
 	location types.GeoLocation,
 	options MuhurtaScoreOptions,
 ) ([]MuhurtaDay, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	offsetMinutes, err := utils.ResolveUtcOffset(options.Timezone, types.DateUTC(year, 6, 1).Ms())
 	if err != nil {
 		return nil, err
@@ -343,15 +268,16 @@ func ComputeAuspiciousDatesForYear(
 	off := int64(offsetMinutes) * 60_000
 	startMs := types.DateUTC(year, 0, 1).Ms() - off
 	endMs := types.DateUTC(year, 11, 31).Ms() + dayMs - 1 - off
-	return ComputeAuspiciousDatesInRange(ctx, rule, startMs, endMs, location, options)
+	return ComputeAuspiciousDatesInRange(ctx, eph, rule, startMs, endMs, location, options)
 }
 
 func FindAuspiciousDates(
-	ctx *astronomy.EphemerisCtx,
+	ctx context.Context,
+	eph *astronomy.EphemerisCtx,
 	rule MuhurtaRule,
 	startMs, endMs int64,
 	location types.GeoLocation,
 	options MuhurtaScoreOptions,
 ) ([]MuhurtaDay, error) {
-	return ComputeAuspiciousDatesInRange(ctx, rule, startMs, endMs, location, options)
+	return ComputeAuspiciousDatesInRange(ctx, eph, rule, startMs, endMs, location, options)
 }

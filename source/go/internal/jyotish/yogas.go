@@ -1,12 +1,6 @@
 package jyotish
 
-import "github.com/ishankgupta95/panchang/source/go/v5/internal/types"
-
-type ComputeYogasOptions struct {
-	Types       []types.YogaType
-	Navamsa     *types.DivisionalChart
-	NodeAspects NodeAspects
-}
+import "github.com/ishankgupta95/panchang/source/go/v5/types"
 
 func ComputeYogas(chart *types.BirthChart, options ComputeYogasOptions) ([]types.Yoga, error) {
 	ctx, err := buildYogaContext(chart, options)

@@ -1,17 +1,9 @@
+// Package core assembles the panchang itself: the five angas with their end times,
+// sunrise-to-sunrise day boundaries, muhurta and inauspicious windows, choghadiya
+// and hora periods, calendar labels and the day's festivals.
 package core
 
-import (
-	"errors"
-
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
-)
-
-type LongitudeAt func(ms int64) float64
-
-type NatalResolvers struct {
-	ChandraBalam func(janmaRashiIndex, transitMoonRashiIndex int, lang types.Language) (types.ChandraBalamInfo, error)
-	Tarabala     func(janmaNakshatraIndex, transitNakshatraIndex int, lang types.Language) (types.TarabalaInfo, error)
-}
+import "errors"
 
 var (
 	errMissingChandraBalam = errors.New(

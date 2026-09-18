@@ -2,8 +2,8 @@ package jyotish
 
 import (
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 var DashaYears = [types.DashaLordCount]float64{
@@ -243,8 +243,6 @@ func buildAshtottariAntarDashas(mahaLord types.DashaLord, mahaStart int64, mahaD
 	return out
 }
 
-type YoginiName string
-
 const (
 	YoginiMangala  YoginiName = "Mangala"
 	YoginiPingala  YoginiName = "Pingala"
@@ -275,28 +273,6 @@ var YoginiPlanet = [8]types.DashaLord{
 }
 
 const yoginiTotalYears float64 = 36
-
-type YoginiMahaDasha struct {
-	Yogini      YoginiName         `json:"yogini"`
-	Lord        types.DashaLord    `json:"lord"`
-	StartDate   types.JSDate       `json:"startDate"`
-	EndDate     types.JSDate       `json:"endDate"`
-	Years       float64            `json:"years"`
-	AntarDashas []YoginiAntarDasha `json:"antarDashas"`
-}
-
-type YoginiAntarDasha struct {
-	Yogini    YoginiName      `json:"yogini"`
-	Lord      types.DashaLord `json:"lord"`
-	StartDate types.JSDate    `json:"startDate"`
-	EndDate   types.JSDate    `json:"endDate"`
-}
-
-type YoginiDashaResult struct {
-	CurrentYogini YoginiName        `json:"currentYogini"`
-	CurrentIndex  int               `json:"currentIndex"`
-	MahaDashas    []YoginiMahaDasha `json:"mahaDashas"`
-}
 
 func ComputeYoginiDasha(birthMs int64, moonSiderealLon float64, asOfMs int64) (YoginiDashaResult, error) {
 	if err := utils.ValidateDate(birthMs); err != nil {
@@ -391,20 +367,6 @@ var charaRashiLord = [12]types.DashaLord{
 	types.DashaJupiter,
 }
 
-type CharaMahaDasha struct {
-	Rashi     int             `json:"rashi"`
-	Lord      types.DashaLord `json:"lord"`
-	StartDate types.JSDate    `json:"startDate"`
-	EndDate   types.JSDate    `json:"endDate"`
-	Years     float64         `json:"years"`
-}
-
-type CharaDashaResult struct {
-	CurrentIndex int              `json:"currentIndex"`
-	CurrentRashi int              `json:"currentRashi"`
-	MahaDashas   []CharaMahaDasha `json:"mahaDashas"`
-}
-
 func ComputeCharaDasha(
 	ctx *astronomy.EphemerisCtx,
 	birthMs int64,
@@ -450,29 +412,6 @@ func ComputeCharaDasha(
 var VishamaPadaRashis = [12]bool{0: true, 1: true, 2: true, 6: true, 7: true, 8: true}
 
 var SamaPadaRashis = [12]bool{3: true, 4: true, 5: true, 9: true, 10: true, 11: true}
-
-type NarayanDirection string
-
-const (
-	NarayanForward  NarayanDirection = "forward"
-	NarayanBackward NarayanDirection = "backward"
-)
-
-type NarayanMahaDasha struct {
-	Rashi     int             `json:"rashi"`
-	Lord      types.DashaLord `json:"lord"`
-	StartDate types.JSDate    `json:"startDate"`
-	EndDate   types.JSDate    `json:"endDate"`
-	Years     float64         `json:"years"`
-}
-
-type NarayanDashaResult struct {
-	Direction     NarayanDirection   `json:"direction"`
-	StartingRashi int                `json:"startingRashi"`
-	CurrentIndex  int                `json:"currentIndex"`
-	CurrentRashi  int                `json:"currentRashi"`
-	MahaDashas    []NarayanMahaDasha `json:"mahaDashas"`
-}
 
 func ComputeNarayanDasha(
 	ctx *astronomy.EphemerisCtx,

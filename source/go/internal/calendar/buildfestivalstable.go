@@ -1,30 +1,15 @@
 package calendar
 
 import (
+	"context"
 	"encoding/json"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/core"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
-
-type BuildFestivalsTableOptions struct {
-	Location              types.GeoLocation
-	TimezoneOffsetMinutes int
-	StartYear             int
-	EndYear               int
-	Languages             []FestivalsTableLanguage
-	Ayanamsa              types.AyanamsaType
-	MasaSystem            types.MasaSystem
-	Region                types.FestivalRegion
-	ReferenceLocation     string
-	GeneratedAt           string
-	Note                  *string
-	RegionAliasWarner     core.RegionAliasWarner
-}
 
 const DefaultFestivalsNote = "Pre-computed festival table. Eclipses are excluded because visibility " +
 	"is location-dependent; use getUpcomingEclipses for those."
@@ -54,9 +39,12 @@ func (d *festivalDictionary) intern(entry FestivalDictEntry) int {
 	return next
 }
 
-func BuildFestivalsTable(
-	ctx *astronomy.EphemerisCtx, opts BuildFestivalsTableOptions,
+func BuildFestivalsTable(ctx context.Context,
+	eph *astronomy.EphemerisCtx, opts BuildFestivalsTableOptions,
 ) (FestivalsFile, error) {
+	if err := ctx.Err(); err != nil {
+		return FestivalsFile{}, err
+	}
 	languages := opts.Languages
 	if languages == nil {
 		languages = AllTableLanguages
@@ -91,7 +79,10 @@ func BuildFestivalsTable(
 	dict := newFestivalDictionary()
 
 	for year := opts.StartYear; year <= opts.EndYear; year++ {
-		days, err := buildFestivalYear(ctx, year, opts.Location, opts.TimezoneOffsetMinutes,
+		if err := ctx.Err(); err != nil {
+			return FestivalsFile{}, err
+		}
+		days, err := buildFestivalYear(ctx, eph, year, opts.Location, opts.TimezoneOffsetMinutes,
 			languages, ayanamsa, masaSystem, region, opts.RegionAliasWarner, dict)
 		if err != nil {
 			return FestivalsFile{}, err
@@ -123,7 +114,8 @@ func BuildFestivalsTable(
 }
 
 func buildFestivalYear(
-	ctx *astronomy.EphemerisCtx,
+	ctx context.Context,
+	eph *astronomy.EphemerisCtx,
 	year int,
 	location types.GeoLocation,
 	offsetMinutes int,
@@ -131,7 +123,7 @@ func buildFestivalYear(
 	ayanamsa types.AyanamsaType,
 	masaSystem types.MasaSystem,
 	region types.FestivalRegion,
-	warner core.RegionAliasWarner,
+	warner types.RegionAliasWarner,
 	dict *festivalDictionary,
 ) ([]PackedFestivalTableDay, error) {
 	startMs := types.DateUTC(year, 0, 1).Ms()
@@ -139,7 +131,7 @@ func buildFestivalYear(
 
 	runs := make([][]FestivalDay, len(languages))
 	for i, language := range languages {
-		run, err := ComputeFestivalsInRange(ctx, startMs, endMs, location, YearlyListingOptions{
+		run, err := ComputeFestivalsInRange(ctx, eph, startMs, endMs, location, YearlyListingOptions{
 			Timezone:          types.TimezoneOffset(offsetMinutes),
 			Ayanamsa:          ayanamsa,
 			MasaSystem:        masaSystem,

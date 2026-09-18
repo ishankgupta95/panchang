@@ -1,3 +1,5 @@
+// Package repopath locates the repository root so tests and tooling can reach
+// shared fixtures without depending on the working directory.
 package repopath
 
 import (

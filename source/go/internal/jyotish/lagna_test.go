@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 var lagnaTestPune = types.GeoLocation{Latitude: 18.5204, Longitude: 73.8567}

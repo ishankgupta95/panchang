@@ -6,7 +6,7 @@ import (
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
 	"testing"
 
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 type matchingGolden struct {
@@ -242,9 +242,13 @@ func TestMahendraSetIsClosedUnderReversal(t *testing.T) {
 				"outcome is then direction-dependent and the docblock is wrong", d, 29-d)
 		}
 	}
-	if (13 > 13) == (29-13 > 13) {
-		t.Error("the Sthree Deergha threshold has become direction-independent; it " +
-			"is > 13 on a 1..27 distance and 13 vs 16 must differ")
+	// Distance is (boy - girl + 27) % 27 + 1, so 13 and its reverse 16 sit on
+	// either side of the > 13 threshold and must score differently.
+	at13 := scoreSthreeDeergha(NatalMoon{Nakshatra: 12}, NatalMoon{})
+	at16 := scoreSthreeDeergha(NatalMoon{Nakshatra: 15}, NatalMoon{})
+	if at13.Passes || !at16.Passes {
+		t.Errorf("Sthree Deergha at distance 13 passes=%v, at 16 passes=%v; the threshold "+
+			"is > 13 on a 1..27 distance, so 13 must fail and 16 must pass", at13.Passes, at16.Passes)
 	}
 }
 

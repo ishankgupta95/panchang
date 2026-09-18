@@ -27,11 +27,11 @@ func TestTreeCensusIsPinned(t *testing.T) {
 	const (
 		wantTS        = 119
 		wantDTS       = 1
-		wantGo        = 144
-		wantGoTests   = 80
+		wantGo        = 153
+		wantGoTests   = 82
 		wantPairs     = 117
 		wantAllowedTS = 2
-		wantAllowedGo = 27
+		wantAllowedGo = 36
 	)
 
 	r, err := CheckRepo(repopath.Root())
@@ -89,7 +89,7 @@ func TestGoPathFor(t *testing.T) {
 		{"source/ts/src/jyotish/kpSubLord.ts", "source/go/internal/jyotish/kpsublord.go"},
 		{"source/ts/src/astronomy/series/moonSeries.ts", "source/go/internal/astronomy/series/moonseries.go"},
 		{"source/ts/src/muhurta/rules/index.ts", "source/go/internal/muhurta/rules/index.go"},
-		{"source/ts/src/types/jyotish.ts", "source/go/internal/types/jyotish.go"},
+		{"source/ts/src/types/jyotish.ts", "source/go/types/jyotish.go"},
 	} {
 		got, err := GoPathFor(c.ts)
 		if err != nil {
@@ -121,9 +121,9 @@ func TestMatchPattern(t *testing.T) {
 		{"source/go/parity/**", "source/go/parity/a/b/c.go", true},
 		{"source/go/parity/**", "source/go/parityx/a.go", false},
 		{"source/go/**", "source/go/a.go", true},
-		{"source/go/**/main.go", "source/go/cmd/dump/main.go", true},
+		{"source/go/**/main.go", "source/go/internal/cmd/dump/main.go", true},
 		{"source/go/**/main.go", "source/go/main.go", true},
-		{"source/go/**/main.go", "source/go/cmd/dump/other.go", false},
+		{"source/go/**/main.go", "source/go/internal/cmd/dump/other.go", false},
 	} {
 		if got := MatchPattern(c.pattern, c.path); got != c.want {
 			t.Errorf("MatchPattern(%q, %q) = %v, want %v", c.pattern, c.path, got, c.want)
@@ -301,14 +301,14 @@ func bothTables(goRows, tsRows []string) []byte {
 
 func TestParseAllowlistsReadsBothTables(t *testing.T) {
 	md := bothTables(
-		[]string{"| `internal/store/store.go` | D19 class D |", "| `source/go/cmd/dump/main.go` | the harness |"},
+		[]string{"| `internal/store/store.go` | D19 class D |", "| `source/go/internal/cmd/dump/main.go` | the harness |"},
 		[]string{"| `source/ts/src/index.ts` | a barrel |"},
 	)
 	a, err := ParseAllowlists(md)
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []string{"source/go/internal/store/store.go", "source/go/cmd/dump/main.go"}
+	want := []string{"source/go/internal/store/store.go", "source/go/internal/cmd/dump/main.go"}
 	for i, e := range a.GoOnly {
 		if e.Pattern != want[i] {
 			t.Errorf("GoOnly[%d] = %q, want %q", i, e.Pattern, want[i])
@@ -376,8 +376,8 @@ func TestPortingMDParses(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(a.GoOnly) != 21 {
-		t.Errorf("§3 GoOnly rows = %d, want 21", len(a.GoOnly))
+	if len(a.GoOnly) != 30 {
+		t.Errorf("§3 GoOnly rows = %d, want 30", len(a.GoOnly))
 	}
 	if len(a.TSOnly) != 2 {
 		t.Errorf("§3 TSOnly rows = %d, want 2", len(a.TSOnly))

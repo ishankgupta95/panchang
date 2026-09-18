@@ -3,7 +3,7 @@ package core
 import (
 	"sync"
 
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/types"
+	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
 var legacyRegionAliases = map[types.FestivalRegion]types.FestivalRegion{
@@ -13,8 +13,6 @@ var legacyRegionAliases = map[types.FestivalRegion]types.FestivalRegion{
 }
 
 var regionWarnOnce sync.Map
-
-type RegionAliasWarner func(message string)
 
 func ResolveRegionAlias(region types.FestivalRegion, warn RegionAliasWarner) types.FestivalRegion {
 	if region == "" {
