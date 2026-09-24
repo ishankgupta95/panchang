@@ -225,7 +225,7 @@ func TestStoreStripeCountIsUniform(t *testing.T) {
 		int64Counts[store.HashInt64(dayIndex)&(stripes-1)]++
 		for _, loc := range stressLocations {
 			key := riseSetScanKey(RiseSetSun, loc, dayIndex)
-			stringCounts[store.HashString(key)&(stripes-1)]++
+			stringCounts[hashRiseSetKey(key)&(stripes-1)]++
 		}
 	}
 	check := func(name string, counts []int, total int) {
@@ -237,7 +237,7 @@ func TestStoreStripeCountIsUniform(t *testing.T) {
 		}
 	}
 	check("HashInt64 over day indices", int64Counts, 4096)
-	check("HashString over scan keys", stringCounts, 4096*len(stressLocations))
+	check("hashRiseSetKey over scan keys", stringCounts, 4096*len(stressLocations))
 	t.Logf("%d stripes: day indices %v", stripes, int64Counts)
 }
 

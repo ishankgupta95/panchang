@@ -11,6 +11,19 @@ import (
 
 var AllPakshas = []Paksha{PakshaShukla, PakshaKrishna}
 
+// convertLabelOptions is convertPanchangOptions for the converters, which read
+// only each day's sunrise tithi, vara, lunar month and samvat. None of those
+// depends on the optional sections or on the anga end times, so every section
+// is off and the end times are not searched.
+func convertLabelOptions(o ConvertOptions) types.PanchangOptions {
+	opts := convertPanchangOptions(o)
+	opts.Sections = core.NoSections()
+	opts.SectionsGiven = true
+	computeEndTimes := false
+	opts.ComputeEndTimes = &computeEndTimes
+	return opts
+}
+
 func ConvertGregorianToHindu(
 	ctx *astronomy.EphemerisCtx,
 	dateMs int64,
@@ -23,8 +36,7 @@ func ConvertGregorianToHindu(
 	if err := utils.ValidateLocation(location); err != nil {
 		return HinduCalendarCoords{}, err
 	}
-	panchang, ok, err := core.GetDailyPanchang(ctx, dateMs, location,
-		convertPanchangOptions(options), core.NatalResolvers{})
+	day, ok, err := core.GetDailyLabels(ctx, dateMs, location, convertLabelOptions(options))
 	if err != nil {
 		return HinduCalendarCoords{}, err
 	}
@@ -34,7 +46,7 @@ func ConvertGregorianToHindu(
 				" to Hindu calendar: polar location with no sunrise",
 			types.ErrNoSunrise)
 	}
-	tithiAtSunrise := panchang.Angas.Tithis[0]
+	tithiAtSunrise := day.Tithi
 	paksha := PakshaKrishna
 	if tithiAtSunrise.Index < 15 {
 		paksha = PakshaShukla
@@ -44,13 +56,13 @@ func ConvertGregorianToHindu(
 		Tithi:        tithiAtSunrise.Index + 1,
 		PakshaTithi:  tithiAtSunrise.Number,
 		Paksha:       paksha,
-		MasaName:     panchang.Calendar.Chandramasa.Name,
-		MasaIndex:    panchang.Calendar.Chandramasa.Index,
-		IsAdhika:     panchang.Calendar.Chandramasa.IsAdhika,
-		VikramSamvat: panchang.Calendar.Samvat.VikramSamvat,
-		ShakaSamvat:  panchang.Calendar.Samvat.ShakaSamvat,
-		VaraName:     panchang.Angas.Vara.Name,
-		VaraIndex:    panchang.Angas.Vara.Index,
+		MasaName:     day.Chandramasa.Name,
+		MasaIndex:    day.Chandramasa.Index,
+		IsAdhika:     day.Chandramasa.IsAdhika,
+		VikramSamvat: day.Samvat.VikramSamvat,
+		ShakaSamvat:  day.Samvat.ShakaSamvat,
+		VaraName:     day.Vara.Name,
+		VaraIndex:    day.Vara.Index,
 	}, nil
 }
 
@@ -82,44 +94,77 @@ func ConvertHinduToGregorian(
 		coords.MasaIndex == 0 && coords.Paksha == PakshaKrishna
 	var masaMidMs int64
 	if wrapsYearEnd {
-		masaMidMs = types.DateUTC(ceYear+1, 2, 10).Ms()
+		masaMidMs = utils.UtcDateMs(ceYear+1, 2, 10)
 	} else {
-		masaMidMs = types.DateUTC(ceYear, 2, 25).Ms() + int64(coords.MasaIndex)*30*dayMs
+		masaMidMs = utils.UtcDateMs(ceYear, 2, 25) + int64(coords.MasaIndex)*30*dayMs
 	}
-	startMs := masaMidMs - 50*dayMs
-	endMs := masaMidMs + 60*dayMs
 	targetTithi := coords.PakshaTithi - 1
 	if coords.Paksha == PakshaKrishna {
 		targetTithi += 15
 	}
 
-	opts := convertPanchangOptions(options)
-	out := []types.JSDate{}
-	for t := startMs; t <= endMs; t += dayMs {
-		p, ok, err := core.GetDailyPanchang(ctx, t, location, opts, core.NatalResolvers{})
-		if err != nil {
-			return nil, err
+	opts := convertLabelOptions(options)
+	scan := func(firstMs, lastMs int64) ([]types.JSDate, error) {
+		out := []types.JSDate{}
+		for day := firstMs; day <= lastMs; day += dayMs {
+			if err := utils.ValidateDate(day); err != nil {
+				return nil, err
+			}
+			t, onDay, err := utils.InstantInCivilDay(day, options.Timezone)
+			if err != nil {
+				return nil, err
+			}
+			if !onDay {
+				continue
+			}
+			p, ok, err := core.GetDailyLabels(ctx, t, location, opts)
+			if err != nil {
+				return nil, err
+			}
+			if !ok {
+				continue
+			}
+			tithi := p.Tithi.Index
+			masa := p.Chandramasa.Index
+			if tithi != targetTithi {
+				continue
+			}
+			if masa != coords.MasaIndex {
+				continue
+			}
+			if p.Samvat.VikramSamvat != coords.VikramSamvat {
+				continue
+			}
+			if coords.AdhikaOnly && !p.Chandramasa.IsAdhika {
+				continue
+			}
+			value, err := utils.CivilDayValue(day, options.Timezone)
+			if err != nil {
+				return nil, err
+			}
+			out = append(out, types.Date(value))
 		}
-		if !ok {
-			continue
-		}
-		tithi := p.Angas.Tithis[0].Index
-		masa := p.Calendar.Chandramasa.Index
-		if tithi != targetTithi {
-			continue
-		}
-		if masa != coords.MasaIndex {
-			continue
-		}
-		if p.Calendar.Samvat.VikramSamvat != coords.VikramSamvat {
-			continue
-		}
-		if coords.AdhikaOnly && !p.Calendar.Chandramasa.IsAdhika {
-			continue
-		}
-		out = append(out, p.Date)
+		return out, nil
 	}
-	return out, nil
+
+	out, err := scan(masaMidMs-50*dayMs, masaMidMs+60*dayMs)
+	if err != nil || !wrapsYearEnd {
+		return out, err
+	}
+	// An Adhika Chaitra's Krishna paksha opens the samvat year instead of closing it.
+	adhikaMidMs := utils.UtcDateMs(ceYear, 2, 25)
+	adhikaFirstMs, adhikaLastMs := adhikaMidMs-50*dayMs, adhikaMidMs+60*dayMs
+	if adhikaFirstMs < utils.SupportedStartMs {
+		adhikaFirstMs = utils.SupportedStartMs
+	}
+	if adhikaLastMs > utils.SupportedEndMs {
+		adhikaLastMs = utils.SupportedEndMs
+	}
+	adhika, err := scan(adhikaFirstMs, adhikaLastMs)
+	if err != nil {
+		return nil, err
+	}
+	return append(adhika, out...), nil
 }
 
 const kaliyugaEpochYear = -3101
@@ -154,7 +199,8 @@ func GetHinduNewYear(
 		region == types.RegionKerala ||
 		region == types.RegionPunjab ||
 		region == types.LegacyRegionBengal || region == types.RegionWestBengal ||
-		region == types.RegionAssam
+		region == types.RegionAssam ||
+		region == types.RegionOdisha
 
 	if useSolarAnchor {
 		return findMeshaSankranti(ctx, gregorianYear, region, location, options)
@@ -167,6 +213,8 @@ type chandraMasaState struct {
 	masa   int
 	adhika bool
 	have   bool
+	dayMs  int64
+	tithi  int
 }
 
 func findChaitraShuklaPratipada(
@@ -175,25 +223,44 @@ func findChaitraShuklaPratipada(
 	location types.GeoLocation,
 	options ConvertOptions,
 ) (types.JSDate, bool, error) {
-	amantaOptions := convertPanchangOptions(options)
+	amantaOptions := convertLabelOptions(options)
 	amantaOptions.MasaSystem = types.Amanta
-	startMs := types.DateUTC(gregorianYear, 1, 15).Ms()
-	endMs := types.DateUTC(gregorianYear, 4, 15).Ms()
+	lastMs := utils.UtcDateMs(gregorianYear, 4, 15)
 	var prev chandraMasaState
-	for t := startMs; t <= endMs; t += dayMs {
-		p, ok, err := core.GetDailyPanchang(ctx, t, location, amantaOptions, core.NatalResolvers{})
+	for day := utils.UtcDateMs(gregorianYear, 1, 15); day <= lastMs; day += dayMs {
+		if err := utils.ValidateDate(day); err != nil {
+			return 0, false, err
+		}
+		t, onDay, err := utils.InstantInCivilDay(day, options.Timezone)
+		if err != nil {
+			return 0, false, err
+		}
+		if !onDay {
+			continue
+		}
+		p, ok, err := core.GetDailyLabels(ctx, t, location, amantaOptions)
 		if err != nil {
 			return 0, false, err
 		}
 		if !ok {
 			continue
 		}
-		masa := p.Calendar.Chandramasa.Index
-		adhika := p.Calendar.Chandramasa.IsAdhika
+		masa := p.Chandramasa.Index
+		adhika := p.Chandramasa.IsAdhika
+		tithi := p.Tithi.Index
 		if masa == 0 && !adhika && prev.have && (prev.masa != 0 || prev.adhika) {
-			return p.Date, true, nil
+			kshayaPratipada := prev.dayMs == day-dayMs && !prev.adhika && prev.tithi == 29 && tithi == 1
+			newYear := day
+			if kshayaPratipada {
+				newYear = prev.dayMs
+			}
+			value, err := utils.CivilDayValue(newYear, options.Timezone)
+			if err != nil {
+				return 0, false, err
+			}
+			return types.Date(value), true, nil
 		}
-		prev = chandraMasaState{masa: masa, adhika: adhika, have: true}
+		prev = chandraMasaState{masa: masa, adhika: adhika, have: true, dayMs: day, tithi: tithi}
 	}
 	return 0, false, nil
 }
@@ -205,7 +272,14 @@ const (
 	meshaCivilDay      meshaDayRule = "civil-day"
 	meshaNextSunrise   meshaDayRule = "next-sunrise"
 	meshaCivilDayPlus1 meshaDayRule = "civil-day-plus-1"
+	meshaNightCutoff   meshaDayRule = "night-cutoff"
 )
+
+// panaNightCutoffPerMille is how far into the night, in thousandths of sunset
+// to sunrise, a transit moves Pana Sankranti to the next civil date: the
+// reference almanac's Bhubaneswar dates put it between 305 (2067, same date)
+// and 327 (2028, next date).
+const panaNightCutoffPerMille int64 = 315
 
 func meshaDayRuleFor(region types.FestivalRegion) meshaDayRule {
 	switch region {
@@ -215,6 +289,8 @@ func meshaDayRuleFor(region types.FestivalRegion) meshaDayRule {
 		return meshaNextSunrise
 	case types.LegacyRegionBengal, types.RegionWestBengal:
 		return meshaCivilDayPlus1
+	case types.RegionOdisha:
+		return meshaNightCutoff
 	default:
 		return meshaSankrantiDay
 	}
@@ -227,8 +303,7 @@ func findMeshaSankranti(
 	location types.GeoLocation,
 	options ConvertOptions,
 ) (types.JSDate, bool, error) {
-	offsetMinutes, err := utils.ResolveUtcOffset(options.Timezone,
-		types.DateUTC(gregorianYear, 3, 1).Ms())
+	gridOffset, err := utils.ResolveUtcOffset(options.Timezone, utils.UtcDateMs(gregorianYear, 3, 1))
 	if err != nil {
 		return 0, false, err
 	}
@@ -241,8 +316,8 @@ func findMeshaSankranti(
 		return int(math.Floor(lon/30)) % 12, nil
 	}
 
-	scanStart := types.DateUTC(gregorianYear, 3, 1).Ms() - int64(offsetMinutes)*60_000 - dayMs
-	scanEnd := types.DateUTC(gregorianYear, 3, 20).Ms() - int64(offsetMinutes)*60_000
+	scanStart := utils.UtcDateMs(gregorianYear, 3, 1) - int64(gridOffset)*60_000 - dayMs
+	scanEnd := utils.UtcDateMs(gregorianYear, 3, 20) - int64(gridOffset)*60_000
 	transitMs, haveTransit := int64(0), false
 	prevMs := scanStart
 	prevRashi, err := rashiAt(prevMs)
@@ -277,17 +352,26 @@ func findMeshaSankranti(
 		return 0, false, nil
 	}
 
-	civilDay := func(ms int64, dayShift int) types.JSDate {
-		local := types.Date(utils.UtcToLocalDisplay(ms, offsetMinutes))
-		return types.DateUTC(local.UTCFullYear(), local.UTCMonth(), local.UTCDate()+dayShift)
+	civilDay := func(ms int64, dayShift int) (types.JSDate, bool, error) {
+		offset, err := utils.ResolveUtcOffset(options.Timezone, ms)
+		if err != nil {
+			return 0, false, err
+		}
+		local := types.Date(utils.UtcToLocalDisplay(ms, offset))
+		value, err := utils.CivilDayValue(
+			utils.UtcDateMs(local.UTCFullYear(), local.UTCMonth(), local.UTCDate()+dayShift), options.Timezone)
+		if err != nil {
+			return 0, false, err
+		}
+		return types.Date(value), true, nil
 	}
 
 	rule := meshaDayRuleFor(region)
 	if rule == meshaCivilDay {
-		return civilDay(transitMs, 0), true, nil
+		return civilDay(transitMs, 0)
 	}
 	if rule == meshaCivilDayPlus1 {
-		return civilDay(transitMs, 1), true, nil
+		return civilDay(transitMs, 1)
 	}
 
 	day, err := meshaSunriseAnchor(ctx, transitMs, rule, location)
@@ -295,9 +379,9 @@ func findMeshaSankranti(
 		if !isPolarRiseSetError(err) {
 			return 0, false, err
 		}
-		return civilDay(transitMs, 0), true, nil
+		return civilDay(transitMs, 0)
 	}
-	return civilDay(day, 0), true, nil
+	return civilDay(day, 0)
 }
 
 func meshaSunriseAnchor(
@@ -343,6 +427,19 @@ func meshaSunriseAnchor(
 		astronomy.DefaultRiseSetLimitDays)
 	if err != nil {
 		return 0, err
+	}
+	if rule == meshaNightCutoff {
+		if transitMs <= dayEnd {
+			return transitMs, nil
+		}
+		nextSunrise, err := astronomy.ComputeSunrise(ctx, dayEnd, location, astronomy.DefaultRiseSetLimitDays)
+		if err != nil {
+			return 0, err
+		}
+		if 1000*(transitMs-dayEnd) > panaNightCutoffPerMille*(nextSunrise-dayEnd) {
+			return nextSunrise, nil
+		}
+		return transitMs, nil
 	}
 	if transitMs <= dayEnd {
 		return dayStart, nil

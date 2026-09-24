@@ -86,7 +86,7 @@ function buildAnandadiTable(): readonly (readonly number[])[] {
   return rows;
 }
 
-export const ANANDADI_TABLE: readonly (readonly number[])[] = buildAnandadiTable();
+export const ANANDADI_TABLE: readonly (readonly number[])[] = /* @__PURE__ */ buildAnandadiTable();
 
 /** Quality per Anandadi yoga, 0..27 in canonical name order, following the reference almanac. */
 export const ANANDADI_QUALITY: readonly ('auspicious' | 'inauspicious' | 'neutral')[] = [

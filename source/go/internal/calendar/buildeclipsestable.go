@@ -11,6 +11,7 @@ import (
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
 	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
@@ -133,9 +134,14 @@ func BuildEclipsesTable(ctx context.Context,
 		return EclipsesFile{}, types.Codef(types.ErrInvalidInput,
 			"languages must contain at least one locale")
 	}
+	if err := checkTableLanguages(languages); err != nil {
+		return EclipsesFile{}, err
+	}
+	if _, err := utils.ResolveUtcOffset(types.TimezoneOffset(opts.TimezoneOffsetMinutes), 0); err != nil {
+		return EclipsesFile{}, err
+	}
 
-	windowStartMs := types.DateUTC(opts.StartYear, 0, 1).Ms() - 2*dayMs
-	windowEndMs := types.DateUTC(opts.EndYear, 11, 31).Ms() + dayMs - 1 + 2*dayMs
+	windowStartMs, windowEndMs := utils.PaddedYearWindow(opts.StartYear, opts.EndYear)
 
 	all, err := ComputeEclipsesInRange(ctx, eph, windowStartMs, windowEndMs, opts.Location)
 	if err != nil {

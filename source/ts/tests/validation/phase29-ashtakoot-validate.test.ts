@@ -1,21 +1,32 @@
 /**
- * @tier 1  ProKerala / reference-almanac Guna Milan panels, plus BPHS table invariants
+ * @tier 1  ProKerala / reference-almanac Guna Milan panels, published Yoni tables and competitor Yoni values, plus BPHS table invariants
  *
  * Per-pair published totals are unobtainable: the match tools are form-only
  * with no GET URL and the public APIs are keyed. So the tables are pinned
- * against Brihat Parashara Hora Shastra Ch.7, Brihat Samhita Ch.102 and the
- * almanac's doc pages; pair natal moons come from AstroSage's R-tier corpus.
+ * against Brihat Parashara Hora Shastra Ch.7, Muhurta Chintamani, the published
+ * Yoni chakras and competitor Yoni values in testdata/charts/yoni-koota-references.json,
+ * and the almanac's doc pages; pair natal moons come from AstroSage's R-tier corpus.
  */
 
 import { describe, it, expect } from 'vitest';
 import { computeAshtakoot } from '../../src/jyotish/matching';
+import { computePathuPorutham } from '../../src/jyotish/pathuPorutham';
 import {
-  RASHI_VARNA, VARNA_RANK, NAKSHATRA_GANA, NAKSHATRA_NADI,
+  RASHI_VARNA, VARNA_RANK, NAKSHATRA_GANA, NAKSHATRA_NADI, NAKSHATRA_YONI,
   YONI_SCORE, BHAKOOT_DOSHIC_DISTANCES, INAUSPICIOUS_TARA_REMAINDERS,
 } from '../../src/jyotish/matchingTables';
 import { readTestData } from '../testdata';
 
 const fixtures = readTestData('charts', 'ashtakoot-pairs.json');
+
+type Moon = { rashi: number; nakshatra: number };
+const yoniRefs = readTestData<{
+  _meta: { animal_order: string[] };
+  tables: { pyjhora: { cells: number[][] }; mahidhar_sharma_chakra: { cells: number[][] } };
+  adopted_overrides: { boy: string; girl: string; value: number }[];
+  spot_values: { boy: Moon; girl: Moon; yoni: number; _source: string }[];
+  pathu_yoni_enemy_pairs: { pairs: [string, string][] };
+}>('charts', 'yoni-koota-references.json');
 
 describe('Ashtakoot tables: Varna (BPHS Ch.7)', () => {
   it('rashi-to-varna mapping has 3 of each varna across 12 rashis', () => {
@@ -31,7 +42,7 @@ describe('Ashtakoot tables: Varna (BPHS Ch.7)', () => {
   });
 });
 
-describe('Ashtakoot tables: Yoni (Brihat Samhita Ch.102 + reference almanac)', () => {
+describe('Ashtakoot tables: Yoni (Muhurta Chintamani mahavaira pairs + the published chakra)', () => {
   const ENEMY_PAIRS: Array<[string, string]> = [
     ['horse', 'buffalo'], ['elephant', 'lion'], ['sheep', 'monkey'],
     ['snake', 'mongoose'], ['dog', 'deer'], ['cat', 'rat'], ['cow', 'tiger'],
@@ -40,21 +51,93 @@ describe('Ashtakoot tables: Yoni (Brihat Samhita Ch.102 + reference almanac)', (
     horse: 0, elephant: 1, sheep: 2, snake: 3, dog: 4, cat: 5, rat: 6, cow: 7,
     buffalo: 8, tiger: 9, deer: 10, monkey: 11, mongoose: 12, lion: 13,
   };
+  it('the fixture lists the animals in yoniIndex order', () => {
+    expect(yoniRefs._meta.animal_order.map((a) => yIdx[a])).toEqual([...Array(14).keys()]);
+  });
   for (const [a, b] of ENEMY_PAIRS) {
     it(`enemy yoni pair ${a}-${b} scores 0 (mutual)`, () => {
       expect(YONI_SCORE[yIdx[a]!]![yIdx[b]!]).toBe(0);
       expect(YONI_SCORE[yIdx[b]!]![yIdx[a]!]).toBe(0);
     });
   }
+  it('0 only on the seven mahavaira pairs', () => {
+    let zeros = 0;
+    for (let i = 0; i < 14; i++) for (let j = 0; j < 14; j++) if (YONI_SCORE[i]![j] === 0) zeros++;
+    expect(zeros).toBe(14);
+  });
   it('same-yoni scores 4 (diagonal)', () => {
     for (let i = 0; i < 14; i++) expect(YONI_SCORE[i]![i]).toBe(4);
   });
-  it('symmetric yoni table (mutual scores)', () => {
+  it('every cell is PyJHora\'s YoniArray except the two cells taken from the Mahidhar Sharma print', () => {
+    const overridden = new Map<string, number>();
+    for (const o of yoniRefs.adopted_overrides) {
+      overridden.set(`${yIdx[o.boy]},${yIdx[o.girl]}`, o.value);
+      overridden.set(`${yIdx[o.girl]},${yIdx[o.boy]}`, o.value);
+    }
+    const print = yoniRefs.tables.mahidhar_sharma_chakra.cells;
+    const pyjhora = yoniRefs.tables.pyjhora.cells;
+    for (let i = 0; i < 14; i++) {
+      for (let j = 0; j < 14; j++) {
+        const o = overridden.get(`${i},${j}`);
+        if (o === undefined) {
+          expect(YONI_SCORE[i]![j], `cell ${i},${j}`).toBe(pyjhora[j]![i]);
+        } else {
+          expect(print[i]![j], `print cell ${i},${j}`).toBe(o);
+          expect(YONI_SCORE[i]![j], `cell ${i},${j}`).toBe(o);
+        }
+      }
+    }
+    expect(overridden.size).toBe(4);
+  });
+  it('symmetric: the two directional cells Frawley and saravali carry are resolved one way each', () => {
     for (let i = 0; i < 14; i++) {
       for (let j = 0; j < 14; j++) {
         expect(YONI_SCORE[i]![j]).toBe(YONI_SCORE[j]![i]);
       }
     }
+  });
+});
+
+describe('Ashtakoot: Yoni spot values published by other sources', () => {
+  for (const s of yoniRefs.spot_values) {
+    const boyYoni = NAKSHATRA_YONI[s.boy.nakshatra];
+    const girlYoni = NAKSHATRA_YONI[s.girl.nakshatra];
+    it(`${boyYoni} boy (nak ${s.boy.nakshatra}) x ${girlYoni} girl (nak ${s.girl.nakshatra}) = ${s.yoni}: ${s._source.split(',')[0]}`, () => {
+      const r = computeAshtakoot(s.boy, s.girl);
+      expect(r.koots.find((k) => k.name === 'Yoni')!.score).toBe(s.yoni);
+    });
+  }
+});
+
+describe('Pathu Porutham Yoni: pass/fail on the enemy pairs only', () => {
+  const byAnimal = (a: string): Moon => {
+    const n = NAKSHATRA_YONI.indexOf(a as (typeof NAKSHATRA_YONI)[number]);
+    return { rashi: Math.floor((n * 40) / 3 / 30), nakshatra: n };
+  };
+  const yoniOf = (b: Moon, g: Moon) => computePathuPorutham(b, g).poruthams.find((k) => k.name === 'Yoni')!;
+  for (const [a, b] of yoniRefs.pathu_yoni_enemy_pairs.pairs) {
+    it(`${a} x ${b} fails with a veto, both ways`, () => {
+      for (const [x, y] of [[a, b], [b, a]] as const) {
+        const k = yoniOf(byAnimal(x), byAnimal(y));
+        expect(k.passes).toBe(false);
+        expect(k.veto).toBe(true);
+      }
+    });
+  }
+  it('every other animal pair passes, including the Ashtakoot 1s (cow x snake, horse x tiger) and snake x rat', () => {
+    const enemies = new Set(yoniRefs.pathu_yoni_enemy_pairs.pairs.flatMap(([a, b]) => [`${a},${b}`, `${b},${a}`]));
+    const animals = yoniRefs._meta.animal_order;
+    let passed = 0;
+    for (const a of animals) {
+      for (const b of animals) {
+        if (enemies.has(`${a},${b}`)) continue;
+        const k = yoniOf(byAnimal(a), byAnimal(b));
+        expect(k.passes, `${a} x ${b}`).toBe(true);
+        expect(k.veto).toBeUndefined();
+        passed++;
+      }
+    }
+    expect(passed).toBe(196 - 14);
   });
 });
 
@@ -88,12 +171,12 @@ describe('Ashtakoot tables: Tara inauspicious remainders', () => {
 });
 
 describe('Ashtakoot: independent Yoni cross-check (NeeleshRoy/ashtakoot)', () => {
-  it('Yoni: nak 17×26 (Anuradha/deer × U.Bhadrapada/cow) = 2', () => {
+  it('Yoni: Anuradha (deer) x U.Bhadrapada (cow) = 3, NeeleshRoy\'s own deer x cow cell', () => {
     const r = computeAshtakoot(
       { rashi: 7, nakshatra: 16 },   // Anuradha
       { rashi: 11, nakshatra: 25 },  // U. Bhadrapada
     );
-    expect(r.koots.find((k) => k.name === 'Yoni')!.score).toBe(2);
+    expect(r.koots.find((k) => k.name === 'Yoni')!.score).toBe(3);
   });
 });
 

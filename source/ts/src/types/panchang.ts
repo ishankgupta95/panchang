@@ -47,7 +47,12 @@ export interface DailySun extends SunPosition {
   ratrimanaMinutes: number;
 }
 
-/** `null` when the `'moonTimes'` section was skipped, and on the ~one day a month with no rise or set in the window. */
+/**
+ * `rise` is the first moonrise of the local calendar day; `set` is the first moonset after it,
+ * or the day's own first moonset when there is no rise. Each is `null` on the ~one day a month
+ * the Moon does not rise (or, with no rise, does not set) that day. `set` also needs the
+ * `'moonTimes'` section; `rise` is filled when `'moonTimes'` or `'festivals'` is requested.
+ */
 export interface DailyMoon extends MoonPosition {
   rise: Date | null;
   set: Date | null;
@@ -86,6 +91,7 @@ export interface DailyCalendarLabels extends CalendarLabels {
 export interface MuhurtaWindows {
   /** The 8th of 15 day-muhurtas, on solar noon. `null` on Wednesday, held inauspicious. */
   abhijit: TimePeriod | null;
+  /** The 14th of 15 night-muhurtas: two to one night-muhurta before sunrise, the night being sunset to next sunrise; its midpoint is `pratahSandhya.start`. */
   brahma: TimePeriod;
   vijaya: TimePeriod;
   godhuli: TimePeriod;
@@ -150,6 +156,7 @@ export interface DailyPanchangResult {
   specialYogas: SpecialYogaInfo[];
   anandadiYoga: AnandadiYogaInfo;
   festivals: FestivalInfo[];
+  /** A lunar eclipse peaking in the day, or a solar eclipse first seen in it (see `getEclipseDuringDay`); `null` when none or the `'eclipse'` section was skipped. */
   eclipse: EclipseInfo | null;
   /** `null` unless `options.janmaRashi` was provided. */
   chandraBalam: ChandraBalamInfo | null;

@@ -3,6 +3,7 @@ package core
 import (
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/store"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
 	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
@@ -31,8 +32,8 @@ func ChaitraNewMoon(ctx *astronomy.EphemerisCtx, gregYear int) (int64, error) {
 		return cached, nil
 	}
 
-	ref := types.DateUTC(gregYear, 0, 20).Ms()
-	result := types.DateUTC(gregYear, 2, 22).Ms()
+	ref := utils.UtcDateMs(gregYear, 0, 20)
+	result := utils.UtcDateMs(gregYear, 2, 22)
 	for i := 0; i < 6; i++ {
 		bounds, err := astronomy.BoundingNewMoons(ctx, ref)
 		if err != nil {

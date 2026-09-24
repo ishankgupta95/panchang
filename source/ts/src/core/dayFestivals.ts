@@ -1,16 +1,20 @@
 import { computeSunrise, computeSunset } from '../astronomy/sunrise';
 import { getMoonrise } from '../astronomy/moonrise';
+import { searchMoonPhase } from '../astronomy/lunation';
 import { PanchangError } from '../types/errors';
 import { nakshatraOf, TOTAL_TITHIS } from '../utils/constants';
+import { normalize360 } from '../utils/angle';
 import { utcToLocalDisplay } from '../utils/timezone';
 import { getTithiIndexFromLons } from './tithi';
-import { computeFestivals, type FestivalDateRule } from './festivals';
+import { computeFestivals, type DayGeometry, type FestivalDateRule, type KalaDay } from './festivals';
 import { resolveRegionAlias } from './regionAlias';
 import { resolveMasaName } from '../i18n/resolver';
 import type { GeoLocation } from '../types/location';
 import type { FestivalRegion, Language, LegacyFestivalRegion } from '../types/options';
 import type { ChandraMasaInfo, FestivalInfo, UtcWindow } from '../types/elements';
 import type { PanchangTranslations } from '../i18n/types';
+
+const DAY_MS = 86_400_000;
 
 export interface DayFestivalInputs {
   sunriseUtc: Date;
@@ -84,12 +88,6 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
   }
 
   const nakshatraAt = (d: Date) => nakshatraOf(getMoon(d));
-  const nakshatraIndicesInDay = new Set<number>([
-    nakshatraAt(sunriseUtc),
-    nakshatraAt(madhyahnaUtc),
-    nakshatraAt(sunsetUtc),
-    nakshatraAt(nishitaUtc),
-  ]);
   const nakshatraByRule: Partial<Record<FestivalDateRule, number>> = {
     madhyahna: nakshatraAt(madhyahnaUtc),
     aparahna: nakshatraAt(aparahnaUtc),
@@ -237,6 +235,88 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
     }
   }
 
+  const rashiAt = (d: Date): number => Math.floor(getSun(d) / 30) % 12;
+  const nakshatraAtSunrise = nakshatraOf(siderealMoonAtSunrise);
+  const nakshatraAtSunset = nakshatraAt(sunsetUtc);
+  const nextDayNakshatraIndex = nakshatraAt(nextSunriseUtc);
+
+  const KRITTIKA = 2;
+  const VRISCHIKA = 7;
+  /** Krittika's first sunrise-or-sunset day; a transit touching neither (polar) belongs to the day holding it. */
+  const masikKarthigaiToday =
+    (nakshatraAt(yesterdaySunsetUtc) !== KRITTIKA &&
+      (nakshatraAtSunrise === KRITTIKA || nakshatraAtSunset === KRITTIKA)) ||
+    (nakshatraAtSunrise === KRITTIKA - 1 && nakshatraAtSunset !== KRITTIKA &&
+      nextDayNakshatraIndex === KRITTIKA + 1);
+  /** Sunset of the Masik Karthigai day of the first Krittika transit from `startDays` days away, or null. */
+  const masikKarthigaiSunsetFrom = (startDays: number): Date | null => {
+    try {
+      let rise = computeSunrise(new Date(sunriseUtc.getTime() + startDays * DAY_MS - 2 * 3600_000), location);
+      for (let i = 0; i < 10; i++) {
+        const set = computeSunset(rise, location);
+        const nextRise = computeSunrise(set, location);
+        const riseNakshatra = nakshatraAt(rise);
+        if (riseNakshatra === KRITTIKA || nakshatraAt(set) === KRITTIKA ||
+            (riseNakshatra === KRITTIKA - 1 && nakshatraAt(nextRise) === KRITTIKA + 1)) {
+          return set;
+        }
+        rise = nextRise;
+      }
+    } catch { /* polar: no such day */ }
+    return null;
+  };
+  /** In-month full moon first, then the nearer full moon; ties go to the earlier day. */
+  const karthigaiDeepamKey = (sunset: Date): [number, number] => {
+    const full = searchMoonPhase(180, new Date(sunset.getTime() - 5 * DAY_MS), 10);
+    if (full === null) return [1, Infinity];
+    return [rashiAt(full) === VRISCHIKA ? 0 : 1, Math.abs(full.getTime() - sunset.getTime())];
+  };
+  const karthigaiDeepamToday = (): boolean => {
+    if (rashiAtSunset !== VRISCHIKA) return false;
+    const mine = karthigaiDeepamKey(sunsetUtc);
+    for (const startDays of [-31, 24]) {
+      const other = masikKarthigaiSunsetFrom(startDays);
+      if (other === null || rashiAt(other) !== VRISCHIKA) continue;
+      const theirs = karthigaiDeepamKey(other);
+      if (theirs[0] < mine[0] ||
+          (theirs[0] === mine[0] && (theirs[1] < mine[1] || (theirs[1] === mine[1] && startDays < 0)))) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  /** Walks sunrises from 20 days ahead while the Sun stays in today's sunrise rashi. */
+  const nakshatraLaterInSolarMonth = (nakshatra: number): boolean => {
+    const before = (nakshatra + 26) % 27;
+    const after = (nakshatra + 1) % 27;
+    try {
+      let prev = computeSunrise(new Date(sunriseUtc.getTime() + 20 * DAY_MS - 2 * 3600_000), location);
+      if (rashiAt(prev) !== rashiAtSunrise) return false;
+      let prevNakshatra = nakshatraAt(prev);
+      for (let i = 0; i < 16; i++) {   // 16 is a backstop; the month test is the exit
+        const next = computeSunrise(new Date(prev.getTime() + 22 * 3600_000), location);
+        const nextNakshatra = nakshatraAt(next);
+        if (prevNakshatra === before && nextNakshatra === after) return true;
+        if (rashiAt(next) !== rashiAtSunrise) return false;
+        if (nextNakshatra === nakshatra && prevNakshatra !== nakshatra) return true;
+        prev = next;
+        prevNakshatra = nextNakshatra;
+      }
+    } catch { /* polar: stop the walk */ }
+    return false;
+  };
+
+  /** Nepali months are solar, and the civil day holding the Sankranti opens the new one. */
+  let varaMasaIndex = chandramasa.index;
+  if (resolveRegionAlias(region) === 'nepal') {
+    const local = new Date(sunriseUtc.getTime() + offsetMinutes * 60_000);
+    const dayEndUtc = new Date(Date.UTC(
+      local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate() + 1,
+    ) - offsetMinutes * 60_000);
+    varaMasaIndex = (rashiAt(dayEndUtc) + 1) % 12;
+  }
+
   let vaisakhiToday = false;
   let vishuToday = false;
   let pohelaBoishakhToday = false;
@@ -340,6 +420,11 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
     const trayodashiIndex = tithiIndexAtSunrise === 10 ? 12 : 27;
     ekadashiTrisprishaYesterday = tithiAtNextSunrise === trayodashiIndex;
   }
+  let ekadashiVriddhaTrisprisha = false;
+  if (ekadashiVriddhaFirstDay) {
+    const trayodashiIndex = tithiIndexAtSunrise === 10 ? 12 : 27;
+    ekadashiVriddhaTrisprisha = tithiAtDayAfterSunrise() === trayodashiIndex;
+  }
 
   const KRISHNA_ASHTAMI = 22;
   const KRISHNA_SAPTAMI = 21;
@@ -384,6 +469,11 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
     janmashtamiNishita = { ashtamiAtNishita, rohiniAtNishita, nextDayClaims, prevDayClaimed };
   }
 
+  const dayGeometry = buildDayGeometry(
+    { sunrise: sunriseUtc.getTime(), sunset: sunsetUtc.getTime(), nextSunrise: nextSunriseUtc.getTime() },
+    location, offsetMinutes, getMoon, getSun,
+  );
+
   const formatClock = (d: Date): string => {
     const hh = String(d.getUTCHours()).padStart(2, '0');
     const mm = String(d.getUTCMinutes()).padStart(2, '0');
@@ -395,6 +485,7 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
       tithiIndex: tithiIndexAtSunrise,
       nakshatraIndex: nakshatraOf(siderealMoonAtSunrise),
       chandraMasaIndex: chandramasa.amantaIndex,
+      varaMasaIndex,
       amantaMasaName: chandramasa.amantaName,
       purnimantaMasaName: chandramasa.purnimantaName,
       isAdhika: chandramasa.isAdhika,
@@ -405,14 +496,20 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
       priorDayTithiByRule,
       priorDayTithiByRuleStart,
       janmashtamiNishita,
-      nakshatraIndicesInDay,
+      masikKarthigaiToday,
+      karthigaiDeepamToday,
       nakshatraByRule,
       nakshatraByRuleStart,
       priorDayNakshatraIndex,
+      nextDayNakshatraIndex,
+      priorDaySolarMasaIndex: rashiAtYesterdaySunrise,
+      nakshatraLaterInSolarMonth,
       remainingPakshaSunriseNakshatras,
       nextDayTithiByRule,
       nextDayNakshatraByRule,
       kshayaTithiIndices,
+      ...(nextDayMasa === undefined ? {} : { nextDayMasa }),
+      dayGeometry,
       ...(nextDayMasaForKshaya === undefined
         ? {}
         : { nextDayMasaIndex: nextDayMasaForKshaya.index, nextDayIsAdhika: nextDayMasaForKshaya.isAdhika }),
@@ -429,6 +526,7 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
       ekadashiVriddhaDwadashiToday,
       ekadashiVriddhaDwadashiTomorrow,
       ekadashiVriddhaFirstDay,
+      ekadashiVriddhaTrisprisha,
       ekadashiTrisprishaToday,
       ekadashiTrisprishaYesterday,
       bhadra: bhadraUtc
@@ -443,4 +541,89 @@ export function computeDayFestivals(input: DayFestivalInputs): FestivalInfo[] {
     (key) => t.festivalNames[key] ?? (t.misc as Record<string, string>)[key] ?? key,
     (idx) => resolveMasaName(idx, lang),
   );
+}
+
+const HOUR_MS = 3600_000;
+/** The elongation solver's fixed bracket grid: one crossing per cell, the same cell whoever asks. */
+const CROSSING_CELL_MS = 6 * HOUR_MS;
+const CROSSING_TOLERANCE_MS = 1000;
+/** Mean Moon-Sun elongation rate, degrees per day: only seeds the grid walk. */
+const MEAN_ELONGATION_DEG_PER_DAY = 12.19;
+
+function isPolarRiseSet(e: unknown): boolean {
+  return e instanceof PanchangError && (e.code === 'NO_SUNRISE' || e.code === 'NO_SUNSET');
+}
+
+/**
+ * Days are chained from today through each day's own sunset and next sunrise, the triple `getDailyPanchang`
+ * builds for that day, so every day measures the same windows. A previous sunrise closer than 12 h, or one
+ * whose day does not end at the next day's sunrise, is a polar gap.
+ */
+function buildDayGeometry(
+  today: KalaDay,
+  location: GeoLocation,
+  offsetMinutes: number,
+  getMoon: (d: Date) => number,
+  getSun: (d: Date) => number,
+): DayGeometry {
+  const days = new Map<number, KalaDay | null>([[0, today]]);
+  const day = (k: number): KalaDay | null => {
+    const cached = days.get(k);
+    if (cached !== undefined) return cached;
+    let out: KalaDay | null = null;
+    try {
+      if (k > 0) {
+        const prev = day(k - 1);
+        if (prev !== null) {
+          const sunset = computeSunset(new Date(prev.nextSunrise), location).getTime();
+          const nextSunrise = computeSunrise(new Date(sunset), location).getTime();
+          out = { sunrise: prev.nextSunrise, sunset, nextSunrise };
+        }
+      } else {
+        const next = day(k + 1);
+        if (next !== null) {
+          const sunrise = computeSunrise(new Date(next.sunrise - 26 * HOUR_MS), location).getTime();
+          if (next.sunrise - sunrise >= 12 * HOUR_MS) {
+            const sunset = computeSunset(new Date(sunrise), location).getTime();
+            const nextSunrise = computeSunrise(new Date(sunset), location).getTime();
+            if (nextSunrise === next.sunrise) out = { sunrise, sunset, nextSunrise };
+          }
+        }
+      }
+    } catch (e: unknown) {
+      if (!isPolarRiseSet(e)) throw e;
+    }
+    days.set(k, out);
+    return out;
+  };
+
+  const elongation = (ms: number): number => normalize360(getMoon(new Date(ms)) - getSun(new Date(ms)));
+  const reached = new Map<number, number>();
+  const elongationReaches = (deg: number, nearMs: number): number => {
+    const memo = reached.get(deg);
+    if (memo !== undefined) return memo;
+    const before = (ms: number): boolean => normalize360(elongation(ms) - deg) > 180;
+    const lead = normalize360(deg - elongation(nearMs));
+    const aheadDays = (lead > 180 ? lead - 360 : lead) / MEAN_ELONGATION_DEG_PER_DAY;
+    let lo = Math.floor((nearMs + aheadDays * 86_400_000) / CROSSING_CELL_MS) * CROSSING_CELL_MS;
+    for (let i = 0; i < 64 && !before(lo); i++) lo -= CROSSING_CELL_MS;
+    for (let i = 0; i < 64 && before(lo + CROSSING_CELL_MS); i++) lo += CROSSING_CELL_MS;
+    let hi = lo + CROSSING_CELL_MS;
+    while (hi - lo > CROSSING_TOLERANCE_MS) {
+      const mid = lo + Math.floor((hi - lo) / 2);
+      if (before(mid)) lo = mid;
+      else hi = mid;
+    }
+    reached.set(deg, hi);
+    return hi;
+  };
+
+  return {
+    today,
+    day,
+    tithiAt: (ms) => getTithiIndexFromLons(getMoon(new Date(ms)), getSun(new Date(ms))),
+    nakshatraAt: (ms) => nakshatraOf(getMoon(new Date(ms))),
+    elongationReaches,
+    localDay: (ms) => Math.floor((ms + offsetMinutes * 60_000) / 86_400_000),
+  };
 }

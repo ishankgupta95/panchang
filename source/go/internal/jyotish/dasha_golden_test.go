@@ -77,6 +77,7 @@ type dashaGolden struct {
 		NarayanVarAtPins   []int     `json:"narayanVariableAtPins"`
 		PratyantarOf       gPeriod   `json:"pratyantarOf"`
 		Pratyantar         []gPeriod `json:"pratyantar"`
+		PratyantarIn       []gPeriod `json:"pratyantarIn"`
 	} `json:"sweep"`
 	BoundaryBirthMs      int64   `json:"boundaryBirthMs"`
 	BoundaryBirthMoonLon float64 `json:"boundaryBirthMoonLon"`
@@ -89,10 +90,11 @@ type dashaGolden struct {
 		Yogini              gResult `json:"yogini"`
 	} `json:"boundary"`
 	PratyantarAll []struct {
-		Maha    int             `json:"maha"`
-		Antar   int             `json:"antar"`
-		Lord    types.DashaLord `json:"lord"`
-		Periods []gPeriod       `json:"periods"`
+		Maha      int             `json:"maha"`
+		Antar     int             `json:"antar"`
+		Lord      types.DashaLord `json:"lord"`
+		Periods   []gPeriod       `json:"periods"`
+		PeriodsIn []gPeriod       `json:"periodsIn"`
 	} `json:"pratyantarAll"`
 	FromBirth []struct {
 		Ayanamsa types.AyanamsaType `json:"ayanamsa"`
@@ -757,6 +759,22 @@ func TestVimshottariPratyantarMatchesTypeScript(t *testing.T) {
 			t.Fatalf("ms=%d: %v", s.Ms, err)
 		}
 		comparePeriods(t, "pratyantar@"+itoa(int(s.Ms%100000)), pratyantarPeriods(got), s.Pratyantar)
+
+		vim, err := ComputeVimshottariDasha(s.Ms, s.MoonLon, s.Ms)
+		if err != nil {
+			t.Fatalf("ms=%d: %v", s.Ms, err)
+		}
+		if len(vim.MahaDashas[0].AntarDashas) == 0 {
+			if s.PratyantarIn != nil {
+				t.Errorf("ms=%d: no birth antardasha, TypeScript has pratyantars", s.Ms)
+			}
+			continue
+		}
+		in, err := ComputeVimshottariPratyantarIn(vim.MahaDashas[0], vim.MahaDashas[0].AntarDashas[0])
+		if err != nil {
+			t.Fatalf("ms=%d: %v", s.Ms, err)
+		}
+		comparePeriods(t, "pratyantarIn@"+itoa(int(s.Ms%100000)), pratyantarPeriods(in), s.PratyantarIn)
 	}
 
 	vim, err := ComputeVimshottariDasha(g.BoundaryBirthMs, g.BoundaryBirthMoonLon, g.BoundaryBirthMs)
@@ -774,6 +792,12 @@ func TestVimshottariPratyantarMatchesTypeScript(t *testing.T) {
 		}
 		comparePeriods(t, "pratyantarAll/"+itoa(c.Maha)+"."+itoa(c.Antar),
 			pratyantarPeriods(got), c.Periods)
+		in, err := ComputeVimshottariPratyantarIn(vim.MahaDashas[c.Maha], ad)
+		if err != nil {
+			t.Fatalf("maha %d antar %d: %v", c.Maha, c.Antar, err)
+		}
+		comparePeriods(t, "pratyantarAllIn/"+itoa(c.Maha)+"."+itoa(c.Antar),
+			pratyantarPeriods(in), c.PeriodsIn)
 	}
 	t.Logf("%d sweep pratyantars + %d exhaustive", len(g.Sweep), len(g.PratyantarAll))
 }

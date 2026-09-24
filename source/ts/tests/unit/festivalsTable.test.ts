@@ -158,8 +158,8 @@ describe('buildFestivalsTable (another location)', () => {
 
   it('matches live getFestivalsInRange for the same location', () => {
     const live = getFestivalsInRange(
-      new Date(Date.UTC(SAMPLE_YEAR, 0, 1)),
-      new Date(Date.UTC(SAMPLE_YEAR, 11, 31)),
+      new Date(Date.UTC(SAMPLE_YEAR, 0, 1) - NYC_OFFSET * 60_000),
+      new Date(Date.UTC(SAMPLE_YEAR, 11, 31) - NYC_OFFSET * 60_000),
       NYC,
       { timezone: NYC_OFFSET, ayanamsa: 'lahiri', masaSystem: 'purnimanta', region: 'all', language: 'en' },
     );

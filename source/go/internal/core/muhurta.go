@@ -20,9 +20,11 @@ func ComputeAbhijitMuhurta(sunriseMs, sunsetMs int64, varaIndex *int) (types.Utc
 }
 
 func ComputeBrahmaMuhurta(sunriseMs, sunsetMs int64) types.UtcWindow {
-	dayDurationMs := float64(sunsetMs - sunriseMs)
-	muhurtaDurationMs := dayDurationMs / 30
+	return BrahmaMuhurtaForNight(sunriseMs, 86_400_000-(sunsetMs-sunriseMs))
+}
 
+func BrahmaMuhurtaForNight(sunriseMs, nightDurationMs int64) types.UtcWindow {
+	muhurtaDurationMs := float64(nightDurationMs) / 15
 	endMs := int64(float64(sunriseMs) - muhurtaDurationMs)
 	return types.UtcWindow{
 		StartMs: int64(float64(endMs) - muhurtaDurationMs),

@@ -72,8 +72,8 @@ export function heliocentricRect(body: VsopBody, ttDays: number, out: Float64Arr
 
 /** A chart interleaves five planets over three distinct Earth epochs. */
 const EARTH_MEMO_SIZE = 4;
-const earthMemoKey = new Float64Array(EARTH_MEMO_SIZE).fill(Number.NaN);
-const earthMemoValue = new Float64Array(EARTH_MEMO_SIZE * 3);
+const earthMemoKey = /* @__PURE__ */ (() => new Float64Array(EARTH_MEMO_SIZE).fill(Number.NaN))();
+const earthMemoValue = /* @__PURE__ */ new Float64Array(EARTH_MEMO_SIZE * 3);
 let earthMemoNext = 0;
 
 /** Reads {@link EAR_L_PRECISE}/{@link EAR_B_PRECISE}, not the coarser angles `sun.ts`

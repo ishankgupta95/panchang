@@ -121,10 +121,11 @@ operator.
 |---|---|---|---|
 | `Math.round` | `math.Round` | `jsnum.Round` | JS ties to +∞, Go ties away from zero. Disagree on every negative tie. In `trig.ts`'s Cody-Waite reduction a q one out **flips the sign**. |
 | `Math.hypot` | `math.Hypot` | `jsnum.Hypot2` / `Hypot3` | Different overflow-safe algorithms; V8 uses Kahan-compensated squares. Disagree on **4.4%** of random pairs, and it sits in the rise/set inner loop. |
+| `x.toFixed(n)` | `fmt` `%.nf` | `jsnum.ToFixed` | `%f` rounds an exact binary tie half to even, `toFixed` picks the larger magnitude: 66.625 is `66.62` in Go, `66.63` in JavaScript. Used in the CIRCUMPOLAR message. |
 | `String(x)` | `strconv.FormatFloat(x,'g',-1,64)` | `jsnum.FormatFloat` | Same value, different spelling (`0.000028547284` vs `2.8547284e-05`; `1e20` vs `1e+20`). Required for the G4.6 byte-identical table gate. |
 | `x % y` | `%` (integer-only) or `math.Remainder` | `jsnum.Mod` | `math.Remainder` rounds the quotient to nearest and can return the opposite sign. |
 | `Math.floor(a/b)` | `a / b` | integer floor-division | Go truncates toward zero; they differ for every negative non-multiple. See §1.5. |
-| `new Date(t)` | `int64(math.Round(t))` | `int64(t)` | TimeClip truncates toward zero, and `t` is usually fractional. See §1.5. |
+| `new Date(t)` | `int64(math.Round(t))` | `int64(t)`, after `jsnum.TimeClip(t)` when `t` can be NaN or huge | TimeClip truncates toward zero, and `t` is usually fractional. A NaN or out-of-range `t` gives an Invalid Date; `int64` of it is implementation-defined in Go (0 on arm64). See §1.5. |
 | `x ** n`, n ≥ 3 | n/a | see below | V8's fdlibm `pow`, Go's `math.Pow`, and explicit products are **three different answers**. `x**2` is safe: V8 lowers it to `x*x` and fdlibm special-cases y=2. |
 
 `x ** n` is the one divergence deliberately left open. It appears at 21 sites in
@@ -197,6 +198,13 @@ TypeScript puts `new Date(t)` (usually the caller's closure) rather than
 rounding inside the function that receives the float. `cache.ts`'s Chebyshev
 nodes are at `midMs + halfMs·cos(πk/(n−1))`, fractional at every interior node,
 and every one of them is truncated on the way to the ephemeris.
+
+That holds only for a finite `t` within 8.64e15 ms of the epoch. Past it, or for
+NaN, JavaScript builds an Invalid Date that the next `validateDate` rejects,
+while Go's conversion is implementation-defined: 0 on arm64, a valid 1970
+instant. Where a search can run off the range (the Newton loops in
+`tithiPravesha.ts` and `varshaphala.ts`), test `jsnum.TimeClip(t)` before the
+conversion and return the `INVALID_DATE` error the TypeScript would reach.
 
 ### 1.6 What is *robust* to the divergence, and how to tell
 
@@ -631,6 +639,19 @@ generator too. (The first ΔT golden was 8.6 MB before this.)
   was called with*, and are stronger than the value check they replace) and put
   the end-to-end wiring test in the upper package, where both are in scope.
 
+- **A fast path that skips part of the day must be output-neutral, and pinned
+  as such.** Two callers read only part of a daily panchang and no longer build
+  the rest, in both languages: the yearly festival walk and the calendar
+  converters read each day through `getDailyLabels` / `core.GetDailyLabels`,
+  which runs the daily panchang's own code and returns once the festival list is
+  complete, with the same narrowed sections and end times on both sides. What it skips cannot fail for a
+  validated date and location: every error there is an index assertion on a
+  computed index, a rise or set search past 2^52 ms, or a transition search
+  that element rates rule out. Pinned by `TestDailyLabelsMatchTheFullPanchang`
+  and `TestConverterDaysReadAsTheFullPanchang`, and by the parity dump, which
+  must stay byte-identical. The rise and set caches' struct keys, the zone store
+  and `FormatInZone`'s stack buffer are Go-only in the same way (§4).
+
 - **A `*Local` string is rendered exactly once, at the publishing boundary**
   (D14). `panchang.go`'s `withLocal` is the only place in the tree that turns a
   `UtcWindow` into a `TimePeriod`; every core module emits instants and has no
@@ -679,15 +700,38 @@ generator too. (The first ΔT golden was 8.6 MB before this.)
     the resident set rather than all of it: less disruptive than the TypeScript,
     behaviour-neutral either way, because a cleared entry is rebuilt to the same
     value.
-  - **Keep the TypeScript's key, including that it is a string.** A struct key
-    is faster and allocation-free, and wrong in one way that matters: Go compares
-    float64 map keys with `==`, so a NaN coordinate produces an entry that can
-    never be found again and the store grows to its cap on every call, where JS
-    stringifies it to `"NaN"` and collides harmlessly. Format the components with
-    `jsnum.FormatFloat`/`FormatInt`, never `strconv`: a key that only *usually*
-    matches **splits a cache rather than failing**, so every answer stays correct
-    and every one is computed twice, which no test will notice. A string key is
-    also the only kind that can be pinned against the TypeScript.
+  - **Keep the TypeScript's key: its components, and the exact equality of its
+    string.** A struct of raw float64 fields is wrong in one way that matters:
+    Go compares float64 map keys with `==`, so a NaN coordinate produces an entry
+    that can never be found again and the store grows to its cap on every call,
+    where JS stringifies it to `"NaN"` and collides harmlessly; and a key that
+    only *usually* matches **splits a cache rather than failing**, so every
+    answer stays correct and every one is computed twice, which no test will
+    notice. Where a key is built on every lookup, the rise and set event and scan
+    caches (`riseSetKey`), Go uses a struct whose fields reproduce the string's
+    equality exactly: each number is stored as its bits after the two
+    identifications `jsnum.FormatFloat` makes (-0 is 0, every NaN is one NaN),
+    and the day index as the bits of its double, as `FormatInt` spells two
+    integers alike only when they are one double. Formatting five numbers per
+    lookup had cost 15% of a warm repeated day and 25% of a warm festival
+    year. The strings are still built in the tests and pinned against the
+    TypeScript's, and `TestRiseSetKeyEqualityIsTheStringKeys` pins that the
+    struct keys are equal exactly when the strings are. Every other store keeps
+    its string key.
+  - **Exact-key memos of pure evaluations** (`SearchMoonPhase`, the eclipse
+    finders, the Moon's latitude at a syzygy, `GetPlanetPosition`) are stores of
+    this class, beside the function each wraps. A value is a function of every
+    field of its key (floats keyed by their bits) and of nothing else, so a hit
+    is the bits a miss would compute, whatever ran before it, in any Session.
+    Never widen a key to a neighbourhood: a new-moon search seeded a millisecond
+    differently can end a millisecond apart, so "the lunation already found" is
+    not the same key. `TestEphemerisMemoHitsEqualFreshMisses` and the facade's
+    `TestResultsDoNotDependOnCallOrder` pin both halves.
+  - **A resolved `*time.Location` is kept** (`utils.loadZone`, a store of 1,024):
+    `time.LoadLocation` re-reads and re-parses zoneinfo on every call. It is
+    immutable, so a kept one answers as a new load would; failures and `"Local"`
+    are never kept, and the cap bounds the endless spellings LoadLocation
+    accepts for one zone (`"Asia//Kolkata"`).
   - **Do not let two stores share a backing array.** `riseSet.ts`'s scan and
     event caches hold the same `readonly number[]`, which is safe there and is
     not in Go. Store a copy, return a copy from the exported accessor, and keep

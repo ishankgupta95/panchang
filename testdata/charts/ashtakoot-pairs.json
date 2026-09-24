@@ -1,11 +1,11 @@
 {
   "_meta": {
     "purpose": "Phase 29 Ashtakoot Guna Milan cross-validation pairs.",
-    "rule_basis": "BPHS Ch.7, Brihat Samhita Ch.102, the reference almanac's published per-koot rules. Per-koot table data verified against the reference almanac and saravali.github.io.",
+    "rule_basis": "BPHS Ch.7 and the reference almanac's published per-koot rules. The reference almanac publishes no per-cell tables (its matcher is a form), so no table here was verified against it. The Yoni table is pinned against published chakras and competitor values in testdata/charts/yoni-koota-references.json.",
     "natal_moons": "All 25 celebrity moons sourced from AstroSage R-tier (Reference) charts. See testdata/charts/astrosage-charts.json for provenance.",
     "rashi_naming": "Mesha=0 ... Meena=11",
     "nakshatra_naming": "Ashwini=0 ... Revati=26",
-    "no_self_seeding": "Expected per-koot scores are hand-derived from the canonical published rules, not seeded from panchang-ts output. The library's output is asserted to match. Per-pair derivation is documented in the test docblock.",
+    "no_self_seeding": "This file holds natal moons only, no expected per-koot scores or totals; the sweep asserts structure (koot order, maxima, ranges, sum). No value is seeded from panchang-ts output.",
     "almanac_scrape_status": "The reference almanac's horoscope-match page is form-only (no GET API). A 30+ pair almanac scrape requires manual fixture seeding: the file format is forward-compatible with adding `expected_total` from an almanac scrape per-pair."
   },
   "pairs": [

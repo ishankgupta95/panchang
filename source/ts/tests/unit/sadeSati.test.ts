@@ -74,6 +74,20 @@ describe('computeSadeSati: arc boundaries', () => {
     const result = computeSadeSati((satRashi + 5) % 12, asOf);
     expect(result.nextArcStart!.getTime()).toBeGreaterThan(asOf.getTime());
   });
+
+  it.each([
+    [10, '2027-08-01', '2027-10-22'],
+    [8, '2022-04-30', '2022-07-14'],
+    [11, '2029-09-01', '2029-10-10'],
+  ])('rashi %i on %s: nextArcStart is the retrograde return, not the next full Sade Sati', (rashi, asOf, laterActive) => {
+    const result = computeSadeSati(rashi, new Date(`${asOf}T00:00:00Z`));
+    expect(result.active).toBe(false);
+    const later = new Date(`${laterActive}T00:00:00Z`);
+    expect(computeSadeSati(rashi, later).active).toBe(true);
+    const next = result.nextArcStart!;
+    expect(next.getTime()).toBeLessThanOrEqual(later.getTime());
+    expect(computeSadeSati(rashi, new Date(next.getTime() + 86_400_000)).active).toBe(true);
+  });
 });
 
 describe('computeSadeSati: input validation', () => {

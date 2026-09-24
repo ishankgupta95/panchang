@@ -2,8 +2,8 @@ package calendar
 
 import "github.com/ishankgupta95/panchang/source/go/v5/types"
 
-func ReadMoonPhasesYearRange(source AnyMoonPhasesFile) MuhurtaYearRangeLike {
-	return MuhurtaYearRangeLike{Start: source.Meta.StartYear, End: source.Meta.EndYear}
+func ReadMoonPhasesYearRange(source AnyMoonPhasesFile) TableYearRange {
+	return TableYearRange{Start: source.Meta.StartYear, End: source.Meta.EndYear}
 }
 
 func flattenMoonPhaseDict(
@@ -14,10 +14,7 @@ func flattenMoonPhaseDict(
 		Phase: entry.Phase,
 		Time:  types.Date(epochMs).ISOString(),
 	}
-	if entry.Description != nil {
-		out.Description = entry.Description.Pick(lang)
-		out.HasDescription = true
-	}
+	out.Description = pickDescription(entry.Description, lang)
 	return out
 }
 
@@ -27,10 +24,7 @@ func flattenMoonPhaseV1(
 	out := MoonPhaseTableEntry{
 		Name: raw.Name.Pick(lang), Phase: raw.Phase, Time: raw.Time,
 	}
-	if raw.Description != nil {
-		out.Description = raw.Description.Pick(lang)
-		out.HasDescription = true
-	}
+	out.Description = pickDescription(raw.Description, lang)
 	return out
 }
 

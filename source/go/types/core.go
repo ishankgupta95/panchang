@@ -56,7 +56,9 @@ type InstantPanchangOptions struct {
 	Language Language
 	// ComputeEndTimes solves the anga transition times; nil means true. When
 	// false the instant result's EndTime fields stay nil and each daily anga
-	// list holds only the element current at sunrise, with no times solved.
+	// list holds only the element current at sunrise, with no times given.
+	// The daily SpecialYogas are unaffected: they still cover every tithi
+	// and nakshatra of the day.
 	ComputeEndTimes *bool
 	// MasaSystem selects purnimanta or amanta lunar months; empty means
 	// Purnimanta.
@@ -78,8 +80,9 @@ type InstantPanchangOptions struct {
 }
 
 // PanchangSection names an optional block of the daily panchang that a
-// [SectionSet] can switch off. A skipped section leaves its fields nil or
-// empty, never partly filled.
+// [SectionSet] can switch off. A skipped section leaves its own fields nil
+// or empty, with the couplings each constant states: festivals also fills
+// Moon.Rise and Bhadra, and eclipse adds its entry to Festivals.
 type PanchangSection string
 
 const (

@@ -153,6 +153,9 @@ func findTithiPravesha(
 	const tolDeg = 0.0001
 
 	for iter := 0; iter < 25; iter++ {
+		if !jsnum.TimeClip(t) {
+			return 0, errInvalidDateInstant
+		}
 		t0 := int64(t)
 		moon, err := astronomy.GetSiderealMoonLongitude(ctx, t0, ayanamsaType)
 		if err != nil {
@@ -172,8 +175,16 @@ func findTithiPravesha(
 		t += float64((phaseDelta / moonSunDiffDegPerDay) * 86400_000)
 	}
 
-	return int64(jsnum.Round(t)), nil // half-up, not math.Round
+	t = jsnum.Round(t) // half-up, not math.Round
+	if !jsnum.TimeClip(t) {
+		return 0, errInvalidDateInstant
+	}
+	return int64(t), nil
 }
+
+// errInvalidDateInstant is what TypeScript reports once a search instant has
+// left the Date range or turned NaN: validateDate on the Invalid Date.
+var errInvalidDateInstant = types.NewPanchangError("Invalid Date: Invalid Date", types.ErrInvalidDate)
 
 func ComputeNatalTithiIndexForTest(sunLon, moonLon float64) int {
 	return computeNatalTithiIndex(sunLon, moonLon)

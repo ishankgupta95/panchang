@@ -23,6 +23,9 @@ const (
 
 // AllAyanamsaTypes lists the five AyanamsaType values in declaration order:
 // Lahiri, Raman, Krishnamurti, TrueChitra, Thirukanitham.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllAyanamsaTypes = []AyanamsaType{Lahiri, Raman, Krishnamurti, TrueChitra, Thirukanitham}
 
 // Language selects the language of every user-facing string in a result. An
@@ -38,6 +41,9 @@ const (
 )
 
 // AllLanguages lists LanguageEn then LanguageHi.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllLanguages = []Language{LanguageEn, LanguageHi}
 
 // MasaSystem selects the lunar month convention that fills the Index and
@@ -57,14 +63,17 @@ const (
 )
 
 // AllMasaSystems lists Purnimanta then Amanta.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllMasaSystems = []MasaSystem{Purnimanta, Amanta}
 
 // FestivalRegion narrows the festivals a result reports. [RegionAll], which
 // an empty option value resolves to, applies no filter; any other value
 // keeps the festivals tagged for that region plus those tagged for every
 // region. The region also picks the civil day a Mesha Sankranti new year
-// falls on (Tamil Nadu, Kerala, Punjab, West Bengal, Assam). The three
-// Legacy values are still accepted and resolve to current ones, see
+// falls on (Tamil Nadu, Kerala, Punjab, West Bengal, Assam, Odisha). The
+// three Legacy values are still accepted and resolve to current ones, see
 // [AllLegacyFestivalRegions].
 type FestivalRegion string
 
@@ -119,6 +128,9 @@ const (
 // order: RegionAll, the twenty Indian states from RegionTamilNadu to
 // RegionMadhyaPradesh, then RegionNepal. The deprecated aliases in
 // AllLegacyFestivalRegions are not included.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllFestivalRegions = []FestivalRegion{
 	RegionAll,
 	RegionTamilNadu, RegionKerala, RegionKarnataka, RegionAndhraPradesh, RegionTelangana,
@@ -142,6 +154,9 @@ const (
 // LegacyRegionTamil, LegacyRegionBengal and LegacyRegionNorthIndia. Each is
 // accepted as input and resolved to its current value, with a one-time
 // deprecation warning when a warner is configured.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllLegacyFestivalRegions = []FestivalRegion{
 	LegacyRegionTamil, LegacyRegionBengal, LegacyRegionNorthIndia,
 }

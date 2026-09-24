@@ -33,7 +33,9 @@ func TimezoneOffset(minutes int) Timezone {
 }
 
 // TimezoneName returns a Timezone identified by an IANA zone name such as
-// "Asia/Kolkata". The name is resolved when the timezone is used, not here.
+// "Asia/Kolkata". The name is resolved when the timezone is used, not here,
+// by [time.LoadLocation], so "" resolves as UTC and "Local" as the host's zone;
+// TypeScript rejects both names with TIMEZONE_RESOLUTION_FAILED.
 func TimezoneName(name string) Timezone {
 	return Timezone{name: name, named: true, set: true}
 }

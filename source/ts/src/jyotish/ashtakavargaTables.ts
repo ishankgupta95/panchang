@@ -21,7 +21,7 @@ export const ASHTAKAVARGA_RECEIVERS: readonly AshtakavargaReceiver[] = [
 export const BENEFIC_OFFSETS: Readonly<Record<
   AshtakavargaReceiver,
   Readonly<Record<AshtakavargaContributor, readonly number[]>>
->> = Object.freeze({
+>> = /* @__PURE__ */ (() => Object.freeze({
   Sun: Object.freeze({
     Sun:     Object.freeze([1, 2, 4, 7, 8, 9, 10, 11]),
     Moon:    Object.freeze([3, 6, 10, 11]),
@@ -92,10 +92,10 @@ export const BENEFIC_OFFSETS: Readonly<Record<
     Saturn:  Object.freeze([3, 5, 6, 11]),
     Lagna:   Object.freeze([1, 3, 4, 6, 10, 11]),
   }),
-});
+}))();
 
 /** Grid totals: invariants of the table, whatever the placements. */
-export const BHINNASHTAKA_TOTAL: Readonly<Record<AshtakavargaReceiver, number>> = Object.freeze({
+export const BHINNASHTAKA_TOTAL: Readonly<Record<AshtakavargaReceiver, number>> = /* @__PURE__ */ Object.freeze({
   Sun: 48, Moon: 49, Mars: 39, Mercury: 54,
   Jupiter: 56, Venus: 52, Saturn: 39,
 });
@@ -103,17 +103,17 @@ export const BHINNASHTAKA_TOTAL: Readonly<Record<AshtakavargaReceiver, number>> 
 export const SARVASHTAKA_TOTAL = 337;
 
 /** Rashi pairs sharing one ruler; Cancer and Leo are absent, their rulers own no second sign. */
-export const EKADHIPATYA_PAIRS: readonly (readonly [number, number])[] = Object.freeze([
+export const EKADHIPATYA_PAIRS: readonly (readonly [number, number])[] = /* @__PURE__ */ (() => Object.freeze([
   Object.freeze([0, 7]) as readonly [number, number],
   Object.freeze([1, 6]) as readonly [number, number],
   Object.freeze([2, 5]) as readonly [number, number],
   Object.freeze([8, 11]) as readonly [number, number],
   Object.freeze([9, 10]) as readonly [number, number],
-]);
+]))();
 
-export const TRIKONA_TRIADS: readonly (readonly [number, number, number])[] = Object.freeze([
+export const TRIKONA_TRIADS: readonly (readonly [number, number, number])[] = /* @__PURE__ */ (() => Object.freeze([
   Object.freeze([0, 4, 8]) as readonly [number, number, number],
   Object.freeze([1, 5, 9]) as readonly [number, number, number],
   Object.freeze([2, 6, 10]) as readonly [number, number, number],
   Object.freeze([3, 7, 11]) as readonly [number, number, number],
-]);
+]))();

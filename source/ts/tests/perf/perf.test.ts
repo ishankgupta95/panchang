@@ -139,9 +139,17 @@ describe('Performance invariants: narrowing work must cost less', () => {
   it.skipIf(process.env.COVERAGE)('the eclipse check is negligible on a day that holds no syzygy', () => {
     const sunrise = computeSunrise(new Date('2025-07-03T18:30:00Z'), PUNE);
     const nextSunrise = computeSunrise(computeSunset(sunrise, PUNE), PUNE);
-    const ratio = ratioOf(() => {
-      getEclipseDuringDay(sunrise, nextSunrise, PUNE);
-    }, fullRun);
+    // The check itself holds no cache, so one day replayed is its honest cost; the full panchang
+    // is measured over distinct days, since a replayed day is largely served from the exact-key
+    // phase-search memo and would shrink the denominator.
+    let ratio = Infinity;
+    for (let i = 0; i < 7; i++) {
+      const den = measureOverDays(fullRunOn);
+      const num = measureMs(() => {
+        getEclipseDuringDay(sunrise, nextSunrise, PUNE);
+      });
+      ratio = Math.min(ratio, num / den);
+    }
     expect(
       ratio,
       `eclipse check took ${(ratio * 100).toFixed(0)}% of a full panchang; ` +

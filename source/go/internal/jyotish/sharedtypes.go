@@ -77,6 +77,14 @@ const (
 	NodeAspects5And9       = types.NodeAspects5And9
 	NarayanForward         = types.NarayanForward
 	NarayanBackward        = types.NarayanBackward
+	YoginiMangala          = types.YoginiMangala
+	YoginiPingala          = types.YoginiPingala
+	YoginiDhanya           = types.YoginiDhanya
+	YoginiBhramari         = types.YoginiBhramari
+	YoginiBhadrika         = types.YoginiBhadrika
+	YoginiUlka             = types.YoginiUlka
+	YoginiSiddha           = types.YoginiSiddha
+	YoginiSankata          = types.YoginiSankata
 	KootVarna              = types.KootVarna
 	KootVashya             = types.KootVashya
 	KootTara               = types.KootTara
@@ -123,5 +131,15 @@ func resolveAspectsOptions(o types.AspectsOptions) (types.NodeAspects, error) {
 		types.ErrInvalidInput)
 }
 
-// AllDignities is the shared value list, aliased for the same reason.
-var AllDignities = types.AllDignities
+// AllDignities is the shared value list, copied so that a caller who modifies
+// types.AllDignities cannot reach it.
+var AllDignities = append([]types.Dignity(nil), types.AllDignities...)
+
+// The engine reads these copies, taken when the package initialises, rather
+// than the exported types variables, which any importer can modify.
+var (
+	allGrahas        = types.AllGrahas
+	allVisibleGrahas = types.AllVisibleGrahas
+	kaalSarpSubtypes = types.AllKaalSarpSubtypes
+	allYogaTypes     = append([]types.YogaType(nil), types.AllYogaTypes...)
+)

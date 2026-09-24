@@ -7,6 +7,8 @@
 import { describe, it, expect } from 'vitest';
 import { computeShadbala, _ojhaYugmaBalaForTest } from '../../src/jyotish/shadbala';
 import { computeRashiChart, computeNavamsa } from '../../src/jyotish/charts';
+import { findSunriseBefore } from '../../src/jyotish/lagna';
+import { computeSunset } from '../../src/astronomy/sunrise';
 import type { Divisional, DivisionalChart, GrahaName, ShadbalaResult } from '../../src/types/jyotish';
 
 /** Not `GrahaName`: Rahu and Ketu have no classical Shadbala. */
@@ -206,6 +208,29 @@ describe('computeShadbala: Kala Bala bounds', () => {
     const b = computeShadbala(new Date('2025-01-01T15:00:00Z'), DELHI).Mercury.kala;
     expect(a).toBeGreaterThanOrEqual(60);
     expect(b).toBeGreaterThanOrEqual(60);
+  });
+
+  // Mercury's Nathonatha is 60 and its Paksha is the benefic value, so the
+  // Sun's Nathonatha is Sun.kala + Mercury.kala - 120.
+  const sunNathonatha = (ms: number, loc: typeof DELHI): number => {
+    const r = computeShadbala(new Date(ms), loc);
+    return r.Sun.kala + r.Mercury.kala - 120;
+  };
+
+  it.each([
+    ['Pune equinox', { latitude: 18.5204, longitude: 73.8567 }, Date.parse('2025-03-20T06:00:00Z')],
+    ['London midsummer', { latitude: 51.5074, longitude: -0.1278 }, Date.parse('2025-06-21T12:00:00Z')],
+  ])('Nathonatha is continuous through sunrise and sunset (%s)', (_label, loc, noonish) => {
+    const sunrise = findSunriseBefore(new Date(noonish), loc).getTime();
+    const sunset = computeSunset(new Date(sunrise), loc).getTime();
+    for (const edge of [sunrise, sunset]) {
+      expect(Math.abs(sunNathonatha(edge, loc) - sunNathonatha(edge - 1000, loc))).toBeLessThan(0.1);
+    }
+    // BPHS 2 x Unnata: 60 at apparent noon, 5 V per hour on either side, so at
+    // sunrise it is 60 x (night length) / 24 h, not a fixed 30.
+    expect(sunNathonatha((sunrise + sunset) / 2, loc)).toBeCloseTo(60, 4);
+    const dayHours = (sunset - sunrise) / 3_600_000;
+    expect(sunNathonatha(sunrise, loc)).toBeCloseTo(60 - 2.5 * dayHours, 4);
   });
 });
 

@@ -43568,6 +43568,13 @@
           }
         },
         {
+          "name": "Kemadruma",
+          "type": "lunar",
+          "reasons": [
+            "No planet but the Sun in 2nd, 12th, or conjunct with Moon (the Sun does not break Kemadruma)"
+          ]
+        },
+        {
           "name": "Veshi",
           "type": "solar",
           "reasons": [
@@ -43604,6 +43611,13 @@
             "applies": false,
             "reasons": []
           }
+        },
+        {
+          "name": "Kemadruma",
+          "type": "lunar",
+          "reasons": [
+            "No planet but the Sun in 2nd, 12th, or conjunct with Moon (the Sun does not break Kemadruma)"
+          ]
         },
         {
           "name": "Veshi",

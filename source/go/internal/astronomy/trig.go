@@ -14,7 +14,7 @@ const inversePI = 1 / jsnum.PI
 
 func reduce(x float64) (r float64, odd bool) {
 	q := jsnum.Round(x * inversePI)
-	r = ((x - q*pi1) - q*pi2) - q*pi3
+	r = float64(float64(x-float64(q*pi1))-float64(q*pi2)) - float64(q*pi3)
 	return r, int64(q)&1 == 1
 }
 

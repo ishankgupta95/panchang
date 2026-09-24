@@ -120,6 +120,88 @@ describe('Ashtottari Dasha: antardashas', () => {
   });
 });
 
+/** Restates the rule: the full mahadasha's sub-periods from its pre-birth start, those over by birth dropped. */
+function fullSpanFirstMaha(
+  names: readonly string[], years: (name: string) => number, total: number,
+  mahaName: string, mahaYears: number, birthMs: number, endMs: number,
+): { name: string; startMs: number }[] {
+  const fullMs = mahaYears * 365.25 * 86_400_000;
+  let cursor = endMs - fullMs;
+  const at = names.indexOf(mahaName);
+  const out: { name: string; startMs: number }[] = [];
+  for (let i = 0; i < names.length; i++) {
+    const name = names[(at + i) % names.length]!;
+    const start = cursor;
+    cursor += (years(name) / total) * fullMs;
+    if (cursor > birthMs) out.push({ name, startMs: Math.max(start, birthMs) });
+  }
+  return out;
+}
+
+function expectAntarsTile(md: { startDate: Date; endDate: Date; antarDashas: { startDate: Date; endDate: Date }[] }): void {
+  const ads = md.antarDashas;
+  expect(ads[0]!.startDate.getTime()).toBe(md.startDate.getTime());
+  expect(ads[ads.length - 1]!.endDate.getTime()).toBe(md.endDate.getTime());
+  for (let i = 1; i < ads.length; i++) {
+    expect(ads[i]!.startDate.getTime()).toBe(ads[i - 1]!.endDate.getTime());
+  }
+}
+
+describe('Ashtottari and Yogini: the birth mahadasha keeps the full mahadasha\'s antardashas, clipped at birth', () => {
+  const moonLon = 355.19020663914483;
+
+  it('Ashtottari 1995-08-15T05:30Z: Rahu mahadasha opens in the Moon antardasha', () => {
+    const md = computeAshtottariDasha(SAMPLE, moonLon, SAMPLE).mahaDashas[0]!;
+    expect(md.lord).toBe('Rahu');
+    expect(md.antarDashas.map((a) => a.lord)).toEqual(['Moon', 'Mars', 'Mercury', 'Saturn', 'Jupiter']);
+    expect(md.antarDashas.map((a) => a.startDate.toISOString().slice(0, 10))).toEqual([
+      '1995-08-15', '1996-09-13', '1997-08-04', '1999-06-25', '2000-08-03',
+    ]);
+    expectAntarsTile(md);
+  });
+
+  it('Yogini 1995-08-15T05:30Z: Ulka mahadasha opens in the Pingala antardasha', () => {
+    const md = computeYoginiDasha(SAMPLE, moonLon, SAMPLE).mahaDashas[0]!;
+    expect(md.yogini).toBe('Ulka');
+    expect(md.antarDashas.map((a) => a.yogini)).toEqual(['Pingala', 'Dhanya', 'Bhramari', 'Bhadrika']);
+    expect(md.antarDashas.map((a) => a.startDate.toISOString().slice(0, 10))).toEqual([
+      '1995-08-15', '1995-10-14', '1996-04-13', '1996-12-13',
+    ]);
+    expectAntarsTile(md);
+  });
+
+  it('matches the full-span construction restated from the rule at many Moon longitudes', () => {
+    for (let k = 0; k < 60; k++) {
+      const lon = (k * 6.1 + 0.37) % 360;
+      const ash = computeAshtottariDasha(SAMPLE, lon, SAMPLE).mahaDashas[0]!;
+      const wantA = fullSpanFirstMaha(ASHTOTTARI_ORDER, (n) => ASHTOTTARI_YEARS[n]!, 108,
+        ash.lord, ash.years, SAMPLE.getTime(), ash.endDate.getTime());
+      expect(ash.antarDashas.map((a) => a.lord)).toEqual(wantA.map((w) => w.name));
+      ash.antarDashas.forEach((a, i) => {
+        expect(Math.abs(a.startDate.getTime() - wantA[i]!.startMs)).toBeLessThanOrEqual(1);
+      });
+
+      const yog = computeYoginiDasha(SAMPLE, lon, SAMPLE).mahaDashas[0]!;
+      const wantY = fullSpanFirstMaha(YOGINI_ORDER, (n) => YOGINI_YEARS[n as keyof typeof YOGINI_YEARS], 36,
+        yog.yogini, yog.years, SAMPLE.getTime(), yog.endDate.getTime());
+      expect(yog.antarDashas.map((a) => a.yogini)).toEqual(wantY.map((w) => w.name));
+      yog.antarDashas.forEach((a, i) => {
+        expect(Math.abs(a.startDate.getTime() - wantY[i]!.startMs)).toBeLessThanOrEqual(1);
+      });
+    }
+  });
+
+  it('every mahadasha\'s antardashas tile it exactly, before and after 1970', () => {
+    for (const iso of ['1955-03-10T04:00:00Z', '1969-12-31T23:59:59Z', '1995-08-15T05:30:00Z', '2071-01-01T00:00:00Z']) {
+      const birth = new Date(iso);
+      for (const lon of [3.3, 57.123, 144.13912296295166, 301.123, 355.19020663914483]) {
+        for (const md of computeAshtottariDasha(birth, lon, birth).mahaDashas) expectAntarsTile(md);
+        for (const md of computeYoginiDasha(birth, lon, birth).mahaDashas) expectAntarsTile(md);
+      }
+    }
+  });
+});
+
 describe('Yogini Dasha: cycle constants', () => {
   it('total years sum to 36', () => {
     let total = 0;

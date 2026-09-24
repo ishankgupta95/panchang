@@ -4,11 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
+	"reflect"
 	"sort"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/core"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
 	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
@@ -222,7 +229,7 @@ func TestMaxStepsIsARealDivision(t *testing.T) {
 
 func TestLocalYearWindowIsTheLastMillisecondOfTheYear(t *testing.T) {
 	for _, year := range []int{1912, 2025, 2088, 2100} {
-		startMs, endMs, err := localYearWindow(year, types.TimezoneOffset(330))
+		startMs, endMs, err := utils.LocalYearWindow(year, types.TimezoneOffset(330))
 		if err != nil {
 			t.Fatalf("%d: %v", year, err)
 		}
@@ -285,7 +292,7 @@ func TestEmptyListingsMarshalAsArrays(t *testing.T) {
 
 func TestEclipsesInRangeIsSortedAndStable(t *testing.T) {
 	ctx := &astronomy.EphemerisCtx{}
-	startMs, endMs, err := localYearWindow(2025, types.TimezoneOffset(330))
+	startMs, endMs, err := utils.LocalYearWindow(2025, types.TimezoneOffset(330))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -472,4 +479,145 @@ func TestMeshaDayRuleForCoversEveryRegion(t *testing.T) {
 			t.Errorf("region %q maps to %q, want the default", r, got)
 		}
 	}
+}
+
+type selectionCase struct {
+	Festival string               `json:"festival"`
+	Keys     []string             `json:"keys"`
+	City     string               `json:"city"`
+	Location types.GeoLocation    `json:"location"`
+	Timezone int                  `json:"timezone"`
+	Date     string               `json:"date"`
+	Year     int                  `json:"year"`
+	Dates    []string             `json:"dates"`
+	Region   types.FestivalRegion `json:"region"`
+	Tier     string               `json:"tier"`
+	Rule     string               `json:"rule"`
+}
+
+func readSelectionFixture(t *testing.T) (dates, lists []selectionCase) {
+	t.Helper()
+	b, err := repopath.ReadTestData("almanac", "almanac-festival-selection-2026-09.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var fx struct {
+		Dates []selectionCase `json:"dates"`
+		Lists []selectionCase `json:"lists"`
+	}
+	if err := json.Unmarshal(b, &fx); err != nil {
+		t.Fatal(err)
+	}
+	return fx.Dates, fx.Lists
+}
+
+func localISODate(ms int64, timezone int) string {
+	return types.Date(ms + int64(timezone)*60_000).ISOString()[:10]
+}
+
+// TestFestivalSelectionMatchesExternalDates holds the Go engine to the same reference-almanac and
+// competitor dates as the TypeScript validation test: each date is the only emission within three
+// days, and each year list is exact.
+func TestFestivalSelectionMatchesExternalDates(t *testing.T) {
+	dates, lists := readSelectionFixture(t)
+	eph := &astronomy.EphemerisCtx{}
+	const dayMs = 86_400_000
+	for _, c := range dates {
+		c := c
+		t.Run(fmt.Sprintf("%s/%s/%s/%s", c.Rule, c.Festival, c.City, c.Date), func(t *testing.T) {
+			parts := strings.Split(c.Date, "-")
+			y, _ := strconv.Atoi(parts[0])
+			m, _ := strconv.Atoi(parts[1])
+			d, _ := strconv.Atoi(parts[2])
+			localMidnight := types.DateUTC(y, m-1, d).Ms() - int64(c.Timezone)*60_000
+			opts := YearlyListingOptions{Timezone: types.TimezoneOffset(c.Timezone), Region: c.Region}
+			got, err := ComputeFestivalsInRange(context.Background(), eph,
+				localMidnight-3*dayMs, localMidnight+3*dayMs, c.Location, opts)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var emitted []string
+			for _, f := range got {
+				if f.Festival.Key == c.Festival {
+					emitted = append(emitted, localISODate(f.Date.Ms(), c.Timezone))
+				}
+			}
+			if !reflect.DeepEqual(emitted, []string{c.Date}) {
+				t.Errorf("%s (%s): emitted on %v, want only %s", c.Festival, c.Tier, emitted, c.Date)
+			}
+		})
+	}
+	for _, l := range lists {
+		l := l
+		t.Run(fmt.Sprintf("%s/%s/%s/%d", l.Rule, strings.Join(l.Keys, "+"), l.City, l.Year), func(t *testing.T) {
+			got, err := ComputeFestivalsForYear(context.Background(), eph, l.Year, l.Location,
+				YearlyListingOptions{Timezone: types.TimezoneOffset(l.Timezone)})
+			if err != nil {
+				t.Fatal(err)
+			}
+			var emitted []string
+			for _, f := range got {
+				for _, k := range l.Keys {
+					if f.Festival.Key == k {
+						emitted = append(emitted, localISODate(f.Date.Ms(), l.Timezone))
+					}
+				}
+			}
+			if !reflect.DeepEqual(emitted, l.Dates) {
+				t.Errorf("%v %d: emitted %v, want %v", l.Keys, l.Year, emitted, l.Dates)
+			}
+		})
+	}
+}
+
+// The converters read each day through GetDailyLabels with every section off
+// and no end times, where they used to build the full panchang. Day by day,
+// what they read, and whether the day exists or errors, must be the same,
+// including across polar night and polar day, where days drop out.
+func TestConverterDaysReadAsTheFullPanchang(t *testing.T) {
+	tromso := types.GeoLocation{Latitude: 69.6496, Longitude: 18.9560}
+	cases := []struct {
+		loc   types.GeoLocation
+		opt   ConvertOptions
+		start int64
+		days  int
+	}{
+		{pune, ConvertOptions{Timezone: types.TimezoneOffset(330)}, types.DateUTC(2023, 0, 1).Ms(), 400},
+		{pune, ConvertOptions{Timezone: types.TimezoneName("Asia/Kolkata"), MasaSystem: types.Amanta,
+			Language: types.LanguageHi, Ayanamsa: types.Raman}, types.DateUTC(2026, 1, 1).Ms(), 120},
+		{types.GeoLocation{Latitude: 40.7128, Longitude: -74.006}, ConvertOptions{Timezone: types.TimezoneName("America/New_York")},
+			types.DateUTC(2024, 1, 20).Ms(), 60},
+		{tromso, ConvertOptions{Timezone: types.TimezoneOffset(60)}, types.DateUTC(2025, 0, 1).Ms(), 365},
+		{longyearbyen, ConvertOptions{Timezone: types.TimezoneOffset(60), MasaSystem: types.Amanta}, types.DateUTC(2024, 0, 1).Ms(), 366},
+	}
+	compared, missing := 0, 0
+	for _, c := range cases {
+		full := convertPanchangOptions(c.opt)
+		narrow := convertLabelOptions(c.opt)
+		for d := 0; d < c.days; d++ {
+			ms := c.start + int64(d)*dayMs
+			p, pOK, pErr := core.GetDailyPanchang(astronomy.NewEphemerisCtx(), ms, c.loc, full, core.NatalResolvers{})
+			l, lOK, lErr := core.GetDailyLabels(astronomy.NewEphemerisCtx(), ms, c.loc, narrow)
+			if pOK != lOK || (pErr == nil) != (lErr == nil) || (pErr != nil && pErr.Error() != lErr.Error()) {
+				t.Fatalf("%s at %+v: labels (%v, %v), full (%v, %v)", types.Date(ms).ISOString(), c.loc, lOK, lErr, pOK, pErr)
+			}
+			if !pOK {
+				missing++
+				continue
+			}
+			first := p.Angas.Tithis[0]
+			want, _ := json.Marshal([]any{p.Date, first.Index, first.Name, first.Number,
+				p.Calendar.Chandramasa, p.Calendar.Samvat, p.Angas.Vara})
+			got, _ := json.Marshal([]any{l.Date, l.Tithi.Index, l.Tithi.Name, l.Tithi.Number,
+				l.Chandramasa, l.Samvat, l.Vara})
+			if string(got) != string(want) {
+				t.Fatalf("%s at %+v:\n full   %s\n labels %s", types.Date(ms).ISOString(), c.loc, want, got)
+			}
+			compared++
+		}
+	}
+	if missing == 0 || compared < 900 {
+		t.Fatalf("compared %d days, %d without a Hindu day: the sweep misses a case", compared, missing)
+	}
+	t.Logf("%d days read identically, %d days without a Hindu day on both sides", compared, missing)
 }

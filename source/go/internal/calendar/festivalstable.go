@@ -1,12 +1,15 @@
 package calendar
 
-func ReadFestivalsYearRange(source AnyFestivalsFile) MuhurtaYearRangeLike {
-	return MuhurtaYearRangeLike{Start: source.Meta.StartYear, End: source.Meta.EndYear}
+func ReadFestivalsYearRange(source AnyFestivalsFile) TableYearRange {
+	return TableYearRange{Start: source.Meta.StartYear, End: source.Meta.EndYear}
 }
 
-type MuhurtaYearRangeLike struct {
-	Start int `json:"start"`
-	End   int `json:"end"`
+func pickDescription(d *LocalizedString, lang FestivalsTableLanguage) *string {
+	if d == nil {
+		return nil
+	}
+	s := d.Pick(lang)
+	return &s
 }
 
 func flattenDict(entry FestivalDictEntry, lang FestivalsTableLanguage) FestivalTableEntry {
@@ -15,19 +18,13 @@ func flattenDict(entry FestivalDictEntry, lang FestivalsTableLanguage) FestivalT
 		Name: entry.Name.Pick(lang),
 		Type: entry.Type,
 	}
-	if entry.Description != nil {
-		out.Description = entry.Description.Pick(lang)
-		out.HasDescription = true
-	}
+	out.Description = pickDescription(entry.Description, lang)
 	return out
 }
 
 func flattenV1(raw FestivalTableEntryRaw, lang FestivalsTableLanguage) FestivalTableEntry {
 	out := FestivalTableEntry{Key: "", Name: raw.Name.Pick(lang), Type: raw.Type}
-	if raw.Description != nil {
-		out.Description = raw.Description.Pick(lang)
-		out.HasDescription = true
-	}
+	out.Description = pickDescription(raw.Description, lang)
 	return out
 }
 

@@ -8,6 +8,10 @@ import (
 func ComputeArudhas(chart *types.BirthChart, lang types.Language) ([]types.Arudha, error) {
 	lang = resolveLang(lang)
 	lagnaRashi := chart.Lagna.Rashi.Index
+	if lagnaRashi < 0 {
+		return nil, types.Codef(types.ErrInvalidInput,
+			"lagna rashi must be a non-negative integer, got %d", lagnaRashi)
+	}
 
 	var planetRashi [types.VisibleGrahaCount]int
 	var seen [types.VisibleGrahaCount]bool
@@ -19,7 +23,7 @@ func ComputeArudhas(chart *types.BirthChart, lang types.Language) ([]types.Arudh
 		planetRashi[v] = p.Rashi.Index
 		seen[v] = true
 	}
-	for _, v := range types.AllVisibleGrahas {
+	for _, v := range allVisibleGrahas {
 		if !seen[v] {
 			return nil, types.Codef(types.ErrInvalidInput,
 				"chart is missing %s, which the Arudha rule needs to locate a bhava lord", v)

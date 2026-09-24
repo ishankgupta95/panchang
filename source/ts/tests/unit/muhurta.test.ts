@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
+import { getDailyPanchang } from '../../src/core/panchang';
 import {
   computeAbhijitMuhurta,
+  computeBrahmaMuhurta,
+  brahmaMuhurtaForNight,
   computeVijayaMuhurta,
   computeGodhuliMuhurta,
   computeNishitaMuhurta,
@@ -75,6 +78,48 @@ describe('computeAbhijitMuhurta', () => {
 
   it('omitted varaIndex computes the window unconditionally', () => {
     expect(computeAbhijitMuhurta(sunrise, sunset)).not.toBeNull();
+  });
+});
+
+describe('computeBrahmaMuhurta', () => {
+  it('is the 14th night-muhurta: 96 to 48 min before sunrise for a 12-hour day', () => {
+    const brahma = computeBrahmaMuhurta(sunrise, sunset);
+    expect(sunrise.getTime() - brahma.start.getTime()).toBe(96 * 60_000);
+    expect(sunrise.getTime() - brahma.end.getTime()).toBe(48 * 60_000);
+  });
+
+  it('takes the night as 24 h minus the daylight', () => {
+    const winterRise = new Date('2024-12-21T07:00:00Z');
+    const winterSet = new Date('2024-12-21T16:00:00Z');
+    const brahma = computeBrahmaMuhurta(winterRise, winterSet);
+    expect(winterRise.getTime() - brahma.end.getTime()).toBe((15 * 3600_000) / 15);
+    expect(brahma.end.getTime() - brahma.start.getTime()).toBe((15 * 3600_000) / 15);
+  });
+
+  it('matches the hand-computed Delhi 2026-11-05 window (night = 24 h - day)', () => {
+    const brahma = computeBrahmaMuhurta(new Date(1793840751816), new Date(1793880197794));
+    expect(brahma.start.getTime()).toBe(1793834491278);
+    expect(brahma.end.getTime()).toBe(1793837621547);
+  });
+
+  it('brahmaMuhurtaForNight uses the night it is given', () => {
+    const brahma = brahmaMuhurtaForNight(sunrise, 15 * 3600_000);
+    expect(sunrise.getTime() - brahma.start.getTime()).toBe(2 * 3600_000);
+    expect(sunrise.getTime() - brahma.end.getTime()).toBe(3600_000);
+  });
+
+  it('the daily panchang measures the night (sunset to next sunrise) and nests Pratah Sandhya at its midpoint', () => {
+    const r = getDailyPanchang(new Date('2026-11-05T06:30:00Z'), { latitude: 28.6139, longitude: 77.209 }, {
+      timezone: 330,
+    })!;
+    const nightMs = r.sun.nextRise.getTime() - r.sun.set.getTime();
+    const b = r.muhurtas.brahma;
+    expect(Math.abs(r.sun.rise.getTime() - nightMs / 15 - b.end.getTime())).toBeLessThan(1);
+    expect(Math.abs(b.end.getTime() - nightMs / 15 - b.start.getTime())).toBeLessThan(1);
+    const mid = (b.start.getTime() + b.end.getTime()) / 2;
+    expect(Math.abs(mid - r.muhurtas.pratahSandhya.start.getTime())).toBeLessThanOrEqual(1);
+    expect(b.startLocal.slice(11, 19)).toBe('04:51:25');
+    expect(b.endLocal.slice(11, 19)).toBe('05:43:38');
   });
 });
 

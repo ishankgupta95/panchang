@@ -10,7 +10,7 @@
 
 /** 49 of 1358 terms; error ≤ 0.00602″. Stride 3: sin, cos (arcsec), power of t. */
 
-export const NUTATION_PSI = new Float64Array([
+export const NUTATION_PSI = /* @__PURE__ */ new Float64Array([
   -17.20642418, 0.0033386, 0, -1.31709122, -0.0013696, 0, -0.22764181, 0.0002796, 0, 0.2074554,
   -0.0000698, 0, 0.1475877, 0.0011817, 0, 0.0711159, -0.0000872, 0, -0.0516821, -0.0000524, 0,
   -0.0387302, 0.000038, 0, -0.0301464, 0.0000816, 0, -0.0215829, 0.0000111, 0, -0.01741882,
@@ -29,7 +29,7 @@ export const NUTATION_PSI = new Float64Array([
 
 /** Stride 14: multipliers of l, l', F, D, Ω, and the nine planetary arguments. */
 
-export const NUTATION_PSI_ARGS = new Int8Array([
+export const NUTATION_PSI_ARGS = /* @__PURE__ */ new Int8Array([
   0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, -2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
   0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, -2, 2, 0, 0, 0, 0,
@@ -57,7 +57,7 @@ export const NUTATION_PSI_ARGS = new Int8Array([
 
 /** 29 of 1056 terms; error ≤ 0.00392″. Stride 3: sin, cos (arcsec), power of t. */
 
-export const NUTATION_EPS = new Float64Array([
+export const NUTATION_EPS = /* @__PURE__ */ new Float64Array([
   0.0015377, 9.2052331, 0, -0.0004587, 0.5730336, 0, 0.0001374, 0.0978461, 0, -0.0000291,
   -0.0897492, 0, -0.0000174, 0.0224386, 0, 0.0000318, 0.020073, 0, 0.0000367, 0.0129026, 0,
   -0.0000132, -0.0095929, 0, -0.0001924, 0.0073871, 0, 0.0000039, -0.0068982, 0, 4e-7,
@@ -70,7 +70,7 @@ export const NUTATION_EPS = new Float64Array([
 
 /** Stride 14: multipliers of l, l', F, D, Ω, and the nine planetary arguments. */
 
-export const NUTATION_EPS_ARGS = new Int8Array([
+export const NUTATION_EPS_ARGS = /* @__PURE__ */ new Int8Array([
   0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, -2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
   0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, -2, 2, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 0, 2, 0, 0, 0, 0,

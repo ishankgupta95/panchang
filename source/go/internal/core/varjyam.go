@@ -1,6 +1,7 @@
 package core
 
 import (
+	"math"
 	"sort"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
@@ -20,6 +21,27 @@ const (
 )
 
 type SpellsOf func(nakshatraIndex int, nakshatraStartMs, nakshatraEndMs int64) []types.UtcWindow
+
+// nanNakshatra is the index a NaN longitude probes to. TypeScript's floor of
+// NaN is NaN, which equals no index, itself included; sameNakshatra keeps that,
+// and each infinity keeps an index of its own as Math.floor does, so a
+// caller's non-finite getMoon walks the TypeScript path on every architecture.
+const nanNakshatra = math.MinInt
+
+func nakshatraIndexAt(ms int64, getMoon LongitudeAt) int {
+	lon := getMoon(ms)
+	switch {
+	case math.IsNaN(lon):
+		return nanNakshatra
+	case math.IsInf(lon, 1):
+		return math.MaxInt
+	case math.IsInf(lon, -1):
+		return math.MinInt + 1
+	}
+	return utils.NakshatraOf(lon)
+}
+
+func sameNakshatra(a, b int) bool { return a == b && a != nanNakshatra }
 
 func ComputeVarjyamWindows(
 	sunriseUtcMs, nextSunriseUtcMs int64,
@@ -45,8 +67,11 @@ func ComputeVarjyam(
 }
 
 func varjyamSpellsForNakshatra(nakshatraIndex int, referenceMs int64, getMoon LongitudeAt) []types.UtcWindow {
-	getIndex := func(ms int64) int { return GetNakshatraIndexAtTime(ms, getMoon) }
+	getIndex := func(ms int64) int { return nakshatraIndexAt(ms, getMoon) }
 	angle := utils.ElementAngle{AngleAt: getMoon, SpanDeg: utils.NakshatraSpan}
+	if getIndex(referenceMs) != nakshatraIndex {
+		return nil
+	}
 
 	startMs, ok := findNakshatraStart(referenceMs, nakshatraIndex, getIndex, angle)
 	if !ok {
@@ -64,7 +89,7 @@ func CollectNakshatraOffsetWindows(
 	getMoon LongitudeAt,
 	spellsOf SpellsOf,
 ) []types.UtcWindow {
-	getIndex := func(ms int64) int { return GetNakshatraIndexAtTime(ms, getMoon) }
+	getIndex := func(ms int64) int { return nakshatraIndexAt(ms, getMoon) }
 	angle := utils.ElementAngle{AngleAt: getMoon, SpanDeg: utils.NakshatraSpan}
 
 	out := make([]types.UtcWindow, 0, 2)
@@ -82,9 +107,13 @@ func CollectNakshatraOffsetWindows(
 			break
 		}
 
-		for _, w := range spellsOf(nakIdx, startMs, endMs) {
-			if w.StartMs >= sunriseUtcMs && w.StartMs < nextSunriseUtcMs {
-				out = append(out, w)
+		// A getMoon outside [0, 360) reads an index outside 0 to 26. TypeScript
+		// finds no offset for it and drops the NaN spell, so it contributes none.
+		if nakIdx >= 0 && nakIdx < utils.TotalNakshatras {
+			for _, w := range spellsOf(nakIdx, startMs, endMs) {
+				if w.StartMs >= sunriseUtcMs && w.StartMs < nextSunriseUtcMs {
+					out = append(out, w)
+				}
 			}
 		}
 
@@ -130,20 +159,20 @@ func findNakshatraStart(
 	lo := sunriseUtcMs - lookbackMs
 	hi := sunriseUtcMs
 
-	if getIndexAt(lo) == currentIndex {
+	if sameNakshatra(getIndexAt(lo), currentIndex) {
 		return 0, false
 	}
 
 	for i := 0; i < varjyamMaxBracketIter && hi-lo > varjyamBracketMs; i++ {
 		mid := floorDiv2(lo + hi)
-		if getIndexAt(mid) == currentIndex {
+		if sameNakshatra(getIndexAt(mid), currentIndex) {
 			hi = mid
 		} else {
 			lo = mid
 		}
 	}
 	if solved, ok := utils.SolveElementBoundary(float64(lo), float64(hi), angle,
-		func(ms int64) bool { return getIndexAt(ms) != currentIndex }); ok {
+		func(ms int64) bool { return !sameNakshatra(getIndexAt(ms), currentIndex) }); ok {
 		return solved, true
 	}
 	return hi, true
@@ -159,20 +188,20 @@ func findNakshatraEnd(
 	lo := sunriseUtcMs
 	hi := sunriseUtcMs + lookforwardMs
 
-	if getIndexAt(hi) == currentIndex {
+	if sameNakshatra(getIndexAt(hi), currentIndex) {
 		return 0, false
 	}
 
 	for i := 0; i < varjyamMaxBracketIter && hi-lo > varjyamBracketMs; i++ {
 		mid := floorDiv2(lo + hi)
-		if getIndexAt(mid) == currentIndex {
+		if sameNakshatra(getIndexAt(mid), currentIndex) {
 			lo = mid
 		} else {
 			hi = mid
 		}
 	}
 	if solved, ok := utils.SolveElementBoundary(float64(lo), float64(hi), angle,
-		func(ms int64) bool { return getIndexAt(ms) == currentIndex }); ok {
+		func(ms int64) bool { return sameNakshatra(getIndexAt(ms), currentIndex) }); ok {
 		return solved, true
 	}
 	return hi, true

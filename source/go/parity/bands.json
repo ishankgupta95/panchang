@@ -32,7 +32,7 @@
       "darwin/arm64": "Apple M3 Max, node v24.4.1, go1.26.4, Ishank's machine, where every earlier recorded number was taken",
       "linux/x64": "Docker node:24-bookworm / golang:1.26 (node v24.19.0, go1.26.7) under --platform linux/amd64 on the same Apple silicon host, i.e. Rosetta-translated x86-64. IEEE semantics are preserved by translation, so these should equal native amd64, but that is an argument, not a measurement, and no native amd64 run has been made. Confirm on the first real CI run before treating these pins as blocking. STALE as of 2026-08-25: these numbers were measured before the audit barriered five astronomy products and typed the two FK5 constants, which tightened darwin by 2 leaves and ~450 changed values per stage. Expect linux to tighten similarly; the first native run must re-pin from the block the gate prints (it will report TIGHTENED, never a band breach)."
     },
-    "bytesPinNote": "The document-byte pins have moved twice on 2026-08-29, both times with the delta predicted before it was measured, and neither time to make a failing check pass.\n(1) -28 on every pin: the dump's `_meta` carried a key whose only content cited an internal planning document that does not ship. Removing it from both dumps removes a 28-byte JSON member.\n(2) -243 at g2, -930 at g3, -1557 at full, identically on the TypeScript and the Go side: every em dash was removed from the library's own output strings (festival names, table descriptions, matching and dosha descriptions) and from the harness metadata. Each ' - ' written with an em dash is 5 bytes and became a 2-byte ': ' or ', ', so every replacement saves exactly 3 bytes. All three deltas are exact multiples of 3 (81, 310 and 519 replacements) and the TypeScript and Go deltas are equal to the byte, which is what says the two languages changed in lockstep. Every band held at 0 invariants and 0 shifted instants, and every non-byte pin (leaf counts, changed values, worst |delta|, worst leaf and path) was unchanged through both moves."
+    "bytesPinNote": "The document-byte pins have moved twice on 2026-08-29, both times with the delta predicted before it was measured, and neither time to make a failing check pass.\n(1) -28 on every pin: the dump's `_meta` carried a key whose only content cited an internal planning document that does not ship. Removing it from both dumps removes a 28-byte JSON member.\n(2) -243 at g2, -930 at g3, -1557 at full, identically on the TypeScript and the Go side: every em dash was removed from the library's own output strings (festival names, table descriptions, matching and dosha descriptions) and from the harness metadata. Each ' - ' written with an em dash is 5 bytes and became a 2-byte ': ' or ', ', so every replacement saves exactly 3 bytes. All three deltas are exact multiples of 3 (81, 310 and 519 replacements) and the TypeScript and Go deltas are equal to the byte, which is what says the two languages changed in lockstep. Every band held at 0 invariants and 0 shifted instants, and every non-byte pin (leaf counts, changed values, worst |delta|, worst leaf and path) was unchanged through both moves.\n(3) 2026-09-24 audit fixes, full stage only, every move predicted per fix group and confirmed after the merge: TS +75966 and Go +75990 bytes. Brahma Muhurta moved to the 14th night muhurta, polar transition days now null, moonset no longer taken from the next day and one duplicate New York eclipse day removed (+74601 TS); Sankashti, post-adhika Ugadi and Navaratri, vriddha-trisprisha Smarta Ekadashi and adhika-year Onam added (+1815); Ashtottari and Yogini birth antardashas clipped, Narayan own-sign 12 years, a new pratyantarIn leaf (-1255); Nathonatha made continuous (-9); DST day walks and the Ekadashi year edge (+814). The numeric pins moved for the first time: numericLeaves 99 to 102 (three Shadbala leaves at e5-2088-reykjavik whose existing ULP-level Paksha difference now rounds differently against the new Nathonatha values, each at most 5.7e-14) and changedNumericValues 3141 to 3138 (+5 from those leaves, -8 from the removed duplicate eclipse's obscuration and magnitude leaves, which carried the known 1e-15 noise). The TS-to-Go byte gap went from 105 to 129 for the same two causes (+20 and +4). Every band held at 0 invariants and 0 shifted instants, and the worst numeric leaf and path are unchanged.\n(4) 2026-09-24 reference-almanac festival rules, Yoni table and day convention, full stage only, predicted per group and confirmed after the merge: TS and Go each -22375 bytes, gap unchanged at 129, numeric pins unchanged. Tithi-day selection +4083 (holika_dahan added, duplicate vriddhi and kala days removed, days moved); nakshatra, solar and vara-in-month rules -25984 (Masik Karthigai duplicates removed, Onam once a year, karthigai_deepam added, vara rules in the purnimanta month); Pathu Porutham Yoni description -470; day convention 0 (same-width dates); -4 from JSON separators on days whose festival list both festival groups changed.\n(5) 2026-09-24, the g2 and g3 pins, which (3) and (4) had left at their 5.3.0 values although three of the audit causes reach those stages. Attributed byte for byte against g2 and g3 dumps of the 5.3.0 tree, which reproduce the old pins exactly, with no residual: `specialYogas` under `computeEndTimes: false` (shape s2-narrow only) +81806, no next-day moonset -3724, the duplicate eclipse day -3257 TS and -3253 Go, and at g3 only the dasha clipping and pratyantarIn leaf -1255, the Pathu Porutham Yoni description -470 and Nathonatha -9 TS and +11 Go. g2: TS +74825, Go +74829, gap 90 to 94; g3: TS +73091, Go +73115, gap 111 to 135. Numeric pins move for the same causes as full: changedNumericValues 2264 to 2256 at g2 and 3046 to 3043 at g3, numericLeaves 97 to 100 at g3. Every band held at both stages. The same attribution run on full shows that the +74601 step in (3) is mostly `specialYogas` (+81806), not Brahma Muhurta, which moves values and no bytes."
   },
   "bands": {
     "invariants": 0,
@@ -54,13 +54,13 @@
           "invariants": 0,
           "timeLeaves": 0,
           "numericLeaves": 3,
-          "changedNumericValues": 2264,
+          "changedNumericValues": 2256,
           "worstNumericLeaf": "moon.siderealLongitude",
           "worstNumericAbs": 1.1368683772161603e-13,
           "worstNumericPath": "daily.Pune|2025|2025-03-20|s1-default.moon.siderealLongitude",
           "bytes": {
-            "ts": 250723409,
-            "go": 250723499
+            "ts": 250798234,
+            "go": 250798328
           }
         }
       }
@@ -78,14 +78,14 @@
         "darwin/arm64": {
           "invariants": 0,
           "timeLeaves": 0,
-          "numericLeaves": 97,
-          "changedNumericValues": 3046,
+          "numericLeaves": 100,
+          "changedNumericValues": 3043,
           "worstNumericLeaf": "planets.longitude",
           "worstNumericAbs": 3.410605131648481e-13,
           "worstNumericPath": "charts.e1-1912-pune.divisionals.D12.planets.2.longitude",
           "bytes": {
-            "ts": 251329961,
-            "go": 251330072
+            "ts": 251403052,
+            "go": 251403187
           }
         }
       }
@@ -103,14 +103,14 @@
         "darwin/arm64": {
           "invariants": 0,
           "timeLeaves": 0,
-          "numericLeaves": 99,
-          "changedNumericValues": 3141,
+          "numericLeaves": 102,
+          "changedNumericValues": 3138,
           "worstNumericLeaf": "planets.longitude",
           "worstNumericAbs": 3.410605131648481e-13,
           "worstNumericPath": "charts.e1-1912-pune.divisionals.D12.planets.2.longitude",
           "bytes": {
-            "ts": 255536691,
-            "go": 255536796
+            "ts": 255590282,
+            "go": 255590411
           }
         }
       }

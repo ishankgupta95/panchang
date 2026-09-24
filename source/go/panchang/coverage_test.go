@@ -1,6 +1,7 @@
 package panchang
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -11,11 +12,28 @@ import (
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
 )
 
+// TestFacadeCoverage classifies every value the npm package exports, from the
+// src/index.ts barrel and from each subpath module package.json publishes
+// (panchang-ts/festivals and the rest), as covered by a Go name or skipped as a
+// deprecated alias.
 func TestFacadeCoverage(t *testing.T) {
-	all := parseBarrelExports(t)
-	if len(all) < 100 {
-		t.Fatalf("parsed %d exports from src/index.ts; the parser is broken, and every check below would pass vacuously", len(all))
+	barrel := parseBarrelExports(t)
+	if len(barrel) < 100 {
+		t.Fatalf("parsed %d exports from src/index.ts; the parser is broken, and every check below would pass vacuously", len(barrel))
 	}
+	subpaths := parseSubpathExports(t)
+	if len(subpaths) < 20 {
+		t.Fatalf("parsed %d exports from the package.json subpath modules; the parser is broken", len(subpaths))
+	}
+	seen := map[string]bool{}
+	var all []string
+	for _, n := range append(barrel, subpaths...) {
+		if !seen[n] {
+			seen[n] = true
+			all = append(all, n)
+		}
+	}
+	sort.Strings(all)
 
 	known := map[string]bool{}
 	for ts := range covered {
@@ -30,16 +48,16 @@ func TestFacadeCoverage(t *testing.T) {
 
 	for _, ts := range all {
 		if !known[ts] {
-			t.Errorf("src/index.ts exports %s and this test classifies it as neither covered nor deprecated. Add it to one", ts)
+			t.Errorf("the npm package exports %s and this test classifies it as neither covered nor deprecated. Add it to one", ts)
 		}
 	}
-	inBarrel := map[string]bool{}
+	exported := map[string]bool{}
 	for _, ts := range all {
-		inBarrel[ts] = true
+		exported[ts] = true
 	}
 	for ts := range known {
-		if !inBarrel[ts] {
-			t.Errorf("%s is classified here but src/index.ts no longer exports it. Remove it", ts)
+		if !exported[ts] {
+			t.Errorf("%s is classified here but the npm package no longer exports it. Remove it", ts)
 		}
 	}
 	if len(covered)+len(deprecated) != len(all) {
@@ -81,26 +99,101 @@ func TestCoveredNamesExist(t *testing.T) {
 		}
 		shared.Write(b)
 	}
-	squash := func(s string) string {
-		return regexp.MustCompile(`[ \t]+`).ReplaceAllString(s, " ")
-	}
 	facadeText, sharedText := squash(string(facade)), squash(shared.String())
 
 	for ts, goName := range covered {
-		var want, where string
-		text := facadeText
-		switch {
-		case strings.HasPrefix(goName, "(*Session)."):
-			want, where = "func (s *Session) "+strings.TrimPrefix(goName, "(*Session).")+"(", "panchang.go"
-		case strings.HasPrefix(goName, "type "):
-			want, where, text = "type "+bare(goName, "type ")+" ", "the types package", sharedText
-		case strings.HasPrefix(goName, "const "):
-			want, where, text = " "+bare(goName, "const ")+" ", "the types package", sharedText
-		default:
-			want, where = "func "+goName+"(", "panchang.go"
-		}
-		if !strings.Contains(text, want) {
+		if ok, want, where := declaredIn(facadeText, sharedText, goName); !ok {
 			t.Errorf("%s maps to %s, but %s declares no %q", ts, goName, where, want)
+		}
+	}
+}
+
+var blankRun = regexp.MustCompile(`[ \t]+`)
+
+func squash(s string) string { return blankRun.ReplaceAllString(s, " ") }
+
+// declaredIn reports whether goName, spelled as the covered table spells it,
+// is declared: functions and methods in the facade text, types and constants
+// in the types package text.
+func declaredIn(facadeText, sharedText, goName string) (ok bool, want, where string) {
+	text := facadeText
+	switch {
+	case strings.HasPrefix(goName, "(*Session)."):
+		want, where = "func (s *Session) "+strings.TrimPrefix(goName, "(*Session).")+"(", "panchang.go"
+	case strings.HasPrefix(goName, "type "):
+		want, where, text = "type "+bare(goName, "type ")+" ", "the types package", sharedText
+	case strings.HasPrefix(goName, "const "):
+		want, where, text = " "+bare(goName, "const ")+" ", "the types package", sharedText
+	default:
+		want, where = "func "+goName+"(", "panchang.go"
+	}
+	return strings.Contains(text, want), want, where
+}
+
+// optionArms maps each overloaded TypeScript export to the option that
+// selects its non-default arm and the separately named Go entry point for
+// that arm. The coverage table above matches export names only, so without
+// this a TypeScript option whose result type differs could go unported.
+var optionArms = map[string]struct{ option, goName string }{
+	"computeArgala":         {"includeTrikonargala: true", "ComputeArgalaWithTrikonargala"},
+	"computeJaiminiKarakas": {"variant: '8-jaimini'", "ComputeJaimini8Karakas"},
+	"computeNarayanDasha":   {"duration: 'variable'", "(*Session).ComputeNarayanDashaVariable"},
+	"computeSripatiLagna":   {"includeCusps: true", "(*Session).ComputeSripatiLagnaWithCusps"},
+}
+
+// TestOverloadArmsHaveGoEntryPoints finds every TypeScript function exported
+// with overload signatures and checks that optionArms names its option, that
+// the option still appears in that file, and that the Go entry point exists.
+func TestOverloadArmsHaveGoEntryPoints(t *testing.T) {
+	overloaded := map[string]string{}
+	decl := regexp.MustCompile(`(?m)^export function ([A-Za-z0-9_]+)\(`)
+	err := filepath.WalkDir(repopath.Src(), func(path string, d os.DirEntry, err error) error {
+		if err != nil || d.IsDir() || !strings.HasSuffix(path, ".ts") {
+			return err
+		}
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		count := map[string]int{}
+		for _, m := range decl.FindAllStringSubmatch(string(b), -1) {
+			count[m[1]]++
+		}
+		for name, n := range count {
+			if n > 1 {
+				overloaded[name] = squash(strings.ReplaceAll(string(b), "\n", " "))
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(overloaded) < len(optionArms) {
+		t.Fatalf("found %d overloaded exports, fewer than the %d optionArms rows; the scan is broken", len(overloaded), len(optionArms))
+	}
+
+	facade, err := os.ReadFile(repopath.Go("panchang", "panchang.go"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	facadeText := squash(string(facade))
+	for name, text := range overloaded {
+		arm, ok := optionArms[name]
+		if !ok {
+			t.Errorf("%s is exported with overloads; add an optionArms row naming the option and the Go function for its non-default arm", name)
+			continue
+		}
+		if !strings.Contains(text, arm.option) {
+			t.Errorf("optionArms says %s selects its arm with %q, which its source no longer contains", name, arm.option)
+		}
+		if ok, want, where := declaredIn(facadeText, "", arm.goName); !ok {
+			t.Errorf("%s's %q arm maps to %s, but %s declares no %q", name, arm.option, arm.goName, where, want)
+		}
+	}
+	for name := range optionArms {
+		if _, ok := overloaded[name]; !ok {
+			t.Errorf("optionArms has a row for %s, which is no longer exported with overloads. Remove it", name)
 		}
 	}
 }
@@ -139,6 +232,53 @@ func parseBarrelExports(t *testing.T) []string {
 				out = append(out, n)
 			}
 		}
+	}
+	sort.Strings(out)
+	return out
+}
+
+// parseSubpathExports reads package.json's exports map and returns the value
+// exports of each subpath module other than ".", from its source file under
+// src/: every `export function` and `export const`.
+func parseSubpathExports(t *testing.T) []string {
+	t.Helper()
+	raw, err := os.ReadFile(repopath.Src("..", "package.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var pkg struct {
+		Exports map[string]struct {
+			Require struct {
+				Default string `json:"default"`
+			} `json:"require"`
+		} `json:"exports"`
+	}
+	if err := json.Unmarshal(raw, &pkg); err != nil {
+		t.Fatal(err)
+	}
+	decl := regexp.MustCompile(`(?m)^export\s+(?:function|const)\s+([A-Za-z0-9_]+)`)
+	var out []string
+	seen := map[string]bool{}
+	files := 0
+	for sub, e := range pkg.Exports {
+		if sub == "." {
+			continue
+		}
+		rel := strings.TrimSuffix(strings.TrimPrefix(e.Require.Default, "./dist/"), ".cjs") + ".ts"
+		b, err := os.ReadFile(repopath.Src(filepath.FromSlash(rel)))
+		if err != nil {
+			t.Fatalf("package.json subpath %s: %v", sub, err)
+		}
+		files++
+		for _, m := range decl.FindAllStringSubmatch(string(b), -1) {
+			if !seen[m[1]] {
+				seen[m[1]] = true
+				out = append(out, m[1])
+			}
+		}
+	}
+	if files < 4 {
+		t.Fatalf("package.json lists %d subpath modules, want at least 4 (festivals, eclipses, moon-phases, muhurta)", files)
 	}
 	sort.Strings(out)
 	return out
@@ -239,6 +379,7 @@ var covered = map[string]string{
 	"computeVimshottariDasha":          "ComputeVimshottariDasha",
 	"computeVimshottariDashaFromBirth": "(*Session).ComputeVimshottariDashaFromBirth",
 	"computeVimshottariPratyantar":     "ComputeVimshottariPratyantar",
+	"computeVimshottariPratyantarIn":   "ComputeVimshottariPratyantarIn",
 	"computeYamaganda":                 "ComputeYamaganda",
 	"computeYogas":                     "ComputeYogas",
 	"computeYoginiDasha":               "ComputeYoginiDasha",
@@ -269,6 +410,20 @@ var covered = map[string]string{
 	"karnavedhaRule":                   "KarnavedhaRule",
 	"mundanRule":                       "MundanRule",
 	"namakaranaRule":                   "NamakaranaRule",
+	"readBestMuhurtaDays":              "ReadBestMuhurtaDays",
+	"readEclipsesForDate":              "ReadEclipsesForDate",
+	"readEclipsesForYear":              "ReadEclipsesForYear",
+	"readEclipsesYearRange":            "ReadEclipsesYearRange",
+	"readFestivalsForDate":             "ReadFestivalsForDate",
+	"readFestivalsForYear":             "ReadFestivalsForYear",
+	"readFestivalsYearRange":           "ReadFestivalsYearRange",
+	"readMoonPhasesForDate":            "ReadMoonPhasesForDate",
+	"readMoonPhasesForYear":            "ReadMoonPhasesForYear",
+	"readMoonPhasesYearRange":          "ReadMoonPhasesYearRange",
+	"readMuhurtaForDate":               "ReadMuhurtaForDate",
+	"readMuhurtaForYear":               "ReadMuhurtaForYear",
+	"readMuhurtaOccasion":              "ReadMuhurtaOccasion",
+	"readMuhurtaYearRange":             "ReadMuhurtaYearRange",
 	"referenceLocation":                "ReferenceLocation",
 	"resolveLocation":                  "ResolveLocation",
 	"scoreMuhurta":                     "(*Session).ScoreMuhurta",
@@ -282,8 +437,17 @@ var covered = map[string]string{
 }
 
 var deprecated = map[string]string{
+	"getEclipsesForDate":      "readEclipsesForDate",
+	"getEclipsesForYear":      "readEclipsesForYear",
 	"getEclipsesInRange":      "computeEclipsesInRange",
+	"getEclipsesYearRange":    "readEclipsesYearRange",
 	"getEkadashiDatesForYear": "computeEkadashiDatesForYear",
+	"getFestivalsForDate":     "readFestivalsForDate",
+	"getFestivalsForYear":     "readFestivalsForYear",
 	"getFestivalsInRange":     "computeFestivalsInRange",
+	"getFestivalsYearRange":   "readFestivalsYearRange",
+	"getMoonPhasesForDate":    "readMoonPhasesForDate",
+	"getMoonPhasesForYear":    "readMoonPhasesForYear",
+	"getMoonPhasesYearRange":  "readMoonPhasesYearRange",
 	"getSankrantisForYear":    "computeSankrantisForYear",
 }

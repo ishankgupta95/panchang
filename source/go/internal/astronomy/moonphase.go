@@ -57,13 +57,14 @@ func ComputeMoonPhasesForYear(ctx context.Context, eph *EphemerisCtx, year int, 
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	offset, err := utils.ResolveUtcOffset(options.Timezone, utcMS(year, 6, 1))
+	startUtc, endUtc, err := utils.LocalYearWindow(year, options.Timezone)
 	if err != nil {
 		return nil, err
 	}
-	startUtc := utcMS(year, 0, 1) - int64(offset)*60_000
-	endUtc := utcMS(year, 11, 31) + 23*3600_000 + 59*60_000 + 59*1000 + 999 - int64(offset)*60_000
-	return ComputeMoonPhasesInRange(ctx, eph, startUtc, endUtc)
+	if err := utils.ValidateLocalYearWindow(year, startUtc, endUtc); err != nil {
+		return nil, err
+	}
+	return ComputeMoonPhasesInRange(ctx, eph, utils.ClampToSupported(startUtc), utils.ClampToSupported(endUtc))
 }
 
 func GetMoonPhasesInRange(ctx context.Context, eph *EphemerisCtx, startMs, endMs int64) ([]MoonPhaseEvent, error) {

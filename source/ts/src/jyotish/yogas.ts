@@ -1,6 +1,7 @@
 import { computeAspects } from './aspects';
 import { computeDignity, type Dignity } from './dignity';
 import { YOGA_CATALOG, type YogaContext } from './yogasCatalog';
+import { PanchangError } from '../types/errors';
 import type {
   BirthChart, DivisionalChart, GrahaName, PlanetPlacement,
   Yoga, YogaType,
@@ -10,8 +11,13 @@ const VISIBLE_GRAHAS: readonly GrahaName[] = [
   'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn',
 ];
 
+const YOGA_TYPES: Readonly<Record<YogaType, true>> = {
+  mahapurusha: true, lunar: true, solar: true, raja: true,
+  dhana: true, special: true, cancellation: true, negative: true,
+};
+
 export interface ComputeYogasOptions {
-  /** Omit or leave empty to evaluate the whole catalog. */
+  /** Omit or leave empty to evaluate the whole catalog; an unknown type throws `INVALID_INPUT`. */
   types?: readonly YogaType[];
 
   /** D9 chart for the Vargottama rule; without it Vargottama is silently skipped. */
@@ -21,9 +27,17 @@ export interface ComputeYogasOptions {
   nodeAspects?: '7-only' | '5-and-9';
 }
 
-/** Named classical yogas present in a natal D1 chart; names are transliterated proper nouns, not locale-resolved. */
+/**
+ * Named classical yogas present in a natal D1 chart; names are transliterated proper nouns, not locale-resolved.
+ * A lagna rashi index outside 0..11 throws `PanchangError` `INVALID_INPUT`.
+ */
 export function computeYogas(chart: BirthChart, options: ComputeYogasOptions = {}): Yoga[] {
   const ctx = buildContext(chart, options);
+  for (const type of options.types ?? []) {
+    if (!Object.prototype.hasOwnProperty.call(YOGA_TYPES, type)) {
+      throw new PanchangError(`unknown yoga type "${String(type)}"`, 'INVALID_INPUT');
+    }
+  }
 
   const typeFilter = options.types && options.types.length > 0
     ? new Set<YogaType>(options.types)
@@ -55,6 +69,10 @@ function buildContext(chart: BirthChart, options: ComputeYogasOptions): YogaCont
     const p = planetByName[g];
     dignity[g] = computeDignity(g, p.rashi.index);
   }
+  const lagnaRashi = chart.lagna.rashi.index;
+  if (!Number.isInteger(lagnaRashi) || lagnaRashi < 0 || lagnaRashi > 11) {
+    throw new PanchangError(`lagna rashi must be integer in [0, 11], got ${lagnaRashi}`, 'INVALID_INPUT');
+  }
 
   const aspects = computeAspects(chart, { nodeAspects: options.nodeAspects ?? '7-only' });
 
@@ -64,6 +82,6 @@ function buildContext(chart: BirthChart, options: ComputeYogasOptions): YogaCont
     aspects,
     navamsa: options.navamsa,
     planetByName,
-    lagnaRashi: chart.lagna.rashi.index,
+    lagnaRashi,
   };
 }

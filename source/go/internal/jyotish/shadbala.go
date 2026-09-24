@@ -36,9 +36,9 @@ func shadbalaForChart(chart *types.BirthChart, basis *NatalBasis) (types.Shadbal
 	if err != nil {
 		return types.ShadbalaResult{}, err
 	}
-	nextSunriseUtc, err := astronomy.ComputeSunrise(basis.Ctx, sunsetUtc, basis.Location,
-		astronomy.DefaultRiseSetLimitDays)
-	if err != nil {
+	// Keeps NO_SUNRISE for a night that does not end.
+	if _, err := astronomy.ComputeSunrise(basis.Ctx, sunsetUtc, basis.Location,
+		astronomy.DefaultRiseSetLimitDays); err != nil {
 		return types.ShadbalaResult{}, err
 	}
 
@@ -55,11 +55,11 @@ func shadbalaForChart(chart *types.BirthChart, basis *NatalBasis) (types.Shadbal
 	}
 
 	var out types.ShadbalaResult
-	for _, v := range types.AllVisibleGrahas {
+	for _, v := range allVisibleGrahas {
 		placement, _ := chart.ByPlanet.Get(v.Graha())
 		sthana := sthanaBala(v, *placement, chart, &divisionalCharts)
 		dig := digBala(v, placement.Longitude, chart.Lagna.SiderealLongitude)
-		kala := kalaBala(v, basis.BirthMs, sunriseUtc, sunsetUtc, nextSunriseUtc,
+		kala := kalaBala(v, basis.BirthMs, sunriseUtc, sunsetUtc,
 			sunPlanet.Longitude, moonPlanet.Longitude)
 		chesta := chestaBala(v, *placement, sunPlanet.Longitude)
 		naisargika := Naisargika[v.Graha()]
@@ -230,39 +230,39 @@ var (
 
 func kalaBala(
 	v types.VisibleGraha,
-	birthMs, sunriseUtc, sunsetUtc, nextSunriseUtc int64,
+	birthMs, sunriseUtc, sunsetUtc int64,
 	sunLon, moonLon float64,
 ) float64 {
-	return nathonathaBala(v, birthMs, sunriseUtc, sunsetUtc, nextSunriseUtc) +
+	return nathonathaBala(v, birthMs, sunriseUtc, sunsetUtc) +
 		pakshaBala(v, sunLon, moonLon)
 }
 
-func nathonathaBala(v types.VisibleGraha, birthMs, sunriseUtc, sunsetUtc, nextSunriseUtc int64) float64 {
+const nathonathaHourMs float64 = 3_600_000
+
+// nathonathaBala is BPHS Ch. 27 v8-9: Divabala = 2 x Unnata, 5 virupas per hour
+// from 0 at apparent midnight to 60 at apparent noon, taken by the day-strong
+// grahas; the night-strong take 60 minus it. Apparent noon is the midpoint of
+// sunrise and sunset, and apparent midnight 12 h after it, so the curve is
+// continuous at sunset and steps by a few hundredths of a virupa at sunrise,
+// where the frame moves to the next day's noon.
+func nathonathaBala(v types.VisibleGraha, birthMs, sunriseUtc, sunsetUtc int64) float64 {
 	if v == types.VisibleMercury {
 		return 60
 	}
-	isDayBirth := birthMs >= sunriseUtc && birthMs < sunsetUtc
-	if isDayBirth {
-		dayLen := sunsetUtc - sunriseUtc
-		phase := float64(birthMs-sunriseUtc) / float64(dayLen)
-		factor := 1 - float64(math.Abs(phase-0.5)*2)
-		if dayStrong[v] {
-			return float64(factor * 60)
-		}
-		if nightStrong[v] {
-			return float64((1 - factor) * 60)
-		}
+	t := float64(birthMs)
+	noon := float64(sunriseUtc+sunsetUtc) / 2 // float division: the midpoint can end in .5
+	var divabala float64
+	if birthMs >= sunriseUtc && birthMs < sunsetUtc {
+		divabala = 60 - float64(math.Abs(t-noon)/nathonathaHourMs*5) // anti-FMA barrier
 	} else {
-		nightStart := sunsetUtc
-		nightLen := nextSunriseUtc - nightStart
-		phase := float64(birthMs-nightStart) / float64(nightLen)
-		factor := 1 - float64(math.Abs(phase-0.5)*2)
-		if nightStrong[v] {
-			return float64(factor * 60)
-		}
-		if dayStrong[v] {
-			return float64((1 - factor) * 60)
-		}
+		divabala = math.Abs(t-(noon+12*nathonathaHourMs)) / nathonathaHourMs * 5
+	}
+	clamped := math.Min(60, math.Max(0, divabala))
+	if dayStrong[v] {
+		return clamped
+	}
+	if nightStrong[v] {
+		return 60 - clamped
 	}
 	return 0
 }

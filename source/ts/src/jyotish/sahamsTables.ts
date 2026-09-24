@@ -87,4 +87,4 @@ export const SAHAM_FORMULAS: readonly SahamFormula[] = [
   { name: 'Tapas',       x: 'Sun',         y: 'Saturn',  z: 'Mercury',     swap: false },
 ];
 
-export const ALL_SAHAM_NAMES: readonly SahamName[] = SAHAM_FORMULAS.map((f) => f.name);
+export const ALL_SAHAM_NAMES: readonly SahamName[] = /* @__PURE__ */ SAHAM_FORMULAS.map((f) => f.name);

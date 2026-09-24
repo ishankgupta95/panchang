@@ -11,7 +11,7 @@ func ComputeYogas(chart *types.BirthChart, options ComputeYogasOptions) ([]types
 	if len(options.Types) > 0 {
 		for _, t := range options.Types {
 			known := false
-			for _, k := range types.AllYogaTypes {
+			for _, k := range allYogaTypes {
 				if k == t {
 					known = true
 				}
@@ -53,18 +53,29 @@ func ComputeYogas(chart *types.BirthChart, options ComputeYogasOptions) ([]types
 }
 
 func buildYogaContext(chart *types.BirthChart, options ComputeYogasOptions) (YogaContext, error) {
+	var planetByName types.PlanetsByGraha
+	var seen [types.GrahaCount]bool
+	for _, p := range chart.Planets {
+		if planetByName.Set(p.Planet, p) {
+			seen[p.Planet] = true
+		}
+	}
 	var dignity [types.GrahaCount]Dignity
-	for _, g := range types.AllGrahas {
-		p, ok := chart.ByPlanet.Get(g)
-		if !ok {
+	for _, g := range allGrahas {
+		if !seen[g] {
 			return YogaContext{}, types.Codef(types.ErrInvalidInput,
 				"chart is missing %s", g)
 		}
+		p, _ := planetByName.Get(g)
 		d, err := ComputeDignity(g, p.Rashi.Index)
 		if err != nil {
 			return YogaContext{}, err
 		}
 		dignity[g] = d
+	}
+	if r := chart.Lagna.Rashi.Index; r < 0 || r > 11 {
+		return YogaContext{}, types.Codef(types.ErrInvalidInput,
+			"lagna rashi must be integer in [0, 11], got %d", r)
 	}
 
 	aspects, err := ComputeAspects(chart, AspectsOptions{NodeAspects: options.NodeAspects})
@@ -77,7 +88,7 @@ func buildYogaContext(chart *types.BirthChart, options ComputeYogasOptions) (Yog
 		Dignity:      dignity,
 		Aspects:      aspects,
 		Navamsa:      options.Navamsa,
-		PlanetByName: chart.ByPlanet,
+		PlanetByName: planetByName,
 		LagnaRashi:   chart.Lagna.Rashi.Index,
 	}, nil
 }

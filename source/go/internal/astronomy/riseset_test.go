@@ -1,6 +1,7 @@
 package astronomy
 
 import (
+	"errors"
 	"math"
 	"os"
 	"runtime"
@@ -530,4 +531,23 @@ func BenchmarkSunriseSunsetYear(b *testing.B) {
 		}
 	}
 	b.ReportMetric(float64(b.Elapsed().Nanoseconds())/float64(b.N*days), "ns/day")
+}
+
+// TestResolveEventStopsAtTheSolverRange pins the edge of the 2^52 ms guard: a
+// scan that stays inside it still solves, and one that reaches a day past it
+// reports INVALID_DATE instead of refining forever.
+func TestResolveEventStopsAtTheSolverRange(t *testing.T) {
+	ctx := NewEphemerisCtx()
+	pune := types.GeoLocation{Latitude: 18.52, Longitude: 73.86}
+	const lastGoodDay = maxSolvableMs/dayMS - 1
+	if _, _, err := ResolveEvent(ctx, solar, +1, (lastGoodDay-1)*dayMS, pune, 0); err != nil {
+		t.Errorf("a scan of the last two whole days inside 2^52 ms failed: %v", err)
+	}
+	for _, from := range []int64{(lastGoodDay+1)*dayMS - 1, -(lastGoodDay + 2) * dayMS} {
+		_, _, err := ResolveEvent(ctx, solar, +1, from, pune, 0)
+		var pe *types.PanchangError
+		if !errors.As(err, &pe) || pe.Code != types.ErrInvalidDate {
+			t.Errorf("ResolveEvent from %d = %v, want INVALID_DATE", from, err)
+		}
+	}
 }

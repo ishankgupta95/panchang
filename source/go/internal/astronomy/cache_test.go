@@ -1,12 +1,15 @@
 package astronomy
 
 import (
+	"encoding/json"
 	"errors"
 	"math"
+	"math/rand"
 	"os"
 	"sync"
 	"testing"
 
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
 	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
@@ -622,4 +625,275 @@ func BenchmarkChebyshevAt(b *testing.B) {
 		sink += block.at(base + float64(i%100_000))
 	}
 	_ = sink
+}
+
+// riseSetEventKeyString and riseSetScanKeyString are the TypeScript's rise and
+// set cache keys, which the riseSetKey structs stand in for.
+func riseSetEventKeyString(body RiseSetBody, direction int, loc types.GeoLocation, dayIndex int64) string {
+	return string(body) + "|" + jsnum.FormatInt(int64(direction)) + "|" +
+		jsnum.FormatFloat(loc.Latitude) + "|" +
+		jsnum.FormatFloat(loc.Longitude) + "|" +
+		jsnum.FormatFloat(loc.Elevation) + "|" +
+		jsnum.FormatInt(dayIndex)
+}
+
+func riseSetScanKeyString(body RiseSetBody, loc types.GeoLocation, dayIndex int64) string {
+	return string(body) + "|" +
+		jsnum.FormatFloat(loc.Latitude) + "|" +
+		jsnum.FormatFloat(loc.Longitude) + "|" +
+		jsnum.FormatFloat(loc.Elevation) + "|" +
+		jsnum.FormatInt(dayIndex)
+}
+
+// Two rise/set cache keys must be equal exactly when the TypeScript's strings
+// are, or the struct keys would share (or split) an entry the strings do not.
+func TestRiseSetKeyEqualityIsTheStringKeys(t *testing.T) {
+	rng := rand.New(rand.NewSource(20260924))
+	special := []float64{0, math.Copysign(0, -1), 1, -1, 18.5204, 73.8567, 560, -33.8688, 1e-7, 1e21, 1.5e-7,
+		123456789012345680000, math.NaN(), math.Float64frombits(0x7ff8000000000abc), math.Inf(1), math.Inf(-1),
+		math.SmallestNonzeroFloat64, math.MaxFloat64, math.Nextafter(18.5204, 19)}
+	days := []int64{0, -1, 1, 20_089, -25_567, 1 << 53, (1 << 53) + 1, -(1 << 53) - 1, (1 << 53) - 1, 1<<60 + 1, 1 << 60, math.MaxInt64, math.MinInt64}
+	pick := func() float64 {
+		if rng.Intn(3) == 0 {
+			return special[rng.Intn(len(special))]
+		}
+		return float64(rng.Intn(5)) / 4
+	}
+	pickDay := func() int64 {
+		if rng.Intn(2) == 0 {
+			return days[rng.Intn(len(days))]
+		}
+		return int64(rng.Intn(3))
+	}
+	bodies := []RiseSetBody{RiseSetSun, RiseSetMoon}
+	equal, distinct := 0, 0
+	for i := 0; i < 400_000; i++ {
+		b1, b2 := bodies[rng.Intn(2)], bodies[rng.Intn(2)]
+		d1, d2 := 1-2*rng.Intn(2), 1-2*rng.Intn(2)
+		l1 := types.GeoLocation{Latitude: pick(), Longitude: pick(), Elevation: pick()}
+		l2 := types.GeoLocation{Latitude: pick(), Longitude: pick(), Elevation: pick()}
+		if rng.Intn(2) == 0 {
+			l2, b2, d2 = l1, b1, d1
+			if rng.Intn(2) == 0 {
+				l2.Latitude = math.Copysign(0, -1) * l1.Latitude
+			}
+		}
+		y1, y2 := pickDay(), pickDay()
+		sameStruct := newRiseSetKey(b1, d1, l1, y1) == newRiseSetKey(b2, d2, l2, y2)
+		sameString := riseSetEventKeyString(b1, d1, l1, y1) == riseSetEventKeyString(b2, d2, l2, y2)
+		if sameStruct != sameString {
+			t.Fatalf("event keys (%s %d %+v %d) and (%s %d %+v %d): struct equal %v, string equal %v",
+				b1, d1, l1, y1, b2, d2, l2, y2, sameStruct, sameString)
+		}
+		sameStruct = riseSetScanKey(b1, l1, y1) == riseSetScanKey(b2, l2, y2)
+		sameString = riseSetScanKeyString(b1, l1, y1) == riseSetScanKeyString(b2, l2, y2)
+		if sameStruct != sameString {
+			t.Fatalf("scan keys (%s %+v %d) and (%s %+v %d): struct equal %v, string equal %v",
+				b1, l1, y1, b2, l2, y2, sameStruct, sameString)
+		}
+		if sameString {
+			equal++
+		} else {
+			distinct++
+		}
+	}
+	if equal < 1000 || distinct < 1000 {
+		t.Fatalf("%d equal and %d distinct pairs: the sweep does not exercise both answers", equal, distinct)
+	}
+}
+
+func marshalBits(t *testing.T, v any) string {
+	t.Helper()
+	b, err := json.Marshal(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(b)
+}
+
+// A memo hit must be the value the unmemoised function computes for the same
+// key on a fresh context, whatever was asked before, and must share no
+// pointer with the store. The sweep repeats keys while they are resident,
+// runs past the stores' sizes, and alternates two contexts.
+func TestEphemerisMemoHitsEqualFreshMisses(t *testing.T) {
+	ClearEphemerisMemos()
+	shared, other := NewEphemerisCtx(), NewEphemerisCtx()
+	rng := rand.New(rand.NewSource(7))
+	lo := types.DateUTC(1900, 0, 1).Ms()
+	hi := types.DateUTC(2100, 11, 1).Ms()
+	pune := types.GeoLocation{Latitude: 18.5204, Longitude: 73.8567, Elevation: 560}
+	ctxFor := func(i int) *EphemerisCtx {
+		if i%2 == 0 {
+			return shared
+		}
+		return other
+	}
+
+	starts := make([]int64, 0, 64)
+	for i := 0; i < 64; i++ {
+		starts = append(starts, lo+rng.Int63n(hi-lo))
+	}
+	for pass := 0; pass < 3; pass++ {
+		for i, start := range starts {
+			for _, target := range []float64{0, 90, 180, 270, math.Copysign(0, -1)} {
+				gotMs, gotOK := SearchMoonPhase(ctxFor(i+pass), target, start, 12)
+				wantMs, wantOK := searchMoonPhase(NewEphemerisCtx(), target, start, 12)
+				if gotMs != wantMs || gotOK != wantOK {
+					t.Fatalf("SearchMoonPhase(%v, %d): memo (%d, %v), fresh (%d, %v)", target, start, gotMs, gotOK, wantMs, wantOK)
+				}
+			}
+			for _, body := range AllPlanetBodies {
+				if got, want := GetPlanetPosition(ctxFor(i+pass), body, start), planetPosition(NewEphemerisCtx(), body, start); got != want {
+					t.Fatalf("GetPlanetPosition(%d, %d): memo %+v, fresh %+v", body, start, got, want)
+				}
+			}
+			if got, want := syzygyLatitude(ctxFor(i+pass), start), GetMoonPosition(NewEphemerisCtx(), start).Latitude; math.Float64bits(got) != math.Float64bits(want) {
+				t.Fatalf("syzygyLatitude(%d): memo %v, fresh %v", start, got, want)
+			}
+		}
+	}
+
+	// Real eclipses, found from syzygies, then a lookup away from any.
+	eclipses := 0
+	for i := 0; i < 40; i++ {
+		start := lo + rng.Int63n(hi-lo)
+		opp, _ := SearchMoonPhase(shared, 180, start, 45)
+		conj, _ := SearchMoonPhase(shared, 0, start, 45)
+		for pass := 0; pass < 2; pass++ {
+			gotL, okL := FindLunarEclipse(ctxFor(i+pass), opp)
+			wantL, wantOKL := findLunarEclipse(NewEphemerisCtx(), opp)
+			if okL != wantOKL || marshalBits(t, gotL) != marshalBits(t, wantL) {
+				t.Fatalf("FindLunarEclipse(%d): memo %+v, fresh %+v", opp, gotL, wantL)
+			}
+			gotS, okS := FindLocalSolarEclipse(ctxFor(i+pass), conj, pune)
+			wantS, wantOKS := findLocalSolarEclipse(NewEphemerisCtx(), conj, pune)
+			if okS != wantOKS || marshalBits(t, gotS) != marshalBits(t, wantS) {
+				t.Fatalf("FindLocalSolarEclipse(%d): memo %+v, fresh %+v", conj, gotS, wantS)
+			}
+			if okL {
+				eclipses++
+				if gotL.PartialBeginMs != nil {
+					*gotL.PartialBeginMs = -1 // must not reach the store
+				}
+			}
+			if okS {
+				eclipses++
+				if gotS.CentralBeginMs != nil {
+					*gotS.CentralBeginMs = -1
+				}
+			}
+		}
+	}
+	if eclipses == 0 {
+		t.Fatal("the sweep found no eclipse, so the eclipse memos were not compared on one")
+	}
+}
+
+// The memos are process-wide, so goroutines with their own contexts share
+// them; the race detector covers the locking, and every answer must still be
+// the fresh value.
+func TestEphemerisMemosAreSafeForConcurrentUse(t *testing.T) {
+	ClearEphemerisMemos()
+	lo := types.DateUTC(2020, 0, 1).Ms()
+	var wg sync.WaitGroup
+	errs := make(chan string, 8)
+	for g := 0; g < 8; g++ {
+		wg.Add(1)
+		go func(g int) {
+			defer wg.Done()
+			ctx := NewEphemerisCtx()
+			for i := 0; i < 60; i++ {
+				start := lo + int64((i*7+g)%40)*dayMS
+				got, ok := SearchMoonPhase(ctx, 0, start, 45)
+				want, wantOK := searchMoonPhase(NewEphemerisCtx(), 0, start, 45)
+				if got != want || ok != wantOK {
+					errs <- "SearchMoonPhase differs under concurrency"
+					return
+				}
+				if GetPlanetPosition(ctx, PlanetSaturn, start) != planetPosition(NewEphemerisCtx(), PlanetSaturn, start) {
+					errs <- "GetPlanetPosition differs under concurrency"
+					return
+				}
+			}
+		}(g)
+	}
+	wg.Wait()
+	close(errs)
+	for e := range errs {
+		t.Fatal(e)
+	}
+}
+
+// TestEphemerisMemosNeverAnswerANeighbouringKey asks each memo for one key and
+// then for keys 1 ms to 1 day away (and, for the local solar eclipse, a
+// location a hair away), and compares every second answer with the
+// unmemoised function on a fresh context. A memo keyed coarser than its
+// inputs, or one that reuses a nearby search, fails here even when it is
+// wrong the same way on every run.
+func TestEphemerisMemosNeverAnswerANeighbouringKey(t *testing.T) {
+	deltas := []int64{1, 999, 59_000, 3_600_000, 86_400_000}
+	bases := []int64{
+		types.DateUTC(1980, 7, 10).Ms() + 12*3_600_000,
+		types.DateUTC(2025, 2, 29).Ms() + 10*3_600_000 + 58*60_000,
+		types.DateUTC(1912, 3, 17).Ms() + 11*3_600_000,
+		types.DateUTC(2061, 6, 1).Ms(),
+	}
+	pune := types.GeoLocation{Latitude: 18.5204, Longitude: 73.8567, Elevation: 560}
+	nudged := []types.GeoLocation{
+		{Latitude: 18.5204 + 1e-9, Longitude: 73.8567, Elevation: 560},
+		{Latitude: 18.5204, Longitude: 73.8567 + 1e-9, Elevation: 560},
+		{Latitude: 18.5204, Longitude: 73.8567, Elevation: 561},
+	}
+	for _, base := range bases {
+		for _, d := range deltas {
+			ClearEphemerisMemos()
+			ctx := NewEphemerisCtx()
+			for _, target := range []float64{0, 180} {
+				SearchMoonPhase(ctx, target, base, 45)
+				got, gotOK := SearchMoonPhase(ctx, target, base+d, 45)
+				want, wantOK := searchMoonPhase(NewEphemerisCtx(), target, base+d, 45)
+				if got != want || gotOK != wantOK {
+					t.Fatalf("SearchMoonPhase(%v, %d) after %d: memo (%d, %v), fresh (%d, %v)", target, base+d, base, got, gotOK, want, wantOK)
+				}
+			}
+			for _, body := range AllPlanetBodies {
+				GetPlanetPosition(ctx, body, base)
+				if got, want := GetPlanetPosition(ctx, body, base+d), planetPosition(NewEphemerisCtx(), body, base+d); got != want {
+					t.Fatalf("GetPlanetPosition(%d, %d) after %d: memo %+v, fresh %+v", body, base+d, base, got, want)
+				}
+			}
+			syzygyLatitude(ctx, base)
+			if got, want := syzygyLatitude(ctx, base+d), GetMoonPosition(NewEphemerisCtx(), base+d).Latitude; math.Float64bits(got) != math.Float64bits(want) {
+				t.Fatalf("syzygyLatitude(%d) after %d: memo %v, fresh %v", base+d, base, got, want)
+			}
+			opp, _ := SearchMoonPhase(ctx, 180, base, 45)
+			conj, _ := SearchMoonPhase(ctx, 0, base, 45)
+			FindLunarEclipse(ctx, opp)
+			gotL, okL := FindLunarEclipse(ctx, opp+d)
+			wantL, wantOKL := findLunarEclipse(NewEphemerisCtx(), opp+d)
+			if okL != wantOKL || marshalBits(t, gotL) != marshalBits(t, wantL) {
+				t.Fatalf("FindLunarEclipse(%d) after %d: memo %+v, fresh %+v", opp+d, opp, gotL, wantL)
+			}
+			FindLocalSolarEclipse(ctx, conj, pune)
+			gotS, okS := FindLocalSolarEclipse(ctx, conj+d, pune)
+			wantS, wantOKS := findLocalSolarEclipse(NewEphemerisCtx(), conj+d, pune)
+			if okS != wantOKS || marshalBits(t, gotS) != marshalBits(t, wantS) {
+				t.Fatalf("FindLocalSolarEclipse(%d) after %d: memo %+v, fresh %+v", conj+d, conj, gotS, wantS)
+			}
+		}
+	}
+	ClearEphemerisMemos()
+	ctx := NewEphemerisCtx()
+	for _, base := range bases {
+		conj, _ := SearchMoonPhase(ctx, 0, base, 45)
+		FindLocalSolarEclipse(ctx, conj, pune)
+		for _, loc := range nudged {
+			gotS, okS := FindLocalSolarEclipse(ctx, conj, loc)
+			wantS, wantOKS := findLocalSolarEclipse(NewEphemerisCtx(), conj, loc)
+			if okS != wantOKS || marshalBits(t, gotS) != marshalBits(t, wantS) {
+				t.Fatalf("FindLocalSolarEclipse(%d, %+v) after Pune: memo %+v, fresh %+v", conj, loc, gotS, wantS)
+			}
+		}
+	}
+	ClearEphemerisMemos()
 }

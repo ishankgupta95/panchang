@@ -10,19 +10,25 @@ import (
 
 // JSDate is an instant as milliseconds since the Unix epoch in UTC, the
 // value JavaScript's Date.getTime returns; an int64 rather than a time.Time
-// keeps the port bit-identical. A result field typed JSDate is always a UTC
-// instant. Where a same-named *Local string sits beside it, that string is
-// the same instant rendered in the result's timezone; many JSDate fields (an
+// keeps the port bit-identical. [JSDate.Time] converts one to a time.Time
+// and [JSDate.ISOString] renders it; it has no String method, so fmt prints
+// the bare integer. A result field typed JSDate is always a UTC instant.
+// Where a same-named *Local string sits beside it, that string is the same
+// instant rendered in the result's timezone; many JSDate fields (an
 // echoed-back input, a Dasha boundary, an EclipseInfo contact, every field
 // of InstantPanchangResult) have no Local companion. A nil *JSDate is
-// TypeScript's null and marshals as JSON null. The methods mirror the Date
-// UTC accessors, index bases included, and JSON is the ISO 8601 string
+// TypeScript's null and marshals as JSON null. The UTC methods mirror the
+// Date UTC accessors, index bases included, and JSON is the ISO 8601 string
 // JSON.stringify gives a Date; all of it is checked against a golden
 // generated from those built-ins.
 type JSDate int64
 
 // Ms returns the instant as epoch milliseconds.
 func (d JSDate) Ms() int64 { return int64(d) }
+
+// Time returns the instant as a [time.Time] in UTC, the same instant
+// time.UnixMilli gives; call In on the result to render it in another zone.
+func (d JSDate) Time() time.Time { return d.utc() }
 
 // Date wraps epoch milliseconds as a [JSDate].
 func Date(ms int64) JSDate { return JSDate(ms) }

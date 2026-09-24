@@ -8,11 +8,6 @@ import (
 	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
-type MuhurtaYearRange struct {
-	Start int `json:"start"`
-	End   int `json:"end"`
-}
-
 func ReadMuhurtaYearRange(source MuhurtaFile) MuhurtaYearRange {
 	return MuhurtaYearRange{Start: source.Meta.StartYear, End: source.Meta.EndYear}
 }
@@ -21,7 +16,7 @@ func ReadMuhurtaOccasion(source MuhurtaFile) string { return source.Meta.Occasio
 
 func flatten(source MuhurtaFile, yearKey string) ([]MuhurtaTableDay, bool) {
 	days, ok := source.Years[yearKey]
-	if !ok {
+	if !ok || days == nil {
 		return nil, false
 	}
 	out := make([]MuhurtaTableDay, 0, len(days))

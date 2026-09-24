@@ -10,9 +10,9 @@ export function computePrashnaChart(
   options: BirthChartOptions = {},
 ): BirthChart {
   const prashnaOptions: BirthChartOptions = {
-    houseSystem: 'placidus-kp',
-    ayanamsa: 'krishnamurti',
     ...options,
+    houseSystem: options.houseSystem ?? 'placidus-kp',
+    ayanamsa: options.ayanamsa ?? 'krishnamurti',
   };
   return computeRashiChart(questionMoment, location, prashnaOptions);
 }

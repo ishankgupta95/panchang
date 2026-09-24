@@ -9,14 +9,14 @@ export type PanchangReference = 'traditional' | 'modern' | 'practical';
 export type ReferenceMode = 'traditional' | 'modern';
 
 /** Ujjain, the classical madhya rekha of the Surya Siddhanta. */
-export const TRADITIONAL_REFERENCE: Readonly<GeoLocation> = Object.freeze({
+export const TRADITIONAL_REFERENCE: Readonly<GeoLocation> = /* @__PURE__ */ Object.freeze({
   latitude: 23.1765,
   longitude: 75.7885,
   elevation: 0,
 });
 
 /** The Central Station, the 1955 Calendar Reform Committee reference for the Rashtriya Panchang. */
-export const MODERN_REFERENCE: Readonly<GeoLocation> = Object.freeze({
+export const MODERN_REFERENCE: Readonly<GeoLocation> = /* @__PURE__ */ Object.freeze({
   latitude: 23.1833,
   longitude: 82.5,
   elevation: 0,
@@ -28,14 +28,16 @@ export const IST_TIMEZONE = 'Asia/Kolkata';
 /** The civil offset for either reference point. Exact for the Central Station, civil for Ujjain. */
 export const IST_OFFSET_MINUTES = 330;
 
-const REFERENCE_LOCATIONS: Readonly<Record<ReferenceMode, Readonly<GeoLocation>>> = Object.freeze({
+const REFERENCE_LOCATIONS: Readonly<Record<ReferenceMode, Readonly<GeoLocation>>> = /* @__PURE__ */ Object.freeze({
   traditional: TRADITIONAL_REFERENCE,
   modern: MODERN_REFERENCE,
 });
 
 /** The reference point for a mode: `traditional` is Ujjain, `modern` is the Central Station. */
 export function referenceLocation(mode: ReferenceMode): Readonly<GeoLocation> {
-  const location = REFERENCE_LOCATIONS[mode];
+  const location = Object.prototype.hasOwnProperty.call(REFERENCE_LOCATIONS, mode)
+    ? REFERENCE_LOCATIONS[mode]
+    : undefined;
   if (location === undefined) {
     throw new PanchangError(
       `Reference mode must be 'traditional' or 'modern', got ${String(mode)}`,
@@ -54,7 +56,8 @@ export interface ResolvedLocation {
 /**
  * Resolves a possibly-absent location and reports which frame the answer is in. A supplied
  * location comes back unchanged as `practical`; an absent one falls back to `mode`. A half-filled
- * location throws, and `{ latitude: 0, longitude: 0 }` is the real place it is.
+ * location throws, and `{ latitude: 0, longitude: 0 }` is the real place it is. `mode` defaults to
+ * `'traditional'`; the Go port has no default, so its ResolveLocation(nil, "") reports INVALID_INPUT.
  */
 export function resolveLocation(
   location?: GeoLocation | null,

@@ -1,4 +1,5 @@
 import { NAISARGIKA_MAITRI, RASHI_LORD } from './matchingTables';
+import { PanchangError } from '../types/errors';
 import type { GrahaName } from '../types/jyotish';
 
 /** Planetary dignity, strongest to weakest. */
@@ -68,11 +69,15 @@ const OWN_RASHIS: Record<GrahaName, ReadonlyArray<number>> = {
 
 /**
  * Dignity of a graha in a rashi; friend / neutral / enemy come from the rashi lord's Naisargika Maitri (BPHS ch. 4).
+ * An unknown graha name throws `PanchangError` `INVALID_INPUT`.
  * @param rashi 0 = Mesha … 11 = Meena.
  */
 export function computeDignity(graha: GrahaName, rashi: number): Dignity {
   if (!Number.isInteger(rashi) || rashi < 0 || rashi >= 12) {
     throw new RangeError(`rashi must be integer in [0, 11], got ${rashi}`);
+  }
+  if (!Object.prototype.hasOwnProperty.call(GRAHA_INDEX, graha)) {
+    throw new PanchangError(`graha out of range: ${String(graha)}`, 'INVALID_INPUT');
   }
 
   if (EXALTATION[graha] === rashi) return 'exalted';

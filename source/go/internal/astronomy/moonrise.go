@@ -11,14 +11,12 @@ func GetMoonrise(ctx *EphemerisCtx, searchFromMs int64, location types.GeoLocati
 	if err := utils.ValidateLocation(location); err != nil {
 		return 0, false, err
 	}
-	ms, ok := ResolveEvent(ctx, lunar, +1, searchFromMs, location, limitDays)
-	return ms, ok, nil
+	return ResolveEvent(ctx, lunar, +1, searchFromMs, location, limitDays)
 }
 
 func GetMoonset(ctx *EphemerisCtx, searchFromMs int64, location types.GeoLocation, limitDays int) (int64, bool, error) {
 	if err := utils.ValidateLocation(location); err != nil {
 		return 0, false, err
 	}
-	ms, ok := ResolveEvent(ctx, lunar, -1, searchFromMs, location, limitDays)
-	return ms, ok, nil
+	return ResolveEvent(ctx, lunar, -1, searchFromMs, location, limitDays)
 }

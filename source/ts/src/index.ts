@@ -42,7 +42,7 @@ export {
 export { computeSadeSati } from './jyotish/sadeSati';
 export { computeDignity } from './jyotish/dignity';
 export type { Dignity } from './jyotish/dignity';
-export { computeVimshottariPratyantar } from './jyotish/dasha';
+export { computeVimshottariPratyantar, computeVimshottariPratyantarIn } from './jyotish/dasha';
 export { computeAspects } from './jyotish/aspects';
 export type { AspectsOptions } from './jyotish/aspects';
 export { computeShadbala, computeBhavaBala } from './jyotish/shadbala';

@@ -133,6 +133,13 @@ describe('computeKpCuspalSubLords', () => {
     }
   });
 
+  it('an option passed as undefined keeps the KP ayanamsa, as an absent one does', () => {
+    const absent = computeKpCuspalSubLords(SAMPLE, DELHI, {});
+    expect(computeKpCuspalSubLords(SAMPLE, DELHI, { ayanamsa: undefined })).toEqual(absent);
+    expect(computeKpCuspalSubLords(SAMPLE, DELHI, { ayanamsa: undefined, houseSystem: undefined }))
+      .toEqual(absent);
+  });
+
   it('forces Placidus-KP regardless of caller-supplied houseSystem', () => {
     const r1 = computeKpCuspalSubLords(SAMPLE, DELHI, { houseSystem: 'whole-sign' });
     const r2 = computeKpCuspalSubLords(SAMPLE, DELHI, { houseSystem: 'placidus-kp' });

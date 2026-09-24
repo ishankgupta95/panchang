@@ -287,7 +287,9 @@ type MuhurtaTableMeta struct {
 // MuhurtaFile is a pre-computed muhurta table for one rule at one location,
 // as BuildMuhurtaTable returns it and as the JSON file is laid out. The
 // shape is shared with the TypeScript panchang-ts/muhurta readers, so a
-// table either language writes reads back in the other.
+// table either language writes reads back in the other. In Go,
+// ReadMuhurtaForYear, ReadBestMuhurtaDays and the other Read functions of the
+// panchang package read it.
 type MuhurtaFile struct {
 	// Meta is the build description, under _meta.
 	Meta MuhurtaTableMeta `json:"_meta"`
@@ -297,6 +299,23 @@ type MuhurtaFile struct {
 	// Years maps each calendar year as a decimal string (2026) to its days
 	// in ascending Date order.
 	Years map[string][]PackedMuhurtaTableDay `json:"years"`
+}
+
+// MuhurtaTableDay is one scored day of a [MuhurtaFile] as the muhurta table
+// readers of the panchang package return it: a [PackedMuhurtaTableDay] with
+// its factor indices resolved against the file's Dict. Result struct with
+// JSON tags.
+type MuhurtaTableDay struct {
+	// Date is the local calendar date, YYYY-MM-DD, at the table's
+	// TimezoneOffsetMinutes.
+	Date string `json:"date"`
+	// Score is the day's score, 0 to 100.
+	Score int `json:"score"`
+	// Passes is true when the packed P flag is 1.
+	Passes bool `json:"passes"`
+	// Factors holds the Dict rows the day's F indices name, in order, never
+	// nil. An index outside Dict is skipped.
+	Factors []MuhurtaFactor `json:"factors"`
 }
 
 // VaraTithiYogaType names one of the seven classical vara and tithi

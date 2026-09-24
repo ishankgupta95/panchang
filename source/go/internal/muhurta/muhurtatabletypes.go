@@ -13,10 +13,3 @@ var AllMuhurtaFactorAxes = []MuhurtaFactorAxis{
 }
 
 func factorIndex(n int) *int { return &n }
-
-type MuhurtaTableDay struct {
-	Date    string          `json:"date"`
-	Score   int             `json:"score"`
-	Passes  bool            `json:"passes"`
-	Factors []MuhurtaFactor `json:"factors"`
-}

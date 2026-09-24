@@ -37,7 +37,7 @@ import {
 import { computeVara } from './vara';
 import { computeRahuKalam, computeGulikaKalam, computeYamaganda } from './inauspicious';
 import {
-  computeAbhijitMuhurta, computeBrahmaMuhurta,
+  computeAbhijitMuhurta, brahmaMuhurtaForNight,
   computeVijayaMuhurta, computeGodhuliMuhurta,
   computeNishitaMuhurta, computeAmritKalaWindows,
   computeMadhyahna, computePratahSandhya, computeSayahnaSandhya,
@@ -85,6 +85,7 @@ import type {
 import type {
   DailyTithiInfo, DailyNakshatraInfo, DailyYogaInfo, DailyKaranaInfo, TimePeriod,
   ChoghadiyaQuality, FestivalInfo, UtcWindow, Unlocalized, PanchakaInfo,
+  TithiInfo, VaraInfo, ChandraMasaInfo, SamvatInfo,
 } from '../types/elements';
 import type { PanchangTranslations } from '../i18n/types';
 
@@ -125,6 +126,7 @@ function varaIndexAtInstant(
       if (next.getTime() > utc.getTime()) break;
       sunrise = next;
     }
+    if (sunrise.getTime() > utc.getTime()) return local.getUTCDay();
     const localSunrise = utcToLocalDisplay(sunrise, offsetMinutes);
     return computeVara(localSunrise, localSunrise, varaNames).index;
   } catch (e: unknown) {
@@ -198,7 +200,9 @@ function buildPanchakaInfo(
 /**
  * The Panchang elements active at a single UTC instant, not over a sunrise-to-sunrise day.
  *
- * @returns `null` for polar locations on dates with no sunrise.
+ * @returns `null` when the last sunrise at or before the instant, which gives the vara,
+ *          cannot be settled: none falls in the 26 h before it, or the last one is not
+ *          followed by another within two days (polar night or polar day).
  */
 export function getInstantPanchang(
   date: Date,
@@ -255,6 +259,7 @@ export function getInstantPanchang(
     }
     throw e;
   }
+  if (sunriseUtc.getTime() > date.getTime()) return null;
   const vara = computeVara(
     utcToLocalDisplay(sunriseUtc, lmtOffsetMinutes),
     utcToLocalDisplay(sunriseUtc, lmtOffsetMinutes),
@@ -306,24 +311,27 @@ export function getInstantPanchang(
     suryaNakshatra.index,
     (type) => (t.specialYogaNames as Record<string, string>)[type] ?? type,
   );
+  const festivalRegion = resolveRegionAlias(options?.region);
+  const solarMasaIndex = Math.floor(siderealSun / 30) % 12;
   const festivals = computeFestivals(
     {
       tithiIndex: tithi.index,
       nakshatraIndex: nakshatraOf(siderealMoon),
       chandraMasaIndex: chandramasa.amantaIndex,
+      varaMasaIndex: festivalRegion === 'nepal' ? (solarMasaIndex + 1) % 12 : chandramasa.index,
       isAdhika: chandramasa.isAdhika,
       varaIndex: vara.index,
-      solarMasaIndex: Math.floor(siderealSun / 30) % 12,
-      region: resolveRegionAlias(options?.region),
+      solarMasaIndex,
+      region: festivalRegion,
     },
     (key) => t.festivalNames[key] ?? (t.misc as Record<string, string>)[key] ?? key,
     (idx) => resolveMasaName(idx, lang),
   );
 
-  const chandraBalam = options?.janmaRashi !== undefined
+  const chandraBalam = options?.janmaRashi != null
     ? computeChandraBalam(options.janmaRashi, chandraRashi.index, lang)
     : null;
-  const tarabala = options?.janmaNakshatra !== undefined
+  const tarabala = options?.janmaNakshatra != null
     ? computeTarabala(options.janmaNakshatra, nakshatraOf(siderealMoon), lang)
     : null;
   const gandaMula = computeGandaMula(nakshatraOf(siderealMoon), lang);
@@ -362,13 +370,57 @@ export function getInstantPanchang(
  * @param date    Any `Date` in the local calendar day wanted; the time is ignored.
  * @param options `timezone` is required: UTC offset in minutes (330 = IST) or
  *                an IANA zone name.
- * @returns       `null` for polar locations on dates with no sunrise / sunset.
+ * @returns       `null` when the Hindu day cannot be formed: the local calendar day holds
+ *                no sunrise (polar night or polar day, including the day each ends, or a
+ *                fixed offset far from the location's solar time), or no sunset and next
+ *                sunrise follow within two days (the last day before polar night or polar day).
  */
 export function getDailyPanchang(
   date: Date,
   location: GeoLocation,
   options: PanchangOptions,
 ): DailyPanchangResult | null {
+  return computeDay(date, location, options, false);
+}
+
+/** @internal The part of a day the festival walks and the calendar converters read. */
+export interface DayLabels {
+  date: Date;
+  /** The tithi at sunrise, as `angas.tithis[0]` names and numbers it. */
+  tithi: TithiInfo;
+  vara: VaraInfo;
+  chandramasa: ChandraMasaInfo;
+  samvat: SamvatInfo;
+  /** `festivals` of the same call, eclipse first. */
+  festivals: FestivalInfo[];
+}
+
+/**
+ * @internal What `getDailyPanchang` puts in the fields {@link DayLabels} names, for the same
+ * arguments, with the same `null` and the same errors. It runs the same code and returns once the
+ * festival list is complete: everything after that point (the day periods, muhurtas, inauspicious
+ * windows, anga spans and local strings) is never built, and none of it feeds a label.
+ */
+export function getDailyLabels(
+  date: Date,
+  location: GeoLocation,
+  options: PanchangOptions,
+): DayLabels | null {
+  return computeDay(date, location, options, true);
+}
+
+function computeDay(
+  date: Date, location: GeoLocation, options: PanchangOptions, labelsOnly: true,
+): DayLabels | null;
+function computeDay(
+  date: Date, location: GeoLocation, options: PanchangOptions, labelsOnly: false,
+): DailyPanchangResult | null;
+function computeDay(
+  date: Date,
+  location: GeoLocation,
+  options: PanchangOptions,
+  labelsOnly: boolean,
+): DailyPanchangResult | DayLabels | null {
   validateDate(date);
   validateLocation(location);
   const offsetMinutes = resolveUtcOffset(options.timezone, date);
@@ -400,6 +452,7 @@ export function getDailyPanchang(
   let nextSunriseUtc: Date;
   try {
     sunriseUtc = computeSunrise(localMidnightUtc, location);
+    if (sunriseUtc.getTime() >= localMidnightUtc.getTime() + 86_400_000) return null;
     sunsetUtc = computeSunset(sunriseUtc, location);
     nextSunriseUtc = computeSunrise(sunsetUtc, location);
   } catch (e: unknown) {
@@ -450,22 +503,6 @@ export function getDailyPanchang(
     siderealSunAtSunrise,
     (idx) => resolveNakshatraName(idx, lang),
   );
-  const brahmaMuhurta = computeBrahmaMuhurta(sunriseUtc, sunsetUtc);
-  const qualityNameFn = (q: ChoghadiyaQuality) => t.qualityNames[q];
-  const choghadiya = computeChoghadiya(
-    sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
-    (idx) => t.choghadiyaNames[idx]!,
-    qualityNameFn,
-  );
-  const hora = computeHora(
-    sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
-    (idx) => t.grahaNames[idx]!,
-  );
-  const gowriPanchangam = computeGowriPanchangam(
-    sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
-    (idx) => t.gowriNames[idx]!,
-    qualityNameFn,
-  );
   const needMoonrise = wantMoonTimes || wantFestivals;
   const moonriseSearchUtc = needMoonrise ? getMoonrise(localMidnightUtc, location) : null;
   const moonriseUtc =
@@ -473,25 +510,7 @@ export function getDailyPanchang(
     moonriseSearchUtc.getTime() < localMidnightUtc.getTime() + 86_400_000
       ? moonriseSearchUtc
       : null;
-  const moonsetUtc = wantMoonTimes
-    ? getMoonset(moonriseUtc ?? localMidnightUtc, location)
-    : null;
   const panchaka = computePanchaka(siderealMoonAtSunrise);
-  const panchakaInfo = buildPanchakaInfo(
-    sunriseUtc, siderealMoonAtSunrise, getMoon,
-    (utc) => varaIndexAtInstant(utc, location, offsetMinutes, t.varaNames),
-    t,
-  );
-  const panchakaRahitaUtc = wantLunarWindows
-    ? computePanchakaRahita(sunriseUtc, nextSunriseUtc, getMoon)
-    : [];
-  const doGhatiMuhurta = computeDoGhati(
-    sunriseUtc, sunsetUtc, nextSunriseUtc,
-    (idx) => t.doGhatiNames[idx]!,
-    qualityNameFn,
-  );
-
-  const durMuhurtaUtc = computeDurMuhurta(sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index);
 
   const bhadraUtc = needBhadra
     ? computeBhadraKaal(
@@ -499,10 +518,6 @@ export function getDailyPanchang(
         (key) => t.bhadraLocationNames[key],
       )
     : null;
-
-  const varjyamUtc = wantLunarWindows
-    ? computeVarjyamWindows(sunriseUtc, nextSunriseUtc, getMoon)
-    : [];
 
   const gandaMula = computeGandaMula(nakshatraAtSunrise.index, lang);
 
@@ -549,32 +564,97 @@ export function getDailyPanchang(
       description: eclipseUtc.description,
     });
   }
+  /** Before the labels exit, so both paths reject a stray bad `janmaRashi` alike. */
+  const chandraBalam = options.janmaRashi != null
+    ? computeChandraBalam(options.janmaRashi, chandraRashi.index, lang)
+    : null;
+  const tarabala = options.janmaNakshatra != null
+    ? computeTarabala(
+        options.janmaNakshatra,
+        nakshatraOf(siderealMoonAtSunrise),
+        lang,
+      )
+    : null;
+  if (labelsOnly) {
+    return { date, tithi: tithiAtSunrise, vara, chandramasa, samvat, festivals };
+  }
+
+  const brahmaMuhurta = brahmaMuhurtaForNight(
+    sunriseUtc, nextSunriseUtc.getTime() - sunsetUtc.getTime(),
+  );
+  const qualityNameFn = (q: ChoghadiyaQuality) => t.qualityNames[q];
+  const choghadiya = computeChoghadiya(
+    sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
+    (idx) => t.choghadiyaNames[idx]!,
+    qualityNameFn,
+  );
+  const hora = computeHora(
+    sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
+    (idx) => t.grahaNames[idx]!,
+  );
+  const gowriPanchangam = computeGowriPanchangam(
+    sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index,
+    (idx) => t.gowriNames[idx]!,
+    qualityNameFn,
+  );
+  const moonsetSearchUtc = wantMoonTimes
+    ? getMoonset(moonriseUtc ?? localMidnightUtc, location)
+    : null;
+  const moonsetUtc =
+    moonsetSearchUtc !== null &&
+    (moonriseUtc !== null || moonsetSearchUtc.getTime() < localMidnightUtc.getTime() + 86_400_000)
+      ? moonsetSearchUtc
+      : null;
+  const panchakaInfo = buildPanchakaInfo(
+    sunriseUtc, siderealMoonAtSunrise, getMoon,
+    (utc) => varaIndexAtInstant(utc, location, offsetMinutes, t.varaNames),
+    t,
+  );
+  const panchakaRahitaUtc = wantLunarWindows
+    ? computePanchakaRahita(sunriseUtc, nextSunriseUtc, getMoon)
+    : [];
+  const doGhatiMuhurta = computeDoGhati(
+    sunriseUtc, sunsetUtc, nextSunriseUtc,
+    (idx) => t.doGhatiNames[idx]!,
+    qualityNameFn,
+  );
+
+  const durMuhurtaUtc = computeDurMuhurta(sunriseUtc, sunsetUtc, nextSunriseUtc, vara.index);
+
+  const varjyamUtc = wantLunarWindows
+    ? computeVarjyamWindows(sunriseUtc, nextSunriseUtc, getMoon)
+    : [];
+
+  const searchTithis = (): DailyTithiInfo[] => findDailyElements(
+    sunriseUtc, nextSunriseUtc, tithiAtSunrise,
+    (d) => getTithiIndexAtTime(d, getMoon, getSun),
+    (d) => {
+      const moon = getMoon(d), sun = getSun(d);
+      const idx = getTithiIndexFromLons(moon, sun);
+      return computeTithiFromLongitudes(moon, sun, resolveTithiName(idx, lang), resolvePakshaName(idx, lang));
+    },
+    36, STANDARD_PRECISION, 3, TITHI_ANGLE(getMoon, getSun),
+  ) as DailyTithiInfo[];
+  const searchNakshatras = (): DailyNakshatraInfo[] => findDailyElements(
+    sunriseUtc, nextSunriseUtc, nakshatraAtSunrise,
+    (d) => getNakshatraIndexAtTime(d, getMoon),
+    (d) => {
+      const moon = getMoon(d);
+      return computeNakshatraFromLongitude(moon, resolveNakshatraName(nakshatraOf(moon), lang));
+    },
+    36, STANDARD_PRECISION, 3, NAKSHATRA_ANGLE(getMoon),
+  ) as DailyNakshatraInfo[];
 
   let tithis: DailyTithiInfo[];
   let nakshatras: DailyNakshatraInfo[];
   let yogas: DailyYogaInfo[];
   let karanas: DailyKaranaInfo[];
+  let yogaTithis: DailyTithiInfo[];
+  let yogaNakshatras: DailyNakshatraInfo[];
 
   if (doEndTimes) {
-    tithis = findDailyElements(
-      sunriseUtc, nextSunriseUtc, tithiAtSunrise,
-      (d) => getTithiIndexAtTime(d, getMoon, getSun),
-      (d) => {
-        const moon = getMoon(d), sun = getSun(d);
-        const idx = getTithiIndexFromLons(moon, sun);
-        return computeTithiFromLongitudes(moon, sun, resolveTithiName(idx, lang), resolvePakshaName(idx, lang));
-      },
-      36, STANDARD_PRECISION, 3, TITHI_ANGLE(getMoon, getSun),
-    ) as DailyTithiInfo[];
-    nakshatras = findDailyElements(
-      sunriseUtc, nextSunriseUtc, nakshatraAtSunrise,
-      (d) => getNakshatraIndexAtTime(d, getMoon),
-      (d) => {
-        const moon = getMoon(d);
-        return computeNakshatraFromLongitude(moon, resolveNakshatraName(nakshatraOf(moon), lang));
-      },
-      36, STANDARD_PRECISION, 3, NAKSHATRA_ANGLE(getMoon),
-    ) as DailyNakshatraInfo[];
+    tithis = searchTithis();
+    nakshatras = searchNakshatras();
     yogas = findDailyElements(
       sunriseUtc, nextSunriseUtc, yogaAtSunrise,
       (d) => getYogaIndexAtTime(d, getMoon, getSun),
@@ -593,16 +673,20 @@ export function getDailyPanchang(
       },
       18, STANDARD_PRECISION, 5, KARANA_ANGLE(getMoon, getSun),
     ) as DailyKaranaInfo[];
+    yogaTithis = tithis;
+    yogaNakshatras = nakshatras;
   } else {
     const bare = { startTime: null, isActiveAtSunrise: true, startTimeLocal: null, endTimeLocal: null };
     tithis = [{ ...tithiAtSunrise, ...bare }];
     nakshatras = [{ ...nakshatraAtSunrise, ...bare }];
     yogas = [{ ...yogaAtSunrise, ...bare }];
     karanas = [{ ...karanaAtSunrise, ...bare }];
+    yogaTithis = searchTithis();
+    yogaNakshatras = searchNakshatras();
   }
 
   const specialYogas = computeSpecialYogasOverDay(
-    vara.index, tithis, nakshatras, suryaNakshatra.index,
+    vara.index, yogaTithis, yogaNakshatras, suryaNakshatra.index,
     (type) => (t.specialYogaNames as Record<string, string>)[type] ?? type,
   );
 
@@ -618,7 +702,18 @@ export function getDailyPanchang(
   const pratahSandhyaUtc = computePratahSandhya(sunriseUtc, sunsetUtc, nextSunriseUtc);
   const sayahnaSandhyaUtc = computeSayahnaSandhya(sunsetUtc, nextSunriseUtc);
 
-  const local = (d: Date) => formatInZone(d, offsetMinutes);
+  /** Adjacent windows share their boundaries, so most instants render twice; `formatInZone`
+   * is a pure function of the millisecond here, so the memo cannot change a string. */
+  const rendered = new Map<number, string>();
+  const local = (d: Date): string => {
+    const ms = d.getTime();
+    let text = rendered.get(ms);
+    if (text === undefined) {
+      text = formatInZone(d, offsetMinutes);
+      rendered.set(ms, text);
+    }
+    return text;
+  };
   const localOrNull = (d: Date | null) => (d ? local(d) : null);
   const withLocal = (tp: UtcWindow): TimePeriod => ({
     start: tp.start,
@@ -626,9 +721,10 @@ export function getDailyPanchang(
     startLocal: local(tp.start),
     endLocal: local(tp.end),
   });
+  /** The keys, order and values of `{ ...s, ...withLocal(s) }`, without the second object. */
   const localizeSlots = <T extends TimePeriod>(
     slots: readonly Unlocalized<T>[],
-  ): T[] => slots.map(s => ({ ...s, ...withLocal(s) }) as T);
+  ): T[] => slots.map(s => ({ ...s, startLocal: local(s.start), endLocal: local(s.end) }) as T);
 
   const dayDurationMs = sunsetUtc.getTime() - sunriseUtc.getTime();
   const nightDurationMs = nextSunriseUtc.getTime() - sunsetUtc.getTime();
@@ -640,17 +736,6 @@ export function getDailyPanchang(
   for (const e of [...tithis, ...nakshatras, ...yogas, ...karanas]) {
     e.endTimeLocal = localOrNull(e.endTime);
   }
-
-  const chandraBalam = options.janmaRashi !== undefined
-    ? computeChandraBalam(options.janmaRashi, chandraRashi.index, lang)
-    : null;
-  const tarabala = options.janmaNakshatra !== undefined
-    ? computeTarabala(
-        options.janmaNakshatra,
-        nakshatraOf(siderealMoonAtSunrise),
-        lang,
-      )
-    : null;
 
   const dayMinutes = Math.round(dayDurationMs / 60_000);
   const nightMinutes = Math.round(nightDurationMs / 60_000);

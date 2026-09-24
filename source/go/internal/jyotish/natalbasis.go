@@ -67,7 +67,7 @@ type GrahaEntry struct {
 
 func GrahaList(basis *NatalBasis) []GrahaEntry {
 	out := make([]GrahaEntry, 0, types.GrahaCount)
-	for _, g := range types.AllGrahas {
+	for _, g := range allGrahas {
 		pos, ok := basis.Positions.Get(g)
 		if !ok {
 			panic("jyotish: AllGrahas contains a graha PlanetaryPositions.Get rejects")

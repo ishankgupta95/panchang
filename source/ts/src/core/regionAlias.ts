@@ -12,7 +12,7 @@ export function resolveRegionAlias(
   region: FestivalRegion | LegacyFestivalRegion | undefined,
 ): FestivalRegion {
   if (region === undefined) return 'all';
-  if (region in LEGACY_REGION_ALIASES) {
+  if (Object.prototype.hasOwnProperty.call(LEGACY_REGION_ALIASES, region)) {
     const legacy = region as LegacyFestivalRegion;
     const canonical = LEGACY_REGION_ALIASES[legacy];
     if (!warned.has(legacy)) {

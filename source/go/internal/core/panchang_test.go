@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"math"
+	"math/rand"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
@@ -696,4 +698,301 @@ func secondsFromLocalMidnight(t *testing.T, local, dateStr string) float64 {
 		t.Fatal(err)
 	}
 	return dayDelta*86_400 + float64(h)*3600 + float64(m)*60 + float64(sec)
+}
+
+func TestBrahmaMuhurtaIsTheFourteenthNightMuhurta(t *testing.T) {
+	rise := types.DateUTC(2024, 0, 1).Ms() + 6*3600_000
+	w := ComputeBrahmaMuhurta(rise, rise+12*3600_000)
+	if rise-w.StartMs != 96*60_000 || rise-w.EndMs != 48*60_000 {
+		t.Errorf("12 h day: brahma %d..%d min before sunrise, want 96..48",
+			(rise-w.StartMs)/60_000, (rise-w.EndMs)/60_000)
+	}
+	// Delhi 2026-11-05, computed by hand from sunrise and sunset with night = 24 h - day.
+	w = ComputeBrahmaMuhurta(1793840751816, 1793880197794)
+	if w.StartMs != 1793834491278 || w.EndMs != 1793837621547 {
+		t.Errorf("Delhi 2026-11-05: %d..%d, want 1793834491278..1793837621547", w.StartMs, w.EndMs)
+	}
+
+	delhi := types.GeoLocation{Latitude: 28.6139, Longitude: 77.209}
+	r := mustDaily(t, types.DateUTC(2026, 10, 5).Ms()+6*3600_000, delhi, dailyOpts())
+	night := r.Sun.NextRise.Ms() - r.Sun.Set.Ms()
+	b := r.Muhurtas.Brahma
+	want := BrahmaMuhurtaForNight(r.Sun.Rise.Ms(), night)
+	if b.Start.Ms() != want.StartMs || b.End.Ms() != want.EndMs {
+		t.Errorf("daily brahma %d..%d, want the measured-night window %d..%d",
+			b.Start.Ms(), b.End.Ms(), want.StartMs, want.EndMs)
+	}
+	mid := (b.Start.Ms() + b.End.Ms()) / 2
+	if d := mid - r.Muhurtas.PratahSandhya.Start.Ms(); d < -1 || d > 1 {
+		t.Errorf("brahma midpoint %d is %d ms from pratah sandhya start", mid, d)
+	}
+	if b.StartLocal[11:19] != "04:51:25" || b.EndLocal[11:19] != "05:43:38" {
+		t.Errorf("Delhi 2026-11-05 daily brahma %s..%s, want 04:51:25..05:43:38", b.StartLocal, b.EndLocal)
+	}
+}
+
+func TestComputeEndTimesFalseKeepsSpecialYogas(t *testing.T) {
+	off := false
+	fast := dailyOpts()
+	fast.ComputeEndTimes = &off
+	base := types.DateUTC(2025, 0, 1).Ms() + 6*3600_000
+	for i := 0; i < 60; i++ {
+		ms := base + int64(i)*86_400_000
+		full := mustDaily(t, ms, testPune, dailyOpts())
+		narrow := mustDaily(t, ms, testPune, fast)
+		a, _ := json.Marshal(full.SpecialYogas)
+		b, _ := json.Marshal(narrow.SpecialYogas)
+		if string(a) != string(b) {
+			t.Errorf("%s: special yogas %s with end times, %s without",
+				types.Date(ms).ISOString()[:10], a, b)
+		}
+	}
+}
+
+func TestCivilDayWithoutSunriseHasNoHinduDay(t *testing.T) {
+	longyearbyen := types.GeoLocation{Latitude: 78.2232, Longitude: 15.6267}
+	opts := PanchangOptions{Timezone: types.TimezoneName("Arctic/Longyearbyen")}
+	ctx := &astronomy.EphemerisCtx{}
+	// 2025-02-14 ends the polar night and 2025-08-24 the midnight sun; neither holds a sunrise.
+	for _, c := range []struct{ month, noRise int }{{1, 14}, {7, 24}} {
+		ms := types.DateUTC(2025, c.month, c.noRise).Ms() + 12*3600_000
+		if _, ok, err := GetDailyPanchang(ctx, ms, longyearbyen, opts, testNatal); ok || err != nil {
+			t.Errorf("%s: ok=%v err=%v, want no Hindu day", types.Date(ms).ISOString()[:10], ok, err)
+		}
+		r, ok, err := GetDailyPanchang(ctx, ms+86_400_000, longyearbyen, opts, testNatal)
+		if !ok || err != nil {
+			t.Fatalf("%s: ok=%v err=%v", types.Date(ms + 86_400_000).ISOString()[:10], ok, err)
+		}
+		if got := r.Sun.RiseLocal[8:10]; got != strconv.Itoa(c.noRise+1) {
+			t.Errorf("next day's sunrise lands on day %s, want %d", got, c.noRise+1)
+		}
+	}
+	for _, iso := range []int64{
+		types.DateUTC(2025, 1, 14).Ms() + 13*3600_000,
+		types.DateUTC(2025, 7, 24).Ms() + 6*3600_000,
+	} {
+		if _, ok, err := GetInstantPanchang(ctx, iso, longyearbyen, InstantPanchangOptions{}, testNatal); ok || err != nil {
+			t.Errorf("%s: instant before the first sunrise: ok=%v err=%v", types.Date(iso).ISOString(), ok, err)
+		}
+	}
+}
+
+func TestNoRiseMoonsetStaysOnTheCivilDay(t *testing.T) {
+	reykjavik := types.GeoLocation{Latitude: 64.1466, Longitude: -21.9426}
+	opts := PanchangOptions{Timezone: types.TimezoneOffset(0), Sections: Sections(SectionMoonTimes), SectionsGiven: true}
+	// testdata/reference/usno-riseset.json: Reykjavik 2025-12-21, Moon continuously below the horizon.
+	for _, day := range []int64{types.DateUTC(2025, 11, 21).Ms(), types.DateUTC(2025, 0, 13).Ms()} {
+		r := mustDaily(t, day+12*3600_000, reykjavik, opts)
+		if r.Moon.Rise != nil || r.Moon.Set != nil {
+			t.Errorf("%s: rise %v set %v, want both nil", types.Date(day).ISOString()[:10], r.Moon.RiseLocal, r.Moon.SetLocal)
+		}
+	}
+	r := mustDaily(t, types.DateUTC(2025, 11, 22).Ms()+12*3600_000, reykjavik, opts)
+	if r.Moon.SetLocal == nil || (*r.Moon.SetLocal)[:16] != "2025-12-22T17:26" {
+		t.Errorf("2025-12-22 set %v, want 2025-12-22T17:26", r.Moon.SetLocal)
+	}
+}
+
+func TestSectionCouplingsAreAsDocumented(t *testing.T) {
+	delhi := types.GeoLocation{Latitude: 28.6139, Longitude: 77.209}
+	with := func(loc types.GeoLocation, ms int64, s ...PanchangSection) types.DailyPanchangResult {
+		return mustDaily(t, ms, loc, PanchangOptions{Timezone: testIST, Sections: Sections(s...), SectionsGiven: true})
+	}
+	keys := func(fs []types.FestivalInfo) []string {
+		out := []string{}
+		for _, f := range fs {
+			out = append(out, f.Key)
+		}
+		return out
+	}
+
+	// Raksha Bandhan 2024 in Delhi waits for Bhadra to end: festivals alone must compute Bhadra.
+	rakhiDay := types.DateUTC(2024, 7, 19).Ms() + 6*3600_000
+	festivals := with(delhi, rakhiDay, SectionFestivals)
+	full := mustDaily(t, rakhiDay, delhi, dailyOpts())
+	if festivals.Inauspicious.Bhadra == nil {
+		t.Fatal("festivals alone: Bhadra is nil, want it filled")
+	}
+	a, _ := json.Marshal(festivals.Inauspicious.Bhadra)
+	b, _ := json.Marshal(full.Inauspicious.Bhadra)
+	if string(a) != string(b) {
+		t.Errorf("festivals alone: Bhadra %s, full call %s", a, b)
+	}
+	found := false
+	for _, f := range festivals.Festivals {
+		if f.Key == "raksha_bandhan" {
+			found = strings.Contains(f.Description, "Bhadra")
+		}
+	}
+	if !found {
+		t.Errorf("raksha_bandhan lost its Bhadra description without lunarWindows: %v", keys(festivals.Festivals))
+	}
+	if with(delhi, rakhiDay).Inauspicious.Bhadra != nil {
+		t.Error("no sections: Bhadra is filled, want nil")
+	}
+
+	// Pune 2025-03-14: the grahan entry comes with the eclipse section, and festivals fills Moon.Rise.
+	grahanDay := types.DateUTC(2025, 2, 14).Ms() + 6*3600_000
+	fullGrahan := mustDaily(t, grahanDay, testPune, dailyOpts())
+	onlyFestivals := with(testPune, grahanDay, SectionFestivals)
+	onlyEclipse := with(testPune, grahanDay, SectionEclipse)
+	if strings.Join(keys(onlyEclipse.Festivals), ",") != "chandra_grahan" {
+		t.Errorf("eclipse alone: festivals %v, want [chandra_grahan]", keys(onlyEclipse.Festivals))
+	}
+	if strings.Contains(strings.Join(keys(onlyFestivals.Festivals), ","), "grahan") ||
+		!strings.Contains(strings.Join(keys(fullGrahan.Festivals), ","), "chandra_grahan") {
+		t.Errorf("grahan entry: festivals alone %v, full %v", keys(onlyFestivals.Festivals), keys(fullGrahan.Festivals))
+	}
+	if onlyFestivals.Moon.Rise == nil || fullGrahan.Moon.Rise == nil ||
+		onlyFestivals.Moon.Rise.Ms() != fullGrahan.Moon.Rise.Ms() || onlyFestivals.Moon.Set != nil {
+		t.Errorf("festivals alone: moon %v/%v, want the full call's rise and no set",
+			onlyFestivals.Moon.RiseLocal, onlyFestivals.Moon.SetLocal)
+	}
+}
+
+func jsonOf(t *testing.T, v any) string {
+	t.Helper()
+	b, err := json.Marshal(v)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(b)
+}
+
+// GetDailyLabels stops the daily computation early. What it returns must be
+// what the full call puts in the same fields, with the same ok and error,
+// over an eclipse-and-festival-dense stretch, every section set its callers
+// use, a second language and region, a named zone, and polar locations whose
+// days drop in and out of existence.
+func TestDailyLabelsMatchTheFullPanchang(t *testing.T) {
+	off := false
+	tromso := types.GeoLocation{Latitude: 69.6496, Longitude: 18.9560}
+	svalbard := types.GeoLocation{Latitude: 78.2232, Longitude: 15.6267}
+	type span struct {
+		loc        types.GeoLocation
+		start      int64
+		days       int
+		zone       types.Timezone
+		regionLang bool
+	}
+	spans := []span{
+		{testPune, types.DateUTC(2025, 7, 1).Ms(), 90, testIST, false}, // the 7 September lunar eclipse to Diwali
+		{testPune, types.DateUTC(2026, 1, 1).Ms(), 40, testIST, true},  // Holi, the 3 March eclipse
+		{types.GeoLocation{Latitude: 40.7128, Longitude: -74.006}, types.DateUTC(2024, 2, 1).Ms(), 45, types.TimezoneName("America/New_York"), false},
+		{tromso, types.DateUTC(2025, 0, 1).Ms(), 30, types.TimezoneOffset(60), false},
+		{tromso, types.DateUTC(2025, 4, 10).Ms(), 20, types.TimezoneOffset(60), false},
+		{svalbard, types.DateUTC(2025, 1, 5).Ms(), 20, types.TimezoneOffset(60), false},
+		{svalbard, types.DateUTC(2025, 9, 20).Ms(), 20, types.TimezoneOffset(60), false},
+	}
+	compared, notOK, eclipses, festivals := 0, 0, 0, 0
+	for _, sp := range spans {
+		optionSets := []PanchangOptions{
+			{Timezone: sp.zone, Sections: Sections(SectionFestivals, SectionEclipse), SectionsGiven: true,
+				InstantPanchangOptions: InstantPanchangOptions{ComputeEndTimes: &off}},
+			{Timezone: sp.zone, Sections: NoSections(), SectionsGiven: true,
+				InstantPanchangOptions: InstantPanchangOptions{ComputeEndTimes: &off, MasaSystem: types.Amanta}},
+			{Timezone: sp.zone},
+		}
+		if sp.regionLang {
+			optionSets = append(optionSets, PanchangOptions{Timezone: sp.zone, InstantPanchangOptions: InstantPanchangOptions{
+				Language: types.LanguageHi, Region: types.RegionTamilNadu, Ayanamsa: types.Raman}})
+		}
+		for _, opts := range optionSets {
+			for d := 0; d < sp.days; d++ {
+				ms := sp.start + int64(d)*86_400_000
+				full, fullOK, fullErr := GetDailyPanchang(astronomy.NewEphemerisCtx(), ms, sp.loc, opts, testNatal)
+				labels, ok, err := GetDailyLabels(astronomy.NewEphemerisCtx(), ms, sp.loc, opts)
+				if ok != fullOK || (err == nil) != (fullErr == nil) || (err != nil && err.Error() != fullErr.Error()) {
+					t.Fatalf("%s: labels (%v, %v), full (%v, %v)", types.Date(ms).ISOString(), ok, err, fullOK, fullErr)
+				}
+				if !ok {
+					notOK++
+					continue
+				}
+				first := full.Angas.Tithis[0]
+				want := jsonOf(t, []any{full.Date, first.Index, first.Name, first.Paksha, first.Number,
+					first.CompletionPercentage, full.Angas.Vara, full.Calendar.Chandramasa, full.Calendar.Samvat, full.Festivals})
+				got := jsonOf(t, []any{labels.Date, labels.Tithi.Index, labels.Tithi.Name, labels.Tithi.Paksha, labels.Tithi.Number,
+					labels.Tithi.CompletionPercentage, labels.Vara, labels.Chandramasa, labels.Samvat, labels.Festivals})
+				if got != want {
+					t.Fatalf("%s: labels differ from the full panchang:\n full   %s\n labels %s", types.Date(ms).ISOString(), want, got)
+				}
+				if full.Eclipse != nil {
+					eclipses++
+				}
+				festivals += len(full.Festivals)
+				compared++
+			}
+		}
+	}
+	if compared < 500 || notOK == 0 || eclipses == 0 || festivals < 100 {
+		t.Fatalf("compared %d days (%d not ok, %d eclipse days, %d festivals): the sweep misses a case",
+			compared, notOK, eclipses, festivals)
+	}
+	t.Logf("%d days identical, %d days without a Hindu day on both sides, %d eclipse days, %d festivals",
+		compared, notOK, eclipses, festivals)
+}
+
+// Goroutines, each with its own context, share the process-wide memos (the
+// phase searches, eclipse finders, planet positions, block and rise/set
+// stores). Whatever order they interleave in, each must get the result a
+// single goroutine gets alone; under -race this also covers the stores' locks.
+func TestConcurrentContextsGetTheSequentialResults(t *testing.T) {
+	type job struct {
+		name string
+		run  func(ctx *astronomy.EphemerisCtx) string
+	}
+	tromso := types.GeoLocation{Latitude: 69.6496, Longitude: 18.956}
+	jobs := []job{}
+	for d := 0; d < 16; d++ {
+		ms := types.DateUTC(2025, 8, 1).Ms() + int64(d)*2*86_400_000
+		jobs = append(jobs,
+			job{"daily", func(ctx *astronomy.EphemerisCtx) string {
+				r, ok, err := GetDailyPanchang(ctx, ms, testPune, dailyOpts(), testNatal)
+				return jsonOf(t, []any{r, ok, err})
+			}},
+			job{"instant", func(ctx *astronomy.EphemerisCtx) string {
+				r, ok, err := GetInstantPanchang(ctx, ms+5*3600_000, testPune, InstantPanchangOptions{}, testNatal)
+				return jsonOf(t, []any{r, ok, err})
+			}},
+			job{"labels", func(ctx *astronomy.EphemerisCtx) string {
+				r, ok, err := GetDailyLabels(ctx, ms+86_400_000, tromso, PanchangOptions{Timezone: types.TimezoneOffset(60)})
+				return jsonOf(t, []any{r, ok, err})
+			}},
+		)
+	}
+	clear := func() {
+		astronomy.ClearEphemerisMemos()
+		astronomy.ClearBlockStores()
+		astronomy.ClearRiseSetTracks()
+		ClearChaitraCache()
+	}
+	clear()
+	want := make([]string, len(jobs))
+	for i, j := range jobs {
+		want[i] = j.run(astronomy.NewEphemerisCtx())
+	}
+	clear()
+	var wg sync.WaitGroup
+	got := make([][]string, 8)
+	for g := range got {
+		wg.Add(1)
+		go func(g int) {
+			defer wg.Done()
+			ctx := astronomy.NewEphemerisCtx()
+			out := make([]string, len(jobs))
+			for _, i := range rand.New(rand.NewSource(int64(g))).Perm(len(jobs)) {
+				out[i] = jobs[i].run(ctx)
+			}
+			got[g] = out
+		}(g)
+	}
+	wg.Wait()
+	for g := range got {
+		for i := range jobs {
+			if got[g][i] != want[i] {
+				t.Fatalf("goroutine %d, job %d (%s): differs from the sequential result", g, i, jobs[i].name)
+			}
+		}
+	}
 }

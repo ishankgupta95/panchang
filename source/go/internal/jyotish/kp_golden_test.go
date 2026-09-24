@@ -682,8 +682,9 @@ func TestTithiPraveshaMatchesTypeScript(t *testing.T) {
 
 		if got.PraveshTithi != got.NatalTithi {
 			mismatched++
-			t.Errorf("%s: praveshTithi %d != natalTithi %d. The chart is documented "+
-				"as preserving the natal tithi exactly", w, got.PraveshTithi, got.NatalTithi)
+			t.Errorf("%s: praveshTithi %d != natalTithi %d. They may differ only when the "+
+				"natal separation is within about 1e-4 deg of a tithi boundary, and no "+
+				"sweep birth is that close", w, got.PraveshTithi, got.NatalTithi)
 		}
 	}
 	t.Logf("%d pravesha charts, %d with a tithi mismatch; worst lagna delta %g deg",

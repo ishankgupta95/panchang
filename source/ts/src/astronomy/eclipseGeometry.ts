@@ -243,11 +243,11 @@ export function findLunarEclipse(oppositionUtc: Date): LunarEclipse | null {
   };
 }
 
-const SUN_VECTOR = new Float64Array(3);
-const MOON_VECTOR = new Float64Array(3);
-const OBSERVER_VECTOR = new Float64Array(3);
-const SUN_TOPOCENTRIC = new Float64Array(3);
-const MOON_TOPOCENTRIC = new Float64Array(3);
+const SUN_VECTOR = /* @__PURE__ */ new Float64Array(3);
+const MOON_VECTOR = /* @__PURE__ */ new Float64Array(3);
+const OBSERVER_VECTOR = /* @__PURE__ */ new Float64Array(3);
+const SUN_TOPOCENTRIC = /* @__PURE__ */ new Float64Array(3);
+const MOON_TOPOCENTRIC = /* @__PURE__ */ new Float64Array(3);
 
 /** All angles degrees, topocentric. */
 export interface SolarView {

@@ -92,7 +92,7 @@ export function deltaTSeconds(date: Date): number {
 }
 
 /** TAI − UTC as `[UTC epoch ms, seconds]`: the complete IERS leap-second list from 1972-01-01. */
-const TAI_MINUS_UTC: readonly (readonly [number, number])[] = [
+const TAI_MINUS_UTC: readonly (readonly [number, number])[] = /* @__PURE__ */ (() => [
   [Date.UTC(1972, 0, 1), 10], [Date.UTC(1972, 6, 1), 11], [Date.UTC(1973, 0, 1), 12],
   [Date.UTC(1974, 0, 1), 13], [Date.UTC(1975, 0, 1), 14], [Date.UTC(1976, 0, 1), 15],
   [Date.UTC(1977, 0, 1), 16], [Date.UTC(1978, 0, 1), 17], [Date.UTC(1979, 0, 1), 18],
@@ -103,16 +103,16 @@ const TAI_MINUS_UTC: readonly (readonly [number, number])[] = [
   [Date.UTC(1997, 6, 1), 31], [Date.UTC(1999, 0, 1), 32], [Date.UTC(2006, 0, 1), 33],
   [Date.UTC(2009, 0, 1), 34], [Date.UTC(2012, 6, 1), 35], [Date.UTC(2015, 6, 1), 36],
   [Date.UTC(2017, 0, 1), 37],
-];
+])();
 
 /** TT − TAI, fixed by definition. */
 const TT_MINUS_TAI = 32.184;
 
 /** Start of the modern UTC scale. */
-const LEAP_SECOND_EPOCH_MS = TAI_MINUS_UTC[0]![0];
+const LEAP_SECOND_EPOCH_MS = /* @__PURE__ */ (() => TAI_MINUS_UTC[0]![0])();
 
 /** How far the measured era runs; bump this and the table above when a leap second is announced or confirmed absent. */
-const OBSERVED_THROUGH_MS = Date.UTC(2027, 0, 1);
+const OBSERVED_THROUGH_MS = /* @__PURE__ */ Date.UTC(2027, 0, 1);
 
 function taiMinusUtc(ms: number): number {
   let offset = TAI_MINUS_UTC[0]![1];
@@ -124,7 +124,7 @@ function taiMinusUtc(ms: number): number {
 }
 
 /** Carried forward so the continuation keeps the model's shape without its measured bias; holding the last observation flat abandons the secular slowing. */
-const OBSERVED_MINUS_MODEL_AT_HANDOFF: number = (() => {
+const OBSERVED_MINUS_MODEL_AT_HANDOFF: number = /* @__PURE__ */ (() => {
   const utDays = (OBSERVED_THROUGH_MS - Date.UTC(2000, 0, 1, 12)) / 86_400_000;
   const year = 2000 + (utDays - 14) / DAYS_PER_TROPICAL_YEAR;
   return TT_MINUS_TAI + taiMinusUtc(OBSERVED_THROUGH_MS) - deltaTSecondsForYear(year);

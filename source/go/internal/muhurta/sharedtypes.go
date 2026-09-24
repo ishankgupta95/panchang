@@ -19,6 +19,8 @@ type (
 	PackedMuhurtaTableDay    = types.PackedMuhurtaTableDay
 	MuhurtaTableMeta         = types.MuhurtaTableMeta
 	MuhurtaFile              = types.MuhurtaFile
+	MuhurtaTableDay          = types.MuhurtaTableDay
+	MuhurtaYearRange         = types.TableYearRange
 	VaraTithiYogaType        = types.VaraTithiYogaType
 	VaraTithiYoga            = types.VaraTithiYoga
 )

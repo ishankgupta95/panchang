@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/store"
 	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
@@ -29,7 +30,39 @@ func signedDelta(a, b float64) float64 {
 	return d
 }
 
+type phaseSearchKey struct {
+	targetBits uint64
+	startMs    int64
+	limitBits  uint64
+}
+
+type phaseSearchValue struct {
+	ms int64
+	ok bool
+}
+
+var phaseSearchMemo = store.New[phaseSearchKey, phaseSearchValue](8192, store.DefaultStripes,
+	func(k phaseSearchKey) uint64 {
+		return store.HashMix(store.HashMix(uint64(k.startMs), k.targetBits), k.limitBits)
+	})
+
+// SearchMoonPhase is searchMoonPhase memoised by all three of its inputs.
+// BoundingNewMoons seeds its closing search from the opening new moon alone,
+// so every day whose opening search lands on the same millisecond shares it.
 func SearchMoonPhase(ctx *EphemerisCtx, targetDegrees float64, startMs int64, limitDays float64) (int64, bool) {
+	key := phaseSearchKey{
+		targetBits: math.Float64bits(targetDegrees),
+		startMs:    startMs,
+		limitBits:  math.Float64bits(limitDays),
+	}
+	v, _ := phaseSearchMemo.GetOrBuild(key, func() phaseSearchValue {
+		ms, ok := searchMoonPhase(ctx, targetDegrees, startMs, limitDays)
+		return phaseSearchValue{ms, ok}
+	})
+	return v.ms, v.ok
+}
+
+func searchMoonPhase(ctx *EphemerisCtx, targetDegrees float64, startMs int64, limitDays float64) (int64, bool) {
 	startF := float64(startMs)
 	limitMs := startF + float64(limitDays*dayMS)
 

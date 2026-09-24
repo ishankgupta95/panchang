@@ -1,4 +1,4 @@
-import { getDailyPanchang } from '../core/panchang';
+import { getDailyLabels } from '../core/panchang';
 import {
   getUpcomingSolarEclipse, getUpcomingLunarEclipse,
 } from '../astronomy/eclipse';
@@ -7,12 +7,17 @@ import { getSiderealSunLongitude } from '../astronomy/sun';
 import { getSiderealMoonLongitude } from '../astronomy/moon';
 import { getTithiIndexFromLons } from '../core/tithi';
 import { PanchangError } from '../types/errors';
-import { resolveUtcOffset, utcToLocalDisplay, getLocalMidnightUtc } from '../utils/timezone';
-import { validateLocation, validateDate } from '../utils/validation';
+import {
+  resolveUtcOffset, utcToLocalDisplay, utcDateMs, wallClockToUtc, localYearWindow,
+  civilDayStepper, clampToSupported, civilDayValue,
+} from '../utils/timezone';
+import { validateLocation, validateDate, validateLocalYearWindow } from '../utils/validation';
 import type { GeoLocation } from '../types/location';
 import type { AyanamsaType, MasaSystem, FestivalRegion, LegacyFestivalRegion } from '../types/options';
 import type { EclipseInfo, FestivalInfo } from '../types/elements';
 import { resolveMasaName } from '../i18n/resolver';
+
+const DAY_MS = 24 * 3600_000;
 
 export interface YearlyListingOptions {
   /** UTC offset in minutes (e.g. 330 for IST), or an IANA zone name. */
@@ -24,13 +29,21 @@ export interface YearlyListingOptions {
 }
 
 export interface FestivalDay {
-  /** A *local* midnight: `toISOString().slice(0, 10)` is off by one east of Greenwich. */
+  /**
+   * The instant the day was queried at: its local midnight from `computeFestivalsForYear` (never
+   * before 1900-01-01T00:00Z), the range start's local time of day from `computeFestivalsInRange`.
+   * Read its date in the listing's timezone, not with `toISOString()`.
+   */
   date: Date;
   festival: FestivalInfo;
 }
 
 export interface SankrantiEvent {
-  /** Civil day the transit is observed on, per the almanac's sunset rule. */
+  /**
+   * Civil day the transit is observed on, per the almanac's sunset rule, as the UTC midnight that falls
+   * within that local day: the date's own UTC midnight at or east of UTC, the next one west of it, so
+   * read it in the listing's timezone.
+   */
   date: Date;
   moment: Date;
   /** Rashi the Sun transitioned INTO (0..11). */
@@ -38,7 +51,12 @@ export interface SankrantiEvent {
   rashiName: string;
 }
 
-/** Smarta Ekadashi fast dates in a Gregorian year; no arunodaya (Dashami-viddha) deferral. */
+/**
+ * Smarta Ekadashi fast dates in a Gregorian year (the local calendar year in `options.timezone`); no
+ * arunodaya (Dashami-viddha) deferral. Each is the UTC midnight that falls within the local day of
+ * the fast, so read it in that zone: the UTC midnight of the fast's own date at every offset at or
+ * east of UTC, and the next UTC midnight west of it.
+ */
 export function computeEkadashiDatesForYear(
   year: number,
   location: GeoLocation,
@@ -48,17 +66,19 @@ export function computeEkadashiDatesForYear(
   if (!Number.isInteger(year)) throw new RangeError(`year must be integer, got ${year}`);
   const out: Date[] = [];
   const dayMs = 24 * 3600_000;
-  const start = new Date(Date.UTC(year, 0, 1));
-  const end = new Date(Date.UTC(year, 11, 31));
+  const first = utcDateMs(year, 0, 1);
+  const last = utcDateMs(year, 11, 31);
   const ayanamsa = options.ayanamsa ?? 'lahiri';
-  const offset = resolveUtcOffset(options.timezone, new Date(Date.UTC(year, 6, 1)));
 
-  const days: Array<{ d: Date; tithi: number }> = [];
-  for (let t = start.getTime(); t <= end.getTime() + dayMs; t += dayMs) {
-    const d = new Date(t);
+  const days: Array<{ d: number; tithi: number }> = [];
+  let offset: number | undefined;
+  for (let d = first - dayMs; d <= last + 2 * dayMs; d += dayMs) {
+    const [midnight, dayOffset] = wallClockToUtc(d, options.timezone, offset);
+    offset = dayOffset;
+    if (Math.floor((midnight + dayOffset * 60_000) / dayMs) * dayMs !== d) continue;
     let sunriseUtc: Date;
     try {
-      sunriseUtc = computeSunrise(getLocalMidnightUtc(d, offset), location);
+      sunriseUtc = computeSunrise(new Date(midnight), location);
       computeSunrise(computeSunset(sunriseUtc, location), location);
     } catch (e: unknown) {
       if (e instanceof PanchangError && (e.code === 'NO_SUNRISE' || e.code === 'NO_SUNSET')) continue;
@@ -73,24 +93,22 @@ export function computeEkadashiDatesForYear(
 
   for (let i = 0; i < days.length; i++) {
     const { d, tithi } = days[i]!;
-    if (d.getTime() > end.getTime()) break;
     const nextEntry = days[i + 1];
-    const next = nextEntry !== undefined && nextEntry.d.getTime() - d.getTime() === dayMs
+    const next = nextEntry !== undefined && nextEntry.d - d === dayMs
       ? nextEntry.tithi
       : undefined;
-    const isEkadashi = tithi === 10 || tithi === 25;
-    if (isEkadashi && next !== tithi) {
-      if ((next === 12 || next === 27) && i > 0) {
-        const prevEntry = days[i - 1]!;
-        if (d.getTime() - prevEntry.d.getTime() === dayMs) {
-          out.push(prevEntry.d);
-          continue;
-        }
+    let fast: number | undefined;
+    if ((tithi === 10 || tithi === 25) && next !== tithi) {
+      fast = d;
+      if ((next === 12 || next === 27) && i > 0 && d - days[i - 1]!.d === dayMs) {
+        fast = days[i - 1]!.d;
       }
-      out.push(d);
-      continue;
+    } else if ((tithi === 9 && next === 11) || (tithi === 24 && next === 26)) {
+      fast = d;
     }
-    if ((tithi === 9 && next === 11) || (tithi === 24 && next === 26)) out.push(d);
+    if (fast !== undefined && fast >= first && fast <= last) {
+      out.push(new Date(civilDayValue(fast, options.timezone)));
+    }
   }
   return out;
 }
@@ -106,12 +124,14 @@ export function computeSankrantisForYear(
   const lang = options.language ?? 'en';
   const ayanamsa = options.ayanamsa ?? 'lahiri';
   const dayMs = 24 * 3600_000;
-  const offset = resolveUtcOffset(options.timezone, new Date(Date.UTC(year, 6, 1)));
+  const offsetAt = (ms: number) => resolveUtcOffset(options.timezone, new Date(ms));
   const sunAt = (ms: number) => getSiderealSunLongitude(new Date(ms), ayanamsa);
   const rashiAt = (ms: number) => Math.floor(sunAt(ms) / 30) % 12;
 
-  const scanStart = Date.UTC(year, 0, 1) - offset * 60_000 - dayMs;
-  const scanEnd = Date.UTC(year, 11, 31, 23, 59) - offset * 60_000 + dayMs;
+  // The scan grid's offset only aligns the daily probes: each transit's year comes from its own day.
+  const gridOffset = offsetAt(utcDateMs(year, 6, 1));
+  const scanStart = utcDateMs(year, 0, 1) - gridOffset * 60_000 - dayMs;
+  const scanEnd = utcDateMs(year, 11, 31) + (23 * 60 + 59) * 60_000 - gridOffset * 60_000 + dayMs;
 
   const out: SankrantiEvent[] = [];
   let prevMs = scanStart;
@@ -138,14 +158,15 @@ export function computeSankrantisForYear(
       anchor = hi <= dayEnd.getTime()
         ? dayStart
         : computeSunrise(dayEnd, location);
-    } catch {
+    } catch (e: unknown) {
+      if (!(e instanceof PanchangError && (e.code === 'NO_SUNRISE' || e.code === 'NO_SUNSET'))) throw e;
       anchor = transitUtc;
     }
 
-    const local = utcToLocalDisplay(anchor, offset);
-    const date = new Date(Date.UTC(
+    const local = utcToLocalDisplay(anchor, offsetAt(anchor.getTime()));
+    const date = new Date(civilDayValue(utcDateMs(
       local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate(),
-    ));
+    ), options.timezone));
     if (local.getUTCFullYear() === year) {
       out.push({ date, moment: transitUtc, rashi, rashiName: resolveMasaName(rashi, lang) });
     }
@@ -156,7 +177,7 @@ export function computeSankrantisForYear(
   return out;
 }
 
-/** Every festival emission in an inclusive date range. */
+/** Every festival emission in an inclusive range, one civil day of `options.timezone` at a time. */
 export function computeFestivalsInRange(
   start: Date,
   end: Date,
@@ -169,24 +190,37 @@ export function computeFestivalsInRange(
   if (start.getTime() > end.getTime()) {
     throw new RangeError(`start (${start.toISOString()}) must be ≤ end (${end.toISOString()})`);
   }
+  return festivalsOnCivilDays(start.getTime(), end.getTime(), location, options);
+}
+
+function festivalsOnCivilDays(
+  startMs: number,
+  endMs: number,
+  location: GeoLocation,
+  options: YearlyListingOptions,
+): FestivalDay[] {
   const out: FestivalDay[] = [];
-  const dayMs = 24 * 3600_000;
-  for (let t = start.getTime(); t <= end.getTime(); t += dayMs) {
-    const d = new Date(t);
-    const p = getDailyPanchang(d, location, {
-      ...options,
-      sections: ['festivals', 'eclipse'],
-      computeEndTimes: false,
-    });
-    if (p === null) continue;
-    for (const f of p.festivals) {
-      out.push({ date: p.date, festival: f });
+  const dayOptions = {
+    ...options,
+    sections: ['festivals', 'eclipse'] as const,
+    computeEndTimes: false,
+  };
+  const next = civilDayStepper(startMs, options.timezone);
+  for (let t = next(); t <= endMs; t = next()) {
+    const day = getDailyLabels(new Date(clampToSupported(t)), location, dayOptions);
+    if (day === null) continue;
+    for (const f of day.festivals) {
+      out.push({ date: day.date, festival: f });
     }
   }
   return out;
 }
 
-/** The next `count` eclipses after `fromDate`, solar and lunar merged by peak. */
+/**
+ * The next `count` eclipses after `fromDate`, solar and lunar merged by peak. Only `fromDate` is checked against
+ * 1900..2100: the walk is not clipped at 2100 and runs until it has `count` eclipses (the Go port has no default
+ * count and adds a cancellable `GetUpcomingEclipsesContext`).
+ */
 export function getUpcomingEclipses(
   fromDate: Date,
   location: GeoLocation,
@@ -234,36 +268,38 @@ export function computeEclipsesInRange(
     );
   }
 
-  const spanDays = Math.ceil((end.getTime() - start.getTime()) / (24 * 3600_000)) + 1;
+  const spanDays = Math.ceil((end.getTime() - start.getTime()) / DAY_MS) + 1;
+  const startMs = start.getTime();
   const endMs = end.getTime();
   const maxSteps = Math.ceil(spanDays / 20) + 50;
 
-  const walk = (next: (from: Date) => EclipseInfo | null): EclipseInfo[] => {
+  // A walk only finds syzygies at or after `start`; the search from a day earlier adds one that peaks after it.
+  const walk = (next: (from: Date, withinDays: number) => EclipseInfo | null): EclipseInfo[] => {
     const acc: EclipseInfo[] = [];
-    let cursor = new Date(start.getTime());
+    let cursor = new Date(startMs);
     for (let step = 0; step < maxSteps; step++) {
-      const e = next(cursor);
+      const e = next(cursor, spanDays);
       if (!e || e.peak.getTime() > endMs) break;
-      acc.push(e);
+      if (e.peak.getTime() >= startMs) acc.push(e);
       cursor = new Date(e.end.getTime() + 1000);
+    }
+    const early = next(new Date(startMs - DAY_MS), 2);
+    if (
+      early && early.peak.getTime() >= startMs && early.peak.getTime() <= endMs &&
+      !acc.some(e => Math.abs(e.peak.getTime() - early.peak.getTime()) < DAY_MS)
+    ) {
+      acc.unshift(early);
     }
     return acc;
   };
 
-  const solar = walk(from => getUpcomingSolarEclipse(from, location, spanDays));
-  const lunar = walk(from => getUpcomingLunarEclipse(from, location, spanDays));
+  const solar = walk((from, days) => getUpcomingSolarEclipse(from, location, days));
+  const lunar = walk((from, days) => getUpcomingLunarEclipse(from, location, days));
 
   return [...solar, ...lunar].sort((a, b) => a.peak.getTime() - b.peak.getTime());
 }
 
-function localYearWindow(year: number, timezone: number | string): [Date, Date] {
-  const offset = resolveUtcOffset(timezone, new Date(Date.UTC(year, 6, 1)));
-  return [
-    new Date(Date.UTC(year, 0, 1) - offset * 60_000),
-    new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999) - offset * 60_000),
-  ];
-}
-
+/** Every festival emission in local calendar year `year`, each day queried at its local midnight. */
 export function computeFestivalsForYear(
   year: number,
   location: GeoLocation,
@@ -271,9 +307,12 @@ export function computeFestivalsForYear(
 ): FestivalDay[] {
   if (!Number.isInteger(year)) throw new RangeError(`year must be integer, got ${year}`);
   const [start, end] = localYearWindow(year, options.timezone);
-  return computeFestivalsInRange(start, end, location, options);
+  validateLocalYearWindow(year, start, end);
+  validateLocation(location);
+  return festivalsOnCivilDays(start, end, location, options);
 }
 
+/** Every eclipse peaking in local calendar year `year`, as {@link computeEclipsesInRange} lists them. */
 export function computeEclipsesForYear(
   year: number,
   location: GeoLocation,
@@ -281,7 +320,10 @@ export function computeEclipsesForYear(
 ): EclipseInfo[] {
   if (!Number.isInteger(year)) throw new RangeError(`year must be integer, got ${year}`);
   const [start, end] = localYearWindow(year, options.timezone);
-  return computeEclipsesInRange(start, end, location);
+  validateLocalYearWindow(year, start, end);
+  return computeEclipsesInRange(
+    new Date(clampToSupported(start)), new Date(clampToSupported(end)), location,
+  );
 }
 
 /** @deprecated Renamed to {@link computeEkadashiDatesForYear} in v5. */

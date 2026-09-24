@@ -24,8 +24,8 @@ func TestSymbolCensusIsPinned(t *testing.T) {
 		t.Fatal(err)
 	}
 	const (
-		wantChecked = 441
-		wantMatched = 413
+		wantChecked = 458
+		wantMatched = 430
 		wantAllowed = 28
 	)
 	if r.Checked != wantChecked {

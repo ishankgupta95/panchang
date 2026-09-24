@@ -1,5 +1,6 @@
 import { collectNakshatraOffsetWindows } from './varjyam';
 import type { UtcWindow } from '../types/elements';
+import { validateDate } from '../utils/validation';
 
 /** Abhijit Muhurta: the 8th of 15 equal day-muhurtas, centred on local noon; `null` on Wednesday (`varaIndex` 3, counting 0 = Sunday), held inauspicious. */
 export function computeAbhijitMuhurta(
@@ -7,6 +8,8 @@ export function computeAbhijitMuhurta(
   sunset: Date,
   varaIndex?: number,
 ): UtcWindow | null {
+  validateDate(sunrise, 'any');
+  validateDate(sunset, 'any');
   if (varaIndex === 3) return null;
 
   const dayDurationMs = sunset.getTime() - sunrise.getTime();
@@ -18,19 +21,31 @@ export function computeAbhijitMuhurta(
   return { start, end };
 }
 
-/** Brahma Muhurta: the two muhurtas (dayDuration / 30 each) ending at sunrise. */
+/**
+ * Brahma Muhurta: the 14th of the 15 night-muhurtas, from two night-muhurtas to one
+ * before sunrise (about 96 to 48 min at an equinox). With only these two instants the
+ * night is taken as 24 h minus the daylight (`sunset - sunrise`); `getDailyPanchang`
+ * measures it from sunset to the next sunrise instead, the night Pratah Sandhya uses,
+ * which moves the window by seconds and puts its midpoint exactly on Pratah Sandhya's start.
+ */
 export function computeBrahmaMuhurta(sunrise: Date, sunset: Date): UtcWindow {
-  const dayDurationMs = sunset.getTime() - sunrise.getTime();
-  const muhurtaDurationMs = dayDurationMs / 30;
+  validateDate(sunrise, 'any');
+  validateDate(sunset, 'any');
+  return brahmaMuhurtaForNight(sunrise, 86_400_000 - (sunset.getTime() - sunrise.getTime()));
+}
 
+/** Brahma Muhurta for a night of `nightDurationMs`: `[sunrise - 2N/15, sunrise - N/15]`. */
+export function brahmaMuhurtaForNight(sunrise: Date, nightDurationMs: number): UtcWindow {
+  const muhurtaDurationMs = nightDurationMs / 15;
   const end = new Date(sunrise.getTime() - muhurtaDurationMs);
   const start = new Date(end.getTime() - muhurtaDurationMs);
-
   return { start, end };
 }
 
 /** Vijaya Muhurta: the 11th of 15 equal day-muhurtas. */
 export function computeVijayaMuhurta(sunrise: Date, sunset: Date): UtcWindow {
+  validateDate(sunrise, 'any');
+  validateDate(sunset, 'any');
   const dayDurationMs = sunset.getTime() - sunrise.getTime();
   const muhurtaDurationMs = dayDurationMs / 15;
   const start = new Date(sunrise.getTime() + 10 * muhurtaDurationMs);
@@ -40,6 +55,7 @@ export function computeVijayaMuhurta(sunrise: Date, sunset: Date): UtcWindow {
 
 /** Godhuli Muhurta: a fixed 48 min symmetric about sunset, the modern panchang convention. */
 export function computeGodhuliMuhurta(sunset: Date): UtcWindow {
+  validateDate(sunset, 'any');
   const halfMs = 24 * 60_000;
   return {
     start: new Date(sunset.getTime() - halfMs),
@@ -49,6 +65,8 @@ export function computeGodhuliMuhurta(sunset: Date): UtcWindow {
 
 /** Nishita Muhurta: the 8th of 15 night-muhurtas; Janmashtami anchors here. */
 export function computeNishitaMuhurta(sunset: Date, nextSunrise: Date): UtcWindow {
+  validateDate(sunset, 'any');
+  validateDate(nextSunrise, 'any');
   const nightDurationMs = nextSunrise.getTime() - sunset.getTime();
   const muhurtaDurationMs = nightDurationMs / 15;
   const start = new Date(sunset.getTime() + 7 * muhurtaDurationMs);
@@ -56,12 +74,17 @@ export function computeNishitaMuhurta(sunset: Date, nextSunrise: Date): UtcWindo
   return { start, end };
 }
 
-/** Amrit Kala windows of a Hindu day, anchored at each nakshatra's OWN start and belonging to the day their START falls in. */
+/**
+ * Amrit Kala windows of a Hindu day, anchored at each nakshatra's OWN start and belonging to the day their START falls
+ * in. `getMoon` returns degrees in [0, 360); a nakshatra read outside 0..26 from an unwrapped value contributes none.
+ */
 export function computeAmritKalaWindows(
   sunriseUtc: Date,
   nextSunriseUtc: Date,
   getMoon: (d: Date) => number,
 ): UtcWindow[] {
+  validateDate(sunriseUtc, 'any');
+  validateDate(nextSunriseUtc, 'any');
   return collectNakshatraOffsetWindows(
     sunriseUtc, nextSunriseUtc, getMoon,
     (nakshatraIndex, nakshatraStartUtc, nakshatraEndUtc) => {
@@ -75,6 +98,8 @@ export function computeAmritKalaWindows(
 
 /** Madhyahna: solar noon ±24 min (one muhurta); Ganesh Chaturthi anchors here. */
 export function computeMadhyahna(sunrise: Date, sunset: Date): UtcWindow {
+  validateDate(sunrise, 'any');
+  validateDate(sunset, 'any');
   const halfMs = 24 * 60_000;
   const noonMs = (sunrise.getTime() + sunset.getTime()) / 2;
   return {
@@ -89,6 +114,9 @@ export function computePratahSandhya(
   sunset: Date,
   nextSunrise: Date,
 ): UtcWindow {
+  validateDate(sunrise, 'any');
+  validateDate(sunset, 'any');
+  validateDate(nextSunrise, 'any');
   const widthMs = (nextSunrise.getTime() - sunset.getTime()) / 10;
   return {
     start: new Date(sunrise.getTime() - widthMs),
@@ -101,6 +129,8 @@ export function computeSayahnaSandhya(
   sunset: Date,
   nextSunrise: Date,
 ): UtcWindow {
+  validateDate(sunset, 'any');
+  validateDate(nextSunrise, 'any');
   const widthMs = (nextSunrise.getTime() - sunset.getTime()) / 10;
   return {
     start: sunset,

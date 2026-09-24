@@ -141,3 +141,6 @@ func HashString(s string) uint64 {
 	}
 	return h
 }
+
+// HashMix folds v into h, for keys of several words.
+func HashMix(h, v uint64) uint64 { return HashInt64(int64(h*0x9e3779b97f4a7c15 ^ v)) }

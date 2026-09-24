@@ -1,5 +1,6 @@
-import { computeAuspiciousDatesInRange, type MuhurtaRule } from './engine';
-import { validateLocation } from '../utils/validation';
+import { scoreOnlyCivilDays, type MuhurtaRule } from './engine';
+import { validateLocation, validateLocalYearWindow } from '../utils/validation';
+import { utcDateMs } from '../utils/timezone';
 import type { GeoLocation } from '../types/location';
 import type { AyanamsaType, MasaSystem, Language } from '../types/options';
 import type {
@@ -89,12 +90,11 @@ export function buildMuhurtaTable(opts: BuildMuhurtaTableOptions): MuhurtaFile {
   const years: Record<string, PackedMuhurtaTableDay[]> = {};
 
   for (let year = startYear; year <= endYear; year++) {
-    const start = new Date(Date.UTC(year, 0, 1) - timezoneOffsetMinutes * 60_000);
-    const end = new Date(
-      Date.UTC(year, 11, 31, 23, 59, 59, 999) - timezoneOffsetMinutes * 60_000,
-    );
+    const start = utcDateMs(year, 0, 1) - timezoneOffsetMinutes * 60_000;
+    const end = utcDateMs(year + 1, 0, 1) - 1 - timezoneOffsetMinutes * 60_000;
+    validateLocalYearWindow(year, start, end);
 
-    const scored = computeAuspiciousDatesInRange(rule, start, end, location, {
+    const scored = scoreOnlyCivilDays(rule, start, end, location, {
       timezone: timezoneOffsetMinutes,
       ayanamsa,
       masaSystem,

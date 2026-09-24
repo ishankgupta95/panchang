@@ -29,7 +29,7 @@ func ScoreMuhurta(
 		return MuhurtaScore{}, err
 	}
 	opts := scoreOptionsPanchangOptions(options)
-	opts.Sections = core.Sections(core.SectionEclipse, core.SectionLunarWindows)
+	opts.Sections = scorerSections()
 	opts.SectionsGiven = true
 
 	p, ok, err := core.GetDailyPanchang(eph, dateMs, location, opts, core.NatalResolvers{})
@@ -72,14 +72,76 @@ func ComputeAuspiciousDatesInRange(ctx context.Context,
 			"start (%s) must be ≤ end (%s)",
 			types.Date(startMs).ISOString(), types.Date(endMs).ISOString())
 	}
+	return ScoreCivilDays(ctx, eph, rule, startMs, endMs, location, options)
+}
 
+// scorerSections are the optional sections scoreFromPanchang reads: the
+// eclipse, and the lunar windows that carry Bhadra. The angas at sunrise, the
+// vara, the lunar month, Ganda Mula, Panchaka and the special yogas it also
+// reads are computed whatever the sections.
+func scorerSections() core.SectionSet {
+	return core.Sections(core.SectionEclipse, core.SectionLunarWindows)
+}
+
+// ScoreCivilDays scores one day per civil date of options.Timezone from
+// startMs to endMs, each at startMs's local time of day, best score first.
+func ScoreCivilDays(ctx context.Context,
+	eph *astronomy.EphemerisCtx,
+	rule MuhurtaRule,
+	startMs, endMs int64,
+	location types.GeoLocation,
+	options MuhurtaScoreOptions,
+) ([]MuhurtaDay, error) {
+	return scoreCivilDays(ctx, eph, rule, startMs, endMs, location, options,
+		scoreOptionsPanchangOptions(options), true)
+}
+
+// scoreOnlyCivilDays is ScoreCivilDays for a caller that keeps only the
+// scores, as BuildMuhurtaTable does: each day is built with the scorer's
+// sections and no anga end times (the special yogas are found from the tithi
+// and nakshatra spans either way), which scores it exactly as the full day
+// does, and no MuhurtaDay keeps its Panchang.
+func scoreOnlyCivilDays(ctx context.Context,
+	eph *astronomy.EphemerisCtx,
+	rule MuhurtaRule,
+	startMs, endMs int64,
+	location types.GeoLocation,
+	options MuhurtaScoreOptions,
+) ([]MuhurtaDay, error) {
+	opts := scoreOptionsPanchangOptions(options)
+	opts.Sections = scorerSections()
+	opts.SectionsGiven = true
+	computeEndTimes := false
+	opts.ComputeEndTimes = &computeEndTimes
+	return scoreCivilDays(ctx, eph, rule, startMs, endMs, location, options, opts, false)
+}
+
+func scoreCivilDays(ctx context.Context,
+	eph *astronomy.EphemerisCtx,
+	rule MuhurtaRule,
+	startMs, endMs int64,
+	location types.GeoLocation,
+	options MuhurtaScoreOptions,
+	opts types.PanchangOptions,
+	keepPanchang bool,
+) ([]MuhurtaDay, error) {
 	out := []MuhurtaDay{}
-	for t := startMs; t <= endMs; t += dayMs {
+	next, err := utils.CivilDayStepper(startMs, options.Timezone)
+	if err != nil {
+		return nil, err
+	}
+	for {
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
-		p, ok, err := core.GetDailyPanchang(eph, t, location,
-			scoreOptionsPanchangOptions(options), core.NatalResolvers{})
+		t, err := next()
+		if err != nil {
+			return nil, err
+		}
+		if t > endMs {
+			break
+		}
+		p, ok, err := core.GetDailyPanchang(eph, utils.ClampToSupported(t), location, opts, core.NatalResolvers{})
 		if err != nil {
 			return nil, err
 		}
@@ -91,7 +153,11 @@ func ComputeAuspiciousDatesInRange(ctx context.Context,
 			return nil, err
 		}
 		if result.Passes || options.IncludeFailures {
-			out = append(out, MuhurtaDay{MuhurtaScore: result, Panchang: p})
+			day := MuhurtaDay{MuhurtaScore: result}
+			if keepPanchang {
+				day.Panchang = p
+			}
+			out = append(out, day)
 		}
 	}
 
@@ -261,14 +327,17 @@ func ComputeAuspiciousDatesForYear(ctx context.Context,
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	offsetMinutes, err := utils.ResolveUtcOffset(options.Timezone, types.DateUTC(year, 6, 1).Ms())
+	startMs, endMs, err := utils.LocalYearWindow(year, options.Timezone)
 	if err != nil {
 		return nil, err
 	}
-	off := int64(offsetMinutes) * 60_000
-	startMs := types.DateUTC(year, 0, 1).Ms() - off
-	endMs := types.DateUTC(year, 11, 31).Ms() + dayMs - 1 - off
-	return ComputeAuspiciousDatesInRange(ctx, eph, rule, startMs, endMs, location, options)
+	if err := utils.ValidateLocalYearWindow(year, startMs, endMs); err != nil {
+		return nil, err
+	}
+	if err := utils.ValidateLocation(location); err != nil {
+		return nil, err
+	}
+	return ScoreCivilDays(ctx, eph, rule, startMs, endMs, location, options)
 }
 
 func FindAuspiciousDates(

@@ -183,3 +183,34 @@ func TestHypotDivergesFromMathHypot(t *testing.T) {
 	}
 	t.Logf("Hypot2 differs from math.Hypot on %d of 200,000 random pairs", diverged)
 }
+
+func TestTimeClipIsTheJavaScriptDateRange(t *testing.T) {
+	for _, v := range []float64{0, -1, 8.64e15, -8.64e15, 1.5} {
+		if !TimeClip(v) {
+			t.Errorf("TimeClip(%v) = false, want true", v)
+		}
+	}
+	for _, v := range []float64{math.NaN(), math.Inf(1), math.Inf(-1), 8.64e15 + 1, -8.64e15 - 1} {
+		if TimeClip(v) {
+			t.Errorf("TimeClip(%v) = true, want false", v)
+		}
+	}
+}
+
+func TestToFixedMatchesJavaScript(t *testing.T) {
+	cases := []struct {
+		x      float64
+		digits int
+		want   string
+	}{
+		{66.625, 2, "66.63"}, {-67.125, 2, "-67.13"}, {70.125, 2, "70.13"}, {75.5, 2, "75.50"},
+		{0.375, 2, "0.38"}, {2.5, 0, "3"}, {-2.5, 0, "-3"}, {0.145, 2, "0.14"}, {1.005, 2, "1.00"},
+		{-0.001, 2, "-0.00"}, {math.Copysign(0, -1), 2, "0.00"}, {0.0005, 3, "0.001"}, {999.995, 2, "1000.00"},
+		{1e21, 2, "1e+21"}, {math.NaN(), 2, "NaN"},
+	}
+	for _, c := range cases {
+		if got := ToFixed(c.x, c.digits); got != c.want {
+			t.Errorf("ToFixed(%v, %d) = %q, JS gives %q", c.x, c.digits, got, c.want)
+		}
+	}
+}

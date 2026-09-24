@@ -9,9 +9,9 @@ import type { GeoLocation } from '../types/location';
 
 export type HorizonBody = 'sun' | 'moon';
 
-const BODY = new Float64Array(3);
-const OBSERVER = new Float64Array(3);
-const TOPOCENTRIC = new Float64Array(3);
+const BODY = /* @__PURE__ */ new Float64Array(3);
+const OBSERVER = /* @__PURE__ */ new Float64Array(3);
+const TOPOCENTRIC = /* @__PURE__ */ new Float64Array(3);
 
 /** Refracted and topocentric: parallax is 9″ for the Sun but 57′ for the Moon, where it decides moonrise. */
 export function bodyAltitudeDegrees(

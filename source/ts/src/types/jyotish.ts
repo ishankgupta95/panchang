@@ -150,7 +150,8 @@ export interface SadeSatiInfo {
   phase: 1 | 2 | 3 | null;
   currentArcStart: Date | null;
   currentArcEnd: Date | null;
-  /** Only set when not currently active. */
+  /** Only set when not currently active: Saturn's next entry into any of the three
+   *  arc rashis, a retrograde return into the 2nd from the Moon included. */
   nextArcStart: Date | null;
 }
 

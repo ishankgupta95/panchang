@@ -1,4 +1,5 @@
 import { computeMoonPhasesInRange } from '../astronomy/moonPhase';
+import { paddedYearWindow, resolveUtcOffset } from '../utils/timezone';
 import type {
   MoonPhaseDictEntry,
   MoonPhasesFile,
@@ -10,11 +11,11 @@ import type {
 } from './moonPhasesTableTypes';
 
 export interface BuildMoonPhasesTableOptions {
-  /** Minutes east of UTC (`330` for IST). */
+  /** Minutes east of UTC (`330` for IST), an integer in -720..840, else `INVALID_TIMEZONE`. */
   timezoneOffsetMinutes: number;
   startYear: number;
   endYear: number;
-  /** Defaults to `['en', 'hi']`. */
+  /** Defaults to `['en', 'hi']`; any other code throws `RangeError`. */
   languages?: readonly MoonPhasesTableLanguage[];
   referenceLocation?: string;
   generatedAt?: string;
@@ -104,10 +105,14 @@ export function buildMoonPhasesTable(
   if (languages.length === 0) {
     throw new RangeError('languages must contain at least one locale');
   }
+  for (const lang of languages) {
+    if (lang !== 'en' && lang !== 'hi') {
+      throw new RangeError(`languages must be drawn from en, hi; got ${JSON.stringify(lang)}`);
+    }
+  }
+  resolveUtcOffset(timezoneOffsetMinutes, new Date(Date.UTC(startYear, 0, 1)));
 
-  const dayMs = 24 * 3600_000;
-  const windowStart = new Date(Date.UTC(startYear, 0, 1) - 2 * dayMs);
-  const windowEnd = new Date(Date.UTC(endYear, 11, 31, 23, 59, 59, 999) + 2 * dayMs);
+  const [windowStart, windowEnd] = paddedYearWindow(startYear, endYear);
 
   const events = computeMoonPhasesInRange(windowStart, windowEnd);
   const dict = PHASE_ORDER.map(phase => makeDictEntry(phase, languages));

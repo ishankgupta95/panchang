@@ -1,6 +1,8 @@
 
 import { computeEclipsesInRange } from './yearly';
+import { paddedYearWindow } from '../utils/timezone';
 import { isEclipseVisibleAnyPhase } from '../astronomy/eclipse';
+import { resolveUtcOffset } from '../utils/timezone';
 import type { GeoLocation } from '../types/location';
 import type { EclipseInfo } from '../types/elements';
 import type {
@@ -15,10 +17,11 @@ import type {
 
 export interface BuildEclipsesTableOptions {
   location: GeoLocation;
-  /** Minutes east of UTC (`330` for IST); buckets eclipses by local peak date. */
+  /** Minutes east of UTC (`330` for IST), an integer in -720..840, else `INVALID_TIMEZONE`; buckets eclipses by local peak date. */
   timezoneOffsetMinutes: number;
   startYear: number;
   endYear: number;
+  /** Defaults to `['en', 'hi']`; any other code throws `RangeError`. */
   languages?: readonly EclipsesTableLanguage[];
   /** `false` also lists below-horizon eclipses, which carry no sutak. */
   visibleOnly?: boolean;
@@ -140,10 +143,14 @@ export function buildEclipsesTable(
   if (languages.length === 0) {
     throw new RangeError('languages must contain at least one locale');
   }
+  for (const lang of languages) {
+    if (lang !== 'en' && lang !== 'hi') {
+      throw new RangeError(`languages must be drawn from en, hi; got ${JSON.stringify(lang)}`);
+    }
+  }
+  resolveUtcOffset(timezoneOffsetMinutes, new Date(Date.UTC(startYear, 0, 1)));
 
-  const dayMs = 24 * 3600_000;
-  const windowStart = new Date(Date.UTC(startYear, 0, 1) - 2 * dayMs);
-  const windowEnd = new Date(Date.UTC(endYear, 11, 31, 23, 59, 59, 999) + 2 * dayMs);
+  const [windowStart, windowEnd] = paddedYearWindow(startYear, endYear);
 
   const eclipses = computeEclipsesInRange(windowStart, windowEnd, location)
     .map(e => ({ e, anyPhase: isEclipseVisibleAnyPhase(e, location) }))

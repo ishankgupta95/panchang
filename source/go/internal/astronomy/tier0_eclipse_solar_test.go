@@ -3,6 +3,7 @@ package astronomy
 import (
 	"fmt"
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -366,6 +367,66 @@ func TestTier0SolarPublishedFields(t *testing.T) {
 		t.Errorf("published obscuration: %s, bound 0.004", obscuration.label())
 	}
 	t.Logf("%d rows: published magnitude %s; obscuration %s", compared, magnitude.label(), obscuration.label())
+}
+
+func TestTier0SolarSubtypeAndDescriptionAsSeen(t *testing.T) {
+	local := loadLocalCanon(t)
+	rows := flattenLocal(local)
+	localType := map[string]EclipseSubtype{"p": EclipsePartial, "a": EclipseAnnular, "t": EclipseTotal}
+	percent := regexp.MustCompile(`(\d+)%`)
+
+	type result struct {
+		mismatch, invisible []string
+		seen                worst
+		clipped             int
+	}
+	results := make([]result, len(rows))
+	parallelRows(len(rows), func(ctx *EphemerisCtx, i int) {
+		site, row := rows[i].site, rows[i].row
+		r := &results[i]
+		where := site.Name + " " + row.Date
+		info, ok := GetUpcomingSolarEclipse(ctx, localToUtcMs(site, row.Date, "12:00")-2*dayMS,
+			types.GeoLocation{Latitude: site.Latitude, Longitude: site.Longitude}, 4, types.LanguageEn)
+		if !ok {
+			r.mismatch = append(r.mismatch, where+" not found")
+			return
+		}
+		if info.Subtype != localType[strings.ToLower(row.LocalType)] {
+			r.mismatch = append(r.mismatch, where+" "+string(info.Subtype))
+		}
+		if strings.Contains(info.Description, "not visible") {
+			r.invisible = append(r.invisible, where)
+		}
+		if row.MaximumFlag == "" {
+			return
+		}
+		r.clipped++
+		m := percent.FindStringSubmatch(info.Description)
+		p, _ := strconv.Atoi(m[1])
+		r.seen.add(float64(p)-row.Obscuration*100, where)
+	})
+
+	var mismatch, invisible []string
+	var seen worst
+	clipped := 0
+	for i := range results {
+		mismatch = append(mismatch, results[i].mismatch...)
+		invisible = append(invisible, results[i].invisible...)
+		seen.merge(&results[i].seen)
+		clipped += results[i].clipped
+	}
+	if clipped != 126 {
+		t.Errorf("%d rows with a clipped maximum, want 126", clipped)
+	}
+	if len(mismatch) != 0 {
+		t.Errorf("local type differs from the catalog: %v", first(mismatch, 5))
+	}
+	if len(invisible) != 0 {
+		t.Errorf("a returned solar eclipse is always seen at some phase: %v", first(invisible, 5))
+	}
+	if math.Abs(seen.value) >= 6 {
+		t.Errorf("described percent vs catalog at sunrise or sunset: %s, bound 6", seen.label())
+	}
 }
 
 func TestTier0SolarPartialAndInvisible(t *testing.T) {

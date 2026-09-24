@@ -23,10 +23,19 @@ export function validateLocation(location: GeoLocation): void {
   }
 }
 
-export function validateDate(date: Date): void {
-  if (!(date instanceof Date) || isNaN(date.getTime())) {
+/**
+ * Throws `INVALID_DATE` for a value that is not a valid `Date`, and for a UTC year outside 1900 to 2100 unless `years`
+ * is `'any'`. The helpers that only do date arithmetic pass `'any'`, so no year they accepted before is refused, and
+ * it checks for `getTime` rather than `instanceof`, so a `Date` from another realm still works there too.
+ */
+export function validateDate(date: Date, years: 'supported' | 'any' = 'supported'): void {
+  const isDate = years === 'any'
+    ? typeof (date as { getTime?: unknown } | null | undefined)?.getTime === 'function'
+    : date instanceof Date;
+  if (!isDate || isNaN(date.getTime())) {
     throw new PanchangError(`Invalid Date: ${String(date)}`, 'INVALID_DATE');
   }
+  if (years === 'any') return;
   const year = date.getUTCFullYear();
   if (year < 1900 || year > 2100) {
     throw new PanchangError(
@@ -34,6 +43,19 @@ export function validateDate(date: Date): void {
       'INVALID_DATE'
     );
   }
+}
+
+/**
+ * A calendar year from 1900 to 2100 is supported whole, even where its local boundaries fall up to
+ * 14 hours outside that span in UTC; any other window fails on whichever boundary lies outside it.
+ */
+export function validateLocalYearWindow(year: number, startMs: number, endMs: number): void {
+  const slack = 14 * 3600_000;
+  const near = (ms: number): boolean =>
+    ms >= Date.UTC(1900, 0, 1) - slack && ms < Date.UTC(2101, 0, 1) + slack;
+  if (year >= 1900 && year <= 2100 && near(startMs) && near(endMs)) return;
+  validateDate(new Date(startMs));
+  validateDate(new Date(endMs));
 }
 
 function assertCyclicIndex(value: number, modulus: number, name: string): void {

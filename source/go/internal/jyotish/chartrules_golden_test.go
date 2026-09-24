@@ -2,6 +2,7 @@ package jyotish
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
 	"reflect"
 	"testing"
@@ -666,4 +667,83 @@ func TestChartRuleDigests(t *testing.T) {
 		}
 	}
 	t.Logf("5 integer digests bit-identical over %d instants", len(g.ChartInstants))
+}
+
+// chartReadings is everything the chart-taking helpers report for one chart.
+type chartReadings struct {
+	Yogas    []types.Yoga
+	Mangal   types.MangalDoshaInfo
+	KaalSarp types.KaalSarpDoshaInfo
+	Pitru    types.PitruDoshaInfo
+}
+
+func readChart(t *testing.T, c *types.BirthChart) chartReadings {
+	t.Helper()
+	ys, err := ComputeYogas(c, ComputeYogasOptions{})
+	if err != nil {
+		t.Fatalf("ComputeYogas: %v", err)
+	}
+	return chartReadings{ys, ComputeMangalDosha(c), ComputeKaalSarp(c), ComputePitruDosha(c)}
+}
+
+// The TypeScript byPlanet shares its objects with planets, so an edit to
+// planets is seen everywhere; ByPlanet here holds copies. The helpers must
+// therefore read Planets, or an edited or Planets-only chart gives a
+// different answer from the TypeScript's.
+func TestChartReadersFollowPlanets(t *testing.T) {
+	ctx := astronomy.NewEphemerisCtx()
+	chart, err := ComputeRashiChart(ctx, 808464600000, // 1995-08-15T05:30Z
+		types.GeoLocation{Latitude: 28.6139, Longitude: 77.2090}, BirthChartOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := readChart(t, &chart)
+
+	planetsOnly := types.BirthChart{Divisional: chart.Divisional, Lagna: chart.Lagna,
+		Bhava: chart.Bhava, Planets: append([]types.PlanetPlacement(nil), chart.Planets...)}
+	if got := readChart(t, &planetsOnly); !reflect.DeepEqual(got, want) {
+		t.Errorf("Planets-only chart:\n got %+v\nwant %+v", got, want)
+	}
+
+	byPlanetOnly := chart
+	byPlanetOnly.Planets = nil
+	if got := ComputeMangalDosha(&byPlanetOnly); !reflect.DeepEqual(got, want.Mangal) {
+		t.Errorf("ByPlanet-only chart, Mangal dosha: got %+v, want %+v", got, want.Mangal)
+	}
+	if got := ComputePitruDosha(&byPlanetOnly); !reflect.DeepEqual(got, want.Pitru) {
+		t.Errorf("ByPlanet-only chart, Pitru dosha: got %+v, want %+v", got, want.Pitru)
+	}
+
+	edited := chart
+	edited.Planets = append([]types.PlanetPlacement(nil), chart.Planets...)
+	sun, _ := chart.ByPlanet.Get(types.GrahaSun)
+	for i := range edited.Planets {
+		switch edited.Planets[i].Planet {
+		case types.GrahaMercury:
+			edited.Planets[i].Rashi, edited.Planets[i].House = sun.Rashi, sun.House
+		case types.GrahaRahu:
+			edited.Planets[i].House = sun.House
+		}
+	}
+	reindexed := edited
+	reindexed.ByPlanet = IndexPlanets(edited.Planets)
+	got, wantEdited := readChart(t, &edited), readChart(t, &reindexed)
+	if !reflect.DeepEqual(got, wantEdited) {
+		t.Errorf("edited Planets with a stale ByPlanet:\n got %+v\nwant %+v", got, wantEdited)
+	}
+	budhaAditya := false
+	for _, y := range got.Yogas {
+		budhaAditya = budhaAditya || y.Name == types.YogaBudhaAditya
+	}
+	if !budhaAditya {
+		t.Error("Mercury moved into the Sun's rashi but Budha-Aditya did not form")
+	}
+
+	missing := planetsOnly
+	missing.Planets = missing.Planets[:len(missing.Planets)-1]
+	_, err = ComputeYogas(&missing, ComputeYogasOptions{})
+	var pe *types.PanchangError
+	if !errors.As(err, &pe) || pe.Code != types.ErrInvalidInput {
+		t.Errorf("chart missing a graha from Planets: err = %v, want ErrInvalidInput", err)
+	}
 }

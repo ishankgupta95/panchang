@@ -44,7 +44,7 @@ func secantBoundary(
 			break
 		}
 		next := jsnum.Round(t1 - (f1*(t1-t0))/(f1-f0))
-		if math.IsNaN(next) || math.IsInf(next, 0) || next < loMs || next > hiMs {
+		if math.IsNaN(next) || math.IsInf(next, 0) || next < math.Floor(loMs) || next > hiMs {
 			return 0, false
 		}
 		converged := math.Abs(next-t1) <= 1

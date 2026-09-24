@@ -62,6 +62,17 @@ func IndexPlanets(planets []types.PlanetPlacement) types.PlanetsByGraha {
 	return byPlanet
 }
 
+// planetsView indexes a caller's chart the way the TypeScript sees it, where
+// byPlanet shares its objects with planets: each Planets entry wins, and the
+// ByPlanet copy only fills a graha Planets does not carry.
+func planetsView(chart *types.BirthChart) types.PlanetsByGraha {
+	byPlanet := chart.ByPlanet
+	for _, p := range chart.Planets {
+		byPlanet.Set(p.Planet, p)
+	}
+	return byPlanet
+}
+
 func ComputeNavamsa(
 	ctx *astronomy.EphemerisCtx,
 	birthMs int64,

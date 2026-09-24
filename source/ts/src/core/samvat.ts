@@ -1,6 +1,8 @@
 import type { SamvatInfo } from '../types/elements';
 import { boundingNewMoons } from '../astronomy/newMoon';
 import { getSiderealSunLongitude } from '../astronomy/sun';
+import { validateDate } from '../utils/validation';
+import { utcDateMs } from '../utils/timezone';
 
 const DAY_MS = 86_400_000;
 
@@ -24,8 +26,8 @@ export function chaitraNewMoon(gregYear: number): number {
   const cached = chaitraCache.get(gregYear);
   if (cached !== undefined) return cached;
 
-  let ref = new Date(Date.UTC(gregYear, 0, 20));
-  let result = Date.UTC(gregYear, 2, 22); // fallback; should not be hit
+  let ref = new Date(utcDateMs(gregYear, 0, 20));
+  let result = utcDateMs(gregYear, 2, 22); // fallback; should not be hit
   for (let i = 0; i < 6; i++) {
     const { next } = boundingNewMoons(ref);
     const sun = getSiderealSunLongitude(next, 'lahiri');
@@ -44,6 +46,7 @@ export function chaitraNewMoon(gregYear: number): number {
  * the 13-position gap between the northern and southern samvatsara lists.
  */
 export function computeSamvat(date: Date): SamvatInfo {
+  validateDate(date, 'any');
   const gregYear = date.getUTCFullYear();
   const pastNewYear = date.getTime() >= chaitraNewMoon(gregYear);
 

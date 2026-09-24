@@ -14,9 +14,9 @@ const PURNIMA = 14;
 const AMAVASYA = 29;
 
 /** Rikta ("empty") tithis, avoided for every mangala karya. */
-const RIKTA = bothPakshas(4, 9, 14);
+const RIKTA = /* @__PURE__ */ bothPakshas(4, 9, 14);
 
-const ASHTAMI = bothPakshas(8);
+const ASHTAMI = /* @__PURE__ */ bothPakshas(8);
 
 const N = {
   ashwini: 0, bharani: 1, krittika: 2, rohini: 3, mrigashira: 4,

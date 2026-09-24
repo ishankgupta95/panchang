@@ -5,8 +5,9 @@ import type { Language } from '../types/options';
 
 const TRANSLATIONS: Record<Language, PanchangTranslations> = { en, hi };
 
+/** English for any language without a table, prototype names such as `'constructor'` included. */
 export function getTranslations(lang: Language): PanchangTranslations {
-  return TRANSLATIONS[lang] ?? en;
+  return Object.prototype.hasOwnProperty.call(TRANSLATIONS, lang) ? TRANSLATIONS[lang] : en;
 }
 
 export function resolvePakshaName(index: number, lang: Language): string {

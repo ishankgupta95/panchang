@@ -1,7 +1,8 @@
 import { NAKSHATRA_SPAN, nakshatraOf } from '../utils/constants';
+import { normalize360 } from '../utils/angle';
 import { getSiderealMoonLongitude } from '../astronomy/moon';
 import { computeLagna } from './lagna';
-import { computeRashiChart } from './charts';
+import { siderealGrahaLongitudes } from './planets';
 import { validateLocation, validateDate } from '../utils/validation';
 import { PanchangError } from '../types/errors';
 import type { AyanamsaType } from '../types/options';
@@ -32,6 +33,17 @@ export const NAKSHATRA_LORD: DashaLord[] = [
 
 const MS_PER_YEAR = 365.25 * 24 * 3600 * 1000;
 
+/** Wraps a finite longitude into [0, 360), so 360 reads as 0 and -0.5 as 359.5; the identity on [0, 360). */
+function resolveMoonLongitude(moonSiderealLon: number): number {
+  if (!Number.isFinite(moonSiderealLon)) {
+    throw new PanchangError(
+      `moonSiderealLon must be a finite number, got ${moonSiderealLon}`,
+      'INVALID_INPUT',
+    );
+  }
+  return normalize360(moonSiderealLon);
+}
+
 /** Deliberately skips `validateDate`: its 1900-2100 bound guards ephemeris accuracy, not table lookup. */
 function resolveAsOf(asOfDate: Date | undefined): Date {
   if (asOfDate === undefined) return new Date();
@@ -43,13 +55,15 @@ function resolveAsOf(asOfDate: Date | undefined): Date {
 
 /**
  * Vimshottari Dasha from birth: 9 mahadashas over 120 years, the first being the balance of the birth-nakshatra lord.
- * @param moonSiderealLon Sidereal Moon longitude at birth, [0, 360).
+ * @param moonSiderealLon Sidereal Moon longitude at birth in degrees, [0, 360). A finite value outside that range is
+ *   wrapped into it; NaN or an infinity throws `PanchangError` `INVALID_INPUT`.
  */
 export function computeVimshottariDasha(
   birthDate: Date,
   moonSiderealLon: number,
   asOfDate?: Date,
 ): VimshottariDashaResult {
+  moonSiderealLon = resolveMoonLongitude(moonSiderealLon);
   validateDate(birthDate);
   const nakIdx = nakshatraOf(moonSiderealLon);
   const degInNak = moonSiderealLon - nakIdx * NAKSHATRA_SPAN;
@@ -77,10 +91,12 @@ export function computeVimshottariDasha(
     if (i === 0) {
       endDate = new Date(cursor.getTime() + balanceMs);
       const virtualStart = new Date(birthDate.getTime() - (fullDurationMs - balanceMs));
-      antarDashas = buildAntarDashas(lord, virtualStart, fullDurationMs, startDate.getTime());
+      antarDashas = buildAntarDashas(
+        lord, virtualStart, fullDurationMs, startDate.getTime(), endDate.getTime());
     } else {
       endDate = new Date(cursor.getTime() + fullDurationMs);
-      antarDashas = buildAntarDashas(lord, startDate, fullDurationMs, startDate.getTime());
+      antarDashas = buildAntarDashas(
+        lord, startDate, fullDurationMs, startDate.getTime(), endDate.getTime());
     }
 
     mahaDashas.push({ lord, startDate, endDate, years, antarDashas });
@@ -109,23 +125,94 @@ export function computeVimshottariDashaFromBirth(
   return computeVimshottariDasha(birthDate, moonSid, asOfDate);
 }
 
-/** The 9 pratyantar (third-level) dashas filling an antardasha, cycling from the antardasha lord. */
+/**
+ * The 9 pratyantar (third-level) dashas filling an antardasha, cycling from the antardasha lord.
+ * The span given is split as if it were a whole antardasha, so the birth antardasha
+ * (`mahaDashas[0].antarDashas[0]`, clipped at birth) needs {@link computeVimshottariPratyantarIn}.
+ * An unknown lord throws `INVALID_INPUT`, an Invalid Date `INVALID_DATE`.
+ */
 export function computeVimshottariPratyantar(antardasha: AntarDasha): PratyantarDasha[] {
   const lordIdx = DASHA_ORDER.indexOf(antardasha.lord);
   if (lordIdx < 0) {
-    throw new Error(`Invalid antardasha lord: ${antardasha.lord}`);
+    throw new PanchangError(`Invalid antardasha lord: ${antardasha.lord}`, 'INVALID_INPUT');
   }
-  const totalMs = antardasha.endDate.getTime() - antardasha.startDate.getTime();
-  const out: PratyantarDasha[] = [];
-  let cursor = new Date(antardasha.startDate.getTime());
+  validateDate(antardasha.startDate, 'any');
+  validateDate(antardasha.endDate, 'any');
+  const startMs = antardasha.startDate.getTime();
+  const endMs = antardasha.endDate.getTime();
+  return buildPratyantars(lordIdx, endMs - startMs, startMs, startMs, endMs);
+}
+
+/**
+ * The pratyantars of an antardasha of `mahaDasha` (only its lord is read): the full antardasha,
+ * ending at `antardasha.endDate`, is split and those over before `antardasha.startDate` dropped,
+ * so the birth antardasha's list starts with the pratyantar running at birth. An antardasha within
+ * a millisecond of its full length gets exactly {@link computeVimshottariPratyantar}'s list.
+ * An unknown lord throws `INVALID_INPUT`, an Invalid Date `INVALID_DATE`.
+ */
+export function computeVimshottariPratyantarIn(
+  mahaDasha: MahaDasha,
+  antardasha: AntarDasha,
+): PratyantarDasha[] {
+  const lordIdx = DASHA_ORDER.indexOf(antardasha.lord);
+  if (lordIdx < 0) {
+    throw new PanchangError(`Invalid antardasha lord: ${antardasha.lord}`, 'INVALID_INPUT');
+  }
+  if (DASHA_ORDER.indexOf(mahaDasha.lord) < 0) {
+    throw new PanchangError(`Invalid mahadasha lord: ${mahaDasha.lord}`, 'INVALID_INPUT');
+  }
+  validateDate(antardasha.startDate, 'any');
+  validateDate(antardasha.endDate, 'any');
+  const startMs = antardasha.startDate.getTime();
+  const endMs = antardasha.endDate.getTime();
+  const spanMs = endMs - startMs;
+  const fullMs = (DASHA_YEARS[antardasha.lord] / 120) * (DASHA_YEARS[mahaDasha.lord] * MS_PER_YEAR);
+  const splitMs = fullMs - spanMs > 1 ? fullMs : spanMs;
+  return buildPratyantars(lordIdx, splitMs, endMs - splitMs, startMs, endMs);
+}
+
+function buildPratyantars(
+  lordIdx: number,
+  fullMs: number,
+  virtualStartMs: number,
+  clipStartMs: number,
+  endMs: number,
+): PratyantarDasha[] {
+  const lords: DashaLord[] = [];
+  const lengthsMs: number[] = [];
   for (let i = 0; i < 9; i++) {
     const subLord = DASHA_ORDER[(lordIdx + i) % 9]!;
-    const subYears = DASHA_YEARS[subLord];
-    const subMs = (subYears / 120) * totalMs;
-    const startDate = new Date(cursor.getTime());
-    const endDate = new Date(cursor.getTime() + subMs);
-    out.push({ lord: subLord, startDate, endDate });
-    cursor = endDate;
+    lords.push(subLord);
+    lengthsMs.push((DASHA_YEARS[subLord] / 120) * fullMs);
+  }
+  return tileSubPeriods(lengthsMs, virtualStartMs, clipStartMs, endMs)
+    .map((p) => ({ lord: lords[p.index]!, startDate: p.startDate, endDate: p.endDate }));
+}
+
+/**
+ * Lays sub-periods of `lengthsMs` end to end from `virtualStartMs`, drops those over by
+ * `clipStartMs`, starts the next there and ends the last exactly at `endMs`, so the list
+ * tiles its parent. The cursor keeps its fraction; only the published Dates truncate.
+ */
+function tileSubPeriods(
+  lengthsMs: readonly number[],
+  virtualStartMs: number,
+  clipStartMs: number,
+  endMs: number,
+): { index: number; startDate: Date; endDate: Date }[] {
+  const out: { index: number; startDate: Date; endDate: Date }[] = [];
+  const last = lengthsMs.length - 1;
+  let cursor = virtualStartMs;
+  for (let i = 0; i <= last; i++) {
+    const start = cursor;
+    cursor = cursor + lengthsMs[i]!;
+    const end = i === last ? endMs : cursor;
+    if (end <= clipStartMs) continue;
+    out.push({
+      index: i,
+      startDate: new Date(start < clipStartMs ? clipStartMs : start),
+      endDate: new Date(end),
+    });
   }
   return out;
 }
@@ -135,27 +222,18 @@ function buildAntarDashas(
   mahaVirtualStart: Date,
   mahaFullDurationMs: number,
   clipStartMs: number,
+  mahaEndMs: number,
 ): AntarDasha[] {
   const mahaIdx = DASHA_ORDER.indexOf(mahaLord);
-  const antarDashas: AntarDasha[] = [];
-  let cursor = mahaVirtualStart.getTime();
-
+  const lords: DashaLord[] = [];
+  const lengthsMs: number[] = [];
   for (let i = 0; i < 9; i++) {
     const antarLord = DASHA_ORDER[(mahaIdx + i) % 9]!;
-    const antarMs = (DASHA_YEARS[antarLord] / 120) * mahaFullDurationMs;
-    const adStart = cursor;
-    const adEnd = cursor + antarMs;
-    cursor = adEnd;
-    if (adEnd <= clipStartMs) continue;
-    const displayStart = adStart < clipStartMs ? clipStartMs : adStart;
-    antarDashas.push({
-      lord: antarLord,
-      startDate: new Date(displayStart),
-      endDate: new Date(adEnd),
-    });
+    lords.push(antarLord);
+    lengthsMs.push((DASHA_YEARS[antarLord] / 120) * mahaFullDurationMs);
   }
-
-  return antarDashas;
+  return tileSubPeriods(lengthsMs, mahaVirtualStart.getTime(), clipStartMs, mahaEndMs)
+    .map((p) => ({ lord: lords[p.index]!, startDate: p.startDate, endDate: p.endDate }));
 }
 
 /** Satya Acharya's eight-lord sequence (no Ketu). */
@@ -184,13 +262,15 @@ export const ASHTOTTARI_NAKSHATRA_GROUPS: readonly (readonly number[])[] = [
 
 /**
  * Ashtottari Dasha from birth: a 108-year, 8-planet cycle prescribed for Krishna Paksha births.
- * @param moonSiderealLon Sidereal Moon longitude at birth, [0, 360).
+ * @param moonSiderealLon Sidereal Moon longitude at birth in degrees, [0, 360). A finite value outside that range is
+ *   wrapped into it; NaN or an infinity throws `PanchangError` `INVALID_INPUT`.
  */
 export function computeAshtottariDasha(
   birthDate: Date,
   moonSiderealLon: number,
   asOfDate?: Date,
 ): VimshottariDashaResult {
+  moonSiderealLon = resolveMoonLongitude(moonSiderealLon);
   validateDate(birthDate);
   const nakIdx = nakshatraOf(moonSiderealLon);
   const degInNak = moonSiderealLon - nakIdx * NAKSHATRA_SPAN;
@@ -208,10 +288,15 @@ export function computeAshtottariDasha(
   for (let i = 0; i < 8; i++) {
     const lord = ASHTOTTARI_ORDER[(lordIdx + i) % 8]!;
     const years = ASHTOTTARI_YEARS[lord]!;
-    const durationMs = i === 0 ? balanceMs : years * MS_PER_YEAR;
+    const fullDurationMs = years * MS_PER_YEAR;
+    const durationMs = i === 0 ? balanceMs : fullDurationMs;
     const startDate = new Date(cursor.getTime());
     const endDate = new Date(cursor.getTime() + durationMs);
-    const antarDashas = buildAshtottariAntarDashas(lord, startDate, durationMs);
+    const virtualStart = i === 0
+      ? new Date(birthDate.getTime() - (fullDurationMs - balanceMs))
+      : startDate;
+    const antarDashas = buildAshtottariAntarDashas(
+      lord, virtualStart, fullDurationMs, startDate.getTime(), endDate.getTime());
     mahaDashas.push({ lord, startDate, endDate, years, antarDashas });
     cursor = endDate;
   }
@@ -229,22 +314,22 @@ export function computeAshtottariDasha(
 
 function buildAshtottariAntarDashas(
   mahaLord: DashaLord,
-  mahaStart: Date,
-  mahaDurationMs: number,
+  mahaVirtualStart: Date,
+  mahaFullDurationMs: number,
+  clipStartMs: number,
+  mahaEndMs: number,
 ): AntarDasha[] {
   const mahaIdx = ASHTOTTARI_ORDER.indexOf(mahaLord);
-  const out: AntarDasha[] = [];
-  let cursor = new Date(mahaStart.getTime());
+  const lords: DashaLord[] = [];
+  const lengthsMs: number[] = [];
   for (let i = 0; i < 8; i++) {
     const antarLord = ASHTOTTARI_ORDER[(mahaIdx + i) % 8]!;
     const antarYears = ASHTOTTARI_YEARS[antarLord]!;
-    const antarMs = (antarYears / ASHTOTTARI_TOTAL_YEARS) * mahaDurationMs;
-    const startDate = new Date(cursor.getTime());
-    const endDate = new Date(cursor.getTime() + antarMs);
-    out.push({ lord: antarLord, startDate, endDate });
-    cursor = endDate;
+    lords.push(antarLord);
+    lengthsMs.push((antarYears / ASHTOTTARI_TOTAL_YEARS) * mahaFullDurationMs);
   }
-  return out;
+  return tileSubPeriods(lengthsMs, mahaVirtualStart.getTime(), clipStartMs, mahaEndMs)
+    .map((p) => ({ lord: lords[p.index]!, startDate: p.startDate, endDate: p.endDate }));
 }
 
 /** The 8 Yoginis, in classical order. */
@@ -299,13 +384,15 @@ export interface YoginiDashaResult {
 
 /**
  * Yogini Dasha from birth: a 36-year cycle of eight Yoginis (Sanjay Rath, *Yogini Dashas*).
- * @param moonSiderealLon Sidereal Moon longitude at birth, [0, 360).
+ * @param moonSiderealLon Sidereal Moon longitude at birth in degrees, [0, 360). A finite value outside that range is
+ *   wrapped into it; NaN or an infinity throws `PanchangError` `INVALID_INPUT`.
  */
 export function computeYoginiDasha(
   birthDate: Date,
   moonSiderealLon: number,
   asOfDate?: Date,
 ): YoginiDashaResult {
+  moonSiderealLon = resolveMoonLongitude(moonSiderealLon);
   validateDate(birthDate);
   const nakIdx = nakshatraOf(moonSiderealLon);
   const degInNak = moonSiderealLon - nakIdx * NAKSHATRA_SPAN;
@@ -322,10 +409,15 @@ export function computeYoginiDasha(
     const yogini = YOGINI_ORDER[(startYoginiIdx + i) % 8]!;
     const lord = YOGINI_PLANET[yogini];
     const years = YOGINI_YEARS[yogini];
-    const durationMs = i === 0 ? balanceMs : years * MS_PER_YEAR;
+    const fullDurationMs = years * MS_PER_YEAR;
+    const durationMs = i === 0 ? balanceMs : fullDurationMs;
     const startDate = new Date(cursor.getTime());
     const endDate = new Date(cursor.getTime() + durationMs);
-    const antarDashas = buildYoginiAntarDashas(yogini, startDate, durationMs);
+    const virtualStart = i === 0
+      ? new Date(birthDate.getTime() - (fullDurationMs - balanceMs))
+      : startDate;
+    const antarDashas = buildYoginiAntarDashas(
+      yogini, virtualStart, fullDurationMs, startDate.getTime(), endDate.getTime());
     mahaDashas.push({ yogini, lord, startDate, endDate, years, antarDashas });
     cursor = endDate;
   }
@@ -343,26 +435,32 @@ export function computeYoginiDasha(
 
 function buildYoginiAntarDashas(
   mahaYogini: YoginiName,
-  mahaStart: Date,
-  mahaDurationMs: number,
+  mahaVirtualStart: Date,
+  mahaFullDurationMs: number,
+  clipStartMs: number,
+  mahaEndMs: number,
 ): YoginiAntarDasha[] {
   const mahaIdx = YOGINI_ORDER.indexOf(mahaYogini);
-  const out: YoginiAntarDasha[] = [];
-  let cursor = new Date(mahaStart.getTime());
+  const yoginis: YoginiName[] = [];
+  const lengthsMs: number[] = [];
   for (let i = 0; i < 8; i++) {
     const yogini = YOGINI_ORDER[(mahaIdx + i) % 8]!;
-    const lord = YOGINI_PLANET[yogini];
     const yoginiYears = YOGINI_YEARS[yogini];
-    const antarMs = (yoginiYears / YOGINI_TOTAL_YEARS) * mahaDurationMs;
-    const startDate = new Date(cursor.getTime());
-    const endDate = new Date(cursor.getTime() + antarMs);
-    out.push({ yogini, lord, startDate, endDate });
-    cursor = endDate;
+    yoginis.push(yogini);
+    lengthsMs.push((yoginiYears / YOGINI_TOTAL_YEARS) * mahaFullDurationMs);
   }
-  return out;
+  return tileSubPeriods(lengthsMs, mahaVirtualStart.getTime(), clipStartMs, mahaEndMs)
+    .map((p) => {
+      const yogini = yoginis[p.index]!;
+      return { yogini, lord: YOGINI_PLANET[yogini], startDate: p.startDate, endDate: p.endDate };
+    });
 }
 
-/** Per-rashi Chara years, "9-8-7" by modality (Achyutananda / Jaimini Sutras Ch. 1). */
+/**
+ * Per-rashi Chara years, fixed by modality whatever the chart: movable 9, fixed 8, dual 7 (96 in all).
+ * Not the Jaimini count (J.S. 1.1.28: signs from the rashi to its lord, less one) of K.N. Rao's Chara
+ * or Sanjay Rath's Narayana dasha; `computeNarayanDasha` with `{ duration: 'variable' }` implements that.
+ */
 export const CHARA_RASHI_YEARS: readonly number[] = [
   9,
   8,
@@ -409,8 +507,10 @@ export interface CharaDashaResult {
 }
 
 /**
- * Chara (Jaimini) Dasha from birth: sign-based from the lagna's rashi, always running forward
- * (the Achyutananda "Karaka Chara" variant), never reversed for even-rashi lagnas.
+ * Chara (Jaimini) Dasha from birth: twelve rashi periods from the lagna's rashi, always running
+ * forward, each lasting its {@link CHARA_RASHI_YEARS} entry. A fixed scheme: the chart only picks
+ * the starting rashi. It is not the Chara dasha of K.N. Rao or P.V.R. Narasimha Rao, whose years come
+ * from each sign's lord and whose direction depends on the chart.
  */
 export function computeCharaDasha(
   birthDate: Date,
@@ -473,8 +573,9 @@ export interface NarayanDashaResult {
 }
 
 /**
- * Narayan-style Jaimini Dasha: a Chara skeleton run in the direction set by the lagna's pada parity;
- * `{ duration: 'variable' }` swaps the fixed modality years for Sanjay Rath's sign-to-lord-distance rules.
+ * Narayan-style Jaimini Dasha: a Chara skeleton run in the direction set by the lagna's pada parity.
+ * By default each rashi takes its fixed {@link CHARA_RASHI_YEARS} entry; `{ duration: 'variable' }`
+ * applies Sanjay Rath's sign-to-lord-distance rules instead (a lord in its own rashi gives 12 years).
  */
 export function computeNarayanDasha(
   birthDate: Date,
@@ -506,7 +607,7 @@ export function computeNarayanDasha(
     : 'backward';
 
   const durationFor = variable
-    ? buildVariableDurationFn(birthDate, location, ayanamsa)
+    ? buildVariableDurationFn(birthDate, ayanamsa)
     : (rashi: number) => CHARA_RASHI_YEARS[rashi]!;
 
   const mahaDashas: NarayanMahaDasha[] = [];
@@ -611,15 +712,21 @@ function compareRashiStrength(
   return 0;
 }
 
+/** `computeRashiChart`'s planet order. */
+const GRAHAS_IN_CHART_ORDER: readonly GrahaName[] = [
+  'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu',
+];
+
 /** Sanjay Rath's variable-duration rules (*Narayana Dasa*) as a rashi → years function. */
 function buildVariableDurationFn(
   birthDate: Date,
-  location: GeoLocation,
   ayanamsa: AyanamsaType,
 ): (rashi: number) => number {
-  const chart = computeRashiChart(birthDate, location, { ayanamsa, houseSystem: 'whole-sign' });
+  const longitudes = siderealGrahaLongitudes(birthDate, ayanamsa, 'mean');
   const planetRashi = new Map<GrahaName, number>();
-  for (const p of chart.planets) planetRashi.set(p.planet, p.rashi.index);
+  for (const planet of GRAHAS_IN_CHART_ORDER) {
+    planetRashi.set(planet, Math.floor(longitudes[planet] / 30));
+  }
 
   function durationFor(rashi: number): number {
     if (rashi === 7 || rashi === 10) {
@@ -645,11 +752,14 @@ function buildVariableDurationFn(
     return baseAndAdjust(rashi, lord, lordRashi);
   }
 
-  /** Floored at 0: a debilitated lord in the dasha rashi itself would go negative. */
+  /**
+   * Rule 2 counts a lord in the rashi itself round the whole zodiac, 13 - 1 = 12; Rule 3(b) caps
+   * exalted Mercury in Virgo at 12. The floor is never crossed: the least is 0, Jupiter debilitated
+   * in Capricorn for Sagittarius.
+   */
   function baseAndAdjust(rashi: number, lord: GrahaName, lordRashi: number): number {
     const anti = !VISHAMA_PADA_RASHIS.has(rashi);
-    const base = inclusiveSignCount(rashi, lordRashi, anti) - 1;
-    let years = base;
+    let years = lordRashi === rashi ? 12 : inclusiveSignCount(rashi, lordRashi, anti) - 1;
     if (NARAYAN_EXALTATION_RASHI[lord] === lordRashi) years += 1;
     else if (NARAYAN_DEBILITATION_RASHI[lord] === lordRashi) years -= 1;
     return Math.min(12, Math.max(0, years));

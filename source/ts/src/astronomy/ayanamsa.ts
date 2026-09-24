@@ -1,8 +1,10 @@
 import { PanchangError } from '../types/errors';
+import { validateDate } from '../utils/validation';
 import type { AyanamsaType } from '../types/options';
 
-/** Precession offset in degrees, subtracted from a tropical longitude to get the sidereal one. */
+/** Precession offset in degrees, subtracted from a tropical longitude to get the sidereal one; an Invalid Date throws `INVALID_DATE`. */
 export function computeAyanamsa(date: Date, type: AyanamsaType = 'lahiri'): number {
+  validateDate(date, 'any');
   const T = julianCenturiesFromJ2000(date);
 
   switch (type) {

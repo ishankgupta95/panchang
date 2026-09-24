@@ -14,6 +14,8 @@ type (
 	BuildMoonPhasesTableOptions = types.BuildMoonPhasesTableOptions
 	ConvertOptions              = types.ConvertOptions
 	EclipseSutak                = types.EclipseSutak
+	EclipseTableDay             = types.EclipseTableDay
+	EclipseTableEntry           = types.EclipseTableEntry
 	EclipseTableEntryRaw        = types.EclipseTableEntryRaw
 	EclipseTableKind            = types.EclipseTableKind
 	EclipseTableMeta            = types.EclipseTableMeta
@@ -21,6 +23,8 @@ type (
 	EclipsesFile                = types.EclipsesFile
 	FestivalDay                 = types.FestivalDay
 	FestivalDictEntry           = types.FestivalDictEntry
+	FestivalTableDay            = types.FestivalTableDay
+	FestivalTableEntry          = types.FestivalTableEntry
 	FestivalTableEntryRaw       = types.FestivalTableEntryRaw
 	FestivalTableMeta           = types.FestivalTableMeta
 	FestivalsFile               = types.FestivalsFile
@@ -30,6 +34,8 @@ type (
 	HinduDateCoords             = types.HinduDateCoords
 	LocalizedString             = types.LocalizedString
 	MoonPhaseDictEntry          = types.MoonPhaseDictEntry
+	MoonPhaseTableDay           = types.MoonPhaseTableDay
+	MoonPhaseTableEntry         = types.MoonPhaseTableEntry
 	MoonPhaseTableEntryRaw      = types.MoonPhaseTableEntryRaw
 	MoonPhaseTableMeta          = types.MoonPhaseTableMeta
 	MoonPhaseTableName          = types.MoonPhaseTableName
@@ -40,6 +46,7 @@ type (
 	Paksha                      = types.Paksha
 	RawEclipseTableDay          = types.RawEclipseTableDay
 	SankrantiEvent              = types.SankrantiEvent
+	TableYearRange              = types.TableYearRange
 	YearlyListingOptions        = types.YearlyListingOptions
 )
 

@@ -1,7 +1,7 @@
 package calendar
 
-func ReadEclipsesYearRange(source EclipsesFile) MuhurtaYearRangeLike {
-	return MuhurtaYearRangeLike{Start: source.Meta.StartYear, End: source.Meta.EndYear}
+func ReadEclipsesYearRange(source EclipsesFile) TableYearRange {
+	return TableYearRange{Start: source.Meta.StartYear, End: source.Meta.EndYear}
 }
 
 func flattenEclipse(raw EclipseTableEntryRaw, lang FestivalsTableLanguage) EclipseTableEntry {
@@ -21,10 +21,7 @@ func flattenEclipse(raw EclipseTableEntryRaw, lang FestivalsTableLanguage) Eclip
 		s := *raw.Sutak
 		out.Sutak = &s
 	}
-	if raw.Description != nil {
-		out.Description = raw.Description.Pick(lang)
-		out.HasDescription = true
-	}
+	out.Description = pickDescription(raw.Description, lang)
 	return out
 }
 

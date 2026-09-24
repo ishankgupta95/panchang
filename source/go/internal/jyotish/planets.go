@@ -137,11 +137,48 @@ func ComputePlanetaryPositions(
 	if rashiName == nil {
 		rashiName = identityName
 	}
+	lon, err := siderealGrahaLongitudes(ctx, ms, ayanamsaType, nodeType)
+	if err != nil {
+		return types.PlanetaryPositions{}, err
+	}
+
+	marsRetro := isRetrograde(ctx, astronomy.PlanetMars, ms)
+	mercRetro := isRetrograde(ctx, astronomy.PlanetMercury, ms)
+	jupRetro := isRetrograde(ctx, astronomy.PlanetJupiter, ms)
+	venRetro := isRetrograde(ctx, astronomy.PlanetVenus, ms)
+	satRetro := isRetrograde(ctx, astronomy.PlanetSaturn, ms)
+
+	g := func(planet types.Graha, retro bool) types.GrahaPosition {
+		return buildGrahaPosition(planet, lon[planet], retro, nakshatraName, rashiName)
+	}
+
+	return types.PlanetaryPositions{
+		Sun:     g(types.GrahaSun, false),
+		Moon:    g(types.GrahaMoon, false),
+		Mars:    g(types.GrahaMars, marsRetro),
+		Mercury: g(types.GrahaMercury, mercRetro),
+		Jupiter: g(types.GrahaJupiter, jupRetro),
+		Venus:   g(types.GrahaVenus, venRetro),
+		Saturn:  g(types.GrahaSaturn, satRetro),
+		Rahu:    g(types.GrahaRahu, true), // always retrograde
+		Ketu:    g(types.GrahaKetu, true),
+	}, nil
+}
+
+// siderealGrahaLongitudes is the nine sidereal longitudes ComputePlanetaryPositions
+// publishes, indexed by Graha, without its retrograde probes.
+func siderealGrahaLongitudes(
+	ctx *astronomy.EphemerisCtx,
+	ms int64,
+	ayanamsaType types.AyanamsaType,
+	nodeType NodeType,
+) ([types.GrahaCount]float64, error) {
+	var lon [types.GrahaCount]float64
 	nodeType = resolveNodeType(nodeType)
 
 	ayanamsa, err := astronomy.ComputeAyanamsa(ms, ayanamsaType)
 	if err != nil {
-		return types.PlanetaryPositions{}, err
+		return lon, err
 	}
 
 	toSidereal := func(tropical float64) float64 {
@@ -150,12 +187,12 @@ func ComputePlanetaryPositions(
 
 	sunSid, err := astronomy.GetSiderealSunLongitude(ctx, ms, ayanamsaType)
 	if err != nil {
-		return types.PlanetaryPositions{}, err
+		return lon, err
 	}
 
 	moonSid, err := astronomy.GetSiderealMoonLongitude(ctx, ms, ayanamsaType)
 	if err != nil {
-		return types.PlanetaryPositions{}, err
+		return lon, err
 	}
 
 	marsTrop := astronomy.GetTropicalPlanetLongitude(ctx, astronomy.PlanetMars, ms)
@@ -172,25 +209,14 @@ func ComputePlanetaryPositions(
 	}
 	ketuTrop := utils.Normalize360(rahuTrop + 180)
 
-	marsRetro := isRetrograde(ctx, astronomy.PlanetMars, ms)
-	mercRetro := isRetrograde(ctx, astronomy.PlanetMercury, ms)
-	jupRetro := isRetrograde(ctx, astronomy.PlanetJupiter, ms)
-	venRetro := isRetrograde(ctx, astronomy.PlanetVenus, ms)
-	satRetro := isRetrograde(ctx, astronomy.PlanetSaturn, ms)
-
-	g := func(planet types.Graha, sid float64, retro bool) types.GrahaPosition {
-		return buildGrahaPosition(planet, sid, retro, nakshatraName, rashiName)
-	}
-
-	return types.PlanetaryPositions{
-		Sun:     g(types.GrahaSun, sunSid, false),
-		Moon:    g(types.GrahaMoon, moonSid, false),
-		Mars:    g(types.GrahaMars, toSidereal(marsTrop), marsRetro),
-		Mercury: g(types.GrahaMercury, toSidereal(mercTrop), mercRetro),
-		Jupiter: g(types.GrahaJupiter, toSidereal(jupTrop), jupRetro),
-		Venus:   g(types.GrahaVenus, toSidereal(venTrop), venRetro),
-		Saturn:  g(types.GrahaSaturn, toSidereal(satTrop), satRetro),
-		Rahu:    g(types.GrahaRahu, toSidereal(rahuTrop), true), // always retrograde
-		Ketu:    g(types.GrahaKetu, toSidereal(ketuTrop), true),
-	}, nil
+	lon[types.GrahaSun] = sunSid
+	lon[types.GrahaMoon] = moonSid
+	lon[types.GrahaMars] = toSidereal(marsTrop)
+	lon[types.GrahaMercury] = toSidereal(mercTrop)
+	lon[types.GrahaJupiter] = toSidereal(jupTrop)
+	lon[types.GrahaVenus] = toSidereal(venTrop)
+	lon[types.GrahaSaturn] = toSidereal(satTrop)
+	lon[types.GrahaRahu] = toSidereal(rahuTrop)
+	lon[types.GrahaKetu] = toSidereal(ketuTrop)
+	return lon, nil
 }

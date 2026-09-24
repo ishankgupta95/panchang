@@ -65,9 +65,11 @@ one diff run still notices a regression, and `cmp` says where it is.
 A band moves only after a written prediction of the delta and its cause
 (`docs/validation-tiers.md` discipline), never by observing an excess and accepting it.
 
-The `full` document byte pins have moved four times, every one of them the festival registry
-and none of them the arithmetic. No numeric pin moved, the 105 byte TS-to-Go gap survived all
-four, and none touched the `g2` or `g3` pins, which exclude the festival block. In order:
+The `full` document byte pins have moved thirteen times. The first four were the festival registry and
+none of them the arithmetic: no numeric pin moved, the 105 byte TS-to-Go gap survived all four, and
+none touched the `g2` or `g3` pins, which exclude the festival block. The last nine are the 2026-09-24
+audit fixes and festival-rule corrections; the first five of those are the first to move numeric pins,
+and three of them also move the `g2` and `g3` pins (see below the table). In order:
 
 | delta | TS | cause |
 |---|---|---|
@@ -75,6 +77,43 @@ four, and none touched the `g2` or `g3` pins, which exclude the festival block. 
 | -4116 | 255542645 to 255538529 | `vat_savitri_amavasya` from `masa: 2` to `masa: 1` |
 | -1847 | 255538529 to 255536682 | the two Upakarma rules re-anchored |
 | +9    | 255536682 to 255536691 | `vat_savitri_amavasya` from a sunrise anchor to aparahna |
+| +74601 | 255536691 to 255611292 | `computeEndTimes: false` no longer narrows `specialYogas` (+81806), no next-day moonset (-3724), one duplicate New York eclipse day removed and polar transition days null (-3481 together); Brahma Muhurta as the 14th night muhurta moves every daily value but no byte |
+| +1815 | 255611292 to 255613107 | Sankashti on chandrodaya fallback days, Ugadi and Navaratri after an adhika month, vriddha-trisprisha Smarta Ekadashi, Onam in adhika years |
+| -1255 | 255613107 to 255611852 | Ashtottari and Yogini birth antardashas clipped, Narayan own-sign 12 years, sub-periods tile exactly, new `vimshottariPratyantarIn` leaf |
+| -9    | 255611852 to 255611843 | Nathonatha Bala continuous across sunrise and sunset |
+| +814  | 255611843 to 255612657 | day walks step civil days in DST zones; the Ekadashi year edge |
+| +4083 | 255612657 to 255616740 | festival day selection: vriddhi first day, kala coverage, Pradosh window, Holika Dahan added |
+| -25984 | 255616740 to 255590756 | Masik Karthigai once per transit, Onam once a year, Karthigai Deepam added, vara rules follow masaSystem |
+| -470  | 255590756 to 255590286 | Pathu Porutham Yoni description (Tamil enemy-pair test) |
+| -4    | 255590286 to 255590282 | JSON separators on days whose festival list both festival changes touched |
+
+The audit moves changed two numeric pins. `numericLeaves` went from 99 to 102: three Shadbala
+leaves at `e5-2088-reykjavik` whose existing ULP-level Paksha difference now rounds differently
+against the new Nathonatha values, each at most 5.7e-14. `changedNumericValues` went from 3141 to
+3138: +5 from those leaves and -8 from the removed duplicate eclipse's obscuration and magnitude
+leaves, which carried the known 1e-15 noise. The same two causes move the TS-to-Go byte gap from
+105 to 129 (+20, +4). Every band held, and the worst numeric leaf and path are unchanged.
+
+The `g2` and `g3` pins moved with the same release, and only for causes already in the table: those
+stages leave out the festival block, `yearly` and the day walks. Measured against dumps of the 5.3.0
+tree, which reproduce the old pins to the byte, every byte is attributed:
+
+| cause | `g2` TS / Go | `g3` TS / Go |
+|---|---|---|
+| `specialYogas` under `computeEndTimes: false` (shape `s2-narrow` only, 1299 of 1920 days) | +81806 / +81806 | +81806 / +81806 |
+| no next-day moonset (76 days) | -3724 / -3724 | -3724 / -3724 |
+| duplicate eclipse day removed (4 days) | -3257 / -3253 | -3257 / -3253 |
+| dasha clipping and the new `vimshottariPratyantarIn` leaf | | -1255 / -1255 |
+| Pathu Porutham Yoni description | | -470 / -470 |
+| Nathonatha Bala | | -9 / +11 |
+| total | +74825 / +74829 | +73091 / +73115 |
+
+So `g2` moves from 250723409 / 250723499 to 250798234 / 250798328 and `g3` from 251329961 / 251330072
+to 251403052 / 251403187. The TS-to-Go gap widens by 4 at `g2` and by 24 at `g3`, the eclipse and
+Nathonatha causes above. `changedNumericValues` tightens by 8 at `g2` (2264 to 2256, the removed eclipse
+leaves) and by 3 at `g3` (3046 to 3043, the same -8 and +5 as `full`), and `numericLeaves` at `g3` goes
+from 97 to 100, the same three Reykjavik Shadbala leaves. Brahma Muhurta moves every daily result and
+no byte, because its instants keep their width.
 
 A festival that is current at no sunrise used to be emitted on no day of the year; the Hindu day
 that wholly contains it now claims it, in both languages on the same day.

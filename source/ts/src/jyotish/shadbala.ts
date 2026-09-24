@@ -30,7 +30,7 @@ function shadbalaForChart(chart: BirthChart, basis: NatalBasis): ShadbalaResult 
   const { birthDate, location } = basis;
   const sunriseUtc = findSunriseBefore(birthDate, location);
   const sunsetUtc = computeSunset(sunriseUtc, location);
-  const nextSunriseUtc = computeSunrise(sunsetUtc, location);
+  computeSunrise(sunsetUtc, location); // keeps NO_SUNRISE for a night that does not end
 
   const sunPlanet = chart.byPlanet.Sun;
   const moonPlanet = chart.byPlanet.Moon;
@@ -48,7 +48,7 @@ function shadbalaForChart(chart: BirthChart, basis: NatalBasis): ShadbalaResult 
     const placement = chart.byPlanet[g];
     const sthana = sthanaBala(g, placement, chart, divisionalCharts);
     const dig = digBala(g, placement.longitude, chart.lagna.siderealLongitude);
-    const kala = kalaBala(g, birthDate, sunriseUtc, sunsetUtc, nextSunriseUtc,
+    const kala = kalaBala(g, birthDate, sunriseUtc, sunsetUtc,
       sunPlanet.longitude, moonPlanet.longitude);
     const chesta = chestaBala(g, placement, sunPlanet.longitude);
     const naisargika = NAISARGIKA[g];
@@ -190,40 +190,40 @@ function kalaBala(
   birthDate: Date,
   sunriseUtc: Date,
   sunsetUtc: Date,
-  nextSunriseUtc: Date,
   sunLon: number,
   moonLon: number,
 ): number {
   if (graha === 'Rahu' || graha === 'Ketu') return 0;
-  const nath = nathonathaBala(graha, birthDate, sunriseUtc, sunsetUtc, nextSunriseUtc);
+  const nath = nathonathaBala(graha, birthDate, sunriseUtc, sunsetUtc);
   const paksha = pakshaBala(graha, sunLon, moonLon);
   return nath + paksha;
 }
 
+const HOUR_MS = 3_600_000;
+
+/** BPHS Ch. 27 v8-9: Divabala = 2 x Unnata, 5 V per hour from 0 at apparent
+ *  midnight to 60 at apparent noon, taken by the day-strong grahas; the
+ *  night-strong take 60 minus it. Apparent noon is the midpoint of sunrise and
+ *  sunset, and apparent midnight 12 h after it, so the curve is continuous at
+ *  sunset and steps by a few hundredths of a V at sunrise, where the frame moves
+ *  to the next day's noon. */
 function nathonathaBala(
   graha: GrahaName,
   birthDate: Date,
   sunriseUtc: Date,
   sunsetUtc: Date,
-  nextSunriseUtc: Date,
 ): number {
   if (graha === 'Mercury') return 60;
   const t = birthDate.getTime();
-  const isDayBirth = t >= sunriseUtc.getTime() && t < sunsetUtc.getTime();
-  if (isDayBirth) {
-    const dayLen = sunsetUtc.getTime() - sunriseUtc.getTime();
-    const phase = (t - sunriseUtc.getTime()) / dayLen;
-    const factor = 1 - Math.abs(phase - 0.5) * 2;
-    if (DAY_STRONG.has(graha)) return factor * 60;
-    if (NIGHT_STRONG.has(graha)) return (1 - factor) * 60;
-  } else {
-    const nightStart = sunsetUtc.getTime();
-    const nightLen = nextSunriseUtc.getTime() - nightStart;
-    const phase = (t - nightStart) / nightLen;
-    const factor = 1 - Math.abs(phase - 0.5) * 2;
-    if (NIGHT_STRONG.has(graha)) return factor * 60;
-    if (DAY_STRONG.has(graha)) return (1 - factor) * 60;
-  }
+  const sunrise = sunriseUtc.getTime();
+  const sunset = sunsetUtc.getTime();
+  const noon = (sunrise + sunset) / 2;
+  const divabala = t >= sunrise && t < sunset
+    ? 60 - (Math.abs(t - noon) / HOUR_MS) * 5
+    : (Math.abs(t - (noon + 12 * HOUR_MS)) / HOUR_MS) * 5;
+  const clamped = Math.min(60, Math.max(0, divabala));
+  if (DAY_STRONG.has(graha)) return clamped;
+  if (NIGHT_STRONG.has(graha)) return 60 - clamped;
   return 0;
 }
 
@@ -309,7 +309,7 @@ const GRAHA_BY_INDEX: readonly Exclude<GrahaName, 'Rahu' | 'Ketu'>[] = [
 
 /** Not the canonical BPHS Ch. 27 table: cardinal bhavas 1/4/7/10 anchor at 60/0/15/30 V
  *  and the rest interpolate, per Sanjay Rath, *Crux of Vedic Astrology* Ch. 6. */
-const BHAVA_DIK_VALUES: readonly number[] = Object.freeze([
+const BHAVA_DIK_VALUES: readonly number[] = /* @__PURE__ */ Object.freeze([
   60,
   40,
   20,

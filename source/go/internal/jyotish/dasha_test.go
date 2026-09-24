@@ -1,9 +1,13 @@
 package jyotish
 
 import (
+	"errors"
 	"math"
+	"strings"
 	"testing"
+	"time"
 
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
 	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
@@ -60,7 +64,7 @@ func TestAntarDashaCursorKeepsItsFraction(t *testing.T) {
 
 	start := int64(631_152_000_123)
 	full := float64(DashaYears[types.DashaVenus] * msPerYear)
-	kept := buildAntarDashas(types.DashaVenus, start, full, start)
+	kept := buildAntarDashas(types.DashaVenus, start, full, start, int64(float64(start)+full))
 	trunc := buildAntarDashasTruncating(types.DashaVenus, start, full, start)
 	if len(kept) != 9 || len(trunc) != 9 {
 		t.Fatalf("expected 9 antardashas each, got %d and %d", len(kept), len(trunc))
@@ -517,8 +521,7 @@ func TestVimshottariSequenceIsContiguous(t *testing.T) {
 				t.Errorf("nakshatra %d: maha %d first antardasha starts at %d, mahadasha at %d",
 					step, i, got, m.StartDate.Ms())
 			}
-			last := m.AntarDashas[len(m.AntarDashas)-1].EndDate.Ms()
-			if d := abs64(last - m.EndDate.Ms()); d > 1 {
+			if last := m.AntarDashas[len(m.AntarDashas)-1].EndDate.Ms(); last != m.EndDate.Ms() {
 				t.Errorf("nakshatra %d: maha %d antardashas end %d ms from the mahadasha end",
 					step, i, last-m.EndDate.Ms())
 			}
@@ -582,4 +585,195 @@ func TestCharaAndNarayanFixedAgreeOnDurations(t *testing.T) {
 
 func isBothInLabel(label string, rashi int) bool {
 	return label == itoa(rashi)+"-a-both-in"
+}
+
+func dayOf(ms int64) string { return time.UnixMilli(ms).UTC().Format("2006-01-02") }
+
+func TestFirstMahaAntarDashasClipAtBirth(t *testing.T) {
+	birth := time.Date(1995, 8, 15, 5, 30, 0, 0, time.UTC).UnixMilli()
+	const lon = 355.19020663914483
+
+	ash, err := ComputeAshtottariDasha(birth, lon, birth)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, a := range ash.MahaDashas[0].AntarDashas {
+		got = append(got, a.Lord.String()+" "+dayOf(a.StartDate.Ms()))
+	}
+	want := []string{"Moon 1995-08-15", "Mars 1996-09-13", "Mercury 1997-08-04", "Saturn 1999-06-25", "Jupiter 2000-08-03"}
+	if strings.Join(got, ", ") != strings.Join(want, ", ") {
+		t.Errorf("Ashtottari Rahu mahadasha at birth: %v, expected %v", got, want)
+	}
+
+	yog, err := ComputeYoginiDasha(birth, lon, birth)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got = nil
+	for _, a := range yog.MahaDashas[0].AntarDashas {
+		got = append(got, string(a.Yogini)+" "+dayOf(a.StartDate.Ms()))
+	}
+	want = []string{"Pingala 1995-08-15", "Dhanya 1995-10-14", "Bhramari 1996-04-13", "Bhadrika 1996-12-13"}
+	if strings.Join(got, ", ") != strings.Join(want, ", ") {
+		t.Errorf("Yogini Ulka mahadasha at birth: %v, expected %v", got, want)
+	}
+}
+
+func checkTiles(t *testing.T, where string, parentStart, parentEnd int64, kids [][2]int64) {
+	t.Helper()
+	if len(kids) == 0 {
+		if parentStart != parentEnd {
+			t.Errorf("%s: no sub-periods in a %d ms parent", where, parentEnd-parentStart)
+		}
+		return
+	}
+	if kids[0][0] != parentStart || kids[len(kids)-1][1] != parentEnd {
+		t.Errorf("%s: sub-periods span %d..%d, parent %d..%d",
+			where, kids[0][0], kids[len(kids)-1][1], parentStart, parentEnd)
+	}
+	for i := 1; i < len(kids); i++ {
+		if kids[i][0] != kids[i-1][1] {
+			t.Errorf("%s: sub-period %d starts %d ms from the previous end", where, i, kids[i][0]-kids[i-1][1])
+		}
+	}
+}
+
+func TestSubPeriodsTileTheirParent(t *testing.T) {
+	births := []int64{
+		time.Date(1955, 3, 10, 4, 0, 0, 0, time.UTC).UnixMilli(),
+		time.Date(1969, 12, 31, 23, 59, 59, 0, time.UTC).UnixMilli(),
+		time.Date(1976, 9, 9, 10, 50, 13, 539_000_000, time.UTC).UnixMilli(),
+		time.Date(1995, 8, 15, 5, 30, 0, 0, time.UTC).UnixMilli(),
+		time.Date(2071, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(),
+	}
+	for _, birth := range births {
+		for _, lon := range []float64{3.3, 57.123, 144.13912296295166, 301.123, 355.19020663914483} {
+			where := itoa(int(birth%100000)) + "/" + itoa(int(lon))
+			vim, err := ComputeVimshottariDasha(birth, lon, birth)
+			if err != nil {
+				t.Fatal(err)
+			}
+			ash, err := ComputeAshtottariDasha(birth, lon, birth)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, r := range []types.VimshottariDashaResult{vim, ash} {
+				for _, m := range r.MahaDashas {
+					var kids [][2]int64
+					for _, a := range m.AntarDashas {
+						kids = append(kids, [2]int64{a.StartDate.Ms(), a.EndDate.Ms()})
+					}
+					checkTiles(t, where+" maha "+m.Lord.String(), m.StartDate.Ms(), m.EndDate.Ms(), kids)
+				}
+			}
+			yog, err := ComputeYoginiDasha(birth, lon, birth)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, m := range yog.MahaDashas {
+				var kids [][2]int64
+				for _, a := range m.AntarDashas {
+					kids = append(kids, [2]int64{a.StartDate.Ms(), a.EndDate.Ms()})
+				}
+				checkTiles(t, where+" yogini "+string(m.Yogini), m.StartDate.Ms(), m.EndDate.Ms(), kids)
+			}
+			for _, m := range vim.MahaDashas {
+				for _, a := range m.AntarDashas {
+					old, _ := ComputeVimshottariPratyantar(a)
+					in, _ := ComputeVimshottariPratyantarIn(m, a)
+					for name, list := range map[string][]types.PratyantarDasha{"old": old, "in": in} {
+						var kids [][2]int64
+						for _, p := range list {
+							kids = append(kids, [2]int64{p.StartDate.Ms(), p.EndDate.Ms()})
+						}
+						checkTiles(t, where+" pratyantar "+name, a.StartDate.Ms(), a.EndDate.Ms(), kids)
+					}
+				}
+			}
+		}
+	}
+}
+
+func TestPratyantarInStartsAtTheOneRunningAtBirth(t *testing.T) {
+	birth := time.Date(1995, 8, 15, 5, 30, 0, 0, time.UTC).UnixMilli()
+	vim, err := ComputeVimshottariDasha(birth, 355.19020663914483, birth)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m0 := vim.MahaDashas[0]
+	in, err := ComputeVimshottariPratyantarIn(m0, m0.AntarDashas[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, p := range in {
+		got = append(got, p.Lord.String()+" "+dayOf(p.StartDate.Ms()))
+	}
+	want := []string{"Mercury 1995-08-15", "Ketu 1995-09-25", "Venus 1995-11-18",
+		"Sun 1996-04-21", "Moon 1996-06-07", "Mars 1996-08-23"}
+	if strings.Join(got, ", ") != strings.Join(want, ", ") {
+		t.Errorf("Mercury/Rahu at birth: %v, expected %v", got, want)
+	}
+
+	for mi, m := range vim.MahaDashas {
+		for ai, a := range m.AntarDashas {
+			if mi == 0 && ai == 0 {
+				continue
+			}
+			old, _ := ComputeVimshottariPratyantar(a)
+			in, _ := ComputeVimshottariPratyantarIn(m, a)
+			if len(old) != len(in) {
+				t.Fatalf("maha %d antar %d: %d vs %d pratyantars", mi, ai, len(in), len(old))
+			}
+			for i := range old {
+				if old[i] != in[i] {
+					t.Errorf("maha %d antar %d [%d]: In %+v, one-argument %+v", mi, ai, i, in[i], old[i])
+				}
+			}
+		}
+	}
+
+	for _, c := range []struct {
+		maha  types.MahaDasha
+		antar types.AntarDasha
+	}{
+		{m0, types.AntarDasha{Lord: types.DashaLord(99)}},
+		{types.MahaDasha{Lord: types.DashaLord(99)}, m0.AntarDashas[0]},
+	} {
+		_, err := ComputeVimshottariPratyantarIn(c.maha, c.antar)
+		var pe *types.PanchangError
+		if !errors.As(err, &pe) || pe.Code != types.ErrInvalidInput {
+			t.Errorf("invalid lord: error %v, expected INVALID_INPUT", err)
+		}
+	}
+}
+
+func TestNarayanLordInOwnRashiGivesTwelveYears(t *testing.T) {
+	ctx := astronomy.NewEphemerisCtx()
+	birth := time.Date(1990, 5, 15, 6, 30, 0, 0, time.UTC).UnixMilli()
+	loc := types.GeoLocation{Latitude: 18.5204, Longitude: 73.8567}
+	chart, err := ComputeRashiChart(ctx, birth, loc, BirthChartOptions{
+		Ayanamsa: types.Lahiri, HouseSystem: types.HouseSystemWholeSign,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range chart.Planets {
+		if p.Planet == types.GrahaSaturn && p.Rashi.Index != 9 {
+			t.Fatalf("Saturn in rashi %d; the case needs it in Capricorn", p.Rashi.Index)
+		}
+	}
+	r, err := ComputeNarayanDashaVariable(ctx, birth, loc, types.Lahiri, birth)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, m := range r.MahaDashas {
+		if m.Rashi == 9 && m.Years != 12 {
+			t.Errorf("Capricorn with Saturn in it: %v years, expected 12", m.Years)
+		}
+		if m.Years > 0 && m.EndDate.Ms() <= m.StartDate.Ms() {
+			t.Errorf("rashi %d: %v years but a zero-length period", m.Rashi, m.Years)
+		}
+	}
 }

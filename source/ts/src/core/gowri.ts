@@ -1,5 +1,7 @@
 import type { GowriSlot, ChoghadiyaQuality, Unlocalized, UnlocalizedInfo } from '../types/elements';
+import { PanchangError } from '../types/errors';
 import { buildEqualSlots } from '../utils/slots';
+import { validateDate } from '../utils/validation';
 
 /** Per the Pambu-Panchangam labels; this Tamil table has no neutral slots, unlike North-Indian variants. */
 const GOWRI_QUALITY: readonly ChoghadiyaQuality[] = [
@@ -48,7 +50,7 @@ function buildSlots(
   });
 }
 
-/** The 16 Gowri Panchangam (Gowri Nalla Neram) slots for a day, 8 per half; `varaIndex` 0 = Sunday … 6 = Saturday, `nameFn` names slot index 0-7. */
+/** The 16 Gowri Panchangam (Gowri Nalla Neram) slots for a day, 8 per half; `varaIndex` 0 = Sunday … 6 = Saturday (any other value throws `INVALID_INPUT`, an Invalid Date `INVALID_DATE`), `nameFn` names slot index 0-7. */
 export function computeGowriPanchangam(
   sunrise: Date,
   sunset: Date,
@@ -57,6 +59,12 @@ export function computeGowriPanchangam(
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
 ): UnlocalizedInfo<GowriSlot> {
+  validateDate(sunrise, 'any');
+  validateDate(sunset, 'any');
+  validateDate(nextSunrise, 'any');
+  if (!Number.isInteger(varaIndex) || varaIndex < 0 || varaIndex > 6) {
+    throw new PanchangError(`varaIndex must be integer in [0, 6], got ${varaIndex}`, 'INVALID_INPUT');
+  }
   const dayMs   = sunset.getTime()      - sunrise.getTime();
   const nightMs = nextSunrise.getTime() - sunset.getTime();
 

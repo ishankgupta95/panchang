@@ -2,8 +2,10 @@ package types
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
 	"testing"
+	"time"
 )
 
 type jsDateGolden struct {
@@ -63,6 +65,10 @@ func TestJSDateMatchesJavaScript(t *testing.T) {
 		}
 		if got := d.Ms(); got != c.Ms {
 			t.Errorf("Ms() round-trip: got %d want %d", got, c.Ms)
+		}
+		if tm := d.Time(); tm.UnixMilli() != c.Ms || tm.Location() != time.UTC ||
+			tm.Year() != c.UTCFullYear || int(tm.Weekday()) != c.UTCDay {
+			t.Errorf("ms=%d Time: got %v (%d ms), want the same instant in UTC", c.Ms, tm, tm.UnixMilli())
 		}
 
 		switch {
@@ -172,4 +178,18 @@ func TestNullableDateIsTheNullArm(t *testing.T) {
 	if string(b) != `{"endTime":null}` {
 		t.Errorf("nil *JSDate marshalled as %s, want {\"endTime\":null}", b)
 	}
+}
+
+// Time hands a result instant to the time package, where it can be rendered
+// in any zone. Printing the JSDate itself shows only the integer.
+func ExampleJSDate_Time() {
+	rise := Date(1751589159922) // Sun.Rise at Pune on 2025-07-04
+
+	fmt.Println(rise)
+	fmt.Println(rise.Time())
+	fmt.Println(rise.Time().In(time.FixedZone("IST", 330*60)).Format(time.RFC3339))
+	// Output:
+	// 1751589159922
+	// 2025-07-04 00:32:39.922 +0000 UTC
+	// 2025-07-04T06:02:39+05:30
 }

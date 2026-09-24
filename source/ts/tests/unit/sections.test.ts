@@ -107,12 +107,32 @@ describe('options.sections', () => {
   });
 
   it('keeps Bhadra-dependent festival descriptions correct without lunarWindows', () => {
-    const day = '2026-08-28'; // Shravana Purnima 2026
-    const withWindows = panchangFor(day, ['festivals', 'lunarWindows']);
-    const withoutWindows = panchangFor(day, ['festivals']);
-    expect(JSON.stringify(withoutWindows.festivals))
-      .toBe(JSON.stringify(withWindows.festivals));
-    expect(withoutWindows.inauspicious.bhadra).toBeNull();
+    // Raksha Bandhan 2024 in Delhi waits for Bhadra to end, so the rule 'festivals needs Bhadra' matters.
+    const DELHI = { latitude: 28.6139, longitude: 77.209 };
+    const at = (sections: readonly PanchangSection[]) =>
+      getDailyPanchang(new Date('2024-08-19T06:30:00Z'), DELHI, { timezone: TZ, sections })!;
+    const withWindows = at(['festivals', 'lunarWindows']);
+    const withoutWindows = at(['festivals']);
+    const rakhi = withoutWindows.festivals.find((f) => f.key === 'raksha_bandhan');
+    expect(rakhi?.description).toContain('Bhadra');
+    expect(JSON.stringify(withoutWindows.festivals)).toBe(JSON.stringify(withWindows.festivals));
+    // Documented coupling: Bhadra is computed, and published, for festivals alone.
+    expect(withoutWindows.inauspicious.bhadra).not.toBeNull();
+    expect(JSON.stringify(withoutWindows.inauspicious.bhadra))
+      .toBe(JSON.stringify(withWindows.inauspicious.bhadra));
+    expect(at([]).inauspicious.bhadra).toBeNull();
+  });
+
+  it('documents its couplings: festivals fills moon.rise, and the grahan entry comes with eclipse', () => {
+    const day = '2025-03-14'; // Chandra Grahan and Holi, Pune
+    const full = panchangFor(day);
+    const festivalsOnly = panchangFor(day, ['festivals']);
+    const eclipseOnly = panchangFor(day, ['eclipse']);
+    expect(full.festivals.map((f) => f.key)).toContain('chandra_grahan');
+    expect(festivalsOnly.festivals.map((f) => f.key)).not.toContain('chandra_grahan');
+    expect(eclipseOnly.festivals.map((f) => f.key)).toEqual(['chandra_grahan']);
+    expect(festivalsOnly.moon.rise?.getTime()).toBe(full.moon.rise?.getTime());
+    expect(festivalsOnly.moon.set).toBeNull();
   });
 
   it.skipIf(process.env.COVERAGE)('stays under its absolute ms/day ceiling when sections are dropped', () => {

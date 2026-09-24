@@ -36,6 +36,23 @@ func ValidateDate(ms int64) error {
 	return nil
 }
 
+// ValidateLocalYearWindow accepts every calendar year from 1900 to 2100 whole,
+// even where its local boundaries fall up to 14 hours outside that span in
+// UTC; any other window fails on whichever boundary lies outside it.
+func ValidateLocalYearWindow(year int, startMs, endMs int64) error {
+	const slack int64 = 14 * 3600_000
+	near := func(ms int64) bool {
+		return ms >= SupportedStartMs-slack && ms <= SupportedEndMs+slack
+	}
+	if year >= 1900 && year <= 2100 && near(startMs) && near(endMs) {
+		return nil
+	}
+	if err := ValidateDate(startMs); err != nil {
+		return err
+	}
+	return ValidateDate(endMs)
+}
+
 func assertCyclicIndex(value, modulus int, name string) error {
 	if value < 0 || value >= modulus {
 		return types.Codef(types.ErrInvalidInput,

@@ -628,4 +628,17 @@ func TestComputeVarjyamRejectsABadIndex(t *testing.T) {
 	if _, _, err := ComputeVarjyam(0, 0, 86_400_000, getMoon); err != nil {
 		t.Errorf("index 0: %v", err)
 	}
+
+	// Pune, sunrise 2025-03-20T00:53:00.123Z with Anuradha (16) in force: every other index used to
+	// return a window a few seconds long with ok=true.
+	const sunrise, nextSunrise = int64(1742431980123), int64(1742518307891)
+	atSunrise := GetNakshatraIndexAtTime(sunrise, getMoon)
+	for i := 0; i < 27; i++ {
+		if i == atSunrise {
+			continue
+		}
+		if w, ok, err := ComputeVarjyam(i, sunrise, nextSunrise, getMoon); ok || err != nil {
+			t.Errorf("index %d with %d at sunrise: %v ok=%v err=%v, want no window", i, atSunrise, w, ok, err)
+		}
+	}
 }

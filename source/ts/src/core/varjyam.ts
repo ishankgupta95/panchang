@@ -4,7 +4,7 @@ import {
   VARJYAM_OFFSET_GHATIKAS,
   VARJYAM_SECOND_OFFSET_GHATIKAS,
 } from '../utils/constants';
-import { assertNakshatraIndex } from '../utils/validation';
+import { assertNakshatraIndex, validateDate } from '../utils/validation';
 import type { UtcWindow } from '../types/elements';
 
 const MAX_VARJYAM_NAKSHATRAS = 3;
@@ -16,7 +16,12 @@ const NAKSHATRA_LOOKFORWARD_HOURS = 30;
 const BRACKET_MS = 120_000;
 const MAX_BRACKET_ITERS = 30;
 
-/** Varjyam (Nakshatra Thyajyam): the earliest forbidden window overlapping the Hindu day, 4 ghatikas of the nakshatra active at sunrise (index 0..26). */
+/**
+ * Varjyam (Nakshatra Thyajyam): the earliest forbidden window overlapping the Hindu day, 4 ghatikas
+ * of the nakshatra active at sunrise. `currentNakshatraIndex` (0..26) must be that nakshatra, as
+ * `getMoon` gives it at `sunriseUtc`; any other index returns `null`. For every spell of the day,
+ * including later nakshatras', use `computeVarjyamWindows`.
+ */
 export function computeVarjyam(
   currentNakshatraIndex: number,
   sunriseUtc: Date,
@@ -24,6 +29,8 @@ export function computeVarjyam(
   getMoon: (d: Date) => number,
 ): UtcWindow | null {
   assertNakshatraIndex(currentNakshatraIndex, 'currentNakshatraIndex');
+  validateDate(sunriseUtc, 'any');
+  validateDate(nextSunriseUtc, 'any');
   const overlapping = varjyamSpellsForNakshatra(currentNakshatraIndex, sunriseUtc, getMoon)
     .filter((w) =>
       w.end.getTime() > sunriseUtc.getTime() &&
@@ -31,12 +38,17 @@ export function computeVarjyam(
   return overlapping[0] ?? null;
 }
 
-/** All Varjyam windows whose START falls in the Hindu day, in start order; ends are unclamped. */
+/**
+ * All Varjyam windows whose START falls in the Hindu day, in start order; ends are unclamped. `getMoon` returns
+ * degrees in [0, 360); a nakshatra read outside 0..26 from an unwrapped value contributes no window.
+ */
 export function computeVarjyamWindows(
   sunriseUtc: Date,
   nextSunriseUtc: Date,
   getMoon: (d: Date) => number,
 ): UtcWindow[] {
+  validateDate(sunriseUtc, 'any');
+  validateDate(nextSunriseUtc, 'any');
   return collectNakshatraOffsetWindows(sunriseUtc, nextSunriseUtc, getMoon, spellsFromBoundaries);
 }
 
@@ -84,6 +96,7 @@ function varjyamSpellsForNakshatra(
 ): UtcWindow[] {
   const getIndex = (d: Date) => getNakshatraIndexAtTime(d, getMoon);
   const angle: ElementAngle = { angleAt: getMoon, spanDeg: 360 / 27 };
+  if (getIndex(referenceUtc) !== nakshatraIndex) return [];
 
   const nakshatraStartUtc = findNakshatraStart(referenceUtc, nakshatraIndex, getIndex, angle);
   if (nakshatraStartUtc === null) return [];

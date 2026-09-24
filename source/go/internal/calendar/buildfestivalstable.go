@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
 	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
@@ -74,6 +75,9 @@ func BuildFestivalsTable(ctx context.Context,
 		return FestivalsFile{}, types.Codef(types.ErrInvalidInput,
 			"languages must contain at least one locale")
 	}
+	if err := checkTableLanguages(languages); err != nil {
+		return FestivalsFile{}, err
+	}
 
 	years := map[string][]PackedFestivalTableDay{}
 	dict := newFestivalDictionary()
@@ -126,8 +130,12 @@ func buildFestivalYear(
 	warner types.RegionAliasWarner,
 	dict *festivalDictionary,
 ) ([]PackedFestivalTableDay, error) {
-	startMs := types.DateUTC(year, 0, 1).Ms()
-	endMs := types.DateUTC(year, 11, 31).Ms()
+	westShift := int64(0)
+	if offsetMinutes < 0 {
+		westShift = int64(offsetMinutes) * 60_000
+	}
+	startMs := utils.UtcDateMs(year, 0, 1) - westShift
+	endMs := utils.UtcDateMs(year, 11, 31) - westShift
 
 	runs := make([][]FestivalDay, len(languages))
 	for i, language := range languages {

@@ -326,7 +326,7 @@ func scanDay(ctx *EphemerisCtx, body RiseSetBody, location types.GeoLocation, da
 
 const maxScans = 20_000
 
-var scanCache = store.New[string, dayEventPair](maxScans, store.DefaultStripes, store.HashString)
+var scanCache = store.New[riseSetKey, dayEventPair](maxScans, store.DefaultStripes, hashRiseSetKey)
 
 func DayEvents(ctx *EphemerisCtx, body RiseSetBody, direction int, location types.GeoLocation, dayIndex int64) []float64 {
 	return append([]float64(nil), dayEventsShared(ctx, body, direction, location, dayIndex)...)
@@ -343,12 +343,8 @@ func dayEventsShared(ctx *EphemerisCtx, body RiseSetBody, direction int, locatio
 	return pair.set
 }
 
-func riseSetScanKey(body RiseSetBody, location types.GeoLocation, dayIndex int64) string {
-	return string(body) + "|" +
-		jsnum.FormatFloat(location.Latitude) + "|" +
-		jsnum.FormatFloat(location.Longitude) + "|" +
-		jsnum.FormatFloat(location.Elevation) + "|" +
-		jsnum.FormatInt(dayIndex)
+func riseSetScanKey(body RiseSetBody, location types.GeoLocation, dayIndex int64) riseSetKey {
+	return newRiseSetKey(body, 0, location, dayIndex)
 }
 
 func floorDivInt(a, b int64) int64 {

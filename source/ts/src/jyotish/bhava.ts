@@ -1,7 +1,8 @@
 import { greenwichApparentSiderealDegrees } from '../astronomy/topocentric';
 import { computeAyanamsa, dateToJulianDay } from '../astronomy/ayanamsa';
 import { meanObliquity } from './planets';
-import { computeNatalBasis, type NatalBasis } from './natalBasis';
+import { computeLagna } from './lagna';
+import type { NatalBasis } from './natalBasis';
 import { resolveMasaName } from '../i18n/resolver';
 import { normalize360, degToRad, radToDeg } from '../utils/angle';
 import { validateLocation, validateDate } from '../utils/validation';
@@ -11,10 +12,17 @@ import type { GeoLocation } from '../types/location';
 import type { BhavaChart, HouseInfo } from '../types/jyotish';
 
 const TWO_PI = 2 * Math.PI;
+/** The fixed-point step slows toward the polar circle: 60 steps settle every cusp to
+ *  |φ| ≈ 66.2°, and up to 93 are needed just below 90° - ε, where every cusp still
+ *  exists. Beyond the circle the old cap stands, so no error there changes. */
+const PLACIDUS_MAX_STEPS = 60;
+const PLACIDUS_MAX_STEPS_BELOW_POLAR_CIRCLE = 200;
 
 /**
  * The 12 house cusps (bhavas): `'whole-sign'` (default), `'equal'`, `'placidus-kp'`.
- * @throws `PanchangError` ('CIRCUMPOLAR') when a `placidus-kp` intermediate cusp is circumpolar.
+ * @throws `PanchangError` ('CIRCUMPOLAR') when a `placidus-kp` intermediate cusp is circumpolar, or
+ *   ('PLACIDUS_DIVERGED') when its iteration does not settle; both happen only beyond the polar
+ *   circles (|φ| > 90° - ε, about 66.56°), where `'whole-sign'` and `'equal'` still work.
  */
 export function computeBhava(
   birthDate: Date,
@@ -23,14 +31,24 @@ export function computeBhava(
 ): BhavaChart {
   validateDate(birthDate);
   validateLocation(location);
+  // The lagna alone, resolved as `computeNatalBasis` resolves it: the cusps never read the
+  // planets, and the lagna raises every error the planets would, first.
+  const ayanamsaType = options.ayanamsa ?? 'lahiri';
+  const lang = options.language ?? 'en';
   return bhavaFromBasis(
-    computeNatalBasis(birthDate, location, options),
+    {
+      birthDate, location, ayanamsaType, lang,
+      lagna: computeLagna(birthDate, location, ayanamsaType, lang),
+    },
     options.houseSystem ?? 'whole-sign',
   );
 }
 
 /** @internal */
-export function bhavaFromBasis(basis: NatalBasis, system: HouseSystem): BhavaChart {
+export function bhavaFromBasis(
+  basis: Pick<NatalBasis, 'birthDate' | 'location' | 'ayanamsaType' | 'lang' | 'lagna'>,
+  system: HouseSystem,
+): BhavaChart {
   const { birthDate, location, ayanamsaType, lang, lagna } = basis;
   const ascSidereal = lagna.siderealLongitude;
 
@@ -93,6 +111,11 @@ function buildCusps(
     case 'placidus-kp': {
       return placidusCusps(mcTropical, ayanamsa, lstDeg, latitudeDeg, εRad);
     }
+    default:
+      throw new PanchangError(
+        `unknown house system "${String(system)}"; expected one of whole-sign, equal, placidus-kp`,
+        'INVALID_INPUT',
+      );
   }
 }
 
@@ -155,8 +178,11 @@ function solvePlacidus(
   const sinε = Math.sin(εRad);
   const cosε = Math.cos(εRad);
   const tolRad = degToRad(1e-7);
+  const maxSteps = Math.abs(tanφ * Math.tan(εRad)) < 1
+    ? PLACIDUS_MAX_STEPS_BELOW_POLAR_CIRCLE
+    : PLACIDUS_MAX_STEPS;
 
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < maxSteps; i++) {
     const sinλ = Math.sin(λRad);
     const cosλ = Math.cos(λRad);
     const α = Math.atan2(sinλ * cosε, cosλ);

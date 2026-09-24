@@ -233,6 +233,7 @@ var kemadrumaRule = YogaRule{
 	Evaluate: func(ctx *YogaContext) *YogaMatch {
 		moon, _ := ctx.PlanetByName.Get(types.GrahaMoon)
 		moonRashi := moon.Rashi.Index
+		sunAdjacent := false
 		for _, p := range ctx.Chart.Planets {
 			if p.Planet == types.GrahaMoon {
 				continue
@@ -241,9 +242,18 @@ var kemadrumaRule = YogaRule{
 				continue
 			}
 			off := rashiOffsetFromTo(moonRashi, p.Rashi.Index)
-			if off == 1 || off == 2 || off == 12 {
+			if off != 1 && off != 2 && off != 12 {
+				continue
+			}
+			if p.Planet != types.GrahaSun {
 				return nil
 			}
+			sunAdjacent = true
+		}
+		if sunAdjacent {
+			return &YogaMatch{Reasons: []string{
+				"No planet but the Sun in 2nd, 12th, or conjunct with Moon (the Sun does not break Kemadruma)",
+			}}
 		}
 		return &YogaMatch{Reasons: []string{
 			"No planet in 2nd, 12th, or conjunct with Moon (Moon isolated from visible grahas)",

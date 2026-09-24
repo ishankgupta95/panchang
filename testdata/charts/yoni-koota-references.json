@@ -1,0 +1,250 @@
+{
+  "_meta": {
+    "purpose": "External evidence for the Ashtakoot Yoni koota table (YONI_SCORE / YoniScore) and for the Pathu Porutham Yoni test. Every value here comes from a published table, a competitor's published output or a classical rule; none comes from this library.",
+    "retrieved": "2026-09-24",
+    "animal_order": ["horse", "elephant", "sheep", "snake", "dog", "cat", "rat", "cow", "buffalo", "tiger", "deer", "monkey", "mongoose", "lion"],
+    "cell_orientation": "Every table below is written boy row by girl column in animal_order, transposed from its source where the source uses another layout.",
+    "root_rule": "Muhurta Chintamani (vivaha prakarana 25-26) fixes only the seven mahavaira (0) pairs: horse-buffalo, elephant-lion, sheep-monkey, snake-mongoose, dog-deer, cat-rat, cow-tiger. Every other cell comes from a commentator's chakra, and the printed chakras disagree with each other.",
+    "adoption": "The library adopts the table the Frawley / Jagannatha Hora / saravali engines share (lineage of the Mahidhar Sharma chakra below), taken cell for cell from PyJHora, except the two cells in `adopted_overrides`, where the printed Mahidhar Sharma chakra gives the same value in both directions and the cross-lineage majority agrees. That table is the only one of the five printed lineages the audit research found that agrees with every competitor spot value in `spot_values`.",
+    "reference_almanac": "The reference almanac publishes no Yoni table; its matcher is a form. The cells in `unconfirmed_cells` still want a hand check against it: the first four tell the adopted lineage from the other printed chakras, the last four are where the adopted lineage's own witnesses disagree."
+  },
+  "tables": {
+    "pyjhora": {
+      "_source": "PyJHora (Python port of Jagannatha Hora), src/jhora/horoscope/match/compatibility.py, YoniArray, https://github.com/naturalstupid/PyJHora (raw file fetched 2026-09-24). Printed as YoniArray[girl][boy]; the table is symmetric, so no transpose changes it.",
+      "cells": [
+        [4, 2, 2, 3, 2, 2, 2, 1, 0, 1, 1, 3, 2, 1],
+        [2, 4, 3, 3, 2, 2, 2, 2, 3, 1, 2, 3, 2, 0],
+        [2, 3, 4, 2, 1, 2, 1, 3, 3, 1, 2, 0, 3, 1],
+        [3, 3, 2, 4, 2, 1, 1, 1, 1, 2, 2, 2, 0, 2],
+        [2, 2, 1, 2, 4, 2, 1, 2, 2, 1, 0, 2, 1, 1],
+        [2, 2, 2, 1, 2, 4, 0, 2, 2, 1, 3, 3, 2, 1],
+        [2, 2, 1, 1, 1, 0, 4, 2, 2, 2, 2, 2, 1, 2],
+        [1, 2, 3, 1, 2, 2, 2, 4, 3, 0, 3, 2, 2, 1],
+        [0, 3, 3, 1, 2, 2, 2, 3, 4, 1, 2, 2, 2, 1],
+        [1, 1, 1, 2, 1, 1, 2, 0, 1, 4, 1, 1, 2, 1],
+        [1, 2, 2, 2, 0, 3, 2, 3, 2, 1, 4, 2, 2, 1],
+        [3, 3, 0, 2, 2, 3, 2, 2, 2, 1, 2, 4, 3, 2],
+        [2, 2, 3, 0, 1, 2, 1, 2, 2, 2, 2, 3, 4, 2],
+        [1, 0, 1, 2, 1, 1, 2, 1, 1, 1, 1, 2, 2, 4]
+      ]
+    },
+    "mahidhar_sharma_chakra": {
+      "_source": "Yonigunah chakra in Mahidhar Sharma's Hindi tika on Muhurta Chintamani (Khemraj / Venkateshwar line), archive.org item muhurta-chintamani-of-daivagya-ramacharya-mahidhar-sharma_202210, page image n97 (printed p. 86). Transcribed from the scan by the 2026-09-24 audit research, rows bride in print, transposed here to rows boy. It carries misprints (for example lion-rat 0 and lion-cow 0, where only the seven mahavaira pairs may be 0), so it is used only for the two overridden cells.",
+      "cells": [
+        [4, 2, 2, 3, 2, 2, 2, 1, 0, 1, 3, 3, 2, 1],
+        [2, 4, 3, 3, 2, 2, 2, 2, 2, 2, 3, 3, 3, 0],
+        [2, 3, 4, 2, 1, 2, 1, 3, 3, 1, 2, 0, 3, 1],
+        [3, 3, 2, 4, 2, 3, 1, 2, 2, 1, 2, 2, 0, 2],
+        [2, 2, 1, 2, 4, 2, 1, 3, 2, 1, 0, 2, 1, 1],
+        [2, 2, 2, 1, 2, 4, 0, 2, 2, 1, 3, 3, 2, 1],
+        [2, 2, 1, 1, 1, 0, 4, 2, 2, 2, 2, 2, 1, 0],
+        [1, 2, 3, 1, 2, 2, 2, 4, 3, 1, 3, 2, 2, 0],
+        [0, 3, 3, 1, 2, 2, 2, 3, 4, 1, 2, 2, 2, 3],
+        [1, 1, 1, 2, 1, 2, 2, 0, 1, 4, 1, 1, 2, 2],
+        [3, 2, 2, 2, 0, 3, 2, 3, 2, 1, 4, 2, 2, 1],
+        [3, 2, 0, 2, 2, 3, 2, 2, 3, 1, 2, 4, 3, 2],
+        [2, 2, 3, 0, 1, 2, 2, 2, 2, 2, 2, 3, 4, 2],
+        [1, 0, 1, 2, 1, 2, 1, 1, 2, 2, 2, 2, 2, 4]
+      ]
+    }
+  },
+  "adopted_overrides": [
+    {
+      "boy": "horse",
+      "girl": "deer",
+      "value": 3,
+      "_source": "Mahidhar Sharma chakra: 3 in both directions. PyJHora sets 1; Frawley and saravali give 3 one way and 1 the other; Kedar Datt Joshi, freehoroscopesonline, Gaur Brahman Samaj and Maitreya's code give 3."
+    },
+    {
+      "boy": "tiger",
+      "girl": "lion",
+      "value": 2,
+      "_source": "Mahidhar Sharma chakra: 2 in both directions. PyJHora and Frawley give 1; Kedar Datt Joshi and Maitreya's code give 2."
+    }
+  ],
+  "spot_values": [
+    {
+      "boy": {
+        "rashi": 1,
+        "nakshatra": 3
+      },
+      "girl": {
+        "rashi": 0,
+        "nakshatra": 2
+      },
+      "yoni": 2,
+      "_source": "AstroSage magazine, Virat Kohli (Rohini pada 3, Taurus) x Anushka Sharma (Krittika pada 1, Aries) Guna Milan table: Yoni Sarpa x Mesha = 2 of 4. https://www.astrosage.com/magazine/virat-kohli-anushka-sharma-marriage-prediction.asp (fetched 2026-09-24)"
+    },
+    {
+      "boy": {
+        "rashi": 5,
+        "nakshatra": 11
+      },
+      "girl": {
+        "rashi": 1,
+        "nakshatra": 3
+      },
+      "yoni": 1,
+      "_source": "Future Point (Leostar vendor) article as reported by the 2026-09-24 audit research: Uttara Phalguni boy (Gau) x Rohini girl (Sarpa) scores Yoni 1. Not re-fetched for this fixture."
+    },
+    {
+      "boy": {
+        "rashi": 0,
+        "nakshatra": 0
+      },
+      "girl": {
+        "rashi": 1,
+        "nakshatra": 3
+      },
+      "yoni": 3,
+      "_source": "AstroYogi, 'Yoni Koota in Kundli Matching': friendly Yonis score 3, naming Snake and Horse. https://www.astroyogi.com/blog/yoni-koota-in-kundli-matching.aspx (fetched 2026-09-24)"
+    },
+    {
+      "boy": {
+        "rashi": 1,
+        "nakshatra": 3
+      },
+      "girl": {
+        "rashi": 0,
+        "nakshatra": 0
+      },
+      "yoni": 3,
+      "_source": "AstroYogi, same page: Snake and Horse, the other direction."
+    },
+    {
+      "boy": {
+        "rashi": 0,
+        "nakshatra": 2
+      },
+      "girl": {
+        "rashi": 0,
+        "nakshatra": 1
+      },
+      "yoni": 3,
+      "_source": "AstroYogi, same page: Sheep and Elephant."
+    },
+    {
+      "boy": {
+        "rashi": 0,
+        "nakshatra": 1
+      },
+      "girl": {
+        "rashi": 3,
+        "nakshatra": 7
+      },
+      "yoni": 3,
+      "_source": "AstroYogi, same page: Sheep and Elephant, the other direction."
+    },
+    {
+      "boy": {
+        "rashi": 8,
+        "nakshatra": 19
+      },
+      "girl": {
+        "rashi": 11,
+        "nakshatra": 26
+      },
+      "yoni": 3,
+      "_source": "AstroYogi, same page: Monkey and Elephant."
+    },
+    {
+      "boy": {
+        "rashi": 0,
+        "nakshatra": 1
+      },
+      "girl": {
+        "rashi": 9,
+        "nakshatra": 21
+      },
+      "yoni": 3,
+      "_source": "AstroYogi, same page: Monkey and Elephant, the other direction."
+    },
+    {
+      "boy": {
+        "rashi": 7,
+        "nakshatra": 16
+      },
+      "girl": {
+        "rashi": 11,
+        "nakshatra": 25
+      },
+      "yoni": 3,
+      "_source": "NeeleshRoy/ashtakoot lib/constants.js YONI.points (fetched 2026-09-24): deer x cow is 3 in both directions. Its own test's 2 for Anuradha x U.Bhadrapada comes from getAnimal mapping Anuradha (17) to Monkey (11), so it reads monkey x cow."
+    },
+    {
+      "boy": {
+        "rashi": 0,
+        "nakshatra": 0
+      },
+      "girl": {
+        "rashi": 7,
+        "nakshatra": 15
+      },
+      "yoni": 1,
+      "_source": "Horse x tiger is 1 in every published table checked: PyJHora, saravali.github.io koota_yoni.html (fetched 2026-09-24), NeeleshRoy, and the Mahidhar Sharma, Kedar Datt Joshi and Kapileshvar Shastri chakras."
+    }
+  ],
+  "unconfirmed_cells": [
+    {
+      "boy": "horse",
+      "girl": "snake",
+      "check": "Ashwini boy x Rohini girl",
+      "note": "3 adopted (AstroYogi names the pair friendly); the other lineages give 2 or 1"
+    },
+    {
+      "boy": "horse",
+      "girl": "monkey",
+      "check": "Ashwini boy x Shravana girl",
+      "note": "3 adopted; the other lineages give 2"
+    },
+    {
+      "boy": "sheep",
+      "girl": "dog",
+      "check": "Krittika boy x Ardra girl",
+      "note": "1 adopted; the other lineages give 2"
+    },
+    {
+      "boy": "dog",
+      "girl": "cat",
+      "check": "Ardra boy x Punarvasu girl",
+      "note": "2 adopted; the other lineages give 1"
+    },
+    {
+      "boy": "horse",
+      "girl": "deer",
+      "check": "Ashwini boy x Anuradha girl, and Anuradha boy x Ashwini girl",
+      "note": "overridden to 3; Frawley and saravali keep 1 in one direction, PyJHora 1 in both"
+    },
+    {
+      "boy": "tiger",
+      "girl": "lion",
+      "check": "Vishakha boy x Dhanishtha girl",
+      "note": "overridden to 2; Frawley and PyJHora give 1"
+    },
+    {
+      "boy": "buffalo",
+      "girl": "lion",
+      "check": "Swati boy x Dhanishtha girl, and P.Bhadrapada boy x Hasta girl",
+      "note": "1 adopted; Frawley and saravali keep 2 in one direction"
+    },
+    {
+      "boy": "rat",
+      "girl": "lion",
+      "check": "Magha boy x Dhanishtha girl",
+      "note": "2 adopted; Kedar Datt Joshi and Maitreya's code give 1"
+    }
+  ],
+  "pathu_yoni_enemy_pairs": {
+    "pairs": [
+      ["horse", "buffalo"],
+      ["elephant", "lion"],
+      ["sheep", "monkey"],
+      ["snake", "mongoose"],
+      ["dog", "deer"],
+      ["cat", "rat"],
+      ["cow", "tiger"]
+    ],
+    "_source": "The Tamil Yoni porutham is a pass/fail test that fails only on enemy (pagai) animals, not a 0 to 4 score: prokerala yoni-porutham.htm and thirumanaporuthamonline.com yoni-porutham (both fetched 2026-09-24) say so, and PyJHora's South Indian mode returns a boolean from an enemy list and never reads YoniArray. The seven pairs are the Muhurta Chintamani mahavaira pairs, listed verbatim by thirumanaporuthamonline.",
+    "not_adopted": "Snake-rat: PyJHora's yoni_enemies_south adds it ('In South India yoni - Snake/Rat are enemies'), as do some Tamil sites, but thirumanaporuthamonline says snake and rat are not enemies. The narrower classical list is used."
+  }
+}

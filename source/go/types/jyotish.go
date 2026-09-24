@@ -42,6 +42,9 @@ var grahaNames = [GrahaCount]string{
 
 // AllGrahas lists the nine grahas in value order, Sun, Moon, Mars, Mercury,
 // Jupiter, Venus, Saturn, Rahu, Ketu, so AllGrahas[i] == Graha(i).
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllGrahas = [GrahaCount]Graha{
 	GrahaSun, GrahaMoon, GrahaMars, GrahaMercury, GrahaJupiter,
 	GrahaVenus, GrahaSaturn, GrahaRahu, GrahaKetu,
@@ -132,6 +135,9 @@ const (
 // AllVisibleGrahas lists the seven visible grahas in value order, Sun, Moon,
 // Mars, Mercury, Jupiter, Venus, Saturn, so AllVisibleGrahas[i] ==
 // VisibleGraha(i).
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllVisibleGrahas = [VisibleGrahaCount]VisibleGraha{
 	VisibleSun, VisibleMoon, VisibleMars, VisibleMercury,
 	VisibleJupiter, VisibleVenus, VisibleSaturn,
@@ -320,6 +326,9 @@ var dashaLordNames = [DashaLordCount]string{
 // AllDashaLords lists the nine lords in Vimshottari order, Ketu through
 // Mercury, so AllDashaLords[i] has value i. The Vimshottari and KP sub-lord
 // sequences step through this array cyclically.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllDashaLords = [DashaLordCount]DashaLord{
 	DashaKetu, DashaVenus, DashaSun, DashaMoon, DashaMars,
 	DashaRahu, DashaJupiter, DashaSaturn, DashaMercury,
@@ -398,11 +407,12 @@ var (
 
 // AntarDasha is one sub-period (antardasha, bhukti) of a [MahaDasha]. Within
 // a mahadasha the antardashas run in lord order beginning with the
-// mahadasha's own lord, each lasting its lord's share of the mahadasha. In
-// Vimshottari the first mahadasha drops every antardasha that ended before
-// birth, the mahadasha's own included, and starts the one straddling birth
-// at birth, so its list can begin with a later lord's antardasha.
-// ComputeVimshottariPratyantar takes one as input.
+// mahadasha's own lord, each lasting its lord's share of the full mahadasha.
+// The first mahadasha drops every antardasha that ended before birth, the
+// mahadasha's own included, and starts the one straddling birth at birth, so
+// its list can begin with a later lord's antardasha.
+// ComputeVimshottariPratyantar takes one as input, and
+// ComputeVimshottariPratyantarIn takes the birth-clipped one.
 type AntarDasha struct {
 	// Lord is the lord of the antardasha.
 	Lord DashaLord `json:"lord"`
@@ -414,10 +424,13 @@ type AntarDasha struct {
 	EndDate JSDate `json:"endDate"`
 }
 
-// PratyantarDasha is one of the nine sub-periods of an [AntarDasha] that
-// ComputeVimshottariPratyantar returns. They run in Vimshottari order
-// beginning with the antardasha's own lord, each taking its lord's
-// Vimshottari years out of 120 of the antardasha's span.
+// PratyantarDasha is one of the sub-periods of an [AntarDasha] that
+// ComputeVimshottariPratyantar and ComputeVimshottariPratyantarIn return. They
+// run in Vimshottari order beginning with the antardasha's own lord, each
+// taking its lord's Vimshottari years out of 120 of the full antardasha, and
+// the last ends exactly when the antardasha does. For an antardasha clipped at
+// birth, ComputeVimshottariPratyantarIn drops those over before birth, so its
+// list can hold fewer than nine.
 type PratyantarDasha struct {
 	// Lord is the lord of the pratyantardasha.
 	Lord DashaLord `json:"lord"`
@@ -446,11 +459,11 @@ type MahaDasha struct {
 	// 20, Ashtottari 6 to 21). It stays the full length for the first entry,
 	// whose StartDate to EndDate span is only the balance at birth.
 	Years float64 `json:"years"`
-	// AntarDashas holds the sub-periods in order. Every mahadasha but the
-	// first begins with Lord's own antardasha; in Vimshottari the first
-	// mahadasha drops every antardasha that ended before birth, Lord's own
-	// included, so its list can begin with a later lord's antardasha and
-	// hold fewer than nine.
+	// AntarDashas holds the sub-periods in order, the last ending exactly at
+	// EndDate. Every mahadasha but the first begins with Lord's own
+	// antardasha; the first mahadasha drops every antardasha that ended
+	// before birth, Lord's own included, so its list can begin with a later
+	// lord's antardasha and hold fewer than nine (eight in Ashtottari).
 	AntarDashas []AntarDasha `json:"antarDashas"`
 }
 
@@ -484,6 +497,9 @@ const (
 )
 
 // AllChandraBalamQualities lists both qualities, strong then weak.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllChandraBalamQualities = []ChandraBalamQuality{ChandraBalamStrong, ChandraBalamWeak}
 
 // ChandraBalamInfo is the transiting Moon's strength relative to a natal
@@ -536,8 +552,9 @@ type LagnaNakshatra struct {
 }
 
 // SripatiLagnaInfo is a [LagnaInfo] extended with the twelve Sripati house
-// cusps (bhava madhyas). The embedded lagna is the same one ComputeLagna
-// gives; only the cusps are Sripati's.
+// cusps (bhava madhyas), as the session method ComputeSripatiLagnaWithCusps
+// in the panchang package returns it. The embedded lagna is the same one
+// ComputeLagna gives; only the cusps are Sripati's.
 type SripatiLagnaInfo struct {
 	LagnaInfo
 	// Cusps holds twelve sidereal longitudes in degrees, 0 to 360; Cusps[i]
@@ -564,12 +581,16 @@ const (
 	// HouseSystemPlacidusKP computes Placidus cusps, the system KP uses.
 	// ComputeBhava then fails with ErrCircumpolar at latitudes where a
 	// cusp is undefined and ErrPlacidusDiverged if the iteration does not
-	// converge.
+	// converge; both happen only beyond the polar circles (|latitude| above
+	// about 66.56 degrees).
 	HouseSystemPlacidusKP HouseSystem = "placidus-kp"
 )
 
 // AllHouseSystems lists the three house systems: whole-sign, equal,
 // placidus-kp.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllHouseSystems = []HouseSystem{
 	HouseSystemWholeSign, HouseSystemEqual, HouseSystemPlacidusKP,
 }
@@ -732,7 +753,9 @@ type BirthChart struct {
 	Planets []PlanetPlacement `json:"planets"`
 	// ByPlanet indexes copies of the Planets entries by graha, so one graha
 	// can be read without scanning the slice. Unlike the TypeScript library,
-	// editing a copy here does not change Planets.
+	// editing a copy here does not change Planets. The dosha and yoga helpers
+	// read Planets, as the TypeScript does, so an edit to Planets reaches them
+	// even while ByPlanet still holds the old copy.
 	ByPlanet PlanetsByGraha `json:"byPlanet"`
 }
 
@@ -762,17 +785,22 @@ const (
 
 // AllDivisionals lists the seven supported vargas in ascending division
 // count: D2, D3, D7, D9, D10, D12, D30.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllDivisionals = []Divisional{
 	DivisionalD2, DivisionalD3, DivisionalD7, DivisionalD9,
 	DivisionalD10, DivisionalD12, DivisionalD30,
 }
 
-// Valid reports whether d is one of [AllDivisionals].
+// Valid reports whether d is one of the seven supported vargas, D2, D3, D7,
+// D9, D10, D12 and D30, the members of [AllDivisionals]. It does not read that
+// variable, so modifying it does not change the answer.
 func (d Divisional) Valid() bool {
-	for _, x := range AllDivisionals {
-		if x == d {
-			return true
-		}
+	switch d {
+	case DivisionalD2, DivisionalD3, DivisionalD7, DivisionalD9,
+		DivisionalD10, DivisionalD12, DivisionalD30:
+		return true
 	}
 	return false
 }
@@ -810,6 +838,9 @@ const (
 
 // AllMangalDoshaSeverities lists the grades in ascending order: none,
 // anshik, purna.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllMangalDoshaSeverities = []MangalDoshaSeverity{MangalNone, MangalAnshik, MangalPurna}
 
 // MangalReference is Mars's placement measured from one reference point (the
@@ -886,9 +917,10 @@ type SadeSatiInfo struct {
 	// resolution. It is nil when not active, and also nil if the scan (30
 	// years forward in 7 day steps) finds no exit stable for 90 days.
 	CurrentArcEnd *JSDate `json:"currentArcEnd"`
-	// NextArcStart is set only when not active: Saturn's next entry into the
-	// rashi before the Moon's, bisected to within one day. It is nil when
-	// active, and nil if no entry lies within 30 years.
+	// NextArcStart is set only when not active: Saturn's next entry into any
+	// of the three arc rashis (a retrograde return into the rashi after the
+	// Moon's counts), bisected to within one day. It is nil when active, and
+	// nil if no entry lies within 30 years.
 	NextArcStart *JSDate `json:"nextArcStart"`
 }
 
@@ -906,6 +938,9 @@ const (
 
 // AllTarabalaQualities lists the two qualities: auspicious, then
 // inauspicious.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllTarabalaQualities = []TarabalaQuality{TarabalaAuspicious, TarabalaInauspicious}
 
 // TarabalaInfo is the tara ComputeTarabala returns for a transit nakshatra
@@ -1020,9 +1055,12 @@ type PlanetShadbala struct {
 	// of its strong house (the 1st, 4th, 7th or 10th, whole-sign from the
 	// lagna).
 	Dig float64 `json:"dig"`
-	// Kala is temporal strength: nathonatha (day or night birth, framed by
-	// the sunrise at or before birth) plus paksha (the Moon's distance from
-	// the Sun, 0 to 180 degrees, favouring benefics as it grows).
+	// Kala is temporal strength: nathonatha plus paksha. Nathonatha is 5
+	// virupas per hour from apparent midnight, 0 there and 60 at apparent
+	// noon (the midpoint of the sunrise at or before birth and the next
+	// sunset), for the Sun, Jupiter and Venus; the Moon, Mars and Saturn take
+	// 60 minus that, and Mercury always takes 60. Paksha is the Moon's
+	// distance from the Sun, 0 to 180 degrees, favouring benefics as it grows.
 	Kala float64 `json:"kala"`
 	// Chesta is motional strength: 30 for the Sun and Moon, 60 when
 	// retrograde, 15 within 10 degrees of the Sun, otherwise 30.
@@ -1140,6 +1178,9 @@ const (
 // AllKaalSarpSubtypes lists the subtypes in Rahu-house order: element i is
 // the subtype for Rahu in house i+1, Anant for house 1 through Sheshnag for
 // house 12. ComputeKaalSarp indexes it with RahuHouse minus one.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllKaalSarpSubtypes = [12]KaalSarpSubtype{
 	KaalSarpAnant, KaalSarpKulik, KaalSarpVasuki, KaalSarpShankhpal,
 	KaalSarpPadma, KaalSarpMahapadma, KaalSarpTakshak, KaalSarpKarkotak,
@@ -1308,6 +1349,9 @@ const (
 
 // AllYogaTypes lists every [YogaType], in the order the catalog evaluates
 // them. ComputeYogas checks the Types option against it.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllYogaTypes = []YogaType{
 	YogaMahapurusha, YogaLunar, YogaSolar, YogaRaja,
 	YogaDhana, YogaSpecial, YogaCancellation, YogaNegative,
@@ -1347,8 +1391,9 @@ const (
 	// Jupiter, Venus or Saturn in each of the 2nd and 12th rashis from the
 	// Moon.
 	YogaDurudhura YogaName = "Durudhura"
-	// YogaKemadruma is the Moon with no visible graha conjunct, 2nd or 12th
-	// from it.
+	// YogaKemadruma is the Moon with no visible graha other than the Sun
+	// conjunct, 2nd or 12th from it: the case where none of Sunapha, Anapha
+	// and Durudhura forms.
 	YogaKemadruma YogaName = "Kemadruma"
 	// YogaBudhaAditya is the Sun and Mercury in the same rashi.
 	YogaBudhaAditya YogaName = "Budha-Aditya"
@@ -1397,6 +1442,9 @@ const (
 
 // AllYogaNames lists every [YogaName] in catalog order, which is also the
 // order ComputeYogas emits matched yogas.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllYogaNames = []YogaName{
 	YogaRuchaka, YogaBhadra, YogaHamsa, YogaMalavya, YogaSasha,
 	YogaGajakesari, YogaSunapha, YogaAnapha, YogaDurudhura, YogaKemadruma,
@@ -1465,6 +1513,9 @@ const (
 // AllKarakaNames lists the roles in rank order, Atmakaraka (rank 1, index 0)
 // through Darakaraka (rank 7, index 6); ComputeJaiminiKarakas fills
 // [JaiminiKarakas] by iterating it.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllKarakaNames = [7]KarakaName{
 	Atmakaraka, Amatyakaraka, Bhratrukaraka, Matrukaraka,
 	Putrakaraka, Gnatikaraka, Darakaraka,
@@ -1557,6 +1608,9 @@ const Pitrukaraka Karaka8Name = "Pitrukaraka"
 // AllKaraka8Names lists the eight roles in rank order, Atmakaraka (highest
 // degree) first and Darakaraka last; index i is the role that
 // [Jaimini8Karakas.SetRank] assigns for rank i.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllKaraka8Names = [8]Karaka8Name{
 	Karaka8Name(Atmakaraka), Karaka8Name(Amatyakaraka), Karaka8Name(Bhratrukaraka),
 	Karaka8Name(Matrukaraka), Pitrukaraka, Karaka8Name(Putrakaraka),
@@ -1568,8 +1622,9 @@ var AllKaraka8Names = [8]Karaka8Name{
 // descending degree within their rashi, Rahu measured as 30 minus its degree
 // because it is permanently retrograde. Equal degrees keep that graha order;
 // Ketu takes no role. It marshals as an object keyed by role name, each
-// value the graha's name string. The panchang package currently exports only
-// the seven-karaka [JaiminiKarakas] ranking.
+// value the graha's name string. ComputeJaimini8Karakas in the panchang
+// package returns it; ComputeJaiminiKarakas returns the seven-karaka
+// [JaiminiKarakas] ranking.
 type Jaimini8Karakas struct {
 	// Atmakaraka is the graha with the highest degree in its rashi (rank 1).
 	Atmakaraka Graha `json:"Atmakaraka"`
@@ -1787,6 +1842,27 @@ type AspectsOptions struct {
 // that order.
 type YoginiName string
 
+// The eight Yoginis in cycle order, each with the planet that rules it and
+// the length of its mahadasha in years.
+const (
+	// YoginiMangala is ruled by the Moon, 1 year.
+	YoginiMangala YoginiName = "Mangala"
+	// YoginiPingala is ruled by the Sun, 2 years.
+	YoginiPingala YoginiName = "Pingala"
+	// YoginiDhanya is ruled by Jupiter, 3 years.
+	YoginiDhanya YoginiName = "Dhanya"
+	// YoginiBhramari is ruled by Mars, 4 years.
+	YoginiBhramari YoginiName = "Bhramari"
+	// YoginiBhadrika is ruled by Mercury, 5 years.
+	YoginiBhadrika YoginiName = "Bhadrika"
+	// YoginiUlka is ruled by Saturn, 6 years.
+	YoginiUlka YoginiName = "Ulka"
+	// YoginiSiddha is ruled by Venus, 7 years.
+	YoginiSiddha YoginiName = "Siddha"
+	// YoginiSankata is ruled by Rahu, 8 years.
+	YoginiSankata YoginiName = "Sankata"
+)
+
 // YoginiMahaDasha is one of the eight mahadashas of a Yogini dasha.
 type YoginiMahaDasha struct {
 	// Yogini is the ruling Yogini.
@@ -1804,9 +1880,11 @@ type YoginiMahaDasha struct {
 	// Sankata, even for the first period, whose dates only span the
 	// unexpired balance at birth.
 	Years float64 `json:"years"`
-	// AntarDashas holds eight sub-periods starting from this Yogini and
-	// cycling onward, each lasting its own Years/36 of this period's actual
-	// span.
+	// AntarDashas holds the sub-periods cycling onward from this Yogini,
+	// each lasting its own Years/36 of the full period, the last ending
+	// exactly at EndDate. The first period drops those that ended before
+	// birth and starts the one straddling birth at birth, so its list can
+	// begin with a later Yogini and hold fewer than eight.
 	AntarDashas []YoginiAntarDasha `json:"antarDashas"`
 }
 
@@ -1817,7 +1895,7 @@ type YoginiAntarDasha struct {
 	// Lord is that Yogini's planet, as in YoginiMahaDasha.Lord.
 	Lord DashaLord `json:"lord"`
 	// StartDate is the sub-period's start as a UTC instant; the first one
-	// starts with its mahadasha.
+	// starts with its mahadasha, at birth in the first mahadasha.
 	StartDate JSDate `json:"startDate"`
 	// EndDate is the sub-period's end, the next sub-period's StartDate.
 	EndDate JSDate `json:"endDate"`
@@ -1850,8 +1928,9 @@ type CharaMahaDasha struct {
 	StartDate JSDate `json:"startDate"`
 	// EndDate is the period's end, the next period's StartDate.
 	EndDate JSDate `json:"endDate"`
-	// Years is fixed by the rashi's modality: 9 for a movable, 8 for a fixed
-	// and 7 for a dual sign. The dates span Years times 365.25 days.
+	// Years is fixed by the rashi's modality whatever the chart: 9 for a
+	// movable, 8 for a fixed and 7 for a dual sign, not the Jaimini count to
+	// the sign's lord. The dates span Years times 365.25 days.
 	Years float64 `json:"years"`
 }
 
@@ -1945,7 +2024,9 @@ const (
 )
 
 // AllDignities lists the seven [Dignity] values, strongest first. It is the
-// package's own slice, not a copy, so callers must not modify it.
+// package's own slice, not a copy, so treat it as read-only: the engine and the
+// panchang All functions keep their own copies, so modifying it changes no
+// result.
 var AllDignities = []Dignity{
 	DignityExalted, DignityMoolatrikona, DignityOwn, DignityFriend,
 	DignityNeutral, DignityEnemy, DignityDebilitated,
@@ -2197,8 +2278,8 @@ const (
 	// PoruthamSthreeDeergha passes when the girl-to-boy nakshatra count
 	// exceeds 13.
 	PoruthamSthreeDeergha PoruthamName = "SthreeDeergha"
-	// PoruthamYoni passes on an Ashtakoot Yoni score of 2 or more; a score
-	// of 0 is a veto.
+	// PoruthamYoni fails, as a veto, only when the yoni animals are one of
+	// the seven enemy pairs; it does not read the Ashtakoot Yoni score.
 	PoruthamYoni PoruthamName = "Yoni"
 	// PoruthamRashi fails on a doshic pair of rashi distances.
 	PoruthamRashi PoruthamName = "Rashi"
@@ -2295,8 +2376,12 @@ func (n *SahamName) UnmarshalJSON(b []byte) error {
 }
 
 // TithiPraveshaChart is the annual soli-lunar return chart that
-// ComputeTithiPravesha returns, cast when the sidereal Sun is back in its
-// natal rashi and the Moon-Sun separation is back at its natal value.
+// ComputeTithiPravesha returns, cast when the Moon-Sun separation is back at
+// its natal value, at the match near the solar return that has the sidereal
+// Sun in its natal rashi. When two matches qualify the one nearer the solar
+// return is taken; when neither does (the Sun can stay in a rashi for less
+// than the ~29.5 days between matches, e.g. Vrischika, Dhanu, Makara), the
+// nearer one is taken and the Sun is in an adjacent rashi.
 type TithiPraveshaChart struct {
 	// PraveshInstant is the return instant, a UTC epoch-millisecond JSDate
 	// that JSON encodes as an ISO 8601 string.
@@ -2305,7 +2390,9 @@ type TithiPraveshaChart struct {
 	// Krishna 1..15 are 15..29.
 	NatalTithi int `json:"natalTithi"`
 	// PraveshTithi is the tithi index at PraveshInstant, 0..29, computed the
-	// same way as NatalTithi and equal to it by construction.
+	// same way as NatalTithi. It equals NatalTithi except when the natal
+	// separation lies within about 1e-4 degrees (under a second of time) of a
+	// tithi boundary, the tolerance the match is found to.
 	PraveshTithi int `json:"praveshTithi"`
 	// VarshaLagna is the lagna at PraveshInstant for the given location.
 	VarshaLagna LagnaInfo `json:"varshaLagna"`

@@ -1,5 +1,6 @@
 import { RASHI_LORD } from './matchingTables';
 import { resolveMasaName } from '../i18n/resolver';
+import { PanchangError } from '../types/errors';
 import type { Language } from '../types/options';
 import type { Arudha, BirthChart, GrahaName } from '../types/jyotish';
 
@@ -7,9 +8,15 @@ const VISIBLE_GRAHAS_BY_INDEX: readonly Exclude<GrahaName, 'Rahu' | 'Ketu'>[] = 
   'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn',
 ];
 
-/** The 12 Arudha padas, one per bhava (Jaimini *Upadesa Sutras* Ch. 1, Rath commentary). */
+/**
+ * The 12 Arudha padas, one per bhava (Jaimini *Upadesa Sutras* Ch. 1, Rath commentary). A lagna rashi index of 12 or
+ * more wraps modulo 12; a negative or fractional one throws `PanchangError` `INVALID_INPUT`.
+ */
 export function computeArudhas(chart: BirthChart, lang: Language = 'en'): Arudha[] {
   const lagnaRashi = chart.lagna.rashi.index;
+  if (!Number.isInteger(lagnaRashi) || lagnaRashi < 0) {
+    throw new PanchangError(`lagna rashi must be a non-negative integer, got ${lagnaRashi}`, 'INVALID_INPUT');
+  }
 
   const planetRashi: Partial<Record<GrahaName, number>> = {};
   for (const p of chart.planets) {

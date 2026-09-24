@@ -261,6 +261,22 @@ func TestPlacidusRejectsBothWaysDistinctly(t *testing.T) {
 	}
 }
 
+func TestPlacidusSettlesBelowThePolarCircle(t *testing.T) {
+	ctx := astronomy.NewEphemerisCtx()
+	for _, c := range []struct{ lat, hour float64 }{{66.3, 13}, {66.4, 7}, {66.5, 3}, {-66.55, 3}} {
+		ms := types.DateUTC(2025, 0, 1).Ms() + int64(c.hour)*3600_000
+		chart := mustBhava(t, ctx, ms, types.GeoLocation{Latitude: c.lat, Longitude: 20},
+			types.HouseSystemPlacidusKP)
+		for i := 0; i < 12; i++ {
+			next := chart.Houses[(i+1)%12].CuspLongitude
+			gap := math.Mod(next-chart.Houses[i].CuspLongitude+360, 360)
+			if gap <= 0 || gap >= 180 {
+				t.Errorf("%v°/%vh: cusps %d and %d are %v degrees apart", c.lat, c.hour, i+1, (i+1)%12+1, gap)
+			}
+		}
+	}
+}
+
 func TestUnknownHouseSystemIsRejected(t *testing.T) {
 	ctx := astronomy.NewEphemerisCtx()
 	ms := types.DateUTC(2025, 0, 14).Ms()

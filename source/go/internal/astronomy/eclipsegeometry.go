@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/store"
 	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
@@ -197,7 +198,37 @@ func seedFromChord(leastSeparation, threshold float64) float64 {
 	return chord / lunarSeparationRateDegPerMS
 }
 
+type lunarEclipseValue struct {
+	eclipse LunarEclipse
+	ok      bool
+}
+
+var lunarEclipseMemo = store.New[int64, lunarEclipseValue](1024, store.DefaultStripes, store.HashInt64)
+
+func copyInt64Ptr(p *int64) *int64 {
+	if p == nil {
+		return nil
+	}
+	v := *p
+	return &v
+}
+
+// FindLunarEclipse is findLunarEclipse memoised by the opposition instant.
+// What it returns shares no pointer with the store.
 func FindLunarEclipse(ctx *EphemerisCtx, oppositionMs int64) (LunarEclipse, bool) {
+	v, _ := lunarEclipseMemo.GetOrBuild(oppositionMs, func() lunarEclipseValue {
+		e, ok := findLunarEclipse(ctx, oppositionMs)
+		return lunarEclipseValue{e, ok}
+	})
+	e := v.eclipse
+	e.PartialBeginMs = copyInt64Ptr(e.PartialBeginMs)
+	e.PartialEndMs = copyInt64Ptr(e.PartialEndMs)
+	e.TotalBeginMs = copyInt64Ptr(e.TotalBeginMs)
+	e.TotalEndMs = copyInt64Ptr(e.TotalEndMs)
+	return e, v.ok
+}
+
+func findLunarEclipse(ctx *EphemerisCtx, oppositionMs int64) (LunarEclipse, bool) {
 	peakMs := refineMinimum(
 		func(ms float64) float64 { return lunarSeparationSquared(ctx, ms) },
 		float64(oppositionMs), []float64{3600_000, 600_000, 60_000, 5_000},
@@ -355,7 +386,42 @@ const (
 	solarScanSteps         = 12
 )
 
+type solarEclipseKey struct {
+	conjunctionMs                   int64
+	latBits, lonBits, elevationBits uint64
+}
+
+type solarEclipseValue struct {
+	eclipse LocalSolarEclipse
+	ok      bool
+}
+
+var solarEclipseMemo = store.New[solarEclipseKey, solarEclipseValue](1024, store.DefaultStripes,
+	func(k solarEclipseKey) uint64 {
+		return store.HashMix(store.HashMix(store.HashMix(uint64(k.conjunctionMs), k.latBits), k.lonBits), k.elevationBits)
+	})
+
+// FindLocalSolarEclipse is findLocalSolarEclipse memoised by the conjunction
+// instant and the whole location. What it returns shares no pointer with the
+// store.
 func FindLocalSolarEclipse(ctx *EphemerisCtx, conjunctionMs int64, location types.GeoLocation) (LocalSolarEclipse, bool) {
+	key := solarEclipseKey{
+		conjunctionMs: conjunctionMs,
+		latBits:       math.Float64bits(location.Latitude),
+		lonBits:       math.Float64bits(location.Longitude),
+		elevationBits: math.Float64bits(location.Elevation),
+	}
+	v, _ := solarEclipseMemo.GetOrBuild(key, func() solarEclipseValue {
+		e, ok := findLocalSolarEclipse(ctx, conjunctionMs, location)
+		return solarEclipseValue{e, ok}
+	})
+	e := v.eclipse
+	e.CentralBeginMs = copyInt64Ptr(e.CentralBeginMs)
+	e.CentralEndMs = copyInt64Ptr(e.CentralEndMs)
+	return e, v.ok
+}
+
+func findLocalSolarEclipse(ctx *EphemerisCtx, conjunctionMs int64, location types.GeoLocation) (LocalSolarEclipse, bool) {
 	separationSquared := func(ms float64) float64 {
 		s := SolarViewAt(ctx, int64(ms), location).Separation
 		return s * s

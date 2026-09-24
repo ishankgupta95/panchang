@@ -1,5 +1,6 @@
 import { solveAngleCrossing } from '../utils/search';
 import type { UtcWindow } from '../types/elements';
+import { validateDate } from '../utils/validation';
 
 /** Half-open `[start, end)` windows of the Hindu day with the Moon OUTSIDE Panchaka, i.e. sidereal longitude in [0°, 300°). */
 export function computePanchakaRahita(
@@ -7,6 +8,8 @@ export function computePanchakaRahita(
   nextSunriseUtc: Date,
   getMoon: (d: Date) => number,
 ): UtcWindow[] {
+  validateDate(sunriseUtc, 'any');
+  validateDate(nextSunriseUtc, 'any');
   const inPanchakaAt = (d: Date) => getMoon(d) >= 300;
 
   const startInP = inPanchakaAt(sunriseUtc);

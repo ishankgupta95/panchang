@@ -33,6 +33,9 @@ const (
 
 // AllChoghadiyaQualities lists every [ChoghadiyaQuality] in declaration
 // order: auspicious, inauspicious, neutral.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllChoghadiyaQualities = []ChoghadiyaQuality{
 	QualityAuspicious, QualityInauspicious, QualityNeutral,
 }
@@ -135,6 +138,9 @@ const (
 )
 
 // AllKaranaTypes lists both [KaranaType] values, fixed then movable.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllKaranaTypes = []KaranaType{KaranaFixed, KaranaMovable}
 
 // KaranaInfo is the karana (half tithi) at one instant, computed from the
@@ -609,6 +615,9 @@ const (
 )
 
 // AllDayNightSegments lists both segments, day then night.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllDayNightSegments = []DayNightSegment{SegmentDay, SegmentNight}
 
 // GandaMulaSeverity grades a Ganda Mula nakshatra. Ashwini, Ashlesha, Magha
@@ -623,6 +632,9 @@ const (
 )
 
 // AllGandaMulaSeverities lists both severities, mild then severe.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllGandaMulaSeverities = []GandaMulaSeverity{GandaMulaMild, GandaMulaSevere}
 
 // GandaMulaInfo says whether the Moon's nakshatra is one of the six Ganda
@@ -677,6 +689,9 @@ const (
 // AllPanchakaTypes lists the six types in weekday order of onset, Sunday
 // through Saturday, with the shared Wednesday and Thursday value samanya
 // last.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllPanchakaTypes = []PanchakaType{
 	PanchakaRoga, PanchakaRaja, PanchakaAgni, PanchakaChora, PanchakaMrityu, PanchakaSamanya,
 }
@@ -753,6 +768,9 @@ const (
 )
 
 // AllBhadraLocations lists the three vasas: earth, heaven, paatal.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllBhadraLocations = []BhadraLocation{BhadraEarth, BhadraHeaven, BhadraPaatal}
 
 // UnlocalizedBhadraVasaSegment is one vasa segment of a Bhadra window before
@@ -889,6 +907,9 @@ const (
 
 // AllSpecialYogaTypes lists the ten types in the order the engine tests
 // them, Amrit Siddhi through Ravi.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllSpecialYogaTypes = []SpecialYogaType{
 	YogaAmritSiddhi, YogaSarvarthaSiddhi, YogaRaviPushya, YogaGuruPushya,
 	YogaDwipushkar, YogaTripushkar, YogaJwalamukhi, YogaAadal, YogaVidaal, YogaRavi,

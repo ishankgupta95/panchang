@@ -7,7 +7,6 @@ import (
 	"math"
 	"testing"
 
-	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
 	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
@@ -182,15 +181,12 @@ func TestRiseSetCacheKeysMatchTypeScript(t *testing.T) {
 			Latitude: c.Inputs.Latitude, Longitude: c.Inputs.Longitude, Elevation: c.Inputs.Elevation,
 		}
 		body := riseSetBodyOf(t, c.Inputs.Body)
-		if got := riseSetScanKey(body, loc, c.Inputs.DayIndex); got != c.ScanKey {
+		// Go keys the caches with riseSetKey structs; these are the strings
+		// whose equality those structs reproduce (TestRiseSetKeyEqualityIsTheStringKeys).
+		if got := riseSetScanKeyString(body, loc, c.Inputs.DayIndex); got != c.ScanKey {
 			t.Errorf("scan key:\n  Go %q\n  TS %q", got, c.ScanKey)
 		}
-		got := string(body) + "|" + jsnum.FormatInt(int64(c.Inputs.Direction)) + "|" +
-			jsnum.FormatFloat(loc.Latitude) + "|" +
-			jsnum.FormatFloat(loc.Longitude) + "|" +
-			jsnum.FormatFloat(loc.Elevation) + "|" +
-			jsnum.FormatInt(c.Inputs.DayIndex)
-		if got != c.EventKey {
+		if got := riseSetEventKeyString(body, c.Inputs.Direction, loc, c.Inputs.DayIndex); got != c.EventKey {
 			t.Errorf("event key:\n  Go %q\n  TS %q", got, c.EventKey)
 		}
 	}
@@ -205,7 +201,10 @@ func TestResolveEventMatchesTypeScript(t *testing.T) {
 	for _, c := range g.ResolveCases {
 		loc := g.locationByName(t, c.Location)
 		kind := RiseSetKind{Body: riseSetBodyOf(t, c.Body)}
-		got, ok := ResolveEvent(ctx, kind, c.Direction, c.FromMs, loc, c.LimitDays)
+		got, ok, err := ResolveEvent(ctx, kind, c.Direction, c.FromMs, loc, c.LimitDays)
+		if err != nil {
+			t.Fatal(err)
+		}
 		if c.Result == nil {
 			nulls++
 			if ok {

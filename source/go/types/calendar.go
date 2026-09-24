@@ -19,11 +19,10 @@ type BuildEclipsesTableOptions struct {
 	// decides which local date each eclipse's peak is filed under, and is
 	// recorded in the meta.
 	TimezoneOffsetMinutes int
-	// StartYear is the first Gregorian year included. The scan overhangs the
-	// range by two days at each end, so 1901 is the earliest year accepted.
+	// StartYear is the first Gregorian year included; years outside the
+	// engine's 1900 to 2100 span are rejected.
 	StartYear int
-	// EndYear is the last Gregorian year included, at or after StartYear;
-	// 2099 is the latest year accepted because of the two day overhang.
+	// EndYear is the last Gregorian year included, at or after StartYear.
 	EndYear int
 	// Languages lists the table languages in emission order. nil means
 	// TableLangEn then TableLangHi; an empty non-nil slice is an error.
@@ -97,11 +96,10 @@ type BuildMoonPhasesTableOptions struct {
 	// decides which local date each phase instant is filed under, and is
 	// recorded in the meta.
 	TimezoneOffsetMinutes int
-	// StartYear is the first Gregorian year included. The scan overhangs the
-	// range by two days at each end, so 1901 is the earliest year accepted.
+	// StartYear is the first Gregorian year included; years outside the
+	// engine's 1900 to 2100 span are rejected.
 	StartYear int
-	// EndYear is the last Gregorian year included, at or after StartYear;
-	// 2099 is the latest year accepted because of the two day overhang.
+	// EndYear is the last Gregorian year included, at or after StartYear.
 	EndYear int
 	// Languages lists the table languages in emission order. nil means
 	// TableLangEn then TableLangHi; an empty non-nil slice is an error.
@@ -302,6 +300,57 @@ type RawEclipseTableDay struct {
 	Eclipses []EclipseTableEntryRaw `json:"eclipses"`
 }
 
+// EclipseTableEntry is one eclipse as the eclipse table readers of the
+// panchang package return it: an [EclipseTableEntryRaw] with Name and
+// Description resolved to a single language. Result struct with JSON tags,
+// in the key order of the TypeScript reader's EclipseTableEntry.
+type EclipseTableEntry struct {
+	// Name is EclipseTableEntryRaw.Name in the requested language, or in the
+	// first language present when the table lacks it.
+	Name string `json:"name"`
+	// Kind is solar or lunar.
+	Kind EclipseTableKind `json:"kind"`
+	// Subtype is the depth: as seen locally for solar, worldwide for lunar.
+	Subtype EclipseTableSubtype `json:"subtype"`
+	// Start is first contact, copied from EclipseTableEntryRaw.Start.
+	Start string `json:"start"`
+	// Peak is the instant of greatest eclipse, copied from
+	// EclipseTableEntryRaw.Peak.
+	Peak string `json:"peak"`
+	// End is last contact, copied from EclipseTableEntryRaw.End.
+	End string `json:"end"`
+	// Obscuration is the fraction of the disc area covered at Peak, 0 to 1.
+	Obscuration float64 `json:"obscuration"`
+	// Magnitude is the catalogue diameter fraction at Peak, copied from
+	// EclipseTableEntryRaw.Magnitude.
+	Magnitude float64 `json:"magnitude"`
+	// VisibleFromLocation is true when the eclipsed body is above the
+	// horizon at the reference location during some phase.
+	VisibleFromLocation bool `json:"visibleFromLocation"`
+	// VisibleAtPeak is true when the eclipsed body is above the horizon at
+	// Peak.
+	VisibleAtPeak bool `json:"visibleAtPeak"`
+	// Sutak is a copy of the table's sutak window, nil (and omitted from
+	// JSON) when the entry has none.
+	Sutak *EclipseSutak `json:"sutak,omitempty"`
+	// Description is the entry's description in the requested language,
+	// or in the first language present. It is nil, and omitted from JSON,
+	// when the table entry has no description; a present description whose
+	// text is empty is a non-nil pointer to "".
+	Description *string `json:"description,omitempty"`
+}
+
+// EclipseTableDay is one local date of an eclipses table as the eclipse
+// table readers of the panchang package return it. Result struct with JSON
+// tags.
+type EclipseTableDay struct {
+	// Date is the local calendar date, YYYY-MM-DD, at the table's
+	// TimezoneOffsetMinutes.
+	Date string `json:"date"`
+	// Eclipses holds the date's entries in table order, never nil.
+	Eclipses []EclipseTableEntry `json:"eclipses"`
+}
+
 // EclipseTableMeta is the _meta block of an [EclipsesFile]: the options the
 // table was built with, after defaults were applied. Result struct with JSON
 // tags.
@@ -333,7 +382,8 @@ type EclipseTableMeta struct {
 
 // EclipsesFile is the eclipses table the session method BuildEclipsesTable
 // returns, in the JSON layout the TypeScript panchang-ts/eclipses reader
-// consumes. Result struct with JSON tags.
+// consumes; ReadEclipsesForYear and its siblings in the panchang package read
+// it in Go. Result struct with JSON tags.
 type EclipsesFile struct {
 	// Meta is serialised under the key _meta.
 	Meta EclipseTableMeta `json:"_meta"`
@@ -354,6 +404,16 @@ const (
 	// TableLangHi is Hindi.
 	TableLangHi FestivalsTableLanguage = "hi"
 )
+
+// TableYearRange is the inclusive span of Gregorian years a precomputed
+// table covers, as the Read*YearRange functions of the panchang package
+// report it from the table's _meta block. Result struct with JSON tags.
+type TableYearRange struct {
+	// Start is the first year the table covers, inclusive.
+	Start int `json:"start"`
+	// End is the last year the table covers, inclusive.
+	End int `json:"end"`
+}
 
 // LocalizedString is a name or description held in each table language at
 // once, the Go form of the TypeScript Partial<Record<lang, string>>. Its
@@ -632,6 +692,36 @@ type RawFestivalTableDay struct {
 	Festivals []FestivalTableEntryRaw `json:"festivals"`
 }
 
+// FestivalTableEntry is one festival as the festival table readers of the
+// panchang package return it, from either table layout, with its name and
+// description resolved to a single language. Result struct with JSON tags.
+type FestivalTableEntry struct {
+	// Key is the festival's stable identifier from the dictionary row, and
+	// "" for an entry read from a v1 (4.x) table, which stores no key.
+	Key string `json:"key"`
+	// Name is the festival's name in the requested language, or in the
+	// first language present when the table lacks it.
+	Name string `json:"name"`
+	// Type is the entry's category.
+	Type FestivalsTableType `json:"type"`
+	// Description is the entry's description in the requested language, or
+	// in the first language present. It is nil, and omitted from JSON, when
+	// the table entry has no description; a present description whose text
+	// is empty is a non-nil pointer to "".
+	Description *string `json:"description,omitempty"`
+}
+
+// FestivalTableDay is one dated row of a festivals table as the festival
+// table readers of the panchang package return it. Result struct with JSON
+// tags.
+type FestivalTableDay struct {
+	// Date is the civil date as YYYY-MM-DD at the table's fixed offset.
+	Date string `json:"date"`
+	// Festivals lists the day's entries in table order, never nil. A
+	// dictionary index outside the table's Dict is skipped.
+	Festivals []FestivalTableEntry `json:"festivals"`
+}
+
 // AnyFestivalsFile is a festivals table of either layout, filled by its own
 // [AnyFestivalsFile.UnmarshalJSON]: a format 2 file sets Dict and Packed, a
 // v1 (4.x) file sets Raw. Wrap an in-memory table with
@@ -821,6 +911,38 @@ type RawMoonPhaseTableDay struct {
 	Phases []MoonPhaseTableEntryRaw `json:"phases"`
 }
 
+// MoonPhaseTableEntry is one phase instant as the Moon phase table readers
+// of the panchang package return it, from either table layout, with its name
+// and description resolved to a single language. Result struct with JSON
+// tags.
+type MoonPhaseTableEntry struct {
+	// Name is the phase's display name in the requested language, or in the
+	// first language present when the table lacks it.
+	Name string `json:"name"`
+	// Phase is the phase the entry records.
+	Phase MoonPhaseTableName `json:"phase"`
+	// Time is the phase instant as an ISO 8601 UTC string: rendered from the
+	// packed epoch value of a format 2 table, and passed through unchanged
+	// from a v1 (4.x) table.
+	Time string `json:"time"`
+	// Description is the phase's gloss in the requested language, or in the
+	// first language present. It is nil, and omitted from JSON, when the
+	// table entry has none; a present description whose text is empty is a
+	// non-nil pointer to "".
+	Description *string `json:"description,omitempty"`
+}
+
+// MoonPhaseTableDay is one dated row of a Moon phases table as the Moon
+// phase table readers of the panchang package return it. Result struct with
+// JSON tags.
+type MoonPhaseTableDay struct {
+	// Date is the civil date as YYYY-MM-DD at the table's fixed offset.
+	Date string `json:"date"`
+	// Phases lists the phase instants on that date in table order, never
+	// nil. A dictionary index outside the table's Dict is skipped.
+	Phases []MoonPhaseTableEntry `json:"phases"`
+}
+
 // AnyMoonPhasesFile is a Moon phases table of either layout, filled by its
 // own [AnyMoonPhasesFile.UnmarshalJSON]: a format 2 file sets Dict and
 // Packed, a v1 (4.x) file sets Raw. Wrap an in-memory table with
@@ -892,8 +1014,8 @@ func (f MoonPhasesFile) AsAny() AnyMoonPhasesFile {
 type YearlyListingOptions struct {
 	// Timezone is required: an unset value fails with ErrInvalidTimezone.
 	// Give a fixed offset (TimezoneOffset) or an IANA name (TimezoneName);
-	// the per-year listings resolve a name to its offset on 1 July of that
-	// year.
+	// a name is resolved wherever it is applied, so each day and each year
+	// boundary uses the offset in force on that date.
 	Timezone Timezone
 	// Ayanamsa selects the sidereal zero point; empty means Lahiri.
 	Ayanamsa AyanamsaType
@@ -916,8 +1038,9 @@ type YearlyListingOptions struct {
 // FestivalDay per festival, all sharing the same Date.
 type FestivalDay struct {
 	// Date is the instant the day was queried at, epoch milliseconds: the
-	// range start plus a whole number of 24 hour steps.
-	// ComputeFestivalsForYear starts at local midnight in Timezone, so it is
+	// range start's local time of day on each civil date in Timezone (a
+	// fixed offset steps exactly 24 hours), and for ComputeFestivalsForYear
+	// that date's local midnight, never earlier than 1900-01-01T00:00Z. It is
 	// not a UTC midnight.
 	Date JSDate `json:"date"`
 	// Festival is the daily panchang's FestivalInfo for this emission.
@@ -928,10 +1051,12 @@ type FestivalDay struct {
 // Sun's sidereal longitude crossing a 30 degree sign boundary. Both instants
 // are epoch milliseconds and marshal as ISO 8601 UTC strings.
 type SankrantiEvent struct {
-	// Date is the civil day the Sankranti is observed on, as the UTC
-	// midnight of that local date: the sunrise-to-sunset day containing the
-	// transit, else the next sunrise's day; the transit's own local date if
-	// no sunrise can be computed.
+	// Date is the civil day the Sankranti is observed on: the
+	// sunrise-to-sunset day containing the transit, else the next sunrise's
+	// day; the transit's own local date if no sunrise can be computed. It is
+	// the UTC midnight that falls within that local day in the listing's
+	// Timezone (the date's own UTC midnight at or east of UTC, the following
+	// one west of it), so read it in that zone.
 	Date JSDate `json:"date"`
 	// Moment is the transit instant in UTC, found by bisection to within one
 	// second.

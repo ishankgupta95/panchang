@@ -24,11 +24,12 @@
 //
 // # Cancelling a long walk
 //
-// The methods that walk a range of dates, the table builders and the yearly
-// listings, each have a twin ending in Context that takes a [context.Context]
-// and stops early once it is cancelled or its deadline passes:
-// [Session.BuildFestivalsTableContext], [Session.ComputeFestivalsForYearContext]
-// and so on. The plain form runs to completion.
+// The methods that walk a range of dates, the table builders, the yearly
+// listings and [Session.GetUpcomingEclipses], each have a twin ending in
+// Context that takes a [context.Context] and stops early once it is cancelled
+// or its deadline passes: [Session.BuildFestivalsTableContext],
+// [Session.ComputeFestivalsForYearContext] and so on. The plain form runs to
+// completion.
 //
 // # A Session is not safe for concurrent use
 //
@@ -44,12 +45,29 @@
 // which the caller may modify; [AllSahamNames] returns an array and
 // [AllSections] a [types.SectionSet].
 //
+// # Reading a precomputed table back
+//
+// The Read functions ([ReadFestivalsForYear], [ReadMuhurtaForDate],
+// [ReadBestMuhurtaDays] and the rest) read a table that a Build*Table method
+// made, or that either language wrote as JSON and [encoding/json] decoded,
+// with no ephemeris and no Session. They are the Go form of the readers the
+// TypeScript package publishes on its panchang-ts/festivals, /eclipses,
+// /moon-phases and /muhurta subpaths. Where TypeScript takes a date as either
+// a Date or a YYYY-MM-DD string, Go has two functions: the ForDate form takes
+// a time.Time and dates it at the table's TimezoneOffsetMinutes, and the
+// ForDateKey form takes the string and matches it exactly. An empty lang
+// means [types.TableLangEn], the TypeScript default; a language the table
+// lacks falls back to the first one present, as [types.LocalizedString.Pick]
+// does.
+//
 // # A false ok is not an error
 //
 // Several methods return (value, ok, error) and the eclipse lookups return
 // (value, ok). A false ok with a nil error means the thing genuinely did not
 // happen: a polar day with no sunrise, or a date with no moonrise. The caller
-// decides what that means. Each such method documents its own ok.
+// decides what that means. Each such method documents its own ok. The table
+// readers return (value, ok) as well, where a false ok means the table holds
+// nothing for that year or date.
 //
 // # Branch on Code, never on message text
 //
@@ -68,6 +86,7 @@ package panchang
 import (
 	"context"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
@@ -460,9 +479,44 @@ const (
 	ISTOffsetMinutes            = types.ISTOffsetMinutes
 )
 
+// The All functions copy from these lists, taken when the package initialises,
+// so a caller that modifies an exported types variable cannot change what they
+// return.
+var (
+	allErrorCodes            = append([]types.ErrorCode(nil), types.AllErrorCodes...)
+	allAyanamsaTypes         = append([]types.AyanamsaType(nil), types.AllAyanamsaTypes...)
+	allBhadraLocations       = append([]types.BhadraLocation(nil), types.AllBhadraLocations...)
+	allChandraBalamQualities = append([]types.ChandraBalamQuality(nil), types.AllChandraBalamQualities...)
+	allChoghadiyaQualities   = append([]types.ChoghadiyaQuality(nil), types.AllChoghadiyaQualities...)
+	allDashaLords            = types.AllDashaLords
+	allDayNightSegments      = append([]types.DayNightSegment(nil), types.AllDayNightSegments...)
+	allDignities             = append([]types.Dignity(nil), types.AllDignities...)
+	allDivisionals           = append([]types.Divisional(nil), types.AllDivisionals...)
+	allEclipseKinds          = append([]types.EclipseKind(nil), types.AllEclipseKinds...)
+	allEclipseSubtypes       = append([]types.EclipseSubtype(nil), types.AllEclipseSubtypes...)
+	allFestivalRegions       = append([]types.FestivalRegion(nil), types.AllFestivalRegions...)
+	allFestivalTypes         = append([]types.FestivalType(nil), types.AllFestivalTypes...)
+	allGandaMulaSeverities   = append([]types.GandaMulaSeverity(nil), types.AllGandaMulaSeverities...)
+	allGrahas                = types.AllGrahas
+	allHouseSystems          = append([]types.HouseSystem(nil), types.AllHouseSystems...)
+	allKaalSarpSubtypes      = types.AllKaalSarpSubtypes
+	allKarakaNames           = types.AllKarakaNames
+	allKaranaTypes           = append([]types.KaranaType(nil), types.AllKaranaTypes...)
+	allLanguages             = append([]types.Language(nil), types.AllLanguages...)
+	allLegacyFestivalRegions = append([]types.FestivalRegion(nil), types.AllLegacyFestivalRegions...)
+	allMangalDoshaSeverities = append([]types.MangalDoshaSeverity(nil), types.AllMangalDoshaSeverities...)
+	allMasaSystems           = append([]types.MasaSystem(nil), types.AllMasaSystems...)
+	allPanchakaTypes         = append([]types.PanchakaType(nil), types.AllPanchakaTypes...)
+	allSpecialYogaTypes      = append([]types.SpecialYogaType(nil), types.AllSpecialYogaTypes...)
+	allTarabalaQualities     = append([]types.TarabalaQuality(nil), types.AllTarabalaQualities...)
+	allVisibleGrahas         = types.AllVisibleGrahas
+	allYogaNames             = append([]types.YogaName(nil), types.AllYogaNames...)
+	allYogaTypes             = append([]types.YogaType(nil), types.AllYogaTypes...)
+)
+
 // AllErrorCodes returns a fresh copy of the fourteen [types.ErrorCode] values, for
 // exhaustiveness checks over the codes a [types.PanchangError] can carry.
-func AllErrorCodes() []types.ErrorCode { return append([]types.ErrorCode(nil), types.AllErrorCodes...) }
+func AllErrorCodes() []types.ErrorCode { return append([]types.ErrorCode(nil), allErrorCodes...) }
 
 // IsCode reports whether err, or any error it wraps, is a [types.PanchangError]
 // carrying code. It is the matching form to reach for: the Err constants are
@@ -479,7 +533,7 @@ func IsCode(err error, code types.ErrorCode) bool {
 // AllAyanamsaTypes returns a fresh copy of the five supported [types.AyanamsaType]
 // values.
 func AllAyanamsaTypes() []types.AyanamsaType {
-	return append([]types.AyanamsaType(nil), types.AllAyanamsaTypes...)
+	return append([]types.AyanamsaType(nil), allAyanamsaTypes...)
 }
 
 // OffsetMinutes returns a [types.Timezone] fixed at m minutes east of UTC, 330 for
@@ -490,7 +544,10 @@ func OffsetMinutes(m int) types.Timezone { return types.TimezoneOffset(m) }
 // Zone returns a [types.Timezone] named by its IANA identifier, resolved against the
 // host's zone database at the instant it is applied, so it follows DST. A name
 // the database cannot resolve reports [types.ErrTimezoneResolutionFailed] at that
-// point; on a host with no zone database, pass [OffsetMinutes] instead.
+// point; on a host with no zone database, import time/tzdata or pass
+// [OffsetMinutes] instead. Two names resolve here that TypeScript rejects with
+// TIMEZONE_RESOLUTION_FAILED: Zone("") reads as UTC and Zone("Local") as the
+// host's local zone, as [time.LoadLocation] reads them.
 func Zone(name string) types.Timezone { return types.TimezoneName(name) }
 
 // TraditionalReference returns the traditional reference point of the panchang,
@@ -515,17 +572,27 @@ func ReferenceLocation(mode types.Reference) (types.GeoLocation, error) {
 // is Null Island rather than "unset". A supplied loc is validated rather than
 // replaced by a reference point: an out-of-range value reports
 // [types.ErrInvalidLatitude], [types.ErrInvalidLongitude] or [types.ErrInvalidElevation].
+// There is no default mode: ResolveLocation(nil, "") reports
+// [types.ErrInvalidInput], where TypeScript's resolveLocation() falls back to
+// traditional when the mode is omitted.
 func ResolveLocation(loc *types.GeoLocation, mode types.Reference) (types.GeoLocation, types.Reference, error) {
 	return core.ResolveLocation(loc, mode)
 }
 
 // A Session holds the ephemeris and the natal resolvers, and is the entry point
-// for everything that needs them. Build one with [New] and reuse it: it
-// memoises the ephemeris as it works, which is most of why the library is fast.
+// for everything that needs them. Build one with [New] and reuse it: it keeps a
+// small memo of the ephemeris as it works. Pure astronomical results (planet
+// positions, phase and eclipse searches, rise and set events, zone offsets) are
+// also kept process-wide, in bounded, locked stores keyed by every input that
+// affects them, which separate Sessions share safely.
+// The zero Session, declared or embedded by value, is ready to use as well: it
+// sets itself up on its first call and then behaves exactly as one from New.
 //
-// A Session is not safe for concurrent use. That memo has no lock, so give each
-// goroutine its own Session. [Session.Reset] drops the memo without discarding
-// the Session; the memo is small and fixed-size, so Reset is rarely needed.
+// A Session is not safe for concurrent use. Its memo has no lock, so give each
+// goroutine its own Session: one shared across goroutines can compute wrong
+// results, and those can then enter the process-wide stores and reach other
+// Sessions too. [Session.Reset] drops the Session's memo without discarding the
+// Session; the memo is small and fixed-size, so Reset is rarely needed.
 type Session struct {
 	eph   *astronomy.EphemerisCtx
 	natal core.NatalResolvers
@@ -536,6 +603,23 @@ type Session struct {
 // drop the memo without discarding the Session.
 func New() *Session {
 	return &Session{eph: astronomy.NewEphemerisCtx(), natal: jyotish.CoreNatalResolvers()}
+}
+
+// ephemeris returns the memo, creating it on the first call of a zero Session.
+func (s *Session) ephemeris() *astronomy.EphemerisCtx {
+	if s.eph == nil {
+		s.eph = astronomy.NewEphemerisCtx()
+	}
+	return s.eph
+}
+
+// resolvers returns the natal resolvers, filling them on the first call of a
+// zero Session.
+func (s *Session) resolvers() core.NatalResolvers {
+	if s.natal.ChandraBalam == nil && s.natal.Tarabala == nil {
+		s.natal = jyotish.CoreNatalResolvers()
+	}
+	return s.natal
 }
 
 // Reset drops the ephemeris memo a [Session] has accumulated (nutation and
@@ -553,41 +637,53 @@ func asOfMs(asOf time.Time) int64 {
 // GetDailyPanchang returns the whole panchang for the calendar day containing
 // date in options.Timezone: the angas running from that day's sunrise to the
 // next with their end times, rise and set times, muhurta and inauspicious
-// windows, calendar labels and festivals. ok is false with a nil error when the
-// location has no sunrise or sunset that day (polar day or polar night). A
+// windows, calendar labels and festivals. ok is false with a nil error when
+// the Hindu day cannot be formed: the local calendar day holds no sunrise
+// (polar night or polar day, including the day each ends, or a fixed offset
+// far from the location's solar time), or no sunset and next sunrise follow
+// within two days (the last day before polar night or polar day). A
 // timezone is required: the error is non-nil for an unset, unresolvable or out
 // of range one (a numeric offset outside -720 to 840), for a date outside 1900
 // to 2100, for out of range coordinates, and for an unrecognised ayanamsa.
 func (s *Session) GetDailyPanchang(date time.Time, location types.GeoLocation, options types.PanchangOptions) (day types.DailyPanchangResult, ok bool, err error) {
-	return core.GetDailyPanchang(s.eph, date.UnixMilli(), location, options, s.natal)
+	return core.GetDailyPanchang(s.ephemeris(), date.UnixMilli(), location, options, s.resolvers())
 }
 
 // GetInstantPanchang returns the angas, calendar labels and festivals holding
 // at the given instant rather than at sunrise. The vara still comes from the
 // last sunrise at or before that instant, taken in local mean time at the
 // location's longitude, so [types.InstantPanchangOptions] carries no timezone. ok is false
-// with a nil error when no sunrise can be found around that instant (polar day
-// or polar night), and the error is non-nil for a date outside 1900 to 2100,
-// out of range coordinates or an unrecognised ayanamsa.
+// with a nil error when that sunrise cannot be settled: none falls in the 26
+// hours before the instant, or the last one is not followed by another within
+// two days (polar day or polar night). The error is non-nil for a date outside
+// 1900 to 2100, out of range coordinates or an unrecognised ayanamsa.
 func (s *Session) GetInstantPanchang(date time.Time, location types.GeoLocation, options types.InstantPanchangOptions) (instant types.InstantPanchangResult, ok bool, err error) {
-	return core.GetInstantPanchang(s.eph, date.UnixMilli(), location, options, s.natal)
+	return core.GetInstantPanchang(s.ephemeris(), date.UnixMilli(), location, options, s.resolvers())
 }
 
 // ComputeSunrise returns the first sunrise at or after searchFrom, searching at
-// most limitDays days forward. The error carries [types.ErrNoSunrise] when that
-// window holds none (midnight sun or polar night), and otherwise reports an out
-// of range latitude, longitude or elevation.
+// most limitDays days forward. limitDays has no default: 0 or less leaves only
+// the instant searchFrom itself, so it reports [types.ErrNoSunrise] on an
+// ordinary day, where TypeScript's getSunrise searches 2 days when the argument
+// is omitted; pass 2 for that answer. The error carries [types.ErrNoSunrise]
+// when the window holds none (midnight sun or polar night),
+// [types.ErrInvalidDate] when the search would reach 2^52 ms (about 142,700
+// years) from 1970, where the solver cannot resolve a millisecond, and
+// otherwise reports an out of range latitude, longitude or elevation.
 func (s *Session) ComputeSunrise(searchFrom time.Time, location types.GeoLocation, limitDays int) (types.JSDate, error) {
-	ms, err := astronomy.ComputeSunrise(s.eph, searchFrom.UnixMilli(), location, limitDays)
+	ms, err := astronomy.ComputeSunrise(s.ephemeris(), searchFrom.UnixMilli(), location, limitDays)
 	return types.JSDate(ms), err
 }
 
 // ComputeSunset returns the first sunset at or after searchFrom, searching at
-// most limitDays days forward. The error carries [types.ErrNoSunset] when that window
-// holds none (midnight sun or polar night), and otherwise reports an out of
+// most limitDays days forward. limitDays has no default: 0 or less leaves only
+// the instant searchFrom itself, where TypeScript's getSunset searches 2 days
+// when the argument is omitted. The error carries [types.ErrNoSunset] when the
+// window holds none (midnight sun or polar night), [types.ErrInvalidDate] when
+// the search would reach 2^52 ms from 1970, and otherwise reports an out of
 // range latitude, longitude or elevation.
 func (s *Session) ComputeSunset(searchFrom time.Time, location types.GeoLocation, limitDays int) (types.JSDate, error) {
-	ms, err := astronomy.ComputeSunset(s.eph, searchFrom.UnixMilli(), location, limitDays)
+	ms, err := astronomy.ComputeSunset(s.ephemeris(), searchFrom.UnixMilli(), location, limitDays)
 	return types.JSDate(ms), err
 }
 
@@ -595,46 +691,62 @@ func (s *Session) ComputeSunset(searchFrom time.Time, location types.GeoLocation
 // most limitDays days forward. ok is false with a nil error when no moonrise
 // falls in that window: moonrise slips about 50 minutes a day, so a short
 // window can miss one, and at polar latitudes the Moon can stay down far
-// longer. The error is non-nil only for an out of range latitude, longitude or
-// elevation.
+// longer. limitDays has no default: 0 or less leaves only the instant
+// searchFrom itself, so ok is false on an ordinary day, where TypeScript's
+// getMoonrise searches 2 days when the argument is omitted. The error is
+// non-nil only for an out of range latitude, longitude or elevation, and
+// [types.ErrInvalidDate] when the search would reach 2^52 ms from 1970.
 func (s *Session) GetMoonrise(searchFrom time.Time, location types.GeoLocation, limitDays int) (rise types.JSDate, ok bool, err error) {
-	ms, ok, err := astronomy.GetMoonrise(s.eph, searchFrom.UnixMilli(), location, limitDays)
+	ms, ok, err := astronomy.GetMoonrise(s.ephemeris(), searchFrom.UnixMilli(), location, limitDays)
 	return types.JSDate(ms), ok, err
 }
 
 // GetMoonset returns the first moonset at or after searchFrom, searching at
 // most limitDays days forward. ok is false with a nil error when no moonset
 // falls in that window: moonset slips about 50 minutes a day, so a short window
-// can miss one, and at polar latitudes the Moon can stay up far longer. The
-// error is non-nil only for an out of range latitude, longitude or elevation.
+// can miss one, and at polar latitudes the Moon can stay up far longer.
+// limitDays has no default: 0 or less leaves only the instant searchFrom
+// itself, where TypeScript's getMoonset searches 2 days when the argument is
+// omitted. The error is non-nil only for an out of range latitude, longitude or
+// elevation, and [types.ErrInvalidDate] when the search would reach 2^52 ms
+// from 1970.
 func (s *Session) GetMoonset(searchFrom time.Time, location types.GeoLocation, limitDays int) (set types.JSDate, ok bool, err error) {
-	ms, ok, err := astronomy.GetMoonset(s.eph, searchFrom.UnixMilli(), location, limitDays)
+	ms, ok, err := astronomy.GetMoonset(s.ephemeris(), searchFrom.UnixMilli(), location, limitDays)
 	return types.JSDate(ms), ok, err
 }
 
 // ComputeAyanamsa returns the ayanamsa at the instant at, in degrees: the
 // amount to subtract from a tropical longitude to get the sidereal longitude in
-// that system. It reports [types.ErrInvalidAyanamsa] for an unknown typ.
+// that system. An empty typ means [types.Lahiri], the default TypeScript's
+// getAyanamsa applies when the type is omitted. It reports
+// [types.ErrInvalidAyanamsa] for an unknown typ.
 func ComputeAyanamsa(at time.Time, typ types.AyanamsaType) (float64, error) {
-	return astronomy.ComputeAyanamsa(at.UnixMilli(), typ)
+	return astronomy.ComputeAyanamsa(at.UnixMilli(), lahiriIfEmpty(typ))
+}
+
+// lahiriIfEmpty resolves the zero AyanamsaType to [types.Lahiri] for the
+// facade functions whose internal counterpart rejects "".
+func lahiriIfEmpty(t types.AyanamsaType) types.AyanamsaType {
+	if t == "" {
+		return types.Lahiri
+	}
+	return t
 }
 
 // GetSiderealSunLongitude returns the Sun's apparent geocentric ecliptic
 // longitude of date at the given instant, in degrees in [0, 360), as the
-// tropical longitude less the named ayanamsa. The error is non-nil only for an
-// unrecognised ayanamsa type, and an empty ayanamsaType counts as unrecognised
-// here.
+// tropical longitude less the named ayanamsa. An empty ayanamsaType means
+// [types.Lahiri]. The error is non-nil only for an unrecognised ayanamsa type.
 func (s *Session) GetSiderealSunLongitude(at time.Time, ayanamsaType types.AyanamsaType) (float64, error) {
-	return astronomy.GetSiderealSunLongitude(s.eph, at.UnixMilli(), ayanamsaType)
+	return astronomy.GetSiderealSunLongitude(s.ephemeris(), at.UnixMilli(), lahiriIfEmpty(ayanamsaType))
 }
 
 // GetSiderealMoonLongitude returns the Moon's apparent geocentric ecliptic
 // longitude of date at the given instant, in degrees in [0, 360), as the
-// tropical longitude less the named ayanamsa. The error is non-nil only for an
-// unrecognised ayanamsa type, and an empty ayanamsaType counts as unrecognised
-// here.
+// tropical longitude less the named ayanamsa. An empty ayanamsaType means
+// [types.Lahiri]. The error is non-nil only for an unrecognised ayanamsa type.
 func (s *Session) GetSiderealMoonLongitude(at time.Time, ayanamsaType types.AyanamsaType) (float64, error) {
-	return astronomy.GetSiderealMoonLongitude(s.eph, at.UnixMilli(), ayanamsaType)
+	return astronomy.GetSiderealMoonLongitude(s.ephemeris(), at.UnixMilli(), lahiriIfEmpty(ayanamsaType))
 }
 
 // ComputeLagna returns the ascendant rising at the given instant and place:
@@ -643,7 +755,7 @@ func (s *Session) GetSiderealMoonLongitude(at time.Time, ayanamsaType types.Ayan
 // means types.Lahiri and an empty lang means types.LanguageEn. The error is non-nil for a date
 // outside 1900 to 2100, out of range coordinates, or an unrecognised ayanamsa.
 func (s *Session) ComputeLagna(birth time.Time, location types.GeoLocation, ayanamsaType types.AyanamsaType, lang types.Language) (types.LagnaInfo, error) {
-	return jyotish.ComputeLagna(s.eph, birth.UnixMilli(), location, ayanamsaType, lang)
+	return jyotish.ComputeLagna(s.ephemeris(), birth.UnixMilli(), location, ayanamsaType, lang)
 }
 
 // ComputeRashiChart returns the D1 birth chart: the lagna, the twelve bhavas in
@@ -655,7 +767,7 @@ func (s *Session) ComputeLagna(birth time.Time, location types.GeoLocation, ayan
 // that latitude ([types.ErrCircumpolar]), or a placidus-kp cusp that fails to
 // converge ([types.ErrPlacidusDiverged]).
 func (s *Session) ComputeRashiChart(birth time.Time, location types.GeoLocation, options types.BirthChartOptions) (types.BirthChart, error) {
-	return jyotish.ComputeRashiChart(s.eph, birth.UnixMilli(), location, options)
+	return jyotish.ComputeRashiChart(s.ephemeris(), birth.UnixMilli(), location, options)
 }
 
 // ComputeNavamsa returns the D9 chart: each graha mapped to its navamsa
@@ -663,7 +775,7 @@ func (s *Session) ComputeRashiChart(birth time.Time, location types.GeoLocation,
 // navamsa lagna. The error is non-nil for a birth date outside 1900 to 2100,
 // out of range coordinates, or an unrecognised ayanamsa.
 func (s *Session) ComputeNavamsa(birth time.Time, location types.GeoLocation, options types.BirthChartOptions) (types.DivisionalChart, error) {
-	return jyotish.ComputeNavamsa(s.eph, birth.UnixMilli(), location, options)
+	return jyotish.ComputeNavamsa(s.ephemeris(), birth.UnixMilli(), location, options)
 }
 
 // ComputeVimshottariDashaFromBirth returns the 120 year Vimshottari sequence
@@ -673,67 +785,60 @@ func (s *Session) ComputeNavamsa(birth time.Time, location types.GeoLocation, op
 // types.Lahiri. The error is non-nil for a birth date outside 1900 to 2100 or an
 // unrecognised ayanamsa.
 func (s *Session) ComputeVimshottariDashaFromBirth(birth time.Time, ayanamsaType types.AyanamsaType, asOf time.Time) (types.VimshottariDashaResult, error) {
-	return jyotish.ComputeVimshottariDashaFromBirth(s.eph, birth.UnixMilli(), ayanamsaType, asOfMs(asOf))
+	return jyotish.ComputeVimshottariDashaFromBirth(s.ephemeris(), birth.UnixMilli(), ayanamsaType, asOfMs(asOf))
 }
 
 // ComputeAshtottariDasha returns the eight Ashtottari mahadashas from the birth
 // instant and the Moon's sidereal longitude in degrees, each with its
 // antardashas, beginning with the unexpired balance of the mahadasha running at
-// birth (108 years for a full cycle). CurrentIndex is the mahadasha holding
-// asOf, or 0 when asOf falls outside all eight; a zero asOf means now. It
-// reports [types.ErrInvalidDate] when birth's UTC year is outside 1900 to 2100,
-// and [types.ErrInvalidInput] when moonSiderealLon lies outside [0, 360), since
-// the longitude is used unnormalised to pick the nakshatra.
+// birth (108 years for a full cycle). The first mahadasha's antardashas are
+// those of the full mahadasha with the ones over before birth dropped, as in
+// [ComputeVimshottariDasha]. CurrentIndex is the mahadasha holding asOf, or 0
+// when asOf falls outside all eight; a zero asOf means now. A finite
+// moonSiderealLon outside [0, 360) is wrapped into it first, so 360 reads as 0
+// and -0.5 as 359.5. It reports [types.ErrInvalidInput] when moonSiderealLon is
+// NaN or infinite, and [types.ErrInvalidDate] when birth's UTC year is outside
+// 1900 to 2100.
 func ComputeAshtottariDasha(birth time.Time, moonSiderealLon float64, asOf time.Time) (types.VimshottariDashaResult, error) {
-	if err := checkMoonLongitude(moonSiderealLon); err != nil {
-		return types.VimshottariDashaResult{}, err
-	}
 	return jyotish.ComputeAshtottariDasha(birth.UnixMilli(), moonSiderealLon, asOfMs(asOf))
-}
-
-// checkMoonLongitude rejects a sidereal Moon longitude outside [0, 360): the
-// dasha functions index their nakshatra tables with it unnormalised, so an out
-// of range value would read past the table.
-func checkMoonLongitude(lon float64) error {
-	if lon != lon || lon < 0 || lon >= 360 {
-		return types.Codef(types.ErrInvalidInput, "moonSiderealLon must be in [0, 360), got %v", lon)
-	}
-	return nil
 }
 
 // ComputeYoginiDasha returns the eight Yogini mahadashas from the birth instant
 // and the Moon's sidereal longitude in degrees, each with its antardashas,
 // beginning with the unexpired balance of the mahadasha running at birth (36
-// years for a full cycle). CurrentIndex is the mahadasha holding asOf, or 0
-// when asOf falls outside all eight; a zero asOf means now. It reports
-// [types.ErrInvalidDate] when birth's UTC year is outside 1900 to 2100, and
-// [types.ErrInvalidInput] when moonSiderealLon lies outside [0, 360), since
-// the longitude is used unnormalised to pick the nakshatra.
+// years for a full cycle). The first mahadasha's antardashas are those of the
+// full mahadasha with the ones over before birth dropped, as in
+// [ComputeVimshottariDasha]. CurrentIndex is the mahadasha holding asOf, or 0
+// when asOf falls outside all eight; a zero asOf means now. A finite
+// moonSiderealLon outside [0, 360) is wrapped into it first, so 360 reads as 0
+// and -0.5 as 359.5. It reports [types.ErrInvalidInput] when moonSiderealLon is
+// NaN or infinite, and [types.ErrInvalidDate] when birth's UTC year is outside
+// 1900 to 2100.
 func ComputeYoginiDasha(birth time.Time, moonSiderealLon float64, asOf time.Time) (types.YoginiDashaResult, error) {
-	if err := checkMoonLongitude(moonSiderealLon); err != nil {
-		return types.YoginiDashaResult{}, err
-	}
 	return jyotish.ComputeYoginiDasha(birth.UnixMilli(), moonSiderealLon, asOfMs(asOf))
 }
 
 // ComputeCharaDasha returns the Jaimini Chara dasha: twelve rashi periods
 // running forward from the lagna rashi (0-based indices), each of the fixed
-// length for its sign. asOf picks out the current period and a zero asOf means
-// now. The error is non-nil for a birth date outside 1900 to 2100, out of range
+// length [CharaRashiYears] gives its sign. Only the starting rashi depends on
+// the chart: this is not the Chara dasha of K.N. Rao or P.V.R. Narasimha Rao,
+// whose years come from each sign's lord and whose direction depends on the
+// chart. asOf picks out the current period and a zero asOf means now. The
+// error is non-nil for a birth date outside 1900 to 2100, out of range
 // coordinates, or an unrecognised ayanamsa.
 func (s *Session) ComputeCharaDasha(birth time.Time, location types.GeoLocation, ayanamsa types.AyanamsaType, asOf time.Time) (types.CharaDashaResult, error) {
-	return jyotish.ComputeCharaDasha(s.eph, birth.UnixMilli(), location, ayanamsa, asOfMs(asOf))
+	return jyotish.ComputeCharaDasha(s.ephemeris(), birth.UnixMilli(), location, ayanamsa, asOfMs(asOf))
 }
 
 // ComputeNarayanDasha returns twelve rashi periods (0-based indices) from the
 // lagna rashi, running forward when that rashi is vishama pada and backward
-// when it is sama pada, each of the fixed length for its sign. asOf picks out
-// the current period and a zero asOf means now; see
+// when it is sama pada, each of the fixed [CharaRashiYears] length for its
+// sign. asOf picks out the current period and a zero asOf means now; see
 // [Session.ComputeNarayanDashaVariable] for the variable duration rule. The
 // error is non-nil for a birth date outside 1900 to 2100, out of range
 // coordinates, or an unrecognised ayanamsa.
 func (s *Session) ComputeNarayanDasha(birth time.Time, location types.GeoLocation, ayanamsa types.AyanamsaType, asOf time.Time) (types.NarayanDashaResult, error) {
-	return jyotish.ComputeNarayanDasha(s.eph, birth.UnixMilli(), location, ayanamsa, asOfMs(asOf))
+	return jyotish.ComputeNarayanDasha(s.ephemeris(), birth.UnixMilli(), location, ayanamsa, asOfMs(asOf))
 }
 
 // ComputeSadeSati reports whether Saturn is transiting the three rashi arc
@@ -744,7 +849,7 @@ func (s *Session) ComputeNarayanDasha(birth time.Time, location types.GeoLocatio
 // non-nil for a natalMoonRashi outside [0, 11], an asOf outside 1900 to 2100,
 // or an unrecognised ayanamsa.
 func (s *Session) ComputeSadeSati(natalMoonRashi int, asOf time.Time, ayanamsa types.AyanamsaType) (types.SadeSatiInfo, error) {
-	return jyotish.ComputeSadeSati(s.eph, natalMoonRashi, asOfMs(asOf), ayanamsa)
+	return jyotish.ComputeSadeSati(s.ephemeris(), natalMoonRashi, asOfMs(asOf), ayanamsa)
 }
 
 // ComputeAshtakoot scores the eight kootas of Guna Milan for two natal Moons,
@@ -764,19 +869,22 @@ func ComputeAshtakoot(boy, girl types.NatalMoon, options types.AshtakootOptions)
 // otherwise reports a date outside 1900 to 2100, out of range coordinates, or
 // an unset or unresolvable timezone.
 func (s *Session) ConvertGregorianToHindu(date time.Time, location types.GeoLocation, options types.ConvertOptions) (types.HinduCalendarCoords, error) {
-	return calendar.ConvertGregorianToHindu(s.eph, date.UnixMilli(), location, options)
+	return calendar.ConvertGregorianToHindu(s.ephemeris(), date.UnixMilli(), location, options)
 }
 
 // ConvertHinduToGregorian returns every Gregorian day whose sunrise carries the
-// given masa, paksha and tithi, scanning a window around that month of the
-// named Vikram Samvat year, and only adhika months when coords.AdhikaOnly is
-// set. The result can hold no dates (a kshaya tithi that touches no sunrise) or
-// two (a tithi spanning two sunrises), which is why it is a slice. The error is
-// non-nil for a MasaIndex outside [0, 11], a PakshaTithi outside [1, 15], a
-// types.Paksha that is neither shukla nor krishna, out of range coordinates, a
-// scanned date outside 1900 to 2100, or an unset or unresolvable timezone.
+// given masa, paksha and tithi, each as the UTC midnight that falls within that
+// local day in options.Timezone (that date's own UTC midnight at or east of
+// UTC, the next one west of it), scanning a window around that month of the named Vikram
+// Samvat year (in purnimanta, an Adhika Chaitra's Krishna paksha too), and
+// only adhika months when coords.AdhikaOnly is set. The result can hold no
+// dates (a kshaya tithi that touches no sunrise) or two (a tithi spanning two
+// sunrises), which is why it is a slice. The error is non-nil for a
+// MasaIndex outside [0, 11], a PakshaTithi outside [1, 15], a types.Paksha
+// that is neither shukla nor krishna, out of range coordinates, a scanned date
+// outside 1900 to 2100, or an unset or unresolvable timezone.
 func (s *Session) ConvertHinduToGregorian(coords types.HinduDateCoords, location types.GeoLocation, options types.ConvertOptions) ([]types.JSDate, error) {
-	return calendar.ConvertHinduToGregorian(s.eph, coords, location, options)
+	return calendar.ConvertHinduToGregorian(s.ephemeris(), coords, location, options)
 }
 
 // BuildFestivalsTable precomputes a festival table for whole years, StartYear
@@ -784,8 +892,9 @@ func (s *Session) ConvertHinduToGregorian(coords types.HinduDateCoords, location
 // requested language and repeated entries interned into a shared dictionary.
 // Eclipses are left out because their visibility is location dependent. The
 // error is non-nil when StartYear exceeds EndYear, when Languages is present
-// but empty (nil means every supported language), and for years outside 1900 to
-// 2100 or out of range coordinates.
+// but empty (nil means every supported language) or names a language other
+// than en and hi, and for years outside 1900 to 2100, out of range coordinates
+// or a UTC offset outside -720 to 840.
 func (s *Session) BuildFestivalsTable(opts types.BuildFestivalsTableOptions) (types.FestivalsFile, error) {
 	return s.BuildFestivalsTableContext(context.Background(), opts)
 }
@@ -794,7 +903,7 @@ func (s *Session) BuildFestivalsTable(opts types.BuildFestivalsTableOptions) (ty
 // It walks a range of dates, checking ctx between steps, and returns ctx.Err()
 // once ctx is cancelled or its deadline passes.
 func (s *Session) BuildFestivalsTableContext(ctx context.Context, opts types.BuildFestivalsTableOptions) (types.FestivalsFile, error) {
-	return calendar.BuildFestivalsTable(ctx, s.eph, opts)
+	return calendar.BuildFestivalsTable(ctx, s.ephemeris(), opts)
 }
 
 // BuildEclipsesTable precomputes an eclipse table for whole years, StartYear to
@@ -803,10 +912,10 @@ func (s *Session) BuildFestivalsTableContext(ctx context.Context, opts types.Bui
 // obscuration, magnitude and the sutak window where one applies. VisibleOnly
 // defaults to true when nil, keeping only eclipses observable from the location
 // during some phase. The error is non-nil when StartYear exceeds EndYear, when
-// Languages is present but empty (nil means every supported language), and for
-// out of range coordinates. The scan overhangs the range by two days at each
-// end, so StartYear 1900 and EndYear 2100 are themselves rejected as reaching
-// outside the supported 1900 to 2100 span; 1901 to 2099 is the usable range.
+// Languages is present but empty (nil means every supported language) or names
+// a language other than en and hi, for a UTC offset outside -720 to 840
+// ([types.ErrInvalidTimezone]), for a year outside 1900 to 2100, and for out of
+// range coordinates.
 func (s *Session) BuildEclipsesTable(opts types.BuildEclipsesTableOptions) (types.EclipsesFile, error) {
 	return s.BuildEclipsesTableContext(context.Background(), opts)
 }
@@ -815,7 +924,7 @@ func (s *Session) BuildEclipsesTable(opts types.BuildEclipsesTableOptions) (type
 // walks a range of dates, checking ctx between steps, and returns ctx.Err()
 // once ctx is cancelled or its deadline passes.
 func (s *Session) BuildEclipsesTableContext(ctx context.Context, opts types.BuildEclipsesTableOptions) (types.EclipsesFile, error) {
-	return calendar.BuildEclipsesTable(ctx, s.eph, opts)
+	return calendar.BuildEclipsesTable(ctx, s.ephemeris(), opts)
 }
 
 // BuildMoonPhasesTable returns a packed table of the four Moon phase instants
@@ -823,9 +932,10 @@ func (s *Session) BuildEclipsesTableContext(ctx context.Context, opts types.Buil
 // opts.EndYear inclusive, each filed under the date it falls on at
 // opts.TimezoneOffsetMinutes. Phase names and descriptions are localised into
 // every language in opts.Languages, into all of them when that is nil. It
-// errors when StartYear is after EndYear, when Languages is non-nil but empty,
-// and, because the scan overhangs the range by two days at each end, when
-// StartYear is 1900 or EndYear is 2100; 1901 to 2099 is the usable range.
+// errors when StartYear is after EndYear, when Languages is non-nil but empty
+// or names a language other than en and hi, when TimezoneOffsetMinutes is
+// outside -720 to 840 ([types.ErrInvalidTimezone]), and for a year outside 1900
+// to 2100.
 func (s *Session) BuildMoonPhasesTable(opts types.BuildMoonPhasesTableOptions) (types.MoonPhasesFile, error) {
 	return s.BuildMoonPhasesTableContext(context.Background(), opts)
 }
@@ -834,7 +944,7 @@ func (s *Session) BuildMoonPhasesTable(opts types.BuildMoonPhasesTableOptions) (
 // It walks a range of dates, checking ctx between steps, and returns ctx.Err()
 // once ctx is cancelled or its deadline passes.
 func (s *Session) BuildMoonPhasesTableContext(ctx context.Context, opts types.BuildMoonPhasesTableOptions) (types.MoonPhasesFile, error) {
-	return calendar.BuildMoonPhasesTable(ctx, s.eph, opts)
+	return calendar.BuildMoonPhasesTable(ctx, s.ephemeris(), opts)
 }
 
 // BuildMuhurtaTable returns a packed table of daily muhurta scores for one
@@ -853,12 +963,156 @@ func (s *Session) BuildMuhurtaTable(opts types.BuildMuhurtaTableOptions) (types.
 // walks a range of dates, checking ctx between steps, and returns ctx.Err()
 // once ctx is cancelled or its deadline passes.
 func (s *Session) BuildMuhurtaTableContext(ctx context.Context, opts types.BuildMuhurtaTableOptions) (types.MuhurtaFile, error) {
-	return muhurta.BuildMuhurtaTable(ctx, s.eph, opts)
+	return muhurta.BuildMuhurtaTable(ctx, s.ephemeris(), opts)
+}
+
+func tableLang(lang types.FestivalsTableLanguage) types.FestivalsTableLanguage {
+	if lang == "" {
+		return types.TableLangEn
+	}
+	return lang
+}
+
+// ReadFestivalsYearRange returns the inclusive span of years a festivals
+// table covers, from its _meta block.
+func ReadFestivalsYearRange(source types.AnyFestivalsFile) types.TableYearRange {
+	return calendar.ReadFestivalsYearRange(source)
+}
+
+// ReadFestivalsForYear returns the dated rows a festivals table holds for
+// year, in table order, with names and descriptions in lang (English when
+// lang is empty). ok is false when the table has no row list for that year,
+// where TypeScript returns null; a covered year with no festival gives an
+// empty, non-nil slice. Wrap a [types.FestivalsFile] with its AsAny method to
+// read it.
+func ReadFestivalsForYear(source types.AnyFestivalsFile, year int, lang types.FestivalsTableLanguage) (days []types.FestivalTableDay, ok bool) {
+	return calendar.ReadFestivalsForYear(source, year, tableLang(lang))
+}
+
+// ReadFestivalsForDate returns the festivals a table lists on the civil date
+// that date falls on at the table's TimezoneOffsetMinutes, in lang (English
+// when empty). It returns an empty, non-nil slice when that date has none or
+// lies outside the table.
+func ReadFestivalsForDate(source types.AnyFestivalsFile, date time.Time, lang types.FestivalsTableLanguage) []types.FestivalTableEntry {
+	return calendar.ReadFestivalsForDate(source, date.UnixMilli(), tableLang(lang))
+}
+
+// ReadFestivalsForDateKey is [ReadFestivalsForDate] for a date already written
+// as YYYY-MM-DD in the table's offset. A key the table has no row for, a
+// malformed one included, gives an empty, non-nil slice.
+func ReadFestivalsForDateKey(source types.AnyFestivalsFile, key string, lang types.FestivalsTableLanguage) []types.FestivalTableEntry {
+	return calendar.ReadFestivalsForDateKey(source, key, tableLang(lang))
+}
+
+// ReadEclipsesYearRange returns the inclusive span of years an eclipses table
+// covers, from its _meta block.
+func ReadEclipsesYearRange(source types.EclipsesFile) types.TableYearRange {
+	return calendar.ReadEclipsesYearRange(source)
+}
+
+// ReadEclipsesForYear returns the dated rows an eclipses table holds for year,
+// in table order, with names and descriptions in lang (English when lang is
+// empty). ok is false when the table has no row list for that year, where
+// TypeScript returns null; a covered year with no eclipse gives an empty,
+// non-nil slice.
+func ReadEclipsesForYear(source types.EclipsesFile, year int, lang types.FestivalsTableLanguage) (days []types.EclipseTableDay, ok bool) {
+	return calendar.ReadEclipsesForYear(source, year, tableLang(lang))
+}
+
+// ReadEclipsesForDate returns the eclipses whose peak falls on the civil date
+// that date falls on at the table's TimezoneOffsetMinutes, in lang (English
+// when empty). It returns an empty, non-nil slice when that date has none or
+// lies outside the table.
+func ReadEclipsesForDate(source types.EclipsesFile, date time.Time, lang types.FestivalsTableLanguage) []types.EclipseTableEntry {
+	return calendar.ReadEclipsesForDate(source, date.UnixMilli(), tableLang(lang))
+}
+
+// ReadEclipsesForDateKey is [ReadEclipsesForDate] for a date already written
+// as YYYY-MM-DD in the table's offset. A key the table has no row for gives
+// an empty, non-nil slice.
+func ReadEclipsesForDateKey(source types.EclipsesFile, key string, lang types.FestivalsTableLanguage) []types.EclipseTableEntry {
+	return calendar.ReadEclipsesForDateKey(source, key, tableLang(lang))
+}
+
+// ReadMoonPhasesYearRange returns the inclusive span of years a Moon phases
+// table covers, from its _meta block.
+func ReadMoonPhasesYearRange(source types.AnyMoonPhasesFile) types.TableYearRange {
+	return calendar.ReadMoonPhasesYearRange(source)
+}
+
+// ReadMoonPhasesForYear returns the dated rows a Moon phases table holds for
+// year, in table order, with names and descriptions in lang (English when
+// lang is empty) and each instant as an ISO 8601 UTC string. ok is false when
+// the table has no row list for that year, where TypeScript returns null.
+// Wrap a [types.MoonPhasesFile] with its AsAny method to read it.
+func ReadMoonPhasesForYear(source types.AnyMoonPhasesFile, year int, lang types.FestivalsTableLanguage) (days []types.MoonPhaseTableDay, ok bool) {
+	return calendar.ReadMoonPhasesForYear(source, year, tableLang(lang))
+}
+
+// ReadMoonPhasesForDate returns the phase instants that fall on the civil
+// date that date falls on at the table's TimezoneOffsetMinutes, in lang
+// (English when empty). It returns an empty, non-nil slice when that date has
+// none or lies outside the table.
+func ReadMoonPhasesForDate(source types.AnyMoonPhasesFile, date time.Time, lang types.FestivalsTableLanguage) []types.MoonPhaseTableEntry {
+	return calendar.ReadMoonPhasesForDate(source, date.UnixMilli(), tableLang(lang))
+}
+
+// ReadMoonPhasesForDateKey is [ReadMoonPhasesForDate] for a date already
+// written as YYYY-MM-DD in the table's offset. A key the table has no row for
+// gives an empty, non-nil slice.
+func ReadMoonPhasesForDateKey(source types.AnyMoonPhasesFile, key string, lang types.FestivalsTableLanguage) []types.MoonPhaseTableEntry {
+	return calendar.ReadMoonPhasesForDateKey(source, key, tableLang(lang))
+}
+
+// ReadMuhurtaYearRange returns the inclusive span of years a muhurta table
+// covers, from its _meta block.
+func ReadMuhurtaYearRange(source types.MuhurtaFile) types.TableYearRange {
+	return muhurta.ReadMuhurtaYearRange(source)
+}
+
+// ReadMuhurtaOccasion returns the occasion a muhurta table was scored for, the
+// Occasion of the rule it was built with.
+func ReadMuhurtaOccasion(source types.MuhurtaFile) string {
+	return muhurta.ReadMuhurtaOccasion(source)
+}
+
+// ReadMuhurtaForYear returns the scored days a muhurta table holds for year,
+// in date order, with each day's factor indices resolved against the table's
+// Dict. ok is false when the table has no day list for that year, where
+// TypeScript returns null; a covered year with no stored day gives an empty,
+// non-nil slice. A table built without IncludeFailures stores only the days
+// that pass.
+func ReadMuhurtaForYear(source types.MuhurtaFile, year int) (days []types.MuhurtaTableDay, ok bool) {
+	return muhurta.ReadMuhurtaForYear(source, year)
+}
+
+// ReadMuhurtaForDate returns the scored day for the civil date that date falls
+// on at the table's TimezoneOffsetMinutes. ok is false when the table stores
+// no day for that date: outside its years, or a failing day of a table built
+// without IncludeFailures.
+func ReadMuhurtaForDate(source types.MuhurtaFile, date time.Time) (day types.MuhurtaTableDay, ok bool) {
+	return muhurta.ReadMuhurtaForDate(source, date.UnixMilli())
+}
+
+// ReadMuhurtaForDateKey is [ReadMuhurtaForDate] for a date already written as
+// YYYY-MM-DD in the table's offset.
+func ReadMuhurtaForDateKey(source types.MuhurtaFile, key string) (day types.MuhurtaTableDay, ok bool) {
+	return muhurta.ReadMuhurtaForDateKey(source, key)
+}
+
+// ReadBestMuhurtaDays returns up to limit of the table's stored days across
+// every year, highest Score first and earlier date first among equal scores.
+// A limit of 0 or less gives an empty, non-nil slice. The TypeScript
+// readBestMuhurtaDays defaults limit to 10; Go takes it explicitly.
+func ReadBestMuhurtaDays(source types.MuhurtaFile, limit int) []types.MuhurtaTableDay {
+	return muhurta.ReadBestMuhurtaDays(source, limit)
 }
 
 // FormatInZone renders at as an ISO 8601 timestamp shifted offsetMinutes east
 // of UTC, with milliseconds and an explicit offset:
-// 2025-07-04T06:02:11.000+05:30.
+// 2025-07-04T06:02:11.000+05:30. Any int is accepted: an offset of 100 hours
+// or more gets as many hour digits as it needs, so pass minutes, not the
+// seconds [time.Time.Zone] reports.
 func FormatInZone(at time.Time, offsetMinutes int) string {
 	return utils.FormatInZone(at.UnixMilli(), offsetMinutes)
 }
@@ -883,8 +1137,14 @@ func ComputeAbhijitMuhurta(sunrise, sunset time.Time, varaIndex *int) (types.Utc
 // [sunriseUtc, nextSunriseUtc), ordered by start. A spell begins a
 // per-nakshatra offset in ghatikas after that nakshatra's start and runs four
 // ghatikas, a ghatika being one sixtieth of the nakshatra's own duration.
-// getMoon supplies the sidereal Moon longitude in degrees at a given instant.
+// getMoon supplies the sidereal Moon longitude in degrees at a given instant,
+// in [0, 360): a value outside it reads a nakshatra index outside 0 to 26, and
+// that nakshatra contributes no spell, as in TypeScript. It panics if getMoon
+// is nil.
 func ComputeAmritKalaWindows(sunriseUtc, nextSunriseUtc time.Time, getMoon types.LongitudeAt) []types.UtcWindow {
+	if getMoon == nil {
+		panic("panchang: ComputeAmritKalaWindows: getMoon must not be nil")
+	}
 	return core.ComputeAmritKalaWindows(sunriseUtc.UnixMilli(), nextSunriseUtc.UnixMilli(), getMoon)
 }
 
@@ -899,7 +1159,8 @@ func ComputeAnandadiYoga(varaIndex, nakshatraIndex int, lang types.Language) (ty
 // ComputeArgala returns, for each bhava 1 to 12, the planets forming argala on
 // it (those in the 2nd, 4th and 11th from it) and those forming virodhargala
 // (the 3rd, 10th and 12th). The Trikona field is left nil; use
-// [ComputeArgalaWithTrikonargala] for the 5th and 9th house intervention.
+// [ComputeArgalaWithTrikonargala] for the 5th and 9th house intervention. It
+// panics if chart is nil.
 func ComputeArgala(chart *types.BirthChart) []types.ArgalaPerBhava {
 	if chart == nil {
 		panic("panchang: ComputeArgala: chart must not be nil")
@@ -910,7 +1171,7 @@ func ComputeArgala(chart *types.BirthChart) []types.ArgalaPerBhava {
 // ComputeArgalaWithTrikonargala returns what [ComputeArgala] does and also
 // fills Trikona, the intervention of the 5th (sources) and the 9th
 // (virodhakas), with Ketu's role reversed. That is the 5/9 trine, not Rath's
-// competing 5/8 "Secondary Argala".
+// competing 5/8 "Secondary Argala". It panics if chart is nil.
 func ComputeArgalaWithTrikonargala(chart *types.BirthChart) []types.ArgalaPerBhava {
 	if chart == nil {
 		panic("panchang: ComputeArgalaWithTrikonargala: chart must not be nil")
@@ -922,8 +1183,10 @@ func ComputeArgalaWithTrikonargala(chart *types.BirthChart) []types.ArgalaPerBha
 // far from the bhava lord as the lord is from the bhava, with a pada landing on
 // the bhava itself moved to the 10th from itself and one landing in the 7th
 // from the bhava moved to the 4th from itself. Rashi names are resolved in
-// lang. It reports [types.ErrInvalidInput] when the chart is missing one of the seven
-// visible grahas, which the rule needs to locate a bhava lord.
+// lang. A lagna rashi index of 12 or more wraps modulo 12. It reports
+// [types.ErrInvalidInput] when chart is nil, when its lagna rashi index is
+// negative, or when it is missing one of the seven visible grahas, which the
+// rule needs to locate a bhava lord.
 func ComputeArudhas(chart *types.BirthChart, lang types.Language) ([]types.Arudha, error) {
 	if chart == nil {
 		return nil, types.Codef(types.ErrInvalidInput,
@@ -935,13 +1198,24 @@ func ComputeArudhas(chart *types.BirthChart, lang types.Language) ([]types.Arudh
 // ComputeAshtakavarga returns the bhinnashtakavarga bindu grid of each of the
 // seven visible grahas, 12 entries indexed from Mesha, and their
 // sarvashtakavarga sum. With options.Reductions set it also fills Reduced, the
-// same grids after trikona sodhana and then ekadhipatya sodhana. A chart
-// missing one of the seven visible grahas panics rather than placing that
-// contributor's bindus from Mesha. The lagna is taken from chart.Lagna as it
-// stands, so an unset lagna contributes from Mesha with no panic.
+// same grids after trikona sodhana and then ekadhipatya sodhana. The lagna is
+// taken from chart.Lagna as it stands, so an unset lagna contributes from
+// Mesha, and a lagna rashi index of 12 or more wraps modulo 12. It panics if
+// chart is nil, if it is missing one of the seven visible grahas (rather than
+// placing that contributor's bindus from Mesha), if its lagna rashi index is
+// negative, or if a visible graha's rashi index is outside 0 to 11.
 func ComputeAshtakavarga(chart *types.BirthChart, options types.AshtakavargaOptions) types.AshtakavargaResult {
 	if chart == nil {
 		panic("panchang: ComputeAshtakavarga: chart must not be nil")
+	}
+	if r := chart.Lagna.Rashi.Index; r < 0 {
+		panic("panchang: ComputeAshtakavarga: lagna rashi index must not be negative, got " + strconv.Itoa(r))
+	}
+	for _, p := range chart.Planets {
+		if _, visible := p.Planet.Visible(); visible && (p.Rashi.Index < 0 || p.Rashi.Index > 11) {
+			panic("panchang: ComputeAshtakavarga: " + p.Planet.String() +
+				" rashi index must be in 0 to 11, got " + strconv.Itoa(p.Rashi.Index))
+		}
 	}
 	return jyotish.ComputeAshtakavarga(chart, options)
 }
@@ -950,8 +1224,8 @@ func ComputeAshtakavarga(chart *types.BirthChart, options types.AshtakavargaOpti
 // the universal 7th plus the special aspects of Mars, Jupiter and Saturn. The
 // zero options value gives the nodes the 7th only; [types.NodeAspects5And9] adds the
 // 5th and 9th for Rahu and Ketu. It reports [types.ErrInvalidInput] for any other
-// types.NodeAspects value, or when the chart does not carry each of the nine grahas
-// exactly once.
+// types.NodeAspects value, when chart is nil, or when it does not carry each of
+// the nine grahas exactly once.
 func ComputeAspects(chart *types.BirthChart, options types.AspectsOptions) (types.AspectMap, error) {
 	if chart == nil {
 		var zero types.AspectMap
@@ -962,9 +1236,10 @@ func ComputeAspects(chart *types.BirthChart, options types.AspectsOptions) (type
 }
 
 // ComputeAuspiciousDatesForYear scores every day of the calendar year in
-// options.Timezone against rule and returns the days sorted by descending
-// score. Days that fail the rule are omitted unless options.IncludeFailures is
-// set. options.Timezone is required and fixes the year's boundaries.
+// options.Timezone against rule, each at its local midnight, and returns the
+// days sorted by descending score. Days that fail the rule are omitted unless
+// options.IncludeFailures is set. options.Timezone is required and fixes the
+// year's boundaries, each at the offset in force on that date.
 func (s *Session) ComputeAuspiciousDatesForYear(year int, rule types.MuhurtaRule, location types.GeoLocation, options types.MuhurtaScoreOptions) ([]types.MuhurtaDay, error) {
 	return s.ComputeAuspiciousDatesForYearContext(context.Background(), year, rule, location, options)
 }
@@ -974,16 +1249,17 @@ func (s *Session) ComputeAuspiciousDatesForYear(year int, rule types.MuhurtaRule
 // dates, checking ctx between steps, and returns ctx.Err() once ctx is
 // cancelled or its deadline passes.
 func (s *Session) ComputeAuspiciousDatesForYearContext(ctx context.Context, year int, rule types.MuhurtaRule, location types.GeoLocation, options types.MuhurtaScoreOptions) ([]types.MuhurtaDay, error) {
-	return muhurta.ComputeAuspiciousDatesForYear(ctx, s.eph, year, rule, location, options)
+	return muhurta.ComputeAuspiciousDatesForYear(ctx, s.ephemeris(), year, rule, location, options)
 }
 
-// ComputeAuspiciousDatesInRange scores each day from start to end inclusive,
-// stepping 24 hours, and returns them sorted by descending score. A day scores
-// 0 to 100 and passes at 50 or more; failing days are omitted unless
-// options.IncludeFailures is set, and days at polar latitudes with no sunrise
-// or sunset are skipped. It errors when either instant lies outside 1900 to
-// 2100, the location is invalid, options.Timezone is unset, or start is after
-// end.
+// ComputeAuspiciousDatesInRange scores each civil day of options.Timezone from
+// start to end inclusive, at start's local time of day on each date (a fixed
+// offset steps exactly 24 hours), and returns them sorted by descending score.
+// A day scores 0 to 100 and passes at 50 or more; failing days are omitted
+// unless options.IncludeFailures is set, and days at polar latitudes with no
+// sunrise or sunset are skipped. It errors when either instant lies outside
+// 1900 to 2100, the location is invalid, options.Timezone is unset, or start
+// is after end.
 func (s *Session) ComputeAuspiciousDatesInRange(rule types.MuhurtaRule, start, end time.Time, location types.GeoLocation, options types.MuhurtaScoreOptions) ([]types.MuhurtaDay, error) {
 	return s.ComputeAuspiciousDatesInRangeContext(context.Background(), rule, start, end, location, options)
 }
@@ -993,7 +1269,7 @@ func (s *Session) ComputeAuspiciousDatesInRange(rule types.MuhurtaRule, start, e
 // dates, checking ctx between steps, and returns ctx.Err() once ctx is
 // cancelled or its deadline passes.
 func (s *Session) ComputeAuspiciousDatesInRangeContext(ctx context.Context, rule types.MuhurtaRule, start, end time.Time, location types.GeoLocation, options types.MuhurtaScoreOptions) ([]types.MuhurtaDay, error) {
-	return muhurta.ComputeAuspiciousDatesInRange(ctx, s.eph, rule, start.UnixMilli(), end.UnixMilli(), location, options)
+	return muhurta.ComputeAuspiciousDatesInRange(ctx, s.ephemeris(), rule, start.UnixMilli(), end.UnixMilli(), location, options)
 }
 
 // ComputeBhava returns the twelve house cusps for a birth at location as
@@ -1005,14 +1281,14 @@ func (s *Session) ComputeAuspiciousDatesInRangeContext(ctx context.Context, rule
 // non-nil for a birth date outside 1900 to 2100, out of range coordinates or
 // an unrecognised ayanamsa.
 func (s *Session) ComputeBhava(birth time.Time, location types.GeoLocation, options types.BirthChartOptions) (types.BhavaChart, error) {
-	return jyotish.ComputeBhava(s.eph, birth.UnixMilli(), location, options)
+	return jyotish.ComputeBhava(s.ephemeris(), birth.UnixMilli(), location, options)
 }
 
 // ComputeBhavaBala returns the four Bhava Bala components (bhavadhipati, dik,
 // drik, sthana) and their total for each of the twelve houses in Virupas, house
 // 1 first. Drik is floored at 0.
 func (s *Session) ComputeBhavaBala(birth time.Time, location types.GeoLocation, options types.BirthChartOptions) (types.BhavaBalaResult, error) {
-	return jyotish.ComputeBhavaBala(s.eph, birth.UnixMilli(), location, options)
+	return jyotish.ComputeBhavaBala(s.ephemeris(), birth.UnixMilli(), location, options)
 }
 
 // ComputeBhavaLagna returns Bhava Lagna for a birth: the sidereal Sun longitude
@@ -1020,12 +1296,24 @@ func (s *Session) ComputeBhavaBala(birth time.Time, location types.GeoLocation, 
 // rashi every two hours). Rashi and nakshatra names are resolved in lang
 // (types.LanguageEn when empty), and an empty ayanamsaType means types.Lahiri.
 func (s *Session) ComputeBhavaLagna(birth time.Time, location types.GeoLocation, ayanamsaType types.AyanamsaType, lang types.Language) (types.LagnaInfo, error) {
-	return jyotish.ComputeBhavaLagna(s.eph, birth.UnixMilli(), location, ayanamsaType, lang)
+	return jyotish.ComputeBhavaLagna(s.ephemeris(), birth.UnixMilli(), location, ayanamsaType, lang)
 }
 
-// ComputeBrahmaMuhurta returns the pre-dawn Brahma muhurta as a UTC window: a
-// span one thirtieth of the daylight length (sunrise to sunset) wide, ending
-// that same span before sunrise.
+// checkWeekday panics, naming fn, unless varaIndex is a weekday, 0 to 6: the
+// window helpers have no error return.
+func checkWeekday(fn string, varaIndex int) {
+	if varaIndex < 0 || varaIndex > 6 {
+		panic("panchang: " + fn + ": varaIndex must be in 0 to 6, got " + strconv.Itoa(varaIndex))
+	}
+}
+
+// ComputeBrahmaMuhurta returns the pre-dawn Brahma muhurta as a UTC window:
+// the 14th of the 15 night-muhurtas, from two night-muhurtas to one before
+// sunrise (about 96 to 48 minutes at an equinox). With only these two
+// instants the night is taken as 24 hours minus the daylight (sunset minus
+// sunrise). GetDailyPanchang measures the night from sunset to the next
+// sunrise instead, the night Pratah Sandhya uses, which moves the window by
+// seconds and puts its midpoint exactly on Pratah Sandhya's start.
 func ComputeBrahmaMuhurta(sunrise, sunset time.Time) types.UtcWindow {
 	return core.ComputeBrahmaMuhurta(sunrise.UnixMilli(), sunset.UnixMilli())
 }
@@ -1055,22 +1343,25 @@ func ComputeDignity(graha types.Graha, rashi int) (types.Dignity, error) {
 // are supported; any other value is an error. House numbers run 1 to 12 counted
 // from the divisional lagna.
 func (s *Session) ComputeDivisionalChart(birth time.Time, location types.GeoLocation, divisional types.Divisional, options types.BirthChartOptions) (types.DivisionalChart, error) {
-	return jyotish.ComputeDivisionalChart(s.eph, birth.UnixMilli(), location, divisional, options)
+	return jyotish.ComputeDivisionalChart(s.ephemeris(), birth.UnixMilli(), location, divisional, options)
 }
 
 // ComputeDoGhati divides daytime and nighttime into 15 equal Do Ghati slots
 // each, indexed 0 to 14 for the day and 15 to 29 for the night. nameFn and
 // qualityNameFn supply the display strings for a slot index and for its fixed
-// auspicious or inauspicious quality.
+// auspicious or inauspicious quality. It panics if either is nil.
 func ComputeDoGhati(sunrise, sunset, nextSunrise time.Time, nameFn func(index int) string, qualityNameFn func(quality types.ChoghadiyaQuality) string) types.UnlocalizedDoGhatiInfo {
+	if nameFn == nil || qualityNameFn == nil {
+		panic("panchang: ComputeDoGhati: nameFn and qualityNameFn must not be nil")
+	}
 	return core.ComputeDoGhati(sunrise.UnixMilli(), sunset.UnixMilli(), nextSunrise.UnixMilli(), nameFn, qualityNameFn)
 }
 
-// ComputeEclipsesForYear returns the eclipses whose new or full moon instant
-// falls in the calendar year in timezone and whose peak falls no later than its
-// end, ordered by peak time, selected and annotated for location
-// exactly as [Session.ComputeEclipsesInRange] does. timezone is required and
-// fixes the year's boundaries.
+// ComputeEclipsesForYear returns the eclipses whose peak falls in the calendar
+// year in timezone, ordered by peak time, selected and annotated for location
+// exactly as [Session.ComputeEclipsesInRange] does, so each eclipse belongs to
+// exactly one year. timezone is required and fixes the year's boundaries, each
+// at the offset in force on that date.
 func (s *Session) ComputeEclipsesForYear(year int, location types.GeoLocation, timezone types.Timezone) ([]types.EclipseInfo, error) {
 	return s.ComputeEclipsesForYearContext(context.Background(), year, location, timezone)
 }
@@ -1079,12 +1370,11 @@ func (s *Session) ComputeEclipsesForYear(year int, location types.GeoLocation, t
 // context. It walks a range of dates, checking ctx between steps, and returns
 // ctx.Err() once ctx is cancelled or its deadline passes.
 func (s *Session) ComputeEclipsesForYearContext(ctx context.Context, year int, location types.GeoLocation, timezone types.Timezone) ([]types.EclipseInfo, error) {
-	return calendar.ComputeEclipsesForYear(ctx, s.eph, year, location, timezone)
+	return calendar.ComputeEclipsesForYear(ctx, s.ephemeris(), year, location, timezone)
 }
 
-// ComputeEclipsesInRange returns the eclipses whose new or full moon instant
-// falls at or after start and whose peak falls no later than end, ordered by
-// peak time. Every lunar eclipse is listed; a
+// ComputeEclipsesInRange returns the eclipses whose peak falls between start
+// and end inclusive, ordered by peak time. Every lunar eclipse is listed; a
 // solar eclipse is listed only when the Sun stands above the horizon at
 // location at the start or the end of the local partial phase.
 // VisibleFromLocation says whether the eclipsed body is above the horizon at
@@ -1098,14 +1388,18 @@ func (s *Session) ComputeEclipsesInRange(start, end time.Time, location types.Ge
 // context. It walks a range of dates, checking ctx between steps, and returns
 // ctx.Err() once ctx is cancelled or its deadline passes.
 func (s *Session) ComputeEclipsesInRangeContext(ctx context.Context, start, end time.Time, location types.GeoLocation) ([]types.EclipseInfo, error) {
-	return calendar.ComputeEclipsesInRange(ctx, s.eph, start.UnixMilli(), end.UnixMilli(), location)
+	return calendar.ComputeEclipsesInRange(ctx, s.ephemeris(), start.UnixMilli(), end.UnixMilli(), location)
 }
 
-// ComputeEkadashiDatesForYear returns the Ekadashi fasting days of year, both
-// pakshas, as UTC midnights. The tithi at sunrise at location fixes each day
+// ComputeEkadashiDatesForYear returns the Ekadashi fasting days of year (the
+// local calendar year in options.Timezone), both pakshas, each as the UTC
+// midnight that falls within the local day of the fast: that date's own UTC
+// midnight at every offset at or east of UTC and the next one west of it, so
+// read the result in that zone. The tithi at sunrise at location fixes each day
 // (options.Timezone is required to place that sunrise), and the vriddha and
-// kshaya cases move the observance onto the neighbouring day. Days at polar
-// latitudes with no sunrise or sunset are skipped.
+// kshaya cases move the observance onto the neighbouring day, into the
+// previous year when that day is 31 December. Days at polar latitudes with no
+// sunrise or sunset are skipped.
 func (s *Session) ComputeEkadashiDatesForYear(year int, location types.GeoLocation, options types.YearlyListingOptions) ([]types.JSDate, error) {
 	return s.ComputeEkadashiDatesForYearContext(context.Background(), year, location, options)
 }
@@ -1114,14 +1408,14 @@ func (s *Session) ComputeEkadashiDatesForYear(year int, location types.GeoLocati
 // with a context. It walks a range of dates, checking ctx between steps, and
 // returns ctx.Err() once ctx is cancelled or its deadline passes.
 func (s *Session) ComputeEkadashiDatesForYearContext(ctx context.Context, year int, location types.GeoLocation, options types.YearlyListingOptions) ([]types.JSDate, error) {
-	return calendar.ComputeEkadashiDatesForYear(ctx, s.eph, year, location, options)
+	return calendar.ComputeEkadashiDatesForYear(ctx, s.ephemeris(), year, location, options)
 }
 
 // ComputeFestivalsForYear returns one entry per festival observed at location
-// during the calendar year in options.Timezone, in date order, with several
-// entries sharing a date when a day carries more than one. options.Region
-// selects the regional festival set, and options.Timezone is required and fixes
-// the year's boundaries.
+// during the calendar year in options.Timezone, each day queried at its local
+// midnight, in date order, with several entries sharing a date when a day
+// carries more than one. options.Region selects the regional festival set, and
+// options.Timezone is required and fixes the year's boundaries.
 func (s *Session) ComputeFestivalsForYear(year int, location types.GeoLocation, options types.YearlyListingOptions) ([]types.FestivalDay, error) {
 	return s.ComputeFestivalsForYearContext(context.Background(), year, location, options)
 }
@@ -1130,15 +1424,16 @@ func (s *Session) ComputeFestivalsForYear(year int, location types.GeoLocation, 
 // context. It walks a range of dates, checking ctx between steps, and returns
 // ctx.Err() once ctx is cancelled or its deadline passes.
 func (s *Session) ComputeFestivalsForYearContext(ctx context.Context, year int, location types.GeoLocation, options types.YearlyListingOptions) ([]types.FestivalDay, error) {
-	return calendar.ComputeFestivalsForYear(ctx, s.eph, year, location, options)
+	return calendar.ComputeFestivalsForYear(ctx, s.ephemeris(), year, location, options)
 }
 
 // ComputeFestivalsInRange returns one entry per festival falling between start
-// and end inclusive, walked one day at a time, so the result is in date order
-// and a day with several festivals yields several entries. Days at polar
-// latitudes with no sunrise or sunset are skipped. It errors when either
-// instant lies outside 1900 to 2100, the location is invalid, options.Timezone
-// is unset, or start is after end.
+// and end inclusive, walked one civil day of options.Timezone at a time at
+// start's local time of day, so the result is in date order and a day with
+// several festivals yields several entries. Days at polar latitudes with no
+// sunrise or sunset are skipped. It errors when either instant lies outside
+// 1900 to 2100, the location is invalid, options.Timezone is unset, or start
+// is after end.
 func (s *Session) ComputeFestivalsInRange(start, end time.Time, location types.GeoLocation, options types.YearlyListingOptions) ([]types.FestivalDay, error) {
 	return s.ComputeFestivalsInRangeContext(context.Background(), start, end, location, options)
 }
@@ -1147,7 +1442,7 @@ func (s *Session) ComputeFestivalsInRange(start, end time.Time, location types.G
 // context. It walks a range of dates, checking ctx between steps, and returns
 // ctx.Err() once ctx is cancelled or its deadline passes.
 func (s *Session) ComputeFestivalsInRangeContext(ctx context.Context, start, end time.Time, location types.GeoLocation, options types.YearlyListingOptions) ([]types.FestivalDay, error) {
-	return calendar.ComputeFestivalsInRange(ctx, s.eph, start.UnixMilli(), end.UnixMilli(), location, options)
+	return calendar.ComputeFestivalsInRange(ctx, s.ephemeris(), start.UnixMilli(), end.UnixMilli(), location, options)
 }
 
 // ComputeGandaMula reports whether currentNakshatraIndex (0 based) is one of
@@ -1164,7 +1459,7 @@ func ComputeGandaMula(currentNakshatraIndex int, lang types.Language) (types.Gan
 // ghatika is 24 minutes). Rashi and nakshatra names are resolved in lang
 // (types.LanguageEn when empty), and an empty ayanamsaType means types.Lahiri.
 func (s *Session) ComputeGhatiLagna(birth time.Time, location types.GeoLocation, ayanamsaType types.AyanamsaType, lang types.Language) (types.LagnaInfo, error) {
-	return jyotish.ComputeGhatiLagna(s.eph, birth.UnixMilli(), location, ayanamsaType, lang)
+	return jyotish.ComputeGhatiLagna(s.ephemeris(), birth.UnixMilli(), location, ayanamsaType, lang)
 }
 
 // ComputeGodhuliMuhurta returns the fixed 48 minute twilight window centered on
@@ -1176,16 +1471,23 @@ func ComputeGodhuliMuhurta(sunset time.Time) types.UtcWindow {
 // ComputeGowriPanchangam divides daytime and nighttime into 8 equal Gowri slots
 // each, the slot sequence taken from the day and night grids for varaIndex (0
 // based, 0 = Sunday). nameFn and qualityNameFn supply the display strings for a
-// slot index (0 to 7) and for its quality, and both must be non-nil.
-// varaIndex outside 0 to 6 panics.
+// slot index (0 to 7) and for its quality. It panics, naming the problem, if
+// varaIndex is outside 0 to 6 or either function is nil; TypeScript throws
+// INVALID_INPUT for the same vara.
 func ComputeGowriPanchangam(sunrise, sunset, nextSunrise time.Time, varaIndex int, nameFn func(index int) string, qualityNameFn func(quality types.ChoghadiyaQuality) string) types.UnlocalizedGowriInfo {
+	checkWeekday("ComputeGowriPanchangam", varaIndex)
+	if nameFn == nil || qualityNameFn == nil {
+		panic("panchang: ComputeGowriPanchangam: nameFn and qualityNameFn must not be nil")
+	}
 	return core.ComputeGowriPanchangam(sunrise.UnixMilli(), sunset.UnixMilli(), nextSunrise.UnixMilli(), varaIndex, nameFn, qualityNameFn)
 }
 
 // ComputeGulikaKalam returns the Gulika Kalam window, one of the eight equal
-// parts of daytime selected by varaIndex (0 based, 0 = Sunday). varaIndex
-// outside 0 to 6 panics.
+// parts of daytime selected by varaIndex (0 based, 0 = Sunday). A varaIndex
+// outside 0 to 6 panics with a message naming it; TypeScript throws
+// INVALID_INPUT.
 func ComputeGulikaKalam(sunrise, sunset time.Time, varaIndex int) types.UtcWindow {
+	checkWeekday("ComputeGulikaKalam", varaIndex)
 	return core.ComputeGulikaKalam(sunrise.UnixMilli(), sunset.UnixMilli(), varaIndex)
 }
 
@@ -1197,13 +1499,13 @@ func ComputeGulikaKalam(sunrise, sunset time.Time, varaIndex int) types.UtcWindo
 // unrecognised ayanamsa, or when no sunrise can be found before birth (polar
 // day or polar night).
 func (s *Session) ComputeHoraLagna(birth time.Time, location types.GeoLocation, ayanamsaType types.AyanamsaType, lang types.Language) (types.LagnaInfo, error) {
-	return jyotish.ComputeHoraLagna(s.eph, birth.UnixMilli(), location, ayanamsaType, lang)
+	return jyotish.ComputeHoraLagna(s.ephemeris(), birth.UnixMilli(), location, ayanamsaType, lang)
 }
 
 // ComputeJaiminiKarakas ranks the seven visible grahas by degree within their
 // rashi, highest first, and assigns them types.Atmakaraka through types.Darakaraka. It
-// errors when the chart carries an out-of-range graha or is missing one of the
-// seven.
+// errors when chart is nil, carries an out-of-range graha or is missing one of
+// the seven.
 func ComputeJaiminiKarakas(chart *types.BirthChart) (types.JaiminiKarakas, error) {
 	if chart == nil {
 		var zero types.JaiminiKarakas
@@ -1213,9 +1515,28 @@ func ComputeJaiminiKarakas(chart *types.BirthChart) (types.JaiminiKarakas, error
 	return jyotish.ComputeJaiminiKarakas(chart)
 }
 
+// ComputeJaimini8Karakas is the eight-karaka variant of
+// [ComputeJaiminiKarakas] (the Upadesa Sutras scheme, the TypeScript
+// computeJaiminiKarakas with variant '8-jaimini'). It ranks Rahu with the
+// seven visible grahas, measuring Rahu as 30 minus its degree because it is
+// permanently retrograde, and adds types.Pitrukaraka as the fifth role, so
+// the ranking runs types.Atmakaraka through types.Darakaraka over eight roles.
+// Equal degrees keep the order Sun through Saturn, then Rahu. It errors when
+// the chart is nil, carries an out-of-range graha, or is missing one of the
+// eight.
+func ComputeJaimini8Karakas(chart *types.BirthChart) (types.Jaimini8Karakas, error) {
+	if chart == nil {
+		var zero types.Jaimini8Karakas
+		return zero, types.Codef(types.ErrInvalidInput,
+			"ComputeJaimini8Karakas: chart must not be nil")
+	}
+	return jyotish.ComputeJaimini8Karakas(chart)
+}
+
 // ComputeKaalSarp reports Kaal Sarp dosha: Afflicted when all seven visible
 // grahas lie on one side of the Rahu/Ketu axis, Partial when all but one do.
-// The subtype, named for Rahu's house, is set only when Afflicted.
+// The subtype, named for Rahu's house, is set only when Afflicted and Rahu's
+// House is 1 to 12, so a zero BirthChart gets none. It panics if chart is nil.
 func ComputeKaalSarp(chart *types.BirthChart) types.KaalSarpDoshaInfo {
 	if chart == nil {
 		panic("panchang: ComputeKaalSarp: chart must not be nil")
@@ -1231,13 +1552,16 @@ func ComputeKaalSarp(chart *types.BirthChart) types.KaalSarpDoshaInfo {
 // latitude ([types.ErrCircumpolar]) or one that fails to converge
 // ([types.ErrPlacidusDiverged]).
 func (s *Session) ComputeKpCuspalSubLords(birth time.Time, location types.GeoLocation, options types.BirthChartOptions) (types.KpCuspalSubLords, error) {
-	return jyotish.ComputeKpCuspalSubLords(s.eph, birth.UnixMilli(), location, options)
+	return jyotish.ComputeKpCuspalSubLords(s.ephemeris(), birth.UnixMilli(), location, options)
 }
 
 // ComputeKpSignificators returns the KP significator houses (1 based) of each
 // graha: the house it occupies, the house its star lord occupies, and the
 // houses either of them owns, together with the inverse index of grahas per
-// house.
+// house. A planet longitude outside [0, 360) is wrapped into it, a NaN or
+// infinite one gives that graha no star lord, and a placement whose Planet is
+// not a valid [types.Graha] is ignored, as in TypeScript. It panics if chart is
+// nil.
 func ComputeKpSignificators(chart *types.BirthChart) types.KpSignificators {
 	if chart == nil {
 		panic("panchang: ComputeKpSignificators: chart must not be nil")
@@ -1248,7 +1572,11 @@ func ComputeKpSignificators(chart *types.BirthChart) types.KpSignificators {
 // ComputeKpSubLord splits a sidereal longitude in degrees into its KP rulers:
 // sign lord, nakshatra (star) lord and sub lord, the sub being the Vimshottari
 // proportional division inside the nakshatra. It also returns the longitude
-// normalized to [0, 360) with its rashi and nakshatra indices (0 based).
+// normalized to [0, 360) with its rashi and nakshatra indices (0 based). A NaN
+// or infinite siderealLongitude has no KP reading: the result then carries
+// Longitude NaN, Rashi and Nakshatra -1, a SignLord and StarLord whose Valid
+// reports false, and SubLord Saturn, mirroring the NaN indices, undefined lords
+// and Saturn that TypeScript returns, on every architecture.
 func ComputeKpSubLord(siderealLongitude float64) types.KpSubLordInfo {
 	return jyotish.ComputeKpSubLord(siderealLongitude)
 }
@@ -1261,7 +1589,7 @@ func ComputeMadhyahna(sunrise, sunset time.Time) types.UtcWindow {
 
 // ComputeMangalCompatibility runs [ComputeMangalDosha] on both charts and
 // applies mutual cancellation: the dosha stands only when exactly one of the
-// two natives is Manglik.
+// two natives is Manglik. It panics if either chart is nil.
 func ComputeMangalCompatibility(boyChart, girlChart *types.BirthChart) types.MangalCompatibility {
 	if boyChart == nil || girlChart == nil {
 		panic("panchang: ComputeMangalCompatibility: charts must not be nil")
@@ -1274,7 +1602,7 @@ func ComputeMangalCompatibility(boyChart, girlChart *types.BirthChart) types.Man
 // three) or purna (all three). Afflicted is then cleared by any cancellation
 // found (Mars in its own sign or exalted, conjunct Jupiter, the Moon or Venus,
 // or under Jupiter's 5th, 7th or 9th aspect), while Severity keeps the
-// uncancelled grade.
+// uncancelled grade. It panics if chart is nil.
 func ComputeMangalDosha(chart *types.BirthChart) types.MangalDoshaInfo {
 	if chart == nil {
 		panic("panchang: ComputeMangalDosha: chart must not be nil")
@@ -1286,9 +1614,8 @@ func ComputeMangalDosha(chart *types.BirthChart) types.MangalDoshaInfo {
 // quarter instants falling in the calendar year in options.Timezone, in time
 // order. The instants themselves are UTC and the same worldwide; only the
 // year's boundaries are local. options.Timezone is required: the error is
-// non-nil for an unset or unresolvable one. The boundaries are converted with
-// the zone's offset on 1 July, so for a zone that observes daylight saving
-// they are off by the DST shift.
+// non-nil for an unset or unresolvable one. Each boundary is local midnight at
+// the offset in force on that date.
 func (s *Session) ComputeMoonPhasesForYear(year int, options types.MoonPhasesForYearOptions) ([]types.MoonPhaseEvent, error) {
 	return s.ComputeMoonPhasesForYearContext(context.Background(), year, options)
 }
@@ -1297,7 +1624,7 @@ func (s *Session) ComputeMoonPhasesForYear(year int, options types.MoonPhasesFor
 // context. It walks a range of dates, checking ctx between steps, and returns
 // ctx.Err() once ctx is cancelled or its deadline passes.
 func (s *Session) ComputeMoonPhasesForYearContext(ctx context.Context, year int, options types.MoonPhasesForYearOptions) ([]types.MoonPhaseEvent, error) {
-	return astronomy.ComputeMoonPhasesForYear(ctx, s.eph, year, options)
+	return astronomy.ComputeMoonPhasesForYear(ctx, s.ephemeris(), year, options)
 }
 
 // ComputeMoonPhasesInRange returns the new, first quarter, full and last
@@ -1313,7 +1640,7 @@ func (s *Session) ComputeMoonPhasesInRange(start, end time.Time) ([]types.MoonPh
 // context. It walks a range of dates, checking ctx between steps, and returns
 // ctx.Err() once ctx is cancelled or its deadline passes.
 func (s *Session) ComputeMoonPhasesInRangeContext(ctx context.Context, start, end time.Time) ([]types.MoonPhaseEvent, error) {
-	return astronomy.ComputeMoonPhasesInRange(ctx, s.eph, start.UnixMilli(), end.UnixMilli())
+	return astronomy.ComputeMoonPhasesInRange(ctx, s.ephemeris(), start.UnixMilli(), end.UnixMilli())
 }
 
 // ComputeNishitaMuhurta returns the eighth of the fifteen equal night muhurtas,
@@ -1333,14 +1660,17 @@ func ComputePanchaka(siderealMoon float64) bool {
 // that is free of Panchaka, at most one window. The slice is empty when the
 // Moon is in Panchaka for the whole day, and holds the whole day when it is
 // never in it. getMoon supplies the sidereal Moon longitude in degrees, 0 to
-// 360, at an instant.
+// 360, at an instant. It panics if getMoon is nil.
 func ComputePanchakaRahita(sunriseUtc, nextSunriseUtc time.Time, getMoon types.LongitudeAt) []types.UtcWindow {
+	if getMoon == nil {
+		panic("panchang: ComputePanchakaRahita: getMoon must not be nil")
+	}
 	return core.ComputePanchakaRahita(sunriseUtc.UnixMilli(), nextSunriseUtc.UnixMilli(), getMoon)
 }
 
 // ComputePathuPorutham scores the ten South Indian poruthams for two natal
-// Moons. Recommended requires at least 5 of the 10 to pass and no veto (Yoni
-// score 0, a shared Rajju, or a Vedha pair). It errors when either input has a
+// Moons. Recommended requires at least 5 of the 10 to pass and no veto (enemy
+// yoni animals, a shared Rajju, or a Vedha pair). It errors when either input has a
 // rashi outside [0, 11], a nakshatra outside [0, 26], an optional lagna or
 // navamsa rashi outside [0, 11], or an optional nakshatra pada outside [1, 4].
 func ComputePathuPorutham(boy, girl types.NatalMoon) (types.PathuPoruthamResult, error) {
@@ -1350,10 +1680,15 @@ func ComputePathuPorutham(boy, girl types.NatalMoon) (types.PathuPoruthamResult,
 // ComputePitruDosha reports Pitru dosha with the reasons that triggered it: the
 // Sun sharing a house with Rahu or with Saturn, Rahu in the 9th house, or the
 // 9th lord (when that lord is not the Sun) sharing a house with Rahu. Afflicted
-// is true when at least one reason applies.
+// is true when at least one reason applies. It panics if chart is nil, or if
+// chart.Bhava has no 9th house with a rashi index in 0 to 11 to take the 9th
+// lord from, as a zero BirthChart has not.
 func ComputePitruDosha(chart *types.BirthChart) types.PitruDoshaInfo {
 	if chart == nil {
 		panic("panchang: ComputePitruDosha: chart must not be nil")
+	}
+	if h := chart.Bhava.Houses; len(h) < 9 || h[8].Rashi.Index < 0 || h[8].Rashi.Index > 11 {
+		panic("panchang: ComputePitruDosha: chart.Bhava must carry a 9th house with a rashi index in 0 to 11")
 	}
 	return jyotish.ComputePitruDosha(chart)
 }
@@ -1363,10 +1698,10 @@ func ComputePitruDosha(chart *types.BirthChart) types.PitruDoshaInfo {
 // nakshatra and retrograde flag. nakshatraName and rashiName turn a 0-based
 // index into a display name and may be nil, in which case the index is
 // formatted as a number; nodeType picks the mean (the default when empty) or
-// true Rahu, with Ketu 180 degrees opposite and both marked retrograde.
-// ayanamsaType is required: an empty or unknown value is an error.
+// true Rahu, with Ketu 180 degrees opposite and both marked retrograde. An
+// empty ayanamsaType means [types.Lahiri]; an unknown one is an error.
 func (s *Session) ComputePlanetaryPositions(at time.Time, ayanamsaType types.AyanamsaType, nakshatraName func(idx int) string, rashiName func(idx int) string, nodeType types.NodeType) (types.PlanetaryPositions, error) {
-	return jyotish.ComputePlanetaryPositions(s.eph, at.UnixMilli(), ayanamsaType, nakshatraName, rashiName, nodeType)
+	return jyotish.ComputePlanetaryPositions(s.ephemeris(), at.UnixMilli(), lahiriIfEmpty(ayanamsaType), nakshatraName, rashiName, nodeType)
 }
 
 // ComputePrashnaChart returns the D1 rashi chart cast for questionMoment at
@@ -1375,7 +1710,7 @@ func (s *Session) ComputePlanetaryPositions(at time.Time, ayanamsaType types.Aya
 // to the birth-chart defaults of whole-sign and types.Lahiri. The error
 // conditions are those of [Session.ComputeRashiChart].
 func (s *Session) ComputePrashnaChart(questionMoment time.Time, location types.GeoLocation, options types.BirthChartOptions) (types.BirthChart, error) {
-	return jyotish.ComputePrashnaChart(s.eph, questionMoment.UnixMilli(), location, options)
+	return jyotish.ComputePrashnaChart(s.ephemeris(), questionMoment.UnixMilli(), location, options)
 }
 
 // ComputePratahSandhya returns the morning twilight window ending at sunrise,
@@ -1385,9 +1720,10 @@ func ComputePratahSandhya(sunrise, sunset, nextSunrise time.Time) types.UtcWindo
 }
 
 // ComputeRahuKalam returns the Rahu Kalam window, one of the eight equal parts
-// of daytime selected by varaIndex (0 based, 0 = Sunday). varaIndex outside 0
-// to 6 panics.
+// of daytime selected by varaIndex (0 based, 0 = Sunday). A varaIndex outside
+// 0 to 6 panics with a message naming it; TypeScript throws INVALID_INPUT.
 func ComputeRahuKalam(sunrise, sunset time.Time, varaIndex int) types.UtcWindow {
+	checkWeekday("ComputeRahuKalam", varaIndex)
 	return core.ComputeRahuKalam(sunrise.UnixMilli(), sunset.UnixMilli(), varaIndex)
 }
 
@@ -1396,14 +1732,15 @@ func ComputeRahuKalam(sunrise, sunset time.Time, varaIndex int) types.UtcWindow 
 // instant's UTC Gregorian year and step up at that year's Chaitra new moon, not
 // on 1 January.
 func (s *Session) ComputeSamvat(date time.Time) (types.SamvatInfo, error) {
-	return calendar.ComputeSamvat(s.eph, date.UnixMilli())
+	return calendar.ComputeSamvat(s.ephemeris(), date.UnixMilli())
 }
 
 // ComputeSankrantisForYear returns the Sankrantis (the Sun's sidereal sign
 // ingresses) whose observance date falls in the given Gregorian year by local
 // date, in time order. Moment is the exact transit instant in UTC, Date is the
 // local day the transit is reckoned to (the sunrise-to-sunset day containing
-// it, else the following sunrise's day), and Rashi is 0-based with 0 = Mesha.
+// it, else the following sunrise's day) as the UTC midnight that falls within
+// that day in options.Timezone, and Rashi is 0-based with 0 = Mesha.
 // It errors if the location is invalid, the timezone cannot be resolved, or
 // options.Ayanamsa is unrecognised.
 func (s *Session) ComputeSankrantisForYear(year int, location types.GeoLocation, options types.YearlyListingOptions) ([]types.SankrantiEvent, error) {
@@ -1414,7 +1751,7 @@ func (s *Session) ComputeSankrantisForYear(year int, location types.GeoLocation,
 // context. It walks a range of dates, checking ctx between steps, and returns
 // ctx.Err() once ctx is cancelled or its deadline passes.
 func (s *Session) ComputeSankrantisForYearContext(ctx context.Context, year int, location types.GeoLocation, options types.YearlyListingOptions) ([]types.SankrantiEvent, error) {
-	return calendar.ComputeSankrantisForYear(ctx, s.eph, year, location, options)
+	return calendar.ComputeSankrantisForYear(ctx, s.ephemeris(), year, location, options)
 }
 
 // ComputeSayahnaSandhya returns the evening twilight window starting at sunset,
@@ -1427,17 +1764,29 @@ func ComputeSayahnaSandhya(sunset, nextSunrise time.Time) types.UtcWindow {
 // a birth, in virupas (60 virupas = 1 rupa). Total sums the six components,
 // counting a negative Drik as zero while the Drik field keeps its sign.
 func (s *Session) ComputeShadbala(birth time.Time, location types.GeoLocation, options types.BirthChartOptions) (types.ShadbalaResult, error) {
-	return jyotish.ComputeShadbala(s.eph, birth.UnixMilli(), location, options)
+	return jyotish.ComputeShadbala(s.ephemeris(), birth.UnixMilli(), location, options)
 }
 
 // ComputeSripatiLagna returns the ascendant for the birth instant under the
 // Sripati house system, the same ascendant [Session.ComputeLagna] gives, since
-// Sripati differs only in its intermediate cusps. SiderealLongitude is in
+// Sripati differs only in its intermediate cusps, which
+// [Session.ComputeSripatiLagnaWithCusps] returns. SiderealLongitude is in
 // degrees under the given ayanamsa (empty means types.Lahiri, empty lang means
 // types.LanguageEn). It errors when the birth date lies outside 1900 to 2100, the
 // location is invalid, or the ayanamsa is unrecognised.
 func (s *Session) ComputeSripatiLagna(birth time.Time, location types.GeoLocation, ayanamsaType types.AyanamsaType, lang types.Language) (types.LagnaInfo, error) {
-	return jyotish.ComputeSripatiLagna(s.eph, birth.UnixMilli(), location, ayanamsaType, lang)
+	return jyotish.ComputeSripatiLagna(s.ephemeris(), birth.UnixMilli(), location, ayanamsaType, lang)
+}
+
+// ComputeSripatiLagnaWithCusps returns what [Session.ComputeSripatiLagna]
+// does plus the twelve Sripati house cusps (the TypeScript computeSripatiLagna
+// with includeCusps true). Each quadrant between the ascendant, the nadir,
+// the descendant and the midheaven is trisected, and Cusps[i] is the
+// bhava madhya of house i+1, a sidereal longitude in degrees from 0 to 360
+// under the same ayanamsa, so Cusps[0] is the ascendant itself. It errors in
+// the same cases as ComputeSripatiLagna.
+func (s *Session) ComputeSripatiLagnaWithCusps(birth time.Time, location types.GeoLocation, ayanamsaType types.AyanamsaType, lang types.Language) (types.SripatiLagnaInfo, error) {
+	return jyotish.ComputeSripatiLagnaWithCusps(s.eph, birth.UnixMilli(), location, ayanamsaType, lang)
 }
 
 // ComputeTarabala returns the tara of a transit nakshatra counted from the
@@ -1455,7 +1804,7 @@ func ComputeTarabala(janmaNakshatraIndex, transitNakshatraIndex int, lang types.
 // candidate with the Sun back in the natal rashi. yearAge counts years after
 // birth and must be 1 or more, otherwise the call fails with types.ErrInvalidInput.
 func (s *Session) ComputeTithiPravesha(natalBirth time.Time, yearAge int, location types.GeoLocation, options types.BirthChartOptions) (types.TithiPraveshaChart, error) {
-	return jyotish.ComputeTithiPravesha(s.eph, natalBirth.UnixMilli(), yearAge, location, options)
+	return jyotish.ComputeTithiPravesha(s.ephemeris(), natalBirth.UnixMilli(), yearAge, location, options)
 }
 
 // ComputeUpagrahas returns the seven shadowy sub-planets for a birth: Gulika
@@ -1466,7 +1815,7 @@ func (s *Session) ComputeTithiPravesha(natalBirth time.Time, yearAge int, locati
 // (0-based, 0 = Mesha), and its whole-sign house counted 1-based from the natal
 // lagna.
 func (s *Session) ComputeUpagrahas(birth time.Time, location types.GeoLocation, options types.BirthChartOptions) (types.Upagrahas, error) {
-	return jyotish.ComputeUpagrahas(s.eph, birth.UnixMilli(), location, options)
+	return jyotish.ComputeUpagrahas(s.ephemeris(), birth.UnixMilli(), location, options)
 }
 
 // ComputeVaraTithiYogas returns the vara and tithi combinations in force for
@@ -1478,19 +1827,32 @@ func ComputeVaraTithiYogas(varaIndex, tithiIndex int) ([]types.VaraTithiYoga, er
 }
 
 // ComputeVarjyam returns the Varjyam window of currentNakshatraIndex (0 based)
-// that overlaps the sunrise to next sunrise day. The bool is false when that
-// nakshatra's spell falls entirely outside the day, or when its boundaries
-// cannot be bracketed within 30 hours either side of sunrise. It errors when
-// the index is outside [0, 26].
+// that overlaps the sunrise to next sunrise day. currentNakshatraIndex must be
+// the nakshatra in force at sunriseUtc as getMoon gives it: the bool is false
+// for any other index, when that nakshatra's spell falls entirely outside the
+// day, or when its boundaries cannot be bracketed within 30 hours either side
+// of sunrise. For every spell of the day, including later nakshatras', use
+// [ComputeVarjyamWindows]. It reports [types.ErrInvalidInput] when the index is
+// outside [0, 26] or getMoon is nil.
 func ComputeVarjyam(currentNakshatraIndex int, sunriseUtc, nextSunriseUtc time.Time, getMoon types.LongitudeAt) (window types.UtcWindow, ok bool, err error) {
+	if getMoon == nil {
+		return types.UtcWindow{}, false, types.Codef(types.ErrInvalidInput,
+			"ComputeVarjyam: getMoon must not be nil")
+	}
 	return core.ComputeVarjyam(currentNakshatraIndex, sunriseUtc.UnixMilli(), nextSunriseUtc.UnixMilli(), getMoon)
 }
 
 // ComputeVarjyamWindows returns every Varjyam spell starting at or after
 // sunrise and before the next sunrise, in start order, walking up to three
 // nakshatras from sunrise. Mula is the one nakshatra that carries two spells,
-// so it alone can contribute more than one window.
+// so it alone can contribute more than one window. getMoon supplies the
+// sidereal Moon longitude in degrees, in [0, 360): a value outside it reads a
+// nakshatra index outside 0 to 26, and that nakshatra contributes no spell, as
+// in TypeScript. It panics if getMoon is nil.
 func ComputeVarjyamWindows(sunriseUtc, nextSunriseUtc time.Time, getMoon types.LongitudeAt) []types.UtcWindow {
+	if getMoon == nil {
+		panic("panchang: ComputeVarjyamWindows: getMoon must not be nil")
+	}
 	return core.ComputeVarjyamWindows(sunriseUtc.UnixMilli(), nextSunriseUtc.UnixMilli(), getMoon)
 }
 
@@ -1500,7 +1862,7 @@ func ComputeVarjyamWindows(sunriseUtc, nextSunriseUtc time.Time, getMoon types.L
 // falls by day. yearAge counts years after birth and must be 1 or more,
 // otherwise the call fails with types.ErrInvalidInput.
 func (s *Session) ComputeVarshaphala(natalBirth time.Time, yearAge int, location types.GeoLocation, options types.BirthChartOptions) (types.VarshaphalaChart, error) {
-	return jyotish.ComputeVarshaphala(s.eph, natalBirth.UnixMilli(), yearAge, location, options)
+	return jyotish.ComputeVarshaphala(s.ephemeris(), natalBirth.UnixMilli(), yearAge, location, options)
 }
 
 // ComputeVijayaMuhurta returns the Vijaya muhurta for a day, the 11th of the 15
@@ -1516,32 +1878,52 @@ func ComputeVijayaMuhurta(sunrise, sunset time.Time) types.UtcWindow {
 // janma nakshatra lord and its already elapsed antardashas dropped;
 // moonSiderealLon is the sidereal Moon longitude at birth in degrees and
 // periods use a 365.25 day year. A zero asOf means now, and CurrentIndex is 0
-// when asOf falls outside every mahadasha. It errors when birth's UTC year is
-// outside 1900 to 2100.
+// when asOf falls outside every mahadasha. A finite moonSiderealLon outside [0,
+// 360) is wrapped into it first, so 360 reads as 0 and -0.5 as 359.5. It
+// reports [types.ErrInvalidInput] when moonSiderealLon is NaN or infinite, and
+// [types.ErrInvalidDate] when birth's UTC year is outside 1900 to 2100.
 func ComputeVimshottariDasha(birth time.Time, moonSiderealLon float64, asOf time.Time) (types.VimshottariDashaResult, error) {
 	return jyotish.ComputeVimshottariDasha(birth.UnixMilli(), moonSiderealLon, asOfMs(asOf))
 }
 
 // ComputeVimshottariPratyantar splits one antardasha into its nine
 // pratyantardashas, beginning with the antardasha's own lord and running in
-// Vimshottari order, each taking its Vimshottari years out of 120 of the span.
-// It errors only when antardasha.Lord is not a valid [types.DashaLord].
+// Vimshottari order, each taking its Vimshottari years out of 120 of the span;
+// the last ends exactly at antardasha.EndDate. It treats the span as a whole
+// antardasha, so for the one running at birth, which the first mahadasha
+// clips to start at birth, use [ComputeVimshottariPratyantarIn]. It errors
+// only when antardasha.Lord is not a valid [types.DashaLord].
 func ComputeVimshottariPratyantar(antardasha types.AntarDasha) ([]types.PratyantarDasha, error) {
 	return jyotish.ComputeVimshottariPratyantar(antardasha)
 }
 
+// ComputeVimshottariPratyantarIn returns the pratyantardashas of antardasha
+// within mahaDasha, of which only the Lord is read. It splits the full
+// antardasha, whose length the two lords fix and which ends at
+// antardasha.EndDate, and drops the pratyantardashas over before
+// antardasha.StartDate, so for the antardasha running at birth the list
+// begins with the pratyantardasha running at birth, started at birth. An
+// antardasha within a millisecond of its full length gets exactly the list
+// [ComputeVimshottariPratyantar] returns. It errors when either Lord is not a
+// valid [types.DashaLord].
+func ComputeVimshottariPratyantarIn(mahaDasha types.MahaDasha, antardasha types.AntarDasha) ([]types.PratyantarDasha, error) {
+	return jyotish.ComputeVimshottariPratyantarIn(mahaDasha, antardasha)
+}
+
 // ComputeYamaganda returns the Yamaganda kalam, one of the eight equal slots of
 // daylight, selected by weekday. varaIndex is 0 for Sunday through 6 for
-// Saturday, and a value outside that range panics; arguments and the returned
-// window are UTC.
+// Saturday, and a value outside that range panics with a message naming it
+// (TypeScript throws INVALID_INPUT); arguments and the returned window are UTC.
 func ComputeYamaganda(sunrise, sunset time.Time, varaIndex int) types.UtcWindow {
+	checkWeekday("ComputeYamaganda", varaIndex)
 	return core.ComputeYamaganda(sunrise.UnixMilli(), sunset.UnixMilli(), varaIndex)
 }
 
 // ComputeYogas evaluates the built-in yoga catalogue against chart and returns
 // every yoga that matches, with its reasons and any bhanga (cancellation). An
 // empty options.Types keeps every yoga type, otherwise only the listed types
-// are evaluated. It errors when chart is nil or missing a graha, or when
+// are evaluated. It errors when chart is nil or missing a graha, when a
+// graha's or the lagna's rashi index is outside 0 to 11, or when
 // options.Types names an unknown [types.YogaType].
 func ComputeYogas(chart *types.BirthChart, options types.ComputeYogasOptions) ([]types.Yoga, error) {
 	if chart == nil {
@@ -1560,7 +1942,7 @@ func ComputeYogas(chart *types.BirthChart, options types.ComputeYogasOptions) ([
 //
 // Deprecated: use [Session.ComputeAuspiciousDatesInRange].
 func (s *Session) FindAuspiciousDates(rule types.MuhurtaRule, start, end time.Time, location types.GeoLocation, options types.MuhurtaScoreOptions) ([]types.MuhurtaDay, error) {
-	return muhurta.FindAuspiciousDates(context.Background(), s.eph, rule, start.UnixMilli(), end.UnixMilli(), location, options)
+	return muhurta.FindAuspiciousDates(context.Background(), s.ephemeris(), rule, start.UnixMilli(), end.UnixMilli(), location, options)
 }
 
 // FindPanchakaOnset returns the instant the Moon entered Panchaka, its sidereal
@@ -1568,44 +1950,56 @@ func (s *Session) FindAuspiciousDates(rule types.MuhurtaRule, start, end time.Ti
 // referenceUtc. The bool is false when the Moon is not in Panchaka at
 // referenceUtc, when it was already in Panchaka seven days earlier and so no
 // crossing lies in the window, or when the crossing search does not converge.
+// It panics if getMoon is nil.
 func FindPanchakaOnset(referenceUtc time.Time, getMoon types.LongitudeAt) (types.JSDate, bool) {
+	if getMoon == nil {
+		panic("panchang: FindPanchakaOnset: getMoon must not be nil")
+	}
 	ms, ok := core.FindPanchakaOnset(referenceUtc.UnixMilli(), getMoon)
 	return types.JSDate(ms), ok
 }
 
-// GetEclipseDuringDay returns the eclipse whose peak falls between sunrise and
-// the next sunrise, that is, within the Hindu day, preferring the solar one
-// when both a solar and a lunar eclipse peak there. Solar eclipses pass the
-// same above-horizon filter as [Session.GetUpcomingSolarEclipse], and ok is
-// false when nothing qualifies, which is the ordinary case. longitudes supplies
+// GetEclipseDuringDay returns the eclipse of the Hindu day from sunrise to the
+// next sunrise: a lunar eclipse whose peak falls in it, or a solar eclipse
+// first seen in it, at its peak when the Sun is up then, else at first contact
+// when it is, else at last contact, so one already in progress at sunrise
+// belongs to that sunrise's day. The solar one is preferred when both
+// qualify. Solar eclipses pass the same above-horizon filter as
+// [Session.GetUpcomingSolarEclipse], and ok is false when nothing qualifies,
+// which is the ordinary case. longitudes supplies
 // the tropical Sun and Moon functions used for the cheap syzygy pre-filter; a
 // [types.SyzygyLongitudes] with either function nil falls back to the session's
 // own ephemeris for both.
 func (s *Session) GetEclipseDuringDay(sunrise, nextSunrise time.Time, location types.GeoLocation, lang types.Language, longitudes types.SyzygyLongitudes) (types.EclipseInfo, bool) {
 	if longitudes.TropicalMoon == nil || longitudes.TropicalSun == nil {
-		longitudes = astronomy.DirectLongitudes(s.eph)
+		longitudes = astronomy.DirectLongitudes(s.ephemeris())
 	}
-	return astronomy.GetEclipseDuringDay(s.eph, sunrise.UnixMilli(), nextSunrise.UnixMilli(), location, lang, longitudes)
+	return astronomy.GetEclipseDuringDay(s.ephemeris(), sunrise.UnixMilli(), nextSunrise.UnixMilli(), location, lang, longitudes)
 }
 
 // GetHinduNewYear returns the day the Hindu year begins in gregorianYear for
-// the region: Chaitra Shukla Pratipada for most regions, or the Mesha Sankranti
-// day for Tamil Nadu, Kerala, Punjab, West Bengal and Assam, where which civil
-// day the transit is reckoned to varies by region. The value identifies a day,
-// not a moment within it. ok is false when the scan finds no such day. A
-// timezone is required in options: the error is non-nil for an unset or
-// unresolvable one, for an invalid location, for an unrecognised
-// options.Ayanamsa, and, on the Chaitra path, for a gregorianYear outside 1900
-// to 2100.
+// the region: Chaitra Shukla Pratipada for most regions (the day containing it
+// when it touches no sunrise, as for Ugadi), or the Mesha Sankranti day for
+// Tamil Nadu, Kerala, Punjab, West Bengal, Assam and Odisha, where which civil
+// day the transit is reckoned to varies by region (Odisha's Pana Sankranti:
+// the transit's civil date, or the next one when the transit falls later than
+// 0.315 of the night after sunset). The value identifies a day, not a moment
+// within it: the UTC midnight that falls within that local day in
+// options.Timezone, which is the date's own UTC midnight at or east of UTC and
+// the following one west of it, so read it in that zone.
+// ok is false when the scan finds no such day. A timezone is required in
+// options: the error is non-nil for an unset or unresolvable one, for an
+// invalid location, for an unrecognised options.Ayanamsa, and, on the Chaitra
+// path, for a gregorianYear outside 1900 to 2100.
 func (s *Session) GetHinduNewYear(gregorianYear int, region types.FestivalRegion, location types.GeoLocation, options types.ConvertOptions) (date types.JSDate, ok bool, err error) {
-	return calendar.GetHinduNewYear(s.eph, gregorianYear, region, location, options)
+	return calendar.GetHinduNewYear(s.ephemeris(), gregorianYear, region, location, options)
 }
 
 // GetKaliYugaYear returns the Kali Yuga year for the instant, counted from the
 // 3102 BCE epoch and turning over at that Gregorian year's Chaitra new moon
 // rather than on 1 January. It errors when the date lies outside 1900 to 2100.
 func (s *Session) GetKaliYugaYear(date time.Time) (int, error) {
-	return calendar.GetKaliYugaYear(s.eph, date.UnixMilli())
+	return calendar.GetKaliYugaYear(s.ephemeris(), date.UnixMilli())
 }
 
 // GetMoonPhasesInRange returns every new moon, first quarter, full moon and
@@ -1615,7 +2009,7 @@ func (s *Session) GetKaliYugaYear(date time.Time) (int, error) {
 //
 // Deprecated: use [Session.ComputeMoonPhasesInRange].
 func (s *Session) GetMoonPhasesInRange(start, end time.Time) ([]types.MoonPhaseEvent, error) {
-	return astronomy.GetMoonPhasesInRange(context.Background(), s.eph, start.UnixMilli(), end.UnixMilli())
+	return astronomy.GetMoonPhasesInRange(context.Background(), s.ephemeris(), start.UnixMilli(), end.UnixMilli())
 }
 
 // GetUpcomingEclipses returns up to count eclipses at or after from, solar and
@@ -1623,10 +2017,21 @@ func (s *Session) GetMoonPhasesInRange(start, end time.Time) ([]types.MoonPhaseE
 // out. A solar eclipse is included only when the Sun is above the horizon at
 // the location at the start or the end of its local partial phase, while lunar
 // eclipses are returned either way, with VisibleFromLocation reporting
-// visibility at peak. It errors when count is below 1, when from lies outside
-// 1900 to 2100, or when the location is invalid.
+// visibility at peak. It errors when count is below 1 (count has no default;
+// TypeScript's getUpcomingEclipses uses 5 when it is omitted), when from lies
+// outside 1900 to 2100, or when the location is invalid. Only from is checked
+// against that span: as in TypeScript, the walk is not clipped at 2100 and
+// keeps going until it has count eclipses, each costing a few milliseconds, so
+// a large count runs long; [Session.GetUpcomingEclipsesContext] can bound it.
 func (s *Session) GetUpcomingEclipses(from time.Time, location types.GeoLocation, count int) ([]types.EclipseInfo, error) {
-	return calendar.GetUpcomingEclipses(s.eph, from.UnixMilli(), location, count)
+	return s.GetUpcomingEclipsesContext(context.Background(), from, location, count)
+}
+
+// GetUpcomingEclipsesContext is [Session.GetUpcomingEclipses] with a context.
+// It checks ctx before each eclipse it looks for, and returns ctx.Err() once
+// ctx is cancelled or its deadline passes.
+func (s *Session) GetUpcomingEclipsesContext(ctx context.Context, from time.Time, location types.GeoLocation, count int) ([]types.EclipseInfo, error) {
+	return calendar.GetUpcomingEclipsesContext(ctx, s.ephemeris(), from.UnixMilli(), location, count)
 }
 
 // GetUpcomingLunarEclipse returns the first lunar eclipse whose penumbral phase
@@ -1639,7 +2044,7 @@ func (s *Session) GetUpcomingEclipses(from time.Time, location types.GeoLocation
 // has an umbral phase, so a penumbral eclipse carries none. ok is false when no
 // lunar eclipse falls in the window.
 func (s *Session) GetUpcomingLunarEclipse(from time.Time, location types.GeoLocation, withinDays int, lang types.Language) (types.EclipseInfo, bool) {
-	return astronomy.GetUpcomingLunarEclipse(s.eph, from.UnixMilli(), location, withinDays, lang)
+	return astronomy.GetUpcomingLunarEclipse(s.ephemeris(), from.UnixMilli(), location, withinDays, lang)
 }
 
 // GetUpcomingSolarEclipse returns the first solar eclipse whose local partial
@@ -1653,9 +2058,12 @@ func (s *Session) GetUpcomingLunarEclipse(from time.Time, location types.GeoLoca
 // behind from but whose new moon is still ahead is returned with a Start
 // earlier than from. VisibleFromLocation reports whether the Sun is up at peak,
 // and the sutak window runs from 12 hours before first contact to last contact.
-// ok is false when no such eclipse falls in the window.
+// When the peak is below the horizon, Subtype and Description give the deepest
+// phase seen, at the sunrise or sunset inside the eclipse, while Obscuration
+// and Magnitude stay at the peak. ok is false when no such eclipse falls in
+// the window.
 func (s *Session) GetUpcomingSolarEclipse(from time.Time, location types.GeoLocation, withinDays int, lang types.Language) (types.EclipseInfo, bool) {
-	return astronomy.GetUpcomingSolarEclipse(s.eph, from.UnixMilli(), location, withinDays, lang)
+	return astronomy.GetUpcomingSolarEclipse(s.ephemeris(), from.UnixMilli(), location, withinDays, lang)
 }
 
 // IsEclipseVisibleAnyPhase reports whether the eclipsed body (the Sun for a
@@ -1664,7 +2072,7 @@ func (s *Session) GetUpcomingSolarEclipse(from time.Time, location types.GeoLoca
 // looser than the types.EclipseInfo.VisibleFromLocation flag, which only looks at the
 // peak.
 func (s *Session) IsEclipseVisibleAnyPhase(eclipse types.EclipseInfo, location types.GeoLocation) bool {
-	return astronomy.IsEclipseVisibleAnyPhase(s.eph, eclipse, location)
+	return astronomy.IsEclipseVisibleAnyPhase(s.ephemeris(), eclipse, location)
 }
 
 // IsPanchakaDosha reports whether a Panchaka type carries a dosha. Every type
@@ -1682,7 +2090,7 @@ func IsPanchakaDosha(t types.PanchakaType) bool {
 // 1900 to 2100, for an invalid location, and for an unrecognised
 // options.Ayanamsa.
 func (s *Session) ScoreMuhurta(date time.Time, location types.GeoLocation, rule types.MuhurtaRule, options types.MuhurtaScoreOptions) (types.MuhurtaScore, error) {
-	return muhurta.ScoreMuhurta(s.eph, date.UnixMilli(), location, rule, options)
+	return muhurta.ScoreMuhurta(s.ephemeris(), date.UnixMilli(), location, rule, options)
 }
 
 // GrahaAbbr returns the two letter English abbreviations of the nine grahas
@@ -1712,8 +2120,10 @@ func YoginiYears() [8]float64 { return jyotish.YoginiYears }
 func YoginiPlanet() [8]types.DashaLord { return jyotish.YoginiPlanet }
 
 // CharaRashiYears returns the length in years of each rashi's Chara dasha,
-// indexed 0 for Mesha through 11 for Meena. It is also the fixed duration table
-// of [Session.ComputeNarayanDasha].
+// indexed 0 for Mesha through 11 for Meena: 9 for a movable, 8 for a fixed and
+// 7 for a dual sign whatever the chart, a fixed table rather than the Jaimini
+// count to the sign's lord that [Session.ComputeNarayanDashaVariable] applies.
+// It is also the fixed duration table of [Session.ComputeNarayanDasha].
 func CharaRashiYears() [12]float64 { return jyotish.CharaRashiYears }
 
 // VishamaPadaRashis reports which rashis are vishama pada (odd footed), indexed
@@ -1880,18 +2290,24 @@ func TravelStartRule() types.MuhurtaRule {
 
 // ComputeNarayanDashaVariable returns the twelve Narayan (Chara) rashi
 // mahadashas from the lagna, taking each period's length from where that
-// rashi's lord sits (0 to 12 years, one added for an exalted lord and one taken
-// off for a debilitated one; for Scorpio and Aquarius, which have two lords,
-// the stronger one counts, or 12 years when both occupy the rashi itself)
-// instead of the fixed table
-// [Session.ComputeNarayanDasha] uses. The order runs forward from an odd-footed
-// (vishama pada) lagna rashi and backward otherwise, with the first period
-// starting at birth. asOf selects the current period and a zero asOf means now;
-// CurrentIndex falls back to 0 when asOf lies outside every period. The error
-// is non-nil for a birth date outside 1900 to 2100, out of range coordinates,
-// or an unrecognised ayanamsa.
+// rashi's lord sits (Sanjay Rath, Narayana Dasa) instead of the fixed table
+// [Session.ComputeNarayanDasha] uses: the signs counted from the rashi to its
+// lord, less one, or 12 when the lord occupies the rashi itself, with one year
+// added for an exalted lord and one taken off for a debilitated one, capped at
+// 12, so 0 to 12 years. Scorpio and Aquarius have two lords (Mars and Ketu,
+// Saturn and Rahu): 12 years when both occupy the rashi, the count to their
+// sign when they sit together elsewhere (adjusted for Mars or Saturn), the
+// count to the other lord when exactly one occupies the rashi, and otherwise
+// the count to the stronger lord, the one whose sign holds more planets, then
+// the one whose sign has rasi drishti from more of Mercury, Jupiter and that
+// sign's own lord, with Mars or Saturn on a tie. The order runs forward from
+// an odd-footed (vishama pada) lagna rashi and backward otherwise, with the
+// first period starting at birth. asOf selects the current period and a zero
+// asOf means now; CurrentIndex falls back to 0 when asOf lies outside every
+// period. The error is non-nil for a birth date outside 1900 to 2100, out of
+// range coordinates, or an unrecognised ayanamsa.
 func (s *Session) ComputeNarayanDashaVariable(birth time.Time, location types.GeoLocation, ayanamsa types.AyanamsaType, asOf time.Time) (types.NarayanDashaResult, error) {
-	return jyotish.ComputeNarayanDashaVariable(s.eph, birth.UnixMilli(), location, ayanamsa, asOfMs(asOf))
+	return jyotish.ComputeNarayanDashaVariable(s.ephemeris(), birth.UnixMilli(), location, ayanamsa, asOfMs(asOf))
 }
 
 // AllSections returns a
@@ -1915,7 +2331,7 @@ func Sections(list ...types.PanchangSection) types.SectionSet { return core.Sect
 // loka a Bhadra (Vishti karana) segment is reckoned to occupy. The returned
 // slice is a fresh copy.
 func AllBhadraLocations() []types.BhadraLocation {
-	return append([]types.BhadraLocation(nil), types.AllBhadraLocations...)
+	return append([]types.BhadraLocation(nil), allBhadraLocations...)
 }
 
 // AllBhadraModes returns every [types.BhadraMode], the ways a [types.MuhurtaRule] can treat
@@ -1928,50 +2344,50 @@ func AllBhadraModes() []types.BhadraMode {
 // the house (1 based) that the transit Moon occupies counted from a janma
 // rashi. The returned slice is a fresh copy.
 func AllChandraBalamQualities() []types.ChandraBalamQuality {
-	return append([]types.ChandraBalamQuality(nil), types.AllChandraBalamQualities...)
+	return append([]types.ChandraBalamQuality(nil), allChandraBalamQualities...)
 }
 
 // AllChoghadiyaQualities returns every [types.ChoghadiyaQuality], the quality label
 // carried by Choghadiya, Gowri and Do Ghati slots and by Anandadi yoga. The
 // returned slice is a fresh copy.
 func AllChoghadiyaQualities() []types.ChoghadiyaQuality {
-	return append([]types.ChoghadiyaQuality(nil), types.AllChoghadiyaQualities...)
+	return append([]types.ChoghadiyaQuality(nil), allChoghadiyaQualities...)
 }
 
 // AllDashaLords returns the nine dasha lords in Vimshottari order, beginning
 // with Ketu. The returned slice is a fresh copy.
 func AllDashaLords() []types.DashaLord {
-	return append([]types.DashaLord(nil), types.AllDashaLords[:]...)
+	return append([]types.DashaLord(nil), allDashaLords[:]...)
 }
 
 // AllDayNightSegments returns both [types.DayNightSegment] values: day (sunrise to
 // sunset) and night (sunset to the next sunrise), the halves a
 // [types.DurMuhurtaPeriod] falls in. The returned slice is a fresh copy.
 func AllDayNightSegments() []types.DayNightSegment {
-	return append([]types.DayNightSegment(nil), types.AllDayNightSegments...)
+	return append([]types.DayNightSegment(nil), allDayNightSegments...)
 }
 
 // AllDignities returns every [types.Dignity] a graha can hold in the rashi it
 // occupies, ordered from exalted down to debilitated. The returned slice is a
 // fresh copy.
-func AllDignities() []types.Dignity { return append([]types.Dignity(nil), types.AllDignities...) }
+func AllDignities() []types.Dignity { return append([]types.Dignity(nil), allDignities...) }
 
 // AllDivisionals returns the seven divisional (varga) charts that
 // [Session.ComputeDivisionalChart] accepts. The returned slice is a fresh copy.
 func AllDivisionals() []types.Divisional {
-	return append([]types.Divisional(nil), types.AllDivisionals...)
+	return append([]types.Divisional(nil), allDivisionals...)
 }
 
 // AllEclipseKinds returns both [types.EclipseKind] values, solar and lunar, as
 // carried by [types.EclipseInfo]. The returned slice is a fresh copy.
 func AllEclipseKinds() []types.EclipseKind {
-	return append([]types.EclipseKind(nil), types.AllEclipseKinds...)
+	return append([]types.EclipseKind(nil), allEclipseKinds...)
 }
 
 // AllEclipseSubtypes returns every [types.EclipseSubtype] an [types.EclipseInfo] can carry.
 // The returned slice is a fresh copy.
 func AllEclipseSubtypes() []types.EclipseSubtype {
-	return append([]types.EclipseSubtype(nil), types.AllEclipseSubtypes...)
+	return append([]types.EclipseSubtype(nil), allEclipseSubtypes...)
 }
 
 // AllEclipseTableKinds returns both [types.EclipseTableKind] values, solar and lunar,
@@ -1992,13 +2408,13 @@ func AllEclipseTableSubtypes() []types.EclipseTableSubtype {
 // types.RegionAll (no regional filter) and excluding the deprecated aliases returned
 // by [AllLegacyFestivalRegions]. The returned slice is a fresh copy.
 func AllFestivalRegions() []types.FestivalRegion {
-	return append([]types.FestivalRegion(nil), types.AllFestivalRegions...)
+	return append([]types.FestivalRegion(nil), allFestivalRegions...)
 }
 
 // AllFestivalTypes returns every [types.FestivalType], the classification carried by
 // [types.FestivalInfo]. The returned slice is a fresh copy.
 func AllFestivalTypes() []types.FestivalType {
-	return append([]types.FestivalType(nil), types.AllFestivalTypes...)
+	return append([]types.FestivalType(nil), allFestivalTypes...)
 }
 
 // AllFestivalsTableTypes returns the eight categories an entry in a generated
@@ -2011,35 +2427,43 @@ func AllFestivalsTableTypes() []types.FestivalsTableType {
 // AllGandaMulaSeverities returns the two severities of a Gandamula nakshatra
 // affliction, mild and severe.
 func AllGandaMulaSeverities() []types.GandaMulaSeverity {
-	return append([]types.GandaMulaSeverity(nil), types.AllGandaMulaSeverities...)
+	return append([]types.GandaMulaSeverity(nil), allGandaMulaSeverities...)
 }
 
 // AllGrahas returns the nine grahas in canonical order, Sun through Ketu, which
 // is also their numeric [types.Graha] order.
-func AllGrahas() []types.Graha { return append([]types.Graha(nil), types.AllGrahas[:]...) }
+func AllGrahas() []types.Graha { return append([]types.Graha(nil), allGrahas[:]...) }
 
 // AllHouseSystems returns the three house systems a bhava chart can be cast in:
 // whole sign, equal and Placidus (KP).
 func AllHouseSystems() []types.HouseSystem {
-	return append([]types.HouseSystem(nil), types.AllHouseSystems...)
+	return append([]types.HouseSystem(nil), allHouseSystems...)
 }
 
 // AllKaalSarpSubtypes returns the twelve Kaal Sarp subtypes in Rahu house
 // order: index i is the subtype for Rahu in house i+1.
 func AllKaalSarpSubtypes() []types.KaalSarpSubtype {
-	return append([]types.KaalSarpSubtype(nil), types.AllKaalSarpSubtypes[:]...)
+	return append([]types.KaalSarpSubtype(nil), allKaalSarpSubtypes[:]...)
+}
+
+// AllKaraka8Names returns the eight roles of the eight-karaka Jaimini scheme
+// in rank order, types.Atmakaraka first and types.Darakaraka last, with
+// [types.Pitrukaraka] fifth: index i is the role [ComputeJaimini8Karakas]
+// gives the graha of rank i. The returned slice is a fresh copy.
+func AllKaraka8Names() []types.Karaka8Name {
+	return append([]types.Karaka8Name(nil), types.AllKaraka8Names[:]...)
 }
 
 // AllKarakaNames returns the seven Jaimini chara karaka titles in rank order,
 // from types.Atmakaraka (the graha at the highest degree within its rashi) down to
 // types.Darakaraka.
 func AllKarakaNames() []types.KarakaName {
-	return append([]types.KarakaName(nil), types.AllKarakaNames[:]...)
+	return append([]types.KarakaName(nil), allKarakaNames[:]...)
 }
 
 // AllKaranaTypes returns the two karana classes, fixed and movable.
 func AllKaranaTypes() []types.KaranaType {
-	return append([]types.KaranaType(nil), types.AllKaranaTypes...)
+	return append([]types.KaranaType(nil), allKaranaTypes...)
 }
 
 // AllKootNames returns the eight Ashtakoot koots in scoring order, Varna (1
@@ -2050,25 +2474,42 @@ func AllKootNames() []types.KootName {
 
 // AllLanguages returns the two output languages, types.LanguageEn ("en") and types.LanguageHi
 // ("hi").
-func AllLanguages() []types.Language { return append([]types.Language(nil), types.AllLanguages...) }
+func AllLanguages() []types.Language { return append([]types.Language(nil), allLanguages...) }
 
 // AllLegacyFestivalRegions returns the three deprecated [types.FestivalRegion] values
 // ("tamil", "bengal", "north-india"). They are still accepted as input and
 // resolve to "tamil-nadu", "west-bengal" and "all" respectively.
 func AllLegacyFestivalRegions() []types.FestivalRegion {
-	return append([]types.FestivalRegion(nil), types.AllLegacyFestivalRegions...)
+	return append([]types.FestivalRegion(nil), allLegacyFestivalRegions...)
 }
 
 // AllMangalDoshaSeverities returns the three Mangal Dosha severities: none,
 // anshik (partial) and purna (full).
 func AllMangalDoshaSeverities() []types.MangalDoshaSeverity {
-	return append([]types.MangalDoshaSeverity(nil), types.AllMangalDoshaSeverities...)
+	return append([]types.MangalDoshaSeverity(nil), allMangalDoshaSeverities...)
 }
 
 // AllMasaSystems returns the two lunar month conventions, purnimanta (the masa
 // ends at the full moon) and amanta (it ends at the new moon).
 func AllMasaSystems() []types.MasaSystem {
-	return append([]types.MasaSystem(nil), types.AllMasaSystems...)
+	return append([]types.MasaSystem(nil), allMasaSystems...)
+}
+
+// AllMoonPhaseNames returns the four principal lunar phases a
+// [types.MoonPhaseEvent] can carry, in the order they occur: new, first
+// quarter, full and last quarter. The returned slice is a fresh copy.
+func AllMoonPhaseNames() []types.MoonPhaseName {
+	return []types.MoonPhaseName{
+		types.MoonPhaseNew, types.MoonPhaseFirstQuarter, types.MoonPhaseFull, types.MoonPhaseLastQuarter,
+	}
+}
+
+// AllMoonPhaseTableNames returns the four phases a Moon phases table entry
+// can carry, in the order they occur and the order of the dictionary
+// [Session.BuildMoonPhasesTable] writes: new, first quarter, full and last
+// quarter. The returned slice is a fresh copy.
+func AllMoonPhaseTableNames() []types.MoonPhaseTableName {
+	return append([]types.MoonPhaseTableName(nil), calendar.PhaseOrder...)
 }
 
 // AllMuhurtaFactorAxes returns the eight axes a muhurta scoring factor can come
@@ -2076,6 +2517,21 @@ func AllMasaSystems() []types.MasaSystem {
 // exclusion).
 func AllMuhurtaFactorAxes() []types.MuhurtaFactorAxis {
 	return append([]types.MuhurtaFactorAxis(nil), muhurta.AllMuhurtaFactorAxes...)
+}
+
+// AllNarayanDirections returns the two directions a Narayan dasha sequence
+// can run, forward (from a vishama pada lagna) and backward. The returned
+// slice is a fresh copy.
+func AllNarayanDirections() []types.NarayanDirection {
+	return []types.NarayanDirection{types.NarayanForward, types.NarayanBackward}
+}
+
+// AllNodeAspects returns the two values [ComputeAspects] and [ComputeYogas]
+// accept for the aspects of Rahu and Ketu: the 7th only, which is also what
+// the empty value means, and the 5th and 9th as well. Any other value is
+// rejected with [types.ErrInvalidInput]. The returned slice is a fresh copy.
+func AllNodeAspects() []types.NodeAspects {
+	return []types.NodeAspects{types.NodeAspects7Only, types.NodeAspects5And9}
 }
 
 // AllNodeTypes returns the two lunar node models available for Rahu and Ketu,
@@ -2089,7 +2545,7 @@ func AllPakshas() []types.Paksha { return append([]types.Paksha(nil), calendar.A
 // AllPanchakaTypes returns the six Panchaka classifications: the five doshas
 // keyed to the onset weekday, plus samanya, which carries no dosha.
 func AllPanchakaTypes() []types.PanchakaType {
-	return append([]types.PanchakaType(nil), types.AllPanchakaTypes...)
+	return append([]types.PanchakaType(nil), allPanchakaTypes...)
 }
 
 // AllPanchangSections returns the four optional sections a [types.SectionSet] can
@@ -2104,10 +2560,20 @@ func AllPoruthamNames() []types.PoruthamName {
 	return append([]types.PoruthamName(nil), jyotish.AllPoruthamNames[:]...)
 }
 
+// AllReferences returns the three reference frames: traditional (Ujjain),
+// modern (the 82.5 E meridian) and practical (the caller's own location).
+// Practical is reported, not requested: [ResolveLocation] returns it for a
+// supplied location, and [ReferenceLocation] rejects it with
+// [types.ErrInvalidInput], so validate a mode argument against the first two
+// only. The returned slice is a fresh copy.
+func AllReferences() []types.Reference {
+	return []types.Reference{types.ReferenceTraditional, types.ReferenceModern, types.ReferencePractical}
+}
+
 // AllSpecialYogaTypes returns the ten day level special yogas the panchang can
 // report, such as Amrit Siddhi and Sarvartha Siddhi.
 func AllSpecialYogaTypes() []types.SpecialYogaType {
-	return append([]types.SpecialYogaType(nil), types.AllSpecialYogaTypes...)
+	return append([]types.SpecialYogaType(nil), allSpecialYogaTypes...)
 }
 
 // AllTableLanguages returns the two languages a generated festivals, eclipses
@@ -2119,7 +2585,7 @@ func AllTableLanguages() []types.FestivalsTableLanguage {
 // AllTarabalaQualities returns the two Tarabala qualities, auspicious and
 // inauspicious.
 func AllTarabalaQualities() []types.TarabalaQuality {
-	return append([]types.TarabalaQuality(nil), types.AllTarabalaQualities...)
+	return append([]types.TarabalaQuality(nil), allTarabalaQualities...)
 }
 
 // AllVaraTithiYogaTypes returns the seven vara and tithi combination yogas, the
@@ -2132,12 +2598,18 @@ func AllVaraTithiYogaTypes() []types.VaraTithiYogaType {
 // AllVisibleGrahas returns the seven physical grahas, Sun through Saturn, in
 // [types.Graha] order; the nodes Rahu and Ketu are excluded.
 func AllVisibleGrahas() []types.VisibleGraha {
-	return append([]types.VisibleGraha(nil), types.AllVisibleGrahas[:]...)
+	return append([]types.VisibleGraha(nil), allVisibleGrahas[:]...)
 }
 
 // AllYogaNames returns the twenty-five birth chart yogas the library detects.
-func AllYogaNames() []types.YogaName { return append([]types.YogaName(nil), types.AllYogaNames...) }
+func AllYogaNames() []types.YogaName { return append([]types.YogaName(nil), allYogaNames...) }
+
+// AllYogaPolarities returns the two polarities a [types.VaraTithiYoga] can
+// carry, auspicious and inauspicious. The returned slice is a fresh copy.
+func AllYogaPolarities() []types.YogaPolarity {
+	return []types.YogaPolarity{types.PolarityAuspicious, types.PolarityInauspicious}
+}
 
 // AllYogaTypes returns the eight categories a birth chart yoga is grouped under
 // (mahapurusha, lunar, solar, raja, dhana, special, cancellation and negative).
-func AllYogaTypes() []types.YogaType { return append([]types.YogaType(nil), types.AllYogaTypes...) }
+func AllYogaTypes() []types.YogaType { return append([]types.YogaType(nil), allYogaTypes...) }

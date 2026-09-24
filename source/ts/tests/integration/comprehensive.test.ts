@@ -438,6 +438,28 @@ describe('getDailyPanchang with computeEndTimes: false', () => {
     expect(r.periods.hora.day).toHaveLength(12);
     expect(r.periods.gowri.day).toHaveLength(8);
   });
+
+  it('keeps the special yogas of tithis and nakshatras that begin after sunrise', () => {
+    const day = noonUtc('2025-01-07');
+    const full = getDailyPanchang(day, PUNE, { timezone: 330 })!;
+    const fast = getDailyPanchang(day, PUNE, { timezone: 330, computeEndTimes: false })!;
+    expect(full.angas.tithis.length).toBeGreaterThan(1);
+    expect(full.angas.nakshatras.length).toBeGreaterThan(1);
+    expect(full.specialYogas.map((y) => y.type)).toContain('sarvartha_siddhi');
+    expect(JSON.stringify(fast.specialYogas)).toBe(JSON.stringify(full.specialYogas));
+  });
+
+  it('changes no published field but the anga lists, over a month', () => {
+    for (let i = 0; i < 31; i++) {
+      const day = noonUtc(`2025-03-${String(i + 1).padStart(2, '0')}`);
+      const full = getDailyPanchang(day, PUNE, { timezone: 330 })! as unknown as Record<string, unknown>;
+      const fast = getDailyPanchang(day, PUNE, { timezone: 330, computeEndTimes: false })! as unknown as Record<string, unknown>;
+      for (const key of Object.keys(full)) {
+        if (key === 'angas') continue;
+        expect(JSON.stringify(fast[key]), `${key} on 2025-03-${i + 1}`).toBe(JSON.stringify(full[key]));
+      }
+    }
+  });
 });
 
 describe('getInstantPanchang: comprehensive', () => {

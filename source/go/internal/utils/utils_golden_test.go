@@ -2,9 +2,14 @@ package utils
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
 	"math"
+	"math/rand"
+	"strconv"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
 	"github.com/ishankgupta95/panchang/source/go/v5/types"
@@ -420,4 +425,166 @@ func TestConstantsMatchTypeScript(t *testing.T) {
 		t.Errorf("VarjyamSecondOffsetGhatikas = %v, want {18: 20} (Mula only)", VarjyamSecondOffsetGhatikas)
 	}
 	t.Logf("all spans, tables and index helpers bit-identical; NakshatraSpan = %v", NakshatraSpan)
+}
+
+func TestSecantKeepsAStepOntoAFractionalLowerBracket(t *testing.T) {
+	// lo = 1000.5 is evaluated at 1000 and the crossing is at 1000.3, so the second secant step
+	// rounds to 1000; it used to be rejected as below lo, leaving the caller one bracket late.
+	const crossing = 1000.3
+	angleAt := func(ms int64) float64 { return 10 + (float64(ms)-crossing)*1e-6 }
+	solved, ok := SolveAngleCrossing(1000.5, 64_000.5, 10, angleAt,
+		func(ms int64) bool { return float64(ms) < crossing })
+	if !ok || float64(solved) <= crossing || float64(solved)-crossing >= 30 {
+		t.Errorf("solved %d ok=%v, want just past %v", solved, ok, crossing)
+	}
+}
+
+// formatInZoneBuilder is FormatInZone as written before it moved to a stack
+// buffer, kept to pin that every instant and offset is spelled the same way.
+func formatInZoneBuilder(ms int64, offsetMinutes int) string {
+	shifted := time.UnixMilli(ms + int64(offsetMinutes)*60_000).UTC()
+	abs := uint64(offsetMinutes)
+	if offsetMinutes < 0 {
+		abs = -abs
+	}
+	year := shifted.Year()
+
+	var b strings.Builder
+	b.Grow(29)
+	if year < 1000 {
+		s := strconv.Itoa(year)
+		for i := len(s); i < 4; i++ {
+			b.WriteByte('0')
+		}
+		b.WriteString(s)
+	} else {
+		b.WriteString(strconv.Itoa(year))
+	}
+	b.WriteByte('-')
+	b.WriteString(twoDigits[int(shifted.Month())])
+	b.WriteByte('-')
+	b.WriteString(twoDigits[shifted.Day()])
+	b.WriteByte('T')
+	b.WriteString(twoDigits[shifted.Hour()])
+	b.WriteByte(':')
+	b.WriteString(twoDigits[shifted.Minute()])
+	b.WriteByte(':')
+	b.WriteString(twoDigits[shifted.Second()])
+	b.WriteByte('.')
+	b.WriteString(threeDigits[shifted.Nanosecond()/1_000_000])
+	if offsetMinutes < 0 {
+		b.WriteByte('-')
+	} else {
+		b.WriteByte('+')
+	}
+	if hours := abs / 60; hours < uint64(len(twoDigits)) {
+		b.WriteString(twoDigits[hours])
+	} else {
+		b.WriteString(strconv.FormatUint(hours, 10))
+	}
+	b.WriteByte(':')
+	b.WriteString(twoDigits[abs%60])
+	return b.String()
+}
+
+func TestFormatInZoneMatchesTheBuilderSpelling(t *testing.T) {
+	rng := rand.New(rand.NewSource(20260924))
+	offsets := []int{0, 330, 345, -300, -210, 840, -720, 1, -1, 59, -59, 60, 525, 3660, -3660,
+		1 << 40, -(1 << 40), int(^uint(0) >> 1), -int(^uint(0)>>1) - 1}
+	edges := []int64{
+		0, -1, 1, 999, -999,
+		time.Date(1900, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(),
+		time.Date(2100, 12, 31, 23, 59, 59, 999_000_000, time.UTC).UnixMilli(),
+		time.Date(999, 12, 31, 23, 59, 59, 0, time.UTC).UnixMilli(),
+		time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli(),
+		time.Date(-5, 6, 1, 0, 0, 0, 0, time.UTC).UnixMilli(),
+		time.Date(12345, 6, 1, 0, 0, 0, 0, time.UTC).UnixMilli(),
+		8_640_000_000_000_000, -8_640_000_000_000_000,
+	}
+	check := func(ms int64, off int) {
+		t.Helper()
+		if got, want := FormatInZone(ms, off), formatInZoneBuilder(ms, off); got != want {
+			t.Fatalf("FormatInZone(%d, %d) = %q, want %q", ms, off, got, want)
+		}
+	}
+	for _, ms := range edges {
+		for _, off := range offsets {
+			check(ms, off)
+		}
+	}
+	lo := time.Date(1890, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli()
+	hi := time.Date(2110, 1, 1, 0, 0, 0, 0, time.UTC).UnixMilli()
+	for i := 0; i < 200_000; i++ {
+		ms := rng.Int63n(2*8_640_000_000_000_000) - 8_640_000_000_000_000
+		if i%2 == 0 {
+			ms = lo + rng.Int63n(hi-lo)
+		}
+		check(ms, rng.Intn(1561)-720)
+	}
+}
+
+func TestFormatInZoneAllocatesOnlyItsResult(t *testing.T) {
+	ms := time.Date(2025, 1, 14, 7, 9, 44, 172_000_000, time.UTC).UnixMilli()
+	var sink string
+	if allocs := testing.AllocsPerRun(1000, func() { sink = FormatInZone(ms, 330) }); allocs != 1 {
+		t.Errorf("FormatInZone allocates %v times per call, want 1", allocs)
+	}
+	if sink != "2025-01-14T12:39:44.172+05:30" {
+		t.Errorf("FormatInZone = %q", sink)
+	}
+}
+
+// A kept zone must answer as a fresh load would, in either order of calls,
+// and a failed or "Local" lookup must never be kept.
+func TestZoneStoreIsOutputNeutralAndBounded(t *testing.T) {
+	winter := time.Date(2025, 1, 15, 12, 0, 0, 0, time.UTC).UnixMilli()
+	summer := time.Date(2025, 7, 15, 12, 0, 0, 0, time.UTC).UnixMilli()
+	for _, name := range []string{"America/New_York", "Europe/London", "Asia/Kolkata", "Australia/Lord_Howe", "UTC", ""} {
+		loc, err := time.LoadLocation(name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for round := 0; round < 2; round++ {
+			for _, ms := range []int64{summer, winter, summer} {
+				got, err := ResolveUtcOffset(types.TimezoneName(name), ms)
+				if err != nil {
+					t.Fatal(err)
+				}
+				_, want := time.UnixMilli(ms).In(loc).Zone()
+				if got != want/60 {
+					t.Fatalf("%q round %d at %d: offset %d, a fresh load gives %d", name, round, ms, got, want/60)
+				}
+			}
+		}
+	}
+
+	for i := 0; i < 2; i++ {
+		_, err := ResolveUtcOffset(types.TimezoneName("Not/AZone"), winter)
+		var pe *types.PanchangError
+		if !errors.As(err, &pe) || pe.Code != types.ErrTimezoneResolutionFailed {
+			t.Fatalf("call %d: err = %v, want ErrTimezoneResolutionFailed", i, err)
+		}
+	}
+	if _, ok := zoneStore.Get("Not/AZone"); ok {
+		t.Error("a failed zone lookup was kept")
+	}
+	if _, err := ResolveUtcOffset(types.TimezoneName("Local"), winter); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := zoneStore.Get("Local"); ok {
+		t.Error(`"Local" was kept, so a later change to time.Local would be missed`)
+	}
+
+	// Read from a zoneinfo directory, each of these is another spelling of
+	// one file that loads; from the embedded zip they fail and are not kept.
+	loaded := 0
+	for i := 0; i < 3000; i++ {
+		name := "America/" + strings.Repeat("./", i%97) + strings.Repeat("/", i/97) + "New_York"
+		if _, err := ResolveUtcOffset(types.TimezoneName(name), winter); err == nil {
+			loaded++
+		}
+	}
+	if n, limit := zoneStore.Len(), zoneStore.Cap(); n > limit {
+		t.Errorf("zone store holds %d entries after %d distinct loads, capacity %d", n, loaded, limit)
+	}
 }

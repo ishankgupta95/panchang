@@ -93,14 +93,15 @@ function buildGrahaPosition(
 
 const identity = (idx: number) => String(idx);
 
-/** Geocentric sidereal positions for all 9 grahas at `date`. */
-export function computePlanetaryPositions(
+/**
+ * @internal The nine sidereal longitudes {@link computePlanetaryPositions} places, by the same
+ * expressions and in the same order, without its retrograde probes.
+ */
+export function siderealGrahaLongitudes(
   date: Date,
   ayanamsaType: AyanamsaType,
-  nakshatraName: (idx: number) => string = identity,
-  rashiName: (idx: number) => string = identity,
   nodeType: 'mean' | 'true' = 'mean',
-): PlanetaryPositions {
+): Record<GrahaName, number> {
   const ayanamsa = computeAyanamsa(date, ayanamsaType);
 
   const toSidereal = (tropical: number) => normalize360(tropical - ayanamsa);
@@ -118,6 +119,29 @@ export function computePlanetaryPositions(
     nodeType === 'true' ? getTrueRahuLongitudeTropical(date) : getMeanRahuLongitudeTropical(date);
   const ketuTrop = normalize360(rahuTrop + 180);
 
+  return {
+    Sun: sunSid,
+    Moon: moonSid,
+    Mars: toSidereal(marsTrop),
+    Mercury: toSidereal(mercTrop),
+    Jupiter: toSidereal(jupTrop),
+    Venus: toSidereal(venTrop),
+    Saturn: toSidereal(satTrop),
+    Rahu: toSidereal(rahuTrop),
+    Ketu: toSidereal(ketuTrop),
+  };
+}
+
+/** Geocentric sidereal positions for all 9 grahas at `date`; an Invalid Date throws `INVALID_DATE`. */
+export function computePlanetaryPositions(
+  date: Date,
+  ayanamsaType: AyanamsaType,
+  nakshatraName: (idx: number) => string = identity,
+  rashiName: (idx: number) => string = identity,
+  nodeType: 'mean' | 'true' = 'mean',
+): PlanetaryPositions {
+  const lon = siderealGrahaLongitudes(date, ayanamsaType, nodeType);
+
   const marsRetro = isRetrograde('mars', date);
   const mercRetro = isRetrograde('mercury', date);
   const jupRetro = isRetrograde('jupiter', date);
@@ -128,15 +152,15 @@ export function computePlanetaryPositions(
     buildGrahaPosition(planet, sid, retro, nakshatraName, rashiName);
 
   return {
-    sun:     g('Sun',     sunSid,                false),
-    moon:    g('Moon',    moonSid,               false),
-    mars:    g('Mars',    toSidereal(marsTrop),   marsRetro),
-    mercury: g('Mercury', toSidereal(mercTrop),   mercRetro),
-    jupiter: g('Jupiter', toSidereal(jupTrop),    jupRetro),
-    venus:   g('Venus',   toSidereal(venTrop),    venRetro),
-    saturn:  g('Saturn',  toSidereal(satTrop),    satRetro),
-    rahu:    g('Rahu',    toSidereal(rahuTrop),   true),
-    ketu:    g('Ketu',    toSidereal(ketuTrop),   true),
+    sun:     g('Sun',     lon.Sun,     false),
+    moon:    g('Moon',    lon.Moon,    false),
+    mars:    g('Mars',    lon.Mars,    marsRetro),
+    mercury: g('Mercury', lon.Mercury, mercRetro),
+    jupiter: g('Jupiter', lon.Jupiter, jupRetro),
+    venus:   g('Venus',   lon.Venus,   venRetro),
+    saturn:  g('Saturn',  lon.Saturn,  satRetro),
+    rahu:    g('Rahu',    lon.Rahu,    true),
+    ketu:    g('Ketu',    lon.Ketu,    true),
   };
 }
 

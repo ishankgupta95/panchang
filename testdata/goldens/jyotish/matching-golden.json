@@ -307,7 +307,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "horse ↔ horse (Ashtakoot Yoni score 4/4)"
+            "description": "horse ↔ horse, not enemies"
           },
           {
             "name": "Rashi",
@@ -488,7 +488,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "horse ↔ cat (Ashtakoot Yoni score 2/4)"
+            "description": "horse ↔ cat, not enemies"
           },
           {
             "name": "Rashi",
@@ -669,7 +669,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ tiger (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ tiger, not enemies"
           },
           {
             "name": "Rashi",
@@ -711,7 +711,7 @@
         "nakshatra": 17
       },
       "ashtakoot": {
-        "totalScore": 19,
+        "totalScore": 20,
         "koots": [
           {
             "name": "Varna",
@@ -733,7 +733,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "horse ↔ deer"
           },
@@ -767,7 +767,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 24,
+        "totalScore": 25,
         "koots": [
           {
             "name": "Varna",
@@ -789,7 +789,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "horse ↔ deer"
           },
@@ -850,7 +850,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "horse ↔ deer (Ashtakoot Yoni score 2/4)"
+            "description": "horse ↔ deer, not enemies"
           },
           {
             "name": "Rashi",
@@ -1033,7 +1033,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "tiger ↔ tiger (Ashtakoot Yoni score 4/4)"
+            "description": "tiger ↔ tiger, not enemies"
           },
           {
             "name": "Rashi",
@@ -1209,7 +1209,7 @@
           {
             "name": "Yoni",
             "passes": false,
-            "description": "snake ↔ mongoose (Ashtakoot Yoni score 0/4)",
+            "description": "snake ↔ mongoose, enemies",
             "veto": true
           },
           {
@@ -1385,7 +1385,7 @@
           {
             "name": "Yoni",
             "passes": false,
-            "description": "snake ↔ mongoose (Ashtakoot Yoni score 0/4)",
+            "description": "snake ↔ mongoose, enemies",
             "veto": true
           },
           {
@@ -1427,7 +1427,7 @@
         "nakshatra": 8
       },
       "ashtakoot": {
-        "totalScore": 14.5,
+        "totalScore": 15.5,
         "koots": [
           {
             "name": "Varna",
@@ -1449,7 +1449,7 @@
           },
           {
             "name": "Yoni",
-            "score": 1,
+            "score": 2,
             "maxScore": 4,
             "description": "dog ↔ cat"
           },
@@ -1481,7 +1481,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 14.5,
+        "totalScore": 15.5,
         "koots": [
           {
             "name": "Varna",
@@ -1503,7 +1503,7 @@
           },
           {
             "name": "Yoni",
-            "score": 1,
+            "score": 2,
             "maxScore": 4,
             "description": "dog ↔ cat"
           },
@@ -1535,7 +1535,7 @@
         "cancellations": []
       },
       "pathuPorutham": {
-        "totalPasses": 5,
+        "totalPasses": 6,
         "recommended": true,
         "poruthams": [
           {
@@ -1560,8 +1560,8 @@
           },
           {
             "name": "Yoni",
-            "passes": false,
-            "description": "dog ↔ cat (Ashtakoot Yoni score 1/4)"
+            "passes": true,
+            "description": "dog ↔ cat, not enemies"
           },
           {
             "name": "Rashi",
@@ -1741,7 +1741,7 @@
           {
             "name": "Yoni",
             "passes": false,
-            "description": "sheep ↔ monkey (Ashtakoot Yoni score 0/4)",
+            "description": "sheep ↔ monkey, enemies",
             "veto": true
           },
           {
@@ -1927,7 +1927,7 @@
           {
             "name": "Yoni",
             "passes": false,
-            "description": "snake ↔ mongoose (Ashtakoot Yoni score 0/4)",
+            "description": "snake ↔ mongoose, enemies",
             "veto": true
           },
           {
@@ -2111,7 +2111,7 @@
           {
             "name": "Yoni",
             "passes": false,
-            "description": "snake ↔ mongoose (Ashtakoot Yoni score 0/4)",
+            "description": "snake ↔ mongoose, enemies",
             "veto": true
           },
           {
@@ -2295,7 +2295,7 @@
           {
             "name": "Yoni",
             "passes": false,
-            "description": "snake ↔ mongoose (Ashtakoot Yoni score 0/4)",
+            "description": "snake ↔ mongoose, enemies",
             "veto": true
           },
           {
@@ -2472,7 +2472,7 @@
           {
             "name": "Yoni",
             "passes": false,
-            "description": "snake ↔ mongoose (Ashtakoot Yoni score 0/4)",
+            "description": "snake ↔ mongoose, enemies",
             "veto": true
           },
           {
@@ -2648,7 +2648,7 @@
           {
             "name": "Yoni",
             "passes": false,
-            "description": "deer ↔ dog (Ashtakoot Yoni score 0/4)",
+            "description": "deer ↔ dog, enemies",
             "veto": true
           },
           {
@@ -2824,7 +2824,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ snake (Ashtakoot Yoni score 2/4)"
+            "description": "deer ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -3003,7 +3003,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ elephant (Ashtakoot Yoni score 2/4)"
+            "description": "deer ↔ elephant, not enemies"
           },
           {
             "name": "Rashi",
@@ -3044,7 +3044,7 @@
         "nakshatra": 25
       },
       "ashtakoot": {
-        "totalScore": 23.5,
+        "totalScore": 24.5,
         "koots": [
           {
             "name": "Varna",
@@ -3066,7 +3066,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "deer ↔ cow"
           },
@@ -3100,7 +3100,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 23.5,
+        "totalScore": 24.5,
         "koots": [
           {
             "name": "Varna",
@@ -3122,7 +3122,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "deer ↔ cow"
           },
@@ -3182,7 +3182,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ cow (Ashtakoot Yoni score 2/4)"
+            "description": "deer ↔ cow, not enemies"
           },
           {
             "name": "Rashi",
@@ -3224,7 +3224,7 @@
         "nakshatra": 25
       },
       "ashtakoot": {
-        "totalScore": 26.5,
+        "totalScore": 27.5,
         "koots": [
           {
             "name": "Varna",
@@ -3246,7 +3246,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "deer ↔ cow"
           },
@@ -3280,7 +3280,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 32.5,
+        "totalScore": 33.5,
         "koots": [
           {
             "name": "Varna",
@@ -3302,7 +3302,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "deer ↔ cow"
           },
@@ -3363,7 +3363,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ cow (Ashtakoot Yoni score 2/4)"
+            "description": "deer ↔ cow, not enemies"
           },
           {
             "name": "Rashi",
@@ -3538,7 +3538,7 @@
           {
             "name": "Yoni",
             "passes": false,
-            "description": "deer ↔ dog (Ashtakoot Yoni score 0/4)",
+            "description": "deer ↔ dog, enemies",
             "veto": true
           },
           {
@@ -3714,7 +3714,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ snake (Ashtakoot Yoni score 2/4)"
+            "description": "deer ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -3755,7 +3755,7 @@
         "nakshatra": 25
       },
       "ashtakoot": {
-        "totalScore": 26.5,
+        "totalScore": 25.5,
         "koots": [
           {
             "name": "Varna",
@@ -3777,7 +3777,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "snake ↔ cow"
           },
@@ -3809,7 +3809,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 26.5,
+        "totalScore": 25.5,
         "koots": [
           {
             "name": "Varna",
@@ -3831,7 +3831,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "snake ↔ cow"
           },
@@ -3889,7 +3889,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ cow (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ cow, not enemies"
           },
           {
             "name": "Rashi",
@@ -4068,7 +4068,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ dog (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ dog, not enemies"
           },
           {
             "name": "Rashi",
@@ -4248,7 +4248,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ snake (Ashtakoot Yoni score 4/4)"
+            "description": "snake ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -4428,7 +4428,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "elephant ↔ cow (Ashtakoot Yoni score 2/4)"
+            "description": "elephant ↔ cow, not enemies"
           },
           {
             "name": "Rashi",
@@ -4608,7 +4608,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "cow ↔ cow (Ashtakoot Yoni score 4/4)"
+            "description": "cow ↔ cow, not enemies"
           },
           {
             "name": "Rashi",
@@ -4650,7 +4650,7 @@
         "nakshatra": 3
       },
       "ashtakoot": {
-        "totalScore": 20.5,
+        "totalScore": 19.5,
         "koots": [
           {
             "name": "Varna",
@@ -4672,7 +4672,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "buffalo ↔ snake"
           },
@@ -4706,7 +4706,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 20.5,
+        "totalScore": 19.5,
         "koots": [
           {
             "name": "Varna",
@@ -4728,7 +4728,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "buffalo ↔ snake"
           },
@@ -4788,7 +4788,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "buffalo ↔ snake (Ashtakoot Yoni score 2/4)"
+            "description": "buffalo ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -4831,7 +4831,7 @@
         "nakshatra": 25
       },
       "ashtakoot": {
-        "totalScore": 18,
+        "totalScore": 19,
         "koots": [
           {
             "name": "Varna",
@@ -4853,7 +4853,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "buffalo ↔ cow"
           },
@@ -4885,7 +4885,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 18,
+        "totalScore": 19,
         "koots": [
           {
             "name": "Varna",
@@ -4907,7 +4907,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "buffalo ↔ cow"
           },
@@ -4965,7 +4965,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "buffalo ↔ cow (Ashtakoot Yoni score 2/4)"
+            "description": "buffalo ↔ cow, not enemies"
           },
           {
             "name": "Rashi",
@@ -5140,7 +5140,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "monkey ↔ snake (Ashtakoot Yoni score 2/4)"
+            "description": "monkey ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -5181,7 +5181,7 @@
         "nakshatra": 26
       },
       "ashtakoot": {
-        "totalScore": 29,
+        "totalScore": 30,
         "koots": [
           {
             "name": "Varna",
@@ -5203,7 +5203,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "monkey ↔ elephant"
           },
@@ -5235,7 +5235,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 29,
+        "totalScore": 30,
         "koots": [
           {
             "name": "Varna",
@@ -5257,7 +5257,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "monkey ↔ elephant"
           },
@@ -5315,7 +5315,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "monkey ↔ elephant (Ashtakoot Yoni score 2/4)"
+            "description": "monkey ↔ elephant, not enemies"
           },
           {
             "name": "Rashi",
@@ -5356,7 +5356,7 @@
         "nakshatra": 5
       },
       "ashtakoot": {
-        "totalScore": 28,
+        "totalScore": 27,
         "koots": [
           {
             "name": "Varna",
@@ -5378,7 +5378,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ dog"
           },
@@ -5412,7 +5412,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 34,
+        "totalScore": 33,
         "koots": [
           {
             "name": "Varna",
@@ -5434,7 +5434,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ dog"
           },
@@ -5495,7 +5495,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "tiger ↔ dog (Ashtakoot Yoni score 2/4)"
+            "description": "tiger ↔ dog, not enemies"
           },
           {
             "name": "Rashi",
@@ -5670,7 +5670,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "dog ↔ snake (Ashtakoot Yoni score 2/4)"
+            "description": "dog ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -5845,7 +5845,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "monkey ↔ cow (Ashtakoot Yoni score 2/4)"
+            "description": "monkey ↔ cow, not enemies"
           },
           {
             "name": "Rashi",
@@ -6026,7 +6026,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "lion ↔ snake (Ashtakoot Yoni score 2/4)"
+            "description": "lion ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -6067,7 +6067,7 @@
         "nakshatra": 26
       },
       "ashtakoot": {
-        "totalScore": 26.5,
+        "totalScore": 27.5,
         "koots": [
           {
             "name": "Varna",
@@ -6089,7 +6089,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "snake ↔ elephant"
           },
@@ -6121,7 +6121,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 26.5,
+        "totalScore": 27.5,
         "koots": [
           {
             "name": "Varna",
@@ -6143,7 +6143,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "snake ↔ elephant"
           },
@@ -6201,7 +6201,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ elephant (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ elephant, not enemies"
           },
           {
             "name": "Rashi",
@@ -6376,7 +6376,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "horse ↔ dog (Ashtakoot Yoni score 2/4)"
+            "description": "horse ↔ dog, not enemies"
           },
           {
             "name": "Rashi",
@@ -6556,7 +6556,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ snake (Ashtakoot Yoni score 4/4)"
+            "description": "snake ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -6598,7 +6598,7 @@
         "nakshatra": 5
       },
       "ashtakoot": {
-        "totalScore": 28,
+        "totalScore": 27,
         "koots": [
           {
             "name": "Varna",
@@ -6620,7 +6620,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ dog"
           },
@@ -6654,7 +6654,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 34,
+        "totalScore": 33,
         "koots": [
           {
             "name": "Varna",
@@ -6676,7 +6676,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ dog"
           },
@@ -6737,7 +6737,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "tiger ↔ dog (Ashtakoot Yoni score 2/4)"
+            "description": "tiger ↔ dog, not enemies"
           },
           {
             "name": "Rashi",
@@ -6912,7 +6912,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "cow ↔ elephant (Ashtakoot Yoni score 2/4)"
+            "description": "cow ↔ elephant, not enemies"
           },
           {
             "name": "Rashi",
@@ -6953,7 +6953,7 @@
         "nakshatra": 3
       },
       "ashtakoot": {
-        "totalScore": 23.5,
+        "totalScore": 24.5,
         "koots": [
           {
             "name": "Varna",
@@ -6975,7 +6975,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "elephant ↔ snake"
           },
@@ -7007,7 +7007,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 23.5,
+        "totalScore": 24.5,
         "koots": [
           {
             "name": "Varna",
@@ -7029,7 +7029,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "elephant ↔ snake"
           },
@@ -7087,7 +7087,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "elephant ↔ snake (Ashtakoot Yoni score 2/4)"
+            "description": "elephant ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -7266,7 +7266,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "elephant ↔ cow (Ashtakoot Yoni score 2/4)"
+            "description": "elephant ↔ cow, not enemies"
           },
           {
             "name": "Rashi",
@@ -7446,7 +7446,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ deer (Ashtakoot Yoni score 4/4)"
+            "description": "deer ↔ deer, not enemies"
           },
           {
             "name": "Rashi",
@@ -7624,7 +7624,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ deer (Ashtakoot Yoni score 4/4)"
+            "description": "deer ↔ deer, not enemies"
           },
           {
             "name": "Rashi",
@@ -7803,7 +7803,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ snake (Ashtakoot Yoni score 4/4)"
+            "description": "snake ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -7983,7 +7983,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "elephant ↔ elephant (Ashtakoot Yoni score 4/4)"
+            "description": "elephant ↔ elephant, not enemies"
           },
           {
             "name": "Rashi",
@@ -8025,7 +8025,7 @@
         "nakshatra": 13
       },
       "ashtakoot": {
-        "totalScore": 32.5,
+        "totalScore": 31.5,
         "koots": [
           {
             "name": "Varna",
@@ -8047,7 +8047,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "sheep ↔ tiger"
           },
@@ -8081,7 +8081,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 32.5,
+        "totalScore": 31.5,
         "koots": [
           {
             "name": "Varna",
@@ -8103,7 +8103,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "sheep ↔ tiger"
           },
@@ -8163,7 +8163,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "sheep ↔ tiger (Ashtakoot Yoni score 2/4)"
+            "description": "sheep ↔ tiger, not enemies"
           },
           {
             "name": "Rashi",
@@ -8338,7 +8338,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ deer (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ deer, not enemies"
           },
           {
             "name": "Rashi",
@@ -8517,7 +8517,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "lion ↔ lion (Ashtakoot Yoni score 4/4)"
+            "description": "lion ↔ lion, not enemies"
           },
           {
             "name": "Rashi",
@@ -8667,7 +8667,7 @@
         "cancellations": []
       },
       "pathuPorutham": {
-        "totalPasses": 5,
+        "totalPasses": 6,
         "recommended": true,
         "poruthams": [
           {
@@ -8692,8 +8692,8 @@
           },
           {
             "name": "Yoni",
-            "passes": false,
-            "description": "horse ↔ cow (Ashtakoot Yoni score 1/4)"
+            "passes": true,
+            "description": "horse ↔ cow, not enemies"
           },
           {
             "name": "Rashi",
@@ -8872,7 +8872,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ monkey (Ashtakoot Yoni score 2/4)"
+            "description": "deer ↔ monkey, not enemies"
           },
           {
             "name": "Rashi",
@@ -9050,7 +9050,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "cat ↔ sheep (Ashtakoot Yoni score 2/4)"
+            "description": "cat ↔ sheep, not enemies"
           },
           {
             "name": "Rashi",
@@ -9230,7 +9230,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ sheep (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ sheep, not enemies"
           },
           {
             "name": "Rashi",
@@ -9271,7 +9271,7 @@
         "nakshatra": 19
       },
       "ashtakoot": {
-        "totalScore": 26.5,
+        "totalScore": 25.5,
         "koots": [
           {
             "name": "Varna",
@@ -9293,7 +9293,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ monkey"
           },
@@ -9327,7 +9327,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 32.5,
+        "totalScore": 31.5,
         "koots": [
           {
             "name": "Varna",
@@ -9349,7 +9349,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ monkey"
           },
@@ -9410,7 +9410,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "tiger ↔ monkey (Ashtakoot Yoni score 2/4)"
+            "description": "tiger ↔ monkey, not enemies"
           },
           {
             "name": "Rashi",
@@ -9451,7 +9451,7 @@
         "nakshatra": 12
       },
       "ashtakoot": {
-        "totalScore": 28,
+        "totalScore": 29,
         "koots": [
           {
             "name": "Varna",
@@ -9473,7 +9473,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "sheep ↔ buffalo"
           },
@@ -9505,7 +9505,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 33,
+        "totalScore": 34,
         "koots": [
           {
             "name": "Varna",
@@ -9527,7 +9527,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "sheep ↔ buffalo"
           },
@@ -9587,7 +9587,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "sheep ↔ buffalo (Ashtakoot Yoni score 2/4)"
+            "description": "sheep ↔ buffalo, not enemies"
           },
           {
             "name": "Rashi",
@@ -9766,7 +9766,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "monkey ↔ monkey (Ashtakoot Yoni score 4/4)"
+            "description": "monkey ↔ monkey, not enemies"
           },
           {
             "name": "Rashi",
@@ -9808,7 +9808,7 @@
         "nakshatra": 1
       },
       "ashtakoot": {
-        "totalScore": 20,
+        "totalScore": 21,
         "koots": [
           {
             "name": "Varna",
@@ -9830,7 +9830,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "snake ↔ elephant"
           },
@@ -9862,7 +9862,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 20,
+        "totalScore": 21,
         "koots": [
           {
             "name": "Varna",
@@ -9884,7 +9884,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "snake ↔ elephant"
           },
@@ -9942,7 +9942,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ elephant (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ elephant, not enemies"
           },
           {
             "name": "Rashi",
@@ -10117,7 +10117,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "rat ↔ buffalo (Ashtakoot Yoni score 2/4)"
+            "description": "rat ↔ buffalo, not enemies"
           },
           {
             "name": "Rashi",
@@ -10292,7 +10292,7 @@
           {
             "name": "Yoni",
             "passes": false,
-            "description": "rat ↔ cat (Ashtakoot Yoni score 0/4)",
+            "description": "rat ↔ cat, enemies",
             "veto": true
           },
           {
@@ -10468,7 +10468,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ deer (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ deer, not enemies"
           },
           {
             "name": "Rashi",
@@ -10647,7 +10647,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "tiger ↔ rat (Ashtakoot Yoni score 2/4)"
+            "description": "tiger ↔ rat, not enemies"
           },
           {
             "name": "Rashi",
@@ -10688,7 +10688,7 @@
         "nakshatra": 2
       },
       "ashtakoot": {
-        "totalScore": 18,
+        "totalScore": 19,
         "koots": [
           {
             "name": "Varna",
@@ -10710,7 +10710,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "buffalo ↔ sheep"
           },
@@ -10742,7 +10742,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 18,
+        "totalScore": 19,
         "koots": [
           {
             "name": "Varna",
@@ -10764,7 +10764,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "buffalo ↔ sheep"
           },
@@ -10822,7 +10822,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "buffalo ↔ sheep (Ashtakoot Yoni score 2/4)"
+            "description": "buffalo ↔ sheep, not enemies"
           },
           {
             "name": "Rashi",
@@ -10997,7 +10997,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "rat ↔ horse (Ashtakoot Yoni score 2/4)"
+            "description": "rat ↔ horse, not enemies"
           },
           {
             "name": "Rashi",
@@ -11177,7 +11177,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "horse ↔ horse (Ashtakoot Yoni score 4/4)"
+            "description": "horse ↔ horse, not enemies"
           },
           {
             "name": "Rashi",
@@ -11218,7 +11218,7 @@
         "nakshatra": 2
       },
       "ashtakoot": {
-        "totalScore": 20,
+        "totalScore": 19,
         "koots": [
           {
             "name": "Varna",
@@ -11240,7 +11240,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "dog ↔ sheep"
           },
@@ -11272,7 +11272,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 20,
+        "totalScore": 19,
         "koots": [
           {
             "name": "Varna",
@@ -11294,7 +11294,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "dog ↔ sheep"
           },
@@ -11352,7 +11352,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "dog ↔ sheep (Ashtakoot Yoni score 2/4)"
+            "description": "dog ↔ sheep, not enemies"
           },
           {
             "name": "Rashi",
@@ -11531,7 +11531,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "monkey ↔ monkey (Ashtakoot Yoni score 4/4)"
+            "description": "monkey ↔ monkey, not enemies"
           },
           {
             "name": "Rashi",
@@ -11707,7 +11707,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ mongoose (Ashtakoot Yoni score 2/4)"
+            "description": "deer ↔ mongoose, not enemies"
           },
           {
             "name": "Rashi",
@@ -11882,7 +11882,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ monkey (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ monkey, not enemies"
           },
           {
             "name": "Rashi",
@@ -12064,7 +12064,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "sheep ↔ sheep (Ashtakoot Yoni score 4/4)"
+            "description": "sheep ↔ sheep, not enemies"
           },
           {
             "name": "Rashi",
@@ -12240,7 +12240,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "cat ↔ cow (Ashtakoot Yoni score 2/4)"
+            "description": "cat ↔ cow, not enemies"
           },
           {
             "name": "Rashi",
@@ -12418,7 +12418,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "elephant ↔ cat (Ashtakoot Yoni score 2/4)"
+            "description": "elephant ↔ cat, not enemies"
           },
           {
             "name": "Rashi",
@@ -12596,7 +12596,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "cat ↔ cow (Ashtakoot Yoni score 2/4)"
+            "description": "cat ↔ cow, not enemies"
           },
           {
             "name": "Rashi",
@@ -12771,7 +12771,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "rat ↔ buffalo (Ashtakoot Yoni score 2/4)"
+            "description": "rat ↔ buffalo, not enemies"
           },
           {
             "name": "Rashi",
@@ -12946,7 +12946,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "dog ↔ horse (Ashtakoot Yoni score 2/4)"
+            "description": "dog ↔ horse, not enemies"
           },
           {
             "name": "Rashi",
@@ -12987,7 +12987,7 @@
         "nakshatra": 8
       },
       "ashtakoot": {
-        "totalScore": 18.5,
+        "totalScore": 17.5,
         "koots": [
           {
             "name": "Varna",
@@ -13009,7 +13009,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ cat"
           },
@@ -13041,7 +13041,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 18.5,
+        "totalScore": 17.5,
         "koots": [
           {
             "name": "Varna",
@@ -13063,7 +13063,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ cat"
           },
@@ -13121,7 +13121,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "tiger ↔ cat (Ashtakoot Yoni score 2/4)"
+            "description": "tiger ↔ cat, not enemies"
           },
           {
             "name": "Rashi",
@@ -13301,7 +13301,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "monkey ↔ dog (Ashtakoot Yoni score 2/4)"
+            "description": "monkey ↔ dog, not enemies"
           },
           {
             "name": "Rashi",
@@ -13476,7 +13476,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "rat ↔ tiger (Ashtakoot Yoni score 2/4)"
+            "description": "rat ↔ tiger, not enemies"
           },
           {
             "name": "Rashi",
@@ -13517,7 +13517,7 @@
         "nakshatra": 13
       },
       "ashtakoot": {
-        "totalScore": 27.5,
+        "totalScore": 26.5,
         "koots": [
           {
             "name": "Varna",
@@ -13539,7 +13539,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "cat ↔ tiger"
           },
@@ -13571,7 +13571,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 32.5,
+        "totalScore": 31.5,
         "koots": [
           {
             "name": "Varna",
@@ -13593,7 +13593,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "cat ↔ tiger"
           },
@@ -13653,7 +13653,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "cat ↔ tiger (Ashtakoot Yoni score 2/4)"
+            "description": "cat ↔ tiger, not enemies"
           },
           {
             "name": "Rashi",
@@ -13694,7 +13694,7 @@
         "nakshatra": 23
       },
       "ashtakoot": {
-        "totalScore": 18,
+        "totalScore": 17,
         "koots": [
           {
             "name": "Varna",
@@ -13716,7 +13716,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "lion ↔ horse"
           },
@@ -13750,7 +13750,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 24,
+        "totalScore": 23,
         "koots": [
           {
             "name": "Varna",
@@ -13772,7 +13772,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "lion ↔ horse"
           },
@@ -13833,7 +13833,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "lion ↔ horse (Ashtakoot Yoni score 2/4)"
+            "description": "lion ↔ horse, not enemies"
           },
           {
             "name": "Rashi",
@@ -14013,7 +14013,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ sheep (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ sheep, not enemies"
           },
           {
             "name": "Rashi",
@@ -14192,7 +14192,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "buffalo ↔ buffalo (Ashtakoot Yoni score 4/4)"
+            "description": "buffalo ↔ buffalo, not enemies"
           },
           {
             "name": "Rashi",
@@ -14234,7 +14234,7 @@
         "nakshatra": 5
       },
       "ashtakoot": {
-        "totalScore": 22,
+        "totalScore": 23,
         "koots": [
           {
             "name": "Varna",
@@ -14256,7 +14256,7 @@
           },
           {
             "name": "Yoni",
-            "score": 1,
+            "score": 2,
             "maxScore": 4,
             "description": "cat ↔ dog"
           },
@@ -14290,7 +14290,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 22,
+        "totalScore": 23,
         "koots": [
           {
             "name": "Varna",
@@ -14312,7 +14312,7 @@
           },
           {
             "name": "Yoni",
-            "score": 1,
+            "score": 2,
             "maxScore": 4,
             "description": "cat ↔ dog"
           },
@@ -14346,7 +14346,7 @@
         ]
       },
       "pathuPorutham": {
-        "totalPasses": 6,
+        "totalPasses": 7,
         "recommended": true,
         "poruthams": [
           {
@@ -14371,8 +14371,8 @@
           },
           {
             "name": "Yoni",
-            "passes": false,
-            "description": "cat ↔ dog (Ashtakoot Yoni score 1/4)"
+            "passes": true,
+            "description": "cat ↔ dog, not enemies"
           },
           {
             "name": "Rashi",
@@ -14547,7 +14547,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ lion (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ lion, not enemies"
           },
           {
             "name": "Rashi",
@@ -14726,7 +14726,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "dog ↔ buffalo (Ashtakoot Yoni score 2/4)"
+            "description": "dog ↔ buffalo, not enemies"
           },
           {
             "name": "Rashi",
@@ -14906,7 +14906,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "buffalo ↔ buffalo (Ashtakoot Yoni score 4/4)"
+            "description": "buffalo ↔ buffalo, not enemies"
           },
           {
             "name": "Rashi",
@@ -15087,7 +15087,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "horse ↔ cat (Ashtakoot Yoni score 2/4)"
+            "description": "horse ↔ cat, not enemies"
           },
           {
             "name": "Rashi",
@@ -15128,7 +15128,7 @@
         "nakshatra": 5
       },
       "ashtakoot": {
-        "totalScore": 16,
+        "totalScore": 17,
         "koots": [
           {
             "name": "Varna",
@@ -15150,7 +15150,7 @@
           },
           {
             "name": "Yoni",
-            "score": 1,
+            "score": 2,
             "maxScore": 4,
             "description": "cat ↔ dog"
           },
@@ -15182,7 +15182,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 16,
+        "totalScore": 17,
         "koots": [
           {
             "name": "Varna",
@@ -15204,7 +15204,7 @@
           },
           {
             "name": "Yoni",
-            "score": 1,
+            "score": 2,
             "maxScore": 4,
             "description": "cat ↔ dog"
           },
@@ -15236,7 +15236,7 @@
         "cancellations": []
       },
       "pathuPorutham": {
-        "totalPasses": 7,
+        "totalPasses": 8,
         "recommended": true,
         "poruthams": [
           {
@@ -15261,8 +15261,8 @@
           },
           {
             "name": "Yoni",
-            "passes": false,
-            "description": "cat ↔ dog (Ashtakoot Yoni score 1/4)"
+            "passes": true,
+            "description": "cat ↔ dog, not enemies"
           },
           {
             "name": "Rashi",
@@ -15441,7 +15441,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ sheep (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ sheep, not enemies"
           },
           {
             "name": "Rashi",
@@ -15482,7 +15482,7 @@
         "nakshatra": 21
       },
       "ashtakoot": {
-        "totalScore": 9,
+        "totalScore": 8,
         "koots": [
           {
             "name": "Varna",
@@ -15504,7 +15504,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ monkey"
           },
@@ -15536,7 +15536,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 9,
+        "totalScore": 8,
         "koots": [
           {
             "name": "Varna",
@@ -15558,7 +15558,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ monkey"
           },
@@ -15616,7 +15616,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "tiger ↔ monkey (Ashtakoot Yoni score 2/4)"
+            "description": "tiger ↔ monkey, not enemies"
           },
           {
             "name": "Rashi",
@@ -15795,7 +15795,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ snake (Ashtakoot Yoni score 2/4)"
+            "description": "deer ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -15975,7 +15975,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ dog (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ dog, not enemies"
           },
           {
             "name": "Rashi",
@@ -16016,7 +16016,7 @@
         "nakshatra": 9
       },
       "ashtakoot": {
-        "totalScore": 32,
+        "totalScore": 31,
         "koots": [
           {
             "name": "Varna",
@@ -16038,7 +16038,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "dog ↔ rat"
           },
@@ -16072,7 +16072,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 32,
+        "totalScore": 31,
         "koots": [
           {
             "name": "Varna",
@@ -16094,7 +16094,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "dog ↔ rat"
           },
@@ -16154,7 +16154,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "dog ↔ rat (Ashtakoot Yoni score 2/4)"
+            "description": "dog ↔ rat, not enemies"
           },
           {
             "name": "Rashi",
@@ -16330,7 +16330,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ elephant (Ashtakoot Yoni score 2/4)"
+            "description": "deer ↔ elephant, not enemies"
           },
           {
             "name": "Rashi",
@@ -16505,7 +16505,7 @@
           {
             "name": "Yoni",
             "passes": false,
-            "description": "mongoose ↔ snake (Ashtakoot Yoni score 0/4)",
+            "description": "mongoose ↔ snake, enemies",
             "veto": true
           },
           {
@@ -16547,7 +16547,7 @@
         "nakshatra": 1
       },
       "ashtakoot": {
-        "totalScore": 23.5,
+        "totalScore": 24.5,
         "koots": [
           {
             "name": "Varna",
@@ -16569,7 +16569,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "buffalo ↔ elephant"
           },
@@ -16601,7 +16601,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 23.5,
+        "totalScore": 24.5,
         "koots": [
           {
             "name": "Varna",
@@ -16623,7 +16623,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "buffalo ↔ elephant"
           },
@@ -16681,7 +16681,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "buffalo ↔ elephant (Ashtakoot Yoni score 2/4)"
+            "description": "buffalo ↔ elephant, not enemies"
           },
           {
             "name": "Rashi",
@@ -16856,7 +16856,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "tiger ↔ snake (Ashtakoot Yoni score 2/4)"
+            "description": "tiger ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -17035,7 +17035,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "mongoose ↔ cow (Ashtakoot Yoni score 2/4)"
+            "description": "mongoose ↔ cow, not enemies"
           },
           {
             "name": "Rashi",
@@ -17211,7 +17211,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ monkey (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ monkey, not enemies"
           },
           {
             "name": "Rashi",
@@ -17253,7 +17253,7 @@
         "nakshatra": 18
       },
       "ashtakoot": {
-        "totalScore": 27.5,
+        "totalScore": 26.5,
         "koots": [
           {
             "name": "Varna",
@@ -17275,7 +17275,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "sheep ↔ dog"
           },
@@ -17307,7 +17307,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 32.5,
+        "totalScore": 31.5,
         "koots": [
           {
             "name": "Varna",
@@ -17329,7 +17329,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "sheep ↔ dog"
           },
@@ -17389,7 +17389,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "sheep ↔ dog (Ashtakoot Yoni score 2/4)"
+            "description": "sheep ↔ dog, not enemies"
           },
           {
             "name": "Rashi",
@@ -17564,7 +17564,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "horse ↔ mongoose (Ashtakoot Yoni score 2/4)"
+            "description": "horse ↔ mongoose, not enemies"
           },
           {
             "name": "Rashi",
@@ -17739,7 +17739,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "dog ↔ elephant (Ashtakoot Yoni score 2/4)"
+            "description": "dog ↔ elephant, not enemies"
           },
           {
             "name": "Rashi",
@@ -17914,7 +17914,7 @@
           {
             "name": "Yoni",
             "passes": false,
-            "description": "cat ↔ rat (Ashtakoot Yoni score 0/4)",
+            "description": "cat ↔ rat, enemies",
             "veto": true
           },
           {
@@ -18091,7 +18091,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "horse ↔ elephant (Ashtakoot Yoni score 2/4)"
+            "description": "horse ↔ elephant, not enemies"
           },
           {
             "name": "Rashi",
@@ -18133,7 +18133,7 @@
         "nakshatra": 11
       },
       "ashtakoot": {
-        "totalScore": 13,
+        "totalScore": 14,
         "koots": [
           {
             "name": "Varna",
@@ -18155,7 +18155,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "deer ↔ cow"
           },
@@ -18187,7 +18187,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 13,
+        "totalScore": 14,
         "koots": [
           {
             "name": "Varna",
@@ -18209,7 +18209,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "deer ↔ cow"
           },
@@ -18267,7 +18267,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ cow (Ashtakoot Yoni score 2/4)"
+            "description": "deer ↔ cow, not enemies"
           },
           {
             "name": "Rashi",
@@ -18448,7 +18448,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "horse ↔ horse (Ashtakoot Yoni score 4/4)"
+            "description": "horse ↔ horse, not enemies"
           },
           {
             "name": "Rashi",
@@ -18624,7 +18624,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "rat ↔ lion (Ashtakoot Yoni score 2/4)"
+            "description": "rat ↔ lion, not enemies"
           },
           {
             "name": "Rashi",
@@ -18799,7 +18799,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "mongoose ↔ tiger (Ashtakoot Yoni score 2/4)"
+            "description": "mongoose ↔ tiger, not enemies"
           },
           {
             "name": "Rashi",
@@ -18974,7 +18974,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "buffalo ↔ monkey (Ashtakoot Yoni score 2/4)"
+            "description": "buffalo ↔ monkey, not enemies"
           },
           {
             "name": "Rashi",
@@ -19149,7 +19149,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ deer (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ deer, not enemies"
           },
           {
             "name": "Rashi",
@@ -19190,7 +19190,7 @@
         "nakshatra": 25
       },
       "ashtakoot": {
-        "totalScore": 20,
+        "totalScore": 21,
         "koots": [
           {
             "name": "Varna",
@@ -19212,7 +19212,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "deer ↔ cow"
           },
@@ -19244,7 +19244,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 20,
+        "totalScore": 21,
         "koots": [
           {
             "name": "Varna",
@@ -19266,7 +19266,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "deer ↔ cow"
           },
@@ -19324,7 +19324,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ cow (Ashtakoot Yoni score 2/4)"
+            "description": "deer ↔ cow, not enemies"
           },
           {
             "name": "Rashi",
@@ -19500,7 +19500,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "buffalo ↔ monkey (Ashtakoot Yoni score 2/4)"
+            "description": "buffalo ↔ monkey, not enemies"
           },
           {
             "name": "Rashi",
@@ -19680,7 +19680,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "dog ↔ buffalo (Ashtakoot Yoni score 2/4)"
+            "description": "dog ↔ buffalo, not enemies"
           },
           {
             "name": "Rashi",
@@ -19721,7 +19721,7 @@
         "nakshatra": 7
       },
       "ashtakoot": {
-        "totalScore": 33,
+        "totalScore": 32,
         "koots": [
           {
             "name": "Varna",
@@ -19743,7 +19743,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "lion ↔ sheep"
           },
@@ -19775,7 +19775,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 33,
+        "totalScore": 32,
         "koots": [
           {
             "name": "Varna",
@@ -19797,7 +19797,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "lion ↔ sheep"
           },
@@ -19855,7 +19855,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "lion ↔ sheep (Ashtakoot Yoni score 2/4)"
+            "description": "lion ↔ sheep, not enemies"
           },
           {
             "name": "Rashi",
@@ -19896,7 +19896,7 @@
         "nakshatra": 14
       },
       "ashtakoot": {
-        "totalScore": 32.5,
+        "totalScore": 33.5,
         "koots": [
           {
             "name": "Varna",
@@ -19918,7 +19918,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "sheep ↔ buffalo"
           },
@@ -19952,7 +19952,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 32.5,
+        "totalScore": 33.5,
         "koots": [
           {
             "name": "Varna",
@@ -19974,7 +19974,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "sheep ↔ buffalo"
           },
@@ -20034,7 +20034,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "sheep ↔ buffalo (Ashtakoot Yoni score 2/4)"
+            "description": "sheep ↔ buffalo, not enemies"
           },
           {
             "name": "Rashi",
@@ -20075,7 +20075,7 @@
         "nakshatra": 17
       },
       "ashtakoot": {
-        "totalScore": 19.5,
+        "totalScore": 20.5,
         "koots": [
           {
             "name": "Varna",
@@ -20097,7 +20097,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "cat ↔ deer"
           },
@@ -20131,7 +20131,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 24.5,
+        "totalScore": 25.5,
         "koots": [
           {
             "name": "Varna",
@@ -20153,7 +20153,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "cat ↔ deer"
           },
@@ -20214,7 +20214,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "cat ↔ deer (Ashtakoot Yoni score 2/4)"
+            "description": "cat ↔ deer, not enemies"
           },
           {
             "name": "Rashi",
@@ -20255,7 +20255,7 @@
         "nakshatra": 15
       },
       "ashtakoot": {
-        "totalScore": 27,
+        "totalScore": 26,
         "koots": [
           {
             "name": "Varna",
@@ -20277,7 +20277,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "deer ↔ tiger"
           },
@@ -20309,7 +20309,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 27,
+        "totalScore": 26,
         "koots": [
           {
             "name": "Varna",
@@ -20331,7 +20331,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "deer ↔ tiger"
           },
@@ -20389,7 +20389,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ tiger (Ashtakoot Yoni score 2/4)"
+            "description": "deer ↔ tiger, not enemies"
           },
           {
             "name": "Rashi",
@@ -20430,7 +20430,7 @@
         "nakshatra": 3
       },
       "ashtakoot": {
-        "totalScore": 28.5,
+        "totalScore": 30.5,
         "koots": [
           {
             "name": "Varna",
@@ -20452,7 +20452,7 @@
           },
           {
             "name": "Yoni",
-            "score": 1,
+            "score": 3,
             "maxScore": 4,
             "description": "horse ↔ snake"
           },
@@ -20486,7 +20486,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 28.5,
+        "totalScore": 30.5,
         "koots": [
           {
             "name": "Varna",
@@ -20508,7 +20508,7 @@
           },
           {
             "name": "Yoni",
-            "score": 1,
+            "score": 3,
             "maxScore": 4,
             "description": "horse ↔ snake"
           },
@@ -20542,7 +20542,7 @@
         ]
       },
       "pathuPorutham": {
-        "totalPasses": 7,
+        "totalPasses": 8,
         "recommended": true,
         "poruthams": [
           {
@@ -20567,8 +20567,8 @@
           },
           {
             "name": "Yoni",
-            "passes": false,
-            "description": "horse ↔ snake (Ashtakoot Yoni score 1/4)"
+            "passes": true,
+            "description": "horse ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -20609,7 +20609,7 @@
         "nakshatra": 18
       },
       "ashtakoot": {
-        "totalScore": 27,
+        "totalScore": 26,
         "koots": [
           {
             "name": "Varna",
@@ -20631,7 +20631,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ dog"
           },
@@ -20663,7 +20663,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 27,
+        "totalScore": 26,
         "koots": [
           {
             "name": "Varna",
@@ -20685,7 +20685,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ dog"
           },
@@ -20743,7 +20743,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "tiger ↔ dog (Ashtakoot Yoni score 2/4)"
+            "description": "tiger ↔ dog, not enemies"
           },
           {
             "name": "Rashi",
@@ -20918,7 +20918,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "mongoose ↔ elephant (Ashtakoot Yoni score 2/4)"
+            "description": "mongoose ↔ elephant, not enemies"
           },
           {
             "name": "Rashi",
@@ -21097,7 +21097,7 @@
           {
             "name": "Yoni",
             "passes": false,
-            "description": "dog ↔ deer (Ashtakoot Yoni score 0/4)",
+            "description": "dog ↔ deer, enemies",
             "veto": true
           },
           {
@@ -21279,7 +21279,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ deer (Ashtakoot Yoni score 4/4)"
+            "description": "deer ↔ deer, not enemies"
           },
           {
             "name": "Rashi",
@@ -21454,7 +21454,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "mongoose ↔ lion (Ashtakoot Yoni score 2/4)"
+            "description": "mongoose ↔ lion, not enemies"
           },
           {
             "name": "Rashi",
@@ -21496,7 +21496,7 @@
         "nakshatra": 18
       },
       "ashtakoot": {
-        "totalScore": 25.5,
+        "totalScore": 24.5,
         "koots": [
           {
             "name": "Varna",
@@ -21518,7 +21518,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ dog"
           },
@@ -21550,7 +21550,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 25.5,
+        "totalScore": 24.5,
         "koots": [
           {
             "name": "Varna",
@@ -21572,7 +21572,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ dog"
           },
@@ -21630,7 +21630,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "tiger ↔ dog (Ashtakoot Yoni score 2/4)"
+            "description": "tiger ↔ dog, not enemies"
           },
           {
             "name": "Rashi",
@@ -21807,7 +21807,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "cat ↔ cat (Ashtakoot Yoni score 4/4)"
+            "description": "cat ↔ cat, not enemies"
           },
           {
             "name": "Rashi",
@@ -21982,7 +21982,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "cat ↔ horse (Ashtakoot Yoni score 2/4)"
+            "description": "cat ↔ horse, not enemies"
           },
           {
             "name": "Rashi",
@@ -22024,7 +22024,7 @@
         "nakshatra": 16
       },
       "ashtakoot": {
-        "totalScore": 26,
+        "totalScore": 27,
         "koots": [
           {
             "name": "Varna",
@@ -22046,7 +22046,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "horse ↔ deer"
           },
@@ -22078,7 +22078,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 26,
+        "totalScore": 27,
         "koots": [
           {
             "name": "Varna",
@@ -22100,7 +22100,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "horse ↔ deer"
           },
@@ -22158,7 +22158,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "horse ↔ deer (Ashtakoot Yoni score 2/4)"
+            "description": "horse ↔ deer, not enemies"
           },
           {
             "name": "Rashi",
@@ -22199,7 +22199,7 @@
         "nakshatra": 4
       },
       "ashtakoot": {
-        "totalScore": 29.5,
+        "totalScore": 30.5,
         "koots": [
           {
             "name": "Varna",
@@ -22221,7 +22221,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "elephant ↔ snake"
           },
@@ -22255,7 +22255,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 29.5,
+        "totalScore": 30.5,
         "koots": [
           {
             "name": "Varna",
@@ -22277,7 +22277,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "elephant ↔ snake"
           },
@@ -22337,7 +22337,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "elephant ↔ snake (Ashtakoot Yoni score 2/4)"
+            "description": "elephant ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -22512,7 +22512,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "lion ↔ tiger (Ashtakoot Yoni score 2/4)"
+            "description": "lion ↔ tiger, not enemies"
           },
           {
             "name": "Rashi",
@@ -22688,7 +22688,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "lion ↔ snake (Ashtakoot Yoni score 2/4)"
+            "description": "lion ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -22865,7 +22865,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "rat ↔ lion (Ashtakoot Yoni score 2/4)"
+            "description": "rat ↔ lion, not enemies"
           },
           {
             "name": "Rashi",
@@ -23040,7 +23040,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "sheep ↔ cat (Ashtakoot Yoni score 2/4)"
+            "description": "sheep ↔ cat, not enemies"
           },
           {
             "name": "Rashi",
@@ -23220,7 +23220,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "elephant ↔ deer (Ashtakoot Yoni score 2/4)"
+            "description": "elephant ↔ deer, not enemies"
           },
           {
             "name": "Rashi",
@@ -23396,7 +23396,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "lion ↔ monkey (Ashtakoot Yoni score 2/4)"
+            "description": "lion ↔ monkey, not enemies"
           },
           {
             "name": "Rashi",
@@ -23573,7 +23573,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "elephant ↔ deer (Ashtakoot Yoni score 2/4)"
+            "description": "elephant ↔ deer, not enemies"
           },
           {
             "name": "Rashi",
@@ -23615,7 +23615,7 @@
         "nakshatra": 10
       },
       "ashtakoot": {
-        "totalScore": 25.5,
+        "totalScore": 24.5,
         "koots": [
           {
             "name": "Varna",
@@ -23637,7 +23637,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "dog ↔ rat"
           },
@@ -23669,7 +23669,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 25.5,
+        "totalScore": 24.5,
         "koots": [
           {
             "name": "Varna",
@@ -23691,7 +23691,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "dog ↔ rat"
           },
@@ -23749,7 +23749,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "dog ↔ rat (Ashtakoot Yoni score 2/4)"
+            "description": "dog ↔ rat, not enemies"
           },
           {
             "name": "Rashi",
@@ -23790,7 +23790,7 @@
         "nakshatra": 4
       },
       "ashtakoot": {
-        "totalScore": 18,
+        "totalScore": 20,
         "koots": [
           {
             "name": "Varna",
@@ -23812,7 +23812,7 @@
           },
           {
             "name": "Yoni",
-            "score": 1,
+            "score": 3,
             "maxScore": 4,
             "description": "horse ↔ snake"
           },
@@ -23844,7 +23844,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 18,
+        "totalScore": 20,
         "koots": [
           {
             "name": "Varna",
@@ -23866,7 +23866,7 @@
           },
           {
             "name": "Yoni",
-            "score": 1,
+            "score": 3,
             "maxScore": 4,
             "description": "horse ↔ snake"
           },
@@ -23898,7 +23898,7 @@
         "cancellations": []
       },
       "pathuPorutham": {
-        "totalPasses": 6,
+        "totalPasses": 7,
         "recommended": true,
         "poruthams": [
           {
@@ -23923,8 +23923,8 @@
           },
           {
             "name": "Yoni",
-            "passes": false,
-            "description": "horse ↔ snake (Ashtakoot Yoni score 1/4)"
+            "passes": true,
+            "description": "horse ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -24103,7 +24103,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "monkey ↔ rat (Ashtakoot Yoni score 2/4)"
+            "description": "monkey ↔ rat, not enemies"
           },
           {
             "name": "Rashi",
@@ -24279,7 +24279,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "buffalo ↔ deer (Ashtakoot Yoni score 2/4)"
+            "description": "buffalo ↔ deer, not enemies"
           },
           {
             "name": "Rashi",
@@ -24320,7 +24320,7 @@
         "nakshatra": 3
       },
       "ashtakoot": {
-        "totalScore": 24.5,
+        "totalScore": 23.5,
         "koots": [
           {
             "name": "Varna",
@@ -24342,7 +24342,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "cow ↔ snake"
           },
@@ -24374,7 +24374,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 24.5,
+        "totalScore": 23.5,
         "koots": [
           {
             "name": "Varna",
@@ -24396,7 +24396,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "cow ↔ snake"
           },
@@ -24454,7 +24454,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "cow ↔ snake (Ashtakoot Yoni score 2/4)"
+            "description": "cow ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -24603,8 +24603,8 @@
         "cancellations": []
       },
       "pathuPorutham": {
-        "totalPasses": 4,
-        "recommended": false,
+        "totalPasses": 5,
+        "recommended": true,
         "poruthams": [
           {
             "name": "Dina",
@@ -24628,8 +24628,8 @@
           },
           {
             "name": "Yoni",
-            "passes": false,
-            "description": "cow ↔ horse (Ashtakoot Yoni score 1/4)"
+            "passes": true,
+            "description": "cow ↔ horse, not enemies"
           },
           {
             "name": "Rashi",
@@ -24670,7 +24670,7 @@
         "nakshatra": 2
       },
       "ashtakoot": {
-        "totalScore": 14,
+        "totalScore": 13,
         "koots": [
           {
             "name": "Varna",
@@ -24692,7 +24692,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "rat ↔ sheep"
           },
@@ -24724,7 +24724,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 14,
+        "totalScore": 13,
         "koots": [
           {
             "name": "Varna",
@@ -24746,7 +24746,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "rat ↔ sheep"
           },
@@ -24804,7 +24804,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "rat ↔ sheep (Ashtakoot Yoni score 2/4)"
+            "description": "rat ↔ sheep, not enemies"
           },
           {
             "name": "Rashi",
@@ -24984,7 +24984,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "sheep ↔ horse (Ashtakoot Yoni score 2/4)"
+            "description": "sheep ↔ horse, not enemies"
           },
           {
             "name": "Rashi",
@@ -25025,7 +25025,7 @@
         "nakshatra": 18
       },
       "ashtakoot": {
-        "totalScore": 28.5,
+        "totalScore": 27.5,
         "koots": [
           {
             "name": "Varna",
@@ -25047,7 +25047,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ dog"
           },
@@ -25079,7 +25079,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 28.5,
+        "totalScore": 27.5,
         "koots": [
           {
             "name": "Varna",
@@ -25101,7 +25101,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ dog"
           },
@@ -25159,7 +25159,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "tiger ↔ dog (Ashtakoot Yoni score 2/4)"
+            "description": "tiger ↔ dog, not enemies"
           },
           {
             "name": "Rashi",
@@ -25200,7 +25200,7 @@
         "nakshatra": 5
       },
       "ashtakoot": {
-        "totalScore": 17.5,
+        "totalScore": 18.5,
         "koots": [
           {
             "name": "Varna",
@@ -25222,7 +25222,7 @@
           },
           {
             "name": "Yoni",
-            "score": 1,
+            "score": 2,
             "maxScore": 4,
             "description": "cat ↔ dog"
           },
@@ -25254,7 +25254,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 17.5,
+        "totalScore": 18.5,
         "koots": [
           {
             "name": "Varna",
@@ -25276,7 +25276,7 @@
           },
           {
             "name": "Yoni",
-            "score": 1,
+            "score": 2,
             "maxScore": 4,
             "description": "cat ↔ dog"
           },
@@ -25308,7 +25308,7 @@
         "cancellations": []
       },
       "pathuPorutham": {
-        "totalPasses": 5,
+        "totalPasses": 6,
         "recommended": true,
         "poruthams": [
           {
@@ -25333,8 +25333,8 @@
           },
           {
             "name": "Yoni",
-            "passes": false,
-            "description": "cat ↔ dog (Ashtakoot Yoni score 1/4)"
+            "passes": true,
+            "description": "cat ↔ dog, not enemies"
           },
           {
             "name": "Rashi",
@@ -25375,7 +25375,7 @@
         "nakshatra": 2
       },
       "ashtakoot": {
-        "totalScore": 28,
+        "totalScore": 29,
         "koots": [
           {
             "name": "Varna",
@@ -25397,7 +25397,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "cow ↔ sheep"
           },
@@ -25429,7 +25429,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 34,
+        "totalScore": 35,
         "koots": [
           {
             "name": "Varna",
@@ -25451,7 +25451,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "cow ↔ sheep"
           },
@@ -25511,7 +25511,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "cow ↔ sheep (Ashtakoot Yoni score 2/4)"
+            "description": "cow ↔ sheep, not enemies"
           },
           {
             "name": "Rashi",
@@ -25553,7 +25553,7 @@
         "nakshatra": 19
       },
       "ashtakoot": {
-        "totalScore": 6,
+        "totalScore": 5,
         "koots": [
           {
             "name": "Varna",
@@ -25575,7 +25575,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ monkey"
           },
@@ -25607,7 +25607,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 6,
+        "totalScore": 5,
         "koots": [
           {
             "name": "Varna",
@@ -25629,7 +25629,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ monkey"
           },
@@ -25687,7 +25687,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "tiger ↔ monkey (Ashtakoot Yoni score 2/4)"
+            "description": "tiger ↔ monkey, not enemies"
           },
           {
             "name": "Rashi",
@@ -25728,7 +25728,7 @@
         "nakshatra": 4
       },
       "ashtakoot": {
-        "totalScore": 23,
+        "totalScore": 25,
         "koots": [
           {
             "name": "Varna",
@@ -25750,7 +25750,7 @@
           },
           {
             "name": "Yoni",
-            "score": 1,
+            "score": 3,
             "maxScore": 4,
             "description": "horse ↔ snake"
           },
@@ -25782,7 +25782,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 23,
+        "totalScore": 25,
         "koots": [
           {
             "name": "Varna",
@@ -25804,7 +25804,7 @@
           },
           {
             "name": "Yoni",
-            "score": 1,
+            "score": 3,
             "maxScore": 4,
             "description": "horse ↔ snake"
           },
@@ -25836,7 +25836,7 @@
         "cancellations": []
       },
       "pathuPorutham": {
-        "totalPasses": 7,
+        "totalPasses": 8,
         "recommended": true,
         "poruthams": [
           {
@@ -25861,8 +25861,8 @@
           },
           {
             "name": "Yoni",
-            "passes": false,
-            "description": "horse ↔ snake (Ashtakoot Yoni score 1/4)"
+            "passes": true,
+            "description": "horse ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -26037,7 +26037,7 @@
           {
             "name": "Yoni",
             "passes": false,
-            "description": "snake ↔ mongoose (Ashtakoot Yoni score 0/4)",
+            "description": "snake ↔ mongoose, enemies",
             "veto": true
           },
           {
@@ -26218,7 +26218,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "rat ↔ lion (Ashtakoot Yoni score 2/4)"
+            "description": "rat ↔ lion, not enemies"
           },
           {
             "name": "Rashi",
@@ -26393,7 +26393,7 @@
           {
             "name": "Yoni",
             "passes": false,
-            "description": "dog ↔ deer (Ashtakoot Yoni score 0/4)",
+            "description": "dog ↔ deer, enemies",
             "veto": true
           },
           {
@@ -26569,7 +26569,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "rat ↔ tiger (Ashtakoot Yoni score 2/4)"
+            "description": "rat ↔ tiger, not enemies"
           },
           {
             "name": "Rashi",
@@ -26746,7 +26746,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "rat ↔ deer (Ashtakoot Yoni score 2/4)"
+            "description": "rat ↔ deer, not enemies"
           },
           {
             "name": "Rashi",
@@ -26925,7 +26925,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "buffalo ↔ buffalo (Ashtakoot Yoni score 4/4)"
+            "description": "buffalo ↔ buffalo, not enemies"
           },
           {
             "name": "Rashi",
@@ -26967,7 +26967,7 @@
         "nakshatra": 24
       },
       "ashtakoot": {
-        "totalScore": 22,
+        "totalScore": 21,
         "koots": [
           {
             "name": "Varna",
@@ -26989,7 +26989,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "cat ↔ lion"
           },
@@ -27023,7 +27023,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 22,
+        "totalScore": 21,
         "koots": [
           {
             "name": "Varna",
@@ -27045,7 +27045,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "cat ↔ lion"
           },
@@ -27105,7 +27105,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "cat ↔ lion (Ashtakoot Yoni score 2/4)"
+            "description": "cat ↔ lion, not enemies"
           },
           {
             "name": "Rashi",
@@ -27147,7 +27147,7 @@
         "nakshatra": 25
       },
       "ashtakoot": {
-        "totalScore": 26.5,
+        "totalScore": 27.5,
         "koots": [
           {
             "name": "Varna",
@@ -27169,7 +27169,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "sheep ↔ cow"
           },
@@ -27203,7 +27203,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 32.5,
+        "totalScore": 33.5,
         "koots": [
           {
             "name": "Varna",
@@ -27225,7 +27225,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "sheep ↔ cow"
           },
@@ -27286,7 +27286,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "sheep ↔ cow (Ashtakoot Yoni score 2/4)"
+            "description": "sheep ↔ cow, not enemies"
           },
           {
             "name": "Rashi",
@@ -27461,7 +27461,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "tiger ↔ snake (Ashtakoot Yoni score 2/4)"
+            "description": "tiger ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -27503,7 +27503,7 @@
         "nakshatra": 26
       },
       "ashtakoot": {
-        "totalScore": 22,
+        "totalScore": 23,
         "koots": [
           {
             "name": "Varna",
@@ -27525,7 +27525,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "snake ↔ elephant"
           },
@@ -27559,7 +27559,7 @@
         ]
       },
       "ashtakootGana": {
-        "totalScore": 22,
+        "totalScore": 23,
         "koots": [
           {
             "name": "Varna",
@@ -27581,7 +27581,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "snake ↔ elephant"
           },
@@ -27641,7 +27641,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "snake ↔ elephant (Ashtakoot Yoni score 2/4)"
+            "description": "snake ↔ elephant, not enemies"
           },
           {
             "name": "Rashi",
@@ -27816,7 +27816,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "cow ↔ elephant (Ashtakoot Yoni score 2/4)"
+            "description": "cow ↔ elephant, not enemies"
           },
           {
             "name": "Rashi",
@@ -27991,7 +27991,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "lion ↔ tiger (Ashtakoot Yoni score 2/4)"
+            "description": "lion ↔ tiger, not enemies"
           },
           {
             "name": "Rashi",
@@ -28166,7 +28166,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ monkey (Ashtakoot Yoni score 2/4)"
+            "description": "deer ↔ monkey, not enemies"
           },
           {
             "name": "Rashi",
@@ -28207,7 +28207,7 @@
         "nakshatra": 14
       },
       "ashtakoot": {
-        "totalScore": 13,
+        "totalScore": 12,
         "koots": [
           {
             "name": "Varna",
@@ -28229,7 +28229,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ buffalo"
           },
@@ -28261,7 +28261,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 13,
+        "totalScore": 12,
         "koots": [
           {
             "name": "Varna",
@@ -28283,7 +28283,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "tiger ↔ buffalo"
           },
@@ -28341,7 +28341,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "tiger ↔ buffalo (Ashtakoot Yoni score 2/4)"
+            "description": "tiger ↔ buffalo, not enemies"
           },
           {
             "name": "Rashi",
@@ -28520,7 +28520,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "lion ↔ snake (Ashtakoot Yoni score 2/4)"
+            "description": "lion ↔ snake, not enemies"
           },
           {
             "name": "Rashi",
@@ -28561,7 +28561,7 @@
         "nakshatra": 7
       },
       "ashtakoot": {
-        "totalScore": 13.5,
+        "totalScore": 14.5,
         "koots": [
           {
             "name": "Varna",
@@ -28583,7 +28583,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "elephant ↔ sheep"
           },
@@ -28615,7 +28615,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 13.5,
+        "totalScore": 14.5,
         "koots": [
           {
             "name": "Varna",
@@ -28637,7 +28637,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 3,
             "maxScore": 4,
             "description": "elephant ↔ sheep"
           },
@@ -28695,7 +28695,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "elephant ↔ sheep (Ashtakoot Yoni score 2/4)"
+            "description": "elephant ↔ sheep, not enemies"
           },
           {
             "name": "Rashi",
@@ -28737,7 +28737,7 @@
         "nakshatra": 7
       },
       "ashtakoot": {
-        "totalScore": 17.5,
+        "totalScore": 16.5,
         "koots": [
           {
             "name": "Varna",
@@ -28759,7 +28759,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "lion ↔ sheep"
           },
@@ -28791,7 +28791,7 @@
         "cancellations": []
       },
       "ashtakootGana": {
-        "totalScore": 17.5,
+        "totalScore": 16.5,
         "koots": [
           {
             "name": "Varna",
@@ -28813,7 +28813,7 @@
           },
           {
             "name": "Yoni",
-            "score": 2,
+            "score": 1,
             "maxScore": 4,
             "description": "lion ↔ sheep"
           },
@@ -28871,7 +28871,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "lion ↔ sheep (Ashtakoot Yoni score 2/4)"
+            "description": "lion ↔ sheep, not enemies"
           },
           {
             "name": "Rashi",
@@ -29020,7 +29020,7 @@
         "cancellations": []
       },
       "pathuPorutham": {
-        "totalPasses": 8,
+        "totalPasses": 9,
         "recommended": true,
         "poruthams": [
           {
@@ -29045,8 +29045,8 @@
           },
           {
             "name": "Yoni",
-            "passes": false,
-            "description": "tiger ↔ elephant (Ashtakoot Yoni score 1/4)"
+            "passes": true,
+            "description": "tiger ↔ elephant, not enemies"
           },
           {
             "name": "Rashi",
@@ -29221,7 +29221,7 @@
           {
             "name": "Yoni",
             "passes": true,
-            "description": "deer ↔ rat (Ashtakoot Yoni score 2/4)"
+            "description": "deer ↔ rat, not enemies"
           },
           {
             "name": "Rashi",
@@ -29254,9 +29254,9 @@
     }
   ],
   "domainDigests": {
-    "ashtakootTotal": "d85066cffa0287e3d123ebfa02e3ced7e61bc47b6310a5d6f4dd3c5e3cecc0f0",
-    "ashtakootKoots": "5bc11dd44b272d0d6a5389b08ffa0abaa2a39ddc411edd86f78b2089bcbaf3ef",
-    "ashtakootGanaTotal": "9b60913c38792e7b601b517a136d3814f2e5af5df5fa6b01009b718331c49d45",
-    "pathuPasses": "0eee7e97dfd40ee311f8aeee0e57360aa5e8f764e808b40daed2c3f58dd194ae"
+    "ashtakootTotal": "573d3b4cf18932603036a62014dbbdf3ca69858e82bcfcb185cfa86116a9d27b",
+    "ashtakootKoots": "3e7c377815c4d2750b490614acb34d7f9cb92942544738279c9f776e8552e4a1",
+    "ashtakootGanaTotal": "70e90ad4b0857fc3572af27d0a6777667d72b1e751991f21c0fe79092107bdab",
+    "pathuPasses": "0f900d9a55c3fc8c4104cd3c64ac1013d9533debbcc31531e829f0e37778c9f4"
   }
 }

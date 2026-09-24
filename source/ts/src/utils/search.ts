@@ -23,7 +23,10 @@ function wrapSignedDeg(x: number): number {
   return m > 180 ? m - 360 : m;
 }
 
-/** Secant solve for the instant the angle reaches `targetDeg`; `null` declines to the caller's bisection. */
+/**
+ * Secant solve for the instant the angle reaches `targetDeg`; `null` declines to the caller's bisection.
+ * A fractional `loMs` is evaluated at its whole millisecond, so a step rounding down onto that instant is kept.
+ */
 function secantBoundary(
   loMs: number,
   hiMs: number,
@@ -41,7 +44,7 @@ function secantBoundary(
   for (let k = 0; k < 8; k++) {
     if (f1 === f0) break;
     const next = Math.round(t1 - (f1 * (t1 - t0)) / (f1 - f0));
-    if (!Number.isFinite(next) || next < loMs || next > hiMs) return null;
+    if (!Number.isFinite(next) || next < Math.floor(loMs) || next > hiMs) return null;
     const converged = Math.abs(next - t1) <= 1;
     t0 = t1; f0 = f1;
     t1 = next; f1 = f(t1);

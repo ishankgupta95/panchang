@@ -6,10 +6,10 @@
 Pure TypeScript Hindu Panchang (almanac), Jyotish, and Birth Chart calculations.
 Zero runtime dependencies. Works offline in React Native (Hermes), Node.js, and browsers.
 
-**Fast** (~0.25 ms trimmed, ~0.41 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **8,805 tests across 138 files**
+**Fast** (~0.16 ms trimmed, ~0.30 ms full) · **Typed** (full TypeScript) · **Offline** (pure JS math) · **9,207 tests across 146 files**
 
 > 📖 **Full documentation: [dharmagya.app/docs/panchang-ts](https://dharmagya.app/docs/panchang-ts)**
-> This README covers install, quick start, and the 5.1 → 5.2, 5.0 → 5.1 and 4.x → 5 migrations
+> This README covers install, quick start, and the 5.3 → 5.4, 5.1 → 5.2, 5.0 → 5.1 and 4.x → 5 migrations
 > in full, plus a per-feature quick reference. The complete reference (every option, result field,
 > table format, accuracy bound and performance note) lives on the docs site.
 
@@ -38,8 +38,8 @@ const result = getDailyPanchang(
   { latitude: 23.1765, longitude: 75.7885 },  // Ujjain, India
   { timezone: 330 },                          // IST = UTC+5:30 = 330 minutes
 );
-// → DailyPanchangResult | null. Null only at polar latitudes where
-//   sunrise can't be computed. Anywhere else, narrow with `if (!result) return;`.
+// → DailyPanchangResult | null. Null only when no sunrise-to-sunrise day starts on that date
+//   (polar latitudes, or an offset far from local solar time). Narrow with `if (!result) return;`.
 
 console.log(result!.angas.tithis[0].name);          // "Krishna Chaturdashi"
 console.log(result!.angas.nakshatras[0].name);      // "Mrigashira"
@@ -182,6 +182,230 @@ A half-filled location throws rather than being completed from a reference point
 
 Note that the shipped static tables (`panchang-ts/festivals`, `/eclipses`, `/muhurta`) are
 pre-computed for Varanasi, which is a fourth point again.
+
+---
+
+## Upgrading to 5.4
+
+Correctness fixes from a full TypeScript and Go audit, festival rules brought in line with the
+reference almanac and its competitors, a corrected Yoni koota table, one new export and two new
+festival keys. Nothing is removed or renamed and no signature changes, but many published values
+move, so read the first sections before upgrading if you cache or diff output. The Go module
+(`source/go/v5`) carries the same changes byte for byte.
+
+### Festival days now follow the reference almanac
+
+Every rule below was checked against published dates: the reference almanac first, then AstroSage
+and other almanacs, with the classical rule (Nirnaya Sindhu, Dharma Sindhu) as the tie-breaker.
+The dates relied on are pinned in `testdata/almanac/almanac-festival-selection-2026-09.json` and
+`almanac-festival-rules-2026-09-nakshatra-solar.json`. Over 5 cities and 1900 to 2100 every
+once-a-year festival now fires exactly once per year and every monthly one at most once per paksha
+or month; before, most of them were listed on two consecutive days in some years. Two exceptions
+remain while their rules are deferred (below): Phagli still takes every day whose sunrise holds
+Purnima (two days in 2033, none in 2018 at Delhi), and a paksha whose Trayodashi touches no
+pradosha window has no Pradosh.
+
+- **A tithi current at two sunrises** (vriddhi): the first day, as the reference publishes (Anant
+  Chaturdashi 2018-09-23, Ghatasthapana 2015-10-13), except the Tritiya vratas (Hariyali, Kajari
+  and Hartalika Teej, Gangaur) and Jagannath Rath Yatra, which take the second (Hartalika Teej
+  2006-08-27). Ugadi, Gudi Padwa, Hanuman Jayanti, Navaratri, Durga Ashtami, Guru, Sharad, Kartika
+  and Vat Savitri Purnima, Mahalaya Amavasya and others lose their second-day duplicate.
+- **Festivals chosen by a kala** use the reference's windows (madhyahna the third fifth of
+  daytime, aparahna the fourth, pradosha sunset to sunset + night/5, nishita the 8th night
+  muhurta). The day whose window the tithi covers most decides Ganesh and Vinayaka Chaturthi
+  (madhyahna), Dhanteras, Diwali and Parashurama Jayanti (pradosha) and Govardhan Puja (daytime),
+  the earlier day winning a tie or when both days' windows are full. Masik and Maha Shivaratri follow the reference's nishita ladder, and Dussehra its aparahna ladder
+  with the Shravana rule. Rama Navami (madhyahna), Bhai Dooj and Vat Savitri Amavasya (aparahna)
+  take the last day whose window the tithi touches, Narak Chaturdashi the first day whose
+  arunodaya it touches, and Vasant Panchami the first day on which Panchami has begun by two
+  fifths of the daytime. Vinayaka Chaturthi in December 2025 at Delhi drops its 12-23 duplicate
+  and keeps 12-24.
+- **Raksha Bandhan, Yajur Upakarma, Nag Panchami and Akshaya Tritiya** take the first sunrise day
+  on which the tithi lasts at least 3 muhurtas, else the day it begins. Akshaya Tritiya 2020 at
+  Delhi drops its 04-25 duplicate and keeps 04-26.
+- **Pradosh vrat** is the day whose pradosha window (sunset to sunset + night/5) overlaps
+  Trayodashi most; it reproduces every reference date for Delhi 2025 and 2027 (Ravi Pradosh
+  2025-02-09 was missing).
+- **Holika Dahan** is a new festival key, `holika_dahan`, on the evening the reference's Bhadra
+  ladder chooses; **`holi` is now the next day** (Rangwali Holi), as the reference publishes it.
+  That holds for `getDailyPanchang`, the listings and the tables. `getInstantPanchang` reports by
+  the tithi at the instant, so an instant in Phalguna Purnima lists `holika_dahan` and `holi`
+  together, and it never lists `karthigai_deepam` (it reports `masik_karthigai` on that day).
+- **Chhath** is anchored on the Shashthi sunrise day with Nahay Khay, Kharna and Usha Arghya at
+  -2, -1 and +1 days; **Maha Navami** takes the first day whose sunset less two muhurtas follows the
+  start of Navami (2015-10-21, 2027-10-08); **Saddula Bathukamma** moves to Durgashtami;
+  **Varamahalakshmi** is the Friday in the 7 days ending on the Shravana Purnima sunrise day.
+- **Masik Karthigai** is one day per Krittika transit (the first day Krittika holds at sunset, else
+  at sunrise); it fired on two consecutive days in about three months of four. **Karthigai Deepam**
+  is a new festival key, `karthigai_deepam`, on the Karthigai-month Krittika day nearest the full
+  moon, for regions `all` and `tamil-nadu`. On that day those two regions list it in place of
+  `masik_karthigai`; every other region still lists `masik_karthigai`, so a table built for `all`
+  and filtered by region afterwards loses that month's Masik Karthigai outside Tamil Nadu.
+- **Onam** is exactly one day a year: the Thiruvonam of Chingam, the first of two Chingam sunrises,
+  the day holding it when it holds no sunrise, and the later of two Thiruvonams in one Chingam
+  (at Kochi, 2024-09-15 and 2013-09-16).
+- **Shravan Somvar, Mangala Gauri, Kartik Somvar and Magha Shanivar** follow `masaSystem`: the
+  default purnimanta gives the North Indian Mondays (Sawan Somwar 2025: 07-14, 07-21, 07-28, 08-04),
+  `amanta` the southern ones as before, region `nepal` the solar month. This changes the default
+  output: a caller that never sets `masaSystem` now gets the North Indian dates.
+- Deferred for lack of a reference capture: a Pradosh fallback when Trayodashi touches no pradosha
+  window, Phagli, and the Guru Purnima short-udaya refinement.
+
+### Yoni koota and Pathu Porutham Yoni
+
+**Yoni koota (`computeAshtakoot`)** now uses the published five-level table (4 same animal, 3
+friendly, 2 neutral, 1 unfriendly, 0 enemy); the old one never awarded 3 and matched no published
+chakra. The table is the chakra of Mahidhar Sharma's tika on Muhurta Chintamani, as carried by
+Frawley and the Jagannatha Hora port PyJHora; the sources are in
+`testdata/charts/yoni-koota-references.json`. 550 of the 1,296 valid pairs of natal Moons change
+total (372 by -1, 166 by +1, 12 by +2). **Pathu Porutham Yoni** (`computePathuPorutham`) is now the
+Tamil pass/fail test, failing only on the seven enemy pairs, and no longer reads the Ashtakoot
+score; its description reads, for example, `"horse ↔ snake, not enemies"`.
+
+### Day-valued results west of UTC, and the Odisha new year
+
+`computeSankrantisForYear` (`SankrantiEvent.date`) and the solar branch of `getHinduNewYear`
+(Tamil Nadu, Kerala, Punjab, West Bengal, Assam) now return the UTC midnight that falls within the
+local day, like every other day-valued result, so formatting them in the location's zone gives the
+right day (Puthandu 2025 in New York read as April 12). At UTC and east of it, IST included, every
+value is byte-identical. **`getHinduNewYear(year, 'odisha')`** returns Pana Sankranti, the Mesha
+Sankranti day, instead of Chaitra Shukla Pratipada: the transit's civil date, or, when the transit
+falls later than 0.315 of the way through the night after sunset, the date of the sunrise that ends
+that night. That cutoff is fitted to the reference
+almanac's Bhubaneswar dates (2024-04-13 for a 21:15 transit, 2028-04-14 for 21:47); no textbook
+Odia rule reproduces them. The cutoff is a fraction of the local night, so the date depends on the
+location (2028 is 04-13 at Delhi and 04-14 at Bhubaneswar), and it can fall a day before
+`SankrantiEvent.date`, which moves a transit after sunset to the next day (Bhubaneswar 2024: 04-13
+and 04-14). The festival listings are not part of this change: `computeFestivalsForYear` returns
+the local midnight of each day and `computeFestivalsInRange` the range start's local time of day,
+and both read correctly in the location's zone.
+
+### Values that move
+
+- **Brahma Muhurta** (`muhurtas.brahma`, `computeBrahmaMuhurta`) is now the 14th of the 15 night
+  muhurtas, from two night muhurtas to one before sunrise (about 96 to 48 minutes at an
+  equinox). It used daylight/30, a 24 minute window ending 24 minutes before sunrise. The daily
+  panchang measures the night from sunset to the next sunrise, so the window's midpoint is
+  exactly Pratah Sandhya's start, which the reference almanac captures in `testdata` confirm;
+  they hold no Brahma Muhurta value of their own.
+- **Year and range listings in zones with daylight saving** (`computeFestivalsForYear`,
+  `computeFestivalsInRange`, `computeAuspiciousDatesForYear`, `computeAuspiciousDatesInRange`,
+  `computeMoonPhasesForYear`, `computeEclipsesForYear`) now step civil days in the zone. They
+  used a fixed 24 hour step from an offset taken on 1 July, so in America and Europe they skipped
+  the spring-forward day, listed the fall-back day twice, included the previous 31 December and
+  dropped the requested one, and stamped winter dates at 23:00 of the previous day (Diwali 2026
+  in New York came back as `2026-11-09T04:00Z`, 23:00 on 8 November in the zone and 9 November at
+  the July offset; it is now `2026-11-08T05:00Z`, local midnight). Numeric offsets and zones without
+  daylight saving, IST included, are byte-identical.
+- **Festivals that went missing**: Sankashti Chaturthi when Chaturthi touches no moonrise (about
+  7% of Krishna pakshas, for example Delhi 2025-10-10), Ugadi, Gudi Padwa and Navaratri when a
+  kshaya Pratipada follows an adhika month, the Smarta Ekadashi of a vriddha Ekadashi followed by
+  a kshaya Dwadashi, and Onam in adhika Bhadrapada years (2012, 2096). Across 9 cities over
+  1900 to 2100 these four fixes add 1,677 entries and remove or move none (the rule changes above
+  restore further dates of their own, and do move and remove entries).
+- **`getHinduNewYear`** on a kshaya Chaitra Shukla Pratipada now returns the containing day, the
+  day the library's own Ugadi falls on and the reference publishes (2026-03-19, was 2026-03-20).
+- **`convertHinduToGregorian`** now finds Adhika Chaitra Krishna-paksha dates in purnimanta mode.
+- **`computeEclipsesInRange` / `computeEclipsesForYear`** select by the eclipse's peak, not its
+  syzygy, so an eclipse near a range or year boundary is listed exactly once.
+- **`computeEkadashiDatesForYear`** covers the local calendar year exactly: a fast on local
+  31 December moves from the next year's list into its own (Pune 1912 loses 1912-01-01, which is
+  the 1911-12-31 fast). The values themselves are unchanged: each is still the UTC midnight that
+  falls within the local day of the fast, so format it in the location's zone.
+- **Years 1900 and 2100** now work at every offset in the year listings and table builders. The
+  festival, moon-phase, eclipse and auspicious-date listings, the lunar `getHinduNewYear`,
+  `convertHinduToGregorian` and the table builders reject years 0 to 99 with `INVALID_DATE` instead
+  of silently reading them as 1900 to 1999. `computeEkadashiDatesForYear` and
+  `computeSankrantisForYear` still take any year, so 99 now means the year 99 rather than 1999,
+  and the solar `getHinduNewYear` returns `null` for such a year (5.3 returned the 1999 date).
+- **Daily panchang edges**: a civil day with no sunrise at a polar transition returns `null`
+  instead of the next day's panchang, and `getInstantPanchang` returns `null` for an instant whose
+  Hindu day has no sunrise to start it; `moon.set` is no longer taken from the next civil day on a
+  day with no moonrise; one eclipse no longer shows on two consecutive days when sunrise falls
+  between syzygy and peak; a solar eclipse whose peak is below the horizon is described by its
+  deepest visible phase (so its description says it is visible while `visibleFromLocation`, which
+  is about the peak, stays `false`); `computeEndTimes: false` no longer changes `specialYogas`; the
+  Bhadra boundary is no longer about a minute off.
+- **Dashas**: Ashtottari and Yogini antardashas of the birth mahadasha are now those of the full
+  mahadasha clipped at birth, as Vimshottari's already were; Narayan `{ duration: 'variable' }`
+  gives 12 years to a sign whose lord occupies it (it gave 0, or 1 for an exalted lord); sub-periods
+  now end exactly at their parent's end (they drifted by up to 8 ms).
+- **Shadbala**: Nathonatha Bala is continuous across sunrise and sunset (it jumped by 60 virupas);
+  cached Shadbala and Bhava Bala totals move by up to about 34 virupas in the pinned charts, and
+  more for a birth just after sunrise in a long night; the Varshaphala year lord can change with
+  them.
+- **Sade Sati** no longer skips a retrograde re-entry when finding `nextArcStart`, which could be
+  about 21 years late.
+- **Kemadruma** no longer counts the Sun, consistent with Sunapha and Anapha.
+- **`computeVarjyam`** returns `null` when the index is not the nakshatra in force at sunrise,
+  instead of a meaningless window (usually a few seconds, occasionally a plausible-looking hour).
+- **Placidus-KP houses** between about 66.2 and 66.56 degrees of latitude now return cusps instead
+  of `PLACIDUS_DIVERGED`.
+
+### New export
+
+- `computeVimshottariPratyantarIn(mahaDasha, antardasha)`: the pratyantars of an antardasha split
+  over its full length and clipped, which is what the birth antardasha needs.
+  `computeVimshottariPratyantar` is unchanged.
+
+### Input handling
+
+Only inputs that used to hang, crash with a raw `TypeError`, or return garbage:
+
+- An Invalid Date, or an instant beyond the rise and set solver's range, throws `INVALID_DATE`
+  instead of hanging `getSunrise` and friends forever.
+- An unknown house system, divisional, graha, yoga type or node-aspect mode, or a vara outside 0
+  to 6, throws `PanchangError` `INVALID_INPUT`. Before, these crashed with a `TypeError`, returned
+  an Invalid Date window, or (yoga type, node-aspect mode) were silently ignored.
+  `computeVimshottariPratyantar` with an unknown lord throws `INVALID_INPUT` too (a plain `Error`
+  before), and the sidereal-longitude helpers throw `INVALID_DATE` for an Invalid Date (5.3
+  returned `NaN`).
+- An Invalid Date in `getUpcomingSolarEclipse` or `getUpcomingLunarEclipse` (5.3: `null`) or in
+  `computePlanetaryPositions` (5.3: `NaN` longitudes) throws `INVALID_DATE`. A non-integer or
+  out-of-range `timezoneOffsetMinutes` in `buildEclipsesTable` or `buildMoonPhasesTable` throws
+  `INVALID_TIMEZONE`; 5.3 built the table.
+- An unknown table language throws a `RangeError` in TypeScript (`INVALID_INPUT` in Go); 5.3
+  built the festivals table anyway and crashed with a `TypeError` in the other two builders.
+- One relaxation: `janmaRashi: null` or `janmaNakshatra: null` in `getDailyPanchang` now means the
+  same as leaving it out (5.3 threw a `RangeError`).
+- A Moon longitude outside [0, 360) is wrapped into it by all three moon-longitude dashas; NaN or
+  Infinity throws `INVALID_INPUT`.
+- `formatInZone` renders any integer offset correctly and throws `INVALID_TIMEZONE` for a
+  fractional one (5.3 printed `+00:undefined`).
+- `computePrashnaChart` and `computeKpCuspalSubLords` keep their KP defaults when an option is
+  passed as `undefined`.
+
+**Documented, not changed**: an omitted `timezone` falls back to the host's zone in untyped
+JavaScript; the Go port reports `INVALID_TIMEZONE` instead, and accepts the zone names `""` (UTC)
+and `"Local"` (the host), which TypeScript rejects.
+
+### Faster, with no output changes
+
+The full parity documents, every table file and every golden are byte-identical before and
+after. Measured on the same machine, alternating builds, medians:
+
+| call | TypeScript | Go |
+|---|---|---|
+| `getDailyPanchang`, a year of days | 1.4x | 1.3x |
+| `getDailyPanchang`, a year in `America/New_York` | 1.5x | 1.4x |
+| `getInstantPanchang`, a year of instants | 1.5x | 1.4x |
+| `computeFestivalsForYear` | 1.8x | 1.5x |
+| `buildMuhurtaTable`, one year | 2.2x | 2.0x |
+| `convertHinduToGregorian` | 6.5x | 5.0x |
+| `getUpcomingEclipses` | 4.6x | 3.9x |
+| `computeSadeSati` | 18x | 16x |
+| `computeKpCuspalSubLords` / `computeBhava` | 12x | 38x |
+| a birth-chart bundle | 2.2x | 2.5x |
+
+Most of the causes were repeated work: the same new-moon searches and planet positions recomputed
+across days and charts (now kept in bounded caches keyed by every input, so no result depends on
+which calls ran before it), house cusps computing nine planet positions they never read, the
+converters and table builders building whole days to read four labels, Sade Sati sampling Saturn at
+steps where it cannot change sign, and a timezone formatter rebuilt on every call. One was not: in
+TypeScript, the sine and cosine behind every series evaluation passed their reduced argument through
+module-level variables, and now keep it in locals with the same operations in the same order. That
+change alone gives the chart primitives their whole speedup and most of the gain on a distinct day
+and in the Ekadashi and Sankranti listings; the caches give nearly all of it on a repeated day.
 
 ---
 
@@ -773,7 +997,7 @@ console.log(i.angas.tithi.name, i.angas.nakshatra.name);
 📖 [Festivals →](https://dharmagya.app/docs/panchang-ts/festivals)
 
 ```typescript
-r.festivals.forEach(f => console.log(f.key, f.name, f.type, f.deferralDate));
+r.festivals.forEach(f => console.log(f.key, f.name, f.type));
 // `name` is localized, so match on `key`, never on `name`:
 const hasDiwali = r.festivals.some(f => f.key === 'diwali');
 
@@ -914,7 +1138,7 @@ import {
 } from 'panchang-ts';
 
 const v = computeVarshaphala(birth, 30, loc);      // Tajik + Muntha + 27 Sahams
-computeTithiPravesha(birth, 30, loc);              // preserves natal tithi exactly
+computeTithiPravesha(birth, 30, loc);              // natal tithi's Sun-Moon separation returns
 computeKpSubLord(45.5).subLord;                    // 243 sub-divisions
 computePrashnaChart(questionTime, querentLoc);     // horary, Placidus-KP default
 ```
@@ -995,7 +1219,7 @@ InteractionManager.runAfterInteractions(() => {
 
 📖 [Full accuracy notes →](https://dharmagya.app/docs/panchang-ts/accuracy)
 
-8,805 tests across 138 files, including fixtures cross-verified against reference
+9,207 tests across 146 files, including fixtures cross-verified against reference
 panchang calculations spanning 2025-2026 across 10 Indian cities plus New York,
 London, Sydney, Dubai, Singapore (diaspora fixtures cover DST on
 `America/New_York`).
@@ -1015,10 +1239,14 @@ London, Sydney, Dubai, Singapore (diaspora fixtures cover DST on
 | Varjyam windows | count + position vs the reference almanac over a 61-day / two-nakshatra-cycle sweep, ≤2 min (62/62 windows) |
 | Sade Sati arc start/end | ±1-2 days vs authoritative ephemerides |
 
-**Festival dating** uses tithi-at-sunrise; a few festivals have authorities on
-other rules (tithi-at-midnight for Janmashtami / Shivaratri / Diwali,
-madhyahna-vyapini for Ganesh Chaturthi edge years) where output can drift
-±1 day. The exact list is
+**Festival dating** follows the reference almanac's day choice when a tithi
+touches two days: the first of two sunrise days (the later one for the Teej and
+Gangaur Tritiya vratas and Rath Yatra); the day holding more of madhyahna (Ganesh
+and Vinayaka Chaturthi), of pradosha (Diwali, Dhanteras, Pradosh vrat) or of the
+nishita muhurta (Shivaratri); three muhurtas after sunrise for Raksha Bandhan,
+Upakarma, Nag Panchami and Akshaya Tritiya; the Holika Dahan ladder, with Holi on
+the next day; Chhath counted from its Shashthi. Rules with few published years to
+check against can still drift ±1 day. The exact list is
 [documented](https://dharmagya.app/docs/panchang-ts/accuracy#festival-tradeoff).
 
 **Detection conventions:** Aadal / Vidaal follow the classical Moon-from-Sun
@@ -1032,36 +1260,40 @@ tyajya spells). Do Ghati does not rotate by weekday.
 
 📖 [Full performance notes →](https://dharmagya.app/docs/panchang-ts/performance)
 
-Measured at Pune, Apple M-series, Node (median of 11 processes). **Distinct
-days** is the calendar-scan cost; **same day repeated** is what a UI
-re-rendering one date sees. Last column is published 4.3.1, benchmarked beside
-this release.
+Measured at Pune, Apple M-series, Node (median of 11 processes, the three builds
+interleaved). **Distinct days** is the calendar-scan cost; **same day repeated** is
+what a UI re-rendering one date sees. The last two columns are the published 5.3.0
+and 4.3.1 packages, benchmarked beside this release.
 
-| `getDailyPanchang` call | Distinct days | Same day repeated | 4.3.1 (distinct) |
-|---|---|---|---|
-| Default (all sections + end-times) | **~0.41 ms** | **~0.17 ms** | ~6.06 ms |
-| `sections: []` + `computeEndTimes: false` | ~0.25 ms | ~0.14 ms | n/a |
-| `getInstantPanchang` | ~0.21 ms | ~0.10 ms | ~0.43 ms |
+| `getDailyPanchang` call | Distinct days | Same day repeated | 5.3.0 (distinct) | 4.3.1 (distinct) |
+|---|---|---|---|---|
+| Default (all sections + end-times) | **~0.30 ms** | **~0.10 ms** | ~0.41 ms | ~5.83 ms |
+| `sections: []` + `computeEndTimes: false` | ~0.16 ms | ~0.05 ms | ~0.26 ms | n/a |
+| `getInstantPanchang` | ~0.13 ms | ~0.02 ms | ~0.22 ms | ~0.44 ms |
 
-**A default day is ~15× cheaper than 4.3.1**, a repeated day ~37×. The levers:
+**A default day is ~1.4× cheaper than 5.3.0 and ~20× cheaper than 4.3.1**, a
+repeated day ~1.9× and ~66×. The levers:
 
 - **`sections`** skips the optional ephemeris-backed blocks (`'festivals'`,
-  `'eclipse'`, `'moonTimes'`, `'lunarWindows'`). Narrowing is exactly
-  output-neutral: every field a narrowed call computes is identical to the full
-  call's; omitted sections sit at their documented `null` / `[]`.
-- **`computeEndTimes: false`** drops the `endTime` transition searches;
-  ~5-10%. Use it to drop fields you don't want, not to go faster.
+  `'eclipse'`, `'moonTimes'`, `'lunarWindows'`). A narrowed call's values equal
+  the full call's and omitted sections sit at their documented `null` / `[]`,
+  with three couplings: `'festivals'` also fills `moon.rise` and
+  `inauspicious.bhadra`, which it needs, and the Surya/Chandra Grahan entry in
+  `festivals` comes with `'eclipse'`, so `['festivals']` alone omits it.
+- **`computeEndTimes: false`** drops the published end times and the yoga and
+  karana transition searches (`specialYogas` still covers the whole day);
+  ~2-5%. Use it to drop fields you don't want, not to go faster.
 
-Range helpers narrow internally: `computeEkadashiDatesForYear` **~18 ms/year**
-(4.3.1: ~2,360), `computeFestivalsInRange` **~131 ms/year** (~2,180),
-`computeSankrantisForYear` **~3.3 ms/year** (~154). Solar rise/set events are
+Range helpers narrow internally: `computeEkadashiDatesForYear` **~16 ms/year**
+(5.3.0: ~19, 4.3.1: ~2,410), `computeFestivalsInRange` **~79 ms/year** (~136, ~2,230),
+`computeSankrantisForYear` **~2.8 ms/year** (~3.3, ~160). Solar rise/set events are
 cached process-wide (bounded, 20k entries), which also makes them
 single-valued.
 
 One deliberate regression: raw chart primitives (`computeRashiChart`,
-`computeNavamsa`) cost ~0.32 ms vs ~0.10 in 4.3.1, the price of an
+`computeNavamsa`) cost ~0.18 ms vs ~0.10 in 4.3.1 (5.3.0: ~0.32), the price of an
 order-of-magnitude accuracy gain against JPL DE441. `computeShadbala` /
-`computeBhavaBala` went the other way, ~2× faster.
+`computeBhavaBala` went the other way, ~3.6× to 3.7× faster than 4.3.1.
 
 ---
 
@@ -1085,11 +1317,15 @@ try {
 Error codes: `INVALID_DATE`, `INVALID_LATITUDE`, `INVALID_LONGITUDE`,
 `INVALID_ELEVATION`, `INVALID_TIMEZONE`, `INVALID_AYANAMSA`, `INVALID_INPUT`,
 `TIMEZONE_RESOLUTION_FAILED`, `NO_SUNRISE`, `NO_SUNSET`, `SEARCH_DIVERGED`,
-`CIRCUMPOLAR` (Placidus-KP houses above ±66.5°).
+`CIRCUMPOLAR` and `PLACIDUS_DIVERGED` (Placidus-KP houses beyond the polar
+circles, |latitude| above about 66.56°; whole-sign and equal houses still work
+there), `SAHAM_DEPENDENCY_ERROR` (an internal Varshaphala saham ordering fault).
 
 **Polar locations.** `getDailyPanchang` and `getInstantPanchang` return `null`
 rather than throwing: the Hindu day is undefined when sunrise can't be
-computed. The low-level `getSunrise` / `getSunset` primitives still throw
+computed, including on the civil day a polar night or midnight sun ends,
+whose first sunrise belongs to the next day. The low-level `getSunrise` /
+`getSunset` primitives still throw
 `PanchangError(NO_SUNRISE)` / `PanchangError(NO_SUNSET)` for direct callers
 who need the precise reason. `getMoonrise` / `getMoonset` return `null` (normal
 for the Moon).

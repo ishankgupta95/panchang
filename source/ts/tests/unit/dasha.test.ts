@@ -104,10 +104,18 @@ describe('computeVimshottariDasha', () => {
       }
     });
 
-    it('last antardasha of each mahadasha ends near mahadasha end', () => {
+    it('last antardasha of each mahadasha ends exactly at the mahadasha end', () => {
       for (const md of result.mahaDashas) {
         const lastAD = md.antarDashas[md.antarDashas.length - 1]!;
-        expect(Math.abs(lastAD.endDate.getTime() - md.endDate.getTime())).toBeLessThan(1000);
+        expect(lastAD.endDate.getTime()).toBe(md.endDate.getTime());
+      }
+    });
+
+    it('also when the first mahadasha straddles 1970 (its last antardasha used to overrun by 1 ms)', () => {
+      const birth = new Date('1976-09-09T10:50:13.539Z');
+      const r = computeVimshottariDasha(birth, 144.13912296295166, birth);
+      for (const md of r.mahaDashas) {
+        expect(md.antarDashas[md.antarDashas.length - 1]!.endDate.getTime()).toBe(md.endDate.getTime());
       }
     });
   });

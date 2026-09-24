@@ -3,6 +3,7 @@ package astronomy
 import (
 	"time"
 
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
 	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
@@ -15,12 +16,16 @@ func ComputeSunrise(ctx *EphemerisCtx, searchFromMs int64, location types.GeoLoc
 	if err := utils.ValidateLocation(location); err != nil {
 		return 0, err
 	}
-	result, ok := ResolveEvent(ctx, solar, +1, searchFromMs, location, limitDays)
+	result, ok, err := ResolveEvent(ctx, solar, +1, searchFromMs, location, limitDays)
+	if err != nil {
+		return 0, err
+	}
 	if !ok {
 		return 0, types.Codef(types.ErrNoSunrise,
-			"No sunrise found within %d days for (%v°, %v°) near %s. "+
+			"No sunrise found within %d days for (%s°, %s°) near %s. "+
 				"This location may be experiencing midnight sun or polar night.",
-			limitDays, location.Latitude, location.Longitude, isoString(searchFromMs))
+			limitDays, jsnum.FormatFloat(location.Latitude), jsnum.FormatFloat(location.Longitude),
+			types.JSDate(searchFromMs).ISOString())
 	}
 	return result, nil
 }
@@ -29,11 +34,15 @@ func ComputeSunset(ctx *EphemerisCtx, searchFromMs int64, location types.GeoLoca
 	if err := utils.ValidateLocation(location); err != nil {
 		return 0, err
 	}
-	result, ok := ResolveEvent(ctx, solar, -1, searchFromMs, location, limitDays)
+	result, ok, err := ResolveEvent(ctx, solar, -1, searchFromMs, location, limitDays)
+	if err != nil {
+		return 0, err
+	}
 	if !ok {
 		return 0, types.Codef(types.ErrNoSunset,
-			"No sunset found within %d days for (%v°, %v°) near %s.",
-			limitDays, location.Latitude, location.Longitude, isoString(searchFromMs))
+			"No sunset found within %d days for (%s°, %s°) near %s.",
+			limitDays, jsnum.FormatFloat(location.Latitude), jsnum.FormatFloat(location.Longitude),
+			types.JSDate(searchFromMs).ISOString())
 	}
 	return result, nil
 }

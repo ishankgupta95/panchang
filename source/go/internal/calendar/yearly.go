@@ -33,21 +33,26 @@ func ComputeEkadashiDatesForYear(ctx context.Context,
 		return nil, err
 	}
 	out := []types.JSDate{}
-	start := types.DateUTC(year, 0, 1).Ms()
-	end := types.DateUTC(year, 11, 31).Ms()
+	first := utils.UtcDateMs(year, 0, 1)
+	last := utils.UtcDateMs(year, 11, 31)
 	ayanamsa := yearlyResolvedAyanamsa(options)
-	offsetMinutes, err := utils.ResolveUtcOffset(options.Timezone, types.DateUTC(year, 6, 1).Ms())
-	if err != nil {
-		return nil, err
-	}
 
-	days := make([]ekadashiDay, 0, 368)
-	for t := start; t <= end+dayMs; t += dayMs {
+	days := make([]ekadashiDay, 0, 370)
+	var offset int
+	var hint *int
+	for d := first - dayMs; d <= last+2*dayMs; d += dayMs {
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
-		sunriseUtcMs, err := astronomy.ComputeSunrise(eph,
-			utils.GetLocalMidnightUtc(t, offsetMinutes), location,
+		midnight, dayOffset, err := utils.WallClockToUtc(d, options.Timezone, hint)
+		if err != nil {
+			return nil, err
+		}
+		offset, hint = dayOffset, &offset
+		if floorDiv(midnight+int64(dayOffset)*60_000, dayMs)*dayMs != d {
+			continue
+		}
+		sunriseUtcMs, err := astronomy.ComputeSunrise(eph, midnight, location,
 			astronomy.DefaultRiseSetLimitDays)
 		if err == nil {
 			var sunsetUtcMs int64
@@ -73,38 +78,49 @@ func ComputeEkadashiDatesForYear(ctx context.Context,
 		if err != nil {
 			return nil, err
 		}
-		days = append(days, ekadashiDay{dMs: t, tithi: core.GetTithiIndexFromLons(siderealMoon, siderealSun)})
+		days = append(days, ekadashiDay{dMs: d, tithi: core.GetTithiIndexFromLons(siderealMoon, siderealSun)})
 	}
 
 	for i := 0; i < len(days); i++ {
 		d, tithi := days[i].dMs, days[i].tithi
-		if d > end {
-			break
-		}
 		next, hasNext := 0, false
 		if i+1 < len(days) && days[i+1].dMs-d == dayMs {
 			next, hasNext = days[i+1].tithi, true
 		}
-		isEkadashi := tithi == 10 || tithi == 25
-		if isEkadashi && !(hasNext && next == tithi) {
-			if hasNext && (next == 12 || next == 27) && i > 0 {
-				if d-days[i-1].dMs == dayMs {
-					out = append(out, types.Date(days[i-1].dMs))
-					continue
-				}
+		fast, isFast := int64(0), false
+		switch {
+		case (tithi == 10 || tithi == 25) && !(hasNext && next == tithi):
+			fast, isFast = d, true
+			if hasNext && (next == 12 || next == 27) && i > 0 && d-days[i-1].dMs == dayMs {
+				fast = days[i-1].dMs
 			}
-			out = append(out, types.Date(d))
-			continue
+		case hasNext && ((tithi == 9 && next == 11) || (tithi == 24 && next == 26)):
+			fast, isFast = d, true
 		}
-		if hasNext && ((tithi == 9 && next == 11) || (tithi == 24 && next == 26)) {
-			out = append(out, types.Date(d))
+		if isFast && fast >= first && fast <= last {
+			value, err := utils.CivilDayValue(fast, options.Timezone)
+			if err != nil {
+				return nil, err
+			}
+			out = append(out, types.Date(value))
 		}
 	}
 	return out, nil
 }
 
+func floorDiv(a, b int64) int64 {
+	q := a / b
+	if a%b != 0 && (a < 0) != (b < 0) {
+		q--
+	}
+	return q
+}
+
+// isPolarRiseSetError matches by code, not against the exported Sentinel
+// variables, whose Code any importer can overwrite.
 func isPolarRiseSetError(err error) bool {
-	return errors.Is(err, types.ErrNoSunriseSentinel) || errors.Is(err, types.ErrNoSunsetSentinel)
+	var pe *types.PanchangError
+	return errors.As(err, &pe) && (pe.Code == types.ErrNoSunrise || pe.Code == types.ErrNoSunset)
 }
 
 func ComputeSankrantisForYear(ctx context.Context,
@@ -121,7 +137,8 @@ func ComputeSankrantisForYear(ctx context.Context,
 	}
 	lang := yearlyResolvedLanguage(options)
 	ayanamsa := yearlyResolvedAyanamsa(options)
-	offsetMinutes, err := utils.ResolveUtcOffset(options.Timezone, types.DateUTC(year, 6, 1).Ms())
+	// The scan grid's offset only aligns the daily probes: each transit's year comes from its own day.
+	gridOffset, err := utils.ResolveUtcOffset(options.Timezone, utils.UtcDateMs(year, 6, 1))
 	if err != nil {
 		return nil, err
 	}
@@ -133,9 +150,9 @@ func ComputeSankrantisForYear(ctx context.Context,
 		return int(math.Floor(lon/30)) % 12, nil
 	}
 
-	scanStart := types.DateUTC(year, 0, 1).Ms() - int64(offsetMinutes)*60_000 - dayMs
-	scanEnd := types.DateUTC(year, 11, 31).Ms() + 23*3600_000 + 59*60_000 -
-		int64(offsetMinutes)*60_000 + dayMs
+	scanStart := utils.UtcDateMs(year, 0, 1) - int64(gridOffset)*60_000 - dayMs
+	scanEnd := utils.UtcDateMs(year, 11, 31) + 23*3600_000 + 59*60_000 -
+		int64(gridOffset)*60_000 + dayMs
 
 	out := []SankrantiEvent{}
 	prevMs := scanStart
@@ -173,14 +190,25 @@ func ComputeSankrantisForYear(ctx context.Context,
 
 		anchorMs, anchorErr := sankrantiAnchor(eph, hi, location)
 		if anchorErr != nil {
+			if !isPolarRiseSetError(anchorErr) {
+				return nil, anchorErr
+			}
 			anchorMs = transitUtcMs
 		}
 
-		local := types.Date(utils.UtcToLocalDisplay(anchorMs, offsetMinutes))
-		date := types.DateUTC(local.UTCFullYear(), local.UTCMonth(), local.UTCDate())
+		anchorOffset, err := utils.ResolveUtcOffset(options.Timezone, anchorMs)
+		if err != nil {
+			return nil, err
+		}
+		local := types.Date(utils.UtcToLocalDisplay(anchorMs, anchorOffset))
+		date, err := utils.CivilDayValue(
+			utils.UtcDateMs(local.UTCFullYear(), local.UTCMonth(), local.UTCDate()), options.Timezone)
+		if err != nil {
+			return nil, err
+		}
 		if local.UTCFullYear() == year {
 			out = append(out, SankrantiEvent{
-				Date:      date,
+				Date:      types.Date(date),
 				Moment:    types.Date(transitUtcMs),
 				Rashi:     rashi,
 				RashiName: i18n.ResolveMasaName(rashi, lang),
@@ -251,6 +279,15 @@ func ComputeFestivalsInRange(ctx context.Context,
 			"start (%s) must be ≤ end (%s)",
 			types.Date(startMs).ISOString(), types.Date(endMs).ISOString())
 	}
+	return festivalsOnCivilDays(ctx, eph, startMs, endMs, location, options)
+}
+
+func festivalsOnCivilDays(ctx context.Context,
+	eph *astronomy.EphemerisCtx,
+	startMs, endMs int64,
+	location types.GeoLocation,
+	options YearlyListingOptions,
+) ([]FestivalDay, error) {
 	out := []FestivalDay{}
 	opts := yearlyPanchangOptions(options)
 	opts.Sections = core.Sections(core.SectionFestivals, core.SectionEclipse)
@@ -258,19 +295,30 @@ func ComputeFestivalsInRange(ctx context.Context,
 	computeEndTimes := false
 	opts.ComputeEndTimes = &computeEndTimes
 
-	for t := startMs; t <= endMs; t += dayMs {
+	next, err := utils.CivilDayStepper(startMs, options.Timezone)
+	if err != nil {
+		return nil, err
+	}
+	for {
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
-		p, ok, err := core.GetDailyPanchang(eph, t, location, opts, core.NatalResolvers{})
+		t, err := next()
+		if err != nil {
+			return nil, err
+		}
+		if t > endMs {
+			break
+		}
+		day, ok, err := core.GetDailyLabels(eph, utils.ClampToSupported(t), location, opts)
 		if err != nil {
 			return nil, err
 		}
 		if !ok {
 			continue
 		}
-		for _, f := range p.Festivals {
-			out = append(out, FestivalDay{Date: p.Date, Festival: f})
+		for _, f := range day.Festivals {
+			out = append(out, FestivalDay{Date: day.Date, Festival: f})
 		}
 	}
 	return out, nil
@@ -282,6 +330,20 @@ func GetUpcomingEclipses(
 	location types.GeoLocation,
 	count int,
 ) ([]astronomy.EclipseInfo, error) {
+	return GetUpcomingEclipsesContext(context.Background(), eph, fromMs, location, count)
+}
+
+// GetUpcomingEclipsesContext is GetUpcomingEclipses checking ctx before it
+// validates and before each eclipse it looks for.
+func GetUpcomingEclipsesContext(ctx context.Context,
+	eph *astronomy.EphemerisCtx,
+	fromMs int64,
+	location types.GeoLocation,
+	count int,
+) ([]astronomy.EclipseInfo, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if err := utils.ValidateDate(fromMs); err != nil {
 		return nil, err
 	}
@@ -302,6 +364,9 @@ func GetUpcomingEclipses(
 	cursorMs := fromMs
 
 	for len(collected) < count {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		sol, hasSol := astronomy.GetUpcomingSolarEclipse(eph, cursorMs, location, withinDays, types.LanguageEn)
 		lun, hasLun := astronomy.GetUpcomingLunarEclipse(eph, cursorMs, location, withinDays, types.LanguageEn)
 		if !hasSol && !hasLun {
@@ -352,31 +417,46 @@ func ComputeEclipsesInRange(ctx context.Context,
 	spanDays := int(math.Ceil(float64(endMs-startMs)/float64(24*3600_000))) + 1
 	maxSteps := int(math.Ceil(float64(spanDays)/20)) + 50
 
-	walk := func(next func(fromMs int64) (astronomy.EclipseInfo, bool)) ([]astronomy.EclipseInfo, error) {
+	// A walk only finds syzygies at or after startMs; the search from a day earlier adds one that peaks after it.
+	walk := func(next func(fromMs int64, withinDays int) (astronomy.EclipseInfo, bool)) ([]astronomy.EclipseInfo, error) {
 		acc := []astronomy.EclipseInfo{}
 		cursorMs := startMs
 		for step := 0; step < maxSteps; step++ {
 			if err := ctx.Err(); err != nil {
 				return nil, err
 			}
-			e, ok := next(cursorMs)
+			e, ok := next(cursorMs, spanDays)
 			if !ok || e.PeakMs.Ms() > endMs {
 				break
 			}
-			acc = append(acc, e)
+			if e.PeakMs.Ms() >= startMs {
+				acc = append(acc, e)
+			}
 			cursorMs = e.EndMs.Ms() + 1000
 		}
-		return acc, nil
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		early, ok := next(startMs-dayMs, 2)
+		if !ok || early.PeakMs.Ms() < startMs || early.PeakMs.Ms() > endMs {
+			return acc, nil
+		}
+		for _, e := range acc {
+			if d := e.PeakMs.Ms() - early.PeakMs.Ms(); d > -dayMs && d < dayMs {
+				return acc, nil
+			}
+		}
+		return append([]astronomy.EclipseInfo{early}, acc...), nil
 	}
 
-	solar, err := walk(func(fromMs int64) (astronomy.EclipseInfo, bool) {
-		return astronomy.GetUpcomingSolarEclipse(eph, fromMs, location, spanDays, types.LanguageEn)
+	solar, err := walk(func(fromMs int64, withinDays int) (astronomy.EclipseInfo, bool) {
+		return astronomy.GetUpcomingSolarEclipse(eph, fromMs, location, withinDays, types.LanguageEn)
 	})
 	if err != nil {
 		return nil, err
 	}
-	lunar, err := walk(func(fromMs int64) (astronomy.EclipseInfo, bool) {
-		return astronomy.GetUpcomingLunarEclipse(eph, fromMs, location, spanDays, types.LanguageEn)
+	lunar, err := walk(func(fromMs int64, withinDays int) (astronomy.EclipseInfo, bool) {
+		return astronomy.GetUpcomingLunarEclipse(eph, fromMs, location, withinDays, types.LanguageEn)
 	})
 	if err != nil {
 		return nil, err
@@ -389,16 +469,6 @@ func ComputeEclipsesInRange(ctx context.Context,
 	return all, nil
 }
 
-func localYearWindow(year int, timezone types.Timezone) (int64, int64, error) {
-	offsetMinutes, err := utils.ResolveUtcOffset(timezone, types.DateUTC(year, 6, 1).Ms())
-	if err != nil {
-		return 0, 0, err
-	}
-	off := int64(offsetMinutes) * 60_000
-	return types.DateUTC(year, 0, 1).Ms() - off,
-		types.DateUTC(year, 11, 31).Ms() + dayMs - 1 - off, nil
-}
-
 func ComputeFestivalsForYear(ctx context.Context,
 	eph *astronomy.EphemerisCtx,
 	year int,
@@ -408,11 +478,17 @@ func ComputeFestivalsForYear(ctx context.Context,
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	startMs, endMs, err := localYearWindow(year, options.Timezone)
+	startMs, endMs, err := utils.LocalYearWindow(year, options.Timezone)
 	if err != nil {
 		return nil, err
 	}
-	return ComputeFestivalsInRange(ctx, eph, startMs, endMs, location, options)
+	if err := utils.ValidateLocalYearWindow(year, startMs, endMs); err != nil {
+		return nil, err
+	}
+	if err := utils.ValidateLocation(location); err != nil {
+		return nil, err
+	}
+	return festivalsOnCivilDays(ctx, eph, startMs, endMs, location, options)
 }
 
 func ComputeEclipsesForYear(ctx context.Context,
@@ -424,9 +500,12 @@ func ComputeEclipsesForYear(ctx context.Context,
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	startMs, endMs, err := localYearWindow(year, timezone)
+	startMs, endMs, err := utils.LocalYearWindow(year, timezone)
 	if err != nil {
 		return nil, err
 	}
-	return ComputeEclipsesInRange(ctx, eph, startMs, endMs, location)
+	if err := utils.ValidateLocalYearWindow(year, startMs, endMs); err != nil {
+		return nil, err
+	}
+	return ComputeEclipsesInRange(ctx, eph, utils.ClampToSupported(startMs), utils.ClampToSupported(endMs), location)
 }

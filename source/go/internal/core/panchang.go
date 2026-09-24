@@ -1,7 +1,6 @@
 package core
 
 import (
-	"errors"
 	"math"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
@@ -127,10 +126,13 @@ func varaIndexAtInstant(
 		}
 	}
 	if err != nil {
-		if errors.Is(err, types.ErrNoSunriseSentinel) || errors.Is(err, types.ErrNoSunsetSentinel) {
+		if isPolarRiseSetError(err) {
 			return types.Date(localMs).UTCDay(), nil
 		}
 		return 0, err
+	}
+	if sunriseMs > utcMs {
+		return types.Date(localMs).UTCDay(), nil
 	}
 	localSunrise := utils.UtcToLocalDisplay(sunriseMs, offsetMinutes)
 	return ComputeVara(localSunrise, localSunrise, varaNames).Index, nil
@@ -283,10 +285,13 @@ func GetInstantPanchang(
 		}
 	}
 	if err != nil {
-		if errors.Is(err, types.ErrNoSunriseSentinel) || errors.Is(err, types.ErrNoSunsetSentinel) {
+		if isPolarRiseSetError(err) {
 			return types.InstantPanchangResult{}, false, nil
 		}
 		return types.InstantPanchangResult{}, false, err
+	}
+	if sunriseUtcMs > dateMs {
+		return types.InstantPanchangResult{}, false, nil
 	}
 
 	sunriseLocal := utils.UtcToLocalDisplay(sunriseUtcMs, lmtOffsetMinutes)
@@ -353,14 +358,21 @@ func GetInstantPanchang(
 		return types.InstantPanchangResult{}, false, err
 	}
 
+	solarMasaIndex := int(math.Floor(siderealSun/30)) % 12
+	varaMasaIndex := chandramasa.Index
+	if o.region == "nepal" {
+		varaMasaIndex = (solarMasaIndex + 1) % 12
+	}
 	festivalList := ComputeFestivals(
 		&FestivalComputeContext{
 			TithiIndex:       tithi.Index,
 			NakshatraIndex:   utils.NakshatraOf(siderealMoon),
 			ChandraMasaIndex: chandramasa.AmantaIndex,
+			VaraMasaIndex:    varaMasaIndex,
+			HasVaraMasaIndex: true,
 			IsAdhika:         chandramasa.IsAdhika,
 			VaraIndex:        vara.Index,
-			SolarMasaIndex:   int(math.Floor(siderealSun/30)) % 12,
+			SolarMasaIndex:   solarMasaIndex,
 			Region:           o.region,
 		},
 		func(key string) string { return resolveFestivalName(t, key) },
@@ -431,6 +443,52 @@ func GetDailyPanchang(
 	options PanchangOptions,
 	natal NatalResolvers,
 ) (types.DailyPanchangResult, bool, error) {
+	return dailyPanchang(ctx, dateMs, location, options, natal, nil)
+}
+
+// DayLabels is the part of a daily panchang the yearly festival walks and the
+// calendar converters read: the date, the tithi at sunrise, the vara, the
+// lunar month, the samvat, and the festival list (eclipse first) the options'
+// sections ask for.
+type DayLabels struct {
+	Date        types.JSDate
+	Tithi       types.TithiInfo
+	Vara        types.VaraInfo
+	Chandramasa types.ChandraMasaInfo
+	Samvat      types.SamvatInfo
+	Festivals   []types.FestivalInfo
+}
+
+// GetDailyLabels returns what GetDailyPanchang would put in the fields
+// DayLabels names, for the same arguments, with the same ok and error. It runs
+// the same code and stops once the festival list is complete, so the day
+// periods, muhurtas, inauspicious windows, anga spans and local strings are
+// never built. What it skips cannot fail for a location and date that have
+// already been validated, and it has no natal resolvers because its callers
+// set no JanmaRashi or JanmaNakshatra. This fast path is Go's alone.
+func GetDailyLabels(
+	ctx *astronomy.EphemerisCtx,
+	dateMs int64,
+	location types.GeoLocation,
+	options PanchangOptions,
+) (DayLabels, bool, error) {
+	var labels DayLabels
+	_, ok, err := dailyPanchang(ctx, dateMs, location, options, NatalResolvers{}, &labels)
+	return labels, ok, err
+}
+
+// dailyPanchang is GetDailyPanchang. With labels non-nil it fills labels and
+// returns a zero result once the festival list is complete, skipping the work
+// no label reads; everything it does compute is computed as in the full call.
+func dailyPanchang(
+	ctx *astronomy.EphemerisCtx,
+	dateMs int64,
+	location types.GeoLocation,
+	options PanchangOptions,
+	natal NatalResolvers,
+	labels *DayLabels,
+) (types.DailyPanchangResult, bool, error) {
+	labelsOnly := labels != nil
 	fail := func(err error) (types.DailyPanchangResult, bool, error) {
 		return types.DailyPanchangResult{}, false, err
 	}
@@ -473,6 +531,9 @@ func GetDailyPanchang(
 	var sunriseUtcMs, sunsetUtcMs, nextSunriseUtcMs int64
 	sunriseUtcMs, err = astronomy.ComputeSunrise(ctx, localMidnightUtcMs, location,
 		astronomy.DefaultRiseSetLimitDays)
+	if err == nil && sunriseUtcMs >= localMidnightUtcMs+86_400_000 {
+		return types.DailyPanchangResult{}, false, nil
+	}
 	if err == nil {
 		sunsetUtcMs, err = astronomy.ComputeSunset(ctx, sunriseUtcMs, location,
 			astronomy.DefaultRiseSetLimitDays)
@@ -482,7 +543,7 @@ func GetDailyPanchang(
 			astronomy.DefaultRiseSetLimitDays)
 	}
 	if err != nil {
-		if errors.Is(err, types.ErrNoSunriseSentinel) || errors.Is(err, types.ErrNoSunsetSentinel) {
+		if isPolarRiseSetError(err) {
 			return types.DailyPanchangResult{}, false, nil
 		}
 		return fail(err)
@@ -526,14 +587,22 @@ func GetDailyPanchang(
 		func(idx int) string { return i18n.ResolveMasaName(idx, o.lang) })
 	suryaNakshatra := ComputeSuryaNakshatra(siderealSunAtSunrise,
 		func(idx int) string { return i18n.ResolveNakshatraName(idx, o.lang) })
-	brahmaMuhurta := ComputeBrahmaMuhurta(sunriseUtcMs, sunsetUtcMs)
 	qualityNameFn := func(q types.ChoghadiyaQuality) string { return t.Quality(q) }
-	choghadiya := ComputeChoghadiya(sunriseUtcMs, sunsetUtcMs, nextSunriseUtcMs, vara.Index,
-		func(idx int) string { return t.ChoghadiyaNames[idx] }, qualityNameFn)
-	hora := ComputeHora(sunriseUtcMs, sunsetUtcMs, nextSunriseUtcMs, vara.Index,
-		func(idx int) string { return t.GrahaNames[idx] })
-	gowriPanchangam := ComputeGowriPanchangam(sunriseUtcMs, sunsetUtcMs, nextSunriseUtcMs, vara.Index,
-		func(idx int) string { return t.GowriNames[idx] }, qualityNameFn)
+	var (
+		brahmaMuhurta   types.UtcWindow
+		choghadiya      types.UnlocalizedChoghadiyaInfo
+		hora            types.UnlocalizedHoraInfo
+		gowriPanchangam types.UnlocalizedGowriInfo
+	)
+	if !labelsOnly {
+		brahmaMuhurta = BrahmaMuhurtaForNight(sunriseUtcMs, nextSunriseUtcMs-sunsetUtcMs)
+		choghadiya = ComputeChoghadiya(sunriseUtcMs, sunsetUtcMs, nextSunriseUtcMs, vara.Index,
+			func(idx int) string { return t.ChoghadiyaNames[idx] }, qualityNameFn)
+		hora = ComputeHora(sunriseUtcMs, sunsetUtcMs, nextSunriseUtcMs, vara.Index,
+			func(idx int) string { return t.GrahaNames[idx] })
+		gowriPanchangam = ComputeGowriPanchangam(sunriseUtcMs, sunsetUtcMs, nextSunriseUtcMs, vara.Index,
+			func(idx int) string { return t.GowriNames[idx] }, qualityNameFn)
+	}
 
 	needMoonrise := wantMoonTimes || wantFestivals
 	var moonriseSearchMs *int64
@@ -552,7 +621,7 @@ func GetDailyPanchang(
 		moonriseUtcMs = moonriseSearchMs
 	}
 	var moonsetUtcMs *int64
-	if wantMoonTimes {
+	if wantMoonTimes && !labelsOnly {
 		from := localMidnightUtcMs
 		if moonriseUtcMs != nil {
 			from = *moonriseUtcMs
@@ -561,26 +630,33 @@ func GetDailyPanchang(
 		if err != nil {
 			return fail(err)
 		}
-		if found {
+		if found && (moonriseUtcMs != nil || ms < localMidnightUtcMs+86_400_000) {
 			moonsetUtcMs = &ms
 		}
 	}
 
 	panchaka := ComputePanchaka(siderealMoonAtSunrise)
-	panchakaInfo, err := buildPanchakaInfo(sunriseUtcMs, siderealMoonAtSunrise, getMoon,
-		func(utcMs int64) (int, error) {
-			return varaIndexAtInstant(ctx, utcMs, location, offsetMinutes, t.VaraNames)
-		}, t)
-	if err != nil {
-		return fail(err)
-	}
+	var (
+		panchakaInfo   types.PanchakaInfo
+		doGhatiMuhurta types.UnlocalizedDoGhatiInfo
+		durMuhurtaUtc  []types.UnlocalizedDurMuhurtaPeriod
+	)
 	panchakaRahitaUtc := []types.UtcWindow{}
-	if wantLunarWindows {
-		panchakaRahitaUtc = ComputePanchakaRahita(sunriseUtcMs, nextSunriseUtcMs, getMoon)
+	if !labelsOnly {
+		panchakaInfo, err = buildPanchakaInfo(sunriseUtcMs, siderealMoonAtSunrise, getMoon,
+			func(utcMs int64) (int, error) {
+				return varaIndexAtInstant(ctx, utcMs, location, offsetMinutes, t.VaraNames)
+			}, t)
+		if err != nil {
+			return fail(err)
+		}
+		if wantLunarWindows {
+			panchakaRahitaUtc = ComputePanchakaRahita(sunriseUtcMs, nextSunriseUtcMs, getMoon)
+		}
+		doGhatiMuhurta = ComputeDoGhati(sunriseUtcMs, sunsetUtcMs, nextSunriseUtcMs,
+			func(idx int) string { return t.DoGhatiNames[idx] }, qualityNameFn)
+		durMuhurtaUtc = ComputeDurMuhurta(sunriseUtcMs, sunsetUtcMs, nextSunriseUtcMs, vara.Index)
 	}
-	doGhatiMuhurta := ComputeDoGhati(sunriseUtcMs, sunsetUtcMs, nextSunriseUtcMs,
-		func(idx int) string { return t.DoGhatiNames[idx] }, qualityNameFn)
-	durMuhurtaUtc := ComputeDurMuhurta(sunriseUtcMs, sunsetUtcMs, nextSunriseUtcMs, vara.Index)
 
 	var bhadraUtc *types.UnlocalizedBhadraInfo
 	if needBhadra {
@@ -591,7 +667,7 @@ func GetDailyPanchang(
 	}
 
 	varjyamUtc := []types.UtcWindow{}
-	if wantLunarWindows {
+	if wantLunarWindows && !labelsOnly {
 		varjyamUtc = ComputeVarjyamWindows(sunriseUtcMs, nextSunriseUtcMs, getMoon)
 	}
 
@@ -661,8 +737,24 @@ func GetDailyPanchang(
 			Type: types.FestivalEclipse, Description: eclipseUtc.Description,
 		}}, festivalList...)
 	}
+	if labelsOnly {
+		*labels = DayLabels{
+			Date: types.Date(dateMs), Tithi: tithiAtSunrise, Vara: vara,
+			Chandramasa: chandramasa, Samvat: samvat, Festivals: festivalList,
+		}
+		return types.DailyPanchangResult{}, true, nil
+	}
 
-	local := func(ms int64) string { return utils.FormatInZone(ms, offsetMinutes) }
+	// Slot lists render each boundary twice, as one slot's end and the next
+	// one's start, so the last rendering is kept; the string is a function of
+	// ms alone here, and FormatInZone never returns "".
+	lastLocalMs, lastLocal := int64(0), ""
+	local := func(ms int64) string {
+		if lastLocal == "" || ms != lastLocalMs {
+			lastLocalMs, lastLocal = ms, utils.FormatInZone(ms, offsetMinutes)
+		}
+		return lastLocal
+	}
 	localOrNull := func(ms *int64) *string {
 		if ms == nil {
 			return nil
@@ -671,13 +763,8 @@ func GetDailyPanchang(
 		return &s
 	}
 
-	var tithis []types.DailyTithiInfo
-	var nakshatras []types.DailyNakshatraInfo
-	var yogas []types.DailyYogaInfo
-	var karanas []types.DailyKaranaInfo
-
-	if o.computeEndTimes {
-		tithis, err = utils.FindDailyElements(sunriseUtcMs, nextSunriseUtcMs, tithiAtSunrise,
+	searchTithis := func() ([]types.DailyTithiInfo, error) {
+		return utils.FindDailyElements(sunriseUtcMs, nextSunriseUtcMs, tithiAtSunrise,
 			func(e types.TithiInfo) int { return e.Index },
 			func(ms int64) int { return GetTithiIndexAtTime(ms, getMoon, getSun) },
 			func(ms int64) types.TithiInfo {
@@ -698,10 +785,10 @@ func GetDailyPanchang(
 					EndTimeLocal:         localOrNull(&endMs),
 				}
 			})
-		if err != nil {
-			return fail(err)
-		}
-		nakshatras, err = utils.FindDailyElements(sunriseUtcMs, nextSunriseUtcMs, nakshatraAtSunrise,
+	}
+
+	searchNakshatras := func() ([]types.DailyNakshatraInfo, error) {
+		return utils.FindDailyElements(sunriseUtcMs, nextSunriseUtcMs, nakshatraAtSunrise,
 			func(e types.NakshatraInfo) int { return e.Index },
 			func(ms int64) int { return GetNakshatraIndexAtTime(ms, getMoon) },
 			func(ms int64) types.NakshatraInfo {
@@ -722,6 +809,21 @@ func GetDailyPanchang(
 					EndTimeLocal:         localOrNull(&endMs),
 				}
 			})
+	}
+
+	var tithis []types.DailyTithiInfo
+	var nakshatras []types.DailyNakshatraInfo
+	var yogas []types.DailyYogaInfo
+	var karanas []types.DailyKaranaInfo
+	var yogaTithis []types.DailyTithiInfo
+	var yogaNakshatras []types.DailyNakshatraInfo
+
+	if o.computeEndTimes {
+		tithis, err = searchTithis()
+		if err != nil {
+			return fail(err)
+		}
+		nakshatras, err = searchNakshatras()
 		if err != nil {
 			return fail(err)
 		}
@@ -771,6 +873,7 @@ func GetDailyPanchang(
 		if err != nil {
 			return fail(err)
 		}
+		yogaTithis, yogaNakshatras = tithis, nakshatras
 	} else {
 		tithis = []types.DailyTithiInfo{{
 			Index: tithiAtSunrise.Index, Name: tithiAtSunrise.Name,
@@ -794,9 +897,17 @@ func GetDailyPanchang(
 			CompletionPercentage: karanaAtSunrise.CompletionPercentage,
 			EndTime:              karanaAtSunrise.EndTime, IsActiveAtSunrise: true,
 		}}
+		yogaTithis, err = searchTithis()
+		if err != nil {
+			return fail(err)
+		}
+		yogaNakshatras, err = searchNakshatras()
+		if err != nil {
+			return fail(err)
+		}
 	}
 
-	specialYogas, err := computeSpecialYogasOverDay(vara.Index, tithis, nakshatras,
+	specialYogas, err := computeSpecialYogasOverDay(vara.Index, yogaTithis, yogaNakshatras,
 		suryaNakshatra.Index, func(y types.SpecialYogaType) string { return t.SpecialYoga(y) })
 	if err != nil {
 		return fail(err)

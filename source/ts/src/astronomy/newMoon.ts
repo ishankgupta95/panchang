@@ -63,11 +63,14 @@ export interface NewMoonBounds {
   next: Date;
 }
 
+/** Module scope, not a static field: the build target writes a static field as an assignment
+ * after the class, which bundlers must keep, and the class and every series with it. */
+const NEW_MOON_CACHE_MAX_ENTRIES = 4;
+
 /** The containment scan must stay guarded by {@link PHASE_AGREEMENT_MS}: unguarded, an
  * instant on a syzygy gets the lunation *starting* there from the cache and the one
  * *ending* there from a fresh call, order-dependent by a whole month. */
 export class NewMoonCache {
-  private static readonly MAX_ENTRIES = 4;
   private entries: NewMoonBounds[] = [];
 
   public hits = 0;
@@ -86,7 +89,7 @@ export class NewMoonCache {
     this.misses++;
     const bounds = boundingNewMoons(ref);
     this.entries.push(bounds);
-    if (this.entries.length > NewMoonCache.MAX_ENTRIES) this.entries.shift();
+    if (this.entries.length > NEW_MOON_CACHE_MAX_ENTRIES) this.entries.shift();
     return bounds;
   }
 }

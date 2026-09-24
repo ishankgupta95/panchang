@@ -19,7 +19,9 @@ func sourceDir(t *testing.T) string {
 }
 
 var (
-	reTsArray  = regexp.MustCompile(`export const (\w+) = new (Float64Array|Int8Array)\(\[`)
+	// The annotation, if the generator writes one, lets a bundler drop a
+	// table nothing imports; it is not part of the data.
+	reTsArray  = regexp.MustCompile(`export const (\w+) = (?:/\* @__PURE__ \*/ )?new (Float64Array|Int8Array)\(\[`)
 	reTsScalar = regexp.MustCompile(`export const (\w+) = (-?[\d.eE+-]+);`)
 )
 

@@ -1,5 +1,5 @@
 import { solveAngleCrossing } from '../utils/search';
-import { assertVaraIndex } from '../utils/validation';
+import { assertVaraIndex, validateDate } from '../utils/validation';
 import type { PanchakaType } from '../types/elements';
 
 /** Panchaka begins at Dhanishtha's 3rd pada. */
@@ -37,6 +37,7 @@ export function findPanchakaOnset(
   referenceUtc: Date,
   getMoon: (d: Date) => number,
 ): Date | null {
+  validateDate(referenceUtc, 'any');
   if (!computePanchaka(getMoon(referenceUtc))) return null;
 
   const hiMs = referenceUtc.getTime();

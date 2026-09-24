@@ -1,4 +1,5 @@
 import type { AspectMap, BirthChart, GrahaName, PlanetPlacement } from '../types/jyotish';
+import { PanchangError } from '../types/errors';
 
 /** 0-based house offsets, beyond the universal 7th. BPHS Ch. 26. */
 const SPECIAL_OFFSETS: Record<GrahaName, readonly number[]> = {
@@ -17,7 +18,7 @@ const SPECIAL_OFFSETS: Record<GrahaName, readonly number[]> = {
 const NODE_5_9_OFFSETS: readonly number[] = [4, 8];
 
 export interface AspectsOptions {
-  /** `'7-only'` (default, BPHS-literal) or `'5-and-9'` (BV Raman / KP). */
+  /** `'7-only'` (default, BPHS-literal; so is `''`) or `'5-and-9'` (BV Raman / KP); anything else throws `INVALID_INPUT`. */
   nodeAspects?: '7-only' | '5-and-9';
 }
 
@@ -26,7 +27,13 @@ export function computeAspects(
   chart: BirthChart,
   options: AspectsOptions = {},
 ): AspectMap {
-  const nodeAspects = options.nodeAspects ?? '7-only';
+  const nodeAspects = options.nodeAspects || '7-only';
+  if (nodeAspects !== '7-only' && nodeAspects !== '5-and-9') {
+    throw new PanchangError(
+      `nodeAspects must be "7-only" or "5-and-9", got "${String(nodeAspects)}"`,
+      'INVALID_INPUT',
+    );
+  }
   const out: Partial<Record<GrahaName, number[]>> = {};
 
   for (const planet of chart.planets) {

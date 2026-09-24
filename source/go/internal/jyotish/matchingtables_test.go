@@ -1,8 +1,10 @@
 package jyotish
 
 import (
+	"encoding/json"
 	"testing"
 
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
 	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
@@ -108,59 +110,148 @@ func TestTableIndexMapsAreTotal(t *testing.T) {
 	}
 }
 
-func TestYoniScoreConstructionIsFaithful(t *testing.T) {
-	sheep, monkey := yIndex[YoniSheep], yIndex[YoniMonkey]
-	if YoniScore[sheep][monkey] != 0 || YoniScore[monkey][sheep] != 0 {
-		t.Errorf("sheep/monkey scores %d/%d, want 0/0. The enemy entry was overwritten "+
-			"by the unfriendly pass, which is exactly what the `== 2` guard prevents",
-			YoniScore[sheep][monkey], YoniScore[monkey][sheep])
-	}
-	inEnemy, inUnfriendly := false, false
-	for _, p := range yoniEnemyPairs {
-		if (p[0] == YoniSheep && p[1] == YoniMonkey) || (p[0] == YoniMonkey && p[1] == YoniSheep) {
-			inEnemy = true
-		}
-	}
-	for _, p := range yoniUnfriendlyPairs {
-		if (p[0] == YoniSheep && p[1] == YoniMonkey) || (p[0] == YoniMonkey && p[1] == YoniSheep) {
-			inUnfriendly = true
-		}
-	}
-	if !inEnemy || !inUnfriendly {
-		t.Errorf("sheep/monkey in enemy list: %v, in unfriendly list: %v. This test's "+
-			"whole premise is that it is in BOTH", inEnemy, inUnfriendly)
-	}
+type yoniRefMoon struct {
+	Rashi     int `json:"rashi"`
+	Nakshatra int `json:"nakshatra"`
+}
 
+type yoniReferences struct {
+	Meta struct {
+		AnimalOrder []YoniAnimal `json:"animal_order"`
+	} `json:"_meta"`
+	Tables struct {
+		PyJHora  struct{ Cells [14][14]int } `json:"pyjhora"`
+		Mahidhar struct{ Cells [14][14]int } `json:"mahidhar_sharma_chakra"`
+	} `json:"tables"`
+	AdoptedOverrides []struct {
+		Boy   YoniAnimal `json:"boy"`
+		Girl  YoniAnimal `json:"girl"`
+		Value int        `json:"value"`
+	} `json:"adopted_overrides"`
+	SpotValues []struct {
+		Boy    yoniRefMoon `json:"boy"`
+		Girl   yoniRefMoon `json:"girl"`
+		Yoni   float64     `json:"yoni"`
+		Source string      `json:"_source"`
+	} `json:"spot_values"`
+	PathuYoniEnemyPairs struct {
+		Pairs [][2]YoniAnimal `json:"pairs"`
+	} `json:"pathu_yoni_enemy_pairs"`
+}
+
+func loadYoniReferences(t *testing.T) yoniReferences {
+	t.Helper()
+	raw, err := repopath.ReadTestData("charts", "yoni-koota-references.json")
+	if err != nil {
+		t.Fatalf("reading yoni-koota-references.json: %v", err)
+	}
+	var f yoniReferences
+	if err := json.Unmarshal(raw, &f); err != nil {
+		t.Fatalf("parsing yoni-koota-references.json: %v", err)
+	}
+	for i, a := range f.Meta.AnimalOrder {
+		if yIndex[a] != i {
+			t.Fatalf("fixture animal %d is %q, YoniIndex %d", i, a, yIndex[a])
+		}
+	}
+	return f
+}
+
+func TestYoniScoreMatchesPublishedTables(t *testing.T) {
+	f := loadYoniReferences(t)
+	overridden := map[[2]int]int{}
+	for _, o := range f.AdoptedOverrides {
+		b, g := yIndex[o.Boy], yIndex[o.Girl]
+		overridden[[2]int{b, g}] = o.Value
+		overridden[[2]int{g, b}] = o.Value
+	}
+	if len(overridden) != 4 {
+		t.Fatalf("%d overridden cells, want the 2 pairs in both directions", len(overridden))
+	}
 	for i := range YoniScore {
 		for j := range YoniScore[i] {
-			if YoniScore[i][j] != YoniScore[j][i] {
-				t.Errorf("YoniScore is asymmetric at (%d,%d): %d vs %d",
-					i, j, YoniScore[i][j], YoniScore[j][i])
+			want, ok := overridden[[2]int{i, j}]
+			if !ok {
+				want = f.Tables.PyJHora.Cells[j][i]
+			} else if f.Tables.Mahidhar.Cells[i][j] != want {
+				t.Errorf("override %d,%d is %d, the printed chakra says %d",
+					i, j, want, f.Tables.Mahidhar.Cells[i][j])
+			}
+			if YoniScore[i][j] != want {
+				t.Errorf("YoniScore[%d][%d] = %d, published %d", i, j, YoniScore[i][j], want)
 			}
 		}
 	}
+
+	zeros := 0
 	for i := range YoniScore {
 		if YoniScore[i][i] != 4 {
 			t.Errorf("YoniScore[%d][%d] = %d, want 4 (same animal)", i, i, YoniScore[i][i])
 		}
 		for j, v := range YoniScore[i] {
-			if v < 0 || v > 4 {
-				t.Errorf("YoniScore[%d][%d] = %d, outside the documented 0..4", i, j, v)
+			if v != YoniScore[j][i] {
+				t.Errorf("YoniScore is asymmetric at (%d,%d): %d vs %d", i, j, v, YoniScore[j][i])
+			}
+			if v == 0 {
+				zeros++
 			}
 		}
 	}
-	seen := map[int]int{}
-	for i := range YoniScore {
-		for _, v := range YoniScore[i] {
-			seen[v]++
+	for _, p := range yoniEnemyPairs {
+		a, b := yIndex[p[0]], yIndex[p[1]]
+		if YoniScore[a][b] != 0 || YoniScore[b][a] != 0 {
+			t.Errorf("mahavaira pair %s/%s scores %d/%d, want 0/0", p[0], p[1], YoniScore[a][b], YoniScore[b][a])
 		}
 	}
-	for _, v := range []int{0, 1, 2, 4} {
-		if seen[v] == 0 {
-			t.Errorf("no cell scores %d: a construction step produced nothing", v)
+	if zeros != 14 {
+		t.Errorf("%d zero cells, want exactly the 7 mahavaira pairs both ways", zeros)
+	}
+
+	for _, s := range f.SpotValues {
+		r, err := ComputeAshtakoot(
+			NatalMoon{Rashi: s.Boy.Rashi, Nakshatra: s.Boy.Nakshatra},
+			NatalMoon{Rashi: s.Girl.Rashi, Nakshatra: s.Girl.Nakshatra}, AshtakootOptions{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := r.Koots[3].Score; r.Koots[3].Name != KootYoni || got != s.Yoni {
+			t.Errorf("nak %d x %d: Yoni %v, published %v (%s)",
+				s.Boy.Nakshatra, s.Girl.Nakshatra, got, s.Yoni, s.Source)
 		}
 	}
-	t.Logf("YoniScore cell distribution: %v", seen)
+}
+
+func TestPathuYoniFailsOnlyOnEnemyPairs(t *testing.T) {
+	f := loadYoniReferences(t)
+	if len(f.PathuYoniEnemyPairs.Pairs) != len(yoniEnemyPairs) {
+		t.Fatalf("fixture lists %d enemy pairs, the code %d", len(f.PathuYoniEnemyPairs.Pairs), len(yoniEnemyPairs))
+	}
+	enemy := map[[2]YoniAnimal]bool{}
+	for _, p := range f.PathuYoniEnemyPairs.Pairs {
+		enemy[p] = true
+		enemy[[2]YoniAnimal{p[1], p[0]}] = true
+	}
+	first := map[YoniAnimal]int{}
+	for n := len(NakshatraYoni) - 1; n >= 0; n-- {
+		first[NakshatraYoni[n]] = n
+	}
+	moon := func(a YoniAnimal) NatalMoon {
+		n := first[a]
+		return NatalMoon{Rashi: n * 40 / 3 / 30, Nakshatra: n}
+	}
+	for _, a := range AllYoniAnimals {
+		for _, b := range AllYoniAnimals {
+			r, err := ComputePathuPorutham(moon(a), moon(b))
+			if err != nil {
+				t.Fatal(err)
+			}
+			k := r.Poruthams[4]
+			isEnemy := enemy[[2]YoniAnimal{a, b}]
+			if k.Name != PoruthamYoni || k.Passes == isEnemy || (k.Veto != nil) != isEnemy {
+				t.Errorf("%s x %s: passes %v veto %v, want passes %v", a, b, k.Passes, k.Veto != nil, !isEnemy)
+			}
+		}
+	}
 }
 
 func TestGanaScoreIsSymmetric(t *testing.T) {

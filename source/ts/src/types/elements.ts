@@ -188,6 +188,7 @@ export type EclipseSubtype = 'partial' | 'total' | 'annular' | 'penumbral';
 
 export interface EclipseInfo {
   kind: 'solar' | 'lunar';
+  /** Lunar: by umbral magnitude. Solar: as seen from the location, so a total or annular phase entirely below the horizon reads `'partial'`. */
   subtype: EclipseSubtype;
   start: Date;
   peak: Date;
@@ -197,9 +198,9 @@ export interface EclipseInfo {
   endLocal?: string;
   /** Body above the horizon at peak. */
   visibleFromLocation: boolean;
-  /** Fraction of the disc's **area** covered at peak, [0, 1]; umbral, so penumbral lunar reads 0. */
+  /** Fraction of the disc's **area** covered at peak, [0, 1], even when the body is below the horizon then; umbral, so penumbral lunar reads 0. */
   obscuration: number;
-  /** Fraction of the **diameter** covered: >1 for a total, negative for a penumbral lunar. */
+  /** Fraction of the **diameter** covered at peak, horizon or not: >1 for a total peak, negative for a penumbral lunar. */
   magnitude: number;
   /** Pre-eclipse impurity window start; null when no sutak applies (penumbral lunar). */
   sutakStart: Date | null;
@@ -207,6 +208,7 @@ export interface EclipseInfo {
   sutakEnd: Date | null;
   sutakStartLocal?: string | null;
   sutakEndLocal?: string | null;
+  /** Subtype, kind, obscuration and visibility; a solar eclipse whose peak is below the horizon is described at the deepest phase seen, at sunrise or sunset. */
   description: string;
 }
 

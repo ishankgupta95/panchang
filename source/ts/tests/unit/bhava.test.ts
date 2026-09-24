@@ -113,6 +113,19 @@ describe('computeBhava: placidus-kp system', () => {
     }
   });
 
+  it('every cusp is found just below the polar circle, where all of them exist', () => {
+    for (const [lat, hour] of [[66.3, 13], [66.4, 7], [66.5, 3], [-66.55, 3]] as const) {
+      const chart = computeBhava(new Date(Date.UTC(2025, 0, 1, hour)), { latitude: lat, longitude: 20 },
+        { houseSystem: 'placidus-kp' });
+      for (let i = 0; i < 12; i++) {
+        const next = chart.houses[(i + 1) % 12]!.cuspLongitude;
+        const gap = (next - chart.houses[i]!.cuspLongitude + 360) % 360;
+        expect(gap).toBeGreaterThan(0);
+        expect(gap).toBeLessThan(180);
+      }
+    }
+  });
+
   it('Sydney (southern hemisphere): axial pairing holds', () => {
     const chart = computeBhava(SAMPLE_DATE, SYDNEY, { houseSystem: 'placidus-kp' });
     for (let i = 0; i < 6; i++) {

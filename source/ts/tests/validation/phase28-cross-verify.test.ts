@@ -245,6 +245,24 @@ describe('Phase 28 cross-validation: aggregate', () => {
     expect(sayahnaMaxDiff).toBeLessThanOrEqual(2);
   });
 
+  it('Brahma Muhurta is centred on the almanac Pratah Sandhya start, to the printed minute, on every fixture', () => {
+    // The almanac opens Pratah Sandhya in the middle of Brahma Muhurta (sunrise - N/10 is the
+    // midpoint of the 14th night-muhurta), so the midpoint is checked against that capture.
+    let checked = 0;
+    let maxDiff = 0;
+    for (const f of TYPED) {
+      if (!f.expected.pratahSandhyaStartHHMM) continue;
+      const r = getDailyPanchang(noonUtc(f.date), f.location, { timezone: f.timezone });
+      if (r === null) continue;
+      const mid = new Date((r.muhurtas.brahma.start.getTime() + r.muhurtas.brahma.end.getTime()) / 2);
+      const d = diffMin(formatInZone(mid, r.timezone.offsetMinutes), f.expected.pratahSandhyaStartHHMM, f.date);
+      maxDiff = Math.max(maxDiff, d);
+      checked++;
+    }
+    expect(checked).toBe(50);
+    expect(maxDiff).toBeLessThanOrEqual(STRICT_TOL_MIN);
+  });
+
   it('Varjyam agrees with the almanac within ±2 min on every fixture that has one', () => {
     let maxDiff = 0;
     let emitted = 0;

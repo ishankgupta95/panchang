@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { computeBhadraKaal, isVishtiKarana, bhadraVasaForRashi } from '../../src/core/bhadra';
 import { LongitudeCache } from '../../src/astronomy/cache';
 import { computeSunrise, computeSunset } from '../../src/astronomy/sunrise';
+import { getDailyPanchang } from '../../src/core/panchang';
 
 describe('isVishtiKarana', () => {
   it('returns true for the 8 Vishti indices', () => {
@@ -105,5 +106,22 @@ describe('piecewise vasa segments (almanac Ujjain 2026-08-19)', () => {
     expect(second!.start.getTime()).toBe(first!.end.getTime());
     expect(second!.end.getTime()).toBe(bhadra.end.getTime());
     expect(bhadra.location).toBe('paatal');
+  });
+});
+
+describe('Bhadra edges agree with the Vishti karana boundaries', () => {
+  it('Urumqi 2024-01-06 and Ushuaia 2011-02-06 (used to be one bisection bracket, 63 s, late)', () => {
+    const cases = [
+      { loc: { latitude: 43.8256, longitude: 87.6168 }, tz: 'Asia/Shanghai', day: '2024-01-06', edge: 'end' },
+      { loc: { latitude: -54.8019, longitude: -68.303 }, tz: 'America/Argentina/Ushuaia', day: '2011-02-06', edge: 'start' },
+    ] as const;
+    for (const c of cases) {
+      const r = getDailyPanchang(new Date(`${c.day}T12:00:00Z`), c.loc, { timezone: c.tz })!;
+      const vishti = r.angas.karanas.filter((k) => isVishtiKarana(k.index));
+      expect(vishti.length, c.day).toBeGreaterThan(0);
+      const bhadra = r.inauspicious.bhadra!;
+      const karanaEdge = c.edge === 'end' ? vishti[vishti.length - 1]!.endTime! : vishti[0]!.startTime!;
+      expect(Math.abs(bhadra[c.edge].getTime() - karanaEdge.getTime()), `${c.day} ${c.edge}`).toBeLessThan(30);
+    }
   });
 });

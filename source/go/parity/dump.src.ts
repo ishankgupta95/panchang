@@ -18,7 +18,7 @@ import { join } from 'node:path';
 import {
   getDailyPanchang, getInstantPanchang,
   computePlanetaryPositions, GRAHA_ABBR,
-  computeVimshottariDashaFromBirth, computeVimshottariPratyantar,
+  computeVimshottariDashaFromBirth, computeVimshottariPratyantar, computeVimshottariPratyantarIn,
   computeAshtottariDasha, computeYoginiDasha, computeCharaDasha, computeNarayanDasha,
   ASHTOTTARI_ORDER, ASHTOTTARI_YEARS,
   YOGINI_ORDER, YOGINI_YEARS, YOGINI_PLANET,
@@ -461,6 +461,8 @@ function writeCharts(doc: Obj): void {
     c.put('vimshottari', vim);
     const antar0 = vim.mahaDashas[0]?.antarDashas[0];
     c.put('vimshottariPratyantar', antar0 ? computeVimshottariPratyantar(antar0) : null);
+    c.put('vimshottariPratyantarIn',
+      antar0 ? computeVimshottariPratyantarIn(vim.mahaDashas[0]!, antar0) : null);
 
     const moonSid = getSiderealMoonLongitude(d, 'lahiri');
     const asht = computeAshtottariDasha(d, moonSid, PIN_DATE);

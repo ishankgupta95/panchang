@@ -3,6 +3,7 @@ package astronomy
 import (
 	"math"
 
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/store"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
 )
 
@@ -26,7 +27,24 @@ type PlanetPosition struct {
 	Distance  float64 `json:"distance"`
 }
 
+type planetKey struct {
+	body PlanetBody
+	ms   int64
+}
+
+var planetMemo = store.New[planetKey, PlanetPosition](4096, store.DefaultStripes,
+	func(k planetKey) uint64 { return store.HashMix(uint64(k.ms), uint64(k.body)) })
+
+// GetPlanetPosition is planetPosition memoised by body and instant: a birth
+// chart, its vargas and its strengths each rebuild the same positions.
 func GetPlanetPosition(ctx *EphemerisCtx, body PlanetBody, ms int64) PlanetPosition {
+	pos, _ := planetMemo.GetOrBuild(planetKey{body, ms}, func() PlanetPosition {
+		return planetPosition(ctx, body, ms)
+	})
+	return pos
+}
+
+func planetPosition(ctx *EphemerisCtx, body PlanetBody, ms int64) PlanetPosition {
 	ttDays := TTDaysSinceJ2000(ms)
 
 	series := VsopBody(body)

@@ -1,10 +1,10 @@
 import { getDailyPanchang } from '../core/panchang';
 import { computeVaraTithiYogas } from './varaTithiYogas';
-import { validateLocation, validateDate } from '../utils/validation';
-import { resolveUtcOffset } from '../utils/timezone';
+import { validateLocation, validateDate, validateLocalYearWindow } from '../utils/validation';
+import { localYearWindow, civilDayStepper, clampToSupported } from '../utils/timezone';
 import type { MuhurtaFactor } from './muhurtaTableTypes';
 import type { GeoLocation } from '../types/location';
-import type { Language, AyanamsaType, MasaSystem } from '../types/options';
+import type { Language, AyanamsaType, MasaSystem, PanchangSection } from '../types/options';
 import type { DailyPanchangResult } from '../types/panchang';
 
 /**
@@ -65,6 +65,11 @@ export interface MuhurtaScoreOptions {
   masaSystem?: MasaSystem;
 }
 
+/** Everything {@link scoreFromPanchang} reads beyond the sections every day computes: the
+ * eclipse, and the Bhadra that `lunarWindows` brings. No value depends on which sections were
+ * asked for (INTERPOLATE_ALWAYS in `core/panchang.ts`), so these score a day as a full one does. */
+const SCORED_SECTIONS: readonly PanchangSection[] = ['eclipse', 'lunarWindows'];
+
 /**
  * Score one day against a muhurta rule; baseline 50, exclusions zero it outright.
  * @param date Any `Date` within the local calendar day to evaluate.
@@ -79,7 +84,7 @@ export function scoreMuhurta(
   validateLocation(location);
   const panchang = getDailyPanchang(date, location, {
     ...options,
-    sections: ['eclipse', 'lunarWindows'],
+    sections: SCORED_SECTIONS,
   });
   if (panchang === null) {
     return {
@@ -93,7 +98,10 @@ export function scoreMuhurta(
   return scoreFromPanchang(panchang, rule);
 }
 
-/** Every day from `start` to `end` inclusive, best score first; failures omitted unless asked for. */
+/**
+ * Every civil day of `options.timezone` from `start` to `end` inclusive, each at start's local
+ * time of day, best score first; failures omitted unless asked for.
+ */
 export function computeAuspiciousDatesInRange(
   rule: MuhurtaRule,
   start: Date,
@@ -107,17 +115,52 @@ export function computeAuspiciousDatesInRange(
   if (start.getTime() > end.getTime()) {
     throw new RangeError(`start (${start.toISOString()}) must be ≤ end (${end.toISOString()})`);
   }
+  return scoreCivilDays(rule, start.getTime(), end.getTime(), location, options);
+}
 
+export function scoreCivilDays(
+  rule: MuhurtaRule,
+  startMs: number,
+  endMs: number,
+  location: GeoLocation,
+  options: MuhurtaScoreOptions & { includeFailures?: boolean },
+): MuhurtaDay[] {
   const out: MuhurtaDay[] = [];
-  const dayMs = 24 * 3600_000;
-  for (let t = start.getTime(); t <= end.getTime(); t += dayMs) {
-    const d = new Date(t);
-    const panchang = getDailyPanchang(d, location, options);
+  const next = civilDayStepper(startMs, options.timezone);
+  for (let t = next(); t <= endMs; t = next()) {
+    const panchang = getDailyPanchang(new Date(clampToSupported(t)), location, options);
     if (panchang === null) continue;
     const result = scoreFromPanchang(panchang, rule);
     if (result.passes || options.includeFailures) {
       out.push({ ...result, panchang });
     }
+  }
+
+  out.sort((a, b) => b.score - a.score);
+  return out;
+}
+
+/**
+ * @internal {@link scoreCivilDays} for a caller that keeps only the scores, as `buildMuhurtaTable`
+ * does: each day is built with {@link SCORED_SECTIONS} and no anga end times (the special yogas are
+ * found from the tithi and nakshatra spans either way), which scores it exactly as the full day
+ * does, and no panchang is kept. The same days in the same order.
+ */
+export function scoreOnlyCivilDays(
+  rule: MuhurtaRule,
+  startMs: number,
+  endMs: number,
+  location: GeoLocation,
+  options: MuhurtaScoreOptions & { includeFailures?: boolean },
+): MuhurtaScore[] {
+  const out: MuhurtaScore[] = [];
+  const dayOptions = { ...options, sections: SCORED_SECTIONS, computeEndTimes: false };
+  const next = civilDayStepper(startMs, options.timezone);
+  for (let t = next(); t <= endMs; t = next()) {
+    const panchang = getDailyPanchang(new Date(clampToSupported(t)), location, dayOptions);
+    if (panchang === null) continue;
+    const result = scoreFromPanchang(panchang, rule);
+    if (result.passes || options.includeFailures) out.push(result);
   }
 
   out.sort((a, b) => b.score - a.score);
@@ -257,7 +300,7 @@ function zero(date: Date, reason: string, code: string): MuhurtaScore {
   };
 }
 
-/** Every scored day in the local calendar year `year`. */
+/** Every scored day in the local calendar year `year`, each queried at its local midnight. */
 export function computeAuspiciousDatesForYear(
   year: number,
   rule: MuhurtaRule,
@@ -265,10 +308,10 @@ export function computeAuspiciousDatesForYear(
   options: MuhurtaScoreOptions & { includeFailures?: boolean },
 ): MuhurtaDay[] {
   if (!Number.isInteger(year)) throw new RangeError(`year must be integer, got ${year}`);
-  const offset = resolveUtcOffset(options.timezone, new Date(Date.UTC(year, 6, 1)));
-  const start = new Date(Date.UTC(year, 0, 1) - offset * 60_000);
-  const end = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999) - offset * 60_000);
-  return computeAuspiciousDatesInRange(rule, start, end, location, options);
+  const [start, end] = localYearWindow(year, options.timezone);
+  validateLocalYearWindow(year, start, end);
+  validateLocation(location);
+  return scoreCivilDays(rule, start, end, location, options);
 }
 
 /** @deprecated Renamed to {@link computeAuspiciousDatesInRange} in v5. */

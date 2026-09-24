@@ -21,10 +21,28 @@ export interface PlanetPosition {
   distance: number;
 }
 
-const EARTH = new Float64Array(3);
-const PLANET = new Float64Array(3);
+const EARTH = /* @__PURE__ */ new Float64Array(3);
+const PLANET = /* @__PURE__ */ new Float64Array(3);
+
+/** Every chart entry point rebuilds the natal positions, so a rashi chart, its vargas and its
+ * Shadbala each evaluate the same fifteen (five planets at birth and at the two retrograde
+ * probes). A position is a pure function of `(body, ms)` and is memoized on exactly that pair,
+ * handed out as a fresh object; cleared when full. */
+const POSITIONS = /* @__PURE__ */ new Map<string, PlanetPosition>();
+const MAX_POSITIONS = 256;
 
 export function getPlanetPosition(body: PlanetBody, date: Date): PlanetPosition {
+  const key = `${body}|${date.getTime()}`;
+  let position = POSITIONS.get(key);
+  if (position === undefined) {
+    position = planetPosition(body, date);
+    if (POSITIONS.size >= MAX_POSITIONS) POSITIONS.clear();
+    POSITIONS.set(key, position);
+  }
+  return { longitude: position.longitude, latitude: position.latitude, distance: position.distance };
+}
+
+function planetPosition(body: PlanetBody, date: Date): PlanetPosition {
   const ttDays = ttDaysSinceJ2000(date);
 
   const series = VSOP_NAME[body];

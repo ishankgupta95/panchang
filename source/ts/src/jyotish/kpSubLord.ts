@@ -67,7 +67,8 @@ function subLordAtOffset(degInNak: number, starLord: DashaLord): DashaLord {
 
 /** KP-Paddhati sub-lord of a sidereal longitude: the nakshatra split into 9
  *  sub-portions proportional to the Vimshottari dasha years, starting from the
- *  nakshatra's own lord. */
+ *  nakshatra's own lord. A non-finite longitude has no KP reading: the indices
+ *  come back NaN and `signLord` and `starLord` undefined. */
 export function computeKpSubLord(siderealLongitude: number): KpSubLordInfo {
   const lon = normalize360(siderealLongitude);
   const rashi = Math.floor(lon / 30);
@@ -99,8 +100,8 @@ export function computeKpCuspalSubLords(
   validateLocation(location);
 
   const kpOptions: BirthChartOptions = {
-    ayanamsa: 'krishnamurti',
     ...options,
+    ayanamsa: options.ayanamsa ?? 'krishnamurti',
     houseSystem: 'placidus-kp',
   };
   const bhava = computeBhava(birthDate, location, kpOptions);
@@ -109,13 +110,14 @@ export function computeKpCuspalSubLords(
   return { cusps };
 }
 
-/** The 4-fold KP significators, keyed both by planet and by house. */
+/** The 4-fold KP significators, keyed both by planet and by house. A planet longitude outside [0, 360) is wrapped
+ *  into it; a non-finite one gives that planet no star lord. */
 export function computeKpSignificators(chart: BirthChart): KpSignificators {
   const planetHouse: Partial<Record<GrahaName, number>> = {};
   const planetStarLord: Partial<Record<GrahaName, DashaLord>> = {};
   for (const p of chart.planets) {
     planetHouse[p.planet] = p.house;
-    const nakIdx = nakshatraOf(p.longitude);
+    const nakIdx = nakshatraOf(normalize360(p.longitude));
     planetStarLord[p.planet] = NAKSHATRA_LORD[nakIdx]!;
   }
 
@@ -171,7 +173,7 @@ export function computeKpSignificators(chart: BirthChart): KpSignificators {
 }
 
 /** @internal */
-export const _SUB_CUMULATIVE_WIDTHS_FOR_TEST: readonly number[] = (() => {
+export const _SUB_CUMULATIVE_WIDTHS_FOR_TEST: readonly number[] = /* @__PURE__ */ (() => {
   const out: number[] = [];
   let cum = 0;
   for (const lord of DASHA_ORDER) {

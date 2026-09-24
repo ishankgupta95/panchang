@@ -1,7 +1,7 @@
 import {
   RASHI_LORD, NAISARGIKA_MAITRI,
   RASHI_VASHYA, VASHYA_SCORE, vashyaIndex,
-  NAKSHATRA_YONI, YONI_SCORE, yoniIndex,
+  NAKSHATRA_YONI, type YoniAnimal,
   NAKSHATRA_GANA,
 } from './matchingTables';
 import {
@@ -131,18 +131,30 @@ function scoreSthreeDeergha(boy: NatalMoon, girl: NatalMoon): PoruthamScore {
   };
 }
 
+/** The Tamil Yoni porutham fails only on enemy animals, not on a low Ashtakoot score:
+ *  the seven mahavaira pairs. Some Tamil lists add snake-rat; it is left out. */
+const YONI_ENEMY_PAIRS: readonly (readonly [YoniAnimal, YoniAnimal])[] = [
+  ['horse', 'buffalo'],
+  ['elephant', 'lion'],
+  ['sheep', 'monkey'],
+  ['snake', 'mongoose'],
+  ['dog', 'deer'],
+  ['cat', 'rat'],
+  ['cow', 'tiger'],
+];
+
 function scoreYoni(boy: NatalMoon, girl: NatalMoon): PoruthamScore {
   const boyYoni = NAKSHATRA_YONI[boy.nakshatra]!;
   const girlYoni = NAKSHATRA_YONI[girl.nakshatra]!;
-  const score = YONI_SCORE[yoniIndex(boyYoni)]![yoniIndex(girlYoni)]!;
-  const passes = score >= 2;
-  const veto = score === 0;
+  const enemies = YONI_ENEMY_PAIRS.some(
+    ([a, b]) => (a === boyYoni && b === girlYoni) || (a === girlYoni && b === boyYoni),
+  );
   const out: PoruthamScore = {
     name: 'Yoni',
-    passes,
-    description: `${boyYoni} ↔ ${girlYoni} (Ashtakoot Yoni score ${score}/4)`,
+    passes: !enemies,
+    description: `${boyYoni} ↔ ${girlYoni}, ${enemies ? 'enemies' : 'not enemies'}`,
   };
-  if (veto) out.veto = true;
+  if (enemies) out.veto = true;
   return out;
 }
 

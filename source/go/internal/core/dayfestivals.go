@@ -10,6 +10,8 @@ import (
 	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
 
+const festivalDayMs = 86_400_000
+
 type DayFestivalInputs struct {
 	SunriseMs     int64
 	SunsetMs      int64
@@ -72,12 +74,6 @@ func ComputeDayFestivals(ctx *astronomy.EphemerisCtx, in DayFestivalInputs) ([]t
 	}
 
 	nakshatraAt := func(ms int64) int { return utils.NakshatraOf(getMoon(ms)) }
-	nakshatraIndicesInDay := map[int]bool{
-		nakshatraAt(sunriseMs):   true,
-		nakshatraAt(a.Madhyahna): true,
-		nakshatraAt(sunsetMs):    true,
-		nakshatraAt(a.Nishita):   true,
-	}
 
 	nakshatraByRule := map[FestivalDateRule]int{
 		RuleMadhyahna: nakshatraAt(a.Madhyahna),
@@ -232,6 +228,121 @@ func ComputeDayFestivals(ctx *astronomy.EphemerisCtx, in DayFestivalInputs) ([]t
 		}
 	}
 
+	rashiAt := func(ms int64) int { return int(math.Floor(getSun(ms)/30)) % 12 }
+	nakshatraAtSunrise := utils.NakshatraOf(in.SiderealMoonAtSunrise)
+	nakshatraAtSunset := nakshatraAt(sunsetMs)
+	nextDayNakshatraIndex := nakshatraAt(nextSunriseMs)
+
+	const krittika = 2
+	const vrischika = 7
+	// Krittika's first sunrise-or-sunset day; a transit touching neither
+	// (polar) belongs to the day holding it.
+	masikKarthigaiToday := (nakshatraAt(yesterdaySunsetMs) != krittika &&
+		(nakshatraAtSunrise == krittika || nakshatraAtSunset == krittika)) ||
+		(nakshatraAtSunrise == krittika-1 && nakshatraAtSunset != krittika &&
+			nextDayNakshatraIndex == krittika+1)
+	// masikKarthigaiSunsetFrom is the sunset of the Masik Karthigai day of the
+	// first Krittika transit from startDays days away.
+	masikKarthigaiSunsetFrom := func(startDays int64) (int64, bool) {
+		rise, err := astronomy.ComputeSunrise(ctx, sunriseMs+startDays*festivalDayMs-2*3600_000, location,
+			astronomy.DefaultRiseSetLimitDays)
+		if err != nil {
+			return 0, false
+		}
+		for i := 0; i < 10; i++ {
+			set, err := astronomy.ComputeSunset(ctx, rise, location, astronomy.DefaultRiseSetLimitDays)
+			if err != nil {
+				return 0, false
+			}
+			nextRise, err := astronomy.ComputeSunrise(ctx, set, location, astronomy.DefaultRiseSetLimitDays)
+			if err != nil {
+				return 0, false
+			}
+			riseNakshatra := nakshatraAt(rise)
+			if riseNakshatra == krittika || nakshatraAt(set) == krittika ||
+				(riseNakshatra == krittika-1 && nakshatraAt(nextRise) == krittika+1) {
+				return set, true
+			}
+			rise = nextRise
+		}
+		return 0, false
+	}
+	// karthigaiDeepamKey ranks an in-month full moon first, then the nearer
+	// full moon; ties go to the earlier day.
+	karthigaiDeepamKey := func(sunset int64) (int, int64) {
+		full, ok := astronomy.SearchMoonPhase(ctx, 180, sunset-5*festivalDayMs, 10)
+		if !ok {
+			return 1, math.MaxInt64
+		}
+		rank := 1
+		if rashiAt(full) == vrischika {
+			rank = 0
+		}
+		dist := full - sunset
+		if dist < 0 {
+			dist = -dist
+		}
+		return rank, dist
+	}
+	karthigaiDeepamToday := func() bool {
+		if rashiAtSunset != vrischika {
+			return false
+		}
+		myRank, myDist := karthigaiDeepamKey(sunsetMs)
+		for _, startDays := range [2]int64{-31, 24} {
+			other, ok := masikKarthigaiSunsetFrom(startDays)
+			if !ok || rashiAt(other) != vrischika {
+				continue
+			}
+			rank, dist := karthigaiDeepamKey(other)
+			if rank < myRank || (rank == myRank && (dist < myDist || (dist == myDist && startDays < 0))) {
+				return false
+			}
+		}
+		return true
+	}
+
+	// nakshatraLaterInSolarMonth walks sunrises from 20 days ahead while the
+	// Sun stays in today's sunrise rashi.
+	nakshatraLaterInSolarMonth := func(nakshatra int) bool {
+		before, after := (nakshatra+26)%27, (nakshatra+1)%27
+		prev, err := astronomy.ComputeSunrise(ctx, sunriseMs+20*festivalDayMs-2*3600_000, location,
+			astronomy.DefaultRiseSetLimitDays)
+		if err != nil || rashiAt(prev) != rashiAtSunrise {
+			return false
+		}
+		prevNakshatra := nakshatraAt(prev)
+		for i := 0; i < 16; i++ { // 16 is a backstop; the month test is the exit
+			next, err := astronomy.ComputeSunrise(ctx, prev+22*3600_000, location,
+				astronomy.DefaultRiseSetLimitDays)
+			if err != nil {
+				return false
+			}
+			nextNakshatra := nakshatraAt(next)
+			if prevNakshatra == before && nextNakshatra == after {
+				return true
+			}
+			if rashiAt(next) != rashiAtSunrise {
+				return false
+			}
+			if nextNakshatra == nakshatra && prevNakshatra != nakshatra {
+				return true
+			}
+			prev, prevNakshatra = next, nextNakshatra
+		}
+		return false
+	}
+
+	// Nepali months are solar, and the civil day holding the Sankranti opens
+	// the new one.
+	varaMasaIndex := in.Chandramasa.Index
+	if ResolveRegionAlias(in.Region, nil) == "nepal" {
+		local := types.Date(sunriseMs + int64(in.OffsetMinutes)*60_000)
+		dayEndMs := int64(types.DateUTC(local.UTCFullYear(), local.UTCMonth(), local.UTCDate()+1)) -
+			int64(in.OffsetMinutes)*60_000
+		varaMasaIndex = (rashiAt(dayEndMs) + 1) % 12
+	}
+
 	vaisakhiToday, vishuToday, pohelaBoishakhToday := false, false, false
 	if isMesha(sankrantiRashi) || isMesha(nextDaySankrantiRashi) || isMesha(prevDaySankrantiRashi) {
 		localMidnightUtc := func(dayOffset int) int64 {
@@ -361,6 +472,18 @@ func ComputeDayFestivals(ctx *astronomy.EphemerisCtx, in DayFestivalInputs) ([]t
 		}
 		ekadashiTrisprishaYesterday = tithiAtNextSunrise == trayodashiIndex
 	}
+	ekadashiVriddhaTrisprisha := false
+	if ekadashiVriddhaFirstDay {
+		trayodashiIndex := 27
+		if in.TithiIndexAtSunrise == 10 {
+			trayodashiIndex = 12
+		}
+		dayAfter, ok, err := tithiAtDayAfterSunrise()
+		if err != nil {
+			return nil, err
+		}
+		ekadashiVriddhaTrisprisha = ok && dayAfter == trayodashiIndex
+	}
 
 	const krishnaAshtami = 22
 	const krishnaSaptami = 21
@@ -399,6 +522,10 @@ func ComputeDayFestivals(ctx *astronomy.EphemerisCtx, in DayFestivalInputs) ([]t
 		}
 	}
 
+	dayGeometry, geometryErr := buildDayGeometry(ctx,
+		KalaDay{Sunrise: sunriseMs, Sunset: sunsetMs, NextSunrise: nextSunriseMs},
+		location, in.OffsetMinutes, getMoon, getSun)
+
 	formatClock := func(ms int64) string {
 		d := types.Date(ms)
 		return twoDigits(d.UTCHours()) + ":" + twoDigits(d.UTCMinutes())
@@ -413,23 +540,34 @@ func ComputeDayFestivals(ctx *astronomy.EphemerisCtx, in DayFestivalInputs) ([]t
 	}
 
 	t := in.T
-	return ComputeFestivals(
+	festivals := ComputeFestivals(
 		&FestivalComputeContext{
 			TithiIndex:                       in.TithiIndexAtSunrise,
 			NakshatraIndex:                   utils.NakshatraOf(in.SiderealMoonAtSunrise),
-			NakshatraIndicesInDay:            nakshatraIndicesInDay,
+			MasikKarthigaiToday:              masikKarthigaiToday,
+			HasMasikKarthigai:                true,
+			KarthigaiDeepamToday:             karthigaiDeepamToday,
 			NakshatraByRule:                  nakshatraByRule,
 			NakshatraByRuleStart:             nakshatraByRuleStart,
 			PriorDayNakshatraIndex:           priorDayNakshatraIndex,
 			HasPriorDayNakshatraIndex:        true,
+			NextDayNakshatraIndex:            nextDayNakshatraIndex,
+			HasNextDayNakshatraIndex:         true,
+			PriorDaySolarMasaIndex:           rashiAtYesterdaySunrise,
+			HasPriorDaySolarMasaIndex:        true,
+			NakshatraLaterInSolarMonth:       nakshatraLaterInSolarMonth,
 			RemainingPakshaSunriseNakshatras: remainingPakshaSunriseNakshatras,
 			NextDayNakshatraByRule:           nextDayNakshatraByRule,
 			NextDayTithiByRule:               nextDayTithiByRule,
 			KshayaTithiIndices:               kshayaTithiIndices,
+			NextDayMasa:                      in.NextDayMasa,
+			DayGeometry:                      dayGeometry,
 			NextDayMasaIndex:                 nextDayMasaIndex,
 			NextDayIsAdhika:                  nextDayIsAdhika,
 			HasNextDayMasa:                   hasNextDayMasa,
 			ChandraMasaIndex:                 in.Chandramasa.AmantaIndex,
+			VaraMasaIndex:                    varaMasaIndex,
+			HasVaraMasaIndex:                 true,
 			AmantaMasaName:                   in.Chandramasa.AmantaName,
 			PurnimantaMasaName:               in.Chandramasa.PurnimantaName,
 			IsAdhika:                         in.Chandramasa.IsAdhika,
@@ -454,6 +592,7 @@ func ComputeDayFestivals(ctx *astronomy.EphemerisCtx, in DayFestivalInputs) ([]t
 			EkadashiVriddhaDwadashiToday:    ekadashiVriddhaDwadashiToday,
 			EkadashiVriddhaDwadashiTomorrow: ekadashiVriddhaDwadashiTomorrow,
 			EkadashiVriddhaFirstDay:         ekadashiVriddhaFirstDay,
+			EkadashiVriddhaTrisprisha:       ekadashiVriddhaTrisprisha,
 			EkadashiTrisprishaToday:         ekadashiTrisprishaToday,
 			EkadashiTrisprishaYesterday:     ekadashiTrisprishaYesterday,
 
@@ -463,7 +602,133 @@ func ComputeDayFestivals(ctx *astronomy.EphemerisCtx, in DayFestivalInputs) ([]t
 		},
 		func(key string) string { return resolveFestivalName(t, key) },
 		func(idx int) string { return i18n.ResolveMasaName(idx, in.Lang) },
-	), nil
+	)
+	if *geometryErr != nil {
+		return nil, *geometryErr
+	}
+	return festivals, nil
+}
+
+const (
+	hourMs = 3600_000
+	// crossingCellMs is the elongation solver's fixed bracket grid: one crossing per cell, the same
+	// cell whoever asks.
+	crossingCellMs                  = 6 * hourMs
+	crossingToleranceMs             = 1000
+	meanElongationDegPerDay float64 = 12.19
+)
+
+// buildDayGeometry chains days from today through each day's own sunset and next sunrise, the
+// triple GetDailyPanchang builds for that day, so every day measures the same windows. A previous
+// sunrise closer than 12 h, or one whose day does not end at the next day's sunrise, is a polar gap.
+// A non-polar rise/set error is kept in the returned pointer, the TS throw.
+func buildDayGeometry(
+	ctx *astronomy.EphemerisCtx,
+	today KalaDay,
+	location types.GeoLocation,
+	offsetMinutes int,
+	getMoon, getSun LongitudeAt,
+) (*DayGeometry, *error) {
+	var firstErr error
+	days := map[int]*KalaDay{0: &today}
+	var day func(k int) (KalaDay, bool)
+	day = func(k int) (KalaDay, bool) {
+		if cached, seen := days[k]; seen {
+			if cached == nil {
+				return KalaDay{}, false
+			}
+			return *cached, true
+		}
+		var out *KalaDay
+		keep := func(err error) {
+			if !isPolarRiseSetError(err) && firstErr == nil {
+				firstErr = err
+			}
+		}
+		if k > 0 {
+			if prev, ok := day(k - 1); ok {
+				sunset, err := astronomy.ComputeSunset(ctx, prev.NextSunrise, location,
+					astronomy.DefaultRiseSetLimitDays)
+				var nextSunrise int64
+				if err == nil {
+					nextSunrise, err = astronomy.ComputeSunrise(ctx, sunset, location,
+						astronomy.DefaultRiseSetLimitDays)
+				}
+				if err != nil {
+					keep(err)
+				} else {
+					out = &KalaDay{Sunrise: prev.NextSunrise, Sunset: sunset, NextSunrise: nextSunrise}
+				}
+			}
+		} else if next, ok := day(k + 1); ok {
+			sunrise, err := astronomy.ComputeSunrise(ctx, next.Sunrise-26*hourMs, location,
+				astronomy.DefaultRiseSetLimitDays)
+			if err != nil {
+				keep(err)
+			} else if next.Sunrise-sunrise >= 12*hourMs {
+				sunset, err := astronomy.ComputeSunset(ctx, sunrise, location, astronomy.DefaultRiseSetLimitDays)
+				var nextSunrise int64
+				if err == nil {
+					nextSunrise, err = astronomy.ComputeSunrise(ctx, sunset, location,
+						astronomy.DefaultRiseSetLimitDays)
+				}
+				switch {
+				case err != nil:
+					keep(err)
+				case nextSunrise == next.Sunrise:
+					out = &KalaDay{Sunrise: sunrise, Sunset: sunset, NextSunrise: nextSunrise}
+				}
+			}
+		}
+		days[k] = out
+		if out == nil {
+			return KalaDay{}, false
+		}
+		return *out, true
+	}
+
+	elongation := func(ms int64) float64 { return utils.Normalize360(getMoon(ms) - getSun(ms)) }
+	reached := map[float64]int64{}
+	elongationReaches := func(deg float64, nearMs int64) int64 {
+		if memo, ok := reached[deg]; ok {
+			return memo
+		}
+		before := func(ms int64) bool { return utils.Normalize360(elongation(ms)-deg) > 180 }
+		lead := utils.Normalize360(deg - elongation(nearMs))
+		if lead > 180 {
+			lead -= 360
+		}
+		aheadDays := lead / meanElongationDegPerDay
+		lo := int64(math.Floor((float64(nearMs)+float64(aheadDays*86_400_000))/crossingCellMs)) * crossingCellMs
+		for i := 0; i < 64 && !before(lo); i++ {
+			lo -= crossingCellMs
+		}
+		for i := 0; i < 64 && before(lo+crossingCellMs); i++ {
+			lo += crossingCellMs
+		}
+		hi := lo + crossingCellMs
+		for hi-lo > crossingToleranceMs {
+			mid := lo + (hi-lo)/2
+			if before(mid) {
+				lo = mid
+			} else {
+				hi = mid
+			}
+		}
+		reached[deg] = hi
+		return hi
+	}
+
+	return &DayGeometry{
+		Today:             today,
+		Day:               day,
+		TithiAt:           func(ms int64) int { return GetTithiIndexFromLons(getMoon(ms), getSun(ms)) },
+		NakshatraAt:       func(ms int64) int { return utils.NakshatraOf(getMoon(ms)) },
+		ElongationReaches: elongationReaches,
+		LocalDay: func(ms int64) int64 {
+			return int64(math.Floor(float64(ms+int64(offsetMinutes)*60_000) / 86_400_000))
+		},
+	}, &firstErr
 }
 
 func resolveFestivalName(t i18n.PanchangTranslations, key string) string {
@@ -521,8 +786,11 @@ func tomorrowNight(ctx *astronomy.EphemerisCtx, nextSunriseMs int64,
 	return tomorrowSunsetMs, dayAfterSunriseMs, nil
 }
 
+// isPolarRiseSetError matches by code, not against the exported Sentinel
+// variables, whose Code any importer can overwrite.
 func isPolarRiseSetError(err error) bool {
-	return errors.Is(err, types.ErrNoSunriseSentinel) || errors.Is(err, types.ErrNoSunsetSentinel)
+	var pe *types.PanchangError
+	return errors.As(err, &pe) && (pe.Code == types.ErrNoSunrise || pe.Code == types.ErrNoSunset)
 }
 
 func isMesha(rashi *int) bool { return rashi != nil && *rashi == 0 }

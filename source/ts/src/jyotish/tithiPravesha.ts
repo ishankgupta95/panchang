@@ -12,13 +12,17 @@ import type {
 } from '../types/jyotish';
 
 /** Tithi-Pravesha (annual soli-lunar return) chart, cast at the PVR Narasimha Rao
- *  redefinition moment: the sidereal Sun back in its natal sign AND the Sun-Moon
- *  separation back at its natal value. */
+ *  redefinition moment: the Sun-Moon separation back at its natal value, at the match
+ *  near the solar return that has the sidereal Sun in its natal sign. When two matches
+ *  qualify the one nearer the solar return is taken; when neither does (the Sun can stay
+ *  in a sign for less than the ~29.5 days between matches, e.g. Vrischika, Dhanu,
+ *  Makara), the nearer one is taken and the Sun is in an adjacent sign. */
 export interface TithiPraveshaChart {
   praveshInstant: Date;
   /** 0..29: Shukla 1..15 → 0..14, Krishna 1..15 → 15..29. */
   natalTithi: number;
-  /** Equals `natalTithi` by construction. */
+  /** Equals `natalTithi` except when the natal separation lies within about 1e-4° (under
+   *  a second of time) of a tithi boundary, the tolerance the match is found to. */
   praveshTithi: number;
   varshaLagna: LagnaInfo;
   planets: PlanetPlacement[];
@@ -83,8 +87,8 @@ function computeNatalTithiIndex(sunLon: number, moonLon: number): number {
 
 const SYNODIC_MONTH_MS = 29.530589 * 86400_000;
 
-/** The natal-sign window is ~30.4 days and tithi matches are 29.53 days apart,
- *  so exactly one of the two candidates qualifies. */
+/** The match with the Sun in the natal sign, trying first t1, the one Newton reaches
+ *  from the solar return; when neither qualifies, the one nearer the solar return. */
 function findTithiPraveshaInNatalSign(
   solarReturn: Date,
   targetDelta: number,

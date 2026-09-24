@@ -173,7 +173,7 @@ export function clearRiseSetTracks(): void {
   clearRiseSetEventCache();
 }
 
-const BODY_VEC = new Float64Array(3);
+const BODY_VEC = /* @__PURE__ */ new Float64Array(3);
 
 class ObserverGeometry {
   readonly sinPhi: number;

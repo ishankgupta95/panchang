@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { findTransitionTime, findStartTime, findDailyElements, STANDARD_PRECISION } from '../../src/utils/search';
+import {
+  findTransitionTime, findStartTime, findDailyElements, solveAngleCrossing, STANDARD_PRECISION,
+} from '../../src/utils/search';
 
 describe('findTransitionTime', () => {
   it('finds the moment a step function changes', () => {
@@ -121,5 +123,19 @@ describe('findDailyElements', () => {
     );
 
     expect(results.length).toBeLessThanOrEqual(3);
+  });
+});
+
+describe('solveAngleCrossing with a fractional lower bracket', () => {
+  it('keeps a secant step that rounds down onto the instant a fractional lo is evaluated at', () => {
+    // Bhadra's bisection leaves fractional brackets. Here lo = 1000.5 is evaluated at 1000 and the
+    // crossing is at 1000.3, so the second secant step rounds to 1000: it used to be rejected as
+    // below lo, and the caller fell back to hi, one whole bracket late.
+    const crossing = 1000.3;
+    const angleAt = (d: Date) => 10 + (d.getTime() - crossing) * 1e-6;
+    const solved = solveAngleCrossing(1000.5, 64_000.5, 10, angleAt, (ms) => ms < crossing);
+    expect(solved).not.toBeNull();
+    expect(solved! - crossing).toBeGreaterThan(0);
+    expect(solved! - crossing).toBeLessThan(30);
   });
 });

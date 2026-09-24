@@ -345,6 +345,26 @@ describe('Sunapha / Anapha / Durudhura / Kemadruma', () => {
     });
     expect(find(computeYogas(chart), 'Kemadruma')).toBeUndefined();
   });
+
+  it('Kemadruma: the Sun alone in the 2nd or 12th does not break it (BJ 13.3, as for Sunapha/Anapha)', () => {
+    for (const sun of [1, 11]) {
+      const chart = synthChart({
+        lagnaRashi: 0, Moon: 0,
+        Sun: sun, Mars: 4, Mercury: 5, Jupiter: 6, Venus: 7, Saturn: 8,
+      });
+      const yogas = computeYogas(chart);
+      expect(find(yogas, 'Sunapha')).toBeUndefined();
+      expect(find(yogas, 'Anapha')).toBeUndefined();
+      const kemadruma = find(yogas, 'Kemadruma');
+      expect(kemadruma).toBeDefined();
+      expect(kemadruma!.reasons[0]).toContain('but the Sun');
+    }
+    const withMercury = synthChart({
+      lagnaRashi: 0, Moon: 0,
+      Sun: 1, Mars: 4, Mercury: 1, Jupiter: 6, Venus: 7, Saturn: 8,
+    });
+    expect(find(computeYogas(withMercury), 'Kemadruma')).toBeUndefined();
+  });
 });
 
 describe('Budha-Aditya / Veshi / Vasi / Ubhayachari', () => {

@@ -295,3 +295,22 @@ func ClearBlockStores() {
 	moonBlockStore.Clear()
 	sunBlockStore.Clear()
 }
+
+// The phase search, the eclipse finders, the syzygy latitude test and the
+// planet positions are memoised in stores like the block stores: exact keys of
+// pure evaluations. Each value is a function of every field of its key and of
+// nothing else (the EphemerisCtx memos those evaluations read are exact-key
+// too), so a hit is the bits a miss would compute, whatever ran before it; a
+// float input is keyed by its bits. None answers from a nearby key: a new-moon
+// search seeded a millisecond differently can end a millisecond apart, and is
+// its own entry.
+
+// ClearEphemerisMemos empties those stores. Only tests and benchmarks need it:
+// an entry never goes stale.
+func ClearEphemerisMemos() {
+	phaseSearchMemo.Clear()
+	syzygyLatitudeMemo.Clear()
+	lunarEclipseMemo.Clear()
+	solarEclipseMemo.Clear()
+	planetMemo.Clear()
+}

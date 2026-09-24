@@ -5,6 +5,7 @@ import {
   getEclipseDuringDay,
 } from '../../src/astronomy/eclipse';
 import { computeSunrise as getSunrise, computeSunset as getSunset } from '../../src/astronomy/sunrise';
+import { solarViewAt } from '../../src/astronomy/eclipseGeometry';
 
 const DELHI = { latitude: 28.6139, longitude: 77.209 };
 const SYDNEY = { latitude: -33.8688, longitude: 151.2093 };
@@ -153,6 +154,36 @@ describe('getEclipseDuringDay', () => {
     const info = getEclipseDuringDay(sunrise, nextSunrise, DELHI);
     expect(info).toBeNull();
   });
+
+  const hinduDaysCarrying = (
+    location: typeof DELHI, fromIso: string, days: number, kind: 'solar' | 'lunar',
+  ): string[] => {
+    const out: string[] = [];
+    let sunrise = getSunrise(new Date(fromIso), location);
+    for (let i = 0; i < days; i++) {
+      const nextSunrise = getSunrise(getSunset(sunrise, location), location);
+      const info = getEclipseDuringDay(sunrise, nextSunrise, location);
+      if (info?.kind === kind) out.push(sunrise.toISOString().slice(0, 16));
+      sunrise = nextSunrise;
+    }
+    return out;
+  };
+
+  it('a solar eclipse in progress at sunrise belongs to that sunrise only (Delhi 2016-03-09)', () => {
+    // Peak 00:42Z below the horizon, sunrise 01:07Z, conjunction 01:54Z: it used to land on 03-08 as well.
+    expect(hinduDaysCarrying(DELHI, '2016-03-06T18:30:00Z', 5, 'solar')).toEqual(['2016-03-09T01:07']);
+  });
+
+  it('a lunar eclipse whose opposition precedes sunrise but whose peak follows it is kept (Chennai 2057-12-11)', () => {
+    const CHENNAI = { latitude: 13.0827, longitude: 80.2707 };
+    // Opposition 00:46:04Z, sunrise 00:50:59Z, peak 00:51:54Z: it used to land on no day at all.
+    expect(hinduDaysCarrying(CHENNAI, '2057-12-08T18:30:00Z', 5, 'lunar')).toEqual(['2057-12-11T00:50']);
+  });
+
+  it('a lunar eclipse peaking just before sunrise stays on the previous Hindu day (Sydney 2004-05-05)', () => {
+    // Peak 20:30Z, the next sunrise 20:32Z, opposition after it: it used to land on both days.
+    expect(hinduDaysCarrying(SYDNEY, '2004-05-02T14:00:00Z', 5, 'lunar')).toEqual(['2004-05-03T20:31']);
+  });
 });
 
 /**
@@ -162,12 +193,23 @@ describe('getEclipseDuringDay', () => {
  */
 describe('getEclipseDuringDay: syzygy guard is answer-preserving', () => {
   function unguarded(sunriseUtc: Date, nextSunriseUtc: Date, location: typeof DELHI) {
-    const windowMs = nextSunriseUtc.getTime() - sunriseUtc.getTime();
-    const windowDays = Math.ceil(windowMs / (24 * 3600_000)) + 1;
-    const solar = getUpcomingSolarEclipse(sunriseUtc, location, windowDays);
-    if (solar && solar.peak.getTime() < nextSunriseUtc.getTime()) return solar;
-    const lunar = getUpcomingLunarEclipse(sunriseUtc, location, windowDays);
-    if (lunar && lunar.peak.getTime() < nextSunriseUtc.getTime()) return lunar;
+    const sunriseMs = sunriseUtc.getTime();
+    const nextSunriseMs = nextSunriseUtc.getTime();
+    const windowDays = Math.ceil((nextSunriseMs - sunriseMs) / (24 * 3600_000)) + 1;
+    const inDay = (ms: number) => ms >= sunriseMs && ms < nextSunriseMs;
+    const cursors = [sunriseUtc, new Date(sunriseMs - 12 * 3600_000)];
+    for (const from of cursors) {
+      const solar = getUpcomingSolarEclipse(from, location, windowDays);
+      if (solar === null) continue;
+      const seenMs = solar.visibleFromLocation ? solar.peak.getTime()
+        : solarViewAt(solar.start, location).sunAltitude > 0 ? solar.start.getTime()
+          : solar.end.getTime();
+      if (inDay(seenMs)) return solar;
+    }
+    for (const from of cursors) {
+      const lunar = getUpcomingLunarEclipse(from, location, windowDays);
+      if (lunar && inDay(lunar.peak.getTime())) return lunar;
+    }
     return null;
   }
   const identity = (e: ReturnType<typeof unguarded>) =>

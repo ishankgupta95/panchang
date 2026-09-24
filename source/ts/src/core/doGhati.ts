@@ -1,5 +1,6 @@
 import type { DoGhatiSlot, ChoghadiyaQuality, Unlocalized, UnlocalizedInfo } from '../types/elements';
 import { buildEqualSlots } from '../utils/slots';
+import { validateDate } from '../utils/validation';
 
 /** Each muhurta has a fixed presiding deity, so the sequence does NOT rotate by weekday. */
 const DO_GHATI_QUALITY: readonly ChoghadiyaQuality[] = [
@@ -61,6 +62,9 @@ export function computeDoGhati(
   nameFn: (index: number) => string,
   qualityNameFn: (quality: ChoghadiyaQuality) => string,
 ): UnlocalizedInfo<DoGhatiSlot> {
+  validateDate(sunrise, 'any');
+  validateDate(sunset, 'any');
+  validateDate(nextSunrise, 'any');
   const dayMs = sunset.getTime() - sunrise.getTime();
   const nightMs = nextSunrise.getTime() - sunset.getTime();
 

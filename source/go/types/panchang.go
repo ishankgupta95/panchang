@@ -92,9 +92,10 @@ type DailyMoon struct {
 	// found within two days, or when neither the moonTimes nor the festivals
 	// section was requested.
 	Rise *JSDate `json:"rise"`
-	// Set is the first moonset after Rise, or after local midnight when Rise
-	// is nil. Nil when none is found within two days or the moonTimes
-	// section was not requested.
+	// Set is the first moonset after Rise, or, when Rise is nil, the first
+	// moonset of the civil day itself. Nil when Rise is nil and no moonset
+	// falls on that civil day, when none is found within two days, or when
+	// the moonTimes section was not requested.
 	Set *JSDate `json:"set"`
 	// RiseLocal is Rise as ISO 8601 with the result timezone's offset; nil
 	// exactly when Rise is nil.
@@ -325,8 +326,9 @@ type MuhurtaWindows struct {
 	// daylight after sunrise, centred on the midpoint of sunrise and sunset.
 	// Nil on Wednesday, when it is held inauspicious.
 	Abhijit *TimePeriod `json:"abhijit"`
-	// Brahma starts two thirtieths and ends one thirtieth of the daylight
-	// length before sunrise.
+	// Brahma is the 14th of the 15 night-muhurtas, 2/15 to 1/15 of the
+	// night (sunset to next sunrise) before sunrise; its midpoint is the
+	// start of PratahSandhya.
 	Brahma TimePeriod `json:"brahma"`
 	// Vijaya is the 11th of the 15 day-muhurtas, 10/15 to 11/15 of the
 	// daylight after sunrise.
@@ -465,6 +467,9 @@ const (
 )
 
 // AllFestivalTypes lists every [FestivalType] in declaration order.
+// It is the package's own value, so treat it as read-only: the engine and
+// the panchang All functions keep their own copies, so modifying it changes
+// no result.
 var AllFestivalTypes = []FestivalType{
 	FestivalMajor, FestivalMinor, FestivalEkadashi, FestivalSmartaEkadashi,
 	FestivalVaishnavaEkadashi, FestivalPradosha, FestivalSankranti, FestivalEclipse,
@@ -486,16 +491,17 @@ type FestivalInfo struct {
 	Description string `json:"description,omitempty"`
 }
 
-// DailyEclipseInfo is the eclipse whose peak falls in the Hindu day, as
-// [DailyPanchangResult.Eclipse]: an [EclipseInfo] plus the same instants
+// DailyEclipseInfo is the eclipse of the Hindu day, as
+// [DailyPanchangResult.Eclipse] attributes it: an [EclipseInfo] plus the same instants
 // rendered in the result timezone. For a solar eclipse the contacts and
 // figures are local to the requested location; for a lunar eclipse the
 // contacts are penumbral and the figures umbral.
 type DailyEclipseInfo struct {
 	// Kind is solar or lunar.
 	Kind EclipseKind `json:"kind"`
-	// Subtype is partial, total or annular for a solar eclipse and
-	// penumbral, partial or total for a lunar one.
+	// Subtype is partial, total or annular for a solar eclipse, as seen
+	// from the location with the Sun up, and penumbral, partial or total
+	// for a lunar one.
 	Subtype EclipseSubtype `json:"subtype"`
 	// Start is first contact: where the partial phase begins as seen from
 	// the location for a solar eclipse, penumbral first contact for a lunar
@@ -517,8 +523,8 @@ type DailyEclipseInfo struct {
 	// horizon at Peak as seen from the requested location.
 	VisibleFromLocation bool `json:"visibleFromLocation"`
 	// Obscuration is the fraction of the disc's area covered at Peak, 0 to
-	// 1. For a lunar eclipse it is the umbral cover, so a penumbral eclipse
-	// reads 0.
+	// 1, even when the body is below the horizon then. For a lunar eclipse
+	// it is the umbral cover, so a penumbral eclipse reads 0.
 	Obscuration float64 `json:"obscuration"`
 	// Magnitude is the fraction of the disc's diameter covered at Peak,
 	// above 1 for a total eclipse. For a lunar eclipse it is the umbral
@@ -538,7 +544,9 @@ type DailyEclipseInfo struct {
 	// offset; nil exactly when SutakEnd is nil.
 	SutakEndLocal *string `json:"sutakEndLocal"`
 	// Description is a localized one-line summary giving the subtype, the
-	// kind, the obscuration as a whole percent and the visibility.
+	// kind, the obscuration as a whole percent and the visibility; a solar
+	// eclipse whose Peak is below the horizon is described at its deepest
+	// phase seen, at sunrise or sunset.
 	Description string `json:"description"`
 }
 
@@ -560,12 +568,14 @@ type EclipseSubtype string
 
 const (
 	// EclipsePartial covers part of the disc: umbral magnitude between 0 and
-	// 1 for a lunar eclipse, local magnitude below 1 for a solar one.
+	// 1 for a lunar eclipse; for a solar one, the Moon never covers or rings
+	// the Sun while the Sun is up at the location.
 	EclipsePartial EclipseSubtype = "partial"
 	// EclipseTotal covers the whole disc: a lunar eclipse is total when its
 	// umbral magnitude reaches 1, a solar one when the Moon's disc is at
-	// least as large as the Sun's and the local separation at peak falls
-	// inside the difference of the two semidiameters.
+	// least as large as the Sun's and the local separation at the deepest
+	// phase seen with the Sun up falls inside the difference of the two
+	// semidiameters.
 	EclipseTotal EclipseSubtype = "total"
 	// EclipseAnnular is a solar eclipse where the Moon sits inside the Sun's
 	// disc and leaves a ring; solar only.
@@ -577,9 +587,15 @@ const (
 
 var (
 	// AllEclipseKinds lists both kinds, solar then lunar.
+	// It is the package's own value, so treat it as read-only: the engine and
+	// the panchang All functions keep their own copies, so modifying it changes
+	// no result.
 	AllEclipseKinds = []EclipseKind{EclipseSolar, EclipseLunar}
 	// AllEclipseSubtypes lists every subtype in declaration order: partial,
 	// total, annular, penumbral.
+	// It is the package's own value, so treat it as read-only: the engine and
+	// the panchang All functions keep their own copies, so modifying it changes
+	// no result.
 	AllEclipseSubtypes = []EclipseSubtype{EclipsePartial, EclipseTotal, EclipseAnnular, EclipsePenumbral}
 )
 
@@ -633,9 +649,11 @@ type DailyPanchangResult struct {
 	// requested, except that an eclipse entry is still prepended whenever
 	// Eclipse is set.
 	Festivals []FestivalInfo `json:"festivals"`
-	// Eclipse is the eclipse whose peak falls between sunrise and next
-	// sunrise. Nil when there is none or the eclipse section was not
-	// requested.
+	// Eclipse is the eclipse of the Hindu day: a lunar eclipse whose peak
+	// falls between sunrise and next sunrise, or a solar eclipse first seen
+	// in that span (at its peak, else first contact, else last contact,
+	// whichever first has the Sun up). Nil when there is none or the
+	// eclipse section was not requested.
 	Eclipse *DailyEclipseInfo `json:"eclipse"`
 	// ChandraBalam is the Moon's transit position at sunrise counted from
 	// the caller's JanmaRashi. Nil unless JanmaRashi was given.

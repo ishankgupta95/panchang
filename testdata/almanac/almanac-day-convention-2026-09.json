@@ -1,0 +1,52 @@
+{
+  "_meta": {
+    "description": "Reference dates for the day-valued new-year and Sankranti results (2026-09 round). panaSankranti pins getHinduNewYear(year, 'odisha') at Bhubaneswar; westOfUtc2027 pins the day a 2027 Sankranti and each solar region's 2027 new year name when read in New York, where the value must be the UTC midnight that falls within that local day.",
+    "scrapedAt": "2026-09-24"
+  },
+  "panaSankranti": {
+    "city": "Bhubaneswar",
+    "location": { "latitude": 20.2961, "longitude": 85.8245 },
+    "timezone": 330,
+    "rule": "The reference almanac states that Odisha starts the year on the Sankranti's own day when it occurs before Hindu midnight, but its published dates put the boundary for evening transits between 21:33 (2067, same date) and 21:48 (2028, next date) IST, 0.305 to 0.327 of the night after sunset. A pre-sunrise transit keeps its own civil date (2025).",
+    "entries": [
+      { "year": 1946, "date": "1946-04-13", "momentIst": "1946-04-13T21:26", "_source": "Reference almanac, Odia New Year (Pana Sankranti) date page /festivals/oriya-newyear/oriya-newyear-date-time.html, geoname-id 1275817, year 1946" },
+      { "year": 2020, "date": "2020-04-13", "momentIst": "2020-04-13T20:39", "_source": "Reference almanac, Odia New Year (Pana Sankranti) date page /festivals/oriya-newyear/oriya-newyear-date-time.html, geoname-id 1275817, year 2020" },
+      { "year": 2024, "date": "2024-04-13", "momentIst": "2024-04-13T21:15", "_source": "Reference almanac, Odia New Year (Pana Sankranti) date page /festivals/oriya-newyear/oriya-newyear-date-time.html, geoname-id 1275817, year 2024" },
+      { "year": 2028, "date": "2028-04-14", "momentIst": "2028-04-13T21:47", "_source": "Reference almanac, Odia New Year (Pana Sankranti) date page /festivals/oriya-newyear/oriya-newyear-date-time.html, geoname-id 1275817, year 2028 (its Mesha Sankranti page for 2028 still files the Sankranti itself on Apr 13)" },
+      { "year": 2032, "date": "2032-04-14", "momentIst": "2032-04-13T22:14", "_source": "Reference almanac, Odia New Year (Pana Sankranti) date page /festivals/oriya-newyear/oriya-newyear-date-time.html, geoname-id 1275817, year 2032" },
+      { "year": 2067, "date": "2067-04-14", "momentIst": "2067-04-14T21:32", "_source": "Reference almanac, Odia New Year (Pana Sankranti) date page /festivals/oriya-newyear/oriya-newyear-date-time.html, geoname-id 1275817, year 2067" },
+      { "year": 2023, "date": "2023-04-14", "_source": "officeholidays.com, Odisha Maha Vishuba Sankranti 2023" },
+      { "year": 2025, "date": "2025-04-14", "_source": "officeholidays.com, Odisha Maha Vishuba Sankranti 2025 (transit before sunrise on Apr 14)" },
+      { "year": 2026, "date": "2026-04-14", "_source": "officeholidays.com, Odisha Maha Vishuba Sankranti 2026" },
+      { "year": 2027, "date": "2027-04-14", "_source": "officeholidays.com, Odisha Maha Vishuba Sankranti 2027" }
+    ]
+  },
+  "westOfUtc2027": {
+    "city": "New York",
+    "location": { "latitude": 40.7128, "longitude": -74.006 },
+    "timezone": -300,
+    "rule": "The reference almanac's attribution rule (a transit between sunrise and sunset keeps its civil day, a night transit files under the next sunrise's day) applied by hand to its 2027 transit moments, converted to UTC-05:00. Sun times: US Naval Observatory, NYC at UTC-05:00, 2025-03-20 05:59/18:08, 2025-06-21 04:25/19:31, 2025-09-22 05:44/17:53, 2025-12-21 07:17/16:32 (testdata/reference/usno-riseset.json). Karka (19:22 on Jul 16, about 5 minutes before sunset) is left out as too close to call by hand.",
+    "sankrantis": [
+      { "rashi": 9, "momentIst": "2027-01-14T21:14", "localTime": "2027-01-14T10:44", "day": "2027-01-14", "why": "daylight" },
+      { "rashi": 10, "momentIst": "2027-02-13T10:13", "localTime": "2027-02-12T23:43", "day": "2027-02-13", "why": "night, next sunrise's day" },
+      { "rashi": 11, "momentIst": "2027-03-15T07:04", "localTime": "2027-03-14T20:34", "day": "2027-03-15", "why": "night (sunset about 18:00), next sunrise's day" },
+      { "rashi": 0, "momentIst": "2027-04-14T15:33", "localTime": "2027-04-14T05:03", "day": "2027-04-14", "why": "before sunrise (about 05:22); a daylight reading also gives Apr 14" },
+      { "rashi": 1, "momentIst": "2027-05-15T12:24", "localTime": "2027-05-15T01:54", "day": "2027-05-15", "why": "night, next sunrise's day" },
+      { "rashi": 2, "momentIst": "2027-06-15T19:00", "localTime": "2027-06-15T08:30", "day": "2027-06-15", "why": "daylight" },
+      { "rashi": 4, "momentIst": "2027-08-17T14:16", "localTime": "2027-08-17T03:46", "day": "2027-08-17", "why": "night, next sunrise's day" },
+      { "rashi": 5, "momentIst": "2027-09-17T14:14", "localTime": "2027-09-17T03:44", "day": "2027-09-17", "why": "night, next sunrise's day" },
+      { "rashi": 6, "momentIst": "2027-10-18T02:12", "localTime": "2027-10-17T15:42", "day": "2027-10-17", "why": "daylight (sunset about 17:15)" },
+      { "rashi": 7, "momentIst": "2027-11-17T02:02", "localTime": "2027-11-16T15:32", "day": "2027-11-16", "why": "daylight (sunset about 16:35)" },
+      { "rashi": 8, "momentIst": "2027-12-16T16:42", "localTime": "2027-12-16T06:12", "day": "2027-12-16", "why": "before sunrise (about 07:15), next sunrise's day" }
+    ],
+    "newYears": [
+      { "region": "tamil-nadu", "day": "2027-04-14", "why": "Tamil rule (sunset): the Mesha transit's observance day" },
+      { "region": "assam", "day": "2027-04-14", "why": "the Mesha transit's observance day" },
+      { "region": "punjab", "day": "2027-04-14", "why": "civil date of the transit" },
+      { "region": "kerala", "day": "2027-04-14", "why": "Malayalam rule: a transit after the first three fifths of the daytime (here before dawn, in the night of the Apr 13 Hindu day) goes to the following day" },
+      { "region": "west-bengal", "day": "2027-04-15", "why": "Bengal rule: a transit after midnight opens the year on the day after next, counting from the Hindu day it belongs to (Apr 13)" },
+      { "region": "odisha", "day": "2027-04-14", "why": "a pre-sunrise transit keeps its own civil date" }
+    ],
+    "_source": "Reference almanac 2027 Sankranti dates page, Jaipur (geoname-id 1269515), the moments already pinned by source/ts/tests/validation/sankranti-2027-almanac.test.ts; the regional rules are the ones the reference almanac prints on its Mesha Sankranti page (/sankranti/mesha-sankranti-date-time.html)"
+  }
+}

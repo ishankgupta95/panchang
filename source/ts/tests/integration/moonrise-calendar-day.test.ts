@@ -43,4 +43,22 @@ describe('moon.rise calendar-day contract', () => {
     expect(nulls).toBeGreaterThanOrEqual(12);
     expect(nulls).toBeLessThanOrEqual(14);
   });
+
+  it('with no moonrise, a moonset on a later civil day is not published (USNO: none that day)', () => {
+    const REYKJAVIK = { latitude: 64.1466, longitude: -21.9426 };
+    const at = (y: number, m: number, d: number) =>
+      getDailyPanchang(new Date(Date.UTC(y, m, d, 12)), REYKJAVIK, { timezone: 0, sections: ['moonTimes'] })!;
+    // testdata/reference/usno-riseset.json: Reykjavik 2025-12-21, Moon continuously below the horizon.
+    const dec21 = at(2025, 11, 21);
+    expect(dec21.moon.rise).toBeNull();
+    expect(dec21.moon.set).toBeNull();
+    expect(dec21.moon.setLocal).toBeNull();
+    // The 12-22 set follows that day's own rise and stays published there, once.
+    const dec22 = at(2025, 11, 22);
+    expect(dec22.moon.riseLocal!.slice(0, 10)).toBe('2025-12-22');
+    expect(dec22.moon.setLocal!.slice(0, 16)).toBe('2025-12-22T17:26');
+    const jan13 = at(2025, 0, 13);
+    expect(jan13.moon.rise).toBeNull();
+    expect(jan13.moon.set).toBeNull();
+  });
 });

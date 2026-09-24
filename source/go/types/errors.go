@@ -17,7 +17,10 @@ const (
 	ErrInvalidLongitude ErrorCode = "INVALID_LONGITUDE"
 	// ErrInvalidElevation: elevation is NaN, infinite or below -500 metres.
 	ErrInvalidElevation ErrorCode = "INVALID_ELEVATION"
-	// ErrInvalidDate: the instant's UTC year is outside 1900 to 2100.
+	// ErrInvalidDate: the instant's UTC year is outside 1900 to 2100, or a
+	// computation would carry it where it cannot go: past 2^52 ms from 1970
+	// for the rise and set solver, or out of the JavaScript Date range, where
+	// TypeScript meets an Invalid Date.
 	ErrInvalidDate ErrorCode = "INVALID_DATE"
 	// ErrInvalidTimezone: the Timezone is unset, or its offset is not an
 	// integer or lies outside -720 to 840 minutes.
@@ -53,8 +56,9 @@ const (
 )
 
 // AllErrorCodes lists every ErrorCode in declaration order, for
-// exhaustiveness checks. It is the package's own slice, not a copy, so
-// callers must not modify it.
+// exhaustiveness checks. It is the package's own slice, not a copy, so treat
+// it as read-only: the engine and the panchang All functions keep their own
+// copies, so modifying it changes no result.
 var AllErrorCodes = []ErrorCode{
 	ErrInvalidLatitude, ErrInvalidLongitude, ErrInvalidElevation, ErrInvalidDate,
 	ErrInvalidTimezone, ErrInvalidAyanamsa, ErrInvalidInput, ErrTimezoneResolutionFailed,
@@ -85,12 +89,16 @@ func (e *PanchangError) Error() string { return e.msg }
 
 // Is reports whether target is a *PanchangError with the same Code; the
 // message is not compared. errors.Is(err, &PanchangError{Code: X}) therefore
-// matches every error carrying code X, as do the Sentinel variables below.
+// matches every error carrying code X, as do the Sentinel variables below. A
+// nil *PanchangError, as receiver or target, matches nothing.
 func (e *PanchangError) Is(target error) bool {
 	t, ok := target.(*PanchangError)
-	return ok && t.Code == e.Code
+	return ok && t != nil && e != nil && t.Code == e.Code
 }
 
+// The Sentinel variables are the package's own values: treat them as
+// read-only. The engine matches codes, not these variables, so modifying one
+// changes no result, only what errors.Is against it reports.
 var (
 	// ErrNoSunriseSentinel is an errors.Is target for ErrNoSunrise.
 	// Operations never return the sentinel itself; they return a fresh error

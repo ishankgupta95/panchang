@@ -28,7 +28,7 @@ func TestTreeCensusIsPinned(t *testing.T) {
 		wantTS        = 119
 		wantDTS       = 1
 		wantGo        = 153
-		wantGoTests   = 82
+		wantGoTests   = 85
 		wantPairs     = 117
 		wantAllowedTS = 2
 		wantAllowedGo = 36

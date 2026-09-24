@@ -19,6 +19,27 @@ describe('edge cases', () => {
     expect(result).toBeNull();
   });
 
+  it('a civil day with no sunrise of its own returns null, not the next day', () => {
+    const LONGYEARBYEN = { latitude: 78.2232, longitude: 15.6267 };
+    const opts = { timezone: 'Arctic/Longyearbyen' };
+    // 2025-02-14 ends the polar night (first sunrise 02-15 11:41), 2025-08-24 ends the midnight sun.
+    for (const [noRise, firstRise] of [[14, 15], [24, 25]] as const) {
+      const month = noRise === 14 ? 2 : 8;
+      expect(getDailyPanchang(noonUtc(2025, month, noRise), LONGYEARBYEN, opts), `2025-${month}-${noRise}`).toBeNull();
+      const next = getDailyPanchang(noonUtc(2025, month, firstRise), LONGYEARBYEN, opts)!;
+      expect(next.sun.riseLocal.slice(8, 10)).toBe(String(firstRise));
+    }
+    expect(getInstantPanchang(new Date('2025-02-14T13:00:00Z'), LONGYEARBYEN)).toBeNull();
+    expect(getInstantPanchang(new Date('2025-08-24T06:00:00Z'), LONGYEARBYEN)).toBeNull();
+    expect(getInstantPanchang(new Date('2025-02-15T11:00:00Z'), LONGYEARBYEN)!.angas.vara.index).toBe(6);
+  });
+
+  it('the last day before polar night has a sunrise but no Hindu day (no next sunrise)', () => {
+    expect(getDailyPanchang(noonUtc(2025, 11, 25), TROMSO, { timezone: 'Europe/Oslo' })).not.toBeNull();
+    expect(computeSunrise(new Date('2025-11-25T23:00:00Z'), TROMSO, 1).toISOString().slice(0, 10)).toBe('2025-11-26');
+    expect(getDailyPanchang(noonUtc(2025, 11, 26), TROMSO, { timezone: 'Europe/Oslo' })).toBeNull();
+  });
+
   it('low-level computeSunrise still throws PanchangError NO_SUNRISE for polar callers', () => {
     expect(() => computeSunrise(noonUtc(2025, 6, 21), TROMSO)).toThrow(PanchangError);
     try {

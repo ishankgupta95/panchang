@@ -90,6 +90,20 @@ describe('computePrashnaChart: option overrides', () => {
   });
 });
 
+describe('computePrashnaChart: KP defaults', () => {
+  it('an option passed as undefined takes the KP default, as an absent one does', () => {
+    const absent = computePrashnaChart(QUESTION_MOMENT, MUMBAI);
+    expect(absent.bhava.system).toBe('placidus-kp');
+    for (const options of [
+      { ayanamsa: undefined },
+      { houseSystem: undefined },
+      { ayanamsa: undefined, houseSystem: undefined },
+    ]) {
+      expect(computePrashnaChart(QUESTION_MOMENT, MUMBAI, options)).toEqual(absent);
+    }
+  });
+});
+
 describe('computePrashnaChart: validation', () => {
   it('throws on invalid latitude', () => {
     expect(() => computePrashnaChart(QUESTION_MOMENT, {

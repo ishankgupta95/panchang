@@ -233,6 +233,55 @@ func TestSyzygyGuardRejectsMostDays(t *testing.T) {
 		rejected, days, 100*float64(rejected)/days, passed, found)
 }
 
+func TestEclipseBelongsToOneHinduDay(t *testing.T) {
+	ctx := NewEphemerisCtx()
+	lon := DirectLongitudes(ctx)
+	carrying := func(site types.GeoLocation, fromMs int64, days int, kind EclipseKind) []string {
+		var out []string
+		sunrise, err := ComputeSunrise(ctx, fromMs, site, DefaultRiseSetLimitDays)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for i := 0; i < days; i++ {
+			sunset, err := ComputeSunset(ctx, sunrise, site, DefaultRiseSetLimitDays)
+			if err != nil {
+				t.Fatal(err)
+			}
+			next, err := ComputeSunrise(ctx, sunset, site, DefaultRiseSetLimitDays)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if e, ok := GetEclipseDuringDay(ctx, sunrise, next, site, types.LanguageEn, lon); ok && e.Kind == kind {
+				out = append(out, types.Date(sunrise).ISOString()[:16])
+			}
+			sunrise = next
+		}
+		return out
+	}
+	for _, c := range []struct {
+		name string
+		site types.GeoLocation
+		from int64
+		kind EclipseKind
+		want string
+	}{
+		// Solar, in progress at sunrise with its peak below the horizon: once, on that sunrise's day.
+		{"Delhi 2016-03-09", types.GeoLocation{Latitude: 28.6139, Longitude: 77.209},
+			utcMS(2016, 2, 6) + 18*3600_000, EclipseSolar, "2016-03-09T01:07"},
+		// Lunar, opposition before sunrise and peak after it: kept on the peak's day.
+		{"Chennai 2057-12-11", types.GeoLocation{Latitude: 13.0827, Longitude: 80.2707},
+			utcMS(2057, 11, 8) + 18*3600_000, EclipseLunar, "2057-12-11T00:50"},
+		// Lunar, peak just before sunrise and opposition after it: only the previous day.
+		{"Sydney 2004-05-05", types.GeoLocation{Latitude: -33.8688, Longitude: 151.2093},
+			utcMS(2004, 4, 2) + 14*3600_000, EclipseLunar, "2004-05-03T20:31"},
+	} {
+		got := carrying(c.site, c.from, 5, c.kind)
+		if len(got) != 1 || got[0] != c.want {
+			t.Errorf("%s: carried on %v, want [%s]", c.name, got, c.want)
+		}
+	}
+}
+
 func BenchmarkLunarShadowAt(b *testing.B) {
 	ctx := NewEphemerisCtx()
 	base := utcMS(2025, 2, 14)

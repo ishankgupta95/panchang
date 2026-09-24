@@ -595,3 +595,60 @@ func TestPackedDayPassesFlagIsZeroOrOne(t *testing.T) {
 		t.Errorf("want both outcomes present with IncludeFailures, got %v", seen)
 	}
 }
+
+// BuildMuhurtaTable scores days built with only the scorer's sections and no
+// end times. Under rules that reach every veto and penalty, across a year with
+// eclipses, an adhika month and every Bhadra, Panchaka and Ganda Mula case, and
+// at a polar location, the lean walk must score every day as the full walk does,
+// in the same order.
+func TestScoreOnlyCivilDaysScoresLikeTheFullWalk(t *testing.T) {
+	exclude, penalize := BhadraExclude, BhadraPenalize
+	rules := []MuhurtaRule{
+		{Occasion: "vetoes", Bhadra: &exclude, ExcludeEkadashi: true, ExcludeEclipse: true,
+			ExcludeAdhikaMasa: true, ExcludeGandaMula: true, ExcludePanchaka: true,
+			AuspiciousTithis: []int{1, 2, 4, 6}, InauspiciousNakshatras: []int{5, 8}},
+		{Occasion: "penalties", Bhadra: &penalize, RequirePaksha: PakshaShukla,
+			AuspiciousNakshatras: []int{3, 12, 21}, InauspiciousVaras: []int{2, 6},
+			AuspiciousYogas: []int{1, 2}, InauspiciousYogas: []int{0, 5}},
+	}
+	type walk struct {
+		loc        types.GeoLocation
+		opts       MuhurtaScoreOptions
+		start, end int64
+	}
+	walks := []walk{
+		{pune, MuhurtaScoreOptions{Timezone: types.TimezoneOffset(330), IncludeFailures: true},
+			types.DateUTC(2026, 0, 1).Ms() - 330*60_000, types.DateUTC(2027, 0, 1).Ms() - 1 - 330*60_000},
+		{pune, MuhurtaScoreOptions{Timezone: types.TimezoneOffset(330), MasaSystem: types.Amanta, Ayanamsa: types.Raman},
+			types.DateUTC(2023, 6, 1).Ms() - 330*60_000, types.DateUTC(2023, 9, 1).Ms() - 330*60_000},
+		{longyearbyen, MuhurtaScoreOptions{Timezone: types.TimezoneOffset(60), IncludeFailures: true},
+			types.DateUTC(2025, 0, 1).Ms() - 60*60_000, types.DateUTC(2025, 3, 1).Ms() - 60*60_000},
+	}
+	days := 0
+	for _, w := range walks {
+		for _, rule := range rules {
+			full, err := ScoreCivilDays(context.Background(), astronomy.NewEphemerisCtx(), rule, w.start, w.end, w.loc, w.opts)
+			if err != nil {
+				t.Fatal(err)
+			}
+			lean, err := scoreOnlyCivilDays(context.Background(), astronomy.NewEphemerisCtx(), rule, w.start, w.end, w.loc, w.opts)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(full) != len(lean) {
+				t.Fatalf("%s: full walk kept %d days, lean %d", rule.Occasion, len(full), len(lean))
+			}
+			for i := range full {
+				a, _ := json.Marshal(full[i].MuhurtaScore)
+				b, _ := json.Marshal(lean[i].MuhurtaScore)
+				if string(a) != string(b) {
+					t.Fatalf("%s day %d: full %s\n lean %s", rule.Occasion, i, a, b)
+				}
+			}
+			days += len(full)
+		}
+	}
+	if days < 700 {
+		t.Fatalf("compared %d scored days", days)
+	}
+}

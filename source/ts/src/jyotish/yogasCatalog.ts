@@ -204,14 +204,19 @@ const KEMADRUMA_RULE: YogaRule = {
   evaluate: (ctx) => {
     const moon = ctx.planetByName.Moon;
     const moonRashi = moon.rashi.index;
+    let sunAdjacent = false;
     for (const p of ctx.chart.planets) {
       if (p.planet === 'Moon' || p.planet === 'Rahu' || p.planet === 'Ketu') continue;
       const off = rashiOffsetFromTo(moonRashi, p.rashi.index);
-      if (off === 1 || off === 2 || off === 12) return null;
+      if (off !== 1 && off !== 2 && off !== 12) continue;
+      if (p.planet !== 'Sun') return null;
+      sunAdjacent = true;
     }
     return {
       reasons: [
-        'No planet in 2nd, 12th, or conjunct with Moon (Moon isolated from visible grahas)',
+        sunAdjacent
+          ? 'No planet but the Sun in 2nd, 12th, or conjunct with Moon (the Sun does not break Kemadruma)'
+          : 'No planet in 2nd, 12th, or conjunct with Moon (Moon isolated from visible grahas)',
       ],
     };
   },
@@ -540,11 +545,11 @@ const DARIDRA_YOGA_RULE: YogaRule = {
 
 /** Catalog order is the order of the `Yoga[]` returned by `computeYogas`. */
 export const YOGA_CATALOG: readonly YogaRule[] = [
-  mahapurushaRule('Ruchaka', 'Mars'),
-  mahapurushaRule('Bhadra', 'Mercury'),
-  mahapurushaRule('Hamsa', 'Jupiter'),
-  mahapurushaRule('Malavya', 'Venus'),
-  mahapurushaRule('Sasha', 'Saturn'),
+  /* @__PURE__ */ mahapurushaRule('Ruchaka', 'Mars'),
+  /* @__PURE__ */ mahapurushaRule('Bhadra', 'Mercury'),
+  /* @__PURE__ */ mahapurushaRule('Hamsa', 'Jupiter'),
+  /* @__PURE__ */ mahapurushaRule('Malavya', 'Venus'),
+  /* @__PURE__ */ mahapurushaRule('Sasha', 'Saturn'),
   GAJAKESARI_RULE,
   SUNAPHA_RULE,
   ANAPHA_RULE,
@@ -558,8 +563,8 @@ export const YOGA_CATALOG: readonly YogaRule[] = [
   DHARMA_KARMADHIPATI_RULE,
   VIPAREETA_RAJA_RULE,
   LAKSHMI_YOGA_RULE,
-  lordsConjunctRule('Dhana Yoga (2-11)', 'dhana', 2, 11),
-  lordsConjunctRule('Dhana Yoga (5-9)', 'dhana', 5, 9),
+  /* @__PURE__ */ lordsConjunctRule('Dhana Yoga (2-11)', 'dhana', 2, 11),
+  /* @__PURE__ */ lordsConjunctRule('Dhana Yoga (5-9)', 'dhana', 5, 9),
   VASUMATI_YOGA_RULE,
   VARGOTTAMA_RULE,
   YOGAKARAKA_RULE,

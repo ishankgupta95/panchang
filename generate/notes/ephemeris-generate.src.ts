@@ -254,8 +254,8 @@ function main(): void {
     }
     return [
       `/** ${doc} */`,
-      `export const ${prefix}_QUARTIC = new Float64Array([\n${floatArray(quarticValues, quarticTol)}\n]);`,
-      `export const ${prefix}_LINEAR = new Float64Array([\n${floatArray(linearValues, linearTol)}\n]);`,
+      `export const ${prefix}_QUARTIC = /* @__PURE__ */ new Float64Array([\n${floatArray(quarticValues, quarticTol)}\n]);`,
+      `export const ${prefix}_LINEAR = /* @__PURE__ */ new Float64Array([\n${floatArray(linearValues, linearTol)}\n]);`,
     ];
   };
 
@@ -294,7 +294,7 @@ function main(): void {
     + ` * QUARTIC tables are stride 6: amplitude, then the five phase-polynomial\n`
     + ` * coefficients. LINEAR tables are stride 4: amplitude, phase, phase rate,\n`
     + ` * power of t.`,
-  ) + `\n/** \`elp82b.f\`'s W1: the Moon's mean longitude polynomial, radians. */\nexport const MOON_MEAN_LONGITUDE = new Float64Array([\n${
+  ) + `\n/** \`elp82b.f\`'s W1: the Moon's mean longitude polynomial, radians. */\nexport const MOON_MEAN_LONGITUDE = /* @__PURE__ */ new Float64Array([\n${
     floatArray(ELP_CONST.w[1]!.slice(1), [1e-13, 1e-13, 1e-13, 1e-16, 1e-18])}\n]);\n\n`
     + moonParts.join('\n\n') + '\n');
 
@@ -334,7 +334,7 @@ function main(): void {
       const name = `${body.toUpperCase()}_${label}`;
       vsopParts.push(
         `/** ${count} of ${flat.length} terms; error ≤ ${(isAngle ? error * 206264.806 : error).toPrecision(3)}${isAngle ? '″' : ' AU'}. */`,
-        `export const ${name} = new Float64Array([\n${floatArray(values, tol)}\n]);`,
+        `export const ${name} = /* @__PURE__ */ new Float64Array([\n${floatArray(values, tol)}\n]);`,
       );
       report.push(`VSOP ${body} ${label}      ${String(count).padStart(5)} / ${flat.length}  err ${(isAngle ? error * 206264.806 : error).toPrecision(3)}${isAngle ? '″' : ' AU'}`);
 
@@ -351,7 +351,7 @@ function main(): void {
         }
         vsopParts.push(
           `/** ${p.count} of ${flat.length} terms; error ≤ ${(p.error * 206264.806).toPrecision(3)}″. */`,
-          `export const ${name}_PRECISE = new Float64Array([\n${floatArray(preciseValues, preciseTol)}\n]);`,
+          `export const ${name}_PRECISE = /* @__PURE__ */ new Float64Array([\n${floatArray(preciseValues, preciseTol)}\n]);`,
         );
         report.push(`VSOP ear ${label} precise ${String(p.count).padStart(5)} / ${flat.length}  err ${(p.error * 206264.806).toPrecision(3)}″`);
       }
@@ -367,7 +367,7 @@ function main(): void {
         }
         vsopParts.push(
           `/** Coarse: error ≤ ${c.error.toPrecision(3)} AU. Light-time only. */`,
-          `export const EAR_R_COARSE = new Float64Array([\n${floatArray(coarse, coarseTol)}\n]);`,
+          `export const EAR_R_COARSE = /* @__PURE__ */ new Float64Array([\n${floatArray(coarse, coarseTol)}\n]);`,
         );
         report.push(`VSOP ear R coarse  ${String(c.count).padStart(5)}         err ${c.error.toPrecision(3)} AU`);
       }
@@ -416,9 +416,9 @@ function main(): void {
     }
     nutParts.push(
       `/** ${kept.length} of ${terms.length} terms; error ≤ ${error.toPrecision(3)}″. Stride 3: sin, cos (arcsec), power of t. */`,
-      `export const NUTATION_${label} = new Float64Array([\n${floatArray(coefficients, coefficients.map(() => 1e-12))}\n]);`,
+      `export const NUTATION_${label} = /* @__PURE__ */ new Float64Array([\n${floatArray(coefficients, coefficients.map(() => 1e-12))}\n]);`,
       `/** Stride 14: multipliers of l, l', F, D, Ω, and the nine planetary arguments. */`,
-      `export const NUTATION_${label}_ARGS = new Int8Array([\n${floatArray(multipliers, multipliers.map(() => 0))}\n]);`,
+      `export const NUTATION_${label}_ARGS = /* @__PURE__ */ new Int8Array([\n${floatArray(multipliers, multipliers.map(() => 0))}\n]);`,
     );
     report.push(`Nutation ${label.padEnd(6)} ${String(kept.length).padStart(5)} / ${terms.length}  err ${error.toPrecision(3)}"`);
   }

@@ -52,7 +52,7 @@ function fundamentalArguments(t: number, out: Float64Array): void {
   out[13] = (0.02438175 + 0.00000538691 * t) * t;
 }
 
-const ARGS = new Float64Array(14);
+const ARGS = /* @__PURE__ */ new Float64Array(14);
 
 export interface Nutation {
   /** In longitude, arcseconds. */
@@ -65,15 +65,15 @@ const NUTATION_RESULT: Nutation = { dpsi: 0, deps: 0 };
 
 /** More than one entry is required: `riseSet.ts` reads a Moon and a Sun track at the *same* instants. */
 const NUTATION_MEMO_SIZE = 16;
-const nutationMemoT = new Float64Array(NUTATION_MEMO_SIZE).fill(Number.NaN);
-const nutationMemoPsi = new Float64Array(NUTATION_MEMO_SIZE);
-const nutationMemoEps = new Float64Array(NUTATION_MEMO_SIZE);
+const nutationMemoT = /* @__PURE__ */ (() => new Float64Array(NUTATION_MEMO_SIZE).fill(Number.NaN))();
+const nutationMemoPsi = /* @__PURE__ */ new Float64Array(NUTATION_MEMO_SIZE);
+const nutationMemoEps = /* @__PURE__ */ new Float64Array(NUTATION_MEMO_SIZE);
 let nutationMemoNext = 0;
 
 /** `sin(k·aᵢ)`/`cos(k·aᵢ)` as `[argument][|k|]`; only non-negative `k` is stored. */
 const MULTIPLE_COUNT = NUTATION_MAX_MULTIPLIER + 1;
-const MULTIPLE_SIN = new Float64Array(14 * MULTIPLE_COUNT);
-const MULTIPLE_COS = new Float64Array(14 * MULTIPLE_COUNT);
+const MULTIPLE_SIN = /* @__PURE__ */ new Float64Array(14 * MULTIPLE_COUNT);
+const MULTIPLE_COS = /* @__PURE__ */ new Float64Array(14 * MULTIPLE_COUNT);
 
 function fillMultipleTables(): void {
   for (let a = 0; a < 14; a++) {

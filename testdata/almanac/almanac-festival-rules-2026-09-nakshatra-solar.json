@@ -1,0 +1,594 @@
+{
+ "_meta": {
+  "captured": "2026-09-24",
+  "scope": "Nakshatra, solar-month and vara-in-month festival rules: Masik Karthigai and Karthigai Deepam, Onam, and masaSystem-aware Shravan Somvar and Mangala Gauri.",
+  "yearLists": "computeFestivalsForYear(year, location, {timezone, ...options}) must emit `key` on exactly `dates` in that year.",
+  "entries": "`key` must be emitted on `date` (default options). `aloneWithinDays`: no other emission of the Karthigai keys within that many days. `ordinal`: the n-th emission of `key` in that calendar year."
+ },
+ "yearLists": [
+  {
+   "key": "masik_karthigai",
+   "city": "Chennai",
+   "location": {
+    "latitude": 13.0827,
+    "longitude": 80.2707
+   },
+   "timezone": 330,
+   "options": {
+    "region": "tamil-nadu"
+   },
+   "year": 2024,
+   "dates": [
+    "2024-01-20",
+    "2024-02-16",
+    "2024-03-14",
+    "2024-04-11",
+    "2024-05-08",
+    "2024-06-05",
+    "2024-07-02",
+    "2024-07-29",
+    "2024-08-25",
+    "2024-09-22",
+    "2024-10-19",
+    "2024-11-16"
+   ],
+   "source": "Reference almanac, Karthigai nakshatra days for Chennai, 2024 (saved page masik-karthigai-list_2024_chennai, captured 2026-09-24): 12 Masik Karthigai days"
+  },
+  {
+   "key": "karthigai_deepam",
+   "city": "Chennai",
+   "location": {
+    "latitude": 13.0827,
+    "longitude": 80.2707
+   },
+   "timezone": 330,
+   "options": {
+    "region": "tamil-nadu"
+   },
+   "year": 2024,
+   "dates": [
+    "2024-12-13"
+   ],
+   "source": "Same page: Karthigai Deepam 2024-12-13, the Krittika day nearer the Tamil Karthigai Purnima (2024-12-15), not 2024-11-16; Krittika touches no sunrise that day"
+  },
+  {
+   "key": "masik_karthigai",
+   "city": "Chennai",
+   "location": {
+    "latitude": 13.0827,
+    "longitude": 80.2707
+   },
+   "timezone": 330,
+   "options": {
+    "region": "tamil-nadu"
+   },
+   "year": 2025,
+   "dates": [
+    "2025-01-09",
+    "2025-02-06",
+    "2025-03-05",
+    "2025-04-01",
+    "2025-04-29",
+    "2025-05-26",
+    "2025-06-22",
+    "2025-07-20",
+    "2025-08-16",
+    "2025-09-12",
+    "2025-10-10",
+    "2025-11-06",
+    "2025-12-31"
+   ],
+   "source": "Reference almanac, Karthigai nakshatra days for Chennai, 2025 (saved page masik-karthigai-list_2025_chennai, captured 2026-09-24): 13 Masik Karthigai days"
+  },
+  {
+   "key": "karthigai_deepam",
+   "city": "Chennai",
+   "location": {
+    "latitude": 13.0827,
+    "longitude": 80.2707
+   },
+   "timezone": 330,
+   "options": {
+    "region": "tamil-nadu"
+   },
+   "year": 2025,
+   "dates": [
+    "2025-12-04"
+   ],
+   "source": "Same page: Karthigai Deepam 2025-12-04 (Krittika 12-03 18:00 to 12-04 14:54 holds no sunset, so its sunrise day)"
+  },
+  {
+   "key": "onam",
+   "city": "Kochi",
+   "location": {
+    "latitude": 9.9312,
+    "longitude": 76.2673
+   },
+   "timezone": 330,
+   "options": {
+    "region": "kerala"
+   },
+   "year": 2000,
+   "dates": [
+    "2000-09-10"
+   ],
+   "source": "Reference almanac, Onam date for Kochi 2000 (saved page onam_2000_kochi): Thiruvonam holds two Chingam sunrises, the first is taken"
+  },
+  {
+   "key": "onam",
+   "city": "Kochi",
+   "location": {
+    "latitude": 9.9312,
+    "longitude": 76.2673
+   },
+   "timezone": 330,
+   "options": {
+    "region": "kerala"
+   },
+   "year": 2006,
+   "dates": [
+    "2006-09-05"
+   ],
+   "source": "Reference almanac, Onam date for Kochi 2006 (saved page onam_2006_kochi): Thiruvonam holds no sunrise, the day containing it is taken"
+  },
+  {
+   "key": "onam",
+   "city": "Kochi",
+   "location": {
+    "latitude": 9.9312,
+    "longitude": 76.2673
+   },
+   "timezone": 330,
+   "options": {
+    "region": "kerala"
+   },
+   "year": 2012,
+   "dates": [
+    "2012-08-29"
+   ],
+   "source": "Reference almanac, Onam date for Kochi 2012 (saved page onam_2012_kochi): the lunar month is Adhika Bhadrapada, which Onam ignores"
+  },
+  {
+   "key": "onam",
+   "city": "Kochi",
+   "location": {
+    "latitude": 9.9312,
+    "longitude": 76.2673
+   },
+   "timezone": 330,
+   "options": {
+    "region": "kerala"
+   },
+   "year": 2013,
+   "dates": [
+    "2013-09-16"
+   ],
+   "source": "HinduPad 'Onam, 16 September 2013' and the Kerala 2013 public holiday list: the later of two Chingam Thiruvonams (2013-08-20 and 09-16)"
+  },
+  {
+   "key": "onam",
+   "city": "Kochi",
+   "location": {
+    "latitude": 9.9312,
+    "longitude": 76.2673
+   },
+   "timezone": 330,
+   "options": {
+    "region": "kerala"
+   },
+   "year": 2024,
+   "dates": [
+    "2024-09-15"
+   ],
+   "source": "Reference almanac, Onam date for Kochi 2024 (saved page onam_2024_kochi): two Thiruvonams in Chingam (08-19, 09-15), the later is taken"
+  },
+  {
+   "key": "onam",
+   "city": "Kochi",
+   "location": {
+    "latitude": 9.9312,
+    "longitude": 76.2673
+   },
+   "timezone": 330,
+   "options": {
+    "region": "kerala"
+   },
+   "year": 2025,
+   "dates": [
+    "2025-09-05"
+   ],
+   "source": "Reference almanac 2025, already pinned in almanac-festivals.json"
+  },
+  {
+   "key": "onam",
+   "city": "Kochi",
+   "location": {
+    "latitude": 9.9312,
+    "longitude": 76.2673
+   },
+   "timezone": 330,
+   "options": {
+    "region": "kerala"
+   },
+   "year": 2031,
+   "dates": [
+    "2031-08-30"
+   ],
+   "source": "Reference almanac, Onam date for Kochi 2031 (saved page onam_2031_kochi): Thiruvonam holds no sunrise, in an Adhika month"
+  },
+  {
+   "key": "shravan_somvar",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "options": {
+    "masaSystem": "purnimanta"
+   },
+   "year": 2025,
+   "dates": [
+    "2025-07-14",
+    "2025-07-21",
+    "2025-07-28",
+    "2025-08-04"
+   ],
+   "source": "Reference almanac, Sawan Somwar 2025 for New Delhi (saved page sawan-somwar-list_2025_newdelhi, captured 2026-09-24): North India list, Purnimanta Shravana 07-11 to 08-09"
+  },
+  {
+   "key": "shravan_somvar",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "options": {
+    "masaSystem": "amanta"
+   },
+   "year": 2025,
+   "dates": [
+    "2025-07-28",
+    "2025-08-04",
+    "2025-08-11",
+    "2025-08-18"
+   ],
+   "source": "Reference almanac, Sawan Somwar 2025 for New Delhi (saved page sawan-somwar-list_2025_newdelhi, captured 2026-09-24): Andhra Pradesh, Telangana, Goa, Maharashtra, Gujarat, Karnataka and Tamil Nadu list, Amanta Shravana 07-25 to 08-23"
+  },
+  {
+   "key": "shravan_somvar",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "options": {
+    "region": "nepal"
+   },
+   "year": 2025,
+   "dates": [
+    "2025-07-21",
+    "2025-07-28",
+    "2025-08-04",
+    "2025-08-11"
+   ],
+   "source": "Reference almanac, Sawan Somwar 2025 for New Delhi (saved page sawan-somwar-list_2025_newdelhi, captured 2026-09-24): Nepal list, solar Shrawan 07-16 to 08-16"
+  }
+ ],
+ "entries": [
+  {
+   "key": "masik_karthigai",
+   "date": "2006-08-16",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "aloneWithinDays": 3,
+   "source": "Reference almanac festival calendar for New Delhi, August 2006 (saved page festivals-month-august_2006_newdelhi, captured 2026-09-24): Masik Karthigai"
+  },
+  {
+   "key": "masik_karthigai",
+   "date": "2013-08-27",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "aloneWithinDays": 3,
+   "source": "Reference almanac festival calendar for New Delhi, August 2013 (saved page festivals-month-august_2013_newdelhi, captured 2026-09-24): Masik Karthigai"
+  },
+  {
+   "key": "masik_karthigai",
+   "date": "2017-10-08",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "aloneWithinDays": 3,
+   "source": "Reference almanac festival calendar for New Delhi, October 2017 (saved page festivals-month-october_2017_newdelhi, captured 2026-09-24): Masik Karthigai"
+  },
+  {
+   "key": "masik_karthigai",
+   "date": "2019-10-16",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "aloneWithinDays": 3,
+   "source": "Reference almanac festival calendar for New Delhi, October 2019 (saved page festivals-month-october_2019_newdelhi, captured 2026-09-24): Masik Karthigai"
+  },
+  {
+   "key": "masik_karthigai",
+   "date": "2020-11-02",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "aloneWithinDays": 3,
+   "source": "Reference almanac festival calendar for New Delhi, November 2020 (saved page festivals-month-november_2020_newdelhi, captured 2026-09-24): Masik Karthigai"
+  },
+  {
+   "key": "masik_karthigai",
+   "date": "2022-08-19",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "aloneWithinDays": 3,
+   "source": "Reference almanac festival calendar for New Delhi, August 2022 (saved page festivals-month-august_2022_newdelhi, captured 2026-09-24): Masik Karthigai"
+  },
+  {
+   "key": "masik_karthigai",
+   "date": "2022-10-12",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "aloneWithinDays": 3,
+   "source": "Reference almanac festival calendar for New Delhi, October 2022 (saved page festivals-month-october_2022_newdelhi, captured 2026-09-24): Masik Karthigai (Krittika 10-12 17:11 to 10-13 18:42 holds both sunsets; the first day is listed)"
+  },
+  {
+   "key": "masik_karthigai",
+   "date": "2026-03-23",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "aloneWithinDays": 3,
+   "source": "Reference almanac festival calendar for New Delhi, March 2026 (saved page festivals-month-march_2026_newdelhi, captured 2026-09-24): Masik Karthigai"
+  },
+  {
+   "key": "masik_karthigai",
+   "date": "2037-03-21",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "aloneWithinDays": 3,
+   "source": "Reference almanac festival calendar for New Delhi, March 2037 (saved page festivals-month-march_2037_newdelhi, captured 2026-09-24): Masik Karthigai"
+  },
+  {
+   "key": "karthigai_deepam",
+   "date": "2020-11-29",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "aloneWithinDays": 3,
+   "source": "Reference almanac festival calendar for New Delhi, November 2020 (saved page festivals-month-november_2020_newdelhi, captured 2026-09-24): Karthigai Deepam"
+  },
+  {
+   "key": "karthigai_deepam",
+   "date": "2021-11-19",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "aloneWithinDays": 3,
+   "source": "Reference almanac festival calendar for New Delhi, November 2021 (saved page festivals-month-november_2021_newdelhi, captured 2026-09-24): Karthigai Deepam"
+  },
+  {
+   "key": "masik_karthigai",
+   "date": "2025-04-01",
+   "city": "Kolkata",
+   "location": {
+    "latitude": 22.5726,
+    "longitude": 88.3639
+   },
+   "timezone": 330,
+   "aloneWithinDays": 3,
+   "source": "Reference almanac festival calendar for Kolkata, April 2025 (saved page festivals-month-april_2025_kolkata, captured 2026-09-24): Masik Karthigai"
+  },
+  {
+   "key": "masik_karthigai",
+   "date": "2025-04-29",
+   "city": "Kolkata",
+   "location": {
+    "latitude": 22.5726,
+    "longitude": 88.3639
+   },
+   "timezone": 330,
+   "aloneWithinDays": 3,
+   "source": "Reference almanac festival calendar for Kolkata, April 2025 (saved page festivals-month-april_2025_kolkata, captured 2026-09-24): Masik Karthigai"
+  },
+  {
+   "key": "shravan_somvar",
+   "date": "2006-08-07",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "ordinal": 4,
+   "source": "Reference almanac festival calendar for New Delhi, August 2006 (saved page festivals-month-august_2006_newdelhi, captured 2026-09-24): Fourth Shravan Somwar Vrat (Purnimanta, the default masaSystem)"
+  },
+  {
+   "key": "mangala_gauri",
+   "date": "2006-08-01",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "ordinal": 3,
+   "source": "Reference almanac festival calendar for New Delhi, August 2006 (saved page festivals-month-august_2006_newdelhi, captured 2026-09-24): Third Mangala Gauri Vrat (Purnimanta, the default masaSystem)"
+  },
+  {
+   "key": "mangala_gauri",
+   "date": "2006-08-08",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "ordinal": 4,
+   "source": "Reference almanac festival calendar for New Delhi, August 2006 (saved page festivals-month-august_2006_newdelhi, captured 2026-09-24): Fourth Mangala Gauri Vrat (Purnimanta, the default masaSystem)"
+  },
+  {
+   "key": "shravan_somvar",
+   "date": "2013-08-05",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "ordinal": 2,
+   "source": "Reference almanac festival calendar for New Delhi, August 2013 (saved page festivals-month-august_2013_newdelhi, captured 2026-09-24): Second Shravan Somwar Vrat (Purnimanta, the default masaSystem)"
+  },
+  {
+   "key": "shravan_somvar",
+   "date": "2013-08-12",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "ordinal": 3,
+   "source": "Reference almanac festival calendar for New Delhi, August 2013 (saved page festivals-month-august_2013_newdelhi, captured 2026-09-24): Third Shravan Somwar Vrat (Purnimanta, the default masaSystem)"
+  },
+  {
+   "key": "shravan_somvar",
+   "date": "2013-08-19",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "ordinal": 4,
+   "source": "Reference almanac festival calendar for New Delhi, August 2013 (saved page festivals-month-august_2013_newdelhi, captured 2026-09-24): Fourth Shravan Somwar Vrat (Purnimanta, the default masaSystem)"
+  },
+  {
+   "key": "mangala_gauri",
+   "date": "2013-08-06",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "ordinal": 3,
+   "source": "Reference almanac festival calendar for New Delhi, August 2013 (saved page festivals-month-august_2013_newdelhi, captured 2026-09-24): Third Mangala Gauri Vrat (Purnimanta, the default masaSystem)"
+  },
+  {
+   "key": "mangala_gauri",
+   "date": "2013-08-13",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "ordinal": 4,
+   "source": "Reference almanac festival calendar for New Delhi, August 2013 (saved page festivals-month-august_2013_newdelhi, captured 2026-09-24): Fourth Mangala Gauri Vrat (Purnimanta, the default masaSystem)"
+  },
+  {
+   "key": "mangala_gauri",
+   "date": "2013-08-20",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "ordinal": 5,
+   "source": "Reference almanac festival calendar for New Delhi, August 2013 (saved page festivals-month-august_2013_newdelhi, captured 2026-09-24): Fifth Mangala Gauri Vrat (Purnimanta, the default masaSystem)"
+  },
+  {
+   "key": "shravan_somvar",
+   "date": "2022-08-01",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "ordinal": 3,
+   "source": "Reference almanac festival calendar for New Delhi, August 2022 (saved page festivals-month-august_2022_newdelhi, captured 2026-09-24): Third Shravan Somwar Vrat (Purnimanta, the default masaSystem)"
+  },
+  {
+   "key": "shravan_somvar",
+   "date": "2022-08-08",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "ordinal": 4,
+   "source": "Reference almanac festival calendar for New Delhi, August 2022 (saved page festivals-month-august_2022_newdelhi, captured 2026-09-24): Fourth Shravan Somwar Vrat (Purnimanta, the default masaSystem)"
+  },
+  {
+   "key": "mangala_gauri",
+   "date": "2022-08-02",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "ordinal": 3,
+   "source": "Reference almanac festival calendar for New Delhi, August 2022 (saved page festivals-month-august_2022_newdelhi, captured 2026-09-24): Third Mangala Gauri Vrat (Purnimanta, the default masaSystem)"
+  },
+  {
+   "key": "mangala_gauri",
+   "date": "2022-08-09",
+   "city": "New Delhi",
+   "location": {
+    "latitude": 28.6139,
+    "longitude": 77.209
+   },
+   "timezone": 330,
+   "ordinal": 4,
+   "source": "Reference almanac festival calendar for New Delhi, August 2022 (saved page festivals-month-august_2022_newdelhi, captured 2026-09-24): Fourth Mangala Gauri Vrat (Purnimanta, the default masaSystem)"
+  }
+ ]
+}

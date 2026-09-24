@@ -96,22 +96,22 @@
     "bengal",
     "north-india"
   ],
-  "digest": "55f3ca31926bce15afa735fc016f737bd72802bb3d47a8c8b6a8fe35b0d99aaa",
-  "convertDigest": "e2ea5d1ceaf4aa7ecb64a6c4511276edd9ffdb3e2a479c5acc77fa4fcb32756d",
+  "digest": "6cecdc346241b209e964f88f4e9c6d02326bf2f906a47319a683c2d13cdb78f9",
+  "convertDigest": "2999720924c4035bea5cc00a486fb6f10bf33a1f6af28d87bf0413632c13f7b2",
   "eraDigest": "d85b2575843fb8fe609983734720682b06bdd9ae31ba23f72576d5293662bed5",
-  "newYearDigest": "9ee41dc03ed0c84c4dd30d9a0c20b2d0491618645d3ca6e3593808abe9893645",
+  "newYearDigest": "dd71ad6f99a7d8d82727bb45da9ba2b85561089634ad8cf4539770928f540f61",
   "upcomingDigest": "1f6d6b968828a99127c69cdfdd849c11bfcdf2cf2c5074252897a2cebfa56cb1",
   "outcomeCounts": {
     "ok,ok,ok,ok": 14
   },
   "guardHits": {
-    "ekadashiPolarContinue": 1055,
-    "ekadashiDaysProbed": 5127,
+    "ekadashiPolarContinue": 1063,
+    "ekadashiDaysProbed": 5155,
     "yearlyBareCatch": 36,
     "sankrantiTransits": 168,
     "meshaCatch": 2,
     "meshaSolarAnchorCalls": 14,
-    "chaitraNull": 36,
+    "chaitraNull": 34,
     "hinduNewYearCalls": 375,
     "convertPolarThrow": 38,
     "convertCalls": 182
@@ -120,7 +120,6 @@
     {
       "label": "Pune|1912",
       "ekadashi": [
-        -1830384000000,
         -1829260800000,
         -1827878400000,
         -1826668800000,
@@ -246,9 +245,9 @@
           "sutakEnd": -1807097665004
         }
       ],
-      "festivalCount": 269,
+      "festivalCount": 258,
       "festivalFirst": "-1830403800000|vaishnava_ekadashi",
-      "festivalLast": "-1799299800000|guru_pushya"
+      "festivalLast": "-1799213400000|sankashti_chaturthi"
     },
     {
       "label": "Pune|2025",
@@ -379,7 +378,7 @@
           "sutakEnd": 1757274993726
         }
       ],
-      "festivalCount": 263,
+      "festivalCount": 254,
       "festivalFirst": "1735842600000|vinayaka_chaturthi",
       "festivalLast": "1767119400000|masik_karthigai"
     },
@@ -511,7 +510,7 @@
           "sutakEnd": 1787896323077
         }
       ],
-      "festivalCount": 259,
+      "festivalCount": 253,
       "festivalFirst": "1767205800000|pradosha",
       "festivalLast": "1798223400000|sankashti_chaturthi"
     },
@@ -668,7 +667,7 @@
           "sutakEnd": null
         }
       ],
-      "festivalCount": 269,
+      "festivalCount": 260,
       "festivalFirst": "1798914600000|vaishnava_ekadashi",
       "festivalLast": "1830191400000|vinayaka_chaturthi"
     },
@@ -813,7 +812,7 @@
           "sutakEnd": 3749946445128
         }
       ],
-      "festivalCount": 279,
+      "festivalCount": 268,
       "festivalFirst": "3723993000000|smarta_ekadashi",
       "festivalLast": "3755183400000|guru_pushya"
     },
@@ -945,7 +944,7 @@
           "sutakEnd": 1787896323077
         }
       ],
-      "festivalCount": 260,
+      "festivalCount": 253,
       "festivalFirst": "1767205800000|pradosha",
       "festivalLast": "1798223400000|sankashti_chaturthi"
     },
@@ -1102,7 +1101,7 @@
           "sutakEnd": 1861900592763
         }
       ],
-      "festivalCount": 263,
+      "festivalCount": 255,
       "festivalFirst": "1830882600000|vaishnava_ekadashi",
       "festivalLast": "1861813800000|chandra_grahan"
     },
@@ -1137,73 +1136,73 @@
       ],
       "sankrantis": [
         {
-          "date": 1736812800000,
+          "date": 1736899200000,
           "moment": 1736825683227,
           "rashi": 9,
           "rashiName": "Makara"
         },
         {
-          "date": 1739318400000,
+          "date": 1739404800000,
           "moment": 1739378099487,
           "rashi": 10,
           "rashiName": "Kumbha"
         },
         {
-          "date": 1741910400000,
+          "date": 1741996800000,
           "moment": 1741958996263,
           "rashi": 11,
           "rashiName": "Meena"
         },
         {
-          "date": 1744502400000,
+          "date": 1744588800000,
           "moment": 1744581678441,
           "rashi": 0,
           "rashiName": "Mesha"
         },
         {
-          "date": 1747180800000,
+          "date": 1747267200000,
           "moment": 1747248718797,
           "rashi": 1,
           "rashiName": "Vrishabha"
         },
         {
-          "date": 1749945600000,
+          "date": 1750032000000,
           "moment": 1749950623828,
           "rashi": 2,
           "rashiName": "Mithuna"
         },
         {
-          "date": 1752624000000,
+          "date": 1752710400000,
           "moment": 1752667867968,
           "rashi": 3,
           "rashiName": "Karka"
         },
         {
-          "date": 1755302400000,
+          "date": 1755388800000,
           "moment": 1755376281078,
           "rashi": 4,
           "rashiName": "Simha"
         },
         {
-          "date": 1757980800000,
+          "date": 1758067200000,
           "moment": 1758054354784,
           "rashi": 5,
           "rashiName": "Kanya"
         },
         {
-          "date": 1760659200000,
+          "date": 1760745600000,
           "moment": 1760689485570,
           "rashi": 6,
           "rashiName": "Tula"
         },
         {
-          "date": 1763251200000,
+          "date": 1763337600000,
           "moment": 1763280958227,
           "rashi": 7,
           "rashiName": "Vrischika"
         },
         {
-          "date": 1765843200000,
+          "date": 1765929600000,
           "moment": 1765839467943,
           "rashi": 8,
           "rashiName": "Dhanus"
@@ -1247,9 +1246,9 @@
           "sutakEnd": 1757274993726
         }
       ],
-      "festivalCount": 255,
-      "festivalFirst": "1735963200000|vinayaka_chaturthi",
-      "festivalLast": "1767153600000|masik_karthigai"
+      "festivalCount": 254,
+      "festivalFirst": "1735880400000|vinayaka_chaturthi",
+      "festivalLast": "1767157200000|pradosha"
     },
     {
       "label": "NewYork|2026",
@@ -1281,73 +1280,73 @@
       ],
       "sankrantis": [
         {
-          "date": 1768348800000,
+          "date": 1768435200000,
           "moment": 1768383860009,
           "rashi": 9,
           "rashiName": "Makara"
         },
         {
-          "date": 1770940800000,
+          "date": 1771027200000,
           "moment": 1770936340209,
           "rashi": 10,
           "rashiName": "Kumbha"
         },
         {
-          "date": 1773446400000,
+          "date": 1773532800000,
           "moment": 1773517199413,
           "rashi": 11,
           "rashiName": "Meena"
         },
         {
-          "date": 1776124800000,
+          "date": 1776211200000,
           "moment": 1776139807762,
           "rashi": 0,
           "rashiName": "Mesha"
         },
         {
-          "date": 1778803200000,
+          "date": 1778889600000,
           "moment": 1778806784179,
           "rashi": 1,
           "rashiName": "Vrishabha"
         },
         {
-          "date": 1781481600000,
+          "date": 1781568000000,
           "moment": 1781508604174,
           "rashi": 2,
           "rashiName": "Mithuna"
         },
         {
-          "date": 1784160000000,
+          "date": 1784246400000,
           "moment": 1784225740209,
           "rashi": 3,
           "rashiName": "Karka"
         },
         {
-          "date": 1786924800000,
+          "date": 1787011200000,
           "moment": 1786934094652,
           "rashi": 4,
           "rashiName": "Simha"
         },
         {
-          "date": 1789603200000,
+          "date": 1789689600000,
           "moment": 1789612156493,
           "rashi": 5,
           "rashiName": "Kanya"
         },
         {
-          "date": 1792195200000,
+          "date": 1792281600000,
           "moment": 1792247290575,
           "rashi": 6,
           "rashiName": "Tula"
         },
         {
-          "date": 1794787200000,
+          "date": 1794873600000,
           "moment": 1794838767846,
           "rashi": 7,
           "rashiName": "Vrischika"
         },
         {
-          "date": 1797379200000,
+          "date": 1797465600000,
           "moment": 1797397243284,
           "rashi": 8,
           "rashiName": "Dhanus"
@@ -1391,9 +1390,9 @@
           "sutakEnd": 1787896323077
         }
       ],
-      "festivalCount": 258,
-      "festivalFirst": "1767240000000|masik_karthigai",
-      "festivalLast": "1798344000000|sankashti_chaturthi"
+      "festivalCount": 252,
+      "festivalFirst": "1767416400000|magha_shanivar",
+      "festivalLast": "1798261200000|sankashti_chaturthi"
     },
     {
       "label": "Sydney|2026",
@@ -1523,9 +1522,9 @@
           "sutakEnd": 1787896323077
         }
       ],
-      "festivalCount": 254,
-      "festivalFirst": "1767189600000|masik_karthigai",
-      "festivalLast": "1797861600000|masik_karthigai"
+      "festivalCount": 249,
+      "festivalFirst": "1767186000000|pradosha",
+      "festivalLast": "1798290000000|sankashti_chaturthi"
     },
     {
       "label": "Longyearbyen|2025",
@@ -1651,8 +1650,8 @@
           "sutakEnd": 1757274993726
         }
       ],
-      "festivalCount": 101,
-      "festivalFirst": "1739487600000|magha_shanivar",
+      "festivalCount": 94,
+      "festivalFirst": "1739574000000|sankashti_chaturthi",
       "festivalLast": "1761346800000|vinayaka_chaturthi"
     },
     {
@@ -1779,8 +1778,8 @@
           "sutakEnd": 1787896323077
         }
       ],
-      "festivalCount": 99,
-      "festivalFirst": "1771023600000|maha_shivaratri",
+      "festivalCount": 92,
+      "festivalFirst": "1771110000000|maha_shivaratri",
       "festivalLast": "1792882800000|sharad_purnima"
     },
     {
@@ -1795,73 +1794,73 @@
       ],
       "sankrantis": [
         {
-          "date": 1768348800000,
+          "date": 1768435200000,
           "moment": 1768383860228,
           "rashi": 9,
           "rashiName": "Makara"
         },
         {
-          "date": 1770854400000,
+          "date": 1770940800000,
           "moment": 1770936340429,
           "rashi": 10,
           "rashiName": "Kumbha"
         },
         {
-          "date": 1773446400000,
+          "date": 1773532800000,
           "moment": 1773517198974,
           "rashi": 11,
           "rashiName": "Meena"
         },
         {
-          "date": 1776038400000,
+          "date": 1776124800000,
           "moment": 1776139807323,
           "rashi": 0,
           "rashiName": "Mesha"
         },
         {
-          "date": 1778716800000,
+          "date": 1778803200000,
           "moment": 1778806784398,
           "rashi": 1,
           "rashiName": "Vrishabha"
         },
         {
-          "date": 1781481600000,
+          "date": 1781568000000,
           "moment": 1781508604394,
           "rashi": 2,
           "rashiName": "Mithuna"
         },
         {
-          "date": 1784160000000,
+          "date": 1784246400000,
           "moment": 1784225740429,
           "rashi": 3,
           "rashiName": "Karka"
         },
         {
-          "date": 1786838400000,
+          "date": 1786924800000,
           "moment": 1786934094872,
           "rashi": 4,
           "rashiName": "Simha"
         },
         {
-          "date": 1789603200000,
+          "date": 1789689600000,
           "moment": 1789612156713,
           "rashi": 5,
           "rashiName": "Kanya"
         },
         {
-          "date": 1792195200000,
+          "date": 1792281600000,
           "moment": 1792247290136,
           "rashi": 6,
           "rashiName": "Tula"
         },
         {
-          "date": 1794787200000,
+          "date": 1794873600000,
           "moment": 1794838767406,
           "rashi": 7,
           "rashiName": "Vrischika"
         },
         {
-          "date": 1797379200000,
+          "date": 1797465600000,
           "moment": 1797397242846,
           "rashi": 8,
           "rashiName": "Dhanus"
@@ -1905,9 +1904,9 @@
           "sutakEnd": 1787896323077
         }
       ],
-      "festivalCount": 58,
-      "festivalFirst": "1772082000000|vaishnava_ekadashi",
-      "festivalLast": "1791694800000|navaratri"
+      "festivalCount": 53,
+      "festivalFirst": "1772168400000|vaishnava_ekadashi",
+      "festivalLast": "1791867600000|vinayaka_chaturthi"
     },
     {
       "label": "Alert|2027",
@@ -1921,73 +1920,73 @@
       ],
       "sankrantis": [
         {
-          "date": 1799884800000,
+          "date": 1799971200000,
           "moment": 1799941528125,
           "rashi": 9,
           "rashiName": "Makara"
         },
         {
-          "date": 1802390400000,
+          "date": 1802476800000,
           "moment": 1802493836937,
           "rashi": 10,
           "rashiName": "Kumbha"
         },
         {
-          "date": 1805068800000,
+          "date": 1805155200000,
           "moment": 1805074513549,
           "rashi": 11,
           "rashiName": "Meena"
         },
         {
-          "date": 1807660800000,
+          "date": 1807747200000,
           "moment": 1807697028954,
           "rashi": 0,
           "rashiName": "Mesha"
         },
         {
-          "date": 1810339200000,
+          "date": 1810425600000,
           "moment": 1810364118750,
           "rashi": 1,
           "rashiName": "Vrishabha"
         },
         {
-          "date": 1813017600000,
+          "date": 1813104000000,
           "moment": 1813066270971,
           "rashi": 2,
           "rashiName": "Mithuna"
         },
         {
-          "date": 1815696000000,
+          "date": 1815782400000,
           "moment": 1815783805809,
           "rashi": 3,
           "rashiName": "Karka"
         },
         {
-          "date": 1818460800000,
+          "date": 1818547200000,
           "moment": 1818492477318,
           "rashi": 4,
           "rashiName": "Simha"
         },
         {
-          "date": 1821139200000,
+          "date": 1821225600000,
           "moment": 1821170707909,
           "rashi": 5,
           "rashiName": "Kanya"
         },
         {
-          "date": 1823731200000,
+          "date": 1823817600000,
           "moment": 1823805832103,
           "rashi": 6,
           "rashiName": "Tula"
         },
         {
-          "date": 1826323200000,
+          "date": 1826409600000,
           "moment": 1826397196654,
           "rashi": 7,
           "rashiName": "Vrischika"
         },
         {
-          "date": 1828915200000,
+          "date": 1829001600000,
           "moment": 1828955577171,
           "rashi": 8,
           "rashiName": "Dhanus"
@@ -2031,8 +2030,8 @@
           "sutakEnd": null
         }
       ],
-      "festivalCount": 52,
-      "festivalFirst": "1803618000000|magha_shanivar",
+      "festivalCount": 49,
+      "festivalFirst": "1804050000000|vaishnava_ekadashi",
       "festivalLast": "1823317200000|pradosha"
     }
   ],
@@ -4940,7 +4939,6 @@
         "varaIndex": 5
       },
       "roundTrip": [
-        1772150400000,
         1772236800000
       ],
       "roundTripContains": true
@@ -5052,7 +5050,6 @@
         "varaIndex": 6
       },
       "roundTrip": [
-        1803686400000,
         1803772800000
       ],
       "roundTripContains": true
@@ -5662,7 +5659,7 @@
     },
     {
       "key": "Pune|2025|odisha",
-      "at": 1743292800000
+      "at": 1744588800000
     },
     {
       "key": "Pune|2025|assam",
@@ -5734,7 +5731,7 @@
     },
     {
       "key": "Pune|2026|all",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|tamil-nadu",
@@ -5746,15 +5743,15 @@
     },
     {
       "key": "Pune|2026|karnataka",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|andhra-pradesh",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|telangana",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|west-bengal",
@@ -5762,7 +5759,7 @@
     },
     {
       "key": "Pune|2026|odisha",
-      "at": 1773964800000
+      "at": 1776124800000
     },
     {
       "key": "Pune|2026|assam",
@@ -5770,27 +5767,27 @@
     },
     {
       "key": "Pune|2026|bihar",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|jharkhand",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|gujarat",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|maharashtra",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|goa",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|rajasthan",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|punjab",
@@ -5798,27 +5795,27 @@
     },
     {
       "key": "Pune|2026|haryana",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|himachal-pradesh",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|uttarakhand",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|uttar-pradesh",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|madhya-pradesh",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|nepal",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2026|tamil",
@@ -5830,7 +5827,7 @@
     },
     {
       "key": "Pune|2026|north-india",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Pune|2027|all",
@@ -5862,7 +5859,7 @@
     },
     {
       "key": "Pune|2027|odisha",
-      "at": 1807056000000
+      "at": 1807660800000
     },
     {
       "key": "Pune|2027|assam",
@@ -5962,7 +5959,7 @@
     },
     {
       "key": "Pune|2028|odisha",
-      "at": 1837728000000
+      "at": 1839196800000
     },
     {
       "key": "Pune|2028|assam",
@@ -6162,7 +6159,7 @@
     },
     {
       "key": "Chennai|2025|odisha",
-      "at": 1743292800000
+      "at": 1744588800000
     },
     {
       "key": "Chennai|2025|assam",
@@ -6234,7 +6231,7 @@
     },
     {
       "key": "Chennai|2026|all",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|tamil-nadu",
@@ -6246,15 +6243,15 @@
     },
     {
       "key": "Chennai|2026|karnataka",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|andhra-pradesh",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|telangana",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|west-bengal",
@@ -6262,7 +6259,7 @@
     },
     {
       "key": "Chennai|2026|odisha",
-      "at": 1773964800000
+      "at": 1776124800000
     },
     {
       "key": "Chennai|2026|assam",
@@ -6270,27 +6267,27 @@
     },
     {
       "key": "Chennai|2026|bihar",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|jharkhand",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|gujarat",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|maharashtra",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|goa",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|rajasthan",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|punjab",
@@ -6298,27 +6295,27 @@
     },
     {
       "key": "Chennai|2026|haryana",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|himachal-pradesh",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|uttarakhand",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|uttar-pradesh",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|madhya-pradesh",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|nepal",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2026|tamil",
@@ -6330,7 +6327,7 @@
     },
     {
       "key": "Chennai|2026|north-india",
-      "at": 1773964800000
+      "at": 1773878400000
     },
     {
       "key": "Chennai|2027|all",
@@ -6362,7 +6359,7 @@
     },
     {
       "key": "Chennai|2027|odisha",
-      "at": 1807056000000
+      "at": 1807660800000
     },
     {
       "key": "Chennai|2027|assam",
@@ -6462,7 +6459,7 @@
     },
     {
       "key": "Chennai|2028|odisha",
-      "at": 1837728000000
+      "at": 1839196800000
     },
     {
       "key": "Chennai|2028|assam",
@@ -6634,103 +6631,103 @@
     },
     {
       "key": "Alert|2025|all",
-      "at": 1743379200000
+      "at": 1743292800000
     },
     {
       "key": "Alert|2025|tamil-nadu",
-      "at": 1744502400000
+      "at": 1744588800000
     },
     {
       "key": "Alert|2025|kerala",
-      "at": 1744502400000
+      "at": 1744588800000
     },
     {
       "key": "Alert|2025|karnataka",
-      "at": 1743379200000
+      "at": 1743292800000
     },
     {
       "key": "Alert|2025|andhra-pradesh",
-      "at": 1743379200000
+      "at": 1743292800000
     },
     {
       "key": "Alert|2025|telangana",
-      "at": 1743379200000
+      "at": 1743292800000
     },
     {
       "key": "Alert|2025|west-bengal",
-      "at": 1744588800000
+      "at": 1744675200000
     },
     {
       "key": "Alert|2025|odisha",
-      "at": 1743379200000
-    },
-    {
-      "key": "Alert|2025|assam",
-      "at": 1744502400000
-    },
-    {
-      "key": "Alert|2025|bihar",
-      "at": 1743379200000
-    },
-    {
-      "key": "Alert|2025|jharkhand",
-      "at": 1743379200000
-    },
-    {
-      "key": "Alert|2025|gujarat",
-      "at": 1743379200000
-    },
-    {
-      "key": "Alert|2025|maharashtra",
-      "at": 1743379200000
-    },
-    {
-      "key": "Alert|2025|goa",
-      "at": 1743379200000
-    },
-    {
-      "key": "Alert|2025|rajasthan",
-      "at": 1743379200000
-    },
-    {
-      "key": "Alert|2025|punjab",
-      "at": 1744502400000
-    },
-    {
-      "key": "Alert|2025|haryana",
-      "at": 1743379200000
-    },
-    {
-      "key": "Alert|2025|himachal-pradesh",
-      "at": 1743379200000
-    },
-    {
-      "key": "Alert|2025|uttarakhand",
-      "at": 1743379200000
-    },
-    {
-      "key": "Alert|2025|uttar-pradesh",
-      "at": 1743379200000
-    },
-    {
-      "key": "Alert|2025|madhya-pradesh",
-      "at": 1743379200000
-    },
-    {
-      "key": "Alert|2025|nepal",
-      "at": 1743379200000
-    },
-    {
-      "key": "Alert|2025|tamil",
-      "at": 1744502400000
-    },
-    {
-      "key": "Alert|2025|bengal",
       "at": 1744588800000
     },
     {
+      "key": "Alert|2025|assam",
+      "at": 1744588800000
+    },
+    {
+      "key": "Alert|2025|bihar",
+      "at": 1743292800000
+    },
+    {
+      "key": "Alert|2025|jharkhand",
+      "at": 1743292800000
+    },
+    {
+      "key": "Alert|2025|gujarat",
+      "at": 1743292800000
+    },
+    {
+      "key": "Alert|2025|maharashtra",
+      "at": 1743292800000
+    },
+    {
+      "key": "Alert|2025|goa",
+      "at": 1743292800000
+    },
+    {
+      "key": "Alert|2025|rajasthan",
+      "at": 1743292800000
+    },
+    {
+      "key": "Alert|2025|punjab",
+      "at": 1744588800000
+    },
+    {
+      "key": "Alert|2025|haryana",
+      "at": 1743292800000
+    },
+    {
+      "key": "Alert|2025|himachal-pradesh",
+      "at": 1743292800000
+    },
+    {
+      "key": "Alert|2025|uttarakhand",
+      "at": 1743292800000
+    },
+    {
+      "key": "Alert|2025|uttar-pradesh",
+      "at": 1743292800000
+    },
+    {
+      "key": "Alert|2025|madhya-pradesh",
+      "at": 1743292800000
+    },
+    {
+      "key": "Alert|2025|nepal",
+      "at": 1743292800000
+    },
+    {
+      "key": "Alert|2025|tamil",
+      "at": 1744588800000
+    },
+    {
+      "key": "Alert|2025|bengal",
+      "at": 1744675200000
+    },
+    {
       "key": "Alert|2025|north-india",
-      "at": 1743379200000
+      "at": 1743292800000
     },
     {
       "key": "Alert|2026|all",
@@ -6738,11 +6735,11 @@
     },
     {
       "key": "Alert|2026|tamil-nadu",
-      "at": 1776038400000
+      "at": 1776124800000
     },
     {
       "key": "Alert|2026|kerala",
-      "at": 1776038400000
+      "at": 1776124800000
     },
     {
       "key": "Alert|2026|karnataka",
@@ -6758,15 +6755,15 @@
     },
     {
       "key": "Alert|2026|west-bengal",
-      "at": 1776124800000
+      "at": 1776211200000
     },
     {
       "key": "Alert|2026|odisha",
-      "at": 1773964800000
+      "at": 1776124800000
     },
     {
       "key": "Alert|2026|assam",
-      "at": 1776038400000
+      "at": 1776124800000
     },
     {
       "key": "Alert|2026|bihar",
@@ -6794,7 +6791,7 @@
     },
     {
       "key": "Alert|2026|punjab",
-      "at": 1776038400000
+      "at": 1776124800000
     },
     {
       "key": "Alert|2026|haryana",
@@ -6822,11 +6819,11 @@
     },
     {
       "key": "Alert|2026|tamil",
-      "at": 1776038400000
+      "at": 1776124800000
     },
     {
       "key": "Alert|2026|bengal",
-      "at": 1776124800000
+      "at": 1776211200000
     },
     {
       "key": "Alert|2026|north-india",
@@ -6838,11 +6835,11 @@
     },
     {
       "key": "Alert|2027|tamil-nadu",
-      "at": 1807660800000
+      "at": 1807747200000
     },
     {
       "key": "Alert|2027|kerala",
-      "at": 1807660800000
+      "at": 1807747200000
     },
     {
       "key": "Alert|2027|karnataka",
@@ -6858,15 +6855,15 @@
     },
     {
       "key": "Alert|2027|west-bengal",
-      "at": 1807747200000
+      "at": 1807833600000
     },
     {
       "key": "Alert|2027|odisha",
-      "at": null
+      "at": 1807747200000
     },
     {
       "key": "Alert|2027|assam",
-      "at": 1807660800000
+      "at": 1807747200000
     },
     {
       "key": "Alert|2027|bihar",
@@ -6894,7 +6891,7 @@
     },
     {
       "key": "Alert|2027|punjab",
-      "at": 1807660800000
+      "at": 1807747200000
     },
     {
       "key": "Alert|2027|haryana",
@@ -6922,11 +6919,11 @@
     },
     {
       "key": "Alert|2027|tamil",
-      "at": 1807660800000
+      "at": 1807747200000
     },
     {
       "key": "Alert|2027|bengal",
-      "at": 1807747200000
+      "at": 1807833600000
     },
     {
       "key": "Alert|2027|north-india",
@@ -6938,11 +6935,11 @@
     },
     {
       "key": "Alert|2028|tamil-nadu",
-      "at": 1839196800000
+      "at": 1839283200000
     },
     {
       "key": "Alert|2028|kerala",
-      "at": 1839196800000
+      "at": 1839283200000
     },
     {
       "key": "Alert|2028|karnataka",
@@ -6958,15 +6955,15 @@
     },
     {
       "key": "Alert|2028|west-bengal",
-      "at": 1839283200000
+      "at": 1839369600000
     },
     {
       "key": "Alert|2028|odisha",
-      "at": 1837728000000
+      "at": 1839283200000
     },
     {
       "key": "Alert|2028|assam",
-      "at": 1839196800000
+      "at": 1839283200000
     },
     {
       "key": "Alert|2028|bihar",
@@ -6994,7 +6991,7 @@
     },
     {
       "key": "Alert|2028|punjab",
-      "at": 1839196800000
+      "at": 1839283200000
     },
     {
       "key": "Alert|2028|haryana",
@@ -7022,11 +7019,11 @@
     },
     {
       "key": "Alert|2028|tamil",
-      "at": 1839196800000
+      "at": 1839283200000
     },
     {
       "key": "Alert|2028|bengal",
-      "at": 1839283200000
+      "at": 1839369600000
     },
     {
       "key": "Alert|2028|north-india",
@@ -7038,11 +7035,11 @@
     },
     {
       "key": "Alert|2029|tamil-nadu",
-      "at": 1870732800000
+      "at": 1870819200000
     },
     {
       "key": "Alert|2029|kerala",
-      "at": 1870732800000
+      "at": 1870819200000
     },
     {
       "key": "Alert|2029|karnataka",
@@ -7058,15 +7055,15 @@
     },
     {
       "key": "Alert|2029|west-bengal",
-      "at": 1870819200000
+      "at": 1870905600000
     },
     {
       "key": "Alert|2029|odisha",
-      "at": null
+      "at": 1870819200000
     },
     {
       "key": "Alert|2029|assam",
-      "at": 1870732800000
+      "at": 1870819200000
     },
     {
       "key": "Alert|2029|bihar",
@@ -7094,7 +7091,7 @@
     },
     {
       "key": "Alert|2029|punjab",
-      "at": 1870732800000
+      "at": 1870819200000
     },
     {
       "key": "Alert|2029|haryana",
@@ -7122,11 +7119,11 @@
     },
     {
       "key": "Alert|2029|tamil",
-      "at": 1870732800000
+      "at": 1870819200000
     },
     {
       "key": "Alert|2029|bengal",
-      "at": 1870819200000
+      "at": 1870905600000
     },
     {
       "key": "Alert|2029|north-india",

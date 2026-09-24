@@ -12,6 +12,15 @@ import (
 
 const twoPi = 2 * jsnum.PI
 
+// The fixed-point step slows toward the polar circle: 60 steps settle every
+// cusp to |φ| ≈ 66.2°, and up to 93 are needed just below 90° - ε, where every
+// cusp still exists. Beyond the circle the old cap stands, so no error there
+// changes.
+const (
+	placidusMaxSteps                 = 60
+	placidusMaxStepsBelowPolarCircle = 200
+)
+
 func ComputeBhava(
 	ctx *astronomy.EphemerisCtx,
 	birthMs int64,
@@ -24,11 +33,37 @@ func ComputeBhava(
 	if err := utils.ValidateLocation(location); err != nil {
 		return types.BhavaChart{}, err
 	}
-	basis, err := ComputeNatalBasis(ctx, birthMs, location, options)
+	basis, err := lagnaBasis(ctx, birthMs, location, options)
 	if err != nil {
 		return types.BhavaChart{}, err
 	}
 	return BhavaFromBasis(&basis, resolveHouseSystem(options.HouseSystem))
+}
+
+// lagnaBasis is ComputeNatalBasis without the planetary positions, which
+// BhavaFromBasis never reads; Positions is left zero. ComputeNatalBasis can
+// fail only where the lagna fails first, so the errors are the same.
+func lagnaBasis(
+	ctx *astronomy.EphemerisCtx,
+	birthMs int64,
+	location types.GeoLocation,
+	options BirthChartOptions,
+) (NatalBasis, error) {
+	ayanamsaType := resolveAyanamsa(options.Ayanamsa)
+	lang := resolveLang(options.Language)
+	lagna, err := ComputeLagna(ctx, birthMs, location, ayanamsaType, lang)
+	if err != nil {
+		return NatalBasis{}, err
+	}
+	return NatalBasis{
+		Ctx:          ctx,
+		BirthMs:      birthMs,
+		Location:     location,
+		AyanamsaType: ayanamsaType,
+		Lang:         lang,
+		NodeType:     resolveNodeType(options.NodeType),
+		Lagna:        lagna,
+	}, nil
 }
 
 func resolveHouseSystem(s types.HouseSystem) types.HouseSystem {
@@ -38,6 +73,8 @@ func resolveHouseSystem(s types.HouseSystem) types.HouseSystem {
 	return s
 }
 
+// BhavaFromBasis reads the basis's lagna, instant, location, ayanamsa and
+// language, never its Positions: ComputeBhava passes a basis without them.
 func BhavaFromBasis(basis *NatalBasis, system types.HouseSystem) (types.BhavaChart, error) {
 	ascSidereal := basis.Lagna.SiderealLongitude
 
@@ -165,8 +202,12 @@ func solvePlacidus(cusp int, thetaRad, phiRad, epsRad, initialGuessDeg float64) 
 	sinEps := math.Sin(epsRad)
 	cosEps := math.Cos(epsRad)
 	tolRad := utils.DegToRad(1e-7)
+	maxSteps := placidusMaxSteps
+	if math.Abs(tanPhi*math.Tan(epsRad)) < 1 {
+		maxSteps = placidusMaxStepsBelowPolarCircle
+	}
 
-	for i := 0; i < 60; i++ {
+	for i := 0; i < maxSteps; i++ {
 		sinLambda := math.Sin(lambdaRad)
 		cosLambda := math.Cos(lambdaRad)
 		alpha := math.Atan2(sinLambda*cosEps, cosLambda)
@@ -175,8 +216,8 @@ func solvePlacidus(cusp int, thetaRad, phiRad, epsRad, initialGuessDeg float64) 
 		cosArg := -tanPhi * math.Tan(delta)
 		if cosArg <= -1 || cosArg >= 1 {
 			return 0, types.Codef(types.ErrCircumpolar,
-				"Placidus cusp %d undefined at latitude %.2f° (circumpolar). Use 'whole-sign' or 'equal'.",
-				cusp, utils.RadToDeg(phiRad))
+				"Placidus cusp %d undefined at latitude %s° (circumpolar). Use 'whole-sign' or 'equal'.",
+				cusp, jsnum.ToFixed(utils.RadToDeg(phiRad), 2))
 		}
 		sda := math.Acos(cosArg)
 		sna := jsnum.PI - sda

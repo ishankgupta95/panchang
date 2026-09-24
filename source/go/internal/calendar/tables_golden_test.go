@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -480,7 +481,7 @@ func TestTableReadersMatchTypeScript(t *testing.T) {
 				for _, d := range fd {
 					for _, f := range d.Festivals {
 						hits["festivalEntries"]++
-						if f.HasDescription {
+						if f.Description != nil {
 							hits["festivalWithDescription"]++
 						}
 						if c.Languages != nil && !containsLang(c.Languages, string(lang)) {
@@ -655,9 +656,10 @@ func TestPackedAndV1ReadTheSameWayWhereTheyCan(t *testing.T) {
 			t.Fatalf("day %d differs after a JSON round trip", i)
 		}
 		for j := range direct[i].Festivals {
-			if direct[i].Festivals[j] != roundTripped[i].Festivals[j] {
-				t.Errorf("day %d festival %d differs:\n  direct %+v\n  parsed %+v",
-					i, j, direct[i].Festivals[j], roundTripped[i].Festivals[j])
+			if a, b := direct[i].Festivals[j], roundTripped[i].Festivals[j]; !reflect.DeepEqual(a, b) {
+				da, _ := json.Marshal(a)
+				db, _ := json.Marshal(b)
+				t.Errorf("day %d festival %d differs:\n  direct %s\n  parsed %s", i, j, da, db)
 			}
 		}
 	}

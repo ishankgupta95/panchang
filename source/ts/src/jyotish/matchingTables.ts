@@ -90,37 +90,28 @@ const Y_INDEX: Record<YoniAnimal, number> = {
 };
 export function yoniIndex(y: YoniAnimal): number { return Y_INDEX[y]; }
 
-/** Yoni compatibility per Brihat Samhita ch. 102: same animal 4, neutral 2, unfriendly 1, hostile 0. */
-export const YONI_SCORE: readonly (readonly number[])[] = (() => {
-  const N = 14;
-  const t: number[][] = Array.from({ length: N }, () => Array(N).fill(2));
-  for (let i = 0; i < N; i++) t[i]![i] = 4;
-  const enemyPairs: [YoniAnimal, YoniAnimal][] = [
-    ['horse', 'buffalo'],
-    ['elephant', 'lion'],
-    ['sheep', 'monkey'],
-    ['snake', 'mongoose'],
-    ['dog', 'deer'],
-    ['cat', 'rat'],
-    ['cow', 'tiger'],
-  ];
-  for (const [a, b] of enemyPairs) {
-    t[Y_INDEX[a]]![Y_INDEX[b]] = 0;
-    t[Y_INDEX[b]]![Y_INDEX[a]] = 0;
-  }
-  const unfriendlyPairs: [YoniAnimal, YoniAnimal][] = [
-    ['horse', 'cow'],
-    ['elephant', 'tiger'],
-    ['cat', 'dog'],
-    ['snake', 'horse'],
-    ['monkey', 'sheep'],
-  ];
-  for (const [a, b] of unfriendlyPairs) {
-    if (t[Y_INDEX[a]]![Y_INDEX[b]] === 2) t[Y_INDEX[a]]![Y_INDEX[b]] = 1;
-    if (t[Y_INDEX[b]]![Y_INDEX[a]] === 2) t[Y_INDEX[b]]![Y_INDEX[a]] = 1;
-  }
-  return t.map((r) => Object.freeze([...r])) as readonly (readonly number[])[];
-})();
+/** Ashtakoot Yoni koota, boy row by girl column in `yoniIndex` order; symmetric. 4 same
+ *  animal, 3 friendly, 2 neutral, 1 unfriendly, 0 the seven mahavaira pairs, the only
+ *  cells Muhurta Chintamani (vivaha 25-26) fixes itself. The rest is the Yoni chakra of
+ *  Mahidhar Sharma's Hindi tika on that text as carried by Frawley and the Jagannatha
+ *  Hora port PyJHora, whose table this equals except horse-deer 3 and tiger-lion 2,
+ *  which follow the printed chakra. */
+export const YONI_SCORE: readonly (readonly number[])[] = [
+  [ 4, 2, 2, 3, 2, 2, 2, 1, 0, 1, 3, 3, 2, 1 ], // Horse
+  [ 2, 4, 3, 3, 2, 2, 2, 2, 3, 1, 2, 3, 2, 0 ], // Elephant
+  [ 2, 3, 4, 2, 1, 2, 1, 3, 3, 1, 2, 0, 3, 1 ], // Sheep
+  [ 3, 3, 2, 4, 2, 1, 1, 1, 1, 2, 2, 2, 0, 2 ], // Snake
+  [ 2, 2, 1, 2, 4, 2, 1, 2, 2, 1, 0, 2, 1, 1 ], // Dog
+  [ 2, 2, 2, 1, 2, 4, 0, 2, 2, 1, 3, 3, 2, 1 ], // Cat
+  [ 2, 2, 1, 1, 1, 0, 4, 2, 2, 2, 2, 2, 1, 2 ], // Rat
+  [ 1, 2, 3, 1, 2, 2, 2, 4, 3, 0, 3, 2, 2, 1 ], // Cow
+  [ 0, 3, 3, 1, 2, 2, 2, 3, 4, 1, 2, 2, 2, 1 ], // Buffalo
+  [ 1, 1, 1, 2, 1, 1, 2, 0, 1, 4, 1, 1, 2, 2 ], // Tiger
+  [ 3, 2, 2, 2, 0, 3, 2, 3, 2, 1, 4, 2, 2, 1 ], // Deer
+  [ 3, 3, 0, 2, 2, 3, 2, 2, 2, 1, 2, 4, 3, 2 ], // Monkey
+  [ 2, 2, 3, 0, 1, 2, 1, 2, 2, 2, 2, 3, 4, 2 ], // Mongoose
+  [ 1, 0, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2, 2, 4 ], // Lion
+];
 
 export const RASHI_LORD: readonly number[] = [
   2, // 0  Aries: Mars

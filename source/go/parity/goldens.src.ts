@@ -48,7 +48,7 @@ import { moonSunElongation, searchMoonPhase, searchMoonQuarter, nextMoonQuarter 
 import { boundingNewMoons, NewMoonCache } from '../../ts/src/astronomy/newMoon';
 import { computeMoonPhasesInRange, computeMoonPhasesForYear } from '../../ts/src/astronomy/moonPhase';
 import {
-  resolveUtcOffset, getLocalMidnightUtc, utcToLocalDisplay, formatInZone,
+  resolveUtcOffset, getLocalMidnightUtc, utcToLocalDisplay, formatInZone, utcDateMs, wallClockToUtc,
 } from '../../ts/src/utils/timezone';
 import {
   findLunarEclipse, findLocalSolarEclipse, lunarShadowAt, solarViewAt, discObscuration,
@@ -167,6 +167,7 @@ import {
 } from '../../ts/src/jyotish/shadbala';
 import {
   computeVimshottariDasha, computeVimshottariDashaFromBirth, computeVimshottariPratyantar,
+  computeVimshottariPratyantarIn,
   computeAshtottariDasha, computeYoginiDasha, computeCharaDasha, computeNarayanDasha,
   DASHA_YEARS, DASHA_ORDER, NAKSHATRA_LORD,
   ASHTOTTARI_ORDER, ASHTOTTARI_YEARS, ASHTOTTARI_NAKSHATRA_GROUPS,
@@ -1991,6 +1992,21 @@ function writeFestivalDispatchGolden(): void {
     }
   }
 
+  for (const sunrise of [17, 18, 19]) {
+    for (const moonrise of [undefined, 17, 18, 19]) {
+      for (const prior of [undefined, 17, 18]) {
+        cases.push({
+          label: `cf|${sunrise}|${moonrise ?? 'x'}|${prior ?? 'x'}`,
+          festivals: run(base({
+            chandraMasaIndex: 6, tithiIndex: sunrise, nakshatraIndex: 26, varaIndex: 3, solarMasaIndex: 11,
+            ...(moonrise === undefined ? {} : { tithiByRule: { chandrodaya: moonrise } }),
+            ...(prior === undefined ? {} : { priorDayTithiByRule: { chandrodaya: prior } }),
+          })),
+        });
+      }
+    }
+  }
+
   for (const s0 of [9, 10]) for (const e0 of [9, 10]) for (const s1 of [9, 10]) for (const e1 of [9, 10]) {
     cases.push({
       label: `af|${s0}-${e0}-${s1}-${e1}`,
@@ -2024,6 +2040,7 @@ function writeFestivalDispatchGolden(): void {
     'ekadashiDashamiViddha', 'vaishnavaDwadashiToday', 'ekadashiKshayaToday',
     'ekadashiGaunaToday', 'ekadashiVriddhaDwadashiToday', 'ekadashiVriddhaDwadashiTomorrow',
     'ekadashiTrisprishaToday', 'ekadashiTrisprishaYesterday', 'ekadashiVriddhaFirstDay',
+    'ekadashiVriddhaTrisprisha',
   ] as const;
   for (const tithi of [9, 10, 11, 24, 25, 26]) {
     for (const masa of [0, 5, 11]) {
@@ -2082,7 +2099,7 @@ function writeFestivalDispatchGolden(): void {
     label: 'extra|krittika-in-day',
     festivals: run(base({
       tithiIndex: 9, nakshatraIndex: 5, varaIndex: 3, solarMasaIndex: 11,
-      chandraMasaIndex: 8, nakshatraIndicesInDay: new Set([2, 14]),
+      chandraMasaIndex: 8, masikKarthigaiToday: true,
     })),
   });
   cases.push({
@@ -2101,6 +2118,56 @@ function writeFestivalDispatchGolden(): void {
       formatClock: (d: Date) => d.toISOString().slice(11, 16),
     })),
   });
+
+  for (const chandra of [3, 4]) {
+    for (const varaMasa of [3, 4, 7, 10]) {
+      for (let vara = 0; vara < 7; vara++) {
+        cases.push({
+          label: `mvs|${chandra}|${varaMasa}|${vara}`,
+          festivals: run(base({
+            chandraMasaIndex: chandra, varaMasaIndex: varaMasa, varaIndex: vara,
+            tithiIndex: 9, nakshatraIndex: 26, solarMasaIndex: 11,
+          })),
+        });
+      }
+    }
+  }
+  for (const nak of [20, 21]) {
+    for (const prior of ['x', '20', '21'] as const) {
+      for (const priorSolar of ['x', '3', '4'] as const) {
+        for (const next of ['x', '21', '22'] as const) {
+          for (const later of ['x', '0', '1'] as const) {
+            cases.push({
+              label: `sno|${nak}|${prior}|${priorSolar}|${next}|${later}`,
+              festivals: run(base({
+                solarMasaIndex: 4, nakshatraIndex: nak, tithiIndex: 9, varaIndex: 3, chandraMasaIndex: 8,
+                ...(prior === 'x' ? {} : { priorDayNakshatraIndex: Number(prior) }),
+                ...(priorSolar === 'x' ? {} : { priorDaySolarMasaIndex: Number(priorSolar) }),
+                ...(next === 'x' ? {} : { nextDayNakshatraIndex: Number(next) }),
+                ...(later === 'x' ? {} : { nakshatraLaterInSolarMonth: () => later === '1' }),
+              })),
+            });
+          }
+        }
+      }
+    }
+  }
+  for (const masik of ['x', '0', '1'] as const) {
+    for (const deepam of ['x', '0', '1'] as const) {
+      for (const region of ['all', 'tamil-nadu', 'kerala'] as const) {
+        for (const nak of [2, 5]) {
+          cases.push({
+            label: `kt|${masik}|${deepam}|${region}|${nak}`,
+            festivals: run(base({
+              tithiIndex: 9, nakshatraIndex: nak, varaIndex: 3, solarMasaIndex: 11, chandraMasaIndex: 8, region,
+              ...(masik === 'x' ? {} : { masikKarthigaiToday: masik === '1' }),
+              ...(deepam === 'x' ? {} : { karthigaiDeepamToday: () => deepam === '1' }),
+            })),
+          });
+        }
+      }
+    }
+  }
 
   const NK_MASAS = [4, 5];
   const NK_TITHIS = [9, 24];          // Shukla Navami and Krishna Navami: the paksha flip
@@ -2198,6 +2265,24 @@ function writeFestivalDispatchGolden(): void {
           })),
         });
       }
+      const adhikaNextStates: readonly [string, string, number | undefined, boolean][] = [
+        ['x', 'N', undefined, false],
+        [String(masa), 'N', masa, false],
+        [String(masa), 'A', masa, true],
+        [String((masa + 1) % 12), 'N', (masa + 1) % 12, false],
+      ];
+      for (const [nextLabel, adhikaLabel, nextIndex, nextAdhika] of adhikaNextStates) {
+        cases.push({
+          label: `ksa|${masa}|${set}|${nextLabel}|${adhikaLabel}`,
+          festivals: run(base({
+            tithiIndex: 29, chandraMasaIndex: masa, isAdhika: true, nakshatraIndex: 26, varaIndex: 3,
+            solarMasaIndex: 11, kshayaTithiIndices,
+            ...(nextIndex === undefined
+              ? {}
+              : { nextDayMasaIndex: nextIndex, nextDayIsAdhika: nextAdhika }),
+          })),
+        });
+      }
     }
   }
 
@@ -2216,8 +2301,11 @@ function writeFestivalDispatchGolden(): void {
           'computeFestivals emits the same festivals for the same context. Each grid ' +
           'varies exactly the fields one matcher arm reads, so a rule filed under the ' +
           'wrong D8 Kind fires under the wrong grid or not at all. ks pins the kshaya ' +
-          'containing-day fallback, kl the last-day kala tie-break, nku and nkk the ' +
-          'nakshatra arm. FESTIVAL_REGISTRY is module-private and cannot be pinned ' +
+          'containing-day fallback and ksa the same fallback on the last day of an adhika ' +
+          'month, kl the last-day kala tie-break, cf the chandrodaya ladder Sankashti and ' +
+          'Karva Chauth share, nku and nkk the ' +
+          'nakshatra arm, mvs the masaSystem month of the vara rules, sno the solar-month ' +
+          'nakshatra arm and kt the Karthigai day. FESTIVAL_REGISTRY is module-private and cannot be pinned ' +
           'directly; this pins the dispatch over it.',
         cases: cases.length,
         distinctKeysEmitted: emitted.size,
@@ -3961,6 +4049,7 @@ function writeDashaGolden(): void {
     const narVP = pinCurrent('computeNarayanDasha(variable)', narV, ms);
 
     const ad = vim.mahaDashas[1]!.antarDashas[0]!;
+    const birthAd = vim.mahaDashas[0]!.antarDashas[0];
     return {
       ms,
       loc: loc.name,
@@ -3979,6 +4068,7 @@ function writeDashaGolden(): void {
       narayanVariableAtPins: narVP,
       pratyantarOf: { lord: ad.lord, startDate: ad.startDate, endDate: ad.endDate },
       pratyantar: computeVimshottariPratyantar(ad),
+      pratyantarIn: birthAd ? computeVimshottariPratyantarIn(vim.mahaDashas[0]!, birthAd) : null,
     };
   });
 
@@ -4006,6 +4096,7 @@ function writeDashaGolden(): void {
     pratVim.mahaDashas[m]!.antarDashas.map((a, ai) => ({
       maha: m, antar: ai, lord: a.lord,
       periods: computeVimshottariPratyantar(a),
+      periodsIn: computeVimshottariPratyantarIn(pratVim.mahaDashas[m]!, a),
     })));
 
   const fromBirth = (['lahiri', 'raman', 'krishnamurti', 'true-chitra', 'thirukanitham'] as const)
@@ -5141,12 +5232,14 @@ function calCountGuards(
   hits: Record<string, number>,
 ): void {
   const dayMs = 86_400_000;
-  const offset = resolveUtcOffset(opts.timezone, new Date(Date.UTC(year, 6, 1)));
+  let offset: number | undefined;
 
-  for (let t = Date.UTC(year, 0, 1); t <= Date.UTC(year, 11, 31) + dayMs; t += dayMs) {
+  for (let t = utcDateMs(year, 0, 1) - dayMs; t <= utcDateMs(year, 11, 31) + 2 * dayMs; t += dayMs) {
     hits['ekadashiDaysProbed']!++;
+    const [midnight, dayOffset] = wallClockToUtc(t, opts.timezone, offset);
+    offset = dayOffset;
     try {
-      const sr = computeSunrise(getLocalMidnightUtc(new Date(t), offset), geo);
+      const sr = computeSunrise(new Date(midnight), geo);
       computeSunrise(computeSunset(sr, geo), geo);
     } catch (e: unknown) {
       if (e instanceof PanchangError && (e.code === 'NO_SUNRISE' || e.code === 'NO_SUNSET')) {

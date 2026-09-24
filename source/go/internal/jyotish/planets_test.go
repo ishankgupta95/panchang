@@ -1,8 +1,11 @@
 package jyotish
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
+	"math/rand"
 	"testing"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
@@ -375,5 +378,141 @@ func TestGrahaListCoversEveryGraha(t *testing.T) {
 	}
 	if len(seen) != types.GrahaCount {
 		t.Errorf("GrahaList covered %d distinct grahas, want %d", len(seen), types.GrahaCount)
+	}
+}
+
+func narrowCases(n int) []struct {
+	ms  int64
+	loc types.GeoLocation
+	opt BirthChartOptions
+} {
+	rng := rand.New(rand.NewSource(20260924))
+	lo := types.DateUTC(1900, 0, 1).Ms()
+	hi := types.DateUTC(2101, 0, 1).Ms()
+	systems := []types.HouseSystem{"", types.HouseSystemWholeSign, types.HouseSystemEqual, types.HouseSystemPlacidusKP, "bogus"}
+	ayanamsas := []types.AyanamsaType{"", types.Lahiri, types.Raman, types.Krishnamurti, types.Thirukanitham, types.TrueChitra, "bogus"}
+	langs := []types.Language{"", types.LanguageEn, types.LanguageHi}
+	nodes := []NodeType{"", NodeMean, NodeTrue}
+	out := make([]struct {
+		ms  int64
+		loc types.GeoLocation
+		opt BirthChartOptions
+	}, 0, n)
+	for i := 0; i < n; i++ {
+		lat := rng.Float64()*178 - 89
+		if i%9 == 0 {
+			lat = (rng.Float64()*24 + 62) * float64(1-2*(i%2)) // around the polar circles
+		}
+		out = append(out, struct {
+			ms  int64
+			loc types.GeoLocation
+			opt BirthChartOptions
+		}{
+			ms:  lo + rng.Int63n(hi-lo),
+			loc: types.GeoLocation{Latitude: lat, Longitude: rng.Float64()*360 - 180, Elevation: rng.Float64() * 3000},
+			opt: BirthChartOptions{
+				HouseSystem: systems[rng.Intn(len(systems))],
+				Ayanamsa:    ayanamsas[rng.Intn(len(ayanamsas))],
+				Language:    langs[rng.Intn(len(langs))],
+				NodeType:    nodes[rng.Intn(len(nodes))],
+			},
+		})
+	}
+	return out
+}
+
+func outcome(v any, err error) string {
+	if err != nil {
+		return "error: " + err.Error()
+	}
+	b, e := json.Marshal(v)
+	if e != nil {
+		return "marshal: " + e.Error()
+	}
+	return string(b)
+}
+
+// ComputeBhava builds its basis without the planetary positions; it must
+// answer, result and error alike, as the full natal basis does.
+func TestBhavaFromTheLagnaBasisMatchesTheFullBasis(t *testing.T) {
+	ctx := astronomy.NewEphemerisCtx()
+	errs := 0
+	for _, c := range narrowCases(1500) {
+		got := outcome(ComputeBhava(ctx, c.ms, c.loc, c.opt))
+		basis, err := ComputeNatalBasis(astronomy.NewEphemerisCtx(), c.ms, c.loc, c.opt)
+		var want string
+		if err != nil {
+			want = outcome(nil, err)
+		} else {
+			want = outcome(BhavaFromBasis(&basis, resolveHouseSystem(c.opt.HouseSystem)))
+		}
+		if got != want {
+			t.Fatalf("%s %+v %+v:\n lagna basis %s\n full basis  %s", types.Date(c.ms).ISOString(), c.loc, c.opt, got, want)
+		}
+		if err != nil || got[:6] == "error:" {
+			errs++
+		}
+	}
+	if errs == 0 {
+		t.Fatal("no case reached an error path")
+	}
+}
+
+// buildVariableDurationFn reads the rashis from siderealGrahaLongitudes; they
+// must be the rashis, and the longitudes the longitudes, of the birth chart.
+func TestSiderealGrahaLongitudesAreTheChartsLongitudes(t *testing.T) {
+	ctx := astronomy.NewEphemerisCtx()
+	for _, c := range narrowCases(1500) {
+		chart, chartErr := ComputeRashiChart(astronomy.NewEphemerisCtx(), c.ms, c.loc,
+			BirthChartOptions{Ayanamsa: resolveAyanamsa(c.opt.Ayanamsa), HouseSystem: types.HouseSystemWholeSign, NodeType: c.opt.NodeType})
+		lon, err := siderealGrahaLongitudes(ctx, c.ms, resolveAyanamsa(c.opt.Ayanamsa), c.opt.NodeType)
+		if (err == nil) != (chartErr == nil) {
+			t.Fatalf("%s: helper error %v, chart error %v", types.Date(c.ms).ISOString(), err, chartErr)
+		}
+		if err != nil {
+			continue
+		}
+		for _, p := range chart.Planets {
+			if math.Float64bits(lon[p.Planet]) != math.Float64bits(p.Longitude) ||
+				int(math.Floor(lon[p.Planet]/30)) != p.Rashi.Index {
+				t.Fatalf("%s %s: helper %v (rashi %d), chart %v (rashi %d)", types.Date(c.ms).ISOString(),
+					p.Planet, lon[p.Planet], int(math.Floor(lon[p.Planet]/30)), p.Longitude, p.Rashi.Index)
+			}
+		}
+	}
+}
+
+// narayanVariableFromChart is the Narayan variable dasha as it read the grahas'
+// rashis before, from a whole-sign rashi chart.
+func narayanRashisFromChart(ctx *astronomy.EphemerisCtx, ms int64, loc types.GeoLocation, ay types.AyanamsaType) (string, error) {
+	chart, err := ComputeRashiChart(ctx, ms, loc, BirthChartOptions{Ayanamsa: ay, HouseSystem: types.HouseSystemWholeSign})
+	if err != nil {
+		return "", err
+	}
+	var r [types.GrahaCount]int
+	for _, p := range chart.Planets {
+		r[p.Planet] = p.Rashi.Index
+	}
+	return fmt.Sprint(r), nil
+}
+
+func TestNarayanVariableRashisMatchTheChart(t *testing.T) {
+	for _, c := range narrowCases(400) {
+		ay := resolveAyanamsa(c.opt.Ayanamsa)
+		want, wantErr := narayanRashisFromChart(astronomy.NewEphemerisCtx(), c.ms, c.loc, ay)
+		lon, err := siderealGrahaLongitudes(astronomy.NewEphemerisCtx(), c.ms, ay, NodeMean)
+		if (err == nil) != (wantErr == nil) {
+			t.Fatalf("%s: helper error %v, chart error %v", types.Date(c.ms).ISOString(), err, wantErr)
+		}
+		if err != nil {
+			continue
+		}
+		var r [types.GrahaCount]int
+		for g, l := range lon {
+			r[g] = int(math.Floor(l / 30))
+		}
+		if got := fmt.Sprint(r); got != want {
+			t.Fatalf("%s: rashis %s, chart %s", types.Date(c.ms).ISOString(), got, want)
+		}
 	}
 }

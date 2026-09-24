@@ -1,5 +1,6 @@
 
 import { computeFestivalsInRange } from './yearly';
+import { utcDateMs } from '../utils/timezone';
 import type { GeoLocation } from '../types/location';
 import type { AyanamsaType, MasaSystem, FestivalRegion } from '../types/options';
 import type {
@@ -16,6 +17,7 @@ export interface BuildFestivalsTableOptions {
   timezoneOffsetMinutes: number;
   startYear: number;
   endYear: number;
+  /** Defaults to `['en', 'hi']`; any other code throws `RangeError`. */
   languages?: readonly FestivalsTableLanguage[];
   ayanamsa?: AyanamsaType;
   masaSystem?: MasaSystem;
@@ -80,6 +82,11 @@ export function buildFestivalsTable(
   if (languages.length === 0) {
     throw new RangeError('languages must contain at least one locale');
   }
+  for (const lang of languages) {
+    if (lang !== 'en' && lang !== 'hi') {
+      throw new RangeError(`languages must be drawn from en, hi; got ${JSON.stringify(lang)}`);
+    }
+  }
 
   const years: Record<string, PackedFestivalTableDay[]> = {};
   const dict = new FestivalDictionary();
@@ -122,8 +129,9 @@ function buildYear(
   region: FestivalRegion,
   dict: FestivalDictionary,
 ): PackedFestivalTableDay[] {
-  const start = new Date(Date.UTC(year, 0, 1));
-  const end = new Date(Date.UTC(year, 11, 31));
+  const westShift = offsetMinutes < 0 ? offsetMinutes * 60_000 : 0;
+  const start = new Date(utcDateMs(year, 0, 1) - westShift);
+  const end = new Date(utcDateMs(year, 11, 31) - westShift);
 
   const runs = languages.map(language =>
     computeFestivalsInRange(start, end, location, {

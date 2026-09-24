@@ -677,15 +677,17 @@ func TestCalendarGuardsAreReached(t *testing.T) {
 		opts := loc.yearlyOptions()
 		for _, year := range loc.Years {
 			ctx := &astronomy.EphemerisCtx{}
-			offsetMinutes, err := utils.ResolveUtcOffset(loc.Timezone, types.DateUTC(year, 6, 1).Ms())
-			if err != nil {
-				t.Fatalf("%s: %v", loc.Name, err)
-			}
+			var offset int
+			var hint *int
 
-			for ms := types.DateUTC(year, 0, 1).Ms(); ms <= types.DateUTC(year, 11, 31).Ms()+dayMs; ms += dayMs {
+			for ms := utils.UtcDateMs(year, 0, 1) - dayMs; ms <= utils.UtcDateMs(year, 11, 31)+2*dayMs; ms += dayMs {
 				hits["ekadashiDaysProbed"]++
-				sr, err := astronomy.ComputeSunrise(ctx,
-					utils.GetLocalMidnightUtc(ms, offsetMinutes), geo, astronomy.DefaultRiseSetLimitDays)
+				midnight, dayOffset, err := utils.WallClockToUtc(ms, loc.Timezone, hint)
+				if err != nil {
+					t.Fatalf("%s: %v", loc.Name, err)
+				}
+				offset, hint = dayOffset, &offset
+				sr, err := astronomy.ComputeSunrise(ctx, midnight, geo, astronomy.DefaultRiseSetLimitDays)
 				if err == nil {
 					var ss int64
 					ss, err = astronomy.ComputeSunset(ctx, sr, geo, astronomy.DefaultRiseSetLimitDays)

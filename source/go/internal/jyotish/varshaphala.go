@@ -89,6 +89,9 @@ func FindSolarReturn(
 
 	const tolDeg = 0.0001
 	for iter := 0; iter < 25; iter++ {
+		if !jsnum.TimeClip(t) {
+			return 0, errInvalidDateInstant
+		}
 		lon, err := astronomy.GetSiderealSunLongitude(ctx, int64(t), ayanamsaType)
 		if err != nil {
 			return 0, err
@@ -101,7 +104,11 @@ func FindSolarReturn(
 		t -= float64((delta / sunDegPerDay) * 86400_000)
 	}
 
-	return int64(jsnum.Round(t)), nil
+	t = jsnum.Round(t)
+	if !jsnum.TimeClip(t) {
+		return 0, errInvalidDateInstant
+	}
+	return int64(t), nil
 }
 
 func varshaphalaIsDayBirth(ctx *astronomy.EphemerisCtx, ms int64, location types.GeoLocation) bool {

@@ -7,6 +7,7 @@ import (
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/i18n"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/store"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/utils"
 	"github.com/ishankgupta95/panchang/source/go/v5/types"
 )
@@ -56,6 +57,18 @@ func IsEclipseVisibleAnyPhase(ctx *EphemerisCtx, eclipse EclipseInfo, location t
 	return false
 }
 
+var syzygyLatitudeMemo = store.New[int64, float64](4096, store.DefaultStripes, store.HashInt64)
+
+// syzygyLatitude is the Moon's ecliptic latitude at a syzygy instant, the
+// test searchFromSyzygies puts to every new and full moon it walks, memoised
+// by the instant.
+func syzygyLatitude(ctx *EphemerisCtx, ms int64) float64 {
+	lat, _ := syzygyLatitudeMemo.GetOrBuild(ms, func() float64 {
+		return GetMoonPosition(ctx, ms).Latitude
+	})
+	return lat
+}
+
 func searchFromSyzygies[T any](
 	ctx *EphemerisCtx,
 	fromMs int64,
@@ -71,7 +84,7 @@ func searchFromSyzygies[T any](
 		if !ok || syzygy > syzygyLimitMs {
 			return zero, false
 		}
-		if math.Abs(GetMoonPosition(ctx, syzygy).Latitude) < eclipseLatitudeLimitDeg {
+		if math.Abs(syzygyLatitude(ctx, syzygy)) < eclipseLatitudeLimitDeg {
 			if hit, found := attempt(syzygy); found {
 				return hit, true
 			}
@@ -155,8 +168,9 @@ func GetUpcomingSolarEclipse(
 		return EclipseInfo{}, false
 	}
 
-	subtype := EclipseSubtype(eclipse.Kind)
 	visibleFromLocation := eclipse.PeakAltitude > 0
+	seenKind, seenObscuration := deepestPhaseSeen(ctx, eclipse, location)
+	subtype := EclipseSubtype(seenKind)
 
 	sutakStartDate := types.Date(eclipse.PartialBeginMs - solarSutakHours*3600_000)
 	sutakEndDate := types.Date(eclipse.PartialEndMs)
@@ -171,9 +185,56 @@ func GetUpcomingSolarEclipse(
 		Magnitude:           eclipse.Magnitude,
 		SutakStartMs:        &sutakStartDate,
 		SutakEndMs:          &sutakEndDate,
-		Description: describeEclipse(
-			EclipseSolar, subtype, eclipse.Obscuration, visibleFromLocation, lang),
+		Description:         describeEclipse(EclipseSolar, subtype, seenObscuration, true, lang),
 	}, true
+}
+
+const horizonCrossingMS = 1000
+
+func horizonCrossingMs(ctx *EphemerisCtx, belowMs, aboveMs int64, location types.GeoLocation) int64 {
+	down, up := belowMs, aboveMs
+	for math.Abs(float64(up-down)) > horizonCrossingMS {
+		mid := int64(math.Floor(float64(down+up) / 2))
+		if SolarViewAt(ctx, mid, location).SunAltitude > 0 {
+			up = mid
+		} else {
+			down = mid
+		}
+	}
+	return up
+}
+
+func deepestPhaseSeen(ctx *EphemerisCtx, eclipse LocalSolarEclipse, location types.GeoLocation) (SolarEclipseKind, float64) {
+	if eclipse.PeakAltitude > 0 {
+		return eclipse.Kind, eclipse.Obscuration
+	}
+	crossings := make([]int64, 0, 2)
+	if eclipse.BeginAltitude > 0 {
+		crossings = append(crossings, horizonCrossingMs(ctx, eclipse.PeakMs, eclipse.PartialBeginMs, location))
+	}
+	if eclipse.EndAltitude > 0 {
+		crossings = append(crossings, horizonCrossingMs(ctx, eclipse.PeakMs, eclipse.PartialEndMs, location))
+	}
+	kind, obscuration := eclipse.Kind, eclipse.Obscuration
+	least := math.Inf(1)
+	for _, ms := range crossings {
+		view := SolarViewAt(ctx, ms, location)
+		if view.Separation >= least {
+			continue
+		}
+		least = view.Separation
+		sun, moon := view.SunSemidiameter, view.MoonSemidiameter
+		kind = SolarPartial
+		if least < math.Abs(moon-sun) {
+			if moon >= sun {
+				kind = SolarTotal
+			} else {
+				kind = SolarAnnular
+			}
+		}
+		obscuration = DiscObscuration(least, sun, moon)
+	}
+	return kind, obscuration
 }
 
 func DirectLongitudes(ctx *EphemerisCtx) SyzygyLongitudes {
@@ -198,6 +259,18 @@ func syzygyBetween(fromMs, toMs int64, targetDeg float64, lon SyzygyLongitudes) 
 
 const syzygyGuardMarginMS = 12 * 3600_000
 
+const syzygySearchSlackMS = 60_000
+
+func solarSightingMs(ctx *EphemerisCtx, eclipse EclipseInfo, location types.GeoLocation) int64 {
+	if eclipse.VisibleFromLocation {
+		return eclipse.PeakMs.Ms()
+	}
+	if SolarViewAt(ctx, eclipse.StartMs.Ms(), location).SunAltitude > 0 {
+		return eclipse.StartMs.Ms()
+	}
+	return eclipse.EndMs.Ms()
+}
+
 func GetEclipseDuringDay(
 	ctx *EphemerisCtx, sunriseMs, nextSunriseMs int64, location types.GeoLocation,
 	lang types.Language, longitudes SyzygyLongitudes,
@@ -207,17 +280,24 @@ func GetEclipseDuringDay(
 
 	guardFrom := sunriseMs - syzygyGuardMarginMS
 	guardTo := nextSunriseMs + syzygyGuardMarginMS
+	inDay := func(ms int64) bool { return ms >= sunriseMs && ms < nextSunriseMs }
+	searchFrom := func(targetDeg float64) int64 {
+		if syzygyBetween(guardFrom, sunriseMs+syzygySearchSlackMS, targetDeg, longitudes) {
+			return guardFrom
+		}
+		return sunriseMs
+	}
 
 	if syzygyBetween(guardFrom, guardTo, 0, longitudes) {
-		if solar, ok := GetUpcomingSolarEclipse(ctx, sunriseMs, location, windowDays, lang); ok &&
-			solar.PeakMs.Ms() < nextSunriseMs {
+		if solar, ok := GetUpcomingSolarEclipse(ctx, searchFrom(0), location, windowDays, lang); ok &&
+			inDay(solarSightingMs(ctx, solar, location)) {
 			return solar, true
 		}
 	}
 
 	if syzygyBetween(guardFrom, guardTo, 180, longitudes) {
-		if lunar, ok := GetUpcomingLunarEclipse(ctx, sunriseMs, location, windowDays, lang); ok &&
-			lunar.PeakMs.Ms() < nextSunriseMs {
+		if lunar, ok := GetUpcomingLunarEclipse(ctx, searchFrom(180), location, windowDays, lang); ok &&
+			inDay(lunar.PeakMs.Ms()) {
 			return lunar, true
 		}
 	}

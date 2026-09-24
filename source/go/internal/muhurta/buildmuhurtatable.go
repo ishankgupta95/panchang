@@ -90,10 +90,13 @@ func BuildMuhurtaTable(ctx context.Context,
 			return MuhurtaFile{}, err
 		}
 		off := int64(opts.TimezoneOffsetMinutes) * 60_000
-		startMs := types.DateUTC(year, 0, 1).Ms() - off
-		endMs := types.DateUTC(year, 11, 31).Ms() + dayMs - 1 - off
+		startMs := utils.UtcDateMs(year, 0, 1) - off
+		endMs := utils.UtcDateMs(year+1, 0, 1) - 1 - off
+		if err := utils.ValidateLocalYearWindow(year, startMs, endMs); err != nil {
+			return MuhurtaFile{}, err
+		}
 
-		scored, err := ComputeAuspiciousDatesInRange(ctx, eph, opts.Rule, startMs, endMs, opts.Location,
+		scored, err := scoreOnlyCivilDays(ctx, eph, opts.Rule, startMs, endMs, opts.Location,
 			MuhurtaScoreOptions{
 				Timezone:        types.TimezoneOffset(opts.TimezoneOffsetMinutes),
 				Ayanamsa:        ayanamsa,

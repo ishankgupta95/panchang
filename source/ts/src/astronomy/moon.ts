@@ -6,11 +6,12 @@ import {
 import { nutation, elpToEclipticOfDate, KM_PER_LIGHT_DAY } from './frame';
 import { computeAyanamsa } from './ayanamsa';
 import { normalize360 } from '../utils/angle';
+import { validateDate } from '../utils/validation';
 import type { AyanamsaType } from '../types/options';
 
 const RAD_TO_DEG = 180 / Math.PI;
 
-const ROTATED = new Float64Array(3);
+const ROTATED = /* @__PURE__ */ new Float64Array(3);
 
 /** True ecliptic and equinox of date. Light-time is applied; stellar aberration
  * deliberately is not, cancelling for a geocentric body. */
@@ -60,7 +61,8 @@ function moonPositionWith(
   };
 }
 
-/** Sidereal longitude of the Moon at a UTC instant, degrees in [0, 360). */
+/** Sidereal longitude of the Moon at a UTC instant, degrees in [0, 360); an Invalid Date throws `INVALID_DATE`. */
 export function getSiderealMoonLongitude(date: Date, ayanamsaType: AyanamsaType): number {
+  validateDate(date, 'any');
   return normalize360(getTropicalMoonLongitude(date) - computeAyanamsa(date, ayanamsaType));
 }

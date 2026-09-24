@@ -116,11 +116,11 @@
       "endYear": 2033
     }
   ],
-  "digest": "f20baafd3312bc4cdcc9376b6d0ddfa925a21e4b8794a1c7b2d0bdda058c71bd",
+  "digest": "5af94c5594c823c856d9531c9550fc3eab18a68b92062528d8bf5bcb9ef1a949",
   "tblHits": {
-    "festivalDays": 3124,
-    "festivalEntries": 5116,
-    "festivalWithDescription": 2546,
+    "festivalDays": 2990,
+    "festivalEntries": 4938,
+    "festivalWithDescription": 2556,
     "eclipseDays": 44,
     "eclipseEntries": 44,
     "eclipseWithSutak": 32,
@@ -130,24 +130,24 @@
     "phaseDays": 1184,
     "phaseEntries": 1184,
     "emptyEclipseYears": 2,
-    "pickFallback": 522,
+    "pickFallback": 504,
     "v1Read": 1
   },
   "tables": [
     {
       "key": "pune-2025",
       "sha256": {
-        "festivals": "737c03a94a237c9285d84b3168a243158c5a5c6e1b86f5fa76d2faae5cf35acc",
+        "festivals": "5a5626759adb666ca89e01a8630de398f835ed4077ab2515e7ac987cf47ecc19",
         "eclipses": "ea93f0c1b9abc693c7e303136a92b0c99d8d738b48853ffa8c5340a18c1bfc84",
         "moonPhases": "328ca2f8e4460996a8967dad941b3b06fc981906edec8e93bd90214fecb16a4a"
       },
       "sha256Masked": {
-        "festivals": "737c03a94a237c9285d84b3168a243158c5a5c6e1b86f5fa76d2faae5cf35acc",
+        "festivals": "5a5626759adb666ca89e01a8630de398f835ed4077ab2515e7ac987cf47ecc19",
         "eclipses": "755e2b0783fba6f0fb948cc5505eb029de215a7a6f9b22ad88771eeea188ba51",
         "moonPhases": "328ca2f8e4460996a8967dad941b3b06fc981906edec8e93bd90214fecb16a4a"
       },
       "bytes": {
-        "festivals": 59660,
+        "festivals": 59026,
         "eclipses": 1929,
         "moonPhases": 9320
       },
@@ -218,12 +218,12 @@
         ]
       },
       "dictLengths": {
-        "festivals": 169,
+        "festivals": 171,
         "moonPhases": 4
       },
       "dayCounts": {
         "festivals": {
-          "2025": 160
+          "2025": 149
         },
         "eclipses": {
           "2025": 1
@@ -274,11 +274,6 @@
                 "name": "Ekadashi",
                 "type": "ekadashi",
                 "description": "Pausha Putrada Ekadashi"
-              },
-              {
-                "key": "masik_karthigai",
-                "name": "Masik Karthigai",
-                "type": "minor"
               }
             ]
           },
@@ -456,11 +451,6 @@
                 "name": "एकादशी",
                 "type": "ekadashi",
                 "description": "पौष पुत्रदा एकादशी"
-              },
-              {
-                "key": "masik_karthigai",
-                "name": "मासिक कार्तिकै",
-                "type": "minor"
               }
             ]
           },
@@ -624,17 +614,17 @@
     {
       "key": "pune-1912",
       "sha256": {
-        "festivals": "031c51cb4ee4206fa7ad1379b7ac1a474dbc0c5ce9e9302e3cf498201743200b",
+        "festivals": "e42aa4037f1cbe733224b8d86628177942044ff2a54ba5422151b67f0d83e9b3",
         "eclipses": "3b4f972af46f19003849d4d19e2af597153b30af81d0f2357238254fb90acb6a",
         "moonPhases": "4aca676e7e07aec6ffd0686c22b6402c2d8f0c8f394736e9bb3a18bdd3be183c"
       },
       "sha256Masked": {
-        "festivals": "031c51cb4ee4206fa7ad1379b7ac1a474dbc0c5ce9e9302e3cf498201743200b",
+        "festivals": "e42aa4037f1cbe733224b8d86628177942044ff2a54ba5422151b67f0d83e9b3",
         "eclipses": "018db6a5da150896586063d8d988e00f72df8bda36a1285eecf69bb83d65b843",
         "moonPhases": "4aca676e7e07aec6ffd0686c22b6402c2d8f0c8f394736e9bb3a18bdd3be183c"
       },
       "bytes": {
-        "festivals": 60409,
+        "festivals": 60055,
         "eclipses": 2918,
         "moonPhases": 9522
       },
@@ -706,12 +696,12 @@
         ]
       },
       "dictLengths": {
-        "festivals": 170,
+        "festivals": 172,
         "moonPhases": 4
       },
       "dayCounts": {
         "festivals": {
-          "1912": 167
+          "1912": 160
         },
         "eclipses": {
           "1912": 2
@@ -750,6 +740,16 @@
             ]
           },
           {
+            "date": "1912-01-06",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
+                "type": "minor"
+              }
+            ]
+          },
+          {
             "date": "1912-01-07",
             "festivals": [
               {
@@ -762,6 +762,11 @@
           {
             "date": "1912-01-13",
             "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
+                "type": "minor"
+              },
               {
                 "key": "lohri",
                 "name": "Lohri",
@@ -819,17 +824,6 @@
                 "name": "Ayyappa Makara Jyothi",
                 "type": "sankranti",
                 "description": "Makara"
-              }
-            ]
-          },
-          {
-            "date": "1912-01-15",
-            "festivals": [
-              {
-                "key": "vaishnava_ekadashi",
-                "name": "Vaishnava Ekadashi",
-                "type": "vaishnava_ekadashi",
-                "description": "Vriddha Dwadashi: Vaishnava fast observed today; the Smarta fast was yesterday."
               }
             ]
           }
@@ -955,6 +949,16 @@
             ]
           },
           {
+            "date": "1912-01-06",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
+                "type": "minor"
+              }
+            ]
+          },
+          {
             "date": "1912-01-07",
             "festivals": [
               {
@@ -967,6 +971,11 @@
           {
             "date": "1912-01-13",
             "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
+                "type": "minor"
+              },
               {
                 "key": "lohri",
                 "name": "लोहड़ी",
@@ -1024,17 +1033,6 @@
                 "name": "अय्यप्पा मकर ज्योति",
                 "type": "sankranti",
                 "description": "मकर"
-              }
-            ]
-          },
-          {
-            "date": "1912-01-15",
-            "festivals": [
-              {
-                "key": "vaishnava_ekadashi",
-                "name": "वैष्णव एकादशी",
-                "type": "vaishnava_ekadashi",
-                "description": "वृद्धा द्वादशी: वैष्णव व्रत आज; स्मार्त व्रत कल था।"
               }
             ]
           }
@@ -1165,17 +1163,17 @@
     {
       "key": "pune-2088",
       "sha256": {
-        "festivals": "6948954922488f27cb295347197b9f32c83c52d0812b020c1c4aefa87ac9c599",
+        "festivals": "98ab07abcdddd937134701aabb0188d968081cbb9ec59dce1222582e197757ec",
         "eclipses": "1542cf8b274664ac279867bec6a2c57e9d84011ab16116a801aaf62aec5db071",
         "moonPhases": "e73551d18546afa4a2e088dcef0c8d3f2f0ef2c4cf94c0582dbdc28287059588"
       },
       "sha256Masked": {
-        "festivals": "6948954922488f27cb295347197b9f32c83c52d0812b020c1c4aefa87ac9c599",
+        "festivals": "98ab07abcdddd937134701aabb0188d968081cbb9ec59dce1222582e197757ec",
         "eclipses": "f5b14cdcd5025248b4bb5dda9e5218a824fb77aa37640481b6bf4de3151a585c",
         "moonPhases": "e73551d18546afa4a2e088dcef0c8d3f2f0ef2c4cf94c0582dbdc28287059588"
       },
       "bytes": {
-        "festivals": 60439,
+        "festivals": 60411,
         "eclipses": 3887,
         "moonPhases": 9472
       },
@@ -1247,12 +1245,12 @@
         ]
       },
       "dictLengths": {
-        "festivals": 169,
+        "festivals": 171,
         "moonPhases": 4
       },
       "dayCounts": {
         "festivals": {
-          "2088": 168
+          "2088": 163
         },
         "eclipses": {
           "2088": 3
@@ -1277,11 +1275,6 @@
                 "name": "Ekadashi",
                 "type": "ekadashi",
                 "description": "Dashami-viddha: Smarta fast observed today; Vaishnava fast next day (Dwadashi)."
-              },
-              {
-                "key": "masik_karthigai",
-                "name": "Masik Karthigai",
-                "type": "minor"
               }
             ]
           },
@@ -1313,6 +1306,16 @@
             ]
           },
           {
+            "date": "2088-01-10",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
+                "type": "minor"
+              }
+            ]
+          },
+          {
             "date": "2088-01-11",
             "festivals": [
               {
@@ -1329,47 +1332,6 @@
                 "key": "lohri",
                 "name": "Lohri",
                 "type": "major"
-              }
-            ]
-          },
-          {
-            "date": "2088-01-15",
-            "festivals": [
-              {
-                "key": "sankranti",
-                "name": "Sankranti",
-                "type": "sankranti",
-                "description": "Makara"
-              },
-              {
-                "key": "makar_sankranti",
-                "name": "Makar Sankranti",
-                "type": "sankranti",
-                "description": "Makara"
-              },
-              {
-                "key": "pongal",
-                "name": "Pongal",
-                "type": "sankranti",
-                "description": "Makara"
-              },
-              {
-                "key": "uttarayan",
-                "name": "Uttarayan",
-                "type": "sankranti",
-                "description": "Makara"
-              },
-              {
-                "key": "magh_bihu",
-                "name": "Magh Bihu",
-                "type": "sankranti",
-                "description": "Makara"
-              },
-              {
-                "key": "ayyappa_makara_jyothi",
-                "name": "Ayyappa Makara Jyothi",
-                "type": "sankranti",
-                "description": "Makara"
               }
             ]
           }
@@ -1503,11 +1465,6 @@
                 "name": "एकादशी",
                 "type": "ekadashi",
                 "description": "दशमी-विद्धा: स्मार्त व्रत आज; वैष्णव व्रत अगले दिन (द्वादशी)।"
-              },
-              {
-                "key": "masik_karthigai",
-                "name": "मासिक कार्तिकै",
-                "type": "minor"
               }
             ]
           },
@@ -1539,6 +1496,16 @@
             ]
           },
           {
+            "date": "2088-01-10",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
+                "type": "minor"
+              }
+            ]
+          },
+          {
             "date": "2088-01-11",
             "festivals": [
               {
@@ -1555,47 +1522,6 @@
                 "key": "lohri",
                 "name": "लोहड़ी",
                 "type": "major"
-              }
-            ]
-          },
-          {
-            "date": "2088-01-15",
-            "festivals": [
-              {
-                "key": "sankranti",
-                "name": "संक्रांति",
-                "type": "sankranti",
-                "description": "मकर"
-              },
-              {
-                "key": "makar_sankranti",
-                "name": "मकर संक्रांति",
-                "type": "sankranti",
-                "description": "मकर"
-              },
-              {
-                "key": "pongal",
-                "name": "पोंगल",
-                "type": "sankranti",
-                "description": "मकर"
-              },
-              {
-                "key": "uttarayan",
-                "name": "उत्तरायण",
-                "type": "sankranti",
-                "description": "मकर"
-              },
-              {
-                "key": "magh_bihu",
-                "name": "माघ बिहू",
-                "type": "sankranti",
-                "description": "मकर"
-              },
-              {
-                "key": "ayyappa_makara_jyothi",
-                "name": "अय्यप्पा मकर ज्योति",
-                "type": "sankranti",
-                "description": "मकर"
               }
             ]
           }
@@ -1785,17 +1711,17 @@
     {
       "key": "newyork-2026",
       "sha256": {
-        "festivals": "938ec6250fd365b04e6e35e14c9db5dbd0eb351a91a218cd6e0800b7a7716e7b",
+        "festivals": "d42745d0326edca712b6959fce5f0fdccdd2d79094187543f3f9e1b3916005b0",
         "eclipses": "2bf93203c0a7207014f5f91cde938648f6bb0b443e35db73ad90727600ec3510",
         "moonPhases": "1fa335271099e7a3a111dce767813817fcb4e103e0e58f4be27e3241c913dc6a"
       },
       "sha256Masked": {
-        "festivals": "938ec6250fd365b04e6e35e14c9db5dbd0eb351a91a218cd6e0800b7a7716e7b",
+        "festivals": "d42745d0326edca712b6959fce5f0fdccdd2d79094187543f3f9e1b3916005b0",
         "eclipses": "e8e7d4ee83624321f9c8f483f61b7312efcd2814dce46454f40e284f308ddb73",
         "moonPhases": "1fa335271099e7a3a111dce767813817fcb4e103e0e58f4be27e3241c913dc6a"
       },
       "bytes": {
-        "festivals": 57428,
+        "festivals": 58107,
         "eclipses": 3868,
         "moonPhases": 9476
       },
@@ -1866,12 +1792,12 @@
         ]
       },
       "dictLengths": {
-        "festivals": 165,
+        "festivals": 167,
         "moonPhases": 4
       },
       "dayCounts": {
         "festivals": {
-          "2026": 151
+          "2026": 156
         },
         "eclipses": {
           "2026": 3
@@ -1883,18 +1809,12 @@
       "read": {
         "festivals-en": [
           {
-            "date": "2025-12-31",
+            "date": "2026-01-03",
             "festivals": [
               {
-                "key": "masik_karthigai",
-                "name": "Masik Karthigai",
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
                 "type": "minor"
-              },
-              {
-                "key": "pradosha",
-                "name": "Pradosha Vrata",
-                "type": "pradosha",
-                "description": "Saumya Pradosha"
               }
             ]
           },
@@ -1904,6 +1824,26 @@
               {
                 "key": "ravi_pushya",
                 "name": "Ravi Pushya",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-06",
+            "festivals": [
+              {
+                "key": "sankashti_chaturthi",
+                "name": "Sankashti Chaturthi",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-10",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
                 "type": "minor"
               }
             ]
@@ -1974,27 +1914,6 @@
                 "name": "Ayyappa Makara Jyothi",
                 "type": "sankranti",
                 "description": "Makara"
-              }
-            ]
-          },
-          {
-            "date": "2026-01-15",
-            "festivals": [
-              {
-                "key": "pradosha",
-                "name": "Pradosha Vrata",
-                "type": "pradosha",
-                "description": "Guru Pradosha"
-              }
-            ]
-          },
-          {
-            "date": "2026-01-16",
-            "festivals": [
-              {
-                "key": "masik_shivaratri",
-                "name": "Masik Shivaratri",
-                "type": "minor"
               }
             ]
           }
@@ -2115,18 +2034,12 @@
         ],
         "festivals-hi": [
           {
-            "date": "2025-12-31",
+            "date": "2026-01-03",
             "festivals": [
               {
-                "key": "masik_karthigai",
-                "name": "मासिक कार्तिकै",
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
                 "type": "minor"
-              },
-              {
-                "key": "pradosha",
-                "name": "प्रदोष व्रत",
-                "type": "pradosha",
-                "description": "सौम्य प्रदोष"
               }
             ]
           },
@@ -2136,6 +2049,26 @@
               {
                 "key": "ravi_pushya",
                 "name": "रवि पुष्य",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-06",
+            "festivals": [
+              {
+                "key": "sankashti_chaturthi",
+                "name": "संकष्टी चतुर्थी",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-10",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
                 "type": "minor"
               }
             ]
@@ -2206,27 +2139,6 @@
                 "name": "अय्यप्पा मकर ज्योति",
                 "type": "sankranti",
                 "description": "मकर"
-              }
-            ]
-          },
-          {
-            "date": "2026-01-15",
-            "festivals": [
-              {
-                "key": "pradosha",
-                "name": "प्रदोष व्रत",
-                "type": "pradosha",
-                "description": "गुरु प्रदोष"
-              }
-            ]
-          },
-          {
-            "date": "2026-01-16",
-            "festivals": [
-              {
-                "key": "masik_shivaratri",
-                "name": "मासिक शिवरात्रि",
-                "type": "minor"
               }
             ]
           }
@@ -2379,17 +2291,17 @@
     {
       "key": "chennai-2026-2027",
       "sha256": {
-        "festivals": "f370192a0de2865b640b485f18e837d62eac61e38435646f4e34b7e99c3c4a70",
+        "festivals": "ceb1f9ea46304020770eef33461909deaf0ee0054563a70796909dedd12bca88",
         "eclipses": "f7677093acc8f124ab45d37723e4dd6e194d5dceeed63c6402155debe09e8b7b",
         "moonPhases": "6ab3ec5379463c2a9e274a3437c4d70c230210870a4551b0711fe5005ebbaf76"
       },
       "sha256Masked": {
-        "festivals": "f370192a0de2865b640b485f18e837d62eac61e38435646f4e34b7e99c3c4a70",
+        "festivals": "ceb1f9ea46304020770eef33461909deaf0ee0054563a70796909dedd12bca88",
         "eclipses": "4e74ef1459f77d36c0a48a532730816e8559212227185b130c09839402855b2c",
         "moonPhases": "6ab3ec5379463c2a9e274a3437c4d70c230210870a4551b0711fe5005ebbaf76"
       },
       "bytes": {
-        "festivals": 77876,
+        "festivals": 77400,
         "eclipses": 4751,
         "moonPhases": 16948
       },
@@ -2473,13 +2385,13 @@
         ]
       },
       "dictLengths": {
-        "festivals": 179,
+        "festivals": 181,
         "moonPhases": 4
       },
       "dayCounts": {
         "festivals": {
-          "2026": 150,
-          "2027": 155
+          "2026": 146,
+          "2027": 152
         },
         "eclipses": {
           "2026": 1,
@@ -2510,6 +2422,16 @@
                 "key": "sankashti_chaturthi",
                 "name": "Sankashti Chaturthi",
                 "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2026-01-10",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
+                "type": "minor"
               }
             ]
           },
@@ -2595,16 +2517,6 @@
                 "name": "Pradosha Vrata",
                 "type": "pradosha",
                 "description": "Bhrigu Pradosha"
-              }
-            ]
-          },
-          {
-            "date": "2026-01-22",
-            "festivals": [
-              {
-                "key": "vinayaka_chaturthi",
-                "name": "Vinayaka Chaturthi",
-                "type": "minor"
               }
             ]
           }
@@ -2702,6 +2614,16 @@
             ]
           },
           {
+            "date": "2026-01-10",
+            "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
+                "type": "minor"
+              }
+            ]
+          },
+          {
             "date": "2026-01-13",
             "festivals": [
               {
@@ -2783,16 +2705,6 @@
                 "name": "प्रदोष व्रत",
                 "type": "pradosha",
                 "description": "भृगु प्रदोष"
-              }
-            ]
-          },
-          {
-            "date": "2026-01-22",
-            "festivals": [
-              {
-                "key": "vinayaka_chaturthi",
-                "name": "विनायक चतुर्थी",
-                "type": "minor"
               }
             ]
           }
@@ -2894,17 +2806,17 @@
     {
       "key": "pune-2025-hi-first",
       "sha256": {
-        "festivals": "d7c262a01e6b9ebc22ea68111c2168886ffafb0306514812f06ba1bf702261aa",
+        "festivals": "57a65f18b66d24370ac8c4a7d3e710086c0288eba9ac263deaf1902cd2b517d7",
         "eclipses": "74343f881881933bf4866a617f1f369b617ffa8f950c31aaf166ab4427ca1105",
         "moonPhases": "a501b2a0901eece3a26779144ef75f33312f7449f886a8573aa6a4d8d507732b"
       },
       "sha256Masked": {
-        "festivals": "d7c262a01e6b9ebc22ea68111c2168886ffafb0306514812f06ba1bf702261aa",
+        "festivals": "57a65f18b66d24370ac8c4a7d3e710086c0288eba9ac263deaf1902cd2b517d7",
         "eclipses": "87b02832fb6853641e93ec1ec80ae9026d64e040ea8ed68fbf2862a1b5a8dad5",
         "moonPhases": "a501b2a0901eece3a26779144ef75f33312f7449f886a8573aa6a4d8d507732b"
       },
       "bytes": {
-        "festivals": 59669,
+        "festivals": 59035,
         "eclipses": 1938,
         "moonPhases": 9329
       },
@@ -2975,12 +2887,12 @@
         ]
       },
       "dictLengths": {
-        "festivals": 169,
+        "festivals": 171,
         "moonPhases": 4
       },
       "dayCounts": {
         "festivals": {
-          "2025": 160
+          "2025": 149
         },
         "eclipses": {
           "2025": 1
@@ -3031,11 +2943,6 @@
                 "name": "Ekadashi",
                 "type": "ekadashi",
                 "description": "Pausha Putrada Ekadashi"
-              },
-              {
-                "key": "masik_karthigai",
-                "name": "Masik Karthigai",
-                "type": "minor"
               }
             ]
           },
@@ -3213,11 +3120,6 @@
                 "name": "एकादशी",
                 "type": "ekadashi",
                 "description": "पौष पुत्रदा एकादशी"
-              },
-              {
-                "key": "masik_karthigai",
-                "name": "मासिक कार्तिकै",
-                "type": "minor"
               }
             ]
           },
@@ -3381,17 +3283,17 @@
     {
       "key": "pune-2025-en-only",
       "sha256": {
-        "festivals": "7e8ed6717a9e093d68956b43ab0ec9f14ac0eff6d7ac076780f3de0f1f899563",
+        "festivals": "ffde1a338932d8a12e376416d85c0692d6a546e925ba1634b6994326675994f1",
         "eclipses": "99e5c629962d46d6eb50b356b2f17b470d6e9fcab93efac64996ac2e451bdecc",
         "moonPhases": "8b02946ced19fabe047427ed4a445d9e3e003e6cd55edac523cf4b48305098d7"
       },
       "sha256Masked": {
-        "festivals": "7e8ed6717a9e093d68956b43ab0ec9f14ac0eff6d7ac076780f3de0f1f899563",
+        "festivals": "ffde1a338932d8a12e376416d85c0692d6a546e925ba1634b6994326675994f1",
         "eclipses": "229eae26f15358257e204a3d6a590b7a8b2152363ee4f7c8a7c795305656f91b",
         "moonPhases": "8b02946ced19fabe047427ed4a445d9e3e003e6cd55edac523cf4b48305098d7"
       },
       "bytes": {
-        "festivals": 45196,
+        "festivals": 44458,
         "eclipses": 1758,
         "moonPhases": 8768
       },
@@ -3462,12 +3364,12 @@
         ]
       },
       "dictLengths": {
-        "festivals": 169,
+        "festivals": 171,
         "moonPhases": 4
       },
       "dayCounts": {
         "festivals": {
-          "2025": 160
+          "2025": 149
         },
         "eclipses": {
           "2025": 1
@@ -3518,11 +3420,6 @@
                 "name": "Ekadashi",
                 "type": "ekadashi",
                 "description": "Pausha Putrada Ekadashi"
-              },
-              {
-                "key": "masik_karthigai",
-                "name": "Masik Karthigai",
-                "type": "minor"
               }
             ]
           },
@@ -3700,11 +3597,6 @@
                 "name": "Ekadashi",
                 "type": "ekadashi",
                 "description": "Pausha Putrada Ekadashi"
-              },
-              {
-                "key": "masik_karthigai",
-                "name": "Masik Karthigai",
-                "type": "minor"
               }
             ]
           },
@@ -3868,17 +3760,17 @@
     {
       "key": "pune-2025-hi-only",
       "sha256": {
-        "festivals": "f72fbfa682b48c751d588ae92469e73cff16c53ea1c64a6a02c0d0e410db8a62",
+        "festivals": "5925305854c4b27525304a862999dd8f15db41b9186100932110ab31ebbfa034",
         "eclipses": "b99bf88a234f9b550794344acbd8dec58e42943f82dee0c37fd15419c81db6cf",
         "moonPhases": "ad47f5d7c5e7f6b931798bee51ceaae726a462f33f658546961e167a02a83b44"
       },
       "sha256Masked": {
-        "festivals": "f72fbfa682b48c751d588ae92469e73cff16c53ea1c64a6a02c0d0e410db8a62",
+        "festivals": "5925305854c4b27525304a862999dd8f15db41b9186100932110ab31ebbfa034",
         "eclipses": "f37cd9b8edf908e6db0c1c8040e2817c1881ad011e82f1abefe4ea9fba547bfc",
         "moonPhases": "ad47f5d7c5e7f6b931798bee51ceaae726a462f33f658546961e167a02a83b44"
       },
       "bytes": {
-        "festivals": 50512,
+        "festivals": 49814,
         "eclipses": 1820,
         "moonPhases": 9027
       },
@@ -3949,12 +3841,12 @@
         ]
       },
       "dictLengths": {
-        "festivals": 169,
+        "festivals": 171,
         "moonPhases": 4
       },
       "dayCounts": {
         "festivals": {
-          "2025": 160
+          "2025": 149
         },
         "eclipses": {
           "2025": 1
@@ -4005,11 +3897,6 @@
                 "name": "एकादशी",
                 "type": "ekadashi",
                 "description": "पौष पुत्रदा एकादशी"
-              },
-              {
-                "key": "masik_karthigai",
-                "name": "मासिक कार्तिकै",
-                "type": "minor"
               }
             ]
           },
@@ -4187,11 +4074,6 @@
                 "name": "एकादशी",
                 "type": "ekadashi",
                 "description": "पौष पुत्रदा एकादशी"
-              },
-              {
-                "key": "masik_karthigai",
-                "name": "मासिक कार्तिकै",
-                "type": "minor"
               }
             ]
           },
@@ -4355,17 +4237,17 @@
     {
       "key": "longyearbyen-2025-all",
       "sha256": {
-        "festivals": "2149dacc2f88edb84e0cb366779a8196460beff2b15cb3602bc3a02d7227560e",
+        "festivals": "3de70189edaaf089d81bf4df9ee621a0c92dc33218d6bb47022c2c1f24de656b",
         "eclipses": "4548e0abe9538db0e250b8388dd10073cb2dfad418323bc18ea1abbdfa4fb396",
         "moonPhases": "4a6b89c06372c9d7a4e38aee7d84deacd8229e34c70ffdf4ecd5902997bbd43f"
       },
       "sha256Masked": {
-        "festivals": "2149dacc2f88edb84e0cb366779a8196460beff2b15cb3602bc3a02d7227560e",
+        "festivals": "3de70189edaaf089d81bf4df9ee621a0c92dc33218d6bb47022c2c1f24de656b",
         "eclipses": "f08c125bede337537d465f53e66f84eed59192288e5cf9d39a9c6e62a554d5b2",
         "moonPhases": "4a6b89c06372c9d7a4e38aee7d84deacd8229e34c70ffdf4ecd5902997bbd43f"
       },
       "bytes": {
-        "festivals": 24227,
+        "festivals": 23738,
         "eclipses": 3856,
         "moonPhases": 9331
       },
@@ -4441,7 +4323,7 @@
       },
       "dayCounts": {
         "festivals": {
-          "2025": 57
+          "2025": 52
         },
         "eclipses": {
           "2025": 3
@@ -4453,42 +4335,12 @@
       "read": {
         "festivals-en": [
           {
-            "date": "2025-02-14",
-            "festivals": [
-              {
-                "key": "magha_shanivar",
-                "name": "Magha Shanivar",
-                "type": "minor"
-              },
-              {
-                "key": "sankashti_chaturthi",
-                "name": "Sankashti Chaturthi",
-                "type": "major"
-              }
-            ]
-          },
-          {
             "date": "2025-02-15",
             "festivals": [
               {
-                "key": "magha_shanivar",
-                "name": "Magha Shanivar",
-                "type": "minor"
-              },
-              {
                 "key": "sankashti_chaturthi",
                 "name": "Sankashti Chaturthi",
                 "type": "major"
-              }
-            ]
-          },
-          {
-            "date": "2025-02-22",
-            "festivals": [
-              {
-                "key": "magha_shanivar",
-                "name": "Magha Shanivar",
-                "type": "minor"
               }
             ]
           },
@@ -4528,6 +4380,26 @@
                 "name": "Pradosha Vrata",
                 "type": "pradosha",
                 "description": "Bhauma Pradosha"
+              }
+            ]
+          },
+          {
+            "date": "2025-02-26",
+            "festivals": [
+              {
+                "key": "maha_shivaratri",
+                "name": "Maha Shivaratri",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2025-03-03",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "Vinayaka Chaturthi",
+                "type": "minor"
               }
             ]
           }
@@ -4648,42 +4520,12 @@
         ],
         "festivals-hi": [
           {
-            "date": "2025-02-14",
-            "festivals": [
-              {
-                "key": "magha_shanivar",
-                "name": "माघ शनिवार",
-                "type": "minor"
-              },
-              {
-                "key": "sankashti_chaturthi",
-                "name": "संकष्टी चतुर्थी",
-                "type": "major"
-              }
-            ]
-          },
-          {
             "date": "2025-02-15",
             "festivals": [
               {
-                "key": "magha_shanivar",
-                "name": "माघ शनिवार",
-                "type": "minor"
-              },
-              {
                 "key": "sankashti_chaturthi",
                 "name": "संकष्टी चतुर्थी",
                 "type": "major"
-              }
-            ]
-          },
-          {
-            "date": "2025-02-22",
-            "festivals": [
-              {
-                "key": "magha_shanivar",
-                "name": "माघ शनिवार",
-                "type": "minor"
               }
             ]
           },
@@ -4723,6 +4565,26 @@
                 "name": "प्रदोष व्रत",
                 "type": "pradosha",
                 "description": "भौम प्रदोष"
+              }
+            ]
+          },
+          {
+            "date": "2025-02-26",
+            "festivals": [
+              {
+                "key": "maha_shivaratri",
+                "name": "महा शिवरात्रि",
+                "type": "major"
+              }
+            ]
+          },
+          {
+            "date": "2025-03-03",
+            "festivals": [
+              {
+                "key": "vinayaka_chaturthi",
+                "name": "विनायक चतुर्थी",
+                "type": "minor"
               }
             ]
           }
@@ -4868,17 +4730,17 @@
     {
       "key": "alert-2027",
       "sha256": {
-        "festivals": "b4bd61065eb13829cbf86a2d142548ab6434a376a76180abb75a2aeb86462f39",
+        "festivals": "2946323b0b9604f8ddd3ef7b805270d4dff6fb811c41f3f35e204d4be95689b1",
         "eclipses": "4247649ff19f14b19ec96ec1fe159ebd50f327628fbe2bb86614c0da4652e2df",
         "moonPhases": "eb78a373e113001ef160eaa9eb9560c7b6d5fa2fccf4f6482b52a247cf3d9afe"
       },
       "sha256Masked": {
-        "festivals": "b4bd61065eb13829cbf86a2d142548ab6434a376a76180abb75a2aeb86462f39",
+        "festivals": "2946323b0b9604f8ddd3ef7b805270d4dff6fb811c41f3f35e204d4be95689b1",
         "eclipses": "76e9db62970d3587921bdd86e9a7eee50352897e54fcc092b2b4b4482d938a1d",
         "moonPhases": "eb78a373e113001ef160eaa9eb9560c7b6d5fa2fccf4f6482b52a247cf3d9afe"
       },
       "bytes": {
-        "festivals": 14514,
+        "festivals": 14313,
         "eclipses": 1900,
         "moonPhases": 9322
       },
@@ -4925,7 +4787,8 @@
         "festivalDict": [
           "key",
           "type",
-          "name"
+          "name",
+          "description"
         ],
         "eclipseEntry": [
           "name",
@@ -4953,7 +4816,7 @@
       },
       "dayCounts": {
         "festivals": {
-          "2027": 33
+          "2027": 31
         },
         "eclipses": {
           "2027": 1
@@ -4964,26 +4827,6 @@
       },
       "read": {
         "festivals-en": [
-          {
-            "date": "2027-02-26",
-            "festivals": [
-              {
-                "key": "magha_shanivar",
-                "name": "Magha Shanivar",
-                "type": "minor"
-              }
-            ]
-          },
-          {
-            "date": "2027-02-27",
-            "festivals": [
-              {
-                "key": "magha_shanivar",
-                "name": "Magha Shanivar",
-                "type": "minor"
-              }
-            ]
-          },
           {
             "date": "2027-03-03",
             "festivals": [
@@ -5025,11 +4868,6 @@
                 "key": "maha_shivaratri",
                 "name": "Maha Shivaratri",
                 "type": "major"
-              },
-              {
-                "key": "magha_shanivar",
-                "name": "Magha Shanivar",
-                "type": "minor"
               }
             ]
           },
@@ -5040,6 +4878,27 @@
                 "key": "vinayaka_chaturthi",
                 "name": "Vinayaka Chaturthi",
                 "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-13",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-15",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "Sankranti",
+                "type": "sankranti",
+                "description": "Meena"
               }
             ]
           }
@@ -5112,26 +4971,6 @@
         ],
         "festivals-hi": [
           {
-            "date": "2027-02-26",
-            "festivals": [
-              {
-                "key": "magha_shanivar",
-                "name": "माघ शनिवार",
-                "type": "minor"
-              }
-            ]
-          },
-          {
-            "date": "2027-02-27",
-            "festivals": [
-              {
-                "key": "magha_shanivar",
-                "name": "माघ शनिवार",
-                "type": "minor"
-              }
-            ]
-          },
-          {
             "date": "2027-03-03",
             "festivals": [
               {
@@ -5172,11 +5011,6 @@
                 "key": "maha_shivaratri",
                 "name": "महा शिवरात्रि",
                 "type": "major"
-              },
-              {
-                "key": "magha_shanivar",
-                "name": "माघ शनिवार",
-                "type": "minor"
               }
             ]
           },
@@ -5187,6 +5021,27 @@
                 "key": "vinayaka_chaturthi",
                 "name": "विनायक चतुर्थी",
                 "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-13",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-15",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "संक्रांति",
+                "type": "sankranti",
+                "description": "मीन"
               }
             ]
           }
@@ -5291,17 +5146,17 @@
     {
       "key": "alert-2027-all",
       "sha256": {
-        "festivals": "0af3e8e78bf5ac6ca4aa2d5007d62e0c3be1d8fab579c517a09ca99c80def176",
+        "festivals": "447a647a670a1a1ad02809f2199b12d242f730aa5f2cd8ac2a37c4d7d1d4676c",
         "eclipses": "7566704312b17fea045c7a752aeccaa52b68cac2f5a570d641a5e018aa545fa6",
         "moonPhases": "aee4ba55ab8d217d5fbe4c177ab3038259aa12f028cc2e552dcf88d3ef3edd07"
       },
       "sha256Masked": {
-        "festivals": "0af3e8e78bf5ac6ca4aa2d5007d62e0c3be1d8fab579c517a09ca99c80def176",
+        "festivals": "447a647a670a1a1ad02809f2199b12d242f730aa5f2cd8ac2a37c4d7d1d4676c",
         "eclipses": "ca7dbb3c8e3a09c39edad60a5eb20037d3663bc7c8ab4c1399055ddd0445dbd3",
         "moonPhases": "aee4ba55ab8d217d5fbe4c177ab3038259aa12f028cc2e552dcf88d3ef3edd07"
       },
       "bytes": {
-        "festivals": 14518,
+        "festivals": 14317,
         "eclipses": 3733,
         "moonPhases": 9326
       },
@@ -5348,7 +5203,8 @@
         "festivalDict": [
           "key",
           "type",
-          "name"
+          "name",
+          "description"
         ],
         "eclipseEntry": [
           "name",
@@ -5376,7 +5232,7 @@
       },
       "dayCounts": {
         "festivals": {
-          "2027": 33
+          "2027": 31
         },
         "eclipses": {
           "2027": 3
@@ -5387,26 +5243,6 @@
       },
       "read": {
         "festivals-en": [
-          {
-            "date": "2027-02-26",
-            "festivals": [
-              {
-                "key": "magha_shanivar",
-                "name": "Magha Shanivar",
-                "type": "minor"
-              }
-            ]
-          },
-          {
-            "date": "2027-02-27",
-            "festivals": [
-              {
-                "key": "magha_shanivar",
-                "name": "Magha Shanivar",
-                "type": "minor"
-              }
-            ]
-          },
           {
             "date": "2027-03-03",
             "festivals": [
@@ -5448,11 +5284,6 @@
                 "key": "maha_shivaratri",
                 "name": "Maha Shivaratri",
                 "type": "major"
-              },
-              {
-                "key": "magha_shanivar",
-                "name": "Magha Shanivar",
-                "type": "minor"
               }
             ]
           },
@@ -5463,6 +5294,27 @@
                 "key": "vinayaka_chaturthi",
                 "name": "Vinayaka Chaturthi",
                 "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-13",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "Masik Karthigai",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-15",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "Sankranti",
+                "type": "sankranti",
+                "description": "Meena"
               }
             ]
           }
@@ -5571,26 +5423,6 @@
         ],
         "festivals-hi": [
           {
-            "date": "2027-02-26",
-            "festivals": [
-              {
-                "key": "magha_shanivar",
-                "name": "माघ शनिवार",
-                "type": "minor"
-              }
-            ]
-          },
-          {
-            "date": "2027-02-27",
-            "festivals": [
-              {
-                "key": "magha_shanivar",
-                "name": "माघ शनिवार",
-                "type": "minor"
-              }
-            ]
-          },
-          {
             "date": "2027-03-03",
             "festivals": [
               {
@@ -5631,11 +5463,6 @@
                 "key": "maha_shivaratri",
                 "name": "महा शिवरात्रि",
                 "type": "major"
-              },
-              {
-                "key": "magha_shanivar",
-                "name": "माघ शनिवार",
-                "type": "minor"
               }
             ]
           },
@@ -5646,6 +5473,27 @@
                 "key": "vinayaka_chaturthi",
                 "name": "विनायक चतुर्थी",
                 "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-13",
+            "festivals": [
+              {
+                "key": "masik_karthigai",
+                "name": "मासिक कार्तिकै",
+                "type": "minor"
+              }
+            ]
+          },
+          {
+            "date": "2027-03-15",
+            "festivals": [
+              {
+                "key": "sankranti",
+                "name": "संक्रांति",
+                "type": "sankranti",
+                "description": "मीन"
               }
             ]
           }
@@ -5786,17 +5634,17 @@
     {
       "key": "newyork-2031-2033",
       "sha256": {
-        "festivals": "ec893e1994e684ae12a550abc28c668fafedca5c8710f9512f823ac57d23cc8b",
+        "festivals": "a978d06c29397b9ee5bfe0d677693c2363f5bbe7de4b0501774394bf26c6b520",
         "eclipses": "6ff78f3e5bda46bb0091e34a14f28959e39d91025c139ea111001deb2acc6e17",
         "moonPhases": "310697f1e3bc195ae2a98a92d35fd4aeafa86af6717eae8ecc27aed37efd693e"
       },
       "sha256Masked": {
-        "festivals": "ec893e1994e684ae12a550abc28c668fafedca5c8710f9512f823ac57d23cc8b",
+        "festivals": "a978d06c29397b9ee5bfe0d677693c2363f5bbe7de4b0501774394bf26c6b520",
         "eclipses": "cb18ad52d1dfeaf4305068cfab36b437e4f554e5a50c07ac032b90103d2e589c",
         "moonPhases": "310697f1e3bc195ae2a98a92d35fd4aeafa86af6717eae8ecc27aed37efd693e"
       },
       "bytes": {
-        "festivals": 95192,
+        "festivals": 94877,
         "eclipses": 4766,
         "moonPhases": 24417
       },
@@ -5880,14 +5728,14 @@
         ]
       },
       "dictLengths": {
-        "festivals": 181,
+        "festivals": 183,
         "moonPhases": 4
       },
       "dayCounts": {
         "festivals": {
-          "2031": 163,
-          "2032": 148,
-          "2033": 161
+          "2031": 160,
+          "2032": 144,
+          "2033": 162
         },
         "eclipses": {
           "2031": 2,
@@ -5922,11 +5770,6 @@
                 "name": "Ekadashi",
                 "type": "ekadashi",
                 "description": "Pausha Putrada Ekadashi"
-              },
-              {
-                "key": "masik_karthigai",
-                "name": "Masik Karthigai",
-                "type": "minor"
               }
             ]
           },
@@ -5954,6 +5797,11 @@
           {
             "date": "2031-01-11",
             "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "Magha Shanivar",
+                "type": "minor"
+              },
               {
                 "key": "sankashti_chaturthi",
                 "name": "Sankashti Chaturthi",
@@ -6118,11 +5966,6 @@
                 "name": "एकादशी",
                 "type": "ekadashi",
                 "description": "पौष पुत्रदा एकादशी"
-              },
-              {
-                "key": "masik_karthigai",
-                "name": "मासिक कार्तिकै",
-                "type": "minor"
               }
             ]
           },
@@ -6150,6 +5993,11 @@
           {
             "date": "2031-01-11",
             "festivals": [
+              {
+                "key": "magha_shanivar",
+                "name": "माघ शनिवार",
+                "type": "minor"
+              },
               {
                 "key": "sankashti_chaturthi",
                 "name": "संकष्टी चतुर्थी",

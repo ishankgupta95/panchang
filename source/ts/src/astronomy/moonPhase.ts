@@ -1,6 +1,6 @@
 import { searchMoonQuarter, nextMoonQuarter } from './lunation';
-import { validateDate } from '../utils/validation';
-import { resolveUtcOffset } from '../utils/timezone';
+import { validateDate, validateLocalYearWindow } from '../utils/validation';
+import { localYearWindow, clampToSupported } from '../utils/timezone';
 
 /** The four principal lunar phases: precise instants, not the ~24h tithi windows. */
 export type MoonPhaseName = 'new' | 'first_quarter' | 'full' | 'last_quarter';
@@ -42,15 +42,14 @@ export function computeMoonPhasesInRange(start: Date, end: Date): MoonPhaseEvent
   return out;
 }
 
-/** Every principal phase whose instant falls in local calendar year `year`. */
+/** Every principal phase whose instant falls in local calendar year `year`, each boundary at its own offset. */
 export function computeMoonPhasesForYear(
   year: number,
   options: { timezone: number | string },
 ): MoonPhaseEvent[] {
-  const offset = resolveUtcOffset(options.timezone, new Date(Date.UTC(year, 6, 1)));
-  const startUtc = new Date(Date.UTC(year, 0, 1) - offset * 60_000);
-  const endUtc = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999) - offset * 60_000);
-  return computeMoonPhasesInRange(startUtc, endUtc);
+  const [start, end] = localYearWindow(year, options.timezone);
+  validateLocalYearWindow(year, start, end);
+  return computeMoonPhasesInRange(new Date(clampToSupported(start)), new Date(clampToSupported(end)));
 }
 
 /** @deprecated Renamed to {@link computeMoonPhasesInRange} in v5. */

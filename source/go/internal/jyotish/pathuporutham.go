@@ -114,16 +114,38 @@ func scoreSthreeDeergha(boy, girl NatalMoon) PoruthamScore {
 	}
 }
 
+// yoniEnemyPairs are the only pairs the Tamil Yoni porutham fails on: the
+// seven mahavaira pairs, not a low Ashtakoot score. Some Tamil lists add
+// snake-rat; it is left out.
+var yoniEnemyPairs = [7][2]YoniAnimal{
+	{YoniHorse, YoniBuffalo},
+	{YoniElephant, YoniLion},
+	{YoniSheep, YoniMonkey},
+	{YoniSnake, YoniMongoose},
+	{YoniDog, YoniDeer},
+	{YoniCat, YoniRat},
+	{YoniCow, YoniTiger},
+}
+
 func scorePoruthamYoni(boy, girl NatalMoon) PoruthamScore {
 	boyYoni := NakshatraYoni[boy.Nakshatra]
 	girlYoni := NakshatraYoni[girl.Nakshatra]
-	score := YoniScore[YoniIndex(boyYoni)][YoniIndex(girlYoni)]
-	out := PoruthamScore{
-		Name: PoruthamYoni, Passes: score >= 2,
-		Description: string(boyYoni) + " ↔ " + string(girlYoni) +
-			" (Ashtakoot Yoni score " + jsnum.FormatInt(int64(score)) + "/4)",
+	enemies := false
+	for _, p := range yoniEnemyPairs {
+		if (p[0] == boyYoni && p[1] == girlYoni) || (p[0] == girlYoni && p[1] == boyYoni) {
+			enemies = true
+			break
+		}
 	}
-	if score == 0 {
+	tail := "not enemies"
+	if enemies {
+		tail = "enemies"
+	}
+	out := PoruthamScore{
+		Name: PoruthamYoni, Passes: !enemies,
+		Description: string(boyYoni) + " ↔ " + string(girlYoni) + ", " + tail,
+	}
+	if enemies {
 		out.Veto = vetoTrue()
 	}
 	return out

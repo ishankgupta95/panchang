@@ -25,10 +25,27 @@ function signedDelta(a: number, b: number): number {
   return d;
 }
 
+/** A search is a pure function of its three inputs, so it is memoized on exactly those. A start
+ * is never rounded or matched to a nearby one: two seeds of one syzygy can end a millisecond apart
+ * (see {@link PHASE_AGREEMENT_MS}), and each is its own entry. Cleared when full. */
+const PHASE_SEARCHES = /* @__PURE__ */ new Map<string, number | null>();
+const MAX_PHASE_SEARCHES = 2048;
+
 /** The step cap keeps a bad derivative estimate from throwing the secant iterate into the next lunation. */
 export function searchMoonPhase(
   targetDegrees: number, startUtc: Date, limitDays: number,
 ): Date | null {
+  const key = `${targetDegrees}|${startUtc.getTime()}|${limitDays}`;
+  let found = PHASE_SEARCHES.get(key);
+  if (found === undefined) {
+    found = convergePhase(targetDegrees, startUtc, limitDays);
+    if (PHASE_SEARCHES.size >= MAX_PHASE_SEARCHES) PHASE_SEARCHES.clear();
+    PHASE_SEARCHES.set(key, found);
+  }
+  return found === null ? null : new Date(found);
+}
+
+function convergePhase(targetDegrees: number, startUtc: Date, limitDays: number): number | null {
   const startMs = startUtc.getTime();
   const limitMs = startMs + limitDays * DAY_MS;
 
@@ -54,7 +71,7 @@ export function searchMoonPhase(
   }
 
   if (t < startMs - PHASE_TOLERANCE_MS || t > limitMs) return null;
-  return new Date(Math.max(startMs, Math.round(t)));
+  return Math.max(startMs, Math.round(t));
 }
 
 /** 0 = new, 1 = first quarter, 2 = full, 3 = last quarter. */

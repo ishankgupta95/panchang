@@ -406,6 +406,34 @@ describe('Tier 0: solar LOCAL circumstances vs NASA’s city catalogs', () => {
     expect(Math.abs(obscuration.value), `obscuration: ${obscuration.label}`).toBeLessThan(0.004);
   }, 600_000);
 
+  it('the published solar subtype and description are the eclipse as seen, even at sunrise or sunset', () => {
+    const LOCAL_TYPE: Record<string, string> = { p: 'partial', a: 'annular', t: 'total' };
+    const typeMismatch: string[] = [];
+    const calledInvisible: string[] = [];
+    const seenPercent = new Worst();
+    let clippedRows = 0;
+    for (const site of localCanon.sites) {
+      const location = { latitude: site.latitude, longitude: site.longitude };
+      for (const row of site.eclipses) {
+        const noonMs = localToUtcMs(site, row.date, '12:00');
+        const info = getUpcomingSolarEclipse(new Date(noonMs - 2 * DAY_MS), location, 4);
+        if (info === null) continue;
+        const where = `${site.name} ${row.date}`;
+        if (info.subtype !== LOCAL_TYPE[row.localType.toLowerCase()]) typeMismatch.push(`${where} ${info.subtype}`);
+        if (/not visible/.test(info.description)) calledInvisible.push(where);
+        if (!row.maximumFlag) continue;
+        // Beside a flagged maximum NASA prints the sunrise or sunset values, which the description now uses.
+        clippedRows++;
+        const percent = Number(/(\d+)%/.exec(info.description)![1]);
+        seenPercent.add(percent - row.obscuration * 100, where);
+      }
+    }
+    expect(clippedRows).toBe(126);
+    expect(typeMismatch, 'local type differs from the catalog').toEqual([]);
+    expect(calledInvisible, 'a solar eclipse the search returns is always seen at some phase').toEqual([]);
+    expect(Math.abs(seenPercent.value), `described percent vs catalog: ${seenPercent.label}`).toBeLessThan(6);
+  }, 600_000);
+
   it('a site where the eclipse is partial, and a site where it is not visible at all', () => {
     const byName = new Map(localCanon.sites.map((s) => [s.name, s]));
     const sydney = byName.get('Sydney, Australia');

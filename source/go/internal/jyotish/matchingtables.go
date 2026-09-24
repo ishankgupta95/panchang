@@ -135,49 +135,28 @@ var yIndex = map[YoniAnimal]int{
 
 func YoniIndex(y YoniAnimal) int { return yIndex[y] }
 
-var YoniScore [14][14]int
-
-var yoniEnemyPairs = [7][2]YoniAnimal{
-	{YoniHorse, YoniBuffalo},
-	{YoniElephant, YoniLion},
-	{YoniSheep, YoniMonkey},
-	{YoniSnake, YoniMongoose},
-	{YoniDog, YoniDeer},
-	{YoniCat, YoniRat},
-	{YoniCow, YoniTiger},
-}
-
-var yoniUnfriendlyPairs = [5][2]YoniAnimal{
-	{YoniHorse, YoniCow},
-	{YoniElephant, YoniTiger},
-	{YoniCat, YoniDog},
-	{YoniSnake, YoniHorse},
-	{YoniMonkey, YoniSheep},
-}
-
-func init() {
-	const n = 14
-	for i := 0; i < n; i++ {
-		for j := 0; j < n; j++ {
-			YoniScore[i][j] = 2
-		}
-	}
-	for i := 0; i < n; i++ {
-		YoniScore[i][i] = 4
-	}
-	for _, p := range yoniEnemyPairs {
-		YoniScore[yIndex[p[0]]][yIndex[p[1]]] = 0
-		YoniScore[yIndex[p[1]]][yIndex[p[0]]] = 0
-	}
-	for _, p := range yoniUnfriendlyPairs {
-		a, b := yIndex[p[0]], yIndex[p[1]]
-		if YoniScore[a][b] == 2 {
-			YoniScore[a][b] = 1
-		}
-		if YoniScore[b][a] == 2 {
-			YoniScore[b][a] = 1
-		}
-	}
+// YoniScore is the Ashtakoot Yoni koota, boy row by girl column in YoniIndex
+// order; it is symmetric. 4 is the same animal, 3 friendly, 2 neutral, 1
+// unfriendly and 0 the seven mahavaira pairs, the only cells Muhurta
+// Chintamani (vivaha 25-26) fixes itself. The rest is the Yoni chakra of
+// Mahidhar Sharma's Hindi tika on that text as carried by Frawley and the
+// Jagannatha Hora port PyJHora, whose table this equals except horse-deer 3
+// and tiger-lion 2, which follow the printed chakra.
+var YoniScore = [14][14]int{
+	{4, 2, 2, 3, 2, 2, 2, 1, 0, 1, 3, 3, 2, 1}, // Horse
+	{2, 4, 3, 3, 2, 2, 2, 2, 3, 1, 2, 3, 2, 0}, // Elephant
+	{2, 3, 4, 2, 1, 2, 1, 3, 3, 1, 2, 0, 3, 1}, // Sheep
+	{3, 3, 2, 4, 2, 1, 1, 1, 1, 2, 2, 2, 0, 2}, // Snake
+	{2, 2, 1, 2, 4, 2, 1, 2, 2, 1, 0, 2, 1, 1}, // Dog
+	{2, 2, 2, 1, 2, 4, 0, 2, 2, 1, 3, 3, 2, 1}, // Cat
+	{2, 2, 1, 1, 1, 0, 4, 2, 2, 2, 2, 2, 1, 2}, // Rat
+	{1, 2, 3, 1, 2, 2, 2, 4, 3, 0, 3, 2, 2, 1}, // Cow
+	{0, 3, 3, 1, 2, 2, 2, 3, 4, 1, 2, 2, 2, 1}, // Buffalo
+	{1, 1, 1, 2, 1, 1, 2, 0, 1, 4, 1, 1, 2, 2}, // Tiger
+	{3, 2, 2, 2, 0, 3, 2, 3, 2, 1, 4, 2, 2, 1}, // Deer
+	{3, 3, 0, 2, 2, 3, 2, 2, 2, 1, 2, 4, 3, 2}, // Monkey
+	{2, 2, 3, 0, 1, 2, 1, 2, 2, 2, 2, 3, 4, 2}, // Mongoose
+	{1, 0, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2, 2, 4}, // Lion
 }
 
 var RashiLord = [12]types.VisibleGraha{

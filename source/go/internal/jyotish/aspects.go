@@ -38,7 +38,7 @@ func ComputeAspects(chart *types.BirthChart, options AspectsOptions) (types.Aspe
 		seen[p.Planet]++
 		out.SetForGraha(p.Planet, housesAspected(p, nodeAspects))
 	}
-	for _, g := range types.AllGrahas {
+	for _, g := range allGrahas {
 		if seen[g] != 1 {
 			return types.AspectMap{}, types.NewPanchangError(
 				"chart must carry each graha exactly once; "+g.String()+" appears "+

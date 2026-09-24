@@ -1,0 +1,2263 @@
+{
+  "_meta": {
+    "purpose": "External dates for the festival day-selection rules: vriddhi and kshaya tithis, kala windows (madhyahna, aparahna, pradosha, nishita, arunodaya), Holika Dahan, Chhath and the Diwali cluster. Every date comes from a reference-almanac page (tier reference-almanac) or a competitor calendar (tier competitor); none is the library's own output.",
+    "semantics": "dates: the festival key is emitted on `date` and on no other day within 3 days of it. lists: the keys emitted in `year` are exactly `dates`.",
+    "captured": "2026-09-24"
+  },
+  "dates": [
+    {
+      "festival": "anant_chaturdashi",
+      "city": "Pune",
+      "location": {
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "timezone": 330,
+      "date": "2018-09-23",
+      "tier": "reference-almanac",
+      "rule": "Q1 vriddhi first",
+      "_source": "Reference almanac, Anant Chaturdashi (Ganesh Visarjan) page, 2018, Pune, captured 2026-09-24 (Chaturdashi at both sunrises)"
+    },
+    {
+      "festival": "anant_chaturdashi",
+      "city": "Pune",
+      "location": {
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "timezone": 330,
+      "date": "2019-09-12",
+      "tier": "reference-almanac",
+      "rule": "Q1 vriddhi first",
+      "_source": "Reference almanac, Anant Chaturdashi (Ganesh Visarjan) page, 2019, Pune, captured 2026-09-24"
+    },
+    {
+      "festival": "navaratri",
+      "city": "Pune",
+      "location": {
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "timezone": 330,
+      "date": "2015-10-13",
+      "tier": "reference-almanac",
+      "rule": "Q1 vriddhi first",
+      "_source": "Reference almanac, Shardiya Navratri page, 2015, Pune, captured 2026-09-24 (Ghatasthapana)"
+    },
+    {
+      "festival": "navaratri",
+      "city": "Pune",
+      "location": {
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "timezone": 330,
+      "date": "2016-10-01",
+      "tier": "reference-almanac",
+      "rule": "Q1 vriddhi first",
+      "_source": "Reference almanac, Shardiya Navratri page, 2016, Pune, captured 2026-09-24 (Ghatasthapana)"
+    },
+    {
+      "festival": "durga_ashtami",
+      "city": "Pune",
+      "location": {
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "timezone": 330,
+      "date": "2027-10-07",
+      "tier": "reference-almanac",
+      "rule": "Q1 vriddhi first",
+      "_source": "Reference almanac, Shardiya Navratri page, 2027, Pune, captured 2026-09-24 (Ashtami at both sunrises, 5 min on day 2)"
+    },
+    {
+      "festival": "hanuman_jayanti",
+      "city": "Kolkata",
+      "location": {
+        "latitude": 22.5726,
+        "longitude": 88.3639
+      },
+      "timezone": 330,
+      "date": "2025-04-12",
+      "tier": "reference-almanac",
+      "rule": "Q1 vriddhi first",
+      "_source": "Reference almanac, festivals of the month page, April 2025, Kolkata, captured 2026-09-24"
+    },
+    {
+      "festival": "vat_savitri_purnima",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2026-06-29",
+      "tier": "reference-almanac",
+      "rule": "Q1 vriddhi first",
+      "_source": "Reference almanac, Vat Purnima page, 2026, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "ugadi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2037-03-17",
+      "tier": "reference-almanac",
+      "rule": "Q1 vriddhi first",
+      "_source": "Reference almanac, festivals of the month page, March 2037, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "gudi_padwa",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2037-03-17",
+      "tier": "reference-almanac",
+      "rule": "Q1 vriddhi first",
+      "_source": "Reference almanac, festivals of the month page, March 2037, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "guru_purnima",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2010-07-25",
+      "tier": "competitor",
+      "rule": "Q1 vriddhi first",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2010 (panchang.astrosage.com, captured 2026-09-24): \"Guru Purnima\""
+    },
+    {
+      "festival": "kartika_purnima",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2002-11-19",
+      "tier": "competitor",
+      "rule": "Q1 vriddhi first",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2002 (panchang.astrosage.com, captured 2026-09-24): \"Kartik Purnima Vrat\""
+    },
+    {
+      "festival": "kartika_purnima",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2003-11-08",
+      "tier": "competitor",
+      "rule": "Q1 vriddhi first",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2003 (panchang.astrosage.com, captured 2026-09-24): \"Kartik Purnima Vrat\""
+    },
+    {
+      "festival": "sharad_purnima",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2010-10-22",
+      "tier": "competitor",
+      "rule": "Q1 vriddhi first",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2010 (panchang.astrosage.com, captured 2026-09-24): \"Ashwin Purnima Vrat\""
+    },
+    {
+      "festival": "sharad_purnima",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2011-10-11",
+      "tier": "competitor",
+      "rule": "Q1 vriddhi first",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2011 (panchang.astrosage.com, captured 2026-09-24): \"Ashwin Purnima Vrat\""
+    },
+    {
+      "festival": "hartalika_teej",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2006-08-27",
+      "tier": "reference-almanac",
+      "rule": "Q1 vriddhi last",
+      "_source": "Reference almanac, festivals of the month page, August 2006, New Delhi, captured 2026-09-24 (Tritiya at both sunrises)"
+    },
+    {
+      "festival": "hariyali_teej",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2007-08-16",
+      "tier": "competitor",
+      "rule": "Q1 vriddhi last",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2007 (panchang.astrosage.com, captured 2026-09-24): \"Hariyali Teej\""
+    },
+    {
+      "festival": "kajari_teej",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2037-08-29",
+      "tier": "competitor",
+      "rule": "Q1 vriddhi last",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2037 (panchang.astrosage.com, captured 2026-09-24): \"Kajari Teej\""
+    },
+    {
+      "festival": "kajari_teej",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2038-08-18",
+      "tier": "competitor",
+      "rule": "Q1 vriddhi last",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2038 (panchang.astrosage.com, captured 2026-09-24): \"Kajari Teej\""
+    },
+    {
+      "festival": "jagannath_rath_yatra",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2004-06-20",
+      "tier": "competitor",
+      "rule": "Q1 vriddhi last",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2004 (panchang.astrosage.com, captured 2026-09-24): \"Jagannath Rath Yatra\""
+    },
+    {
+      "festival": "jagannath_rath_yatra",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2030-07-03",
+      "tier": "competitor",
+      "rule": "Q1 vriddhi last",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2030 (panchang.astrosage.com, captured 2026-09-24): \"Jagannath Rath Yatra\""
+    },
+    {
+      "festival": "hariyali_teej",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2013-08-10",
+      "tier": "reference-almanac",
+      "rule": "Q1 udaya, no vriddhi (unchanged)",
+      "_source": "Reference almanac, festivals of the month page, August 2013, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "kajari_teej",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2006-08-12",
+      "tier": "reference-almanac",
+      "rule": "Q1 udaya, no vriddhi (unchanged)",
+      "_source": "Reference almanac, festivals of the month page, August 2006, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "kajari_teej",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2013-08-23",
+      "tier": "reference-almanac",
+      "rule": "Q1 udaya, no vriddhi (unchanged)",
+      "_source": "Reference almanac, festivals of the month page, August 2013, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "kajari_teej",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-08-14",
+      "tier": "reference-almanac",
+      "rule": "Q1 udaya, no vriddhi (unchanged)",
+      "_source": "Reference almanac, festivals of the month page, August 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "hartalika_teej",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-08-30",
+      "tier": "reference-almanac",
+      "rule": "Q1 udaya, no vriddhi (unchanged)",
+      "_source": "Reference almanac, festivals of the month page, August 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "gangaur",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2026-03-21",
+      "tier": "reference-almanac",
+      "rule": "Q1 udaya, no vriddhi (unchanged)",
+      "_source": "Reference almanac, festivals of the month page, March 2026, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "gangaur",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2037-03-20",
+      "tier": "reference-almanac",
+      "rule": "Q1 udaya, no vriddhi (unchanged)",
+      "_source": "Reference almanac, festivals of the month page, March 2037, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "gangaur",
+      "city": "Kolkata",
+      "location": {
+        "latitude": 22.5726,
+        "longitude": 88.3639
+      },
+      "timezone": 330,
+      "date": "2025-04-01",
+      "tier": "reference-almanac",
+      "rule": "Q1 udaya, no vriddhi (unchanged)",
+      "_source": "Reference almanac, festivals of the month page, April 2025, Kolkata, captured 2026-09-24"
+    },
+    {
+      "festival": "raksha_bandhan",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2006-08-09",
+      "tier": "reference-almanac",
+      "rule": "Q1b trimuhurta",
+      "_source": "Reference almanac, festivals of the month page, August 2006, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "yajur_upakarma",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2006-08-09",
+      "tier": "reference-almanac",
+      "rule": "Q1b trimuhurta",
+      "_source": "Reference almanac, festivals of the month page, August 2006, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "raksha_bandhan",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2013-08-20",
+      "tier": "reference-almanac",
+      "rule": "Q1b trimuhurta",
+      "_source": "Reference almanac, festivals of the month page, August 2013, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "yajur_upakarma",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2013-08-20",
+      "tier": "reference-almanac",
+      "rule": "Q1b trimuhurta",
+      "_source": "Reference almanac, festivals of the month page, August 2013, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "raksha_bandhan",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-08-11",
+      "tier": "reference-almanac",
+      "rule": "Q1b trimuhurta",
+      "_source": "Reference almanac, festivals of the month page, August 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "yajur_upakarma",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-08-11",
+      "tier": "reference-almanac",
+      "rule": "Q1b trimuhurta",
+      "_source": "Reference almanac, festivals of the month page, August 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "nag_panchami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2013-08-11",
+      "tier": "reference-almanac",
+      "rule": "Q1b trimuhurta",
+      "_source": "Reference almanac, festivals of the month page, August 2013, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "nag_panchami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-08-02",
+      "tier": "reference-almanac",
+      "rule": "Q1b trimuhurta",
+      "_source": "Reference almanac, festivals of the month page, August 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "akshaya_tritiya",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2020-04-26",
+      "tier": "reference-almanac",
+      "rule": "Q1b trimuhurta",
+      "_source": "Reference almanac, Akshaya Tritiya page, 2020, New Delhi, captured 2026-09-24 (puja muhurat 05:45 to 12:19)"
+    },
+    {
+      "festival": "akshaya_tritiya",
+      "city": "Pune",
+      "location": {
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "timezone": 330,
+      "date": "2020-04-26",
+      "tier": "reference-almanac",
+      "rule": "Q1b trimuhurta",
+      "_source": "Reference almanac, Akshaya Tritiya page, 2020, Pune, captured 2026-09-24"
+    },
+    {
+      "festival": "akshaya_tritiya",
+      "city": "Kolkata",
+      "location": {
+        "latitude": 22.5726,
+        "longitude": 88.3639
+      },
+      "timezone": 330,
+      "date": "2025-04-30",
+      "tier": "reference-almanac",
+      "rule": "Q1b trimuhurta",
+      "_source": "Reference almanac, festivals of the month page, April 2025, Kolkata, captured 2026-09-24"
+    },
+    {
+      "festival": "raksha_bandhan",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2009-08-05",
+      "tier": "competitor",
+      "rule": "Q1b trimuhurta",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2009 (panchang.astrosage.com, captured 2026-09-24): \"Raksha Bandhan\""
+    },
+    {
+      "festival": "nag_panchami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2015-08-19",
+      "tier": "competitor",
+      "rule": "Q1b trimuhurta",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2015 (panchang.astrosage.com, captured 2026-09-24): \"Nag Panchami\""
+    },
+    {
+      "festival": "akshaya_tritiya",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2014-05-02",
+      "tier": "competitor",
+      "rule": "Q1b trimuhurta",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2014 (panchang.astrosage.com, captured 2026-09-24): \"Akshaya Tritiya\""
+    },
+    {
+      "festival": "akshaya_tritiya",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2027-05-09",
+      "tier": "competitor",
+      "rule": "Q1b trimuhurta",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2027 (panchang.astrosage.com, captured 2026-09-24): \"Akshaya Tritiya\""
+    },
+    {
+      "festival": "akshaya_tritiya",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2036-04-29",
+      "tier": "competitor",
+      "rule": "Q1b trimuhurta",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2036 (panchang.astrosage.com, captured 2026-09-24): \"Akshaya Tritiya\""
+    },
+    {
+      "festival": "dhanteras",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2017-10-17",
+      "tier": "reference-almanac",
+      "rule": "Q2 pradosha max overlap",
+      "_source": "Reference almanac, festivals of the month page, October 2017, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "diwali",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2017-10-19",
+      "tier": "reference-almanac",
+      "rule": "Q2 pradosha max overlap",
+      "_source": "Reference almanac, festivals of the month page, October 2017, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "narak_chaturdashi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2017-10-18",
+      "tier": "reference-almanac",
+      "rule": "X2 arunodaya first",
+      "_source": "Reference almanac, festivals of the month page, October 2017, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "govardhan_puja",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2017-10-20",
+      "tier": "reference-almanac",
+      "rule": "X2 daytime coverage",
+      "_source": "Reference almanac, festivals of the month page, October 2017, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "bhai_dooj",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2017-10-21",
+      "tier": "reference-almanac",
+      "rule": "X2 aparahna last",
+      "_source": "Reference almanac, festivals of the month page, October 2017, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "dhanteras",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2019-10-25",
+      "tier": "reference-almanac",
+      "rule": "Q2 pradosha max overlap",
+      "_source": "Reference almanac, festivals of the month page, October 2019, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "diwali",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2019-10-27",
+      "tier": "reference-almanac",
+      "rule": "Q2 pradosha max overlap",
+      "_source": "Reference almanac, festivals of the month page, October 2019, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "narak_chaturdashi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2019-10-27",
+      "tier": "reference-almanac",
+      "rule": "X2 arunodaya first",
+      "_source": "Reference almanac, festivals of the month page, October 2019, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "govardhan_puja",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2019-10-28",
+      "tier": "reference-almanac",
+      "rule": "X2 daytime coverage",
+      "_source": "Reference almanac, festivals of the month page, October 2019, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "bhai_dooj",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2019-10-29",
+      "tier": "reference-almanac",
+      "rule": "X2 aparahna last",
+      "_source": "Reference almanac, festivals of the month page, October 2019, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "dhanteras",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2020-11-13",
+      "tier": "reference-almanac",
+      "rule": "Q2 pradosha max overlap",
+      "_source": "Reference almanac, festivals of the month page, November 2020, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "diwali",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2020-11-14",
+      "tier": "reference-almanac",
+      "rule": "Q2 pradosha max overlap",
+      "_source": "Reference almanac, festivals of the month page, November 2020, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "narak_chaturdashi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2020-11-14",
+      "tier": "reference-almanac",
+      "rule": "X2 arunodaya first",
+      "_source": "Reference almanac, festivals of the month page, November 2020, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "govardhan_puja",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2020-11-15",
+      "tier": "reference-almanac",
+      "rule": "X2 daytime coverage",
+      "_source": "Reference almanac, festivals of the month page, November 2020, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "bhai_dooj",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2020-11-16",
+      "tier": "reference-almanac",
+      "rule": "X2 aparahna last",
+      "_source": "Reference almanac, festivals of the month page, November 2020, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "dhanteras",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2021-11-02",
+      "tier": "reference-almanac",
+      "rule": "Q2 pradosha max overlap",
+      "_source": "Reference almanac, festivals of the month page, November 2021, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "diwali",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2021-11-04",
+      "tier": "reference-almanac",
+      "rule": "Q2 pradosha max overlap",
+      "_source": "Reference almanac, festivals of the month page, November 2021, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "narak_chaturdashi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2021-11-04",
+      "tier": "reference-almanac",
+      "rule": "X2 arunodaya first",
+      "_source": "Reference almanac, festivals of the month page, November 2021, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "govardhan_puja",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2021-11-05",
+      "tier": "reference-almanac",
+      "rule": "X2 daytime coverage",
+      "_source": "Reference almanac, festivals of the month page, November 2021, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "bhai_dooj",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2021-11-06",
+      "tier": "reference-almanac",
+      "rule": "X2 aparahna last",
+      "_source": "Reference almanac, festivals of the month page, November 2021, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "dhanteras",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-10-22",
+      "tier": "reference-almanac",
+      "rule": "Q2 pradosha max overlap",
+      "_source": "Reference almanac, festivals of the month page, October 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "diwali",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-10-24",
+      "tier": "reference-almanac",
+      "rule": "Q2 pradosha max overlap",
+      "_source": "Reference almanac, festivals of the month page, October 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "narak_chaturdashi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-10-24",
+      "tier": "reference-almanac",
+      "rule": "X2 arunodaya first",
+      "_source": "Reference almanac, festivals of the month page, October 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "govardhan_puja",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-10-26",
+      "tier": "reference-almanac",
+      "rule": "X2 daytime coverage",
+      "_source": "Reference almanac, festivals of the month page, October 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "bhai_dooj",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-10-26",
+      "tier": "reference-almanac",
+      "rule": "X2 aparahna last",
+      "_source": "Reference almanac, festivals of the month page, October 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "parashurama_jayanti",
+      "city": "Kolkata",
+      "location": {
+        "latitude": 22.5726,
+        "longitude": 88.3639
+      },
+      "timezone": 330,
+      "date": "2025-04-29",
+      "tier": "reference-almanac",
+      "rule": "Q2 pradosha max overlap",
+      "_source": "Reference almanac, festivals of the month page, April 2025, Kolkata, captured 2026-09-24 (Akshaya Tritiya is the next day)"
+    },
+    {
+      "festival": "ganesh_chaturthi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2006-08-27",
+      "tier": "reference-almanac",
+      "rule": "Q2 madhyahna max overlap",
+      "_source": "Reference almanac, festivals of the month page, August 2006, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "ganesh_chaturthi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-08-31",
+      "tier": "reference-almanac",
+      "rule": "Q2 madhyahna max overlap",
+      "_source": "Reference almanac, festivals of the month page, August 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "rama_navami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2026-03-26",
+      "tier": "reference-almanac",
+      "rule": "Q2 madhyahna last overlap",
+      "_source": "Reference almanac, festivals of the month page, March 2026, New Delhi, captured 2026-09-24 (Smarta)"
+    },
+    {
+      "festival": "rama_navami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2037-03-25",
+      "tier": "reference-almanac",
+      "rule": "Q2 madhyahna last overlap",
+      "_source": "Reference almanac, festivals of the month page, March 2037, New Delhi, captured 2026-09-24 (Smarta)"
+    },
+    {
+      "festival": "rama_navami",
+      "city": "Kolkata",
+      "location": {
+        "latitude": 22.5726,
+        "longitude": 88.3639
+      },
+      "timezone": 330,
+      "date": "2025-04-06",
+      "tier": "reference-almanac",
+      "rule": "Q2 madhyahna last overlap",
+      "_source": "Reference almanac, festivals of the month page, April 2025, Kolkata, captured 2026-09-24"
+    },
+    {
+      "festival": "ganesh_chaturthi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2033-08-28",
+      "tier": "competitor",
+      "rule": "Q2 madhyahna max overlap",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2033 (panchang.astrosage.com, captured 2026-09-24): \"Ganesh Chaturthi\""
+    },
+    {
+      "festival": "ganesh_chaturthi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2036-08-24",
+      "tier": "competitor",
+      "rule": "Q2 madhyahna max overlap",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2036 (panchang.astrosage.com, captured 2026-09-24): \"Ganesh Chaturthi\""
+    },
+    {
+      "festival": "rama_navami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2005-04-18",
+      "tier": "competitor",
+      "rule": "Q2 madhyahna last overlap",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2005 (panchang.astrosage.com, captured 2026-09-24): \"Ram Navami\""
+    },
+    {
+      "festival": "rama_navami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2007-03-27",
+      "tier": "competitor",
+      "rule": "Q2 madhyahna last overlap",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2007 (panchang.astrosage.com, captured 2026-09-24): \"Ram Navami\""
+    },
+    {
+      "festival": "rama_navami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2032-04-19",
+      "tier": "competitor",
+      "rule": "Q2 madhyahna last overlap",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2032 (panchang.astrosage.com, captured 2026-09-24): \"Ram Navami\""
+    },
+    {
+      "festival": "vasant_panchami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2019-02-10",
+      "tier": "competitor",
+      "rule": "Q2 sangava start",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2019 (panchang.astrosage.com, captured 2026-09-24): \"Basant Panchmi\""
+    },
+    {
+      "festival": "vasant_panchami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2020-01-29",
+      "tier": "competitor",
+      "rule": "Q2 sangava start",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2020 (panchang.astrosage.com, captured 2026-09-24): \"Basant Panchmi\""
+    },
+    {
+      "festival": "vasant_panchami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2035-02-13",
+      "tier": "competitor",
+      "rule": "Q2 sangava start",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2035 (panchang.astrosage.com, captured 2026-09-24): \"Basant Panchmi\""
+    },
+    {
+      "festival": "vasant_panchami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2040-02-17",
+      "tier": "competitor",
+      "rule": "Q2 sangava start",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2040 (panchang.astrosage.com, captured 2026-09-24): \"Basant Panchmi\""
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2006-08-07",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, August 2006, New Delhi, captured 2026-09-24 (Soma Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2006-08-21",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, August 2006, New Delhi, captured 2026-09-24 (Soma Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2013-08-04",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, August 2013, New Delhi, captured 2026-09-24 (Ravi Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2013-08-18",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, August 2013, New Delhi, captured 2026-09-24 (Ravi Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-08-09",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, August 2022, New Delhi, captured 2026-09-24 (Bhauma Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-08-24",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, August 2022, New Delhi, captured 2026-09-24 (Budha Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2017-10-03",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, October 2017, New Delhi, captured 2026-09-24 (Bhauma Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2017-10-17",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, October 2017, New Delhi, captured 2026-09-24 (Bhauma Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2019-10-11",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, October 2019, New Delhi, captured 2026-09-24 (Shukra Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2019-10-25",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, October 2019, New Delhi, captured 2026-09-24 (Shukra Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-10-07",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, October 2022, New Delhi, captured 2026-09-24 (Shukra Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-10-22",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, October 2022, New Delhi, captured 2026-09-24 (Shani Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2020-11-13",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, November 2020, New Delhi, captured 2026-09-24 (Shukra Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2020-11-27",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, November 2020, New Delhi, captured 2026-09-24 (Shukra Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2021-11-02",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, November 2021, New Delhi, captured 2026-09-24 (Bhauma Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2021-11-16",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, November 2021, New Delhi, captured 2026-09-24 (Bhauma Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2026-03-01",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, March 2026, New Delhi, captured 2026-09-24 (Ravi Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2026-03-16",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, March 2026, New Delhi, captured 2026-09-24 (Soma Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2026-03-30",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, March 2026, New Delhi, captured 2026-09-24 (Soma Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2037-03-14",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, March 2037, New Delhi, captured 2026-09-24 (Shani Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2037-03-29",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, March 2037, New Delhi, captured 2026-09-24 (Ravi Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "Kolkata",
+      "location": {
+        "latitude": 22.5726,
+        "longitude": 88.3639
+      },
+      "timezone": 330,
+      "date": "2025-04-10",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, April 2025, Kolkata, captured 2026-09-24 (Guru Pradosh Vrat)"
+    },
+    {
+      "festival": "pradosha",
+      "city": "Kolkata",
+      "location": {
+        "latitude": 22.5726,
+        "longitude": 88.3639
+      },
+      "timezone": 330,
+      "date": "2025-04-25",
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "_source": "Reference almanac, festivals of the month page, April 2025, Kolkata, captured 2026-09-24 (Shukra Pradosh Vrat)"
+    },
+    {
+      "festival": "holika_dahan",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2026-03-03",
+      "tier": "reference-almanac",
+      "rule": "Q4 holika",
+      "_source": "Reference almanac, festivals of the month page, March 2026, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "holi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2026-03-04",
+      "tier": "reference-almanac",
+      "rule": "Q4 holika",
+      "_source": "Reference almanac, festivals of the month page, March 2026, New Delhi, captured 2026-09-24 (Holika Dahan + 1)"
+    },
+    {
+      "festival": "holika_dahan",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2037-03-01",
+      "tier": "reference-almanac",
+      "rule": "Q4 holika",
+      "_source": "Reference almanac, festivals of the month page, March 2037, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "holi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2037-03-02",
+      "tier": "reference-almanac",
+      "rule": "Q4 holika",
+      "_source": "Reference almanac, festivals of the month page, March 2037, New Delhi, captured 2026-09-24 (Holika Dahan + 1)"
+    },
+    {
+      "festival": "holika_dahan",
+      "city": "Pune",
+      "location": {
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "timezone": 330,
+      "date": "2034-03-04",
+      "tier": "reference-almanac",
+      "rule": "Q4 holika",
+      "_source": "Reference almanac, Holika Dahan and Holi page, 2034, Pune, captured 2026-09-24 (pradosh 18:41 to 21:07)"
+    },
+    {
+      "festival": "holi",
+      "city": "Pune",
+      "location": {
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "timezone": 330,
+      "date": "2034-03-05",
+      "tier": "reference-almanac",
+      "rule": "Q4 holika",
+      "_source": "Reference almanac, Holika Dahan and Holi page, 2034, Pune, captured 2026-09-24 (Rangwali Holi)"
+    },
+    {
+      "festival": "holika_dahan",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2003-03-17",
+      "tier": "competitor",
+      "rule": "Q4 holika",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2003 (panchang.astrosage.com, captured 2026-09-24): \"Holika Dahan\""
+    },
+    {
+      "festival": "holi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2003-03-18",
+      "tier": "competitor",
+      "rule": "Q4 holika",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2003 (panchang.astrosage.com, captured 2026-09-24): \"Holi\""
+    },
+    {
+      "festival": "holika_dahan",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2018-03-01",
+      "tier": "competitor",
+      "rule": "Q4 holika",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2018 (panchang.astrosage.com, captured 2026-09-24): \"Holika Dahan\""
+    },
+    {
+      "festival": "holi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2018-03-02",
+      "tier": "competitor",
+      "rule": "Q4 holika",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2018 (panchang.astrosage.com, captured 2026-09-24): \"Holi\""
+    },
+    {
+      "festival": "holika_dahan",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2023-03-07",
+      "tier": "competitor",
+      "rule": "Q4 holika",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2023 (panchang.astrosage.com, captured 2026-09-24): \"Holika Dahan\""
+    },
+    {
+      "festival": "holi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2023-03-08",
+      "tier": "competitor",
+      "rule": "Q4 holika",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2023 (panchang.astrosage.com, captured 2026-09-24): \"Holi\""
+    },
+    {
+      "festival": "holika_dahan",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2027-03-22",
+      "tier": "competitor",
+      "rule": "Q4 holika",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2027 (panchang.astrosage.com, captured 2026-09-24): \"Holika Dahan\""
+    },
+    {
+      "festival": "holi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2027-03-23",
+      "tier": "competitor",
+      "rule": "Q4 holika",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2027 (panchang.astrosage.com, captured 2026-09-24): \"Holi\""
+    },
+    {
+      "festival": "masik_shivaratri",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2006-08-21",
+      "tier": "reference-almanac",
+      "rule": "Q5 nishita ladder",
+      "_source": "Reference almanac, festivals of the month page, August 2006, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "masik_shivaratri",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2013-08-05",
+      "tier": "reference-almanac",
+      "rule": "Q5 nishita ladder",
+      "_source": "Reference almanac, festivals of the month page, August 2013, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "masik_shivaratri",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-08-25",
+      "tier": "reference-almanac",
+      "rule": "Q5 nishita ladder",
+      "_source": "Reference almanac, festivals of the month page, August 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "masik_shivaratri",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2017-10-18",
+      "tier": "reference-almanac",
+      "rule": "Q5 nishita ladder",
+      "_source": "Reference almanac, festivals of the month page, October 2017, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "masik_shivaratri",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2019-10-26",
+      "tier": "reference-almanac",
+      "rule": "Q5 nishita ladder",
+      "_source": "Reference almanac, festivals of the month page, October 2019, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "masik_shivaratri",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-10-23",
+      "tier": "reference-almanac",
+      "rule": "Q5 nishita ladder",
+      "_source": "Reference almanac, festivals of the month page, October 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "masik_shivaratri",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2020-11-13",
+      "tier": "reference-almanac",
+      "rule": "Q5 nishita ladder",
+      "_source": "Reference almanac, festivals of the month page, November 2020, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "masik_shivaratri",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2021-11-03",
+      "tier": "reference-almanac",
+      "rule": "Q5 nishita ladder",
+      "_source": "Reference almanac, festivals of the month page, November 2021, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "masik_shivaratri",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2026-03-17",
+      "tier": "reference-almanac",
+      "rule": "Q5 nishita ladder",
+      "_source": "Reference almanac, festivals of the month page, March 2026, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "masik_shivaratri",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2037-03-15",
+      "tier": "reference-almanac",
+      "rule": "Q5 nishita ladder",
+      "_source": "Reference almanac, festivals of the month page, March 2037, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "masik_shivaratri",
+      "city": "Kolkata",
+      "location": {
+        "latitude": 22.5726,
+        "longitude": 88.3639
+      },
+      "timezone": 330,
+      "date": "2025-04-26",
+      "tier": "reference-almanac",
+      "rule": "Q5 nishita ladder",
+      "_source": "Reference almanac, festivals of the month page, April 2025, Kolkata, captured 2026-09-24"
+    },
+    {
+      "festival": "maha_shivaratri",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2018-02-13",
+      "tier": "competitor",
+      "rule": "Q5 nishita ladder",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2018 (panchang.astrosage.com, captured 2026-09-24): \"Mahashivratri\""
+    },
+    {
+      "festival": "maha_navami",
+      "city": "Pune",
+      "location": {
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "timezone": 330,
+      "date": "2015-10-21",
+      "tier": "reference-almanac",
+      "rule": "Q10 navami start",
+      "_source": "Reference almanac, Shardiya Navratri page, 2015, Pune, captured 2026-09-24 (Navami from 13:29)"
+    },
+    {
+      "festival": "maha_navami",
+      "city": "Pune",
+      "location": {
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "timezone": 330,
+      "date": "2016-10-10",
+      "tier": "reference-almanac",
+      "rule": "Q10 navami start",
+      "_source": "Reference almanac, Shardiya Navratri page, 2016, Pune, captured 2026-09-24 (Navami from 22:31 the day before)"
+    },
+    {
+      "festival": "maha_navami",
+      "city": "Pune",
+      "location": {
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "timezone": 330,
+      "date": "2027-10-08",
+      "tier": "reference-almanac",
+      "rule": "Q10 navami start",
+      "_source": "Reference almanac, Shardiya Navratri page, 2027, Pune, captured 2026-09-24 (Navami from 06:28)"
+    },
+    {
+      "festival": "maha_navami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2019-10-06",
+      "tier": "reference-almanac",
+      "rule": "Q10 navami start",
+      "_source": "Reference almanac, festivals of the month page, October 2019, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "durga_ashtami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2019-10-06",
+      "tier": "reference-almanac",
+      "rule": "Q1 udaya (unchanged)",
+      "_source": "Reference almanac, festivals of the month page, October 2019, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "maha_navami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-10-04",
+      "tier": "reference-almanac",
+      "rule": "Q10 navami start",
+      "_source": "Reference almanac, festivals of the month page, October 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "durga_ashtami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-10-03",
+      "tier": "reference-almanac",
+      "rule": "Q1 udaya (unchanged)",
+      "_source": "Reference almanac, festivals of the month page, October 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "maha_navami",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2010-10-15",
+      "tier": "competitor",
+      "rule": "Q10 navami start",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2010 (panchang.astrosage.com, captured 2026-09-24): \"Durga Maha Navami Puja\""
+    },
+    {
+      "festival": "bathukamma_saddula",
+      "city": "Hyderabad",
+      "location": {
+        "latitude": 17.385,
+        "longitude": 78.4867
+      },
+      "timezone": 330,
+      "date": "2025-09-30",
+      "tier": "competitor",
+      "rule": "Q10 durgashtami",
+      "_source": "Sakshi Post and HinduPad, Saddula Bathukamma 2025 on Durgashtami (per the 2026-09-24 research)"
+    },
+    {
+      "festival": "chhath_sandhya_arghya",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2017-10-26",
+      "tier": "reference-almanac",
+      "rule": "X1 chhath udaya Shashthi",
+      "_source": "Reference almanac, festivals of the month page, October 2017, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "chhath_sandhya_arghya",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2020-11-20",
+      "tier": "reference-almanac",
+      "rule": "X1 chhath udaya Shashthi",
+      "_source": "Reference almanac, festivals of the month page, November 2020, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "chhath_sandhya_arghya",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2021-11-10",
+      "tier": "reference-almanac",
+      "rule": "X1 chhath udaya Shashthi",
+      "_source": "Reference almanac, festivals of the month page, November 2021, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "chhath_sandhya_arghya",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-10-30",
+      "tier": "reference-almanac",
+      "rule": "X1 chhath udaya Shashthi",
+      "_source": "Reference almanac, festivals of the month page, October 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "dussehra",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2019-10-08",
+      "tier": "reference-almanac",
+      "rule": "X3 Shravana override",
+      "_source": "Reference almanac, festivals of the month page, October 2019, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "dussehra",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-10-05",
+      "tier": "reference-almanac",
+      "rule": "X3 Shravana override",
+      "_source": "Reference almanac, festivals of the month page, October 2022, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "dussehra",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2013-10-13",
+      "tier": "competitor",
+      "rule": "X3 Shravana override",
+      "_source": "AstroSage Hindu calendar, New Delhi, 2013 (panchang.astrosage.com, captured 2026-09-24): \"Dussehra\""
+    },
+    {
+      "festival": "dussehra",
+      "city": "Pune",
+      "location": {
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "timezone": 330,
+      "date": "2015-10-22",
+      "tier": "reference-almanac",
+      "rule": "X3 Shravana override",
+      "_source": "Reference almanac, Shardiya Navratri page, 2015, Pune, captured 2026-09-24 (Vijayadashami)"
+    },
+    {
+      "festival": "dussehra",
+      "city": "Pune",
+      "location": {
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "timezone": 330,
+      "date": "2016-10-11",
+      "tier": "reference-almanac",
+      "rule": "X3 Shravana override",
+      "_source": "Reference almanac, Shardiya Navratri page, 2016, Pune, captured 2026-09-24 (Vijayadashami)"
+    },
+    {
+      "festival": "dussehra",
+      "city": "Pune",
+      "location": {
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "timezone": 330,
+      "date": "2027-10-09",
+      "tier": "reference-almanac",
+      "rule": "X3 Shravana override",
+      "_source": "Reference almanac, Shardiya Navratri page, 2027, Pune, captured 2026-09-24 (Vijayadashami)"
+    },
+    {
+      "festival": "varamahalakshmi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2006-08-04",
+      "tier": "reference-almanac",
+      "rule": "X4 Friday before Shravana Purnima",
+      "_source": "Reference almanac, festivals of the month page, August 2006, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "varamahalakshmi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2013-08-16",
+      "tier": "reference-almanac",
+      "rule": "X4 Friday before Shravana Purnima",
+      "_source": "Reference almanac, festivals of the month page, August 2013, New Delhi, captured 2026-09-24"
+    },
+    {
+      "festival": "varamahalakshmi",
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "date": "2022-08-12",
+      "tier": "reference-almanac",
+      "rule": "X4 Friday before Shravana Purnima",
+      "_source": "Reference almanac, festivals of the month page, August 2022, New Delhi, captured 2026-09-24"
+    }
+  ],
+  "lists": [
+    {
+      "keys": [
+        "pradosha"
+      ],
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "year": 2025,
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "dates": [
+        "2025-01-11",
+        "2025-01-27",
+        "2025-02-09",
+        "2025-02-25",
+        "2025-03-11",
+        "2025-03-27",
+        "2025-04-10",
+        "2025-04-25",
+        "2025-05-09",
+        "2025-05-24",
+        "2025-06-08",
+        "2025-06-23",
+        "2025-07-08",
+        "2025-07-22",
+        "2025-08-06",
+        "2025-08-20",
+        "2025-09-05",
+        "2025-09-19",
+        "2025-10-04",
+        "2025-10-18",
+        "2025-11-03",
+        "2025-11-17",
+        "2025-12-02",
+        "2025-12-17"
+      ],
+      "_source": "Reference almanac, Pradosh vrat year list, 2025, New Delhi, captured 2026-09-24 (complete year list)"
+    },
+    {
+      "keys": [
+        "pradosha"
+      ],
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "year": 2027,
+      "tier": "reference-almanac",
+      "rule": "Q3 pradosh vrat",
+      "dates": [
+        "2027-01-05",
+        "2027-01-20",
+        "2027-02-03",
+        "2027-02-18",
+        "2027-03-05",
+        "2027-03-20",
+        "2027-04-04",
+        "2027-04-18",
+        "2027-05-03",
+        "2027-05-17",
+        "2027-06-02",
+        "2027-06-16",
+        "2027-07-01",
+        "2027-07-15",
+        "2027-07-31",
+        "2027-08-14",
+        "2027-08-29",
+        "2027-09-13",
+        "2027-09-27",
+        "2027-10-12",
+        "2027-10-27",
+        "2027-11-11",
+        "2027-11-25",
+        "2027-12-11",
+        "2027-12-25"
+      ],
+      "_source": "Reference almanac, Pradosh vrat year list, 2027, New Delhi, captured 2026-09-24 (complete year list)"
+    },
+    {
+      "keys": [
+        "masik_shivaratri",
+        "maha_shivaratri"
+      ],
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "year": 2025,
+      "tier": "reference-almanac",
+      "rule": "Q5 nishita ladder",
+      "dates": [
+        "2025-01-27",
+        "2025-02-26",
+        "2025-03-27",
+        "2025-04-26",
+        "2025-05-25",
+        "2025-06-23",
+        "2025-07-23",
+        "2025-08-21",
+        "2025-09-19",
+        "2025-10-19",
+        "2025-11-18",
+        "2025-12-18"
+      ],
+      "_source": "Reference almanac, Masik Shivaratri year list, 2025, New Delhi, captured 2026-09-24 (complete year list)"
+    },
+    {
+      "keys": [
+        "masik_shivaratri",
+        "maha_shivaratri"
+      ],
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "year": 2027,
+      "tier": "reference-almanac",
+      "rule": "Q5 nishita ladder",
+      "dates": [
+        "2027-01-05",
+        "2027-02-04",
+        "2027-03-06",
+        "2027-04-05",
+        "2027-05-04",
+        "2027-06-03",
+        "2027-07-02",
+        "2027-07-31",
+        "2027-08-30",
+        "2027-09-28",
+        "2027-10-27",
+        "2027-11-26",
+        "2027-12-25"
+      ],
+      "_source": "Reference almanac, Masik Shivaratri year list, 2027, New Delhi, captured 2026-09-24 (complete year list)"
+    },
+    {
+      "keys": [
+        "vinayaka_chaturthi",
+        "ganesh_chaturthi"
+      ],
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "year": 2025,
+      "tier": "reference-almanac",
+      "rule": "Q5 madhyahna max overlap",
+      "dates": [
+        "2025-01-03",
+        "2025-02-01",
+        "2025-03-03",
+        "2025-04-01",
+        "2025-05-01",
+        "2025-05-30",
+        "2025-06-28",
+        "2025-07-28",
+        "2025-08-27",
+        "2025-09-25",
+        "2025-10-25",
+        "2025-11-24",
+        "2025-12-24"
+      ],
+      "_source": "Reference almanac, Vinayaka Chaturthi year list, 2025, New Delhi, captured 2026-09-24 (complete year list)"
+    },
+    {
+      "keys": [
+        "vinayaka_chaturthi",
+        "ganesh_chaturthi"
+      ],
+      "city": "Pune",
+      "location": {
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "timezone": 330,
+      "year": 2025,
+      "tier": "reference-almanac",
+      "rule": "Q5 madhyahna max overlap",
+      "dates": [
+        "2025-01-03",
+        "2025-02-01",
+        "2025-03-03",
+        "2025-04-01",
+        "2025-05-01",
+        "2025-05-30",
+        "2025-06-28",
+        "2025-07-28",
+        "2025-08-27",
+        "2025-09-25",
+        "2025-10-25",
+        "2025-11-24",
+        "2025-12-24"
+      ],
+      "_source": "Reference almanac, Vinayaka Chaturthi year list, 2025, Pune, captured 2026-09-24 (complete year list)"
+    },
+    {
+      "keys": [
+        "vinayaka_chaturthi",
+        "ganesh_chaturthi"
+      ],
+      "city": "New Delhi",
+      "location": {
+        "latitude": 28.6139,
+        "longitude": 77.209
+      },
+      "timezone": 330,
+      "year": 2027,
+      "tier": "reference-almanac",
+      "rule": "Q5 madhyahna max overlap",
+      "dates": [
+        "2027-01-11",
+        "2027-02-10",
+        "2027-03-12",
+        "2027-04-10",
+        "2027-05-09",
+        "2027-06-08",
+        "2027-07-07",
+        "2027-08-05",
+        "2027-09-04",
+        "2027-10-03",
+        "2027-11-02",
+        "2027-12-02",
+        "2027-12-31"
+      ],
+      "_source": "Reference almanac, Vinayaka Chaturthi year list, 2027, New Delhi, captured 2026-09-24 (complete year list)"
+    }
+  ]
+}

@@ -17,13 +17,13 @@
  */
 
 /** `elp82b.f`'s W1: the Moon's mean longitude polynomial, radians. */
-export const MOON_MEAN_LONGITUDE = new Float64Array([
+export const MOON_MEAN_LONGITUDE = /* @__PURE__ */ new Float64Array([
   3.8103444305883, 8399.684731773914, -0.000028547284, 3.20170955e-8, -1.53637456e-10,
 ]);
 
 /** 657 terms; error ≤ 0.399″ over |t| ≤ 1.5. */
 
-export const MOON_LONGITUDE_QUARTIC = new Float64Array([
+export const MOON_LONGITUDE_QUARTIC = /* @__PURE__ */ new Float64Array([
   22639.58578, 2.355555898, 8328.6914269556, 0.0001570278, 2.504e-7, -1.2e-9, 4586.4383,
   8.041377584, 7214.062866668, -0.000213926, -1.86e-7, 9e-10, 2369.91394, 10.39693348,
   15542.754293624, -0.0000569, 6.4e-8, -3e-10, 769.02571, 4.7111118, 16657.38285391,
@@ -175,7 +175,7 @@ export const MOON_LONGITUDE_QUARTIC = new Float64Array([
   -2e-9, 0.00538, 17.55, 39272.225, 0.0004, 8e-7, -4e-9,
 ]);
 
-export const MOON_LONGITUDE_LINEAR = new Float64Array([
+export const MOON_LONGITUDE_LINEAR = /* @__PURE__ */ new Float64Array([
   14.24883, 27.222815, 2.301197, 0, 7.06304, 2.182456, -33.757045, 0, 1.6768, -0.043125,
   628.301955, 1, 1.14307, 13.49291, 8364.73984, 0, 0.90114, -35.82391, -0.35232, 0, 0.82155,
   4.56444, 393.02097, 0, 0.78811, 24.86727, -8326.39023, 0, 0.51642, 11.2261, 6585.76091, 1,
@@ -317,7 +317,7 @@ export const MOON_LONGITUDE_LINEAR = new Float64Array([
 
 /** 414 terms; error ≤ 0.200″ over |t| ≤ 1.5. */
 
-export const MOON_LATITUDE_QUARTIC = new Float64Array([
+export const MOON_LATITUDE_QUARTIC = /* @__PURE__ */ new Float64Array([
   18461.23868, 1.627905233, 8433.4661581305, -0.000059392, -5e-9, 2e-11, 1010.16707, 3.98346113,
   16762.15758509, 0.00009764, 2.45e-7, -1e-9, 999.69358, 0.72765066, -104.77473117, 0.00021642,
   2.55e-7, -1e-9, 623.65243, 8.76902825, 7109.2881355, 0.0000025, 7e-8, -3e-10, 199.48374,
@@ -456,7 +456,7 @@ export const MOON_LATITUDE_QUARTIC = new Float64Array([
   0.0042, 27.176, 55548.056, 0.0001, 6e-7, -3e-9,
 ]);
 
-export const MOON_LATITUDE_LINEAR = new Float64Array([
+export const MOON_LATITUDE_LINEAR = /* @__PURE__ */ new Float64Array([
   8.04508, 6.95195, 8399.709114, 0, 1.37497, 11.7539, 8399.68473, 0, 0.63037, 28.85072,
   8435.76735, 0, 0.63014, 25.5949, -8431.16496, 0, 0.45586, 1.4548, 71.0177, 0, 0.4157, 9.3075,
   16728.40054, 0, 0.32622, 0.55455, -8467.2232, 0, 0.29854, -6.5866, -7143.0452, 0, 0.14073,
@@ -520,7 +520,7 @@ export const MOON_LATITUDE_LINEAR = new Float64Array([
 
 /** Coarse: error ≤ 20.0″. Not a prefix of the full table; the split by phase degree does not preserve amplitude order. */
 
-export const MOON_LATITUDE_COARSE_QUARTIC = new Float64Array([
+export const MOON_LATITUDE_COARSE_QUARTIC = /* @__PURE__ */ new Float64Array([
   18461.2387, 1.62790523, 8433.46615813, -0.00005939, -5e-9, 2e-11, 1010.167, 3.983461,
   16762.157585, 0.0000976, 2.5e-7, -1e-9, 999.6936, 0.7276507, -104.7747312, 0.0002164, 2.6e-7,
   -1e-9, 623.6524, 8.7690282, 7109.2881355, 0.0000025, 7e-8, -3e-10, 199.4837, 9.669283,
@@ -544,13 +544,13 @@ export const MOON_LATITUDE_COARSE_QUARTIC = new Float64Array([
   23766.671, 0.0003, 6e-7, -3e-9, 1.766, 11.1677, 14809.6776, 0.00016, 3e-7, -2e-9,
 ]);
 
-export const MOON_LATITUDE_COARSE_LINEAR = new Float64Array([
+export const MOON_LATITUDE_COARSE_LINEAR = /* @__PURE__ */ new Float64Array([
   8.045, 6.95195, 8399.70911, 0,
 ]);
 
 /** 623 terms; error ≤ 0.198 km over |t| ≤ 1.5. */
 
-export const MOON_DISTANCE_QUARTIC = new Float64Array([
+export const MOON_DISTANCE_QUARTIC = /* @__PURE__ */ new Float64Array([
   385000.52896, 1.5707963268, 0, 0, 0, 0, -20905.35504, 3.926352225, 8328.6914269556,
   0.0001570278, 2.504e-7, -1.2e-9, -3699.11092, 9.61217391, 7214.062866668, -0.000213926,
   -1.86e-7, 9e-10, -2955.96756, 11.96772981, 15542.754293624, -0.000056899, 6.4e-8, -3e-10,
@@ -691,7 +691,7 @@ export const MOON_DISTANCE_QUARTIC = new Float64Array([
   0.0004, 8e-7, -4e-9,
 ]);
 
-export const MOON_DISTANCE_LINEAR = new Float64Array([
+export const MOON_DISTANCE_LINEAR = /* @__PURE__ */ new Float64Array([
   1.0587, 11.92211, 8364.73984, 0, 0.51395, 12.01085, 14914.45234, 1, 0.72783, 26.43806,
   -8326.39023, 0, 0.68256, 34.29081, 8330.99262, 0, 0.59827, 13.87989, 8393.12578, 0, 0.38245,
   9.6553, 6585.7609, 1, 0.32654, -0.8279, -7700.38947, 1, 0.45648, 9.2504, 8294.93438, 0,
@@ -827,7 +827,7 @@ export const MOON_DISTANCE_LINEAR = new Float64Array([
 
 /** Track: error ≤ 4.90 km. Not a prefix of the full table; the split by phase degree does not preserve amplitude order. */
 
-export const MOON_DISTANCE_TRACK_QUARTIC = new Float64Array([
+export const MOON_DISTANCE_TRACK_QUARTIC = /* @__PURE__ */ new Float64Array([
   385000.529, 1.5707963268, 0, 0, 0, 0, -20905.355, 3.926352225, 8328.691426956, 0.000157028,
   2.5e-7, -1e-9, -3699.1109, 9.6121739, 7214.06286667, -0.00021393, -1.9e-7, 9e-10, -2955.9676,
   11.9677298, 15542.75429362, -0.0000569, 6e-8, -3e-10, -569.9251, 6.2819081, 16657.3828539,
@@ -876,7 +876,7 @@ export const MOON_DISTANCE_TRACK_QUARTIC = new Float64Array([
   38299.5715, -0.0003, -6e-8, 3e-10,
 ]);
 
-export const MOON_DISTANCE_TRACK_LINEAR = new Float64Array([
+export const MOON_DISTANCE_TRACK_LINEAR = /* @__PURE__ */ new Float64Array([
   1.0587, 11.9221, 8364.73984, 0, 0.514, 12.0109, 14914.4523, 1, 0.7278, 26.438, -8326.3902, 0,
   0.6826, 34.2908, 8330.9926, 0, 0.5983, 13.8799, 8393.1258, 0, 0.3824, 9.6553, 6585.761, 1,
   0.3265, -0.828, -7700.3895, 1, 0.4565, 9.2504, 8294.9344, 0, 0.4528, 1.3977, -8362.4485, 0,
@@ -885,7 +885,7 @@ export const MOON_DISTANCE_TRACK_LINEAR = new Float64Array([
 
 /** Coarse: error ≤ 90.4 km. Not a prefix of the full table; the split by phase degree does not preserve amplitude order. */
 
-export const MOON_DISTANCE_COARSE_QUARTIC = new Float64Array([
+export const MOON_DISTANCE_COARSE_QUARTIC = /* @__PURE__ */ new Float64Array([
   385000.529, 1.570796327, 0, 0, 0, 0, -20905.355, 3.92635223, 8328.69142696, 0.00015703,
   2.5e-7, -1e-9, -3699.111, 9.6121739, 7214.0628667, -0.0002139, -2e-7, 9e-10, -2955.9676,
   11.9677298, 15542.7542936, -0.0000569, 6e-8, -3e-10, -569.925, 6.281908, 16657.382854,
@@ -902,6 +902,6 @@ export const MOON_DISTANCE_COARSE_QUARTIC = new Float64Array([
   3e-9, -12.8314, 14.3664, 23243.14377, 0.0001, 3e-7, -1e-9,
 ]);
 
-export const MOON_DISTANCE_COARSE_LINEAR = new Float64Array([
+export const MOON_DISTANCE_COARSE_LINEAR = /* @__PURE__ */ new Float64Array([
 
 ]);

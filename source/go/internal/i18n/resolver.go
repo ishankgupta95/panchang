@@ -2,20 +2,27 @@ package i18n
 
 import "github.com/ishankgupta95/panchang/source/go/v5/types"
 
-var translations = map[types.Language]PanchangTranslations{
-	types.LanguageEn: en,
-	types.LanguageHi: hi,
+// translations holds pointers so the name resolvers below read one field
+// without copying the whole table (a few KB) on every call. Nothing writes to
+// en or hi after initialisation.
+var translations = map[types.Language]*PanchangTranslations{
+	types.LanguageEn: &en,
+	types.LanguageHi: &hi,
 }
 
-func GetTranslations(lang types.Language) PanchangTranslations {
+func translationsFor(lang types.Language) *PanchangTranslations {
 	if t, ok := translations[lang]; ok {
 		return t
 	}
-	return en
+	return &en
+}
+
+func GetTranslations(lang types.Language) PanchangTranslations {
+	return *translationsFor(lang)
 }
 
 func ResolvePakshaName(index int, lang types.Language) string {
-	t := GetTranslations(lang)
+	t := translationsFor(lang)
 	if index < 15 {
 		return t.PakshaNames.Shukla
 	}
@@ -23,7 +30,7 @@ func ResolvePakshaName(index int, lang types.Language) string {
 }
 
 func ResolveTithiName(index int, lang types.Language) string {
-	t := GetTranslations(lang)
+	t := translationsFor(lang)
 	if index == 14 {
 		return t.Misc.Purnima
 	}
@@ -40,19 +47,19 @@ func ResolveTithiName(index int, lang types.Language) string {
 }
 
 func ResolveNakshatraName(index int, lang types.Language) string {
-	return GetTranslations(lang).NakshatraNames[index]
+	return translationsFor(lang).NakshatraNames[index]
 }
 
 func ResolveYogaName(index int, lang types.Language) string {
-	return GetTranslations(lang).YogaNames[index]
+	return translationsFor(lang).YogaNames[index]
 }
 
 func ResolveAnandadiYogaName(index int, lang types.Language) string {
-	return GetTranslations(lang).AnandadiYogaNames[index]
+	return translationsFor(lang).AnandadiYogaNames[index]
 }
 
 func ResolveKaranaName(index int, lang types.Language) string {
-	t := GetTranslations(lang)
+	t := translationsFor(lang)
 	if index == 0 {
 		return t.KaranaNames.Fixed[0]
 	}
@@ -63,11 +70,11 @@ func ResolveKaranaName(index int, lang types.Language) string {
 }
 
 func ResolveMasaName(index int, lang types.Language) string {
-	return GetTranslations(lang).MasaNames[index]
+	return translationsFor(lang).MasaNames[index]
 }
 
 func ResolveChandraMasaName(index int, lang types.Language, adhika bool) string {
-	t := GetTranslations(lang)
+	t := translationsFor(lang)
 	name := t.ChandraMasaNames[index]
 	if adhika {
 		return t.Misc.Adhika + " " + name

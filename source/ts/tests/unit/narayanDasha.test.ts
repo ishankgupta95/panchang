@@ -5,6 +5,7 @@ import {
   CHARA_RASHI_YEARS,
 } from '../../src/jyotish/dasha';
 import { computeLagna } from '../../src/jyotish/lagna';
+import { computeRashiChart } from '../../src/jyotish/charts';
 import { readTestData } from '../testdata';
 
 const fixtures = readTestData('charts', 'astrosage-charts.json');
@@ -242,7 +243,9 @@ const VISHAMA_PADA_SET = new Set<number>([0, 1, 2, 6, 7, 8]);
 function inclusiveSignCount(src: number, dst: number, anti: boolean): number {
   return anti ? ((src - dst + 12) % 12) + 1 : ((dst - src + 12) % 12) + 1;
 }
+/** Rath's Rule 2: count to the lord less one, a lord in the rashi itself counting 13 - 1 = 12. */
 function expectedNarayanBase(rashi: number, lordRashi: number): number {
+  if (lordRashi === rashi) return 12;
   const anti = !VISHAMA_PADA_SET.has(rashi);
   return inclusiveSignCount(rashi, lordRashi, anti) - 1;
 }
@@ -275,7 +278,6 @@ describe('Narayan Dasha: variable-duration opt-in, real fixture sweep', () => {
     const f = VARIABLE_FIXTURE_CHARTS.find((c) => c.name === name)!;
     const utc = variableLocalToUtc(f.dateLocal, f.tzh);
     const loc = { latitude: f.lat, longitude: f.lon };
-    const { computeRashiChart } = await import('../../src/jyotish/charts');
     const chart = computeRashiChart(utc, loc, { houseSystem: 'whole-sign' });
     const planetRashi = new Map<string, number>(
       chart.planets.map((p) => [p.planet, p.rashi.index] as const),
@@ -383,8 +385,7 @@ describe('Narayan variable: Rule 4 dual-lord (Scorpio / Aquarius)', () => {
 
 describe('Narayan variable: Sanjay Rath worked Einstein table validation', () => {
   function einsteinExpected(rashi: number, _lord: string, lordRashi: number, exalt: number): number {
-    const anti = !VISHAMA_PADA_SET.has(rashi);
-    let y = inclusiveSignCount(rashi, lordRashi, anti) - 1 + exalt;
+    const y = expectedNarayanBase(rashi, lordRashi) + exalt;
     return Math.min(12, Math.max(0, y));
   }
 
@@ -392,8 +393,8 @@ describe('Narayan variable: Sanjay Rath worked Einstein table validation', () =>
     expect(einsteinExpected(0, 'Mars', 9, +1)).toBe(10);
   });
 
-  it('Algorithm: Cancer → Moon-in-Scorpio (debilitated) → years=8 [Sanjay Rath table: 12]', () => {
-    expect(einsteinExpected(3, 'Moon', 7, -1)).toBe(7);
+  it('Algorithm: Cancer → Moon in Cancer (own rashi) → 13 - 1 = 12, as the table prints', () => {
+    expect(einsteinExpected(3, 'Moon', 3, 0)).toBe(12);
   });
 
   it('Algorithm: Libra → Venus-in-Pisces (exalted) → years=6', () => {
@@ -402,5 +403,46 @@ describe('Narayan variable: Sanjay Rath worked Einstein table validation', () =>
 
   it('Algorithm: Sagittarius → Jupiter-in-Aquarius → years=2', () => {
     expect(einsteinExpected(8, 'Jupiter', 10, 0)).toBe(2);
+  });
+});
+
+describe('Narayan variable: a lord in its own rashi gives 12 years (Rath, Rule 2: 13 - 1)', () => {
+  function variableFor(utc: Date, loc: { latitude: number; longitude: number }) {
+    const chart = computeRashiChart(utc, loc, { houseSystem: 'whole-sign' });
+    const planetRashi = new Map<string, number>(chart.planets.map((p) => [p.planet, p.rashi.index] as const));
+    return { planetRashi, result: computeNarayanDasha(utc, loc, 'lahiri', { duration: 'variable' }) };
+  }
+  function fixture(name: string) {
+    const f = VARIABLE_FIXTURE_CHARTS.find((c) => c.name === name)!;
+    return variableFor(variableLocalToUtc(f.dateLocal, f.tzh), { latitude: f.lat, longitude: f.lon });
+  }
+
+  it.each([
+    ['Barack Obama', 9, 'Saturn'],
+    ['Ashok Gehlot', 11, 'Jupiter'],
+    ['Ashok Gehlot', 0, 'Mars'],
+    ['Ashok Gehlot', 1, 'Venus'],
+  ] as const)('%s: rashi %i with %s in it runs 12 years', (name, rashi, lord) => {
+    const { planetRashi, result } = fixture(name);
+    expect(planetRashi.get(lord)).toBe(rashi);
+    expect(result.mahaDashas.find((md) => md.rashi === rashi)!.years).toBe(12);
+  });
+
+  it('Modi: Mercury in Virgo is own rashi and exalted, 12 + 1 capped at 12 (Rule 3b)', () => {
+    const { planetRashi, result } = fixture('Narendra Modi');
+    expect(planetRashi.get('Mercury')).toBe(5);
+    expect(result.mahaDashas.find((md) => md.rashi === 5)!.years).toBe(12);
+  });
+
+  it('1990-05-15T06:30Z Pune: Saturn in Capricorn gives Capricorn 12 years, no zero-length period', () => {
+    const { planetRashi, result } = variableFor(new Date('1990-05-15T06:30:00Z'),
+      { latitude: 18.5204, longitude: 73.8567 });
+    expect(planetRashi.get('Saturn')).toBe(9);
+    const cap = result.mahaDashas.find((md) => md.rashi === 9)!;
+    expect(cap.years).toBe(12);
+    expect(cap.endDate.getTime() - cap.startDate.getTime()).toBe(12 * 365.25 * 86_400_000);
+    for (const md of result.mahaDashas) {
+      if (md.years > 0) expect(md.endDate.getTime()).toBeGreaterThan(md.startDate.getTime());
+    }
   });
 });

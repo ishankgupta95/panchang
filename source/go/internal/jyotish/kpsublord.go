@@ -32,6 +32,14 @@ func subLordAtOffset(degInNak float64, starLord types.DashaLord) types.DashaLord
 
 func ComputeKpSubLord(siderealLongitude float64) KpSubLordInfo {
 	lon := utils.Normalize360(siderealLongitude)
+	if math.IsNaN(lon) {
+		// TypeScript reads NaN indices and undefined sign and star lords here,
+		// and its sub lord walk falls through to Saturn.
+		return KpSubLordInfo{
+			Longitude: lon, Rashi: -1, Nakshatra: -1,
+			SignLord: -1, StarLord: -1, SubLord: types.DashaSaturn,
+		}
+	}
 	rashi := int(math.Floor(lon / 30))
 	nakIdx := utils.NakshatraOf(lon)
 	degInNak := lon - float64(float64(nakIdx)*utils.NakshatraSpan)
@@ -87,11 +95,15 @@ func ComputeKpSignificators(chart *types.BirthChart) KpSignificators {
 	var planetStarLord [types.GrahaCount]types.DashaLord
 	var haveStarLord [types.GrahaCount]bool
 	for _, p := range chart.Planets {
+		if !p.Planet.Valid() {
+			continue // TypeScript files it under a key no later step reads
+		}
 		planetHouse[p.Planet] = p.House
 		haveHouse[p.Planet] = true
-		nakIdx := utils.NakshatraOf(p.Longitude)
-		planetStarLord[p.Planet] = NakshatraLord[nakIdx]
-		haveStarLord[p.Planet] = true
+		if lon := utils.Normalize360(p.Longitude); !math.IsNaN(lon) {
+			planetStarLord[p.Planet] = NakshatraLord[utils.NakshatraOf(lon)]
+			haveStarLord[p.Planet] = true
+		}
 	}
 
 	lagnaRashi := chart.Lagna.Rashi.Index

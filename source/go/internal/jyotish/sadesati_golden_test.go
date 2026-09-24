@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
 	"math"
+	"math/rand"
 	"testing"
 
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/astronomy"
@@ -338,7 +339,7 @@ func TestSadeSatiRejectsRashiOutOfRange(t *testing.T) {
 func findNextEntryIntEndpoints(
 	ctx *astronomy.EphemerisCtx,
 	startMs int64,
-	targetRashi int,
+	isInArc func(rashi int) bool,
 	ayanamsa types.AyanamsaType,
 ) (*types.JSDate, error) {
 	stepMs := int64(sadeSatiCoarseStep) * sadeSatiDayMs
@@ -354,7 +355,7 @@ func findNextEntryIntEndpoints(
 		if err != nil {
 			return nil, err
 		}
-		if r == targetRashi && prevRashi != targetRashi {
+		if isInArc(r) && !isInArc(prevRashi) {
 			lo, hi := ms, next
 			for hi-lo > sadeSatiDayMs {
 				mid := lo + (hi-lo)/2
@@ -362,7 +363,7 @@ func findNextEntryIntEndpoints(
 				if err != nil {
 					return nil, err
 				}
-				if rm == targetRashi {
+				if isInArc(rm) {
 					hi = mid
 				} else {
 					lo = mid
@@ -409,12 +410,13 @@ func TestSadeSatiBisectionNeedsFloatEndpoints(t *testing.T) {
 			skipped++
 			continue
 		}
-		target := (c.Rashi + 11) % 12
-		f, err := findNextEntry(ctx, c.Ms, target, "lahiri")
+		m := c.Rashi
+		isInArc := func(r int) bool { return r == (m+11)%12 || r == m || r == (m+1)%12 }
+		f, err := findNextEntry(ctx, c.Ms, isInArc, "lahiri")
 		if err != nil {
 			t.Fatalf("rashi=%d ms=%d: %v", c.Rashi, c.Ms, err)
 		}
-		i64, err := findNextEntryIntEndpoints(ctx, c.Ms, target, "lahiri")
+		i64, err := findNextEntryIntEndpoints(ctx, c.Ms, isInArc, "lahiri")
 		if err != nil {
 			t.Fatalf("rashi=%d ms=%d: %v", c.Rashi, c.Ms, err)
 		}
@@ -444,4 +446,232 @@ func TestSadeSatiBisectionNeedsFloatEndpoints(t *testing.T) {
 	t.Logf("float and int64 bisection endpoints agree on all %d inactive cases "+
 		"checked, as the valuation predicts (%d further inactive cases skipped by "+
 		"the %d-case cap)", checked, skipped, bisectionCases)
+}
+
+// The scans take steady samples without evaluating them, on the strength of
+// saturnMaxSpeedDegPerDay. This pins that bound against the ephemeris over
+// every instant a scan can reach: 12 years before 1900 to 30 years after 2100.
+func TestSaturnSiderealSpeedStaysBelowTheSkipBound(t *testing.T) {
+	ctx := astronomy.NewEphemerisCtx()
+	from := types.DateUTC(1887, 0, 1).Ms()
+	to := types.DateUTC(2133, 0, 1).Ms()
+	step := int64(4) * sadeSatiDayMs
+	if testing.Short() {
+		step *= 8
+	}
+	const half = sadeSatiDayMs / 4
+	worst := 0.0
+	for ms := from; ms < to; ms += step {
+		a, err := saturnSiderealLongitude(ctx, ms-half, types.Lahiri)
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := saturnSiderealLongitude(ctx, ms+half, types.Lahiri)
+		if err != nil {
+			t.Fatal(err)
+		}
+		d := math.Abs(b - a)
+		if d > 180 {
+			d = 360 - d
+		}
+		worst = math.Max(worst, d/0.5)
+	}
+	if worst >= saturnMaxSpeedDegPerDay || worst < 0.12 {
+		t.Fatalf("fastest sidereal Saturn %v deg/day; the skip bound %v needs it below, and a "+
+			"value under 0.12 means the sampling missed the known 0.1303 peak", worst, saturnMaxSpeedDegPerDay)
+	}
+	t.Logf("fastest sidereal Saturn %.6f deg/day, bound %v", worst, saturnMaxSpeedDegPerDay)
+}
+
+func TestSaturnSkipDivisorMatchesTypeScript(t *testing.T) {
+	// 0.2 * 7 in JavaScript.
+	if saturnMaxDegPerCoarseStep != 1.4000000000000001 {
+		t.Fatalf("0.2 * 7 = %v, JavaScript gives 1.4000000000000001", saturnMaxDegPerCoarseStep)
+	}
+}
+
+// findArcBoundaryEvaluatingAll and findNextEntryEvaluatingAll are the scans as
+// they were before steady samples were skipped: every coarse sample evaluated.
+func findArcBoundaryEvaluatingAll(ctx *astronomy.EphemerisCtx, startMs int64,
+	isInArc func(rashi int) bool, forward bool, ayanamsa types.AyanamsaType,
+) (*types.JSDate, int, error) {
+	stepDays := sadeSatiCoarseStep
+	scanDays := sadeSatiMaxForwardScanDays
+	if !forward {
+		stepDays = -sadeSatiCoarseStep
+		scanDays = sadeSatiMaxBackwardScanDays
+	}
+	stepMs := int64(stepDays) * sadeSatiDayMs
+	maxIters := float64(scanDays) / float64(sadeSatiCoarseStep)
+	currentMs, lastInsideMs, outsideRunDays, evals := startMs, startMs, 0, 0
+	for i := 0; float64(i) < maxIters; i++ {
+		currentMs += stepMs
+		r, err := saturnRashi(ctx, currentMs, ayanamsa)
+		evals++
+		if err != nil {
+			return nil, evals, err
+		}
+		if isInArc(r) {
+			outsideRunDays = 0
+			lastInsideMs = currentMs
+			continue
+		}
+		outsideRunDays += sadeSatiCoarseStep
+		if outsideRunDays >= sadeSatiStabilityDays {
+			d, err := refineBoundary(ctx, lastInsideMs, isInArc, forward, ayanamsa)
+			return d, evals, err
+		}
+	}
+	return nil, evals, nil
+}
+
+func findNextEntryEvaluatingAll(ctx *astronomy.EphemerisCtx, startMs int64,
+	isInArc func(rashi int) bool, ayanamsa types.AyanamsaType,
+) (*types.JSDate, error) {
+	stepMs := int64(sadeSatiCoarseStep) * sadeSatiDayMs
+	ms := startMs
+	prevRashi, err := saturnRashi(ctx, ms, ayanamsa)
+	if err != nil {
+		return nil, err
+	}
+	maxIters := float64(sadeSatiMaxForwardScanDays) / float64(sadeSatiCoarseStep)
+	for i := 0; float64(i) < maxIters; i++ {
+		next := ms + stepMs
+		r, err := saturnRashi(ctx, next, ayanamsa)
+		if err != nil {
+			return nil, err
+		}
+		if isInArc(r) && !isInArc(prevRashi) {
+			lo, hi := float64(ms), float64(next)
+			for hi-lo > sadeSatiDayMs {
+				mid := lo + (hi-lo)/2
+				rm, err := saturnRashi(ctx, int64(mid), ayanamsa)
+				if err != nil {
+					return nil, err
+				}
+				if isInArc(rm) {
+					hi = mid
+				} else {
+					lo = mid
+				}
+			}
+			return jsDatePtr(int64(hi)), nil
+		}
+		ms = next
+		prevRashi = r
+	}
+	return nil, nil
+}
+
+func sameDatePtr(a, b *types.JSDate) bool {
+	return (a == nil && b == nil) || (a != nil && b != nil && a.Ms() == b.Ms())
+}
+
+// The skipping scans must return exactly what the evaluate-everything scans
+// return: from random instants, from instants a millisecond to a few weeks
+// either side of Saturn's rashi ingresses (where the arc edges sit), for every
+// arc, under several ayanamsas, and for arcs no natal Moon yields.
+func TestSadeSatiScansSkipWithoutChangingTheResult(t *testing.T) {
+	ctx := astronomy.NewEphemerisCtx()
+	rng := rand.New(rand.NewSource(20260924))
+	lo := types.DateUTC(1900, 0, 1).Ms()
+	hi := types.DateUTC(2101, 0, 1).Ms()
+
+	starts := []int64{lo, hi - 1}
+	for i := 0; i < 8; i++ {
+		starts = append(starts, lo+rng.Int63n(hi-lo))
+	}
+	// Ingresses: from eight spread-out instants, walk weekly to the next rashi
+	// change and bisect it to the millisecond.
+	ingresses := 0
+	for k := int64(0); k < 8; k++ {
+		ms := lo + 400*sadeSatiDayMs + k*(hi-lo-2000*sadeSatiDayMs)/8
+		a, _ := saturnRashi(ctx, ms, types.Lahiri)
+		for {
+			b, _ := saturnRashi(ctx, ms+sadeSatiCoarseStep*sadeSatiDayMs, types.Lahiri)
+			if b != a {
+				break
+			}
+			ms += sadeSatiCoarseStep * sadeSatiDayMs
+		}
+		l, h := ms, ms+sadeSatiCoarseStep*sadeSatiDayMs
+		for h-l > 1 {
+			m := l + (h-l)/2
+			if r, _ := saturnRashi(ctx, m, types.Lahiri); r == a {
+				l = m
+			} else {
+				h = m
+			}
+		}
+		for _, off := range []int64{-1, 0, 1, -7 * sadeSatiDayMs, 40 * sadeSatiDayMs} {
+			starts = append(starts, h+off)
+		}
+		ingresses++
+	}
+	if ingresses < 8 {
+		t.Fatalf("found %d ingresses", ingresses)
+	}
+	if testing.Short() {
+		starts = starts[:12]
+	}
+
+	type arc struct {
+		name string
+		in   func(r int) bool
+	}
+	arcs := []arc{}
+	for m := 0; m < 12; m++ {
+		m := m
+		arcs = append(arcs, arc{"natal" + itoa(m), func(r int) bool { return r == (m+11)%12 || r == m || r == (m+1)%12 }})
+	}
+	arcs = append(arcs,
+		arc{"one sign", func(r int) bool { return r == 4 }},
+		arc{"two apart", func(r int) bool { return r == 1 || r == 3 }},
+	)
+	ayanamsas := []types.AyanamsaType{types.Lahiri, types.Raman, types.Krishnamurti}
+
+	checked, fullEvals := 0, 0
+	for i, start := range starts {
+		ay := ayanamsas[i%len(ayanamsas)]
+		// The two natal arcs with an edge at the rashi boundary nearest
+		// Saturn, two others, and the two unusual arc shapes.
+		lon, err := saturnSiderealLongitude(ctx, start, ay)
+		if err != nil {
+			t.Fatal(err)
+		}
+		edge := int(math.Round(lon/30)) % 12
+		picks := []int{(edge + 1) % 12, (edge + 10) % 12, rng.Intn(12), rng.Intn(12), 12, 13}
+		for _, pick := range picks {
+			a := arcs[pick]
+			for _, forward := range []bool{true, false} {
+				got, err := findArcBoundary(ctx, start, a.in, forward, ay)
+				if err != nil {
+					t.Fatal(err)
+				}
+				want, evals, err := findArcBoundaryEvaluatingAll(ctx, start, a.in, forward, ay)
+				if err != nil {
+					t.Fatal(err)
+				}
+				fullEvals += evals
+				if !sameDatePtr(got, want) {
+					t.Fatalf("findArcBoundary(%s, %s, forward=%v, %s) = %s, evaluating every sample gives %s",
+						types.Date(start).ISOString(), a.name, forward, ay, nilOrDate(got), nilOrDate(want))
+				}
+			}
+			got, err := findNextEntry(ctx, start, a.in, ay)
+			if err != nil {
+				t.Fatal(err)
+			}
+			want, err := findNextEntryEvaluatingAll(ctx, start, a.in, ay)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !sameDatePtr(got, want) {
+				t.Fatalf("findNextEntry(%s, %s, %s) = %s, evaluating every sample gives %s",
+					types.Date(start).ISOString(), a.name, ay, nilOrDate(got), nilOrDate(want))
+			}
+			checked++
+		}
+	}
+	t.Logf("%d start x arc cases identical (%d full-scan evaluations compared)", checked, fullEvals)
 }

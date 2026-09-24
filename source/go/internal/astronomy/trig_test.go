@@ -5,8 +5,10 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/ishankgupta95/panchang/source/go/v5/internal/jsnum"
 	"github.com/ishankgupta95/panchang/source/go/v5/internal/repopath"
 	"math"
+	"math/big"
 	"testing"
 )
 
@@ -314,4 +316,44 @@ func TestFMABarrierIsLoadBearing(t *testing.T) {
 		}
 	})
 	t.Logf("fused vs barriered: %d/200000 arguments differ, worst |Δ| %.3e", diverged, worst)
+}
+
+// jsRounded is one IEEE double operation as JavaScript performs it: the exact
+// result of op on a and b, rounded once to the nearest double.
+func jsRounded(op func(z, x, y *big.Float) *big.Float, a, b float64) float64 {
+	exact := op(new(big.Float).SetPrec(1024), big.NewFloat(a), big.NewFloat(b))
+	f, _ := new(big.Float).SetPrec(53).SetMode(big.ToNearestEven).Set(exact).Float64()
+	return f
+}
+
+// The golden sweeps stop at 1e6, where every product in reduce is exact and
+// so fused or not gives the same bits. Past about 1e8 rad (q above 2^25) they
+// are not, and only the float64 barriers make reduce round each product as
+// trig.ts does. No series argument over the supported dates comes near that;
+// this pins the barriers anyway, against an exact emulation of the TypeScript.
+func TestReduceRoundsEachProductAsTypeScriptDoes(t *testing.T) {
+	mul := (*big.Float).Mul
+	sub := (*big.Float).Sub
+	s := uint32(0x2ed0ce)
+	for i := 0; i < 20_000; i++ {
+		s = s*1664525 + 1013904223
+		x := math.Pow(10, 8+5*float64(s)/4294967296)
+		if i%2 == 1 {
+			x = -x
+		}
+		product := jsRounded(mul, x, inversePI)
+		if frac := product - math.Floor(product); math.Abs(frac-0.5) < 1e-3 {
+			// Near a tie Round's own subtraction can take the unrounded product
+			// on arm64 and pick the other quadrant; that is Round's matter, not
+			// the barriers', and a millionth of the sweep at most.
+			continue
+		}
+		q := jsnum.Round(product)
+		want := jsRounded(sub, jsRounded(sub, jsRounded(sub, x, jsRounded(mul, q, pi1)),
+			jsRounded(mul, q, pi2)), jsRounded(mul, q, pi3))
+		got, odd := reduce(x)
+		if wantOdd := int64(q)&1 == 1; math.Float64bits(got) != math.Float64bits(want) || odd != wantOdd {
+			t.Fatalf("reduce(%v) = (%v, %v), TypeScript rounding gives (%v, %v)", x, got, odd, want, wantOdd)
+		}
+	}
 }

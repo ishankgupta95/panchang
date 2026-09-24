@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { computeFestivals, type FestivalComputeContext } from '../../src/core/festivals';
+import {
+  computeFestivals, type DayGeometry, type FestivalComputeContext, type KalaDay,
+} from '../../src/core/festivals';
 import type { FestivalRegion } from '../../src/types/options';
 
 const resolver = (key: string) => key;
@@ -231,6 +233,21 @@ describe('computeFestivals', () => {
       expect(r.some(f => f.type === 'smarta_ekadashi')).toBe(false);
     });
 
+    it('emits nothing on the first day of a plain vriddha Ekadashi', () => {
+      const r = computeFestivals(ctx({ tithiIndex: 10, ekadashiVriddhaFirstDay: true }), resolver);
+      expect(r.filter(f => f.type.endsWith('ekadashi'))).toEqual([]);
+    });
+
+    it('emits Smarta + generic, not Vaishnava, on vriddha day 1 when Dwadashi touches no sunrise', () => {
+      const r = computeFestivals(
+        ctx({ tithiIndex: 25, ekadashiVriddhaFirstDay: true, ekadashiVriddhaTrisprisha: true }),
+        resolver,
+      );
+      expect(r.filter(f => f.type.endsWith('ekadashi')).map(f => f.type))
+        .toEqual(['smarta_ekadashi', 'ekadashi']);
+      expect(r.find(f => f.type === 'smarta_ekadashi')?.description).toBe('ekadashi_apara');
+    });
+
     it('emits Vaishnava Ekadashi on the first day of a vriddha Dwadashi', () => {
       const r = computeFestivals(
         ctx({ tithiIndex: 11, ekadashiVriddhaDwadashiToday: true }),
@@ -434,7 +451,29 @@ describe('computeFestivals', () => {
 
     it('does not emit on other tithis', () => {
       const r = computeFestivals(
-        ctx({ tithiIndex: 18, tithiByRule: { chandrodaya: 19 } }),
+        ctx({ tithiIndex: 19, tithiByRule: { chandrodaya: 19 } }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'sankashti_chaturthi')).toBe(false);
+    });
+
+    it('falls back to sunrise when Chaturthi touches no moonrise, as Karva Chauth does', () => {
+      const r = computeFestivals(
+        ctx({
+          tithiIndex: 18, chandraMasaIndex: 6,
+          tithiByRule: { chandrodaya: 19 }, priorDayTithiByRule: { chandrodaya: 17 },
+        }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'sankashti_chaturthi')).toBe(true);
+      expect(r.some(f => f.name === 'karva_chauth')).toBe(true);
+    });
+
+    it('the fallback yields when yesterday\'s moonrise already had Chaturthi', () => {
+      const r = computeFestivals(
+        ctx({
+          tithiIndex: 18, tithiByRule: { chandrodaya: 19 }, priorDayTithiByRule: { chandrodaya: 18 },
+        }),
         resolver,
       );
       expect(r.some(f => f.name === 'sankashti_chaturthi')).toBe(false);
@@ -468,12 +507,75 @@ describe('computeFestivals', () => {
       expect(r.some(f => f.name === 'onam')).toBe(true);
     });
 
+    it('Onam is keyed on the solar month, so an adhika lunar month does not suppress it', () => {
+      const r = computeFestivals(
+        ctx({ nakshatraIndex: 21, solarMasaIndex: 4, isAdhika: true }),
+        resolver,
+      );
+      expect(r.some(f => f.name === 'onam')).toBe(true);
+    });
+
     it('Onam does not fire with correct nakshatra but wrong solar masa', () => {
       const r = computeFestivals(
         ctx({ nakshatraIndex: 21, solarMasaIndex: 3 }),
         resolver,
       );
       expect(r.some(f => f.name === 'onam')).toBe(false);
+    });
+
+    const onam = (o: Partial<FestivalComputeContext>): boolean =>
+      computeFestivals(ctx({ solarMasaIndex: 4, nextDayNakshatraIndex: 22, ...o }), resolver)
+        .some(f => f.key === 'onam');
+
+    it('Onam: the second of two Chingam sunrises in Thiruvonam yields to the first', () => {
+      expect(onam({ nakshatraIndex: 21, priorDayNakshatraIndex: 21, priorDaySolarMasaIndex: 4 })).toBe(false);
+      expect(onam({ nakshatraIndex: 21, priorDayNakshatraIndex: 20, priorDaySolarMasaIndex: 4 })).toBe(true);
+    });
+
+    it('Onam: a Thiruvonam whose first sunrise fell in Karkidakam takes its first Chingam sunrise', () => {
+      expect(onam({ nakshatraIndex: 21, priorDayNakshatraIndex: 21, priorDaySolarMasaIndex: 3 })).toBe(true);
+    });
+
+    it('Onam: a Thiruvonam touching no sunrise belongs to the day holding it', () => {
+      expect(onam({ nakshatraIndex: 20, nextDayNakshatraIndex: 22 })).toBe(true);
+      expect(onam({ nakshatraIndex: 20, nextDayNakshatraIndex: 21 })).toBe(false);
+    });
+
+    it('Onam: the earlier of two Chingam Thiruvonams yields to the later', () => {
+      const asked: number[] = [];
+      const later = (n: number): boolean => { asked.push(n); return true; };
+      expect(onam({ nakshatraIndex: 21, nakshatraLaterInSolarMonth: later })).toBe(false);
+      expect(asked).toEqual([21]);
+      expect(onam({ nakshatraIndex: 21, nakshatraLaterInSolarMonth: () => false })).toBe(true);
+    });
+  });
+
+  describe('Masik Karthigai and Karthigai Deepam', () => {
+    const keys = (o: Partial<FestivalComputeContext>): string[] =>
+      computeFestivals(ctx(o), resolver).map(f => f.key)
+        .filter(k => k === 'masik_karthigai' || k === 'karthigai_deepam');
+
+    it('the day flag decides, not Krittika at sunrise', () => {
+      expect(keys({ nakshatraIndex: 2, masikKarthigaiToday: false })).toEqual([]);
+      expect(keys({ nakshatraIndex: 1, masikKarthigaiToday: true })).toEqual(['masik_karthigai']);
+    });
+
+    it('without the flag (the instant view), Krittika at sunrise', () => {
+      expect(keys({ nakshatraIndex: 2 })).toEqual(['masik_karthigai']);
+    });
+
+    it('Karthigai Deepam replaces that day\'s Masik Karthigai where it is observed', () => {
+      const deepam = { masikKarthigaiToday: true, karthigaiDeepamToday: () => true };
+      expect(keys(deepam)).toEqual(['karthigai_deepam']);
+      expect(keys({ ...deepam, region: 'tamil-nadu' })).toEqual(['karthigai_deepam']);
+      expect(keys({ ...deepam, region: 'maharashtra' })).toEqual(['masik_karthigai']);
+      expect(keys({ masikKarthigaiToday: true, karthigaiDeepamToday: () => false })).toEqual(['masik_karthigai']);
+    });
+
+    it('Karthigai Deepam is only asked on a Masik Karthigai day', () => {
+      let asked = false;
+      keys({ masikKarthigaiToday: false, karthigaiDeepamToday: () => { asked = true; return true; } });
+      expect(asked).toBe(false);
     });
   });
 
@@ -554,12 +656,14 @@ describe('computeFestivals', () => {
       const r = computeFestivals(ctx({ tithiIndex: 4, chandraMasaIndex: 7 }), resolver);
       expect(r.some(f => f.name === 'chhath_kharna')).toBe(true);
     });
-    it('Sandhya Arghya: uses pradosha tithi', () => {
-      const r = computeFestivals(
+    it('Sandhya Arghya: the Shashthi (5) udaya day, not a Shashthi pradosha', () => {
+      const udaya = computeFestivals(ctx({ tithiIndex: 5, chandraMasaIndex: 7 }), resolver);
+      expect(udaya.some(f => f.name === 'chhath_sandhya_arghya')).toBe(true);
+      const pradosha = computeFestivals(
         ctx({ tithiIndex: 4, chandraMasaIndex: 7, tithiByRule: { pradosha: 5 } }),
         resolver,
       );
-      expect(r.some(f => f.name === 'chhath_sandhya_arghya')).toBe(true);
+      expect(pradosha.some(f => f.name === 'chhath_sandhya_arghya')).toBe(false);
     });
     it('Usha Arghya: Kartika (7) Shukla Shashthi (wait, Saptami=6)', () => {
       const r = computeFestivals(ctx({ tithiIndex: 6, chandraMasaIndex: 7 }), resolver);
@@ -788,6 +892,25 @@ describe('computeFestivals', () => {
         resolver,
       );
       expect(r.some(f => f.name === 'shravan_somvar')).toBe(false);
+    });
+    it('the month comes from varaMasaIndex (the caller\'s masaSystem) when given', () => {
+      const monday = (chandraMasaIndex: number, varaMasaIndex: number) =>
+        computeFestivals(ctx({ chandraMasaIndex, varaMasaIndex, varaIndex: 1, tithiIndex: 20 }), resolver)
+          .some(f => f.key === 'shravan_somvar');
+      expect(monday(3, 4)).toBe(true);    // Amanta Ashadha Krishna = Purnimanta Shravana
+      expect(monday(4, 5)).toBe(false);   // Amanta Shravana Krishna = Purnimanta Bhadrapada
+    });
+    it('Bonalu and Varamahalakshmi keep the Amanta month', () => {
+      const r = computeFestivals(
+        ctx({ chandraMasaIndex: 3, varaMasaIndex: 4, varaIndex: 0, tithiIndex: 20 }),
+        resolver,
+      );
+      expect(r.some(f => f.key === 'bonalu')).toBe(true);
+      const vm = computeFestivals(
+        ctx({ chandraMasaIndex: 3, varaMasaIndex: 4, varaIndex: 5, tithiIndex: 10 }),
+        resolver,
+      );
+      expect(vm.some(f => f.key === 'varamahalakshmi')).toBe(false);
     });
   });
 
@@ -1093,13 +1216,18 @@ describe('computeFestivals', () => {
       expect(r.some(f => f.name === 'mahalaya_amavasya')).toBe(true);
     });
 
-    it('Saddula Bathukamma: Ashwin (6) Shukla Navami (8)', () => {
+    it('Saddula Bathukamma: Ashwin (6) Shukla Ashtami (7), the Durgashtami day', () => {
       const r = computeFestivals(
-        ctx({ tithiIndex: 8, chandraMasaIndex: 6, region: 'telangana' }),
+        ctx({ tithiIndex: 7, chandraMasaIndex: 6, region: 'telangana' }),
         resolver,
       );
       expect(r.some(f => f.name === 'bathukamma_saddula')).toBe(true);
-      expect(r.some(f => f.name === 'maha_navami')).toBe(true);
+      expect(r.some(f => f.name === 'durga_ashtami')).toBe(true);
+      const navami = computeFestivals(
+        ctx({ tithiIndex: 8, chandraMasaIndex: 6, region: 'telangana' }),
+        resolver,
+      );
+      expect(navami.some(f => f.name === 'bathukamma_saddula')).toBe(false);
     });
 
     it('does NOT emit either marker outside Telangana', () => {
@@ -1205,12 +1333,12 @@ describe('computeFestivals', () => {
       expect(r.some(f => f.name === 'hariyali_teej')).toBe(false);
     });
 
-    it("kshayaRule 'exclude' opts Holi out, because it is pradosha-anchored", () => {
+    it("kshayaRule 'exclude' opts Phagli out; Holi is chosen by the Holika Dahan ladder, not excluded", () => {
       const r = computeFestivals(
         ctx({ tithiIndex: 20, chandraMasaIndex: 11, kshayaTithiIndices: new Set([14]) }),
         resolver,
       );
-      expect(r.some(f => f.name === 'holi')).toBe(false);
+      expect(r.some(f => f.name === 'holi')).toBe(true);
       expect(r.some(f => f.name === 'phagli')).toBe(false);
     });
 
@@ -1244,6 +1372,39 @@ describe('computeFestivals', () => {
       expect(r.some(f => f.name === 'ugadi')).toBe(false);
       expect(r.some(f => f.name === 'gudi_padwa')).toBe(false);
     });
+
+    it('fires on the last day of an Adhika month when the anchor opens the Nija month', () => {
+      const navaratri = computeFestivals(
+        ctx({
+          tithiIndex: 29, chandraMasaIndex: 6, isAdhika: true, kshayaTithiIndices: new Set([0]),
+          nextDayMasaIndex: 6, nextDayIsAdhika: false,
+        }),
+        resolver,
+      );
+      expect(navaratri.map(f => f.name)).toEqual(['navaratri']);
+
+      const ugadi = computeFestivals(
+        ctx({
+          tithiIndex: 29, chandraMasaIndex: 0, isAdhika: true, kshayaTithiIndices: new Set([0]),
+          nextDayMasaIndex: 0, nextDayIsAdhika: false, region: 'maharashtra',
+        }),
+        resolver,
+      );
+      expect(ugadi.map(f => f.name)).toEqual(['ugadi', 'gudi_padwa']);
+    });
+
+    it('an Adhika day still skips the anchor when tomorrow is absent or still adhika', () => {
+      for (const next of [{}, { nextDayMasaIndex: 6, nextDayIsAdhika: true }]) {
+        const r = computeFestivals(
+          ctx({
+            tithiIndex: 29, chandraMasaIndex: 6, isAdhika: true, kshayaTithiIndices: new Set([0]),
+            ...next,
+          }),
+          resolver,
+        );
+        expect(r.some(f => f.name === 'navaratri')).toBe(false);
+      }
+    });
   });
 
   it('returns empty when nothing matches', () => {
@@ -1258,5 +1419,66 @@ describe('computeFestivals', () => {
     expect(r.length).toBeGreaterThanOrEqual(2);
     expect(r.some(f => f.name === 'dhanteras')).toBe(true);
     expect(r.some(f => f.type === 'pradosha')).toBe(true);
+  });
+});
+
+/**
+ * Days of exactly 12 h daylight from 06:00: madhyahna 10:48-13:12, pradosha 18:00-20:24, nishita
+ * 23:36-00:24. One anchor tithi occupies [start, end); the expected days follow from the rule text.
+ */
+describe('day selection with a day geometry', () => {
+  const H = 3_600_000;
+  const DAY0 = Date.UTC(2030, 0, 10);
+  const at = (day: number, hours: number): number => DAY0 + day * 24 * H + hours * H;
+  const run = (day: number, tithi: number, span: [number, number], masa: number, bhadraEnd?: number) => {
+    const kalaDay = (k: number): KalaDay => ({
+      sunrise: at(day + k, 6), sunset: at(day + k, 18), nextSunrise: at(day + k + 1, 6),
+    });
+    const tithiAt = (ms: number): number =>
+      ms < span[0] ? (tithi + 29) % 30 : ms < span[1] ? tithi : (tithi + 1) % 30;
+    const reaches: Record<number, number> = {
+      [tithi * 12]: span[0], [((tithi + 1) % 30) * 12]: span[1], [tithi * 12 + 6]: bhadraEnd ?? span[0],
+    };
+    const g: DayGeometry = {
+      today: kalaDay(0), day: kalaDay, tithiAt, nakshatraAt: () => 10,
+      elongationReaches: (deg) => reaches[deg] ?? Number.NaN,
+      localDay: (ms) => Math.floor(ms / (24 * H)),
+    };
+    return computeFestivals(
+      ctx({ tithiIndex: tithiAt(at(day, 6)), chandraMasaIndex: masa, dayGeometry: g }), resolver,
+    ).map((f) => f.key);
+  };
+
+  it('Shivaratri: nishita fully held on both nights goes to the later night', () => {
+    const span: [number, number] = [at(0, 23.5), at(2, 0.5)];
+    expect(run(0, 28, span, 2)).not.toContain('masik_shivaratri');
+    expect(run(1, 28, span, 2)).toContain('masik_shivaratri');
+  });
+
+  it('Vinayaka Chaturthi: madhyahna fully held on both days goes to the earlier day', () => {
+    const span: [number, number] = [at(0, 10.7), at(1, 13.3)];
+    expect(run(0, 3, span, 2)).toContain('vinayaka_chaturthi');
+    expect(run(1, 3, span, 2)).not.toContain('vinayaka_chaturthi');
+  });
+
+  it('Pradosh vrat: a Trayodashi touching neither pradosha has no vrat (no fallback)', () => {
+    const span: [number, number] = [at(0, 20.7), at(1, 17.8)];
+    expect(run(0, 12, span, 2)).not.toContain('pradosha');
+    expect(run(1, 12, span, 2)).not.toContain('pradosha');
+  });
+
+  it('Raksha Bandhan: under 3 muhurtas of Purnima after the udaya sunrise moves it to the day Purnima begins', () => {
+    const span: [number, number] = [at(0, 10), at(1, 7)];
+    expect(run(0, 14, span, 4)).toContain('raksha_bandhan');
+    expect(run(1, 14, span, 4)).not.toContain('raksha_bandhan');
+  });
+
+  it('Holika Dahan on the evening Bhadra ends before midnight, Holi the next day', () => {
+    const span: [number, number] = [at(0, 9), at(1, 8)];
+    const bhadraEnd = at(0, 20.5);
+    expect(run(0, 14, span, 11, bhadraEnd)).toEqual(expect.arrayContaining(['holika_dahan']));
+    expect(run(0, 14, span, 11, bhadraEnd)).not.toContain('holi');
+    expect(run(1, 14, span, 11, bhadraEnd)).toContain('holi');
+    expect(run(1, 14, span, 11, bhadraEnd)).not.toContain('holika_dahan');
   });
 });

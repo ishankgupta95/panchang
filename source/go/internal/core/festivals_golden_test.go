@@ -99,6 +99,17 @@ func ctxForLabel(t *testing.T, label string) *FestivalComputeContext {
 			c.PriorDayTithiByRule = map[FestivalDateRule]int{rule: num(p[4])}
 		}
 		return c
+	case "cf":
+		c := &FestivalComputeContext{
+			ChandraMasaIndex: 6, TithiIndex: num(p[1]), NakshatraIndex: 26, VaraIndex: 3, SolarMasaIndex: 11,
+		}
+		if p[2] != "x" {
+			c.TithiByRule = map[FestivalDateRule]int{RuleChandrodaya: num(p[2])}
+		}
+		if p[3] != "x" {
+			c.PriorDayTithiByRule = map[FestivalDateRule]int{RuleChandrodaya: num(p[3])}
+		}
+		return c
 	case "af":
 		d := strings.Split(p[1], "-")
 		if len(d) != 4 {
@@ -152,6 +163,8 @@ func ctxForLabel(t *testing.T, label string) *FestivalComputeContext {
 			c.EkadashiTrisprishaYesterday = true
 		case "ekadashiVriddhaFirstDay":
 			c.EkadashiVriddhaFirstDay = true
+		case "ekadashiVriddhaTrisprisha":
+			c.EkadashiVriddhaTrisprisha = true
 		default:
 			t.Fatalf("label %q: unknown ekadashi flag %q", label, p[4])
 		}
@@ -222,6 +235,42 @@ func ctxForLabel(t *testing.T, label string) *FestivalComputeContext {
 			t.Fatalf("label %q: unknown paksha set %q", label, p[5])
 		}
 		return c
+	case "mvs":
+		return &FestivalComputeContext{
+			ChandraMasaIndex: num(p[1]), VaraMasaIndex: num(p[2]), HasVaraMasaIndex: true,
+			VaraIndex: num(p[3]), TithiIndex: 9, NakshatraIndex: 26, SolarMasaIndex: 11,
+		}
+	case "sno":
+		c := &FestivalComputeContext{
+			SolarMasaIndex: 4, NakshatraIndex: num(p[1]), TithiIndex: 9, VaraIndex: 3, ChandraMasaIndex: 8,
+		}
+		if p[2] != "x" {
+			c.PriorDayNakshatraIndex, c.HasPriorDayNakshatraIndex = num(p[2]), true
+		}
+		if p[3] != "x" {
+			c.PriorDaySolarMasaIndex, c.HasPriorDaySolarMasaIndex = num(p[3]), true
+		}
+		if p[4] != "x" {
+			c.NextDayNakshatraIndex, c.HasNextDayNakshatraIndex = num(p[4]), true
+		}
+		if p[5] != "x" {
+			later := p[5] == "1"
+			c.NakshatraLaterInSolarMonth = func(int) bool { return later }
+		}
+		return c
+	case "kt":
+		c := &FestivalComputeContext{
+			TithiIndex: 9, NakshatraIndex: num(p[4]), VaraIndex: 3, SolarMasaIndex: 11, ChandraMasaIndex: 8,
+			Region: types.FestivalRegion(p[3]),
+		}
+		if p[1] != "x" {
+			c.MasikKarthigaiToday, c.HasMasikKarthigai = p[1] == "1", true
+		}
+		if p[2] != "x" {
+			deepam := p[2] == "1"
+			c.KarthigaiDeepamToday = func() bool { return deepam }
+		}
+		return c
 	case "nkk":
 		c := &FestivalComputeContext{
 			ChandraMasaIndex: num(p[1]), TithiIndex: num(p[2]), NakshatraIndex: 26,
@@ -240,10 +289,13 @@ func ctxForLabel(t *testing.T, label string) *FestivalComputeContext {
 			}
 		}
 		return c
-	case "ks":
+	case "ks", "ksa":
 		c := &FestivalComputeContext{
 			TithiIndex: 20, ChandraMasaIndex: num(p[1]), NakshatraIndex: 26, VaraIndex: 3,
 			SolarMasaIndex: 11, KshayaTithiIndices: map[int]bool{},
+		}
+		if p[0] == "ksa" {
+			c.TithiIndex, c.IsAdhika = 29, true
 		}
 		if p[2] != "x" {
 			for _, s := range strings.Split(p[2], "-") {
@@ -259,7 +311,7 @@ func ctxForLabel(t *testing.T, label string) *FestivalComputeContext {
 		case "krittika-in-day":
 			return &FestivalComputeContext{
 				TithiIndex: 9, NakshatraIndex: 5, VaraIndex: 3, SolarMasaIndex: 11,
-				ChandraMasaIndex: 8, NakshatraIndicesInDay: map[int]bool{2: true, 14: true},
+				ChandraMasaIndex: 8, MasikKarthigaiToday: true, HasMasikKarthigai: true,
 			}
 		case "purnimanta-naming":
 			return &FestivalComputeContext{
@@ -333,8 +385,8 @@ func TestFestivalDispatchMatchesTypeScript(t *testing.T) {
 }
 
 func TestFestivalRegistryShape(t *testing.T) {
-	if len(festivalRegistry) != 53 {
-		t.Errorf("registry holds %d rules, want 53", len(festivalRegistry))
+	if len(festivalRegistry) != 54 {
+		t.Errorf("registry holds %d rules, want 54", len(festivalRegistry))
 	}
 	kinds := map[FestivalRuleKind]int{}
 	seen := map[string]bool{}
@@ -367,7 +419,7 @@ func TestFestivalRegistryShape(t *testing.T) {
 		}
 	}
 	want := map[FestivalRuleKind]int{
-		KindMasaTithi: 44, KindMasaVara: 6, KindSolarNakshatra: 1, KindMasaNakshatra: 2,
+		KindMasaTithi: 45, KindMasaVara: 6, KindSolarNakshatra: 1, KindMasaNakshatra: 2,
 	}
 	for k, n := range want {
 		if kinds[k] != n {

@@ -40,6 +40,20 @@ describe('computeVarjyam: input validation', () => {
   it('throws RangeError for non-integer nakshatra index', () => {
     expect(() => computeVarjyam(3.5, sunrise, nextSunrise, noopMoon)).toThrow(RangeError);
   });
+
+  it('returns null for any index but the nakshatra in force at sunrise', () => {
+    // Anuradha (16) is in force at sunrise; its spell ended before it. Every other index used to
+    // yield a window a few seconds long, and the next nakshatra's a plausible one at the wrong time.
+    const start = new Date('2025-06-01T00:00:00Z');
+    const rise = new Date(start.getTime() + 20 * 3600_000);
+    const moon = syntheticMoon(start, 16);
+    for (let i = 0; i < 27; i++) {
+      if (i === 16) continue;
+      expect(computeVarjyam(i, rise, new Date(rise.getTime() + 86_400_000), moon), `index ${i}`).toBeNull();
+    }
+    const next = computeVarjyamWindows(rise, new Date(rise.getTime() + 86_400_000), moon);
+    expect(next.length).toBeGreaterThan(0);
+  });
 });
 
 describe('computeVarjyam: synthetic Moon (deterministic offsets, 24-min ghatikas)', () => {

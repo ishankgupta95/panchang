@@ -116,6 +116,7 @@ call site: sunrise/sunset ±2 min, element end-times ±3 min, planetary longitud
 | `almanac-precise.json` | vara, tithi and nakshatra at sunrise, sunrise/sunset, chandra masa |
 | `almanac-planets.json` | sidereal longitude, rashi, nakshatra and retrograde flag for the nine grahas |
 | `almanac-festivals.json` | festival name → date across two years |
+| `almanac-festival-selection-2026-09.json` | the day a festival takes when its tithi touches two days (vriddhi, kala windows, Holika Dahan, Chhath, the Diwali cluster): almanac festival pages and year lists, plus competitor-calendar dates marked `tier: competitor` where the almanac page was not captured |
 | `almanac-diaspora.json` | vara, tithi and nakshatra at sunrise, sunrise/sunset for five non-Indian cities spanning DST and the solstices |
 | `almanac-phase28.json` | a fifty-entry cross-check of the daily panchang |
 | `almanac-muhurat-days-2025-2027.json` | the published muhurat day lists per occasion |
@@ -133,7 +134,8 @@ consulted.
 | file | what it is |
 |---|---|
 | `astrosage-charts.json` | natal corpus: twenty-five public figures, Reference-tier charts from celebrity.astrosage.com, Lahiri ayanamsa, decimal degrees within rashi |
-| `ashtakoot-pairs.json` | compatibility pairs over that corpus; per-koot scores hand-derived from BPHS Ch. 7 and Brihat Samhita Ch. 102, not scraped |
+| `ashtakoot-pairs.json` | compatibility pairs over that corpus; natal moons only, swept for structure (no expected scores) |
+| `yoni-koota-references.json` | the published Yoni koota tables (PyJHora, the Mahidhar Sharma chakra), competitor Yoni spot values and the Tamil Yoni porutham enemy pairs, each with its source |
 | `ayanamsa-reference.json` | empty, a placeholder for a future Swiss Ephemeris cross-check |
 
 ### `structural/`, Tier 3

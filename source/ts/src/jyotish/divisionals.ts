@@ -5,10 +5,12 @@ import { normalize360 } from '../utils/angle';
 import type { BirthChartOptions } from '../types/options';
 import type { GeoLocation } from '../types/location';
 import type { Divisional, DivisionalChart, PlanetPlacement } from '../types/jyotish';
+import { PanchangError } from '../types/errors';
 
 /**
  * A divisional (varga) chart per the BPHS Ch. 6 rules, whole-sign anchored to
- * its own divisional lagna.
+ * its own divisional lagna. Any `divisional` outside D2, D3, D7, D9, D10, D12
+ * and D30 throws `PanchangError` `INVALID_INPUT`.
  */
 export function computeDivisionalChart(
   birthDate: Date,
@@ -62,6 +64,11 @@ function transformFor(divisional: Exclude<Divisional, 'D9'>): (lon: number) => n
     case 'D10': return dasamsaLongitude;
     case 'D12': return dwadasamsaLongitude;
     case 'D30': return trimsamsaLongitude;
+    default:
+      throw new PanchangError(
+        `unknown divisional "${String(divisional)}"; expected one of D2, D3, D7, D9, D10, D12, D30`,
+        'INVALID_INPUT',
+      );
   }
 }
 

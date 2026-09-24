@@ -12,10 +12,11 @@ var marsOwnRashis = [12]bool{0: true, 7: true}
 const marsExaltedRashi = 9
 
 func ComputeMangalDosha(chart *types.BirthChart) types.MangalDoshaInfo {
-	mars := chart.ByPlanet.Mars
-	moon := chart.ByPlanet.Moon
-	venus := chart.ByPlanet.Venus
-	jupiter := chart.ByPlanet.Jupiter
+	byPlanet := planetsView(chart)
+	mars := byPlanet.Mars
+	moon := byPlanet.Moon
+	venus := byPlanet.Venus
+	jupiter := byPlanet.Jupiter
 
 	marsRashi := mars.Rashi.Index
 	houseFrom := func(refRashi int) int {
@@ -129,8 +130,9 @@ func ComputeMangalCompatibility(boyChart, girlChart *types.BirthChart) types.Man
 }
 
 func ComputeKaalSarp(chart *types.BirthChart) types.KaalSarpDoshaInfo {
-	rahu := chart.ByPlanet.Rahu
-	ketu := chart.ByPlanet.Ketu
+	byPlanet := planetsView(chart)
+	rahu := byPlanet.Rahu
+	ketu := byPlanet.Ketu
 
 	rahuLon := rahu.Longitude
 	inForward, inBackward, total := 0, 0, 0
@@ -151,8 +153,8 @@ func ComputeKaalSarp(chart *types.BirthChart) types.KaalSarpDoshaInfo {
 	partial := !afflicted && (inForward == total-1 || inBackward == total-1)
 
 	var subtype *types.KaalSarpSubtype
-	if afflicted {
-		st := types.AllKaalSarpSubtypes[rahu.House-1]
+	if afflicted && rahu.House >= 1 && rahu.House <= 12 { // TypeScript reads undefined past the table
+		st := kaalSarpSubtypes[rahu.House-1]
 		subtype = &st
 	}
 
@@ -166,13 +168,14 @@ func ComputeKaalSarp(chart *types.BirthChart) types.KaalSarpDoshaInfo {
 }
 
 func ComputePitruDosha(chart *types.BirthChart) types.PitruDoshaInfo {
-	sun := chart.ByPlanet.Sun
-	rahu := chart.ByPlanet.Rahu
-	saturn := chart.ByPlanet.Saturn
+	byPlanet := planetsView(chart)
+	sun := byPlanet.Sun
+	rahu := byPlanet.Rahu
+	saturn := byPlanet.Saturn
 
 	ninthRashi := chart.Bhava.Houses[8].Rashi.Index
 	ninthLordGraha := RashiLord[ninthRashi]
-	ninthLord, _ := chart.ByPlanet.Get(ninthLordGraha.Graha())
+	ninthLord, _ := byPlanet.Get(ninthLordGraha.Graha())
 
 	reasons := make([]string, 0, 4)
 

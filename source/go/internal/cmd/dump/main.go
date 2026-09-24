@@ -595,8 +595,10 @@ func writeCharts(doc *obj) {
 		putVimshottari(c, "vimshottari", vim)
 		if len(vim.MahaDashas) > 0 && len(vim.MahaDashas[0].AntarDashas) > 0 {
 			c.put("vimshottariPratyantar", safe2(jyotish.ComputeVimshottariPratyantar(vim.MahaDashas[0].AntarDashas[0])))
+			c.put("vimshottariPratyantarIn", safe2(jyotish.ComputeVimshottariPratyantarIn(vim.MahaDashas[0], vim.MahaDashas[0].AntarDashas[0])))
 		} else {
 			c.put("vimshottariPratyantar", nil)
+			c.put("vimshottariPratyantarIn", nil)
 		}
 
 		moonSid, moonErr := astronomy.GetSiderealMoonLongitude(newCtx(), ms, types.Lahiri)
